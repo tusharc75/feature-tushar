@@ -24,7 +24,7 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import queryString from 'query-string';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { useLocation, useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -170,39 +170,23 @@ const MarketSegment = () => {
     </Fragment>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      case 'parentMarketSegmentName':
-        return 'parentMarketSegment.optionLabel';
-
-      default:
-        return field;
-    }
-  };
-
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
 
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {

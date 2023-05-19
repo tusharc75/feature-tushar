@@ -1,5 +1,5 @@
-import { Box, Menu, MenuItem } from '@material-ui/core';
-import { useState, useEffect, useContext } from 'react';
+import { Box, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, Typography } from '@material-ui/core';
@@ -13,6 +13,9 @@ import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import QtyDialog from './QtyDialog';
 import { ExpandMore } from '@material-ui/icons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import HistoryIcon from '@material-ui/icons/History';
+import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
 const Request = ({ workOrder }) => {
 
@@ -25,6 +28,7 @@ const Request = ({ workOrder }) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [qtyDialog, setQtyDialog] = useState({ open: false, status: null, data: null });
+  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [], productName: '' });
 
   const {
     state: { user }
@@ -136,6 +140,14 @@ const Request = ({ workOrder }) => {
           return row.original['processedQty'] ? <p className="text-truncate">{row.original['processedQty']}</p> : <NoDataCell />;
         }
       },
+      {
+        accessor: 'status',
+        Header: 'Status',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['status'] ? <p className="text-truncate">{row.original['status']}</p> : <NoDataCell />;
+        }
+      },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
           {
@@ -209,41 +221,57 @@ const Request = ({ workOrder }) => {
     extracolumns.push({
       accessor: 'action',
       Header: 'Action',
-      minWidth: 230,
-      width: 230,
+      minWidth: 260,
+      width: 260,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => {
-        return row.original['status'] === MATERIAL_REQUEST_STATUS.requested ? (
-          <Box display="flex">
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              disabled={loading}
-              onClick={() => {
-                setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: row.original });
-              }}
-            >
-              Process
-            </Button>
-            <Box pl={1} />
-            <Button
-              variant="outlined"
-              color="secondary"
-              size="small"
-              disabled={loading}
-              onClick={() => {
-                setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row.original });
-              }}
-            >
-              Close
-            </Button>
-          </Box>
-        ) : (
-          <Typography variant="body2">{row.original?.status}</Typography>
-        );
+        return <>
+          <div style={{ display: 'flex', justifyContent: 'right' }}>
+            {row.original['status'] === MATERIAL_REQUEST_STATUS.requested && (
+              <Fragment>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  disabled={loading}
+                  onClick={() => {
+                    setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: row.original });
+                  }}
+                >
+                  Process
+                </Button>
+                <Box pl={1} />
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  disabled={loading}
+                  onClick={() => {
+                    setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row.original });
+                  }}
+                >
+                  Close
+                </Button>
+                <Box pl={1} />
+              </Fragment>
+            )}
+            {row.original["processesLogs"] && row.original["processesLogs"]?.length > 0 && (
+              <HtmlTooltip title="View Logs">
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setOpenProcessLogs({ open: true, logs: row.original["processesLogs"], productName: row.original?.productName });
+                  }}
+                >
+                  <HistoryIcon />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+          </div>
+        </>
       }
     });
     setColumns([...column, ...extracolumns]);
@@ -356,6 +384,16 @@ const Request = ({ workOrder }) => {
           }}
         />
       )}
+
+      {openProcessLogs.open &&
+        <ProcessLogs
+          onClose={() => {
+            setOpenProcessLogs({ open: false, logs: [], productName: '' })
+          }}
+          logsData={openProcessLogs.logs}
+          productName={openProcessLogs.productName}
+        />
+      }
     </>
   );
 };
