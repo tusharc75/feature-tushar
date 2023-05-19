@@ -44,7 +44,7 @@ import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import EntitySelectionsDialog from '../../components/EntitySelections';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import { HiBadgeCheck } from 'react-icons/hi';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -617,40 +617,6 @@ export default function Account(props) {
     </>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      case 'lead':
-        return 'staticData.lead.concatedName';
-
-      default:
-        return field;
-    }
-  };
-
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-
-    if (field !== updatedField) return updatedField;
-
-    switch (field) {
-      case 'owner':
-        return 'owner.optionLabel';
-
-      case 'parentAccount':
-        return 'parentAccount.optionLabel';
-      case 'entity':
-        return 'entity.optionLabel';
-
-      default:
-        return field;
-    }
-  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}&filterAccounts=${queryType === 'My Accounts' ? 2 : selectedType}` : '?';
@@ -658,25 +624,24 @@ export default function Account(props) {
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
+    
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    const updatedFilters = [];
-    if (type !== options[0]) {
-      updatedFilters.push({ field: 'staticData.approved', term: type === 'Approved' });
+      if (type !== options[0]) {
+      deepFilters.push({ field: 'staticData.approved', term: type === 'Approved' });
     }
-
-    if (JSON.parse(sessionStorage.getItem('filters')) !== null) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
-
-    deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {
