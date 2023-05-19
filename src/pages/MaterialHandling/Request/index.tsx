@@ -1,5 +1,5 @@
-import { Box, Menu, MenuItem } from '@material-ui/core';
-import { useState, useEffect, useContext } from 'react';
+import { Box, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, Typography } from '@material-ui/core';
@@ -11,11 +11,14 @@ import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CommentDialog from './CommentDialog';
-import { isMobile } from 'react-device-detect';
+import QtyDialog from './QtyDialog';
 import { ExpandMore } from '@material-ui/icons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import HistoryIcon from '@material-ui/icons/History';
+import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
 const Request = ({ workOrder }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
@@ -24,7 +27,8 @@ const Request = ({ workOrder }) => {
   const [rowsData, setRowsData] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [commentDialog, setCommentDialog] = useState({ open: false, data: null });
+  const [qtyDialog, setQtyDialog] = useState({ open: false, status: null, data: null });
+  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [], productName: '' });
 
   const {
     state: { user }
@@ -46,7 +50,7 @@ const Request = ({ workOrder }) => {
           type: 'success',
           message: data.message
         });
-        setCommentDialog({ open: false, data: null });
+        setQtyDialog({ open: false, status: null, data: null });
         fetchData();
       })
       .catch((err) => {
@@ -68,8 +72,8 @@ const Request = ({ workOrder }) => {
           e.storageLocation = e?.storageLocation?.optionLabel;
           e.requestById = e?.requestBy?.optionValue;
           e.requestBy = e?.requestBy?.optionLabel;
-          e.responseById = e?.responseBy?.optionValue;
-          e.responseBy = e?.responseBy?.optionLabel;
+          e.processById = e?.processBy?.optionValue;
+          e.processBy = e?.processBy?.optionLabel;
         });
         setRowsData(data);
       })
@@ -122,10 +126,26 @@ const Request = ({ workOrder }) => {
     const extracolumns: any = [
       {
         accessor: 'qty',
-        Header: 'Qty',
-        width: 200,
+        Header: 'Requested Qty',
+        width: 150,
         Cell: ({ row }) => {
           return row.original['qty'] ? <p className="text-truncate">{row.original['qty']}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'processedQty',
+        Header: 'Processed Qty',
+        width: 150,
+        Cell: ({ row }) => {
+          return row.original['processedQty'] ? <p className="text-truncate">{row.original['processedQty']}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'status',
+        Header: 'Status',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['status'] ? <p className="text-truncate">{row.original['status']}</p> : <NoDataCell />;
         }
       },
       ...(user?.user?.brandPolicy?.storageLocation
@@ -145,7 +165,7 @@ const Request = ({ workOrder }) => {
         : []),
       {
         accessor: 'requestBy',
-        Header: 'Request By',
+        Header: 'Requested By',
         width: 200,
         Cell: ({ row }) => {
           return row?.original['requestBy'] ?
@@ -156,7 +176,7 @@ const Request = ({ workOrder }) => {
       },
       {
         accessor: 'requestDate',
-        Header: 'Request Date',
+        Header: 'Requested Date',
         width: 200,
         Cell: ({ row }) => {
           return row.original['requestDate'] ? (
@@ -167,23 +187,23 @@ const Request = ({ workOrder }) => {
         }
       },
       {
-        accessor: 'responseBy',
-        Header: 'Response By ',
+        accessor: 'processBy',
+        Header: 'Processed By',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['responseBy'] ?
-            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['responseById']}`} target="_blank">
-              {row?.original['responseBy']}
+          return row?.original['processBy'] ?
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['processById']}`} target="_blank">
+              {row?.original['processBy']}
             </a> : <NoDataCell />;
         }
       },
       {
-        accessor: 'responseDate',
-        Header: 'Response Date',
+        accessor: 'processDate',
+        Header: 'Processed Date',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['responseDate'] ? (
-            <p className="text-truncate">{moment(row.original['responseDate']).format(dateTimeFormat)}</p>
+          return row.original['processDate'] ? (
+            <p className="text-truncate">{moment(row.original['processDate']).format(dateTimeFormat)}</p>
           ) : (
             <NoDataCell />
           );
@@ -201,45 +221,57 @@ const Request = ({ workOrder }) => {
     extracolumns.push({
       accessor: 'action',
       Header: 'Action',
-      minWidth: 230,
-      width: 230,
+      minWidth: 260,
+      width: 260,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => {
-        return row.original['status'] === MATERIAL_REQUEST_STATUS.requested ? (
-          <Box display="flex">
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              disabled={loading}
-              onClick={() => {
-                handleUpdateStatus(
-                  MATERIAL_REQUEST_STATUS.processed,
-                  [{ _id: row.original?._id, uniqueId: row.original?.uniqueId, qty: row.original?.qty }],
-                  ''
-                );
-              }}
-            >
-              Process
-            </Button>
-            <Box pl={1} />
-            <Button
-              variant="outlined"
-              color="secondary"
-              size="small"
-              disabled={loading}
-              onClick={() => {
-                setCommentDialog({ open: true, data: row.original });
-              }}
-            >
-              Reject
-            </Button>
-          </Box>
-        ) : (
-          <Typography variant="body2">{row.original?.status}</Typography>
-        );
+        return <>
+          <div style={{ display: 'flex', justifyContent: 'right' }}>
+            {row.original['status'] === MATERIAL_REQUEST_STATUS.requested && (
+              <Fragment>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  disabled={loading}
+                  onClick={() => {
+                    setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: row.original });
+                  }}
+                >
+                  Process
+                </Button>
+                <Box pl={1} />
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  disabled={loading}
+                  onClick={() => {
+                    setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row.original });
+                  }}
+                >
+                  Close
+                </Button>
+                <Box pl={1} />
+              </Fragment>
+            )}
+            {row.original["processesLogs"] && row.original["processesLogs"]?.length > 0 && (
+              <HtmlTooltip title="View Logs">
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setOpenProcessLogs({ open: true, logs: row.original["processesLogs"], productName: row.original?.productName });
+                  }}
+                >
+                  <HistoryIcon />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+          </div>
+        </>
       }
     });
     setColumns([...column, ...extracolumns]);
@@ -253,63 +285,49 @@ const Request = ({ workOrder }) => {
     setAnchorEl(null);
   };
 
-
   return (
     <>
-      <Box>
-        <Box display='flex' justifyContent={'space-between'}>
-          <Box />
-          <Box>
-            <Button
-              disabled={selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
-                ? false : true}
-              variant={isMobile ? 'text' : 'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-              endIcon={<ExpandMore />}
-            >
-              {isMobile ? '' : 'Actions'}
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
+      <Box display='flex' justifyContent={'space-between'} >
+        <Box />
+        <Box>
+          <Button
+            disabled={selectedRecords?.length > 0 &&
+              selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+              ? false : true}
+            variant={'outlined'}
+            color="default"
+            size="small"
+            onClick={openActions}
+            aria-controls="action-menu"
+            endIcon={<ExpandMore />}
+          >
+            {'Actions'}
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="action-menu"
+            open={Boolean(anchorEl)}
+            onClose={closeActions}
+          >
+            <MenuItem
+              onClick={() => {
+                setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: null });
+                closeActions()
               }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  let records = selectedRecords?.map((item) => {
-                    return {
-                      _id: item?._id,
-                      uniqueId: item?.uniqueId,
-                      qty: item?.qty
-                    }
-                  })
-                  handleUpdateStatus(
-                    MATERIAL_REQUEST_STATUS.processed,
-                    records,
-                    ''
-                  );
-                  closeActions()
-                }}
-              >Process</MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setCommentDialog({ open: true, data: null });
-                  closeActions()
-                }}
-              >Reject</MenuItem>
-            </Menu>
-          </Box>
+            >Process</MenuItem>
+            <MenuItem
+              onClick={() => {
+                setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: null });
+                closeActions()
+              }}
+            >Close</MenuItem>
+          </Menu>
         </Box>
       </Box>
       <Box pt={2}>
@@ -335,36 +353,47 @@ const Request = ({ workOrder }) => {
           </Box>
         )}
       </Box>
-      {commentDialog.open && (
-        <CommentDialog
-          open={commentDialog.open}
+      {qtyDialog.open && (
+        <QtyDialog
+          open={qtyDialog.open}
           loading={loading}
-          onClose={() => setCommentDialog({ open: false, data: null })}
-          onSuccess={(comment) => {
-            if (selectedRecords?.length && !commentDialog?.data) {
-              let records = selectedRecords?.map((item) => {
+          onClose={() => setQtyDialog({ open: false, status: null, data: null })}
+          status={qtyDialog.status}
+          data={qtyDialog.data}
+          onSuccess={(data) => {
+            if (qtyDialog?.data) {
+              handleUpdateStatus(
+                qtyDialog.status,
+                [{ _id: qtyDialog.data?._id, uniqueId: qtyDialog.data?.uniqueId, qty: parseInt(data?.qty) }],
+                data.comment || ''
+              );
+            }
+            else if (selectedRecords?.length) {
+              let rows = selectedRecords?.map((item) => {
                 return {
                   _id: item?._id,
                   uniqueId: item?.uniqueId,
-                  qty: item?.qty
+                  qty: item?.qty - (item?.processedQty || 0)
                 }
               })
               handleUpdateStatus(
-                MATERIAL_REQUEST_STATUS.rejected,
-                records,
-                comment || ''
-              );
-            } else {
-              handleUpdateStatus(
-                MATERIAL_REQUEST_STATUS.rejected,
-                [{ _id: commentDialog.data?._id, uniqueId: commentDialog.data?.uniqueId, qty: commentDialog.data?.qty }],
-                comment || ''
-              );
+                qtyDialog.status,
+                rows,
+                data.comment || '');
             }
-
           }}
         />
       )}
+
+      {openProcessLogs.open &&
+        <ProcessLogs
+          onClose={() => {
+            setOpenProcessLogs({ open: false, logs: [], productName: '' })
+          }}
+          logsData={openProcessLogs.logs}
+          productName={openProcessLogs.productName}
+        />
+      }
     </>
   );
 };

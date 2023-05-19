@@ -2358,7 +2358,7 @@ export const SERVICE_ORDER_STATUS = {
 export const MATERIAL_REQUEST_STATUS = {
   requested: 'Requested',
   processed: 'Processed',
-  rejected: 'Rejected'
+  closed: 'Closed'
 };
 
 export const convertMsToTime = (milliseconds: any) => {
