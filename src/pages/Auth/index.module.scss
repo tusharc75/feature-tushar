@@ -67,6 +67,9 @@
       background-color: #dbe0e8;
       display: block;
       flex-grow: 1;
+      [data-mode='dark'] & {
+        background-color: #555555;
+      }
     }
     p {
       font-weight: 400;
@@ -135,6 +138,9 @@
   .left {
     padding: var(--left-padding, 30px 20px);
     border-right: 1px solid #e2e2e2;
+    [data-mode='dark'] & {
+      border-right: 1px solid rgba(255, 255, 255, 0.17);
+    }
   }
   .right {
     @media all and (max-width: 768px) {
@@ -176,5 +182,6 @@
   .submitButton {
     border-radius: 6px !important;
     min-height: scaleFunc(38px) !important;
+    box-shadow: none !important;
   }
 }

@@ -12,6 +12,9 @@
     background: linear-gradient(180deg, #ffffff 0%, #f1f5ff 100%);
     pointer-events: none;
     z-index: -1;
+    [data-mode='dark'] & {
+      background: linear-gradient(180deg, #24243e 0%, #0e0e23 100%);
+    }
   }
 }
 .mainContainer {
@@ -27,8 +30,14 @@
   flex-basis: calc(var(--icon-size) + var(--left-right-icon-spacing, 15px));
   button {
     color: #163340;
+    [data-mode='dark'] & {
+      color: rgba(244, 244, 244, 1);
+    }
     &:disabled {
       color: #979899;
+      [data-mode='dark'] & {
+        color: rgba(40, 40, 69, 0.8);
+      }
     }
   }
   &:first-of-type {
@@ -65,6 +74,11 @@
   padding: 15px 10px 13px;
   text-align: center;
 
+  [data-mode='dark'] & {
+    background: #282845;
+    border: 1px solid #555555;
+  }
+
   .stepCompleteIcon {
     position: absolute;
     top: -9px;
@@ -100,14 +114,26 @@
     color: #1d1d1d;
     font-weight: 600;
     text-transform: uppercase;
+    [data-mode='dark'] & {
+      color: #fff;
+    }
   }
 }
 
 .currentStep {
   border: 2.11609px solid #0f9fa9;
+  [data-mode='dark'] & {
+    border: 2.11609px solid #0f9fa9;
+  }
 }
 .inActiveStep {
   background-color: #f4f4f4;
+  [data-mode='dark'] & {
+    .label {
+      color: rgba(211, 211, 211, 0.6);
+    }
+    background-color: rgba(40, 40, 69, 0.8);
+  }
   .stepIcon {
     svg {
       color: gray;
