@@ -35,7 +35,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from 'react-router-dom';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { AiFillCrown, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
@@ -262,41 +262,42 @@ const SerializedAsset = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-    let filterById = [];
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
+
     if (warehouse?.optionValue) {
-      filterById.push({ field: 'warehouse', term: warehouse?.optionValue });
+      filterByIds.push({ field: 'warehouse', term: warehouse?.optionValue });
     }
     if (selectedPlant && selectedPlant !== '') {
-      filterById.push({ field: 'warehouse', term: selectedPlant });
+      filterByIds.push({ field: 'warehouse', term: selectedPlant });
     }
     if (redirectProduct?.id) {
-      filterById.push({ field: 'product', term: redirectProduct?.id });
+      filterByIds.push({ field: 'product', term: redirectProduct?.id });
     }
     if (fromPurchaseOrder?.pOId) {
-      filterById.push({ field: 'purchaseOrder', term: fromPurchaseOrder.pOId });
+      filterByIds.push({ field: 'purchaseOrder', term: fromPurchaseOrder.pOId });
     }
     if (fromPurchaseOrder?.productId) {
-      filterById.push({ field: 'product', term: fromPurchaseOrder.productId });
+      filterByIds.push({ field: 'product', term: fromPurchaseOrder.productId });
     }
     if (productCategory && productCategory !== '') {
-      filterById.push({ field: 'productCategory', term: productCategory });
+      filterByIds.push({ field: 'productCategory', term: productCategory });
     }
     if (productFilter && productFilter !== '') {
-      filterById.push({ field: 'product', term: productFilter });
+      filterByIds.push({ field: 'product', term: productFilter });
     }
-    if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}`;
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
     }
+
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+    
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -440,19 +441,6 @@ const SerializedAsset = () => {
 
   const closeActions = () => {
     setAnchorEl(null);
-  };
-
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
   };
 
   return (
