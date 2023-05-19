@@ -999,6 +999,10 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                   aria-label="Them switcher"
                   color="inherit"
                   className={styles.showIconLayout}
+                  style={{
+                    opacity: process?.env?.REACT_APP_DEV_ENV === 'true' ? 1 : 0,
+                    pointerEvents: process?.env?.REACT_APP_DEV_ENV === 'true' ? 'all' : 'none'
+                  }}
                 >
                   {themeColor === 'light' ? <BsMoon size={19} /> : <BsSun size={19} />}
                 </IconButton>
@@ -1097,6 +1101,10 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
               aria-label="Them switcher"
               color="inherit"
               className={styles.showIconLayout}
+              style={{
+                opacity: process?.env?.REACT_APP_DEV_ENV === 'true' ? 1 : 0,
+                pointerEvents: process?.env?.REACT_APP_DEV_ENV === 'true' ? 'all' : 'none'
+              }}
             >
               {themeColor === 'light' ? <BsMoon size={19} /> : <BsSun size={19} />}
             </IconButton>
