@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -9,10 +9,11 @@ import { dateTimeFormat } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import { isMobile, isTablet } from 'react-device-detect';
 
 function ProcessLogs({ onClose, logsData, productName }) {
 
-    const [fullScreen, setFullScreen] = useState(true);
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState([]);
 
@@ -75,54 +76,53 @@ function ProcessLogs({ onClose, logsData, productName }) {
         setRowsData(data);
     };
 
-    return (
-        <Dialog
-            open
-            fullScreen={fullScreen}
-            maxWidth="md"
-            fullWidth
-            onClose={(e, reason) => {
-                if (reason !== 'backdropClick') {
-                    onClose();
-                }
+    return (<Dialog
+        open
+        fullScreen={fullScreen}
+        maxWidth="md"
+        fullWidth
+        onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+                onClose();
+            }
+        }}
+    >
+        <CustomDialogHeader
+            title={`Logs - ${productName}`}
+            onClose={onClose}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
             }}
-        >
-            <CustomDialogHeader
-                title={`Logs - ${productName}`}
-                onClose={onClose}
-                isMinimized={!fullScreen}
-                onMinimizeMaximize={() => {
-                    setFullScreen((prevState) => !prevState);
-                }}
-                showRequiredLabel={false}
-                showManimizeMaximize={true}
-            />
-            <CustomDialogContent>
-                {rowsData && columns ? (
-                    <Box p={2}>
-                        <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
-                            <CustomReactTable
-                                height={'calc(100vh - 200px)'}
-                                columns={columns}
-                                data={rowsData}
-                                onSelect={() => { }}
-                                childrenProperty="subRows"
-                                uniqueKey="_id"
-                                hideSelection={true}
-                                hideAction={false}
-                                hideExpander={true}
-                                renderedFrom={"workOrder_consumables_request_process_logs"}
-                                isClientSideGrid={true}
-                            />
-                        </Box>
+            showRequiredLabel={false}
+            showManimizeMaximize={true}
+        />
+        <CustomDialogContent>
+            {rowsData && columns ? (
+                <Box p={2}>
+                    <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
+                        <CustomReactTable
+                            height={'calc(100vh - 200px)'}
+                            columns={columns}
+                            data={rowsData}
+                            onSelect={() => { }}
+                            childrenProperty="subRows"
+                            uniqueKey="_id"
+                            hideSelection={true}
+                            hideAction={false}
+                            hideExpander={true}
+                            renderedFrom={"workOrder_consumables_request_process_logs"}
+                            isClientSideGrid={true}
+                        />
                     </Box>
-                ) : (
-                    <Box p={2} height={500} bgcolor="white">
-                        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                    </Box>
-                )}
-            </CustomDialogContent>
-        </Dialog>
+                </Box>
+            ) : (
+                <Box p={2} height={500} bgcolor="white">
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
+            )}
+        </CustomDialogContent>
+    </Dialog>
     );
 }
 

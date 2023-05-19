@@ -29,7 +29,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
         showManimizeMaximize={false}
         showRequiredLabel={false}
       />
-      <Formik initialValues={{ qty: 0 }} onSubmit={onSuccess} validateOnMount validate={validate}>
+      <Formik initialValues={{ qty: parseInt(data?.qty) - parseInt(data?.processedQty || 0) }} onSubmit={onSuccess} validateOnMount validate={validate}>
         {({ touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <CustomDialogContent>

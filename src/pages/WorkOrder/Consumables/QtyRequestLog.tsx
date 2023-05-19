@@ -1,4 +1,4 @@
-import { Box, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, IconButton, Typography } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { MATERIAL_REQUEST_STATUS, dateTimeFormat } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -15,6 +15,7 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import ProcessLogs from './ProcessLogs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
+import QtyWithdrawalDialog from './QtyWithdrawalDialog';
 
 function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productName }) {
 
@@ -22,6 +23,8 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
   const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [rowsData, setRowsData] = useState([]);
+  const [withdrawalQtyDialog, setWithdrawalQtyDialog] = useState({ open: false, data: null });
+
   const {
     state: { user }
   }: any = useData();
@@ -34,6 +37,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
   }, [workOrderId, uniqueId]);
 
   const fetchColumn = async () => {
+    setColumns(null)
     const column: any = [
       {
         accessor: 'requestDate',
@@ -131,14 +135,26 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
       {
         accessor: 'action',
         Header: 'Action',
-        width: 100,
-        minWidth: 100,
+        width: 150,
+        minWidth: 150,
         sticky: 'right',
         disableFilters: true,
         canDrag: false,
         Cell: ({ row }: any) => (
           <div style={{ display: 'flex', justifyContent: 'right' }}>
-            {row.original["processesLogs"] && row.original["processesLogs"]?.length && (
+            {row.original['status'] === MATERIAL_REQUEST_STATUS.requested && (
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => {
+                  setWithdrawalQtyDialog({ open: true, data: row.original })
+                }}
+              >
+                Withdrawal
+              </Button>
+            )}
+            {row.original["processesLogs"] && row.original["processesLogs"]?.length > 0 && (
               <HtmlTooltip title="View Logs">
                 <IconButton
                   size="small"
@@ -179,62 +195,77 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
   };
 
   return (
-    <Dialog
-      open
-      fullScreen={fullScreen}
-      maxWidth="md"
-      fullWidth
-      onClose={(e, reason) => {
-        if (reason !== 'backdropClick') {
-          onClose();
-        }
-      }}
-    >
-      <CustomDialogHeader
-        title={`Logs - ${productName}`}
-        onClose={onClose}
-        isMinimized={!fullScreen}
-        onMinimizeMaximize={() => {
-          setFullScreen((prevState) => !prevState);
+    <>
+      <Dialog
+        open
+        fullScreen={fullScreen}
+        maxWidth="md"
+        fullWidth
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            onClose();
+          }
         }}
-        showRequiredLabel={false}
-        showManimizeMaximize={true}
-      />
-      <CustomDialogContent>
-        {rowsData && columns ? (
-          <Box p={2}>
-            <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
-              <CustomReactTable
-                height={'calc(100vh - 200px)'}
-                columns={columns}
-                data={rowsData}
-                onSelect={() => { }}
-                childrenProperty="subRows"
-                uniqueKey="_id"
-                hideSelection={true}
-                hideAction={false}
-                hideExpander={true}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-              />
-            </Box>
-          </Box>
-        ) : (
-          <Box p={2} height={500} bgcolor="white">
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </CustomDialogContent>
-      {openProcessLogs.open &&
-        <ProcessLogs
-          onClose={() => {
-            setOpenProcessLogs({ open: false, logs: [] })
+      >
+        <CustomDialogHeader
+          title={`Logs - ${productName}`}
+          onClose={onClose}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
           }}
-          logsData={openProcessLogs.logs}
-          productName={productName}
+          showRequiredLabel={false}
+          showManimizeMaximize={true}
         />
-      }
-    </Dialog>
+        <CustomDialogContent>
+          {rowsData && columns ? (
+            <Box p={2}>
+              <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
+                <CustomReactTable
+                  height={'calc(100vh - 200px)'}
+                  columns={columns}
+                  data={rowsData}
+                  onSelect={() => { }}
+                  childrenProperty="subRows"
+                  uniqueKey="_id"
+                  hideSelection={true}
+                  hideAction={false}
+                  hideExpander={true}
+                  renderedFrom={renderedFrom}
+                  isClientSideGrid={true}
+                />
+              </Box>
+            </Box>
+          ) : (
+            <Box p={2} height={500} bgcolor="white">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </CustomDialogContent>
+        {openProcessLogs.open &&
+          <ProcessLogs
+            onClose={() => {
+              setOpenProcessLogs({ open: false, logs: [] })
+            }}
+            logsData={openProcessLogs.logs}
+            productName={productName}
+          />
+        }
+      </Dialog>
+      {withdrawalQtyDialog.open &&
+        <QtyWithdrawalDialog
+          onSuccess={() => {
+            setWithdrawalQtyDialog({ open: false, data: null })
+            fetchColumn()
+            fetchData()
+          }}
+          onClose={() => {
+            setWithdrawalQtyDialog({ open: false, data: null })
+          }}
+          data={withdrawalQtyDialog.data}
+          workOrderId={workOrderId}
+        />}
+    </>
   );
 }
 
