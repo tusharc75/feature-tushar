@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, IconButton, Typography } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
@@ -12,6 +12,9 @@ import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import ProcessLogs from './ProcessLogs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import HistoryIcon from '@material-ui/icons/History';
 
 function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productName }) {
 
@@ -23,58 +26,60 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
     state: { user }
   }: any = useData();
 
+  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [] });
+
   useEffect(() => {
     fetchColumn();
     fetchData();
   }, [workOrderId, uniqueId]);
 
   const fetchColumn = async () => {
-    const column = [];
-    const {
-      data: { data }
-    } = await axiosInstance().put(`/field/find-field-labels`, {
-      fields: [
-        {
-          resource: 'Product',
-          fieldNames: ['productName', 'productNumber', 'productDescription']
-        }
-      ]
-    });
-    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
-    productFields?.forEach((e) => {
-      if (e?.fieldName === 'productName') {
-        column.push({
-          accessor: e?.fieldName,
-          Header: e?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => {
-            return row?.original[e?.fieldName] ? (
-              <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.product?.optionValue}`} target="_blank">
-                {row?.original[e?.fieldName]}
-              </a>
-            ) : (
-              <NoDataCell />
-            );
-          }
-        });
-      } else {
-        column.push({
-          accessor: e?.fieldName,
-          Header: e?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => {
-            return row?.original[e?.fieldName] ? <p className="text-truncate">{row?.original[e?.fieldName]}</p> : <NoDataCell />;
-          }
-        });
-      }
-    });
-    const extracolumns: any = [
+    const column: any = [
       {
-        accessor: 'qty',
-        Header: 'Qty',
+        accessor: 'requestDate',
+        Header: 'Requested Date',
         width: 200,
         Cell: ({ row }) => {
+          return row?.original['requestDate'] ? (
+            <p className="text-truncate">{moment(row?.original['requestDate']).format(dateTimeFormat)}</p>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'requestBy',
+        Header: 'Requestd By',
+        width: 200,
+        Cell: ({ row }) => {
+          return row?.original['requestBy'] ?
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestById']}`} target="_blank">
+              {row?.original['requestBy']}
+            </a> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'qty',
+        Header: 'Requestd Qty',
+        width: 150,
+        Cell: ({ row }) => {
           return row?.original['qty'] ? <p className="text-truncate">{row?.original['qty']}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'processedQty',
+        Header: 'Processed Qty',
+        width: 150,
+        Cell: ({ row }) => {
+          return row?.original['processedQty'] ? <p className="text-truncate">{row?.original['processedQty']}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'status',
+        Header: 'Status',
+        width: 150,
+        Cell: ({ row }) => {
+          return row?.original['status'] ? <p className="text-truncate">{row?.original['status']}</p> : <NoDataCell />;
         }
       },
       ...(user?.user?.brandPolicy?.storageLocation
@@ -92,29 +97,6 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
           }
         ]
         : []),
-      {
-        accessor: 'requestBy',
-        Header: 'Requestd By',
-        width: 200,
-        Cell: ({ row }) => {
-          return row?.original['requestBy'] ?
-            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestById']}`} target="_blank">
-              {row?.original['requestBy']}
-            </a> : <NoDataCell />;
-        }
-      },
-      {
-        accessor: 'requestDate',
-        Header: 'Requestd Date',
-        width: 200,
-        Cell: ({ row }) => {
-          return row?.original['requestDate'] ? (
-            <p className="text-truncate">{moment(row?.original['requestDate']).format(dateTimeFormat)}</p>
-          ) : (
-            <NoDataCell />
-          );
-        }
-      },
       {
         accessor: 'processBy',
         Header: 'Processed By',
@@ -145,21 +127,35 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
         Cell: ({ row }) => {
           return row?.original['comment'] ? <p className="text-truncate">{row?.original['comment']}</p> : <NoDataCell />;
         }
+      },
+      {
+        accessor: 'action',
+        Header: 'Action',
+        width: 100,
+        minWidth: 100,
+        sticky: 'right',
+        disableFilters: true,
+        canDrag: false,
+        Cell: ({ row }: any) => (
+          <div style={{ display: 'flex', justifyContent: 'right' }}>
+            {row.original["processesLogs"] && row.original["processesLogs"]?.length && (
+              <HtmlTooltip title="View Logs">
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setOpenProcessLogs({ open: true, logs: row.original["processesLogs"] });
+                  }}
+                >
+                  <HistoryIcon />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+          </div>
+        )
       }
     ];
-    extracolumns.push({
-      accessor: 'status',
-      Header: 'Status',
-      minWidth: 200,
-      width: 200,
-      sticky: 'right',
-      disableFilters: true,
-      canDrag: false,
-      Cell: ({ row }) => {
-        return <Typography variant="body2">{row?.original?.status}</Typography>;
-      }
-    });
-    setColumns([...column, ...extracolumns]);
+    setColumns([...column]);
   };
 
   const fetchData = () => {
@@ -168,9 +164,6 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
       .then(({ data: { data } }) => {
         const filteredData = data?.filter((e) => e.uniqueId === uniqueId);
         filteredData?.forEach((e) => {
-          e.productName = e.product?.optionLabel;
-          e.productDescription = e.product?.productDescription;
-          e.productNumber = e.product?.productNumber;
           e.storageLocationId = e?.storageLocation?.optionValue;
           e.storageLocation = e?.storageLocation?.optionLabel;
           e.requestById = e?.requestBy?.optionValue;
@@ -232,6 +225,15 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
           </Box>
         )}
       </CustomDialogContent>
+      {openProcessLogs.open &&
+        <ProcessLogs
+          onClose={() => {
+            setOpenProcessLogs({ open: false, logs: [] })
+          }}
+          logsData={openProcessLogs.logs}
+          productName={productName}
+        />
+      }
     </Dialog>
   );
 }
