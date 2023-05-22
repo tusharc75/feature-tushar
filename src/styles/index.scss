@@ -3405,7 +3405,7 @@ body {
       }
     }
   }
-  th[data-sticky-first-right-td='true'] {
+  [data-sticky-first-right-td='true'] {
     border-left: 1px solid var(--dark-mode-border-color, #ddd) !important;
   }
   td,
