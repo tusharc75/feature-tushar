@@ -7,7 +7,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 
 function ListView({ resourceList }) {
@@ -68,53 +68,27 @@ function ListView({ resourceList }) {
         }
     }, [selectedResource, page, filters, limit, sorting])
 
-
-    const replaceFieldName = (field) => {
-        switch (field) {
-            case 'createdBy':
-                return 'createdBy.user.concatedName';
-            case 'updatedBy':
-                return 'updatedBy.user.concatedName';
-            default:
-                return field;
-        }
-    };
-
-    const replaceFieldNameForSorting = (field) => {
-        const updatedField = replaceFieldName(field);
-        if (field !== updatedField) return updatedField;
-        switch (field) {
-            case 'owner':
-                return 'owner.optionLabel';
-
-            case 'customerAccount':
-                return 'customerAccount.optionLabel';
-
-            case 'supplierAccountName':
-                return 'supplierAccountName.optionLabel';
-
-            default:
-                return field;
-        }
-    };
-
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
         }
-        if (!isObjectEmpty(filters)) {
-            const updatedFilters = [];
-            Object.keys(filters).forEach((field) => {
-                updatedFilters.push({
-                    field: replaceFieldName(field),
-                    term: encodeURI(filters[field].filter)
-                });
-            });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+
+        const { filterByIds, deepFilters } = gridFilterParser(filters)
+
+        if (filterByIds?.length) {
+            deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
         }
+        if (deepFilters?.length) {
+            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
+        }
+
+        if (filterByIds?.length || deepFilters?.length) {
+            deepFilter = `${deepFilter}&filterType=and`;
+        }
+
         if (sorting.length > 0) {
-            deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
         }
         return deepFilter;
     };
