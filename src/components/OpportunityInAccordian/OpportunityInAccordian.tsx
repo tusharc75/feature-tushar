@@ -35,41 +35,7 @@ import AssignOpportunityDialog from '../AssignRolesDialog/AssignOpportunityDialo
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
-
-function DisplayData({ key, label, value, icon, highlightsHead = false }) {
-  return (
-    <div style={{ flexGrow: 1 }}>
-      <List style={{ padding: 0 }}>
-        <ListItem key={key} style={{ alignItems: 'flex-start', paddingInline: '0' }}>
-          <ListItemIcon style={{ minWidth: '24px', marginTop: 11 }}>{icon}</ListItemIcon>
-          <ListItemText
-            primary={
-              highlightsHead ? (
-                <span
-                  style={{
-                    background: '#EFFBF9',
-                    padding: '1px 6px',
-                    borderRadius: '4px',
-                    display: 'inline-block',
-                    color: '#298B88',
-                    fontWeight: 600
-                  }}
-                >
-                  {value ? value : '-'}
-                </span>
-              ) : value ? (
-                <span style={{ fontSize: '15px' }}>{value}</span>
-              ) : (
-                '-'
-              )
-            }
-            secondary={<span style={{ fontSize: '14px' }}>{label}</span>}
-          />
-        </ListItem>
-      </List>
-    </div>
-  );
-}
+import DisplayData from 'src/CardDisplayData';
 
 export default function OpportunityInAccordian({
   opportunities,
