@@ -21,7 +21,6 @@ import { useData } from 'src/StateProvider/Provider';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
   
-  let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
@@ -330,7 +329,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               childrenProperty="subRows"
               uniqueKey="_id"
               onSaveEdit={onSaveInlineEdit}
-              renderedFrom={renderedFrom}
+              renderedFrom={'workOrder_consumables'}
               isClientSideGrid={true}
               hideExpander={true}
               hideSelection={allowedToEdit ? false : true}
@@ -348,7 +347,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             reference={'workOrder'}
             handleCloseDialog={() => setConsumablesDialog(false)}
             assignedProducts={dataRows?.map((d) => d?.materialId) || []}
-            renderedFrom={'workOrder_consumables'}
             onSuccess={(rows) => {
               handleSubmit(rows);
             }}
@@ -373,7 +371,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           <QtyRequestLog
             uniqueId={openLogDialog.uniqueId}
             workOrderId={workOrderId}
-            renderedFrom={renderedFrom}
             productName={openLogDialog?.data?.productName}
             onClose={() => {
               setOpenLogDialog({
@@ -381,6 +378,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
                 uniqueId: null,
                 data: null
               });
+              fetchData();
             }}
           />
         )}

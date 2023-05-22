@@ -99,7 +99,6 @@ export const CustomOfflineProvider = ({ children }) => {
               })
               .catch((error) => {});
             await new Promise((resolve) => setTimeout(resolve, 2000));
-            console.log('data to update', d);
           }
         });
         await rentalJobOfflineUpdate([]);

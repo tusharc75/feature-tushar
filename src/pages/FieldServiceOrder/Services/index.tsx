@@ -543,7 +543,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
           productId={null}
           handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
           assignedProducts={[]}
-          renderedFrom={renderedFrom}
           onSuccess={(product) => {
             handleAdd(product);
           }}

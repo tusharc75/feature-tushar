@@ -516,7 +516,6 @@ const PackageList = () => {
           productId={[...selectedRecords.map((d) => d._id)]}
           handleCloseDialog={() => setShowProductAssignDialog(false)}
           assignedProducts={selectedPackageProducts}
-          renderedFrom={`${renderedFrom}_sub-1`}
           onSuccess={() => {
             setShowProductAssignDialog(false);
           }}

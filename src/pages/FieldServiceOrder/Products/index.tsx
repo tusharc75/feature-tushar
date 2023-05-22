@@ -399,7 +399,6 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
           productId={null}
           handleCloseDialog={() => setAddProductDialog({ open: false, parentId: null })}
           assignedProducts={[]}
-          renderedFrom={renderedFrom}
           onSuccess={(row) => {
             handleAdd(row);
           }}

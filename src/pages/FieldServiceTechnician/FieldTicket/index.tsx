@@ -87,7 +87,6 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
         try {
           insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
         } catch (ex) {
-          console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`);
         }
       }
 
@@ -110,12 +109,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
       setFrameWorkComponent({ ...tempFrameworkComponent });
       columns = [...columns, ...getStaticFields()];
       setColumns([...columns]);
-      // axiosInstance()
-      //   .get(`/field?resource=${sidebarResource?.fieldTicket}`)
-      //   .then(({ data: { data } }) => {
-      //   });
     } catch (err) {
-      console.log(err);
     }
   };
 

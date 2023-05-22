@@ -314,7 +314,6 @@ function Product({ id }) {
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
           assignedProducts={[...parts?.map((p) => p.product), id]}
           reference={'serviceMaster'}
-          renderedFrom={`${renderedFrom}_grid-sub-1`}
           onSuccess={() => {
             fetchData();
             setOpenAssignProductDialog(false);
