@@ -160,7 +160,7 @@ const RenderDialog = ({ modalContent, handleClose, handleRoutes }) => {
           borderRadius: 16,
           margin: 15,
           marginBottom: 94,
-          background: themeColor === 'dark' ? '#0e0e23' : '#fff',
+          background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff',
           boxShadow:
             '0px 165px 66px rgba(142, 159, 199, 0.01), 0px 93px 56px rgba(142, 159, 199, 0.05), 0px 41px 41px rgba(142, 159, 199, 0.09), 0px 10px 23px rgba(142, 159, 199, 0.1), 0px 0px 0px rgba(142, 159, 199, 0.1)'
         }

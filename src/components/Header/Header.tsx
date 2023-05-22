@@ -932,7 +932,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
       <AppBar
         position="relative"
         className={` ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`}
-        style={{ backgroundColor: themeColor === 'light' ? '#fff' : '#0E0E23' }}
+        style={{ backgroundColor: themeColor === 'light' ? '#fff' : 'var(--dark-primary)' }}
       >
         <Toolbar className={` ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
           <Box
@@ -1000,8 +1000,8 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                   color="inherit"
                   className={styles.showIconLayout}
                   style={{
-                    opacity: process?.env?.REACT_APP_DEV_ENV === 'true' ? 1 : 0,
-                    pointerEvents: process?.env?.REACT_APP_DEV_ENV === 'true' ? 'all' : 'none'
+                    opacity: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 1 : 0,
+                    pointerEvents: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 'all' : 'none'
                   }}
                 >
                   {themeColor === 'light' ? <BsMoon size={19} /> : <BsSun size={19} />}
@@ -1102,8 +1102,8 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
               color="inherit"
               className={styles.showIconLayout}
               style={{
-                opacity: process?.env?.REACT_APP_DEV_ENV === 'true' ? 1 : 0,
-                pointerEvents: process?.env?.REACT_APP_DEV_ENV === 'true' ? 'all' : 'none'
+                opacity: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 1 : 0,
+                pointerEvents: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 'all' : 'none'
               }}
             >
               {themeColor === 'light' ? <BsMoon size={19} /> : <BsSun size={19} />}
