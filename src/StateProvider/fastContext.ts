@@ -1,9 +1,13 @@
 import createFastContext from './createFastContext';
 
-export const SEARCH = 'searchQuery';
+const SEARCH = 'searchQuery';
+const THEME = 'themeColor';
 
-const { Provider, useStore } = createFastContext({
-  searchQuery: ''
-});
+const initialState: { searchQuery: string; themeColor: 'light' | 'dark' } = {
+  searchQuery: '',
+  themeColor: 'light'
+};
 
-export { Provider as FastProvider, useStore };
+const { Provider, useStore } = createFastContext(initialState);
+
+export { Provider as FastProvider, useStore, SEARCH, THEME };

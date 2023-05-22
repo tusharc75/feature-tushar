@@ -11,7 +11,7 @@ $isAppliedBill: #a8ec9c;
     .tr {
       background: #fff;
       [data-mode='dark'] & {
-        background: #0e0e23;
+        background: var(--dark-primary);
       }
 
       :last-child {
@@ -24,14 +24,14 @@ $isAppliedBill: #a8ec9c;
     .tr:nth-of-type(even) {
       background: white;
       [data-mode='dark'] & {
-        background: #0e0e23;
+        background: var(--dark-primary);
       }
     }
 
     .th[data-sticky-td='true'] {
       background: white;
       [data-mode='dark'] & {
-        background: #0e0e23;
+        background: var(--dark-primary);
       }
     }
 
@@ -39,7 +39,7 @@ $isAppliedBill: #a8ec9c;
       padding: 8px !important;
       background-color: white !important;
       [data-mode='dark'] & {
-        background: #0e0e23 !important;
+        background: var(--dark-primary) !important;
       }
       //color: white !important;
       border-right: 1px solid var(--dark-mode-border-color, #ddd) !important;
@@ -50,7 +50,7 @@ $isAppliedBill: #a8ec9c;
       //border-right: 1px solid #ddd;
       background: white;
       [data-mode='dark'] & {
-        background: #0e0e23;
+        background: var(--dark-primary);
         color: white;
       }
       overflow: hidden;
