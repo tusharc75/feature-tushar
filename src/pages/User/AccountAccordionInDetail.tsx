@@ -11,7 +11,8 @@ import {
   ListItemAvatar,
   ListItemText,
   MenuItem,
-  Menu
+  Menu,
+  Button
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -29,76 +30,8 @@ import { FaIndustry } from 'react-icons/fa';
 import { AiOutlinePhone } from 'react-icons/ai';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
 import { MoreVert } from '@material-ui/icons';
-
-const Accordion = withStyles({
-  root: {
-    border: '1px solid rgba(0, 0, 0, .125) !important',
-    boxShadow: 'none',
-    '&:not(:last-child)': {
-      borderBottom: 0
-    },
-    '&:before': {
-      display: 'none'
-    },
-    '&$expanded': {
-      margin: 'auto'
-    }
-  },
-  expanded: {}
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-  root: {
-    backgroundColor: 'white',
-    borderBottom: '1px solid #f1ece8',
-    background: '#ffffff',
-    fontWeight: 'bold',
-    padding: '0px',
-    '&$expanded': {
-      minHeight: 46
-    }
-  },
-  content: {
-    '&$expanded': {
-      margin: '12px 0'
-    }
-  },
-  expanded: {}
-})(MuiAccordionSummary);
-
-const AccordionDetails = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(1),
-    display: 'block'
-  }
-}))(MuiAccordionDetails);
-
-function DisplayData({ label, value, icon, showCopyToText = false }) {
-  return (
-    <div style={{ flexGrow: 1 }}>
-      <List>
-        <ListItem>
-          <ListItemAvatar>{icon}</ListItemAvatar>
-          <ListItemText
-            primary={
-              <>
-                <Grid container>
-                  <Grid item xs={10} md={10} sm={10} className="text-truncate">
-                    {value ? value : '-'}{' '}
-                  </Grid>
-                  <Grid item xs={2} md={2} sm={2}>
-                    {showCopyToText ? <CopyToClipboard textToCopy={value} /> : null}
-                  </Grid>
-                </Grid>{' '}
-              </>
-            }
-            secondary={label}
-          />
-        </ListItem>
-      </List>
-    </div>
-  );
-}
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import DisplayData from 'src/CardDisplayData';
 
 export default function AccountAccordionDetail({ accounts, type, expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit }) {
   const {
@@ -146,10 +79,9 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
   };
   return (
     <>
-      <Accordion expanded={expandAccount} className="omsAccordian accordAccount">
+      <Accordion expanded={expandAccount} className="accordAccount" onChange={() => setExpandAccount(!expandAccount)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container className="pos_rel">
-            <div className="clicker_div" onClick={() => setExpandAccount(!expandAccount)}></div>
             <Grid item xs={8}>
               <Box display="flex">
                 <Box>
@@ -167,14 +99,6 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
                 {isAllowedToEdit && (
                   <>
                     {(type === 'customer' ? permissions?.customerAccount?.isCreate : permissions?.supplierAccount?.isCreate) && (
-                      // <IconButton
-                      //     color="primary"
-                      //     size="small"
-                      //     onClick={() => { setShowCreateAccountDialog(true) }}
-                      // >
-                      //     <ControlPointIcon />
-                      // </IconButton>
-
                       <>
                         <IconButton aria-haspopup="true" color="primary" size="small" onClick={handleOpenMenu}>
                           <MoreVert />
@@ -205,8 +129,8 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
                   <Grid container spacing={1}>
                     {accounts.slice(0, maxRecordsToShow).map((obj, index) => (
                       <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
-                        <Card>
-                          <CardContent className="detailCard detailListing">
+                        <Card className="detailCard  card-v1" variant="outlined">
+                          <CardContent className="card-link">
                             <Grid container className="detailCardHeader">
                               <Grid item xs={12} sm={12}>
                                 <Link
@@ -241,24 +165,21 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
                 )}
               </>
             )}
+            {accounts?.length > 0 && accounts.length > maxRecordsToShow && (
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Button
+                  onClick={() => {
+                    setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
+                  }}
+                  endIcon={<FaArrowAltCircleDown size={25} />}
+                  className="accordion-outlined-button"
+                >
+                  <span className="show_more_text">Show More</span>
+                </Button>
+              </Box>
+            )}
           </>
         </AccordionDetails>
-        {accounts?.length > 0 && accounts.length > maxRecordsToShow && (
-          <Box
-            margin={1}
-            className="btn-view gap-1 expander"
-            onClick={() => {
-              setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
-            }}
-            p={1}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <span className="show_more_text">Show More</span>
-            <FaArrowAltCircleDown size={25} />
-          </Box>
-        )}
       </Accordion>
       {showCreateAccountDialog && (
         <ManageAccountDialog
