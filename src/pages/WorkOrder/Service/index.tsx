@@ -172,24 +172,24 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
 
       if (services?.length) {
         let pendingServiceIndex = services?.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
-        if (user?.brandPolicy?.workOrderServiceSequence) {
+        if (pendingServiceIndex === -1) {
+          let tempServiceSortedArray = reverse([...services]);
+          pendingServiceIndex = tempServiceSortedArray.findIndex((d) =>
+            [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
+          );
           if (pendingServiceIndex === -1) {
-            let tempServiceSortedArray = reverse([...services]);
-            pendingServiceIndex = tempServiceSortedArray.findIndex((d) =>
-              [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
-            );
-            if (pendingServiceIndex === -1) {
-              pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
-            } else {
-              pendingServiceIndex = services?.length - pendingServiceIndex;
-              if (services[pendingServiceIndex]?.type === 'quotation') {
-                pendingServiceIndex = pendingServiceIndex + 1;
-              }
+            pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
+          } else {
+            pendingServiceIndex = services?.length - pendingServiceIndex;
+            if (services[pendingServiceIndex]?.type === 'quotation') {
+              pendingServiceIndex = pendingServiceIndex + 1;
             }
           }
-          pendingServiceIndex = pendingServiceIndex > -1 ? pendingServiceIndex : 0;
-          const order = services[pendingServiceIndex]?.order;
-          services?.forEach((element, index) => {
+        }
+        pendingServiceIndex = pendingServiceIndex > -1 ? pendingServiceIndex : 0;
+        const order = services[pendingServiceIndex]?.order;
+        services?.forEach((element, index) => {
+          if (user?.brandPolicy?.workOrderServiceSequence) {
             if (element?.type === 'service') {
               if (element.order === order || index <= pendingServiceIndex) {
                 if (
@@ -204,12 +204,12 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 element.clickable = false;
               }
             }
-          });
-        } else {
-          services?.forEach((element) => {
+          }
+          else {
             element.clickable = true;
-          });
-        }
+          }
+        });
+
         if (isQuotation) {
           if (quotation && quotation?.status === QUOTATION_STATUS.acceptByCustomer) {
           } else {

@@ -20,7 +20,7 @@ import HistoryIcon from '@material-ui/icons/History';
 import { useData } from 'src/StateProvider/Provider';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
-  
+
 
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
@@ -257,7 +257,8 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: 'Qty can not be less than consumed qty'
+        message: user?.user?.brandPolicy?.workOrderConsumableRequest ? 'Qty can not be less than consumed qty plus requested qty' :
+          'Qty can not be less than consumed qty'
       });
       return;
     } else if (parseInt(inputField.qty) === 0) {
