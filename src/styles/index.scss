@@ -96,8 +96,6 @@
   }
 }
 
-
-
 @import '~ag-grid-community/dist/styles/ag-theme-material/sass/_ag-theme-material-mixin.scss';
 
 .ag-theme-material {
@@ -3406,6 +3404,9 @@ body {
         color: #fff !important;
       }
     }
+  }
+  th[data-sticky-first-right-td='true'] {
+    border-left: 1px solid var(--dark-mode-border-color, #ddd) !important;
   }
   td,
   .ag-cell,
