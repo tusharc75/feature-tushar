@@ -196,7 +196,6 @@ const Layout = ({ children, width }) => {
     }
   };
 
-
   return (
     <div ref={contentRef}>
       <Joyride
@@ -227,7 +226,7 @@ const Layout = ({ children, width }) => {
           transition={{ duration: 0.3 }}
           exit={{ opacity: 0 }}
           className={classes.content}
-          style={{ backgroundColor: theme === 'light' ? '#f1f5ff' : '#24243e' }}
+          style={{ backgroundColor: theme === 'light' ? '#f1f5ff' : 'var(--dark-secondary)' }}
           onClick={handleToggleState}
         >
           <div className={classes.layout} ref={bodyRef} onScroll={onScroll}>

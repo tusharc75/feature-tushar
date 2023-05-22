@@ -470,7 +470,6 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
           productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           assignedProducts={[]}
-          renderedFrom={renderedFrom}
           onSuccess={(d) => {
             handleAdd(d);
           }}

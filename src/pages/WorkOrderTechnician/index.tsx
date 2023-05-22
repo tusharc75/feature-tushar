@@ -259,7 +259,6 @@ const WorkOrderTechnician = () => {
     { accessor: 'stepData', title: 'Time', type: 'timer' }
   ];
 
-  console.log(selectedService)
 
   return (
     <Box className="main-container-v1">

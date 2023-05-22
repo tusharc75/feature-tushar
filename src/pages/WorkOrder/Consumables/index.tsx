@@ -20,8 +20,7 @@ import HistoryIcon from '@material-ui/icons/History';
 import { useData } from 'src/StateProvider/Provider';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
-  
-  let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
+
 
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
@@ -39,7 +38,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   useEffect(() => {
     var allowRequest = false;
     if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
-      console.log(warehouse)
       if (warehouse?.manager && warehouse?.manager?.includes(user?.user?._id)) {
         allowRequest = false;
       }
@@ -48,11 +46,11 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       }
     }
     setConsumeRequest(allowRequest)
-    fetchColumns(allowRequest);
+    fetchColumns();
     fetchData();
   }, [allowedToEdit, workOrderId]);
 
-  const fetchColumns = async (allowRequest) => {
+  const fetchColumns = async () => {
     const column = [];
     const {
       data: { data }
@@ -122,7 +120,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
-      ...(allowRequest
+      ...(user?.user?.brandPolicy?.workOrderConsumableRequest
         ? [
           {
             accessor: 'requestedQty',
@@ -259,7 +257,8 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: 'Qty can not be less than consumed qty'
+        message: user?.user?.brandPolicy?.workOrderConsumableRequest ? 'Qty can not be less than consumed qty plus requested qty' :
+          'Qty can not be less than consumed qty'
       });
       return;
     } else if (parseInt(inputField.qty) === 0) {
@@ -331,7 +330,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               childrenProperty="subRows"
               uniqueKey="_id"
               onSaveEdit={onSaveInlineEdit}
-              renderedFrom={renderedFrom}
+              renderedFrom={'workOrder_consumables'}
               isClientSideGrid={true}
               hideExpander={true}
               hideSelection={allowedToEdit ? false : true}
@@ -349,7 +348,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             reference={'workOrder'}
             handleCloseDialog={() => setConsumablesDialog(false)}
             assignedProducts={dataRows?.map((d) => d?.materialId) || []}
-            renderedFrom={'workOrder_consumables'}
             onSuccess={(rows) => {
               handleSubmit(rows);
             }}
@@ -374,7 +372,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           <QtyRequestLog
             uniqueId={openLogDialog.uniqueId}
             workOrderId={workOrderId}
-            renderedFrom={renderedFrom}
             productName={openLogDialog?.data?.productName}
             onClose={() => {
               setOpenLogDialog({
@@ -382,6 +379,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
                 uniqueId: null,
                 data: null
               });
+              fetchData();
             }}
           />
         )}

@@ -130,7 +130,7 @@
 
       [data-mode='dark'] & {
         box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08);
-        background: #0e0e23;
+        background: var(--dark-primary);
         -webkit-background-clip: padding-box;
         background-clip: padding-box;
       }
@@ -210,7 +210,7 @@
     align-items: center;
     max-width: 100%;
     [data-mode='dark'] & {
-      background-color: #0e0e23 !important;
+      background-color: var(--dark-primary) !important;
     }
 
     button {
@@ -372,7 +372,7 @@
   cursor: pointer;
   [data-mode='dark'] & {
     box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08);
-    background: #0e0e23;
+    background: var(--dark-primary);
     color: #fff;
   }
   img {
