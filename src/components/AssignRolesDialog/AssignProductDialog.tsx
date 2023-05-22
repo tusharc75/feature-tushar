@@ -42,9 +42,10 @@ const AssignProductDialog = ({
   handleCloseDialog,
   assignedProducts,
   reference = 'product',
-  renderedFrom,
   serialized = null
 }) => {
+  
+  const renderedFrom = `${routes.product.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const {
     state: { user, permissions, selectedEntity }

@@ -581,7 +581,6 @@ const ServiceMaster = (props: Props) => {
           //assignedProducts={assignProductDialog.products}
           assignedProducts={[]}
           reference={'productService'}
-          renderedFrom={`${renderedFrom}_grid-sub-1`}
           onSuccess={(d: any) => {
             setAssignStepsToConsumablesDialog({ open: true, consumables: d, service: assignProductDialog.service, steps: assignProductDialog.steps });
             // const data = d?.map((d) => {
