@@ -114,12 +114,15 @@ export const setDataBySectionName = (secName, index = 0) => {
     icon = <DashboardIcons.FORM_ICON colors={iconColour} />;
     sideBarIcon = <MdOutlineDynamicForm size={20} />;
   } else if (['Service Operations Management'].includes(secName)) {
+    text = 'Deploy, Track and Bill for field services efficiently.';
     icon = <DashboardIcons.SERVICE_OPERATION_MANAGEMENT colors={iconColour} />;
     sideBarIcon = <ServiceOperationManagementIcon size={20} />;
   } else if (['Purchasing Management'].includes(secName)) {
+    text = 'Manage working capital effectively.';
     icon = <DashboardIcons.PURCHASING_MANAGEMENT colors={iconColour} />;
     sideBarIcon = <PurchasingManagementIcon size={20} />;
   } else if (['Planning & Forecasting'].includes(secName)) {
+    text = 'Optimize your resource utilization.';
     icon = <DashboardIcons.PLANNING_FORECASTING colors={iconColour} />;
     sideBarIcon = <MdOutlineEventAvailable size={20} />;
   } else if (['Brand Admin'].includes(secName)) {
