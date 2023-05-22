@@ -195,38 +195,6 @@ const DemandOrder = () => {
     </>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
-
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-
-    if (field !== updatedField) return updatedField;
-
-    switch (field) {
-      case 'owner':
-        return 'owner.optionLabel';
-
-      case 'customerAccount':
-        return 'customerAccount.optionLabel';
-
-      case 'supplierAccountName':
-        return 'supplierAccountName.optionLabel';
-
-      default:
-        return field;
-    }
-  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
