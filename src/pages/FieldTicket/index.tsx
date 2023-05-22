@@ -29,6 +29,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import styles from '../Leads/Header.module.scss';
 import ManageFieldTicket from './ManageFieldTicket';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 
 const FieldTicket = () => {
   const renderedFrom = camelCase(routes?.fieldTicket.title);
@@ -50,71 +52,97 @@ const FieldTicket = () => {
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
   const { getColumnData } = useColumns();
+  const { isOffline } = useContext(CustomOfflineContext);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.fieldTicket}`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicketDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
+  const fetchGridColumns = async () => {
+    let data;
+    if (isOffline) {
+      data = await findOne(objectStore.resource, objectStore.fieldTicket);
+    } else {
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
+      data = response?.data?.data;
+      try {
+        insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
+      } catch (ex) {
+        console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`);
+      }
+    }
+    let columns = [];
+    let rendererNames = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicketDetail.path);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName);
+        }
+      }
+    });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      actionsRenderer: ActionsRenderer
+    };
+    setFrameWorkComponent({ ...tempFrameworkComponent });
+    columns = [...columns, ...getStaticFields()];
+    setColumns([...columns]);
   };
 
-  const fetchFieldTicketData = () => {
+  const fetchFieldTicketData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    axiosInstance()
-      .get(`${routes?.fieldTicket.path}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data?.map((u: any) => {
-          let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.fieldTicket?.isDelete;
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
-          return {
-            ...finalObject
-          };
-        });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+    if (isOffline) {
+      const getAllData = await findAll(objectStore.fieldTicket);
+      let rows = getAllData?.map((u: any) => {
+        let finalObject: any = prepareDataForGrid(u);
+        finalObject['canDelete'] = permissions?.fieldTicket?.isDelete;
+        finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+        finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
+        return {
+          ...finalObject
+        };
       });
+      dispatch({ type: 'initialize', data: rows, count: rows?.length || 0 });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    } else {
+      axiosInstance()
+        .get(`${routes?.fieldTicket.path}${queryString}`)
+        .then(({ data: { data, count } }) => {
+          let rows = data?.map((u: any) => {
+            let finalObject: any = prepareDataForGrid(u);
+            finalObject['canDelete'] = permissions?.fieldTicket?.isDelete;
+            finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+            finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
+            return {
+              ...finalObject
+            };
+          });
+          if (appendRows) {
+            dispatch({
+              type: 'initialize',
+              data: [...dataRows, ...rows],
+              count: count,
+              selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+            });
+          } else {
+            dispatch({
+              type: 'initialize',
+              data: rows,
+              count: count,
+              selectedRecords: rows.filter((f) => f.isChecked === true)
+            });
+          }
+          dispatch({ type: 'initialize', data: rows, count: count });
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+        });
+    }
   };
 
   const getQueryString = (isExport = false) => {
@@ -206,29 +234,50 @@ const FieldTicket = () => {
     </Fragment>
   );
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     let ids = [];
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
       ids = selectedRecords.map((m) => m._id);
     }
-    axiosInstance()
-      .put(`${routes?.fieldTicket?.path}/remove`, { ids: ids })
-      .then(({ data }) => {
-        removeLocalStorage(localStorageSelectedRecords);
-        fetchFieldTicketData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    if (isOffline) {
+      for (let i = 0; i < ids.length; i++) {
+        deleteOne(objectStore.fieldTicket, ids[i]);
+        const data = await findOne(objectStore.offlineDataSync, ids[i]);
+        if (data.data.offlineSyncStatus === 'new') {
+          deleteOne(objectStore.offlineDataSync, ids[i]);
+        } else {
+          await insertUpdate(objectStore.offlineDataSync, ids[i], { type: 'fieldTicket', data: { ...data.data, offlineSyncStatus: 'delete' } });
+        }
+      }
+      removeLocalStorage(localStorageSelectedRecords);
+      fetchFieldTicketData();
+      setShowDeleteConfirmBox(false);
+      setDeleteRecord(null);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Field Ticket Deleted Successfully in Offline!'
       });
+    } else {
+      axiosInstance()
+        .put(`${routes?.fieldTicket?.path}/remove`, { ids: ids })
+        .then(({ data }) => {
+          removeLocalStorage(localStorageSelectedRecords);
+          fetchFieldTicketData();
+          setShowDeleteConfirmBox(false);
+          setDeleteRecord(null);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   useEffect(() => {
@@ -237,7 +286,7 @@ const FieldTicket = () => {
 
   useEffect(() => {
     fetchFieldTicketData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, isOffline]);
 
   return (
     <Fragment>
