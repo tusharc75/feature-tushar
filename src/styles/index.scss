@@ -3281,7 +3281,7 @@ body {
     color: #1d1d1d;
   }
   .link {
-    color: var(--link);
+    color: var(--link) !important;
     word-wrap: break-word;
   }
 }
