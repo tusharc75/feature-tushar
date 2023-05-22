@@ -16,8 +16,8 @@ const useStyles = makeStyles(() => ({
     margin: '0px 6px 14px',
     borderRadius: '4px',
     // boxShadow: 'rgb(23 43 77 / 20%) 0px 1px 1px, rgb(23 43 77 / 20%) 0px 0px 1px',
-    backgroundColor: 'rgb(255, 255, 255)',
-    color: 'rgb(23, 43, 77)',
+    backgroundColor: 'var(--dark-primary, rgb(255, 255, 255))',
+    color: 'var(--dark-primary-text, rgb(23, 43, 77))',
     padding: '14px 15px',
     transition: 'transform .2s, background .3s',
     '&:hover': {

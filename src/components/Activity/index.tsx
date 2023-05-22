@@ -41,24 +41,24 @@ import { isEmpty } from 'lodash';
 const useStyles = makeStyles(() => ({
   activityBox: {
     padding: '15px 30px 30px',
-    background: '#ffffff'
+    background: 'var(--dark-secondary, #FFFFFF)'
   },
   activitySubBox: {
     display: 'flex',
     padding: '7px 8px',
     margin: '0px 0px 12px',
     cursor: 'pointer',
-    background: '#fff',
-    border: '1px solid #E7E7E7',
+    background: 'var(--card-bg, #FFF)',
+    border: '1px solid var(--dark-mode-border-color, #E7E7E7)',
     boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.04)',
     borderRadius: '4px',
     minHeight: '46px',
-    color: '#5B5B5B',
+    color: 'var(--dark-primary-text,#5B5B5B)',
     '& h6': {
       fontWeight: '500',
       fontSize: '14px',
       lineHeight: '17px',
-      color: '#5B5B5B'
+      color: 'var(--dark-primary-text,#5B5B5B)'
     }
   },
   historyButton: {
@@ -67,7 +67,7 @@ const useStyles = makeStyles(() => ({
   },
   detailsHeader: {
     padding: '10px',
-    background: '#FFFFFF',
+    background: 'var(--card-bg, #FFFFFF)',
     borderRadius: '7px 7px 0 0',
     position: 'sticky',
     top: '0px',
@@ -78,7 +78,7 @@ const useStyles = makeStyles(() => ({
 
 const Activity = (props) => {
   const classes = useStyles();
-  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => { } } = props;
+  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => {} } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [type, setType] = useState(null);
@@ -243,7 +243,7 @@ const Activity = (props) => {
                           <Typography
                             variant="subtitle2"
                             className={`d-flex align-items-center `}
-                            style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: '#5B5B5B' }}
+                            style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: 'var(--dark-primary-text,#5B5B5B)' }}
                           >
                             {getIcon(data)} {data} ({totalCount[data]})
                           </Typography>
@@ -257,32 +257,37 @@ const Activity = (props) => {
                             <Box mr={1}>
                               <HtmlTooltip title={'Add Folder'}>
                                 <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}>
-                                  <CreateNewFolderIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+                                  <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
                                 </IconButton>
                               </HtmlTooltip>
                             </Box>
                           )}
                           {data === 'Email' && user?.user?.brandPolicy?.inboundEmail && isEmpty(user?.user?.brandPolicy?.inboundEmail) && (
                             <Box mr={1}>
-                              <HtmlTooltip title={`support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`}>
+                              <HtmlTooltip
+                                title={`support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`}
+                              >
                                 <IconButton
                                   size="small"
                                   onClick={(e) => {
-                                    emailCopy(e, `support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`);
+                                    emailCopy(
+                                      e,
+                                      `support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`
+                                    );
                                   }}
                                 >
-                                  <MailIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+                                  <MailIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
                                 </IconButton>
                               </HtmlTooltip>
                             </Box>
                           )}
                           <Box mr={1}>
                             <HtmlTooltip title={infoTitle[data]}>
-                              <InfoOutlinedIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+                              <InfoOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
                             </HtmlTooltip>
                           </Box>
                           <IconButton size="small" onClick={(event) => handleCreateActivity(event, data)}>
-                            <AddOutlinedIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+                            <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
                           </IconButton>
                         </Grid>
                       )

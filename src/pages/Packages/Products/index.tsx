@@ -402,7 +402,6 @@ const ProductsTable = ({ packageId, packageData }) => {
           productId={packageId}
           handleCloseDialog={() => setShowProductAssignDialog(false)}
           assignedProducts={[...rowsData?.map((e) => e._id)]}
-          renderedFrom={`${renderedFrom}_sub-1`}
           onSuccess={() => {
             fetchData();
             setShowProductAssignDialog(false);

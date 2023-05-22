@@ -1,272 +1,267 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import axiosInstance from "../../axios/axiosInstance";
-import { deliveryTicket, rentalManagement, sidebarResource, asyncForEach } from "../../constants/helpers";
-import { CustomToastContext } from "../CustomToastContext/CustomToastContext";
-import { objectStore, findAll, deleteOne, setUpindexDB } from "../../constants/indexdbhelper";
-import { rentalJobOfflineUpdate } from "../../pages/RentalManagement/rentalOfflineHelper";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import axiosInstance from '../../axios/axiosInstance';
+import { deliveryTicket, rentalManagement, sidebarResource, asyncForEach } from '../../constants/helpers';
+import { CustomToastContext } from '../CustomToastContext/CustomToastContext';
+import { objectStore, findAll, deleteOne, setUpindexDB } from '../../constants/indexdbhelper';
+import { rentalJobOfflineUpdate } from '../../pages/RentalManagement/rentalOfflineHelper';
 import { sortBy } from 'lodash';
+import routes from 'src/components/Helpers/Routes';
 
 export const CustomOfflineContext = createContext(null);
 const limit = 500;
 
 let dataToFetch = [];
 Object.keys(sidebarResource).forEach((key) => {
-    dataToFetch.push({
-        key: key,
-        value: sidebarResource[key]
-    })
-})
+  dataToFetch.push({
+    key: key,
+    value: sidebarResource[key]
+  });
+});
 
 export const CustomOfflineProvider = ({ children }) => {
+  const toastConfig = useContext(CustomToastContext);
 
-    const toastConfig = useContext(CustomToastContext);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [isSynch, setIsSynch] = useState(false);
 
-    const [isOffline, setIsOffline] = useState(!navigator.onLine)
-    const [isSynch, setIsSynch] = useState(false)
+  const [offlineFieldsData, setOfflineFieldsData] = useState(null);
+  const [offlineGridData, setOfflineGridData] = useState(null);
 
-    const [offlineFieldsData, setOfflineFieldsData] = useState(null);
-    const [offlineGridData, setOfflineGridData] = useState(null);
-
-    useEffect(() => {
-        if (localStorage.getItem("token")) {
-            synchronizationData();
-        }
-    }, [isOffline])
-
-    window.addEventListener(
-        'load',
-        function (e) {
-            if (navigator.onLine) {
-                if (isOffline) setIsOffline(false);
-            } else {
-                setIsOffline(true);
-            }
-        },
-        false
-    );
-
-    window.addEventListener('online', function (e) {
-        setIsOffline(false)
-    });
-
-    window.addEventListener('offline', function (e) {
-        setIsOffline(true)
-    });
-
-    const synchronizationData = async () => {
-        if (localStorage.getItem("isSynchronizationData") === "true") {
-            return false
-        }
-        if (!isOffline) {
-            await setUpindexDB()
-            var data = await findAll(objectStore.offlineDataSync);
-            if (data?.length) {
-                localStorage.setItem("isSynchronizationData", "true")
-                setIsSynch(true)
-                var OrderBy = ["Loading", "Receiving"];
-                data = sortBy(data, function (item: any) {
-                    return OrderBy.indexOf(item?.data?.ticketType);
-                });
-                await asyncForEach(data, async (d: any) => {
-                    if (d?.type === "deliveryTicket") {
-                        await axiosInstance().post(`${deliveryTicket.api}/offlinedatasync`, d.data)
-                            .then(({ data: { data } }) => {
-                                deleteOne(objectStore.offlineDataSync, d.data._id)
-                                deleteOne(objectStore.deliveryTicket, d.data._id)
-                            })
-                            .catch((error) => {
-                            });
-                        await new Promise(resolve => setTimeout(resolve, 2000))
-                    }
-                    if (d?.type === "assets") {
-                        d.data?.forEach((ele) => {
-                            delete ele.status
-                        })
-                        await axiosInstance().post(`${rentalManagement.api}/${d._id}/inventory/sync-assets`, d.data)
-                            .then(({ data: { data } }) => {
-                                deleteOne(objectStore.offlineDataSync, d._id)
-                            })
-                            .catch((error) => {
-                            });
-                        await new Promise(resolve => setTimeout(resolve, 2000))
-                    }
-                })
-                await rentalJobOfflineUpdate([])
-                localStorage.removeItem("isSynchronizationData")
-                setIsSynch(false)
-            }
-            else {
-                setIsSynch(false)
-            }
-        }
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      synchronizationData();
     }
+  }, [isOffline]);
 
-    const passDataToSave = () => {
-        if (!isOffline && localStorage.getItem("offlineDataToSave")) {
-            try {
-                const offlineDataToSave = JSON.parse(localStorage.getItem("offlineDataToSave"));
+  window.addEventListener(
+    'load',
+    function (e) {
+      if (navigator.onLine) {
+        if (isOffline) setIsOffline(false);
+      } else {
+        setIsOffline(true);
+      }
+    },
+    false
+  );
 
-                Promise.all(Object.keys(offlineDataToSave).map(async offlineData => {
-                    await offlineDataToSave[offlineData].forEach(async m => {
-                        if (m.method === "get") {
-                            await axiosInstance().get(m.api);
-                        }
-                        else if (m.method === "post") {
-                            await axiosInstance().post(m.api, m.values);
-                        }
-                        else if (m.method === "put") {
-                            await axiosInstance().put(m.api, m.values);
-                        }
-                    });
+  window.addEventListener('online', function (e) {
+    setIsOffline(false);
+  });
 
-                })).then(() => {
-                    localStorage.removeItem("offlineDataToSave");
-                    // fetchFieldsData();
-                })
-            } catch (ex) {
+  window.addEventListener('offline', function (e) {
+    setIsOffline(true);
+  });
 
-            }
-        }
+  const synchronizationData = async () => {
+    if (localStorage.getItem('isSynchronizationData') === 'true') {
+      return false;
     }
+    if (!isOffline) {
+      await setUpindexDB();
+      var data = await findAll(objectStore.offlineDataSync);
+      if (data?.length) {
+        localStorage.setItem('isSynchronizationData', 'true');
+        setIsSynch(true);
+        var OrderBy = ['Loading', 'Receiving'];
+        data = sortBy(data, function (item: any) {
+          return OrderBy.indexOf(item?.data?.ticketType);
+        });
+        await asyncForEach(data, async (d: any) => {
+          if (d?.type === 'deliveryTicket') {
+            await axiosInstance()
+              .post(`${deliveryTicket.api}/offlinedatasync`, d.data)
+              .then(({ data: { data } }) => {
+                deleteOne(objectStore.offlineDataSync, d.data._id);
+                deleteOne(objectStore.deliveryTicket, d.data._id);
+              })
+              .catch((error) => {});
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+          }
+          if (d?.type === 'assets') {
+            d.data?.forEach((ele) => {
+              delete ele.status;
+            });
+            await axiosInstance()
+              .post(`${rentalManagement.api}/${d._id}/inventory/sync-assets`, d.data)
+              .then(({ data: { data } }) => {
+                deleteOne(objectStore.offlineDataSync, d._id);
+              })
+              .catch((error) => {});
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+          }
+          if (d?.type === 'fieldTicket') {
+            await axiosInstance()
+              .post(`${routes?.fieldTicket?.path}/offlinedatasync`, d.data)
+              .then(({ data: { data } }) => {
+                deleteOne(objectStore.offlineDataSync, d.data._id);
+                deleteOne(objectStore.fieldTicket, d.data._id);
+              })
+              .catch((error) => {});
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+          }
+        });
+        await rentalJobOfflineUpdate([]);
+        localStorage.removeItem('isSynchronizationData');
+        setIsSynch(false);
+      } else {
+        setIsSynch(false);
+      }
+    }
+  };
 
-    const updateFieldsData = (module, data) => {
-        let initializeOfflineData = {}
-        initializeOfflineData[module] = {
-            ...data
-        }
-        try {
-            const storedLocalStorageOfflineFieldsData = JSON.parse(localStorage.getItem("offlineFieldsData"));
+  const passDataToSave = () => {
+    if (!isOffline && localStorage.getItem('offlineDataToSave')) {
+      try {
+        const offlineDataToSave = JSON.parse(localStorage.getItem('offlineDataToSave'));
+
+        Promise.all(
+          Object.keys(offlineDataToSave).map(async (offlineData) => {
+            await offlineDataToSave[offlineData].forEach(async (m) => {
+              if (m.method === 'get') {
+                await axiosInstance().get(m.api);
+              } else if (m.method === 'post') {
+                await axiosInstance().post(m.api, m.values);
+              } else if (m.method === 'put') {
+                await axiosInstance().put(m.api, m.values);
+              }
+            });
+          })
+        ).then(() => {
+          localStorage.removeItem('offlineDataToSave');
+          // fetchFieldsData();
+        });
+      } catch (ex) {}
+    }
+  };
+
+  const updateFieldsData = (module, data) => {
+    let initializeOfflineData = {};
+    initializeOfflineData[module] = {
+      ...data
+    };
+    try {
+      const storedLocalStorageOfflineFieldsData = JSON.parse(localStorage.getItem('offlineFieldsData'));
+
+      if (storedLocalStorageOfflineFieldsData) {
+        storedLocalStorageOfflineFieldsData[module] = initializeOfflineData[module];
+
+        setOfflineFieldsData(storedLocalStorageOfflineFieldsData);
+        localStorage.setItem('offlineFieldsData', JSON.stringify(storedLocalStorageOfflineFieldsData));
+      } else {
+        setOfflineFieldsData(initializeOfflineData);
+        localStorage.setItem('offlineFieldsData', JSON.stringify(initializeOfflineData));
+      }
+    } catch (ex) {}
+  };
+
+  const fetchFieldsData = (module) => {
+    if (module) {
+      const getModule = dataToFetch.find((d) => d.key === module);
+      if (getModule) {
+        let initializeOfflineData = {};
+
+        const apis = {
+          fieldsApis: [getModule]
+          // gridDataApis: [getModule]
+        };
+
+        Promise.all(
+          apis.fieldsApis.map(async (field) => {
+            await axiosInstance()
+              .get(`/field?resource=${field.value}`)
+              .then(({ data: { data } }) => {
+                initializeOfflineData[field.key] = data;
+              });
+            // await axiosInstance().get(`${rentalManagementApi}?limit=${limit}`).then(({ data: { data } }) => {
+            //     initializeOfflineData.gridData[field.key] = data;
+            // })
+          })
+        ).then(() => {
+          try {
+            const storedLocalStorageOfflineFieldsData = JSON.parse(localStorage.getItem('offlineFieldsData'));
 
             if (storedLocalStorageOfflineFieldsData) {
-                storedLocalStorageOfflineFieldsData[module] = initializeOfflineData[module];
+              storedLocalStorageOfflineFieldsData[module] = initializeOfflineData[module];
 
-                setOfflineFieldsData(storedLocalStorageOfflineFieldsData);
-                localStorage.setItem("offlineFieldsData", JSON.stringify(storedLocalStorageOfflineFieldsData));
-
+              setOfflineFieldsData(storedLocalStorageOfflineFieldsData);
+              localStorage.setItem('offlineFieldsData', JSON.stringify(storedLocalStorageOfflineFieldsData));
             } else {
-                setOfflineFieldsData(initializeOfflineData);
-                localStorage.setItem("offlineFieldsData", JSON.stringify(initializeOfflineData));
+              setOfflineFieldsData(initializeOfflineData);
+              localStorage.setItem('offlineFieldsData', JSON.stringify(initializeOfflineData));
             }
-        } catch (ex) {
+          } catch (ex) {}
+        });
+      }
+    }
+  };
 
-        }
-
+  const updateOfflineGridData = (module, data, recordsToDelete = []) => {
+    if (navigator.onLine) {
+      fetchFieldsData(module);
     }
 
-    const fetchFieldsData = (module) => {
-        if (module) {
-            const getModule = dataToFetch.find(d => d.key === module);
-            if (getModule) {
+    try {
+      const storedLocalStorageOfflineGridData = JSON.parse(localStorage.getItem('offlineGridData'));
 
-                let initializeOfflineData = {}
+      if (storedLocalStorageOfflineGridData) {
+        if (!storedLocalStorageOfflineGridData[module]) {
+          let initializeOfflineGridData = {
+            ...storedLocalStorageOfflineGridData,
+            [module]: data
+          };
 
-                const apis = {
-                    fieldsApis: [getModule],
-                    // gridDataApis: [getModule]
-                }
+          setOfflineGridData(initializeOfflineGridData);
+          localStorage.setItem('offlineGridData', JSON.stringify(initializeOfflineGridData));
+        } else {
+          data.forEach((d) => {
+            const indexOfExistingRecord = storedLocalStorageOfflineGridData[module].findIndex((f) => f._id === d._id);
 
-                Promise.all(apis.fieldsApis.map(async field => {
-                    await axiosInstance().get(`/field?resource=${field.value}`).then(({ data: { data } }) => {
-                        initializeOfflineData[field.key] = data;
-                    })
-                    // await axiosInstance().get(`${rentalManagementApi}?limit=${limit}`).then(({ data: { data } }) => {
-                    //     initializeOfflineData.gridData[field.key] = data;
-                    // })
-                })).then(() => {
-                    try {
-                        const storedLocalStorageOfflineFieldsData = JSON.parse(localStorage.getItem("offlineFieldsData"));
-
-                        if (storedLocalStorageOfflineFieldsData) {
-                            storedLocalStorageOfflineFieldsData[module] = initializeOfflineData[module];
-
-                            setOfflineFieldsData(storedLocalStorageOfflineFieldsData);
-                            localStorage.setItem("offlineFieldsData", JSON.stringify(storedLocalStorageOfflineFieldsData));
-
-                        } else {
-                            setOfflineFieldsData(initializeOfflineData);
-                            localStorage.setItem("offlineFieldsData", JSON.stringify(initializeOfflineData));
-                        }
-                    } catch (ex) {
-
-                    }
-                });
-            }
-        }
-    }
-
-    const updateOfflineGridData = (module, data, recordsToDelete = []) => {
-
-        if (navigator.onLine) {
-            fetchFieldsData(module);
-        }
-
-        try {
-            const storedLocalStorageOfflineGridData = JSON.parse(localStorage.getItem("offlineGridData"));
-
-            if (storedLocalStorageOfflineGridData) {
-
-                if (!storedLocalStorageOfflineGridData[module]) {
-                    let initializeOfflineGridData = {
-                        ...storedLocalStorageOfflineGridData,
-                        [module]: data
-                    }
-
-                    setOfflineGridData(initializeOfflineGridData);
-                    localStorage.setItem("offlineGridData", JSON.stringify(initializeOfflineGridData));
-
-                } else {
-
-                    data.forEach(d => {
-                        const indexOfExistingRecord = storedLocalStorageOfflineGridData[module].findIndex(f => f._id === d._id);
-
-                        if (indexOfExistingRecord === -1) {
-                            storedLocalStorageOfflineGridData[module].push(d);
-                        } else {
-                            storedLocalStorageOfflineGridData[module][indexOfExistingRecord] = d;
-                        }
-                    });
-
-                    recordsToDelete.forEach(_id => {
-                        storedLocalStorageOfflineGridData[module] = storedLocalStorageOfflineGridData[module].filter(f => f._id !== _id);
-                    });
-
-                    setOfflineGridData(storedLocalStorageOfflineGridData);
-                    localStorage.setItem("offlineGridData", JSON.stringify(storedLocalStorageOfflineGridData));
-                }
-
+            if (indexOfExistingRecord === -1) {
+              storedLocalStorageOfflineGridData[module].push(d);
             } else {
-                let initializeOfflineGridData = {
-                    [module]: data
-                }
-
-                setOfflineGridData(initializeOfflineGridData);
-                localStorage.setItem("offlineGridData", JSON.stringify(initializeOfflineGridData));
+              storedLocalStorageOfflineGridData[module][indexOfExistingRecord] = d;
             }
-        } catch (ex) {
+          });
 
+          recordsToDelete.forEach((_id) => {
+            storedLocalStorageOfflineGridData[module] = storedLocalStorageOfflineGridData[module].filter((f) => f._id !== _id);
+          });
+
+          setOfflineGridData(storedLocalStorageOfflineGridData);
+          localStorage.setItem('offlineGridData', JSON.stringify(storedLocalStorageOfflineGridData));
         }
-    }
+      } else {
+        let initializeOfflineGridData = {
+          [module]: data
+        };
 
-    useEffect(() => {
-        // if (navigator.onLine) {
-        //     fetchFieldsData();
-        // } 
-        // else {
-        // if (localStorage.getItem("offlineData")) {
-        //     try {
-        //         setOfflineData(JSON.parse(localStorage.getItem("offlineData")));
-        //     } catch (ex) {
-        //         toastConfig.setToastConfig({ open: true, type: "error", message: "Facing issue while getting offline data" });
-        //     }
-        // }
-        // // }
-    }, [])
+        setOfflineGridData(initializeOfflineGridData);
+        localStorage.setItem('offlineGridData', JSON.stringify(initializeOfflineGridData));
+      }
+    } catch (ex) {}
+  };
 
-    return (
-        <CustomOfflineContext.Provider
-            value={{ isOffline, isSynch, offlineFieldsData, offlineGridData, fetchFieldsData, updateOfflineGridData, updateFieldsData }}
-        >
-            {children}
-        </CustomOfflineContext.Provider>
-    );
+  useEffect(() => {
+    // if (navigator.onLine) {
+    //     fetchFieldsData();
+    // }
+    // else {
+    // if (localStorage.getItem("offlineData")) {
+    //     try {
+    //         setOfflineData(JSON.parse(localStorage.getItem("offlineData")));
+    //     } catch (ex) {
+    //         toastConfig.setToastConfig({ open: true, type: "error", message: "Facing issue while getting offline data" });
+    //     }
+    // }
+    // // }
+  }, []);
+
+  return (
+    <CustomOfflineContext.Provider
+      value={{ isOffline, isSynch, offlineFieldsData, offlineGridData, fetchFieldsData, updateOfflineGridData, updateFieldsData }}
+    >
+      {children}
+    </CustomOfflineContext.Provider>
+  );
 };

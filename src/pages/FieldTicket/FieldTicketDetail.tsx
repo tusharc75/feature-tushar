@@ -14,17 +14,20 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import TabPanel from '../../components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
 import AddCost from './AddCost';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { findOne, objectStore } from 'src/constants/indexdbhelper';
 
 const FieldTicketDetail = () => {
-
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const { state: { permissions, user } }: any = useData();
+  const {
+    state: { permissions, user }
+  }: any = useData();
 
   const [fieldTicketData, setFieldTicketData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -33,32 +36,41 @@ const FieldTicketDetail = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-  const [tabValue, setTabValue] = useState(0)
+  const [tabValue, setTabValue] = useState(0);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     if (id) {
       fetchFields();
       fetchData();
     }
-  }, [id]);
+  }, [id, isOffline]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get('/field?resource=Field Ticket')
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    try {
+      let data;
+      if (isOffline) {
+        data = await findOne(objectStore.resource, objectStore.fieldTicket);
+      } else {
+        const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
+        data = response?.data?.data;
+      }
+      setFields(data?.filter((field) => field.isRead));
+    } catch (err) {
+      toastConfig.setToastConfig(err);
+    }
   };
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`${routes.fieldTicket.path}/${id}`);
+      let data;
+      if (isOffline) {
+        data = await findOne(objectStore.fieldTicket, id);
+      } else {
+        const response = await axiosInstance().get(`${routes.fieldTicket.path}/${id}`);
+        data = response?.data?.data;
+      }
       setFieldTicketData(data);
       setAllowedToEdit(data?.owner?.optionValue === user?.user?._id);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
@@ -102,7 +114,6 @@ const FieldTicketDetail = () => {
     setTabValue(newValue);
   };
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -112,17 +123,11 @@ const FieldTicketDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.fieldTicket?.isUpdate && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                className="btn-outline-v1"
-                onClick={handleOpenUpdateDialog}
-              >
+              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
-            {permissions?.fieldTicket?.isDelete && (
-              <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-            )}
+            {permissions?.fieldTicket?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton referenceId={fieldTicketData?._id} resource={ACTIVITY_RESOURCE.fieldTicket} />
           </Box>
         </Box>
@@ -172,10 +177,7 @@ const FieldTicketDetail = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <AddCost
-            fieldTicketData={fieldTicketData}
-            id={id}
-          />
+          <AddCost fieldTicketData={fieldTicketData} id={id} />
         </TabPanel>
       </Box>
       {showConfirmBox && (

@@ -562,7 +562,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           assignedProducts={[]}
-          renderedFrom={renderedFrom}
           onSuccess={(d) => {
             handleAdd(d);
           }}

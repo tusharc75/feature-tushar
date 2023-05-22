@@ -22,7 +22,7 @@ import { sidebarResource } from '../../../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   block: {
-    background: '#f0f0f0',
+    background: 'var(--dark-secondary, #eeeeee)',
     borderRadius: '4px',
     minHeight: 'calc(100vh - 33.5vh)',
     height: '100%'
@@ -101,7 +101,7 @@ const Board = ({ type, filter }) => {
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
-      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue]
+      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue];
       axiosInstance()
         .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
@@ -145,7 +145,7 @@ const Board = ({ type, filter }) => {
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         fetchBoard();
       });
@@ -241,7 +241,7 @@ const Board = ({ type, filter }) => {
             open={openDialog}
             onClose={(e, reason) => {
               if (reason !== 'backdropClick') {
-                handleCloseDialog()
+                handleCloseDialog();
                 setFullScreen(false);
               }
             }}

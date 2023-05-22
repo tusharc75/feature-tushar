@@ -20,11 +20,11 @@ function CustomDialogComponent({ title, open, onClose, children }) {
       aria-labelledby="form-dialog-title"
       fullScreen={isMobile || isTablet}
       fullWidth
-      PaperProps={{ style: { background: themeColor === 'dark' ? '#0E0E23' : '#fff' } }}
+      PaperProps={{ style: { background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff' } }}
     >
       {title && <CustomDialogHeader title={title} onClose={onClose}></CustomDialogHeader>}
 
-      <CustomDialogContent style={{ background: themeColor === 'dark' ? '#0E0E23' : '#fff' }}>{children}</CustomDialogContent>
+      <CustomDialogContent style={{ background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff' }}>{children}</CustomDialogContent>
 
       <CustomDialogFooter>
         <Button color="primary" size="small" onClick={onClose}>

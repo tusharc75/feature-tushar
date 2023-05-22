@@ -136,14 +136,14 @@
   color: #000;
   overflow: hidden;
   [data-mode='dark'] & {
-    background-color: #0e0e23;
+    background-color: var(--dark-primary);
   }
   .filtered_data {
     max-height: 330px;
     background-color: white;
 
     [data-mode='dark'] & {
-      background-color: #0e0e23;
+      background-color: var(--dark-primary);
     }
 
     .resultUL {

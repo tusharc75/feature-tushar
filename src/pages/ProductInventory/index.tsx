@@ -429,7 +429,6 @@ const InventoryProduct = () => {
     axiosInstance()
       .get(api)
       .then(({ data }) => {
-        console.log(data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

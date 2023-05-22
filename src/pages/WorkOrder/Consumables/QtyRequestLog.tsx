@@ -17,7 +17,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import QtyWithdrawalDialog from './QtyWithdrawalDialog';
 
-function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productName }) {
+function QtyRequestLog({ onClose, workOrderId, uniqueId, productName }) {
 
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
@@ -53,7 +53,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
       },
       {
         accessor: 'requestBy',
-        Header: 'Requestd By',
+        Header: 'Requested By',
         width: 200,
         Cell: ({ row }) => {
           return row?.original['requestBy'] ?
@@ -64,7 +64,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
       },
       {
         accessor: 'qty',
-        Header: 'Requestd Qty',
+        Header: 'Requested Qty',
         width: 150,
         Cell: ({ row }) => {
           return row?.original['qty'] ? <p className="text-truncate">{row?.original['qty']}</p> : <NoDataCell />;
@@ -151,21 +151,23 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
                   setWithdrawalQtyDialog({ open: true, data: row.original })
                 }}
               >
-                Withdrawal
+                Close
               </Button>
             )}
             {row.original["processesLogs"] && row.original["processesLogs"]?.length > 0 && (
-              <HtmlTooltip title="View Logs">
-                <IconButton
-                  size="small"
-                  aria-label="Delete"
-                  onClick={() => {
-                    setOpenProcessLogs({ open: true, logs: row.original["processesLogs"] });
-                  }}
-                >
-                  <HistoryIcon />
-                </IconButton>
-              </HtmlTooltip>
+              <Box ml={1}>
+                <HtmlTooltip title="View Logs">
+                  <IconButton
+                    size="small"
+                    aria-label="Delete"
+                    onClick={() => {
+                      setOpenProcessLogs({ open: true, logs: row.original["processesLogs"] });
+                    }}
+                  >
+                    <HistoryIcon />
+                  </IconButton>
+                </HtmlTooltip>
+              </Box>
             )}
           </div>
         )
@@ -231,7 +233,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, renderedFrom, productNa
                   hideSelection={true}
                   hideAction={false}
                   hideExpander={true}
-                  renderedFrom={renderedFrom}
+                  renderedFrom={'workOrder_consumables_request'}
                   isClientSideGrid={true}
                 />
               </Box>

@@ -48,11 +48,11 @@ function QtyWithdrawalDialog({ workOrderId, onClose, data, onSuccess }) {
         <Dialog open={true} fullWidth TransitionComponent={CustomDialogTransition}>
             <CustomDialogHeader
                 onClose={onClose}
-                title={`Withdrawal Qty`}
+                title={`Close Request`}
                 showManimizeMaximize={false}
                 showRequiredLabel={false}
             />
-            <Formik initialValues={{ qty: 0 }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+            <Formik initialValues={{ qty: (parseInt(data?.qty) - parseInt(data?.processedQty || 0)) }} onSubmit={handleSubmit} validateOnMount validate={validate}>
                 {({ touched, errors, setFieldValue, values }) => (
                     <Form autoComplete="off" autoCorrect="off" noValidate>
                         <CustomDialogContent>
@@ -92,7 +92,7 @@ function QtyWithdrawalDialog({ workOrderId, onClose, data, onSuccess }) {
                                 disabled={loading}
                                 type="submit"
                             >
-                                Withdrawal
+                                Close Request
                             </CustomButton>
                         </CustomDialogFooter>
                     </Form>

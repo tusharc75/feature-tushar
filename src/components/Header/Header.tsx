@@ -932,7 +932,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
       <AppBar
         position="relative"
         className={` ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`}
-        style={{ backgroundColor: themeColor === 'light' ? '#fff' : '#0E0E23' }}
+        style={{ backgroundColor: themeColor === 'light' ? '#fff' : 'var(--dark-primary)' }}
       >
         <Toolbar className={` ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
           <Box
@@ -990,22 +990,23 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                     </Tooltip>
                   </IconButton>
                 )}
-
-                <IconButton
-                  onClick={() => {
-                    toggleThemeColor();
-                  }}
-                  aria-describedby={`current theme ${themeColor}`}
-                  aria-label="Them switcher"
-                  color="inherit"
-                  className={styles.showIconLayout}
-                  style={{
-                    opacity: process?.env?.REACT_APP_DEV_ENV === 'true' ? 1 : 0,
-                    pointerEvents: process?.env?.REACT_APP_DEV_ENV === 'true' ? 'all' : 'none'
-                  }}
-                >
-                  {themeColor === 'light' ? <BsMoon size={19} /> : <BsSun size={19} />}
-                </IconButton>
+                <Tooltip title={themeColor === 'light' ? 'Turn off the light' : 'Turn on the light'}>
+                  <IconButton
+                    onClick={() => {
+                      toggleThemeColor();
+                    }}
+                    aria-describedby={`current theme ${themeColor}`}
+                    aria-label="Them switcher"
+                    color="inherit"
+                    className={styles.showIconLayout}
+                    style={{
+                      opacity: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 1 : 0,
+                      pointerEvents: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 'all' : 'none'
+                    }}
+                  >
+                    {themeColor === 'light' ? <BsMoon size={19} /> : <BsSun size={19} />}
+                  </IconButton>
+                </Tooltip>
 
                 <IconButton
                   id="notificationButton"
@@ -1093,21 +1094,23 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
             </div>
           )}
           {isMobile && (
-            <IconButton
-              onClick={() => {
-                toggleThemeColor();
-              }}
-              aria-describedby={`current theme ${themeColor}`}
-              aria-label="Them switcher"
-              color="inherit"
-              className={styles.showIconLayout}
-              style={{
-                opacity: process?.env?.REACT_APP_DEV_ENV === 'true' ? 1 : 0,
-                pointerEvents: process?.env?.REACT_APP_DEV_ENV === 'true' ? 'all' : 'none'
-              }}
-            >
-              {themeColor === 'light' ? <BsMoon size={19} /> : <BsSun size={19} />}
-            </IconButton>
+            <Tooltip title={themeColor === 'light' ? 'Turn off the light' : 'Turn on the light'}>
+              <IconButton
+                onClick={() => {
+                  toggleThemeColor();
+                }}
+                aria-describedby={`current theme ${themeColor}`}
+                aria-label="Them switcher"
+                color="inherit"
+                className={styles.showIconLayout}
+                style={{
+                  opacity: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 1 : 0,
+                  pointerEvents: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 'all' : 'none'
+                }}
+              >
+                {themeColor === 'light' ? <BsMoon size={19} /> : <BsSun size={19} />}
+              </IconButton>
+            </Tooltip>
           )}
           <Box className={styles.profile}>
             <UserProfile anchorRef={anchorRef} open={open} onToggle={handleToggle} onClose={handleClose} onListKeyDown={handleListKeyDown} />
