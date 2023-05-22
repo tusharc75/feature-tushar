@@ -91,7 +91,6 @@ const FieldServiceTechnician = () => {
     setFieldService(null);
     if (isOffline) {
       const data: any = await findAll(objectStore.fieldServiceTechnician);
-      console.log(data);
       setFieldService(data);
       setSelectedFieldService(data[0]);
     } else {
@@ -143,7 +142,6 @@ const FieldServiceTechnician = () => {
   }
 
   const handleAddOffline = async (fieldService) => {
-    console.log(fieldService);
     await insertUpdate(objectStore.fieldServiceTechnician, fieldService._id, fieldService);
     fieldRef.current.triggerChildFunction();
     findAllStoredData();

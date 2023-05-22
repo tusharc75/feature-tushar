@@ -729,7 +729,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         <AssignProductDialog
           productsDialogOpen={addProductDialog}
           handleCloseDialog={() => setAddProductDialog(false)}
-          renderedFrom={`${renderedFrom}_grid-sub-1`}
           reference="purchaseOrder"
           onSuccess={handleAddProduct}
           productId={null}

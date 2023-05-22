@@ -641,7 +641,6 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
           productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           assignedProducts={[]}
-          renderedFrom={renderedFrom}
           onSuccess={(d) => {
             handleAdd(d);
           }}
