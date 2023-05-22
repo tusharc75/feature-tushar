@@ -221,56 +221,60 @@ const Request = ({ workOrder }) => {
     extracolumns.push({
       accessor: 'action',
       Header: 'Action',
-      minWidth: 260,
-      width: 260,
+      minWidth: 240,
+      width: 240,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => {
         return <>
-          <div style={{ display: 'flex', justifyContent: 'right' }}>
-            {row.original['status'] === MATERIAL_REQUEST_STATUS.requested && (
-              <Fragment>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  disabled={loading}
-                  onClick={() => {
-                    setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: row.original });
-                  }}
-                >
-                  Process
-                </Button>
-                <Box pl={1} />
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  size="small"
-                  disabled={loading}
-                  onClick={() => {
-                    setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row.original });
-                  }}
-                >
-                  Close
-                </Button>
-                <Box pl={1} />
-              </Fragment>
-            )}
-            {row.original["processesLogs"] && row.original["processesLogs"]?.length > 0 && (
-              <HtmlTooltip title="View Logs">
-                <IconButton
-                  size="small"
-                  aria-label="Delete"
-                  onClick={() => {
-                    setOpenProcessLogs({ open: true, logs: row.original["processesLogs"], productName: row.original?.productName });
-                  }}
-                >
-                  <HistoryIcon />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-          </div>
+          <Box display='flex'>
+            <Box display='flex' flexGrow={1}>
+              {row.original['status'] === MATERIAL_REQUEST_STATUS.requested && (
+                <Fragment>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    disabled={loading}
+                    onClick={() => {
+                      setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: row.original });
+                    }}
+                  >
+                    Process
+                  </Button>
+                  <Box pl={1} />
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    size="small"
+                    disabled={loading}
+                    onClick={() => {
+                      setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row.original });
+                    }}
+                  >
+                    Close
+                  </Button>
+                  <Box pl={1} />
+                </Fragment>
+              )}
+            </Box>
+            <Box>
+              {row.original["processesLogs"] && row.original["processesLogs"]?.length > 0 && (
+                <HtmlTooltip title="View Logs">
+                  <IconButton
+                    size="small"
+                    aria-label="Delete"
+                    onClick={() => {
+                      setOpenProcessLogs({ open: true, logs: row.original["processesLogs"], productName: row.original?.productName });
+                    }}
+                  >
+                    <HistoryIcon />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+            </Box>
+          </Box>
         </>
       }
     });

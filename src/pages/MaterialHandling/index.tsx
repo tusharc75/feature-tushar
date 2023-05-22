@@ -9,6 +9,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Request from './Request';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Autocomplete } from '@material-ui/lab';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const MaterialHandling = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -109,30 +110,43 @@ const MaterialHandling = () => {
         {workOrder ? (
           <Grid container spacing={2}>
             <Grid item xs={12} md={3} sm={12}>
-              {workOrder?.map((data, index) => {
-                return (
-                  <Box
-                    mb={2}
-                    key={index}
-                    onClick={() => {
-                      setSelectedWorkOrder(data);
-                    }}
-                    style={{
-                      cursor: 'pointer',
-                      backgroundColor: selectedWorkOrder === data ? '#0f9fa9' : 'white',
-                      color: selectedWorkOrder === data ? 'white' : 'black',
-                      border: '1px solid #ebebeb'
-                    }}
-                  >
-                    <Box p={2}>
-                      <Typography>{`Work Order : ${data?.workOrderNumber}`}</Typography>
-                      <Typography>{`Product : ${data?.product?.optionLabel}`}</Typography>
-                      <Typography>{`Asset : ${data?.serializedAsset?.optionLabel}`}</Typography>
-                      <Typography>{`${routes.warehouse.title} : ${data?.warehouse?.optionLabel}`}</Typography>
+              <Box style={{ height: 'calc(100vh - 220px)', overflow: 'auto' }}>
+                {workOrder?.map((data, index) => {
+                  return (
+                    <Box
+                      mb={2}
+                      key={index}
+                      onClick={() => {
+                        setSelectedWorkOrder(data);
+                      }}
+                      style={{
+                        cursor: 'pointer',
+                        backgroundColor: selectedWorkOrder === data ? '#0f9fa9' : 'white',
+                        color: selectedWorkOrder === data ? 'white' : 'black',
+                        border: '1px solid #ebebeb'
+                      }}
+                    >
+                      <Box p={2}>
+                        <Box display='flex'>
+                          <Typography variant='subtitle2'>{`Work Order : ${data?.workOrderNumber}`}</Typography>
+                          <Box pl={1}>
+                            <IconButton
+                              onClick={() => {
+                                window.open(`${routes.workOrderDetail.path}/${data?._id}`);
+                              }}
+                              aria-label="delete" size="small">
+                              <OpenInNewIcon fontSize="inherit" />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                        <Typography variant='body2'>{`Product : ${data?.product?.optionLabel}`}</Typography>
+                        <Typography variant='body2'>{`Asset : ${data?.serializedAsset?.optionLabel}`}</Typography>
+                        <Typography variant='body2'>{`${routes.warehouse.title} : ${data?.warehouse?.optionLabel}`}</Typography>
+                      </Box>
                     </Box>
-                  </Box>
-                );
-              })}
+                  );
+                })}
+              </Box>
             </Grid>
             <Grid item xs={12} md={9} sm={12}>
               {selectedWorkOrder && (

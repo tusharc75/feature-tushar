@@ -25,7 +25,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
     <Dialog open={open} fullWidth TransitionComponent={CustomDialogTransition}>
       <CustomDialogHeader
         onClose={onClose}
-        title={`${status === MATERIAL_REQUEST_STATUS.processed ? 'Process' : 'Close'}${data ? ' - ' : ''}${data?.productName}`}
+        title={`${status === MATERIAL_REQUEST_STATUS.processed ? 'Process' : 'Close'}${data ? ' - ' : ''}${data?.productName || ''}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
       />
