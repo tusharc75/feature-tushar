@@ -39,7 +39,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   useEffect(() => {
     var allowRequest = false;
     if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
-      console.log(warehouse)
       if (warehouse?.manager && warehouse?.manager?.includes(user?.user?._id)) {
         allowRequest = false;
       }
@@ -48,11 +47,11 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       }
     }
     setConsumeRequest(allowRequest)
-    fetchColumns(allowRequest);
+    fetchColumns();
     fetchData();
   }, [allowedToEdit, workOrderId]);
 
-  const fetchColumns = async (allowRequest) => {
+  const fetchColumns = async () => {
     const column = [];
     const {
       data: { data }
@@ -122,7 +121,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
-      ...(allowRequest
+      ...(user?.user?.brandPolicy?.workOrderConsumableRequest
         ? [
           {
             accessor: 'requestedQty',
