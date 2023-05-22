@@ -109,7 +109,7 @@ function ProcessLogs({ onClose, logsData, productName }) {
                             childrenProperty="subRows"
                             uniqueKey="_id"
                             hideSelection={true}
-                            hideAction={false}
+                            hideAction={true}
                             hideExpander={true}
                             renderedFrom={"workOrder_consumables_request_process_logs"}
                             isClientSideGrid={true}
