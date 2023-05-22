@@ -15,7 +15,7 @@ function CustomDialogContent({ children, style = {} }) {
   const [themeColor] = useAppTheme();
   return (
     <React.Fragment>
-      <DialogContent style={{ ...style, background: themeColor === 'dark' ? '#0E0E23' : '#fff' }}>{children}</DialogContent>
+      <DialogContent style={{ ...style, background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff' }}>{children}</DialogContent>
     </React.Fragment>
   );
 }

@@ -1,18 +1,18 @@
-import { useCallback, useEffect, useState, Fragment } from "react";
-import { Box, Chip, Grid, Paper, Typography } from "@material-ui/core";
+import { useCallback, useEffect, useState, Fragment } from 'react';
+import { Box, Chip, Grid, Paper, Typography } from '@material-ui/core';
 import { MdDateRange } from 'react-icons/md';
-import moment from "moment";
-import { useLocation, useHistory } from 'react-router-dom'
+import moment from 'moment';
+import { useLocation, useHistory } from 'react-router-dom';
 
-import axiosInstance from "../../axios/axiosInstance";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import { ListRelatedTo } from "../../components/Activity/Helpers/ListRelatedTo";
-import ActivityModelHandler from "../../components/Activity/ActivityModelHandler";
-import routes from "../../components/Helpers/Routes";
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import { ListRelatedTo } from '../../components/Activity/Helpers/ListRelatedTo';
+import ActivityModelHandler from '../../components/Activity/ActivityModelHandler';
+import routes from '../../components/Helpers/Routes';
 
 const Reminder = () => {
-  const history = useHistory()
-  const { state } = useLocation()
+  const history = useHistory();
+  const { state } = useLocation();
   const [events, setEvents] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [cases, setCases] = useState([]);
@@ -21,43 +21,42 @@ const Reminder = () => {
   const [loadingCases, setLoadingCases] = useState(true);
   const [selectedActivity, setSelectedActivity] = useState(null);
   let searchData: any = window.location.search;
-  searchData = searchData ? searchData.split("?") : null
-  searchData = searchData ? searchData[1].split("&") : null
-  searchData = searchData ? searchData.map(q => {
-    let obj: any = {};
-    if (q.includes("type")) {
-      obj["type"] = q.split("=")[1]
-    }
-    if (q.includes("id")) {
-      obj["id"] = q.split("=")[1]
-    }
-    return obj
-  }) : null
-  searchData = searchData ? Object.assign({}, { ...searchData[0], ...searchData[1] }) : null
-
+  searchData = searchData ? searchData.split('?') : null;
+  searchData = searchData ? searchData[1].split('&') : null;
+  searchData = searchData
+    ? searchData.map((q) => {
+        let obj: any = {};
+        if (q.includes('type')) {
+          obj['type'] = q.split('=')[1];
+        }
+        if (q.includes('id')) {
+          obj['id'] = q.split('=')[1];
+        }
+        return obj;
+      })
+    : null;
+  searchData = searchData ? Object.assign({}, { ...searchData[0], ...searchData[1] }) : null;
 
   useEffect(() => {
     if (!state) return;
 
     if (state) {
-      const { data } = state
-      setSelectedActivity({ type: data?.type, id: data?._id })
+      const { data } = state;
+      setSelectedActivity({ type: data?.type, id: data?._id });
     }
-  }, [state])
+  }, [state]);
 
   useEffect(() => {
     if (!searchData) return;
 
     if (searchData && !selectedActivity) {
-      setSelectedActivity(searchData)
+      setSelectedActivity(searchData);
     }
-
-  }, [searchData])
-
+  }, [searchData]);
 
   const fetchTasks = useCallback(() => {
     axiosInstance()
-      .get("/task/my")
+      .get('/task/my')
       .then(({ data: { data } }) => {
         setLoadingTasks(false);
         setTasks(data);
@@ -69,7 +68,7 @@ const Reminder = () => {
 
   const fetchEvents = useCallback(() => {
     axiosInstance()
-      .get("/event/my")
+      .get('/event/my')
       .then(({ data: { data } }) => {
         setLoadingEvents(false);
         setEvents(data);
@@ -81,7 +80,7 @@ const Reminder = () => {
 
   const fetchCases = useCallback(() => {
     axiosInstance()
-      .get("/case/my")
+      .get('/case/my')
       .then(({ data: { data } }) => {
         setLoadingCases(false);
         setCases(data);
@@ -101,39 +100,35 @@ const Reminder = () => {
     <Chip
       size="small"
       icon={
-        <MdDateRange size={10}
+        <MdDateRange
+          size={10}
           style={{
             color:
               new Date(data).getFullYear() < new Date().getFullYear() ||
-                new Date(data).getMonth() < new Date().getMonth() ||
-                new Date(data).getDate() < new Date().getDate()
-                ? "#dc3545"
+              new Date(data).getMonth() < new Date().getMonth() ||
+              new Date(data).getDate() < new Date().getDate()
+                ? '#dc3545'
                 : new Date(data).getDate() === new Date().getDate() &&
                   new Date(data).getMonth() === new Date().getMonth() &&
                   new Date(data).getFullYear() === new Date().getFullYear()
-                  ? "#28a745"
-                  : "#838485",
+                ? '#28a745'
+                : '#838485'
           }}
-
         />
       }
-      label={
-        type
-          ? moment(data).format("MMM, DD HH:MM")
-          : moment(data).format("MMM, DD YYYY")
-      }
+      label={type ? moment(data).format('MMM, DD HH:MM') : moment(data).format('MMM, DD YYYY')}
       style={{
-        background: "#dfdfdf",
+        background: '#dfdfdf',
         color:
           new Date(data).getFullYear() < new Date().getFullYear() ||
-            new Date(data).getMonth() < new Date().getMonth() ||
-            new Date(data).getDate() < new Date().getDate()
-            ? "#dc3545"
+          new Date(data).getMonth() < new Date().getMonth() ||
+          new Date(data).getDate() < new Date().getDate()
+            ? '#dc3545'
             : new Date(data).getDate() === new Date().getDate() &&
               new Date(data).getMonth() === new Date().getMonth() &&
               new Date(data).getFullYear() === new Date().getFullYear()
-              ? "#28a745"
-              : "#838485",
+            ? '#28a745'
+            : '#838485'
       }}
     />
   );
@@ -148,7 +143,7 @@ const Reminder = () => {
           onClose={() => {
             setSelectedActivity(null);
             if (searchData) {
-              history.push('/reminder')
+              history.push('/reminder');
             }
           }}
           fetchBoard={() => {
@@ -167,7 +162,7 @@ const Reminder = () => {
             <Box boxShadow={1} height="calc(100vh - 120px)" p={1}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={4} lg={3}>
-                  <Box bgcolor="lightgrey" p={1} borderRadius={4} mb={2}>
+                  <Box bgcolor="var(--dark-secondary,lightgrey)" p={1} borderRadius={4} mb={2}>
                     <Typography variant="body1">Events</Typography>
                   </Box>
                   <Box height="calc(100vh - 190px)" overflow="auto">
@@ -176,48 +171,33 @@ const Reminder = () => {
                         key={event._id}
                         p={1}
                         mb={1}
-                        bgcolor="#f5f5f5"
+                        bgcolor="var(--dark-secondary, #f5f5f5)"
                         borderRadius={2}
-                        style={{ cursor: "pointer" }}
-                        onClick={() =>
-                          setSelectedActivity({ id: event._id, type: "event" })
-                        }
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setSelectedActivity({ id: event._id, type: 'event' })}
                       >
                         <Box display="flex" justifyContent="space-between">
-                          <Typography
-                            variant="body1"
-                            style={{ fontWeight: 500 }}
-                            className="text-truncate"
-                          >
+                          <Typography variant="body1" style={{ fontWeight: 500 }} className="text-truncate">
                             {event.name}
                           </Typography>
-                          {dynamicChip(event?.startDate, "event")}
+                          {dynamicChip(event?.startDate, 'event')}
                         </Box>
 
                         <Typography variant="body2" color="textSecondary">
                           {event.description}
                         </Typography>
                         <Box mt={2}>
-                          <ListRelatedTo
-                            relatedTo={event?.relatedTo}
-                            originRelatedTo={[]}
-                          />
+                          <ListRelatedTo relatedTo={event?.relatedTo} originRelatedTo={[]} />
                         </Box>
                       </Box>
                     ))}
                     <Box textAlign="center">
-                      <Typography>
-                        {loadingEvents
-                          ? "Loading..."
-                          : !events.length
-                            ? "No Events"
-                            : null}
-                      </Typography>
+                      <Typography>{loadingEvents ? 'Loading...' : !events.length ? 'No Events' : null}</Typography>
                     </Box>
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={4} lg={3}>
-                  <Box bgcolor="lightgrey" p={1} borderRadius={4} mb={2}>
+                  <Box bgcolor="var(--dark-secondary,lightgrey)" p={1} borderRadius={4} mb={2}>
                     <Typography variant="body1">Tasks</Typography>
                   </Box>
                   <Box height="calc(100vh - 190px)" overflow="auto">
@@ -226,19 +206,13 @@ const Reminder = () => {
                         key={task._id}
                         p={1}
                         mb={1}
-                        bgcolor="#f5f5f5"
+                        bgcolor="var(--dark-secondary,#f5f5f5)"
                         borderRadius={2}
-                        style={{ cursor: "pointer" }}
-                        onClick={() =>
-                          setSelectedActivity({ id: task._id, type: "task" })
-                        }
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setSelectedActivity({ id: task._id, type: 'task' })}
                       >
                         <Box display="flex" justifyContent="space-between">
-                          <Typography
-                            variant="body1"
-                            style={{ fontWeight: 500 }}
-                            className="text-truncate"
-                          >
+                          <Typography variant="body1" style={{ fontWeight: 500 }} className="text-truncate">
                             {task.name}
                           </Typography>
                           {dynamicChip(task?.dueDate)}
@@ -251,26 +225,17 @@ const Reminder = () => {
                           {task.description}
                         </Typography>
                         <Box mt={2}>
-                          <ListRelatedTo
-                            relatedTo={task?.relatedTo}
-                            originRelatedTo={[]}
-                          />
+                          <ListRelatedTo relatedTo={task?.relatedTo} originRelatedTo={[]} />
                         </Box>
                       </Box>
                     ))}
                     <Box textAlign="center">
-                      <Typography>
-                        {loadingTasks
-                          ? "Loading..."
-                          : !tasks.length
-                            ? "No Tasks"
-                            : null}
-                      </Typography>
+                      <Typography>{loadingTasks ? 'Loading...' : !tasks.length ? 'No Tasks' : null}</Typography>
                     </Box>
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={4} lg={3}>
-                  <Box bgcolor="lightgrey" p={1} borderRadius={4} mb={2}>
+                  <Box bgcolor="var(--dark-secondary,lightgrey)" p={1} borderRadius={4} mb={2}>
                     <Typography variant="body1">Cases</Typography>
                   </Box>
                   <Box height="calc(100vh - 190px)" overflow="auto">
@@ -279,19 +244,13 @@ const Reminder = () => {
                         key={cas._id}
                         p={1}
                         mb={1}
-                        bgcolor="#f5f5f5"
+                        bgcolor="var(--dark-secondary,#f5f5f5)"
                         borderRadius={2}
-                        style={{ cursor: "pointer" }}
-                        onClick={() =>
-                          setSelectedActivity({ id: cas._id, type: "case" })
-                        }
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setSelectedActivity({ id: cas._id, type: 'case' })}
                       >
                         <Box display="flex" justifyContent="space-between">
-                          <Typography
-                            variant="body1"
-                            style={{ fontWeight: 500 }}
-                            className="text-truncate"
-                          >
+                          <Typography variant="body1" style={{ fontWeight: 500 }} className="text-truncate">
                             {cas.name}
                           </Typography>
 
@@ -306,21 +265,12 @@ const Reminder = () => {
                           {cas.description}
                         </Typography>
                         <Box mt={2}>
-                          <ListRelatedTo
-                            relatedTo={cas?.relatedTo}
-                            originRelatedTo={[]}
-                          />
+                          <ListRelatedTo relatedTo={cas?.relatedTo} originRelatedTo={[]} />
                         </Box>
                       </Box>
                     ))}
                     <Box textAlign="center">
-                      <Typography>
-                        {loadingCases
-                          ? "Loading..."
-                          : !cases.length
-                            ? "No Cases"
-                            : null}
-                      </Typography>
+                      <Typography>{loadingCases ? 'Loading...' : !cases.length ? 'No Cases' : null}</Typography>
                     </Box>
                   </Box>
                 </Grid>

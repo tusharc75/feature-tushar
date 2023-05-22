@@ -5,7 +5,7 @@ import { useAppTheme } from 'src/constants/AppConfig';
 function CommonSkeleton({ lenArray }) {
   const [themeColor] = useAppTheme();
   return (
-    <Grid container spacing={2} style={{ background: themeColor === 'light' ? '#fff' : '#0E0E23' }}>
+    <Grid container spacing={2} style={{ background: themeColor === 'light' ? '#fff' : 'var(--dark-primary)' }}>
       {lenArray.map((i, index) => (
         <Grid item sm={6} md={6} key={index}>
           <Skeleton variant="text" width="100px" height="16px" />

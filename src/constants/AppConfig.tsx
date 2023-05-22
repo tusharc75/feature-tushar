@@ -1,5 +1,6 @@
 import { ThemeProvider, createTheme, useTheme } from '@material-ui/core/styles';
-import React, { useState, ReactNode, useEffect } from 'react';
+import React, { ReactNode, useEffect } from 'react';
+import { useStore, THEME } from 'src/StateProvider/fastContext';
 
 const LOCAL_STORE_NAME = 'app_color_mode';
 
@@ -19,7 +20,7 @@ interface ColorModeInterface {
 type ThemeColor = 'dark' | 'light';
 
 export default function ColorModeProvider({ children }: ColorModeInterface) {
-  const [theme, setTheme] = useState<ThemeColor>('light');
+  const [theme, setStore] = useStore((store) => store[THEME]);
 
   useEffect(() => {
     // const localTheme = getThemeFromLocal();
@@ -31,7 +32,7 @@ export default function ColorModeProvider({ children }: ColorModeInterface) {
     //   setThemeToLocal(prefersDark ? 'dark' : 'light');
     //   setTheme(prefersDark ? 'dark' : 'light');
     // }
-    setTheme('light');
+    setStore({ [THEME]: 'light' });
   }, []);
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function ColorModeProvider({ children }: ColorModeInterface) {
   };
 
   const toggle = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setStore({ [THEME]: theme === 'dark' ? 'light' : 'dark' });
   };
 
   const darkModeTheme = createTheme(getDesignTokens(theme));
