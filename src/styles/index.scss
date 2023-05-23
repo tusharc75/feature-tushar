@@ -3636,3 +3636,11 @@ body {
   border-radius: 50% !important;
   color: #424242;
 }
+
+.container-with-border {
+  border: 1px solid var(--common-border-color);
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 3.13009px 34.2857px;
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 100%;
+}
