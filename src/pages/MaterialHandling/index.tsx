@@ -20,8 +20,12 @@ const MaterialHandling = () => {
 
   const [workOrder, setWorkOrder] = useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
+
   const [warehouseOptions, setWarehouseOptions] = useState([]);
-  const [selectedPlant, setSelectedPlant] = useState(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+
+  const [workOrderOptions, setWorkOrderOptions] = useState([]);
+  const [selectedOptionWorkOrder, setSelectedOptionWorkOrder] = useState(null);
 
   useEffect(() => {
     axiosInstance()
@@ -45,15 +49,17 @@ const MaterialHandling = () => {
     } else {
       setWorkOrder([]);
     }
-  }, [selectedPlant, warehouseOptions]);
+  }, [selectedWarehouse, warehouseOptions]);
 
   const fetchData = () => {
     setWorkOrder(null);
     setSelectedWorkOrder(null);
+    setWorkOrderOptions([])
+    setSelectedOptionWorkOrder(null)
     let api = `/material-handling`;
     const filterById: any = [];
-    if (selectedPlant) {
-      filterById.push({ field: 'warehouse', term: selectedPlant.optionValue });
+    if (selectedWarehouse) {
+      filterById.push({ field: 'warehouse', term: selectedWarehouse.optionValue });
     } else {
       filterById.push({ field: 'warehouse', term: { $in: warehouseOptions?.map((e) => e?.optionValue) } });
     }
@@ -64,6 +70,11 @@ const MaterialHandling = () => {
         setWorkOrder(data);
         if (data?.length) {
           setSelectedWorkOrder(data[0]);
+          const workOrders: any = [];
+          data?.forEach((e) => {
+            workOrders.push({ optionLabel: e.workOrderNumber, optionValue: e._id })
+          })
+          setWorkOrderOptions(workOrders)
         }
       })
       .catch((error) => {
@@ -88,15 +99,41 @@ const MaterialHandling = () => {
                 getOptionLabel={(option: any) => option.optionLabel}
                 getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                 value={
-                  warehouseOptions.filter((data) => data.optionValue === selectedPlant?.optionValue).length
-                    ? warehouseOptions.filter((data) => data.optionValue === selectedPlant?.optionValue)[0]
+                  warehouseOptions.filter((data) => data.optionValue === selectedWarehouse?.optionValue).length
+                    ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse?.optionValue)[0]
                     : ''
                 }
                 onChange={(e, val) => {
-                  setSelectedPlant(val);
+                  setSelectedWarehouse(val);
                 }}
                 size="small"
                 renderInput={(params) => <TextField {...params} label={routes.warehouse.title} variant="outlined" />}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Autocomplete
+                options={workOrderOptions}
+                fullWidth
+                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                value={
+                  workOrderOptions.filter((data) => data.optionValue === selectedOptionWorkOrder?.optionValue).length
+                    ? workOrderOptions.filter((data) => data.optionValue === selectedOptionWorkOrder?.optionValue)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  setSelectedOptionWorkOrder(val);
+                  if (val) {
+                    setSelectedWorkOrder(workOrder?.find((e) => e._id === val?.optionValue));
+                  }
+                  else {
+                    if (workOrder?.length) {
+                      setSelectedWorkOrder(workOrder[0]);
+                    }
+                  }
+                }}
+                size="small"
+                renderInput={(params) => <TextField {...params} label={routes.workOrder.title} variant="outlined" />}
               />
             </Grid>
           </Grid>
@@ -108,64 +145,66 @@ const MaterialHandling = () => {
         </Box>
         {workOrder ? (
           <Grid container spacing={2}>
-            <Grid item xs={12} lg={3}>
-              <Box className="container-with-border " p={3}>
-                <Box style={{ height: 'calc(100vh - 220px)', overflow: 'auto' }}>
-                  {workOrder?.map((data, index) => {
-                    return (
-                      <Box
-                        mb={2}
-                        key={index}
-                        onClick={() => {
-                          setSelectedWorkOrder(data);
-                        }}
-                        style={
-                          {
-                            cursor: 'pointer',
-                            backgroundColor: selectedWorkOrder === data ? '#0f9fa9' : 'var(--dark-secondary, white)',
-                            '--card-color-primary': selectedWorkOrder === data ? 'white' : 'var(--dark-primary-text, #2A3042)',
-                            '--card-color-secondary': selectedWorkOrder === data ? 'white' : 'var(--dark-secondary-text, #5B5B5B)',
-                            border: '1px solid var(--common-border-color)',
-                            borderRadius: '8px'
-                          } as React.CSSProperties
-                        }
-                      >
-                        <Box p={2}>
-                          <Box display="flex">
-                            <Typography variant="subtitle2" style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8 }}>
-                              Work Order : <span style={{ color: 'var(--card-color-secondary)' }}>{data?.workOrderNumber}</span>
-                            </Typography>
-                            <Box pl={1}>
-                              <IconButton
-                                onClick={() => {
-                                  window.open(`${routes.workOrderDetail.path}/${data?._id}`);
-                                }}
-                                aria-label="delete"
-                                size="small"
-                              >
-                                <OpenInNewIcon fontSize="inherit" />
-                              </IconButton>
+            {!selectedOptionWorkOrder &&
+              <Grid item xs={12} lg={3}>
+                <Box className="container-with-border" p={2}>
+                  <Box style={{ height: 'calc(100vh - 220px)', overflow: 'auto' }}>
+                    {workOrder?.map((data, index) => {
+                      return (
+                        <Box
+                          mb={2}
+                          key={index}
+                          onClick={() => {
+                            setSelectedWorkOrder(data);
+                          }}
+                          style={
+                            {
+                              cursor: 'pointer',
+                              backgroundColor: selectedWorkOrder === data ? '#0f9fa9' : 'var(--dark-secondary, white)',
+                              '--card-color-primary': selectedWorkOrder === data ? 'white' : 'var(--dark-primary-text, #2A3042)',
+                              '--card-color-secondary': selectedWorkOrder === data ? 'white' : 'var(--dark-secondary-text, #5B5B5B)',
+                              border: '1px solid var(--common-border-color)',
+                              borderRadius: '8px'
+                            } as React.CSSProperties
+                          }
+                        >
+                          <Box p={2}>
+                            <Box display="flex">
+                              <Typography variant="subtitle2" style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8 }}>
+                                Work Order : <span style={{ color: 'var(--card-color-secondary)' }}>{data?.workOrderNumber}</span>
+                              </Typography>
+                              <Box pl={1}>
+                                <IconButton
+                                  onClick={() => {
+                                    window.open(`${routes.workOrderDetail.path}/${data?._id}`);
+                                  }}
+                                  aria-label="delete"
+                                  size="small"
+                                >
+                                  <OpenInNewIcon fontSize="inherit" />
+                                </IconButton>
+                              </Box>
                             </Box>
+                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 500 }}>
+                              Product : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 400 }}>{data?.product?.optionLabel}</span>
+                            </Typography>
+                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 500 }}>
+                              Asset :{' '}
+                              <span style={{ color: 'var(--card-color-secondary)', fontWeight: 400 }}>{data?.serializedAsset?.optionLabel}</span>
+                            </Typography>
+                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 500 }}>
+                              {routes.warehouse.title} :{' '}
+                              <span style={{ color: 'var(--card-color-secondary)', fontWeight: 400 }}>{data?.warehouse?.optionLabel}</span>
+                            </Typography>
                           </Box>
-                          <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 500 }}>
-                            Product : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 400 }}>{data?.product?.optionLabel}</span>
-                          </Typography>
-                          <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 500 }}>
-                            Asset :{' '}
-                            <span style={{ color: 'var(--card-color-secondary)', fontWeight: 400 }}>{data?.serializedAsset?.optionLabel}</span>
-                          </Typography>
-                          <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 500 }}>
-                            {routes.warehouse.title} :{' '}
-                            <span style={{ color: 'var(--card-color-secondary)', fontWeight: 400 }}>{data?.warehouse?.optionLabel}</span>
-                          </Typography>
                         </Box>
-                      </Box>
-                    );
-                  })}
+                      );
+                    })}
+                  </Box>
                 </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={12} lg={9}>
+              </Grid>
+            }
+            <Grid item xs={12} lg={selectedOptionWorkOrder ? 12 : 9}>
               {selectedWorkOrder && (
                 <Box className="container-with-border " p={3}>
                   <Request workOrder={selectedWorkOrder?._id} />

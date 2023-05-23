@@ -30,7 +30,6 @@ interface EditDialogProps {
   showSaveAndNext: any;
   loadingEdit: any;
 }
-
 const rateChangeFields = ['unit', 'pricingMethod'];
 
 const MaterialDialog: FC<EditDialogProps> = ({
@@ -57,7 +56,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [rowData]);
 
   const fetchFields = async () => {
     var data = await fetch_invoice_product_fields(invoiceData?.currency);
@@ -246,7 +245,6 @@ const MaterialDialog: FC<EditDialogProps> = ({
       }
     }
   };
-
   function validate(values) {
     const errors = {};
     let startDate = moment(values?.estimateStartDate);
@@ -271,7 +269,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
       open={true}
       fullWidth
     >
-      {initialData && initialData.fields.length ? (
+      {initialData && loadingEdit === false && initialData.fields.length ? (
         <Formik
           innerRef={ref}
           enableReinitialize={true}
@@ -443,6 +441,23 @@ const MaterialDialog: FC<EditDialogProps> = ({
                 >
                   {'Close'}
                 </Button>
+
+                {isBulkedit === false && showSaveAndNext && (
+                  <CustomButton
+                    loading={loadingEdit}
+                    disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(true);
+                      submitForm();
+                    }}
+                  >
+                    Save & Next
+                  </CustomButton>
+                )}
+
                 <CustomButton
                   loading={loading}
                   disabled={isEqual(ref?.current?.values, initialData.values)}
