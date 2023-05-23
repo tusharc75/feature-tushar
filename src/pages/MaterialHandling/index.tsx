@@ -108,7 +108,7 @@ const MaterialHandling = () => {
         </Box>
         {workOrder ? (
           <Grid container spacing={2}>
-            <Grid item xs={12} md={3} sm={12}>
+            <Grid item xs={12} lg={3}>
               <Box className="container-with-border " p={3}>
                 <Box style={{ height: 'calc(100vh - 220px)', overflow: 'auto' }}>
                   {workOrder?.map((data, index) => {
@@ -132,7 +132,7 @@ const MaterialHandling = () => {
                       >
                         <Box p={2}>
                           <Box display="flex">
-                            <Typography variant="subtitle2" style={{ color: 'var(--card-color-primary)', marginBottom: 8 }}>
+                            <Typography variant="subtitle2" style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8 }}>
                               Work Order : <span style={{ color: 'var(--card-color-secondary)' }}>{data?.workOrderNumber}</span>
                             </Typography>
                             <Box pl={1}>
@@ -165,7 +165,7 @@ const MaterialHandling = () => {
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={12} md={9} sm={12}>
+            <Grid item xs={12} lg={9}>
               {selectedWorkOrder && (
                 <Box className="container-with-border " p={3}>
                   <Request workOrder={selectedWorkOrder?._id} />
