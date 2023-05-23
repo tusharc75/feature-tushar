@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Checkbox from '@material-ui/core/Checkbox';
 import Box from '@material-ui/core/Box';
@@ -30,23 +30,19 @@ const useStyles = makeStyles(() => ({
   headerHeight: {
     maxWidth: 100,
     minWidth: 100,
-    height: 40,
-  },
+    height: 40
+  }
 }));
 
 export const Converter = ({ fields, values, setFieldValue, touched, errors }) => {
-
-
   const [isEditUnitName, setEditUnitName] = useState(null);
   const [newUnitName, setNewUnitName] = useState(null);
-
 
   const onChangeValue = (index, fieldName, value) => {
     let data = values['unitoption'] ? [...values['unitoption']] : [];
     data[index][fieldName] = value;
     setFieldValue('unitoption', data);
   };
-
 
   const handleChangeUnit = (value) => {
     setFieldValue(
@@ -98,17 +94,14 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
   const handleChangeUnitName = () => {
     if (isEditUnitName === newUnitName) {
       setEditUnitName(null);
-    }
-    else if (newUnitName.trim() === "") {
+    } else if (newUnitName.trim() === '') {
       setEditUnitName(null);
       return;
-    }
-    else if (values['units'].includes(newUnitName)) {
+    } else if (values['units'].includes(newUnitName)) {
       setEditUnitName(null);
       return;
-    }
-    else {
-      const unitName = newUnitName.trim().replace(/[^a-zA-Z0-9/]/g, '')
+    } else {
+      const unitName = newUnitName.trim().replace(/[^a-zA-Z0-9/]/g, '');
       if (values['units'] && values['units'].includes(isEditUnitName)) {
         const units = values['units'];
         units[units.indexOf(isEditUnitName)] = unitName;
@@ -126,7 +119,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
       }
       if (values['unitoption']) {
         const unitoption = values['unitoption'];
-        unitoption.forEach(element => {
+        unitoption.forEach((element) => {
           for (let row in element) {
             if (row === isEditUnitName) {
               element[unitName] = element[row];
@@ -138,7 +131,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
       }
       setEditUnitName(null);
     }
-  }
+  };
 
   const classes = useStyles();
   return (
@@ -154,7 +147,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
           value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
         }
         onChange={(e, value) => handleChangeUnit(value)}
-        renderInput={(params) =>
+        renderInput={(params) => (
           <TextField
             {...params}
             margin="dense"
@@ -164,22 +157,26 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
             placeholder="Units"
             error={touched['units'] && Boolean(errors['units'])}
             helperText={touched['units'] && errors['units']}
-          />}
+          />
+        )}
       />
       {values['units'] && values['units'].length > 0 && (
-        <Box marginTop={1} border={1} p={1} borderColor="grey.300" maxHeight={300} style={{ overflow: 'auto' }}>
+        <Box marginTop={1} border={1} p={1} borderColor="var(--common-border-color)" maxHeight={300} style={{ overflow: 'auto' }}>
           <table>
             <thead>
               <tr>
                 <th></th>
                 {values['units'] &&
                   values['units'].map((_unit, index) => (
-                    <th key={index} className={classes.headerHeight}
+                    <th
+                      key={index}
+                      className={classes.headerHeight}
                       onClick={() => {
-                        setEditUnitName(_unit)
-                        setNewUnitName(_unit)
-                      }}  >
-                      {isEditUnitName === _unit ?
+                        setEditUnitName(_unit);
+                        setNewUnitName(_unit);
+                      }}
+                    >
+                      {isEditUnitName === _unit ? (
                         <TextField
                           id="unitNameChangeField"
                           name={_unit}
@@ -191,14 +188,15 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
                           value={newUnitName}
                           onKeyDown={(e: any) => {
                             if (e.keyCode == 13) {
-                              handleChangeUnitName()
+                              handleChangeUnitName();
                             }
                           }}
                           onBlur={handleChangeUnitName}
                           onChange={(event) => setNewUnitName(event.target.value)}
                         />
-                        : _unit
-                      }
+                      ) : (
+                        _unit
+                      )}
                     </th>
                   ))}
               </tr>
@@ -207,9 +205,7 @@ export const Converter = ({ fields, values, setFieldValue, touched, errors }) =>
               {values['units'] &&
                 values['units'].map((_unit, i) => (
                   <tr key={i}>
-                    <th style={{ paddingRight: 10, minWidth: 50 }}>
-                      {_unit}
-                    </th>
+                    <th style={{ paddingRight: 10, minWidth: 50 }}>{_unit}</th>
                     {values['units'] &&
                       values['units'].map((_unit, index) => (
                         <td className={classes.tdWidth} key={index}>

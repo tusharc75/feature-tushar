@@ -3,10 +3,9 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, CircularProgress, Tab, Tabs, useMediaQuery, useTheme } from '@material-ui/core';
+import { Box, CircularProgress, Tab, Tabs, useTheme } from '@material-ui/core';
 import SearchBox from '../../../components/Helpers/SearchBox';
 import routes from '../../../components/Helpers/Routes';
-import { Link, useHistory } from 'react-router-dom';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import {
   serializedAsset,
@@ -25,7 +24,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import { prepareDataForGrid } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import { groupBy, orderBy, sortBy, uniq, map } from 'lodash';
+import { uniq, map } from 'lodash';
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
 import { Autocomplete } from '@material-ui/lab';
 import TextField from '@material-ui/core/TextField';
@@ -46,7 +45,6 @@ const AddSerializedAsset = ({
   rentalId = null,
   repairJobId = null,
   transferAssetId = null,
-  salesOrderId = null,
   notIn = null,
   filterByPlant = null
 }) => {
@@ -220,8 +218,6 @@ const AddSerializedAsset = ({
       deepFilter = `${deepFilter}&repairJobId=${repairJobId}&notIn=${notIn}`;
     } else if (transferAssetId) {
       deepFilter = `${deepFilter}&transferAssetId=${transferAssetId}&notIn=${notIn}`;
-    } else if (salesOrderId) {
-      deepFilter = `${deepFilter}&salesOrder=${salesOrderId}&notIn=${notIn}`;
     } else {
       if (selectedPlant == null) {
         deepFilter = `${deepFilter}&entityWise=1`;
@@ -581,46 +577,6 @@ const AddSerializedAsset = ({
 
               <div className={'listing-grid'}>
                 {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                  // isMobile && !isTablet ?
-                  //     <CustomSwipableList
-                  //         allowSelection={true}
-                  //         allowSwipe={true}
-                  //         permissions={permissions}
-                  //         primaryField={columns?.find(d => d.primaryField)}
-                  //         onClick={(data) => {
-                  //             history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
-
-                  //         }}
-                  //         dataRows={dataRows}
-                  //         selectedRecords={selectedRecords}
-                  //         dispatch={dispatch}
-                  //         onEdit={false}
-                  //         extraParamsToCheckDelete={false}
-                  //         onDelete={false}
-                  //         rowCount={rowCount}
-                  //         page={page}
-                  //         loading={loading}
-                  //         checkError={false}
-                  //         chips={[
-                  //             {
-                  //                 label: "PO Number:",
-                  //                 field: "purchaseOrder"
-                  //             },
-                  //             {
-                  //                 label: "Product Category:",
-                  //                 field: "productCategory"
-                  //             },
-                  //             {
-                  //                 label: "Plant:",
-                  //                 field: "warehouse"
-                  //             }
-                  //         ]}
-                  //         onCreate={null}
-                  //         showClone={false}
-                  //         onClone={false}
-                  //         fullHeight={true}
-                  //         renderedFrom={renderedFrom}
-                  //     /> :
                   <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}

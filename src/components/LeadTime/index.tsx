@@ -96,7 +96,7 @@ const LeadTimeMaster = ({ Id, type, className = '', minHeight = null }) => {
           ) : null}
           {leadTimeData?.steps?.length ? (
             leadTimeData?.steps?.map((steps, index) => (
-              <Box key={index} bgcolor="white" width={'100%'}>
+              <Box key={index} width={'100%'}>
                 <Grid container>
                   <Grid item xs={2}>
                     <Typography className="table-body-v1 bt-0 br-0" style={{ width: '100%' }} variant="body2">
@@ -117,7 +117,7 @@ const LeadTimeMaster = ({ Id, type, className = '', minHeight = null }) => {
               </Box>
             ))
           ) : loadingPLT ? (
-            <Box bgcolor="white" width={'100%'}>
+            <Box width={'100%'}>
               <Grid container>
                 <Grid item xs={6} justifyContent={'center'}>
                   <Typography variant="body2">Loading ...</Typography>
@@ -125,7 +125,7 @@ const LeadTimeMaster = ({ Id, type, className = '', minHeight = null }) => {
               </Grid>
             </Box>
           ) : (
-            <Box bgcolor="white" width={'100%'}>
+            <Box width={'100%'}>
               <Grid container>
                 <Grid item xs={6} justifyContent={'center'}>
                   <Typography variant="body2">No Data Found</Typography>

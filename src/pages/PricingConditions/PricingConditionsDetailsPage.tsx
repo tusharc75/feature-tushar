@@ -560,7 +560,7 @@ function PricingConditionsDetailsPage() {
                               />
                             </Grid>
                           </Grid>
-                          <Box marginTop={1} border={1} p={1} borderColor="grey.300">
+                          <Box marginTop={1} border={1} p={1} borderColor="var(--common-border-color)">
                             <table>
                               <thead>
                                 <tr>
@@ -646,7 +646,7 @@ function PricingConditionsDetailsPage() {
                         {discount.map((val, index) => (
                           <Box key={index} mb={2}>
                             <Badge badgeContent={index + 1} color="primary"></Badge>
-                            <Box p={2} border={1} borderColor="grey.300">
+                            <Box p={2} border={1} borderColor="var(--common-border-color)">
                               <Grid spacing={3} container>
                                 <Grid item xs={12} sm={2} md={2}>
                                   <FormControl fullWidth margin="dense" variant="outlined">
@@ -780,7 +780,7 @@ function PricingConditionsDetailsPage() {
                         {charge.map((val, index) => (
                           <Box key={index} mb={2}>
                             <Badge badgeContent={index + 1} color="primary"></Badge>
-                            <Box p={2} border={1} borderColor="grey.300">
+                            <Box p={2} border={1} borderColor="var(--common-border-color)">
                               <Grid spacing={3} container>
                                 <Grid item xs={12} sm={2} md={2}>
                                   <TextField
@@ -874,7 +874,7 @@ function PricingConditionsDetailsPage() {
                         {tax.map((val, index) => (
                           <Box key={index} mb={2}>
                             <Badge badgeContent={index + 1} color="primary"></Badge>
-                            <Box p={2} border={1} borderColor="grey.300">
+                            <Box p={2} border={1} borderColor="var(--common-border-color)">
                               <Grid spacing={3} container>
                                 <Grid item xs={12} sm={2} md={2}>
                                   <TextField

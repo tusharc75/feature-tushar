@@ -216,7 +216,7 @@ const AssignSerializedAssetDialog = ({
                         p={1}
                         border={1}
                         className="cursor-pointer"
-                        borderColor="grey.300"
+                        borderColor="var(--common-border-color)"
                         onClick={() => {
                           if (selectedProduct === d.id) {
                             setSelectedProduct(null);
