@@ -191,7 +191,7 @@ const PackageList = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
@@ -353,11 +353,10 @@ const PackageList = () => {
                       },
                       {
                         title: 'Sub-Package Export',
-                        api: `${packages.api}/unknown/package/template?export=true${
-                          getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                        api: `${packages.api}/unknown/package/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                             ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                             : ''
-                        }`,
+                          }`,
                         type: 'export'
                       },
                       {
@@ -391,9 +390,9 @@ const PackageList = () => {
               showTransferEntityDialog={handleTransferEntityDialog}
               openAssingToProduct={openAssingToProduct}
               filters={filters}
-              // showClonepackagesDialog={() => {
-              //   handleShowClonepackagesDialog()
-              // }}
+            // showClonepackagesDialog={() => {
+            //   handleShowClonepackagesDialog()
+            // }}
             ></PackageHeader>
           </div>
           {Object.keys(frameWorkComponent).length > 0 ? (
