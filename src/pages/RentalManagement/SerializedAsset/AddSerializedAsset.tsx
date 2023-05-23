@@ -67,9 +67,6 @@ const AddSerializedAsset = ({
 
   const [plantList, setPlantList] = useState([]);
   const [selectedPlant, setSelectedPlant] = useState(filterByPlant);
-  const [subleaseAsset, setSubleaseAsset] = useState(false);
-  const [inUseAsset, setInUseAsset] = useState(false);
-
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [tabValue, setTabValue] = useState(0);
 
@@ -81,7 +78,7 @@ const AddSerializedAsset = ({
     searchTimeout = setTimeout(() => {
       fetchProductInventory();
     }, millisec);
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPlant, subleaseAsset, selectedProduct, inUseAsset]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPlant, selectedProduct, tabValue]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -152,8 +149,8 @@ const AddSerializedAsset = ({
     }
     let queryString = getQueryString();
     let api = serializedAsset.api;
-    if (inUseAsset) {
-      api = `${api}/in-use`
+    if (tabValue === 2) {
+      api = `${api}/in-use${queryString}`
     } else {
       api = `${api}${queryString}`
     }
@@ -233,7 +230,7 @@ const AddSerializedAsset = ({
         deepFilter = `${deepFilter}&availableAsset=true`;
       }
     }
-    if (subleaseAsset) {
+    if (tabValue === 1) {
       deepFilter = `${deepFilter}&subleaseAsset=1`;
     } else {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
@@ -333,16 +330,6 @@ const AddSerializedAsset = ({
     dispatch({ type: 'selection', selectedRecords: [] });
     localStorage.removeItem(localStorageSelectedRecords);
     setSelectedPlant(null);
-    if (tabValue === 0) {
-      setSubleaseAsset(false);
-      setInUseAsset(false)
-    } else if (tabValue === 1) {
-      setSubleaseAsset(true);
-      setInUseAsset(false)
-    } else if (tabValue === 2) {
-      setSubleaseAsset(false);
-      setInUseAsset(true)
-    }
   }, [tabValue])
 
   return (
