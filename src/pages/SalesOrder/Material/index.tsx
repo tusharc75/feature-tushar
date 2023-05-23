@@ -33,7 +33,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false,  showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
   const [recordToUpdate, setRecordToUpdate] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
@@ -84,12 +84,12 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
         Header: 'Detail',
         minWidth: 300,
         width: 300,
-        Cell: ({ row }) => (
+        Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {
               <p
                 onClick={() => {
-                  handleOpen(row.original);
+                  handleOpen(row, rows);
                 }}
                 className="link text-truncate"
                 title={row.original?.detail}
@@ -322,7 +322,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       });
   };
 
-  const handleSaveData = async (rows: any) => {
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
       delete element.srno;
       delete element.detail;
@@ -340,9 +340,24 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     setUpdating(true);
     axiosInstance()
       .put(`${salesOrder.api}/material/${salesOrderData._id}`, { material: rows })
-      .then(() => {
+      .then(({data}) => {
         setUpdating(false);
-        setIsProductEdit({ open: false, isBulkedit: false });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        if (saveAndNext) {
+          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          setRecordToUpdate(rowsData[rowIndex + 1]);
+          setIsProductEdit({
+            open: true,
+            isBulkedit: false,
+            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+          });
+        }else{
+          setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
+        }
         fetchMaterialData();
       })
       .catch((error) => {
@@ -367,9 +382,9 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       });
   };
 
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
-    setRecordToUpdate(rowData);
+  const handleOpen = (row, rows) => {
+    setIsProductEdit({ open: true, isBulkedit: false,  showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false  });
+    setRecordToUpdate(row.original);
   };
 
   const calculatePrice = (arr: any[]) => {
@@ -483,7 +498,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           >
             <MenuItem
               onClick={() => {
-                setIsProductEdit({ open: true, isBulkedit: true });
+                setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
                 closeActions();
               }}
             >
@@ -546,7 +561,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
         <SalesOrderQtyDialog
           calculatePrice={calculatePrice}
           onClose={() => {
-            setIsProductEdit({ open: false, isBulkedit: false });
+            setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
             setRecordToUpdate(null);
           }}
           isBulkedit={isProductEdit.isBulkedit}
@@ -555,6 +570,8 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           material={material}
           selectedProducts={selectedProducts}
           salesOrderData={salesOrderData}
+          loadingEdit={isUpdating}
+          showSaveAndNext={isProductEdit?.showSaveAndNext}
         />
       )}
       {addchildDialog.open && (
