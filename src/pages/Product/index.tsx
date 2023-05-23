@@ -322,7 +322,7 @@ const Product = () => {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (productType && productType !== '') {
       deepFilters.push({ field: 'productType', term: productType });
@@ -346,7 +346,7 @@ const Product = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-  
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -479,7 +479,6 @@ const Product = () => {
   const handleFilterClose = () => {
     setisOpenDialog(false);
   };
-
 
   const handleSubmit = (ids: string[]) => {
     setSubmitting(true);
