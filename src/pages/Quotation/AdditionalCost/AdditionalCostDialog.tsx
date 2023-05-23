@@ -22,17 +22,20 @@ interface AdditionalCostDialogProps {
   handleAddCost: VoidFunction | any;
   handleUpdateCost: VoidFunction | any;
   costData?: object | any;
+  loadingEdit?: Boolean;
+  showSaveAndNext?: Boolean;
 }
 
-const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData }) => {
+const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData, showSaveAndNext, loadingEdit }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const ref = useRef(null);
+  const [saveAndNext, setSaveAndNext] = useState(false);
 
   useEffect(() => {
+    setInitialData({ fields: [], values: {} });
     axiosInstance()
       .get(`/field/child?resource=${CHILD_RESOURCE.quotationCost}`)
       .then(({ data: { data } }) => {
@@ -50,7 +53,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
         }
         EvaluteproductFields(poFields);
       });
-  }, []);
+  }, [costData]);
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
@@ -70,7 +73,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
     } else {
       let returnData = [];
       returnData = [{ ...values, _id: costData._id }];
-      handleUpdateCost(returnData);
+      handleUpdateCost(returnData, saveAndNext);
     }
   };
 
@@ -193,13 +196,32 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
                 >
                   {'Close'}
                 </Button>
+                {showSaveAndNext && (
+                  <CustomButton
+                    loading={loadingEdit}
+                    disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(true);
+                      submitForm();
+                    }}
+                  >
+                    {' '}
+                    Save & Next
+                  </CustomButton>
+                )}
                 <CustomButton
-                  loading={loading}
+                  loading={loadingEdit}
                   disabled={isEqual(ref?.current?.values, initialData.values)}
                   variant="contained"
                   color="primary"
                   type="submit"
-                  onClick={submitForm}
+                  onClick={() => {
+                    setSaveAndNext(false);
+                    submitForm();
+                  }}
                 >
                   {' '}
                   Save
