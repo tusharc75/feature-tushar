@@ -3193,6 +3193,7 @@ body {
   border-radius: 4.06331px 4.06331px 0px 0px;
   display: flex;
   align-items: center;
+  position: relative;
   [data-mode='dark'] & {
     background: #282845;
   }
@@ -3205,6 +3206,12 @@ body {
     [data-mode='dark'] & {
       color: #fff;
     }
+  }
+  .float-right-button-v1 {
+    position: absolute;
+    top: 50%;
+    right: 28px;
+    transform: translateY(-50%);
   }
 }
 
@@ -3414,10 +3421,13 @@ body {
     & > *:not(.MuiChip-root) {
       font-weight: 400 !important;
       font-size: 13px !important;
-      // line-height: 19px !important;
       color: #2a3547;
       [data-mode='dark'] & {
-        color: #e5e5e5 !important;
+        color: #e5e5e5;
+      }
+      &.link {
+        color: var(--link) !important;
+        word-wrap: break-word;
       }
     }
   }
