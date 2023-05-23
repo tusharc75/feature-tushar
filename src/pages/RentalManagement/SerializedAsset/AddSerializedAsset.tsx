@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, CircularProgress, useMediaQuery, useTheme } from '@material-ui/core';
+import { Box, CircularProgress, Tab, Tabs, useMediaQuery, useTheme } from '@material-ui/core';
 import SearchBox from '../../../components/Helpers/SearchBox';
 import routes from '../../../components/Helpers/Routes';
 import { Link, useHistory } from 'react-router-dom';
@@ -70,8 +70,10 @@ const AddSerializedAsset = ({
   const [plantList, setPlantList] = useState([]);
   const [selectedPlant, setSelectedPlant] = useState(filterByPlant);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
+  const [inUseAsset, setInUseAsset] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 600;
@@ -81,7 +83,7 @@ const AddSerializedAsset = ({
     searchTimeout = setTimeout(() => {
       fetchProductInventory();
     }, millisec);
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPlant, subleaseAsset, selectedProduct]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPlant, subleaseAsset, selectedProduct, inUseAsset]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -93,7 +95,7 @@ const AddSerializedAsset = ({
       .then(({ data: { data, count } }) => {
         setPlantList(data);
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }, []);
 
   const fetchGridColumns = () => {
@@ -151,6 +153,12 @@ const AddSerializedAsset = ({
       gridApi.setRowData([]);
     }
     let queryString = getQueryString();
+    let api = serializedAsset.api;
+    if (inUseAsset) {
+      api = `${api}/in-use`
+    } else {
+      api = `${api}${queryString}`
+    }
     if (selectedProducts.length > 0) {
       var updatedFilters = [];
       if (selectedProduct) {
@@ -164,7 +172,7 @@ const AddSerializedAsset = ({
     }
 
     axiosInstance()
-      .get(`${serializedAsset.api}${queryString}`)
+      .get(api)
       .then(({ data }) => {
         data.data = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -314,6 +322,33 @@ const AddSerializedAsset = ({
       });
   };
 
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  useEffect(() => {
+    dispatch({ type: 'selection', selectedRecords: [] });
+    localStorage.removeItem(localStorageSelectedRecords);
+    setSelectedPlant(null);
+    if (tabValue === 0) {
+      setSubleaseAsset(false);
+      setInUseAsset(false)
+    } else if (tabValue === 1) {
+      setSubleaseAsset(true);
+      setInUseAsset(false)
+    } else if (tabValue === 2) {
+      setSubleaseAsset(false);
+      setInUseAsset(true)
+    }
+  }, [tabValue])
+
   return (
     <Fragment>
       {
@@ -323,39 +358,39 @@ const AddSerializedAsset = ({
             onClose={handleSerializedAssetClose}
           ></CustomDialogHeader>
           <CustomDialogContent>
-            <Box pt={1} pb={1}>
+            <Box pt={1} pb={1} className='main-container-v1'>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={5}>
                   <Box display="flex">
                     <Box style={{ display: 'inline' }}>
                       {serializedProducts.length > 0
                         ? serializedProducts.map((d) => (
-                            <Box
-                              m={0.5}
-                              p={1}
-                              border={1}
-                              className="cursor-pointer"
-                              borderColor="grey.300"
-                              onClick={() => {
-                                if (selectedProduct === d.id) {
-                                  setSelectedProduct(null);
-                                } else {
-                                  setSelectedProduct(d.id);
-                                }
-                              }}
-                              style={{ display: 'inline-block' }}
-                              bgcolor={d.id === selectedProduct && 'primary.main'}
-                              color={d.id === selectedProduct && 'white'}
-                            >
-                              {d?.qty < 0 ? (
-                                <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                              ) : d?.qty === 0 ? (
-                                <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                              ) : (
-                                <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                              )}
-                            </Box>
-                          ))
+                          <Box
+                            m={0.5}
+                            p={1}
+                            border={1}
+                            className="cursor-pointer"
+                            borderColor="grey.300"
+                            onClick={() => {
+                              if (selectedProduct === d.id) {
+                                setSelectedProduct(null);
+                              } else {
+                                setSelectedProduct(d.id);
+                              }
+                            }}
+                            style={{ display: 'inline-block' }}
+                            bgcolor={d.id === selectedProduct && 'primary.main'}
+                            color={d.id === selectedProduct && 'white'}
+                          >
+                            {d?.qty < 0 ? (
+                              <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                            ) : d?.qty === 0 ? (
+                              <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                            ) : (
+                              <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                            )}
+                          </Box>
+                        ))
                         : null}
                     </Box>
                   </Box>
@@ -368,7 +403,7 @@ const AddSerializedAsset = ({
                 <Grid item xs={12} md={3}>
                   {referenceType === 'Rental Job' && (
                     <Grid container>
-                      <Grid item xs={6} justifyContent={'flex-end'}>
+                      {/* <Grid item xs={6} justifyContent={'flex-end'}>
                         {permissions?.sublease && (
                           <FormControlLabel
                             control={
@@ -391,8 +426,8 @@ const AddSerializedAsset = ({
                             label="Sublease Assets"
                           />
                         )}
-                      </Grid>
-                      <Grid item xs={6} justifyContent={'flex-end'}>
+                      </Grid> */}
+                      <Grid item xs={12} justifyContent={'flex-end'}>
                         <Autocomplete
                           fullWidth
                           options={plantList}
@@ -473,10 +508,10 @@ const AddSerializedAsset = ({
                           getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()
                             ? 'Direct transfer to customer location'
                             : referenceType === 'Rental Job'
-                            ? 'Add to Job'
-                            : referenceType === 'ReplaceAsset'
-                            ? 'Replace'
-                            : 'Add'
+                              ? 'Add to Job'
+                              : referenceType === 'ReplaceAsset'
+                                ? 'Replace'
+                                : 'Add'
                         }
                       >
                         <Button
@@ -502,72 +537,114 @@ const AddSerializedAsset = ({
                   </Box>
                 </Grid>
               </Grid>
-            </Box>
-            <div className={'listing-grid'}>
-              {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                // isMobile && !isTablet ?
-                //     <CustomSwipableList
-                //         allowSelection={true}
-                //         allowSwipe={true}
-                //         permissions={permissions}
-                //         primaryField={columns?.find(d => d.primaryField)}
-                //         onClick={(data) => {
-                //             history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
+              {
+                referenceType === 'Rental Job' && (
+                  <Grid container spacing={2}>
+                    <Grid item >
+                      <Tabs
+                        className="new-tab-container-v1"
+                        variant="scrollable"
+                        scrollButtons="auto"
+                        value={tabValue}
+                        onChange={handleMainTabChange}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        aria-label="Serialized Asset Tab"
+                        TabIndicatorProps={{
+                          style: {
+                            height: 0
+                          }
+                        }}
+                      >
+                        <Tab className={'tabLayout'} value={0} label={<div className="d-flex align-items-center tab-font">Assets</div>} {...a11yProps(0)} />
 
-                //         }}
-                //         dataRows={dataRows}
-                //         selectedRecords={selectedRecords}
-                //         dispatch={dispatch}
-                //         onEdit={false}
-                //         extraParamsToCheckDelete={false}
-                //         onDelete={false}
-                //         rowCount={rowCount}
-                //         page={page}
-                //         loading={loading}
-                //         checkError={false}
-                //         chips={[
-                //             {
-                //                 label: "PO Number:",
-                //                 field: "purchaseOrder"
-                //             },
-                //             {
-                //                 label: "Product Category:",
-                //                 field: "productCategory"
-                //             },
-                //             {
-                //                 label: "Plant:",
-                //                 field: "warehouse"
-                //             }
-                //         ]}
-                //         onCreate={null}
-                //         showClone={false}
-                //         onClone={false}
-                //         fullHeight={true}
-                //         renderedFrom={renderedFrom}
-                //     /> :
-                <CustomAgGrid
-                  columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameWorkComponent}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  allowAction={false}
-                  loading={loading}
-                  customGridOptions={{ getRowStyle: getRowStyleScheduled }}
-                  renderedFrom={renderedFrom}
-                  showOnlyShowFilteredRecordSwitch={true}
-                  refreshGrid={fetchProductInventory}
-                />
-              ) : (
-                <Box p={2} height={500}>
-                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Box>
-              )}
-            </div>
+                        {permissions?.sublease && (
+                          <Tab
+                            className={'tabLayout'}
+                            value={1}
+                            label={<div className="d-flex align-items-center tab-font">Sublease Assets</div>}
+                            {...a11yProps(1)}
+                          />
+                        )}
+
+                        <Tab
+                          className={'tabLayout'}
+                          value={2}
+                          label={<div className="d-flex align-items-center tab-font">In Use Assets</div>}
+                          {...a11yProps(2)}
+                        />
+
+                      </Tabs>
+                    </Grid>
+                  </Grid>
+                )}
+
+              <div className={'listing-grid'}>
+                {Object.keys(frameWorkComponent).length > 0 && columns ? (
+                  // isMobile && !isTablet ?
+                  //     <CustomSwipableList
+                  //         allowSelection={true}
+                  //         allowSwipe={true}
+                  //         permissions={permissions}
+                  //         primaryField={columns?.find(d => d.primaryField)}
+                  //         onClick={(data) => {
+                  //             history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
+
+                  //         }}
+                  //         dataRows={dataRows}
+                  //         selectedRecords={selectedRecords}
+                  //         dispatch={dispatch}
+                  //         onEdit={false}
+                  //         extraParamsToCheckDelete={false}
+                  //         onDelete={false}
+                  //         rowCount={rowCount}
+                  //         page={page}
+                  //         loading={loading}
+                  //         checkError={false}
+                  //         chips={[
+                  //             {
+                  //                 label: "PO Number:",
+                  //                 field: "purchaseOrder"
+                  //             },
+                  //             {
+                  //                 label: "Product Category:",
+                  //                 field: "productCategory"
+                  //             },
+                  //             {
+                  //                 label: "Plant:",
+                  //                 field: "warehouse"
+                  //             }
+                  //         ]}
+                  //         onCreate={null}
+                  //         showClone={false}
+                  //         onClone={false}
+                  //         fullHeight={true}
+                  //         renderedFrom={renderedFrom}
+                  //     /> :
+                  <CustomAgGrid
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameWorkComponent}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    allowAction={false}
+                    loading={loading}
+                    customGridOptions={{ getRowStyle: getRowStyleScheduled }}
+                    renderedFrom={renderedFrom}
+                    showOnlyShowFilteredRecordSwitch={true}
+                    refreshGrid={fetchProductInventory}
+                  />
+                ) : (
+                  <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                  </Box>
+                )}
+              </div>
+            </Box>
           </CustomDialogContent>
         </Dialog>
       }
