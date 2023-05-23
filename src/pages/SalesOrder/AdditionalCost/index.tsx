@@ -25,10 +25,11 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
     state: { user, permissions }
   }: any = useData();
 
+  const [isUpdating, setUpdating] = useState(false);
   const [columns, setColumns] = useState([]);
   const [rowsData, setRowsData] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
-  const [showCostDialog, setShowCostDialog] = useState(false);
+  const [showCostDialog, setShowCostDialog] = useState({open: false, showSaveAndNext: false});
   const [selectedCostData, setSelectedCostData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -38,6 +39,11 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
   useEffect(() => {
     fetchFields();
   }, []);
+
+  const handleOpen = (row, rows) => {
+     setShowCostDialog({open: true, showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false });
+     setSelectedCostData(row.original);
+  };
 
   const fetchFields = async () => {
     var data = [];
@@ -67,7 +73,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) =>
+      Cell: ({ row, rows }) =>
         allowedToEdit && (
           <Fragment>
             <HtmlTooltip title="Edit">
@@ -75,8 +81,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
                 size="small"
                 aria-label="Clone"
                 onClick={() => {
-                  setShowCostDialog(true);
-                  setSelectedCostData(row.original);
+                  handleOpen(row, rows)
                 }}
               >
                 <EditIcon color="primary" />
@@ -115,11 +120,13 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
   };
 
   const handleAddCost = (rows) => {
+    setUpdating(true);
     axiosInstance()
       .post(`${salesOrder.api}/additionalcost/${salesOrderData._id}/add`, { additionalCost: rows })
       .then(({ data }) => {
         fetchAdditionalCost();
-        setShowCostDialog(false);
+        setShowCostDialog({open: false, showSaveAndNext:false});
+        setUpdating(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -127,28 +134,41 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
         });
       })
       .catch((error) => {
+        setUpdating(false);
         toastConfig.setToastConfig(error);
       });
   };
 
-  const handleUpdateCost = (rows) => {
+  const handleUpdateCost = (rows:any, saveAndNext = false) => {
     rows.forEach((element) => {
       delete element.index;
       delete element.isValid;
       delete element.hideSelection;
     });
+    setUpdating(true);
     axiosInstance()
       .put(`${salesOrder.api}/additionalcost/${salesOrderData._id}/update`, { additionalCost: rows })
       .then(({ data }) => {
-        fetchAdditionalCost();
-        setShowCostDialog(false);
+        setUpdating(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
+        if(saveAndNext) {
+          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          setSelectedCostData(rowsData[rowIndex + 1]);
+          setShowCostDialog({
+            open: true,
+            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+          });
+        } else {
+          setShowCostDialog({open:false, showSaveAndNext: false});
+        }
+        fetchAdditionalCost();
       })
       .catch((error) => {
+        setUpdating(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -194,7 +214,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
             color="primary"
             size="small"
             onClick={() => {
-              setShowCostDialog(true);
+              setShowCostDialog({open: true, showSaveAndNext: false});
               setSelectedCostData(null);
             }}
           >
@@ -264,16 +284,18 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {showCostDialog && (
+      {showCostDialog.open && (
         <AdditionalCostDialog
           onClose={() => {
-            setShowCostDialog(false);
+            setShowCostDialog({open: false, showSaveAndNext:false});
             setSelectedCostData(null);
           }}
           handleAddCost={handleAddCost}
           handleUpdateCost={handleUpdateCost}
           currency={salesOrderData?.currency}
           costData={selectedCostData}
+          loadingEdit={isUpdating}
+          showSaveAndNext={showCostDialog.showSaveAndNext}
         />
       )}
       {showDeleteConfirmBox && (

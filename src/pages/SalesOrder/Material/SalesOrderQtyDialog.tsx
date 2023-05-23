@@ -27,6 +27,8 @@ interface EditDialogProps {
   material: any[];
   selectedProducts: any[];
   isBulkedit: any;
+  loadingEdit?: Boolean;
+  showSaveAndNext?: Boolean;
 }
 
 const rateChangeFields = ['unit', 'pricingMethod'];
@@ -39,22 +41,25 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
   rowData,
   material,
   selectedProducts,
-  isBulkedit
+  isBulkedit,
+  showSaveAndNext,
+  loadingEdit
 }) => {
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [saveAndNext, setSaveAndNext] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [rowData]);
 
   const fetchFields = async () => {
+    setInitialData({ fields: [], values: {} });
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
@@ -262,7 +267,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
         }
         const child = material.filter((e) => e.parentId === rowData._id);
         resetValueZero(child);
-        handleSaveData([...rows, ...child]);
+        handleSaveData([...rows, ...child], saveAndNext);
         setShowConfirmationDialog(false);
       }
     }
@@ -487,13 +492,32 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                 >
                   {'Close'}
                 </Button>
+                {isBulkedit === false && showSaveAndNext && (
+                  <CustomButton
+                    loading={loadingEdit}
+                    disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(true);
+                      submitForm();
+                    }}
+                  >
+                    {' '}
+                    Save & Next
+                  </CustomButton>
+                )}
                 <CustomButton
-                  loading={loading}
-                  disabled={isEqual(ref?.current?.values, initialData.values)}
+                  loading={loadingEdit}
+                  disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
                   variant="contained"
                   color="primary"
                   type="submit"
-                  onClick={submitForm}
+                  onClick={() => {
+                    setSaveAndNext(false);
+                    submitForm();
+                  }}
                 >
                   {' '}
                   Save
