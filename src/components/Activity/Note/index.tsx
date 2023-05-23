@@ -1,20 +1,20 @@
-import { useState, useEffect, Fragment } from "react";
-import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
-import { CreateNote } from "./CreateNote";
-import { GetNote, DeleteNote } from "../../../axios/activity";
-import Typography from "@material-ui/core/Typography";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import IconButton from "@material-ui/core/IconButton";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import Dialog from "@material-ui/core/Dialog";
-import { ListRelatedTo } from "../Helpers/ListRelatedTo";
-import { ViewAll } from "../Helpers/ViewAll";
-import ActivityLoader from "../../Helpers/ActivityLoader";
-import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, displayDate } from "../../../constants/helpers";
-import { useData } from "../../../StateProvider/Provider";
+import { useState, useEffect, Fragment } from 'react';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import { CreateNote } from './CreateNote';
+import { GetNote, DeleteNote } from '../../../axios/activity';
+import Typography from '@material-ui/core/Typography';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import IconButton from '@material-ui/core/IconButton';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import Dialog from '@material-ui/core/Dialog';
+import { ListRelatedTo } from '../Helpers/ListRelatedTo';
+import { ViewAll } from '../Helpers/ViewAll';
+import ActivityLoader from '../../Helpers/ActivityLoader';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
+import { useData } from '../../../StateProvider/Provider';
 
 export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -23,7 +23,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(true);
   const {
-    state: { permissions },
+    state: { permissions }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -36,7 +36,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     await GetNote(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setNotes(data);
-        onSetCount("Note", data.length);
+        onSetCount('Note', data.length);
         setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
       })
       .catch((err) => {
@@ -70,7 +70,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         fetchNote();
         handleActivityRefresh();
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const handleClose = () => {
@@ -80,7 +80,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   };
   const handleDialogClose = () => {
     setOpen(false);
-  }
+  };
 
   return (
     <Box className="activityDetailBox">
@@ -92,11 +92,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
             <Box key={_note._id} className="activity">
               <Box>
                 <Grid container>
-                  <Grid
-                    item
-                    xs={10}
-                    className="d-flex align-items-center gap-1"
-                  >
+                  <Grid item xs={10} className="d-flex align-items-center gap-1">
                     <Typography
                       variant="subtitle2"
                       className="cursor-pointer"
@@ -107,33 +103,21 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                     >
                       {_note.name}
                     </Typography>
-                    <span className="activity-date">
-                      Created :{" "}
-                      {displayDate(_note.createdBy.date)}
-                    </span>
+                    <span className="activity-date">Created : {displayDate(_note.createdBy.date)}</span>
                   </Grid>
-                  {
-                    permissions["note"]?.isUpdate || permissions["note"]?.isDelete ?
-                      <Grid item xs={2} container justify="flex-end">
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          aria-label="delete"
-                          onClick={(event) => handleOpenMenu(event, _note._id)}
-                        >
-                          <MoreHorizIcon />
-                        </IconButton>
-                      </Grid> : null
-                  }
+                  {permissions['note']?.isUpdate || permissions['note']?.isDelete ? (
+                    <Grid item xs={2} container justify="flex-end">
+                      <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, _note._id)}>
+                        <MoreHorizIcon />
+                      </IconButton>
+                    </Grid>
+                  ) : null}
                 </Grid>
               </Box>
               <Box pt={1}>
                 <Grid container>
                   <Grid item xs={12}>
-                    <ListRelatedTo
-                      relatedTo={_note.relatedTo}
-                      originRelatedTo={relatedTo}
-                    />
+                    <ListRelatedTo relatedTo={_note.relatedTo} originRelatedTo={relatedTo} />
                   </Grid>
                 </Grid>
               </Box>
@@ -142,42 +126,32 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
           <ViewAll type="note" relatedTo={relatedTo} />
         </Fragment>
       ) : (
-        <Box p={1} border={1} borderColor="grey.300" textAlign="center">
+        <Box p={1} border={1} borderColor="var(--common-border-color)" textAlign="center">
           <Typography variant="subtitle2">No Past Note</Typography>
         </Box>
       )}
 
-      <Menu
-        id="simple-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleCloseMenu}
-      >
-        {
-          permissions["note"]?.isUpdate ? <MenuItem onClick={handleEdit}>Edit</MenuItem> : null
-        }
-        {
-          permissions["note"]?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
+      <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+        {permissions['note']?.isUpdate ? <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
+        {permissions['note']?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
       </Menu>
-
 
       <Dialog
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
         onClose={() => {
-          handleDialogClose()
+          handleDialogClose();
           setFullScreen(false);
         }}
         fullWidth
-        fullScreen={fullScreen || (isMobile || isTablet)}
+        fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
       >
         <CreateNote
           noteId={noteId}
           handleClose={() => {
-            handleClose()
+            handleClose();
             setFullScreen(false);
           }}
           relatedTo={relatedTo}
@@ -187,7 +161,7 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
           }}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
+            setFullScreen((prevState) => !prevState);
           }}
           showManimizeMaximize={true}
         />

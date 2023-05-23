@@ -1,13 +1,13 @@
-import { makeStyles } from "@material-ui/core/styles";
-import { Box } from "@material-ui/core";
+import { makeStyles } from '@material-ui/core/styles';
+import { Box } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    border: "1px solid #D4D6D7",
+    border: '1px solid var(--dark-mode-border-color, #D4D6D7)',
     borderRadius: 4,
     padding: theme.spacing(1, 2),
-    overflow: "hidden",
-  },
+    overflow: 'hidden'
+  }
 }));
 
 const BoxWithBorder = ({ children, ...rest }) => {

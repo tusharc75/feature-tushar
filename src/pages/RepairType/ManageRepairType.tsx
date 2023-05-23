@@ -259,7 +259,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                         border={1}
                         mt={2}
                         mb={1}
-                        borderColor="grey.300"
+                        borderColor="var(--common-border-color)"
                         width={'100%'}
                       >
                         <Box p={1}>
@@ -280,7 +280,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                           </Grid>
                         </Box>
                         {repairSteps?.map((steps, index) => (
-                          <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                          <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                             <Grid container>
                               <Grid item xs={2} sm={2} md={2} lg={2}>
                                 <Typography variant="body2">{steps.order}</Typography>

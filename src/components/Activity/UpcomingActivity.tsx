@@ -24,7 +24,7 @@ const UpcomingActivity = (props) => {
   };
 
   return (
-    <Box border={1} p={1} bgcolor="white" borderColor="grey.300">
+    <Box border={1} p={1} bgcolor="white" borderColor="var(--common-border-color)">
       <Box ml={1} mb={1}>
         <Typography variant="h6">Upcoming Activity</Typography>
       </Box>
@@ -32,7 +32,7 @@ const UpcomingActivity = (props) => {
         <Box>
           {activity.length ? (
             activity.map((_activity, index) => (
-              <Box key={_activity._id} mb={1} border={1} p={1} borderColor="grey.300">
+              <Box key={_activity._id} mb={1} border={1} p={1} borderColor="var(--common-border-color)">
                 <Box>
                   <Grid container>
                     <Grid item xs={6}>
@@ -57,7 +57,7 @@ const UpcomingActivity = (props) => {
               </Box>
             ))
           ) : (
-            <Box p={1} border={1} borderColor="grey.300" textAlign="center">
+            <Box p={1} border={1} borderColor="var(--common-border-color)" textAlign="center">
               <Typography variant="subtitle2">No Past Activity</Typography>
             </Box>
           )}

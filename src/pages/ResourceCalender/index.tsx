@@ -39,7 +39,7 @@ const ResourceCalendar = () => {
                   permissions[resource.key]?.isRead && (
                     <Grid key={resource.key} item xs={12} sm={2} md={3} lg={4}>
                       <Link to={`/resource-calendar${routes[resource.key]?.path}`}>
-                        <Box border={1} borderColor="grey.300" bgcolor="grey.100" borderRadius={1} p={2}>
+                        <Box border={1} borderColor="var(--common-border-color)" bgcolor="grey.100" borderRadius={1} p={2}>
                           <Typography variant="h6">
                             <MdDescription size={25} className="headerLogo mr-2 pt-1" />
                             {resource.title}

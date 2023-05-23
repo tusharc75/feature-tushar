@@ -180,7 +180,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
         </Box>
       )}
       {values['formulaFields'] && values['formulaFields'].length > 0 && (
-        <Box marginTop={1} border={1} p={1} borderColor="grey.300" maxHeight={300} style={{ overflow: 'auto' }}>
+        <Box marginTop={1} border={1} p={1} borderColor="var(--common-border-color)" maxHeight={300} style={{ overflow: 'auto' }}>
           <table style={{ width: '100%' }}>
             <tbody>
               <>

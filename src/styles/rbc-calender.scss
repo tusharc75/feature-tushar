@@ -114,31 +114,34 @@
   color: #5e5e5e;
   border-color: #c4c4c4;
 }
+.rbc-time-view {
+  overflow: auto;
+}
 
 // dark theme for react-big-calender
 [data-mode='dark'] {
-  .rbc-toolbar-label {
-    color: var(--dark-primary-text);
-  }
   .rbc-calendar {
     background-color: var(--dark-primary);
-  }
+    .rbc-toolbar-label {
+      color: var(--dark-primary-text);
+    }
 
-  .rbc-time-header-content,
-  button,
-  .rbc-header,
-  .rbc-month-view,
-  .rbc-month-row,
-  .rbc-day-bg {
-    border-color: var(--dark-mode-border-color) !important;
-  }
+    .rbc-time-header-content,
+    button,
+    .rbc-header,
+    .rbc-month-view,
+    .rbc-month-row,
+    .rbc-day-bg {
+      border-color: var(--dark-mode-border-color) !important;
+    }
 
-  .rbc-today,
-  .rbc-off-range-bg {
-    background-color: var(--dark-secondary);
-  }
-  button {
-    background-color: var(--dark-secondary);
-    color: var(--dark-primary-text);
+    .rbc-today,
+    .rbc-off-range-bg {
+      background-color: var(--dark-secondary);
+    }
+    button {
+      background-color: var(--dark-secondary);
+      color: var(--dark-primary-text);
+    }
   }
 }

@@ -61,7 +61,7 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
         {calendarType === 'week'
           ? Array.from(dates, (date, index) => {
               return (
-                <Box key={index} borderColor="grey.300" minWidth={moment(date).daysInMonth() * dayPixel}>
+                <Box key={index} borderColor="var(--common-border-color)" minWidth={moment(date).daysInMonth() * dayPixel}>
                   <Typography variant="caption" color="textSecondary" display="block">
                     {moment(date).format('MMM YYYY').toUpperCase()}
                   </Typography>
@@ -99,7 +99,7 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
                   display="inline"
                   minWidth={moment(date).daysInMonth() * dayPixel}
                   border={1}
-                  borderColor="grey.300"
+                  borderColor="var(--common-border-color)"
                   textAlign="center"
                 >
                   <Typography variant="body2" color="textSecondary" display="block">
@@ -111,7 +111,15 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
           : null}
         {calendarType === 'quater'
           ? dates.map((date, index) => (
-              <Box key={index} p={2} display="inline" minWidth={dayPixel * parseInt(date.days)} border={1} borderColor="grey.300" textAlign="center">
+              <Box
+                key={index}
+                p={2}
+                display="inline"
+                minWidth={dayPixel * parseInt(date.days)}
+                border={1}
+                borderColor="var(--common-border-color)"
+                textAlign="center"
+              >
                 <Typography variant="body2" display="block">
                   {(
                     moment(date.q_s_date).format('MMM') +

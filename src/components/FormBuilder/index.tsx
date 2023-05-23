@@ -11,11 +11,18 @@ import { DragBox } from './DragBox';
 import { DropMaster } from './DropMaster';
 import { CustomField } from './CustomField/index';
 import styles from './Form.module.scss';
-import { CHILD_RESOURCE } from "../../constants/helpers";
+import { CHILD_RESOURCE } from '../../constants/helpers';
 
-const subForms = [CHILD_RESOURCE.rentalManagementProduct, CHILD_RESOURCE.rentalManagementCost,
-CHILD_RESOURCE.salesOrderProduct, CHILD_RESOURCE.salesOrderCost, CHILD_RESOURCE.purchaseOrderProduct, CHILD_RESOURCE.purchaseOrderCost,
-CHILD_RESOURCE.repairJobAsset, CHILD_RESOURCE.subleaseProduct]
+const subForms = [
+  CHILD_RESOURCE.rentalManagementProduct,
+  CHILD_RESOURCE.rentalManagementCost,
+  CHILD_RESOURCE.salesOrderProduct,
+  CHILD_RESOURCE.salesOrderCost,
+  CHILD_RESOURCE.purchaseOrderProduct,
+  CHILD_RESOURCE.purchaseOrderCost,
+  CHILD_RESOURCE.repairJobAsset,
+  CHILD_RESOURCE.subleaseProduct
+];
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -35,12 +42,20 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, isCustomField, module, extraFields, resource
-  , onAddRemoveField = null,
+export const FormBuilder = ({
+  section,
+  setSection,
+  deleteField,
+  setDeleteField,
+  isCustomField,
+  module,
+  extraFields,
+  resource,
+  onAddRemoveField = null
 }) => {
   const addSection = (sectionHoverIndex) => {
     let data = [...section];
-    if (onAddRemoveField) onAddRemoveField()
+    if (onAddRemoveField) onAddRemoveField();
     if (sectionHoverIndex !== null) {
       const obj = {
         sectionId: parseInt((Math.random() * 100000).toString()),
@@ -81,31 +96,25 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
     isCalculativeField = true;
   }
   if (subForms.includes(resource)) {
-    filterFieldType = []
+    filterFieldType = [];
     isCalculativeField = true;
   }
 
   const classes = useStyles();
   return (
-    <Box p={2} bgcolor="white">
+    <Box p={2}>
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
         <Grid container spacing={1}>
           <Grid item xs={12} md={3} sm={4}>
-            <Box border={1} p={2} borderColor="grey.300" className={styles.set_gridbox_layout}>
+            <Box border={1} p={2} borderColor="var(--common-border-color)" className={styles.set_gridbox_layout}>
               <Grid container spacing={1} className={styles.form_grid_box}>
                 {Object.keys(FieldList).map((type, index) => {
                   return !filterFieldType.includes(type) ? (
-                    <DragBox
-                      key={index}
-                      type="field"
-                      label={FieldList[type].label}
-                      name={FieldList[type].type}
-                      removeExtraField={removeExtraField}
-                    />
+                    <DragBox key={index} type="field" label={FieldList[type].label} name={FieldList[type].type} removeExtraField={removeExtraField} />
                   ) : null;
                 })}
               </Grid>
-              <Box >
+              <Box>
                 <Divider />
               </Box>
               <DragBox name="New Section" label="New Section" type="master"></DragBox>
@@ -117,8 +126,12 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
             </Box>
           </Grid>
           <Grid item xs={12} md={9} sm={8}>
-            <Box border={1} p={2} bgcolor="grey.100" borderColor="grey.300" className={module === 'form-builder' ?
-              classes.screenHeightAutoFormBuilder : classes.screenHeightAutoFormTemplate}>
+            <Box
+              border={1}
+              p={2}
+              borderColor="var(--common-border-color)"
+              className={module === 'form-builder' ? classes.screenHeightAutoFormBuilder : classes.screenHeightAutoFormTemplate}
+            >
               <DropMaster
                 addSection={addSection}
                 setSection={setSection}
