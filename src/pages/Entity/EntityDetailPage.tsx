@@ -341,7 +341,7 @@ const EntityDetailsPage = () => {
               )}
             </Box>
             <Box mt={2} className="single-form-v1 ">
-              <Box width="100%" className="form-head-v1">
+              <Box className="form-head-v1">
                 <Typography className="form-label-style-v1" component={'h3'}>
                   {'DOA Details '}
                 </Typography>
@@ -410,8 +410,6 @@ const EntityDetailsPage = () => {
                       <>
                         <Box marginY={2} />
                         <Button
-                          variant="outlined"
-                          className="accordion-outlined-button"
                           onClick={() =>
                             history.push(`/user`, {
                               id: entityData._id,
@@ -420,6 +418,8 @@ const EntityDetailsPage = () => {
                               text: 'Entity'
                             })
                           }
+                          variant="outlined"
+                          className="accordion-outlined-button"
                           startIcon={<FaEye />}
                         >
                           View All &#8599;
