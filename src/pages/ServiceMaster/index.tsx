@@ -144,19 +144,19 @@ const ServiceMaster = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-   
+
     const { filterByIds, deepFilters } = gridFilterParser(filters)
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -287,11 +287,10 @@ const ServiceMaster = () => {
               },
               {
                 title: 'Step Export',
-                api: `${serviceMaster.api}/steps/unknown/template?export=true${
-                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                api: `${serviceMaster.api}/steps/unknown/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                     ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                     : ''
-                }`,
+                  }`,
                 type: 'export'
               },
               {
@@ -306,11 +305,10 @@ const ServiceMaster = () => {
               },
               {
                 title: 'Consumable Export',
-                api: `${serviceMaster.api}/product/unknown/template?export=true${
-                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                api: `${serviceMaster.api}/product/unknown/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                     ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                     : ''
-                }`,
+                  }`,
                 type: 'export'
               },
               {

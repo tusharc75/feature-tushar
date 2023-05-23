@@ -178,7 +178,7 @@ const PurchaseOrder = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
     const { filterByIds, deepFilters } = gridFilterParser(filters)
 
     if (plantId && plantId !== '') {
@@ -190,18 +190,18 @@ const PurchaseOrder = () => {
     if (fromSalesOrder) {
       filterByIds.push({ field: 'salesOrder', term: fromSalesOrder?._id });
     }
-    
+
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -524,7 +524,7 @@ const PurchaseOrder = () => {
                     <MenuItem
                       disabled={
                         permissions?.purchaseOrder?.isDelete &&
-                        selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
+                          selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
                           ? false
                           : true
                       }
