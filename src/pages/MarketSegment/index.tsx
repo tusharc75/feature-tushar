@@ -179,7 +179,7 @@ const MarketSegment = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -450,7 +450,7 @@ const MarketSegment = () => {
             owerCollaboratorInitialsOrImages=""
             onCreate={() => setOpen({ open: true, idToClone: null, isClone: null })}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
