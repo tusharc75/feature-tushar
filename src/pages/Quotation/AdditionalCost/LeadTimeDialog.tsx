@@ -68,149 +68,158 @@ function LeadTimeDialog({ quotationId, data, versionId, onClose, handleSucess })
     setLeadTimeMasterSteps(data);
   };
 
-  return (<Dialog
-    maxWidth="md"
-    fullWidth
-    open
-    fullScreen={fullScreen || isMobile || isTablet}
-    TransitionComponent={CustomDialogTransition}
-    aria-labelledby="customized-dialog-title"
-    onClose={(e, reason) => {
-      if (reason !== 'backdropClick') {
-        onClose();
-      }
-    }}
-  >
-    <CustomDialogHeader
-      title={data?.detail || data?.description}
+  return (
+    <Dialog
+      maxWidth="md"
+      fullWidth
+      open
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
       onClose={(e, reason) => {
-        onClose();
+        if (reason !== 'backdropClick') {
+          onClose();
+        }
       }}
-      isMinimized={!fullScreen}
-      onMinimizeMaximize={() => {
-        setFullScreen((prevState) => !prevState);
-      }}
-      showManimizeMaximize={true}
-    />
-    <CustomDialogContent>
-      <Grid container>
-        <Grid item xs={12}>
-          <Box style={{ maxHeight: '350px', overflow: 'auto' }} bgcolor="white" border={1} mt={2} mb={1} borderColor="grey.300" width={'100%'}>
-            <Box p={1} bgcolor="grey.200">
-              <Grid container xs={12}>
-                <Grid item xs={6}>
-                  <Typography variant="body2">Lead Time Status</Typography>
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography variant="body2">{leadTimeMasterSteps?.length && totalDays ? `${totalDays} Days` : 'Days'}</Typography>
-                </Grid>
-                <Grid item xs={2}>
-                  <Grid container justifyContent="flex-end">
-                    <IconButton
-                      size="small"
-                      aria-label="setting"
-                      onClick={() => {
-                        handleAddLTMSteps();
-                      }}
-                    >
-                      <AddCircleOutlineIcon fontSize="small" />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Box>
-            {leadTimeMasterSteps?.map((steps, index) => (
-              <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-                <Grid container spacing={1}>
+    >
+      <CustomDialogHeader
+        title={data?.detail || data?.description}
+        onClose={(e, reason) => {
+          onClose();
+        }}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen((prevState) => !prevState);
+        }}
+        showManimizeMaximize={true}
+      />
+      <CustomDialogContent>
+        <Grid container>
+          <Grid item xs={12}>
+            <Box
+              style={{ maxHeight: '350px', overflow: 'auto' }}
+              bgcolor="white"
+              border={1}
+              mt={2}
+              mb={1}
+              borderColor="var(--common-border-color)"
+              width={'100%'}
+            >
+              <Box p={1} bgcolor="grey.200">
+                <Grid container xs={12}>
                   <Grid item xs={6}>
-                    <Autocomplete
-                      options={leadTimeStatusDropdown || []}
-                      getOptionLabel={(option) => option}
-                      value={steps?.leadTimeStatus || ''}
-                      onChange={(event: any, value) => {
-                        handleOnLTMStatusChangeValue(index, value);
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="Lead Time Status"
-                          variant="outlined"
-                          size="small"
-                          fullWidth
-                          InputProps={{
-                            ...params.InputProps,
-                            endAdornment: <React.Fragment>{params.InputProps.endAdornment}</React.Fragment>
-                          }}
-                        />
-                      )}
-                    />
+                    <Typography variant="body2">Lead Time Status</Typography>
                   </Grid>
                   <Grid item xs={4}>
-                    <TextField
-                      id="Days-Field"
-                      variant="outlined"
-                      margin="dense"
-                      name="Days"
-                      label="Days"
-                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                      type="number"
-                      fullWidth
-                      style={{ margin: 0 }}
-                      value={steps?.days || ''}
-                      onChange={(event) => handleOnDaysChangeValue(index, event.target.value)}
-                    />
+                    <Typography variant="body2">{leadTimeMasterSteps?.length && totalDays ? `${totalDays} Days` : 'Days'}</Typography>
                   </Grid>
                   <Grid item xs={2}>
                     <Grid container justifyContent="flex-end">
-                      <IconButton size="small" aria-label="setting" onClick={() => handleRemoveLTMSteps(index)}>
-                        <RemoveCircleOutlineIcon fontSize="small" />
+                      <IconButton
+                        size="small"
+                        aria-label="setting"
+                        onClick={() => {
+                          handleAddLTMSteps();
+                        }}
+                      >
+                        <AddCircleOutlineIcon fontSize="small" />
                       </IconButton>
                     </Grid>
                   </Grid>
                 </Grid>
               </Box>
-            ))}
-          </Box>
+              {leadTimeMasterSteps?.map((steps, index) => (
+                <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
+                  <Grid container spacing={1}>
+                    <Grid item xs={6}>
+                      <Autocomplete
+                        options={leadTimeStatusDropdown || []}
+                        getOptionLabel={(option) => option}
+                        value={steps?.leadTimeStatus || ''}
+                        onChange={(event: any, value) => {
+                          handleOnLTMStatusChangeValue(index, value);
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Lead Time Status"
+                            variant="outlined"
+                            size="small"
+                            fullWidth
+                            InputProps={{
+                              ...params.InputProps,
+                              endAdornment: <React.Fragment>{params.InputProps.endAdornment}</React.Fragment>
+                            }}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        id="Days-Field"
+                        variant="outlined"
+                        margin="dense"
+                        name="Days"
+                        label="Days"
+                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                        type="number"
+                        fullWidth
+                        style={{ margin: 0 }}
+                        value={steps?.days || ''}
+                        onChange={(event) => handleOnDaysChangeValue(index, event.target.value)}
+                      />
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Grid container justifyContent="flex-end">
+                        <IconButton size="small" aria-label="setting" onClick={() => handleRemoveLTMSteps(index)}>
+                          <RemoveCircleOutlineIcon fontSize="small" />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Box>
+              ))}
+            </Box>
+          </Grid>
         </Grid>
-      </Grid>
-    </CustomDialogContent>
-    <CustomDialogFooter>
-      <Button
-        type="button"
-        variant="outlined"
-        color="primary"
-        size="small"
-        onClick={() => {
-          onClose();
-          setShowConfirmDialog(true);
-        }}
-      >
-        Cancel
-      </Button>
-      <CustomButton
-        loading={loading}
-        variant="contained"
-        color="primary"
-        disabled={loading}
-        onClick={(e) => {
-          e.preventDefault();
-          handleSubmit();
-        }}
-      >
-        Save
-      </CustomButton>
-    </CustomDialogFooter>
-    {showConfirmDialog ? (
-      <ConfirmCancelDialog
-        open={showConfirmDialog}
-        onSave={() => { }}
-        onClose={() => {
-          setShowConfirmDialog(false);
-          onClose();
-        }}
-      />
-    ) : null}
-  </Dialog>
+      </CustomDialogContent>
+      <CustomDialogFooter>
+        <Button
+          type="button"
+          variant="outlined"
+          color="primary"
+          size="small"
+          onClick={() => {
+            onClose();
+            setShowConfirmDialog(true);
+          }}
+        >
+          Cancel
+        </Button>
+        <CustomButton
+          loading={loading}
+          variant="contained"
+          color="primary"
+          disabled={loading}
+          onClick={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+        >
+          Save
+        </CustomButton>
+      </CustomDialogFooter>
+      {showConfirmDialog ? (
+        <ConfirmCancelDialog
+          open={showConfirmDialog}
+          onSave={() => {}}
+          onClose={() => {
+            setShowConfirmDialog(false);
+            onClose();
+          }}
+        />
+      ) : null}
+    </Dialog>
   );
 }
 

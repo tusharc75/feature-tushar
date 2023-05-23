@@ -13,13 +13,11 @@ import { DragIndicator } from '@material-ui/icons';
 import TextField from '@material-ui/core/TextField';
 import { isMobile, isTablet } from 'react-device-detect';
 
-
 const ItemTypes = {
   CARD: 'card'
 };
 
 const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
-
   const [valid, setValid] = React.useState(false);
   const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
 
@@ -56,7 +54,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
           [hoverIndex, 0, dragCard]
         ]
       });
-      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 }))
+      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 }));
       setPreRows(updatedIndexColumns);
     },
     [preRows]
@@ -77,7 +75,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
           [hoverIndex, 0, dragCard]
         ]
       });
-      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 + preRows.length }))
+      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 + preRows.length }));
       setPostRows(updatedIndexColumns);
     },
     [postRows]
@@ -109,13 +107,18 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
         }}
         showRequiredLabel={false}
         showManimizeMaximize={true}
-        onClose={handleClose} />
+        onClose={handleClose}
+      />
       <CustomDialogContent>
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-          {(preRows?.length > 0) &&
-            <Box mb={2} p={1} border={1} borderColor="grey.300" bgcolor="grey.100">
-              {postRows?.length > 0 ? <Typography variant="subtitle2" gutterBottom>Pre Work</Typography> : null}
-              {preRows?.length && (
+          {preRows?.length > 0 && (
+            <Box mb={2} p={1} border={1} borderColor="var(--common-border-color)" bgcolor="grey.100">
+              {postRows?.length > 0 ? (
+                <Typography variant="subtitle2" gutterBottom>
+                  Pre Work
+                </Typography>
+              ) : null}
+              {preRows?.length &&
                 preRows?.map((column: any, index) => (
                   <RenderListItem
                     key={column.field}
@@ -123,14 +126,19 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
                     moveItem={moveItemPre}
                     index={index}
                     onChangeValue={onChangeValuePre}
-                    id={column.field} />
-                ))
-              )}
-            </Box>}
-          {(postRows?.length > 0) &&
-            <Box mb={2} p={1} border={1} borderColor="grey.300" bgcolor="grey.100">
-              {preRows?.length > 0 ? <Typography variant="subtitle2" gutterBottom>Post Work</Typography> : null}
-              {postRows?.length && (
+                    id={column.field}
+                  />
+                ))}
+            </Box>
+          )}
+          {postRows?.length > 0 && (
+            <Box mb={2} p={1} border={1} borderColor="var(--common-border-color)" bgcolor="grey.100">
+              {preRows?.length > 0 ? (
+                <Typography variant="subtitle2" gutterBottom>
+                  Post Work
+                </Typography>
+              ) : null}
+              {postRows?.length &&
                 postRows?.map((column: any, index) => (
                   <RenderListItem
                     key={column.field}
@@ -138,10 +146,11 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
                     moveItem={moveItemPost}
                     index={index}
                     onChangeValue={onChangeValuePost}
-                    id={column.field} />
-                ))
-              )}
-            </Box>}
+                    id={column.field}
+                  />
+                ))}
+            </Box>
+          )}
         </DndProvider>
       </CustomDialogContent>
       <CustomDialogFooter>
@@ -228,7 +237,7 @@ const RenderListItem = ({ column, moveItem, id, index, onChangeValue }) => {
 
   return (
     <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
-      <Box bgcolor="white" border={1} mb={1} p={1} borderColor="grey.300">
+      <Box bgcolor="white" border={1} mb={1} p={1} borderColor="var(--common-border-color)">
         <Grid container spacing={1}>
           <Grid item xs={1}>
             <Box pt={1}>

@@ -214,7 +214,7 @@ const EcommerceHome = () => {
                     <CircularProgress size={30} color="inherit" />
                   </Box>
                 ) : (
-                  <Box border={1} p={2} bgcolor="grey.100" borderColor="grey.300" className={classes.screenHeightAuto}>
+                  <Box border={1} p={2} bgcolor="grey.100" borderColor="var(--common-border-color)" className={classes.screenHeightAuto}>
                     <DropBox formData={formData} setFormData={setFormData} handleRemove={handleRemove} findCard={findCard} moveCard={moveCard} />
                   </Box>
                 )}

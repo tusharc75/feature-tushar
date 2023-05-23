@@ -142,19 +142,19 @@ const LeadTimeMasterDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.leadTimeMaster?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.leadTimeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
+            <>
+              {permissions?.leadTimeMaster?.isUpdate && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className={'btn-outline-v1'}
+                  size="small"
+                  onClick={handleOpenUpdateDialog}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.leadTimeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            </>
           </Box>
         </Box>
       </Box>
@@ -205,7 +205,7 @@ const LeadTimeMasterDetails = () => {
                 </Box>
               </Box>
               {leadTimeMasterData?.steps?.length ? (
-                <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                <Box p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                   <Grid container>
                     <Grid item xs={2}>
                       <Typography variant="body1">#</Typography>
@@ -221,7 +221,7 @@ const LeadTimeMasterDetails = () => {
               ) : null}
               {leadTimeMasterData?.steps?.length ? (
                 leadTimeMasterData?.steps?.map((steps, index) => (
-                  <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                  <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                     <Grid container>
                       <Grid item xs={2}>
                         <Typography variant="body2">{index + 1}</Typography>
@@ -236,7 +236,7 @@ const LeadTimeMasterDetails = () => {
                   </Box>
                 ))
               ) : (
-                <Box bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                <Box p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                   <Grid container>
                     <Grid item xs={6} justifyContent={'center'}>
                       <Typography variant="body2">No Data Found</Typography>
@@ -245,7 +245,7 @@ const LeadTimeMasterDetails = () => {
                 </Box>
               )}
               {leadTimeMasterData?.steps?.length ? (
-                <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                <Box p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                   <Grid container>
                     <Grid item xs={2}>
                       <Typography variant="body2"></Typography>
