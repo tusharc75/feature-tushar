@@ -25,7 +25,7 @@
 }
 
 .search_input {
-  background: white;
+  background: transparent;
   outline: none;
   position: relative;
   border: 0;
@@ -45,6 +45,11 @@
     transition: border 0.3s;
     border: 1px solid rgba(0, 0, 0, 0.2);
 
+    [data-mode='dark'] & {
+      border: 1px solid #3d3d5c;
+      color: white;
+    }
+
     &:focus {
       outline: 1px solid #0f9fa9;
     }
@@ -56,6 +61,9 @@
     font-weight: 400;
     font-size: 16px;
     line-height: 19px;
+    [data-mode='dark'] & {
+      color: white;
+    }
   }
 
   :-ms-input-placeholder {
@@ -63,6 +71,9 @@
     font-weight: 400;
     font-size: 16px;
     line-height: 19px;
+    [data-mode='dark'] & {
+      color: white;
+    }
   }
 
   ::-ms-input-placeholder {
@@ -70,6 +81,9 @@
     font-weight: 400;
     font-size: 16px;
     line-height: 19px;
+    [data-mode='dark'] & {
+      color: white;
+    }
   }
 
   .searchIcon {
@@ -95,6 +109,9 @@
     transform: translateY(-50%);
     fill: #7e818c;
     cursor: pointer;
+    [data-mode='dark'] & {
+      fill: white;
+    }
   }
 }
 .searchContainer {
@@ -118,9 +135,16 @@
   background-color: #fff;
   color: #000;
   overflow: hidden;
+  [data-mode='dark'] & {
+    background-color: var(--dark-primary);
+  }
   .filtered_data {
-    max-height: 372px;
+    max-height: 330px;
     background-color: white;
+
+    [data-mode='dark'] & {
+      background-color: var(--dark-primary);
+    }
 
     .resultUL {
       position: relative;
@@ -144,6 +168,10 @@
       top: 0;
       z-index: 1;
       font-size: 14px;
+      [data-mode='dark'] & {
+        background-color: #282845;
+        color: white;
+      }
     }
     .heaaderResults {
       padding: 3px 23px;
@@ -152,6 +180,9 @@
       font-weight: 500;
       font-size: 15px;
       transition: backgorund 0s;
+      [data-mode='dark'] & {
+        color: white;
+      }
     }
     .listIcon {
       min-width: unset;
@@ -159,6 +190,7 @@
     }
     .no_result_container {
       padding: 20px 0;
+      -webkit-user-select: none;
       user-select: none;
       svg {
         fill: var(--grey);
@@ -169,6 +201,7 @@
     }
     .no_result {
       color: var(--grey);
+      -webkit-user-select: none;
       user-select: none;
       text-align: center;
     }
@@ -180,7 +213,7 @@
   left: 0;
   right: 0;
   box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.05) !important;
-  color: #3d3d3d !important;
+  color: inherit !important;
 
   .mainConainer {
     display: flex;
@@ -243,7 +276,7 @@
       font-weight: 500;
       font-size: 18px;
       line-height: 22px;
-      color: #3d3d3d;
+      color: inherit;
     }
   }
   // Genereal classes

@@ -87,10 +87,10 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
 
   const handleSubmit = (values) => {
     if (values?.fromDate) {
-      values.fromDate = moment(values?.fromDate).format('MM/DD/YYYY')
+      values.fromDate = moment(values?.fromDate).format('MM/DD/YYYY');
     }
     if (values?.toDate) {
-      values.toDate = moment(values?.toDate).format('MM/DD/YYYY')
+      values.toDate = moment(values?.toDate).format('MM/DD/YYYY');
     }
     setLoading(true);
     if (id && isClone === false) {
@@ -146,7 +146,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
     let fromDate = moment(values?.fromDate);
     let toDate = moment(values?.toDate);
     if (toDate.diff(fromDate, 'days') < 0) {
-      errors['toDate'] = 'Please enter valid to date'
+      errors['toDate'] = 'Please enter valid to date';
     }
     return errors;
   }
@@ -284,7 +284,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

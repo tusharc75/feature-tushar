@@ -23,7 +23,6 @@ import {
 import { useData } from 'src/StateProvider/Provider';
 
 const Invoice = () => {
-
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
   const [columns, setColumns] = useState(null);
@@ -44,7 +43,6 @@ const Invoice = () => {
     fetchInvoiceData();
   }, []);
 
-
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Invoice`);
@@ -63,7 +61,7 @@ const Invoice = () => {
     });
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
-      ...tempFrameworkComponent,
+      ...tempFrameworkComponent
       //actionsRenderer: ActionsRenderer
     };
     setFrameworkComponent({ ...tempFrameworkComponent });
@@ -90,7 +88,7 @@ const Invoice = () => {
   //   </>;
   // };
 
-  const handleSingleDelete = async () => { };
+  const handleSingleDelete = async () => {};
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -143,12 +141,12 @@ const Invoice = () => {
             actionWidth={100}
             loading={loading}
             allowAction={false}
-            renderedFrom={"job_invoice"}
+            renderedFrom={'job_invoice'}
             refreshGrid={fetchInvoiceData}
             showOnlyShowFilteredRecordSwitch={true}
           />
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

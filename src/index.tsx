@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Provider } from './StateProvider/Provider';
+import { FastProvider, useStore } from './StateProvider/fastContext';
 import { CustomToastProvider } from './StateProvider/CustomToastContext/CustomToastContext';
 import { MsalProvider } from '@azure/msal-react';
 import AzureInstance from './AzureInstance';
@@ -23,7 +24,6 @@ import './components/Chatter/style.scss';
 import { CustomChatNotificationCountProvider } from './StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { GlobalChatProvider } from './StateProvider/GlobalChatContext';
 import { CustomOfflineProvider } from './StateProvider/OfflineContext/OfflineContext';
-// import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import { version } from '../package.json';
 
 // @ts-ignore
@@ -44,21 +44,23 @@ if (process.env.REACT_APP_ENV !== 'local' && navigator.onLine) {
 ReactDOM.render(
   <React.StrictMode>
     <Router>
-      <Provider>
-        <CustomToastProvider>
-          <CustomNotificationCountProvider>
-            <CustomChatNotificationCountProvider>
-              <MsalProvider instance={AzureInstance}>
-                <GlobalChatProvider>
-                  <CustomOfflineProvider>
-                    <App />
-                  </CustomOfflineProvider>
-                </GlobalChatProvider>
-              </MsalProvider>
-            </CustomChatNotificationCountProvider>
-          </CustomNotificationCountProvider>
-        </CustomToastProvider>
-      </Provider>
+      <FastProvider>
+        <Provider>
+          <CustomToastProvider>
+            <CustomNotificationCountProvider>
+              <CustomChatNotificationCountProvider>
+                <MsalProvider instance={AzureInstance}>
+                  <GlobalChatProvider>
+                    <CustomOfflineProvider>
+                      <App />
+                    </CustomOfflineProvider>
+                  </GlobalChatProvider>
+                </MsalProvider>
+              </CustomChatNotificationCountProvider>
+            </CustomNotificationCountProvider>
+          </CustomToastProvider>
+        </Provider>
+      </FastProvider>
     </Router>
   </React.StrictMode>,
   document.getElementById('root')

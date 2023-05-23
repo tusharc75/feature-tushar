@@ -28,7 +28,6 @@ const AttachmentSchema = object().shape({
 });
 
 export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId, serviceName, stepName, handleClose, handleSuccess }) {
-
   const [initialValues, setInitialValues] = useState(null);
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -47,7 +46,6 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
     fetchData();
   }, []);
 
-
   const fetchData = async () => {
     setIsFetching(true);
     axiosInstance()
@@ -60,7 +58,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
           setCanEdit(data?.canEdit);
           if (data?.file && data?.file?.length) {
             data?.file?.sort((a: any, b: any) => {
-              return (new Date(b?.date)).getTime() - (new Date(a?.date)).getTime();
+              return new Date(b?.date).getTime() - new Date(a?.date).getTime();
             });
             setOtherAttachments(data.file);
           }
@@ -259,7 +257,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
         ) : null
       ) : (
         <div>
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         </div>

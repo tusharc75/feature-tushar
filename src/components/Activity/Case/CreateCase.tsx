@@ -31,10 +31,10 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
-import Loader from '../../Loader';
 import { dateFormatForInputControl } from '../../../constants/helpers';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { map } from 'lodash';
+import { isEqual } from 'lodash';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const CaseSchema = object().shape({
   name: string().required('Please enter case name'),
@@ -55,7 +55,6 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
   const [openAddSub, setOpenAddSub] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formValues, setFormValues] = useState({});
 
   useEffect(() => {
     fetchCaseDetail();
@@ -65,24 +64,21 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
     if (id) {
       await GetCaseDetail(id)
         .then(({ data }) => {
-          if (data?.assignee && data?.assignee !== "") {
-            if (typeof data?.assignee === "string") {
+          if (data?.assignee && data?.assignee !== '') {
+            if (typeof data?.assignee === 'string') {
               data['assignee'] = [{ userId: data?.assignee }];
-            }
-            else {
+            } else {
               data['assignee'] = data?.assignee?.map((assignee) => ({
                 userId: assignee
               }));
             }
-          }
-          else {
-            data['assignee'] = []
+          } else {
+            data['assignee'] = [];
           }
           setInitialValues(null);
           setInitialValues(data);
-          setFormValues(data);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       let initialData = {
         name: '',
@@ -94,7 +90,6 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
         dueDate: new Date()
       };
       setInitialValues(initialData);
-      setFormValues(initialData);
     }
   };
 
@@ -131,32 +126,22 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
     return errors;
   }
 
-  const isFieldNotTouched = (initialValues, values) => {
-    return Object.values(initialValues).toString() === Object.values(values).toString();
-  };
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
-
   return (
     <>
-      <CustomDialogHeader
-        title={`${id ? 'Edit' : 'New'} Case`}
-        onClose={() => {
-          if (isFieldNotTouched(initialValues, formValues)) handleClose();
-          else setShowConfirmDialog(true);
-        }}
-        isMinimized={isMinimized}
-        onMinimizeMaximize={onMinimizeMaximize}
-        showManimizeMaximize={showManimizeMaximize}
-      ></CustomDialogHeader>
       {initialValues ? (
         <Formik initialValues={initialValues} validationSchema={CaseSchema} onSubmit={handleSave} validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <>
+              <CustomDialogHeader
+                title={`${id ? 'Edit' : 'New'} Case`}
+                onClose={() => {
+                  if (isEqual(initialValues, values)) handleClose();
+                  else setShowConfirmDialog(true);
+                }}
+                isMinimized={isMinimized}
+                onMinimizeMaximize={onMinimizeMaximize}
+                showManimizeMaximize={showManimizeMaximize}
+              ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <MuiPickersUtilsProvider utils={DateUtils}>
@@ -188,7 +173,6 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                             helperText={touched['name'] && errors['name']}
                             onChange={(e) => {
                               setFieldValue('name', e.target.value.trimStart());
-                              handleValuesChange({ name: e.target.value.trimStart() });
                             }}
                           />
                           <Box pt={1}>
@@ -203,7 +187,6 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               variant="outlined"
                               onChange={(e) => {
                                 setFieldValue('description', e.target.value);
-                                handleValuesChange({ description: e.target.value });
                               }}
                             />
                           </Box>
@@ -272,7 +255,6 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               touched={touched}
                               required={false}
                               setFieldValue={(name, value) => {
-                                handleValuesChange({ [name]: value });
                                 setFieldValue(name, value);
                               }}
                               multiple={true}
@@ -288,7 +270,6 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               touched={touched}
                               required={true}
                               setFieldValue={(name, value) => {
-                                handleValuesChange({ [name]: value });
                                 setFieldValue(name, value);
                               }}
                               multiple={false}
@@ -362,7 +343,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                   color="primary"
                   size="small"
                   onClick={() => {
-                    if (isFieldNotTouched(initialValues, values)) handleClose();
+                    if (isEqual(initialValues, values)) handleClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
@@ -391,7 +372,9 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
         </Formik>
       ) : (
         <CustomDialogContent>
-          <Loader minHeight="500px" text="Loading..." />
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         </CustomDialogContent>
       )}
     </>

@@ -10,7 +10,6 @@ import {
   yupSchema,
   initializeDropdownById,
   opportunity,
-  simplifyValues,
   setFieldsInAscendingOrder,
   formFieldNames,
   getCollaboratorDropdownDataSource,
@@ -76,7 +75,7 @@ export default function NewOpportunityProjectSales({
   const [ownerDataSource, setOwnerDataSource] = useState([]);
   const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  
+
   useEffect(() => {
     const processSteps = opportunityData.fields.find(
       (d) => d.type.toLowerCase() === "process"
@@ -714,23 +713,10 @@ export default function NewOpportunityProjectSales({
                   >
                     Cancel
                   </Button>
-
                   <CustomButton
                     loading={loading}
                     variant="contained"
                     color="primary"
-                    disabled={
-                      uploadingImageOrFileProgress > 0 ||
-                      Object.values(
-                        simplifyValues(
-                          opportunityData.initialValues,
-                          opportunityData.fields
-                        )
-                      ).toString() ===
-                      Object.values(
-                        simplifyValues(values, opportunityData.fields)
-                      ).toString()
-                    }
                     onClick={(e) => {
                       e.preventDefault();
                       const err = Object.keys(errors);

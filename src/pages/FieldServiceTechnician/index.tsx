@@ -1,5 +1,5 @@
 import { Box, Button, Grid, IconButton, Menu, MenuItem, Paper, Tab, Tabs, Typography } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -12,6 +12,9 @@ import { dateFormat } from 'src/constants/helpers';
 import EventNoteIcon from '@material-ui/icons/EventNote';
 import TabPanel from 'src/components/TabPanel';
 import Consumables from './Consumables';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import { clearAll, deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const status = {
   completed: 'Completed',
@@ -59,6 +62,8 @@ const style = {
 
 const FieldServiceTechnician = () => {
   const toastConfig = useContext(CustomToastContext);
+  const { isOffline } = useContext(CustomOfflineContext);
+
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
@@ -66,26 +71,43 @@ const FieldServiceTechnician = () => {
   const [fieldService, setFieldService] = useState(null);
   const [selectedFieldService, setSelectedFieldService] = useState(null);
   const [tabValue, setTabValue] = useState(0);
+  const [offlineStore, setOfflineStore] = useState([]);
+
+  const fieldRef: any = useRef();
+
+  const fieldRemoveRef: any = useRef();
 
   useEffect(() => {
     fetchData();
-  }, []);
+    findAllStoredData();
+  }, [isOffline]);
 
-  const fetchData = () => {
+  const findAllStoredData = async () => {
+    const data = await findAll(objectStore.fieldServiceTechnician);
+    setOfflineStore(data?.map((d) => d?._id) || []);
+  };
+
+  const fetchData = async () => {
     setFieldService(null);
-    axiosInstance()
-      .get(`/field-service-technician`)
-      .then(({ data: { data } }) => {
-        setFieldService(data?.data);
-        const isAvailable = data?.data.find((d) => d._id === selectedFieldService?._id);
-        const index = data?.data.findIndex((d) => d._id === selectedFieldService?._id);
-        if (data?.data?.length) {
-          isAvailable ? setSelectedFieldService(data?.data[index]) : setSelectedFieldService(data?.data[0]);
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    if (isOffline) {
+      const data: any = await findAll(objectStore.fieldServiceTechnician);
+      setFieldService(data);
+      setSelectedFieldService(data[0]);
+    } else {
+      axiosInstance()
+        .get(`/field-service-technician`)
+        .then(({ data: { data } }) => {
+          setFieldService(data?.data);
+          const isAvailable = data?.data.find((d) => d._id === selectedFieldService?._id);
+          const index = data?.data.findIndex((d) => d._id === selectedFieldService?._id);
+          if (data?.data?.length) {
+            isAvailable ? setSelectedFieldService(data?.data[index]) : setSelectedFieldService(data?.data[0]);
+          }
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const getBgColor = (data) => {
@@ -119,6 +141,18 @@ const FieldServiceTechnician = () => {
     };
   }
 
+  const handleAddOffline = async (fieldService) => {
+    await insertUpdate(objectStore.fieldServiceTechnician, fieldService._id, fieldService);
+    fieldRef.current.triggerChildFunction();
+    findAllStoredData();
+  };
+
+  const handleRemoveOffline = async (fieldService) => {
+    deleteOne(objectStore.fieldServiceTechnician, fieldService._id);
+    fieldRemoveRef.current.triggerChildFunction();
+    findAllStoredData();
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -140,12 +174,13 @@ const FieldServiceTechnician = () => {
                     }}
                     style={{
                       cursor: 'pointer',
-                      backgroundColor: selectedFieldService === data ? '#298b88' : getBgColor(data),
+                      backgroundColor: selectedFieldService === data ? '#0f9fa9' : getBgColor(data),
                       color: selectedFieldService === data ? 'white' : 'black',
                       border: '1px solid #ebebeb'
                     }}
+                    sx={{ position: 'relative' }}
                   >
-                    <Box p={3}>
+                    <Box p={3} pt={5}>
                       <Box sx={style.serviceHead}>
                         <Typography>
                           <span>{data?.fieldServiceOrderNumber}</span>
@@ -167,11 +202,43 @@ const FieldServiceTechnician = () => {
                         <Typography style={{ fontSize: '14px' }}>Location: {data?.shippingAddress?.optionLabel}</Typography>
                       </Box>
                     </Box>
+                    {!isOffline && (
+                      <Box>
+                        <Button
+                          style={{ position: 'absolute', right: '5px', top: '5px' }}
+                          variant="outlined"
+                          color="primary"
+                          size="small"
+                          onClick={() => {
+                            offlineStore?.includes(data._id) ? handleRemoveOffline(data) : handleAddOffline(data);
+                          }}
+                        >
+                          {offlineStore?.includes(data._id) ? 'Remove Offline' : 'Add Offline'}
+                        </Button>
+                      </Box>
+                    )}
                   </Box>
                 );
               })}
             </Grid>
             <Grid item xs={12} md={8} sm={12}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Box display={'flex'} justifyContent={'flex-end'}>
+                  <Button
+                    onClick={() => {
+                      clearAll(objectStore.fieldServiceTechnician);
+                      clearAll(objectStore.fieldTicket);
+                      findAllStoredData();
+                    }}
+                  >
+                    Clear Offline
+                  </Button>
+                  <Box ml={1} />
+                  <IconButton size="small" onClick={() => fetchData()}>
+                    <RefreshIcon />
+                  </IconButton>
+                </Box>
+              </div>
               {selectedFieldService && (
                 <Box
                   style={{
@@ -213,7 +280,7 @@ const FieldServiceTechnician = () => {
                   </Tabs>
                   <TabPanel value={tabValue} index={0}>
                     <Box>
-                      <FieldTicket selectedFieldService={selectedFieldService} />
+                      <FieldTicket selectedFieldService={selectedFieldService} fieldRef={fieldRef} fieldRemoveRef={fieldRemoveRef} />
                     </Box>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
@@ -226,7 +293,7 @@ const FieldServiceTechnician = () => {
             </Grid>
           </Grid>
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

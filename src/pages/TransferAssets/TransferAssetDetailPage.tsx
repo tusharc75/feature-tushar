@@ -20,7 +20,7 @@ import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import Steps2 from 'src/components/Steps';
+import Steps from 'src/components/Steps';
 import { RiFlowChart } from 'react-icons/ri';
 import TransferAssetViews from './RoadMapViews';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -376,7 +376,7 @@ const TransferAssetDetailPage = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <Box my={2}>
-            <Steps2
+            <Steps
               isNextStep={false}
               nextStep={isNextStep}
               steps={stepList}

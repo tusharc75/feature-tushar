@@ -21,48 +21,81 @@ import { useData } from 'src/StateProvider/Provider';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
 
-  let renderedFrom = camelCase(routes?.workOrder.title + 'workOrder_consumables');
 
   const toastConfig = useContext(CustomToastContext);
-
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
-  const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null });
+  const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null, data: null });
+  const [consumeRequest, setConsumeRequest] = useState(false);
 
   const {
     state: { user }
   }: any = useData();
 
-
   useEffect(() => {
+    var allowRequest = false;
+    if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
+      if (warehouse?.manager && warehouse?.manager?.includes(user?.user?._id)) {
+        allowRequest = false;
+      }
+      else {
+        allowRequest = true;
+      }
+    }
+    setConsumeRequest(allowRequest)
     fetchColumns();
     fetchData();
-  }, [allowedToEdit]);
+  }, [allowedToEdit, workOrderId]);
 
-  const fetchColumns = () => {
-    const column: any = [
-      {
-        accessor: 'product',
-        Header: 'Product',
-        width: 300,
-        Cell: ({ row }) =>
-          row?.original?.product ? (
-            <p className="text-truncate" title={row?.original?.product}>
-              <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.productId}`} target="_blank">
-                {row.original.product}
+  const fetchColumns = async () => {
+    const column = [];
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+          fieldNames: ['productName', 'productNumber', 'productDescription']
+        }
+      ]
+    });
+    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
+    productFields?.forEach((e) => {
+      if (e?.fieldName === 'productName') {
+        column.push({
+          accessor: e?.fieldName,
+          Header: e?.fieldLabel,
+          width: 200,
+          Cell: ({ row }) => {
+            return row.original[e?.fieldName] ? (
+              <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
+                {row.original[e?.fieldName]}
               </a>
-            </p>
-          ) : (
-            <NoDataCell />
-          )
-      },
+            ) : (
+              <NoDataCell />
+            );
+          }
+        });
+      } else {
+        column.push({
+          accessor: e?.fieldName,
+          Header: e?.fieldLabel,
+          width: 200,
+          Cell: ({ row }) => {
+            return row.original[e?.fieldName] ? <p className="text-truncate">{row.original[e?.fieldName]}</p> : <NoDataCell />;
+          }
+        });
+      }
+    });
+
+    const extracolumns: any = [
       {
         accessor: 'service',
         Header: 'Service',
-        width: 300,
+        width: 200,
         Cell: ({ row }) =>
           row?.original?.service ? (
             <p className="text-truncate" title={row?.original?.service}>
@@ -77,7 +110,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       {
         accessor: 'stepName',
         Header: 'Step Name',
-        width: 300,
+        width: 200,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.stepName || <NoDataCell />}</p>
       },
       {
@@ -87,14 +120,16 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
-      ...(user?.user?.brandPolicy?.workOrderConsumableRequest ? [
-        {
-          accessor: 'requestedQty',
-          Header: 'Requested Qty',
-          width: 150,
-          Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-        }
-      ] : []),
+      ...(user?.user?.brandPolicy?.workOrderConsumableRequest
+        ? [
+          {
+            accessor: 'requestedQty',
+            Header: 'Requested Qty',
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+          }
+        ]
+        : []),
       {
         accessor: 'consumedQty',
         Header: 'Consumed Qty',
@@ -106,6 +141,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         Header: 'Action',
         width: 100,
         minWidth: 100,
+        sticky: 'right',
         disableFilters: true,
         canDrag: false,
         Cell: ({ row }: any) => (
@@ -116,7 +152,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
                   size="small"
                   aria-label="Delete"
                   onClick={() => {
-                    setOpenLogDialog({ open: true, uniqueId: row.original._id });
+                    setOpenLogDialog({ open: true, uniqueId: row.original._id, data: row.original });
                   }}
                 >
                   <HistoryIcon />
@@ -128,12 +164,12 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
                 <IconButton
                   size="small"
                   aria-label="Delete"
-                  disabled={row?.original?.consumedQty ? true : false}
+                  disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
                   onClick={() => {
                     handleDelete([row.original]);
                   }}
                 >
-                  <DeleteIcon color={row?.original?.consumedQty ? 'disabled' : 'error'} />
+                  <DeleteIcon color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -141,10 +177,12 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         )
       }
     ];
-    setColumns(column);
+
+    setColumns([...column, ...extracolumns]);
   };
 
   const fetchData = async () => {
+    setDataRows(null);
     var query = ``;
     if (service && uniqueId) {
       query = query + `?service=${service}&uniqueId=${uniqueId}`;
@@ -157,9 +195,12 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res: any = {
-            ...prepareDataForGrid(u),
+            ...prepareDataForGrid(u)
           };
-          res.hideSelection = u?.qty - u?.consumedQty === 0 ? true : false;
+          res.productName = u?.product?.optionLabel;
+          res.productDescription = u?.product?.productDescription;
+          res.productNumber = u?.product?.productNumber;
+          res.hideSelection = u?.qty - ((u?.consumedQty || 0) + (u?.requestedQty || 0)) === 0 ? true : false;
           return res;
         });
         setDataRows(rows);
@@ -212,11 +253,12 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    if (parseInt(inputField.qty) < updatedData.consumedQty) {
+    if (parseInt(inputField.qty) < ((updatedData?.consumedQty || 0) + (updatedData?.requestedQty || 0))) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: 'Qty can not be less than consumed qty'
+        message: user?.user?.brandPolicy?.workOrderConsumableRequest ? 'Qty can not be less than consumed qty plus requested qty' :
+          'Qty can not be less than consumed qty'
       });
       return;
     } else if (parseInt(inputField.qty) === 0) {
@@ -268,7 +310,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               size="small"
               variant="contained"
             >
-              {'Consume '}{' '}
+              {consumeRequest ? 'Request ' : 'Consume '}{' '}
               {selectedRecords?.filter((e) => !e?.hideSelection).length > 0
                 ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')'
                 : ''}
@@ -288,12 +330,13 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               childrenProperty="subRows"
               uniqueKey="_id"
               onSaveEdit={onSaveInlineEdit}
-              renderedFrom={renderedFrom}
+              renderedFrom={'workOrder_consumables'}
               isClientSideGrid={true}
               hideExpander={true}
+              hideSelection={allowedToEdit ? false : true}
             />
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
@@ -305,7 +348,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             reference={'workOrder'}
             handleCloseDialog={() => setConsumablesDialog(false)}
             assignedProducts={dataRows?.map((d) => d?.materialId) || []}
-            renderedFrom={'workOrder_consumables'}
             onSuccess={(rows) => {
               handleSubmit(rows);
             }}
@@ -323,18 +365,21 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             warehouse={warehouse}
             selectedRecords={selectedRecords?.filter((e) => !e?.hideSelection)}
             serviceName={serviceName}
+            consumeRequest={consumeRequest}
           />
         )}
         {openLogDialog.open && (
           <QtyRequestLog
             uniqueId={openLogDialog.uniqueId}
             workOrderId={workOrderId}
-            renderedFrom={renderedFrom}
+            productName={openLogDialog?.data?.productName}
             onClose={() => {
               setOpenLogDialog({
                 open: false,
                 uniqueId: null,
+                data: null
               });
+              fetchData();
             }}
           />
         )}

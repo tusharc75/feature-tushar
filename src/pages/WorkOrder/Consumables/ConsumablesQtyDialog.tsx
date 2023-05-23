@@ -30,7 +30,7 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, selectedRecords, serviceName }) => {
+const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, selectedRecords, serviceName, consumeRequest }) => {
 
   const classes = useClasses();
   const toastConfig = useContext(CustomToastContext);
@@ -54,7 +54,7 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
         if (data[sidebarResource.storageLocation]) {
-          const storageLocationOption = data[sidebarResource.storageLocation]?.filter((e) => e.warehouse === warehouse);
+          const storageLocationOption = data[sidebarResource.storageLocation]?.filter((e) => e.warehouse === warehouse?.optionValue);
           setStorageLocationOptions(storageLocationOption);
         }
       });
@@ -139,7 +139,7 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
         let tempProduct = selectedRecords.find((u) => u._id === d._id);
         let qty = tempProduct.qty - ((tempProduct?.consumedQty || 0) + (tempProduct?.requestedQty || 0));
         if (tempProduct && d.consumedQty > qty) {
-          errors.consumedQty = 'Consume Qty is limited to Qty.';
+          errors.consumedQty = `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.`;
         }
       });
     }
@@ -198,7 +198,7 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
                                 <TableCell align="left">Product</TableCell>
                                 {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">Storage Location</TableCell>}
                                 <TableCell align="left">{'Qty'}</TableCell>
-                                <TableCell align="left">{'Consume Qty'}</TableCell>
+                                <TableCell align="left">{consumeRequest ? 'Request Qty' : 'Consume Qty'}</TableCell>
                               </TableRow>
                             </TableHead>
                             <TableBody>
@@ -276,9 +276,9 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
                                           consumedQty: value
                                         });
                                       }}
-                                      label="Consume Qty"
-                                      placeholder="Consume Qty"
-                                      helperText={validate([value])?.consumedQty ? 'Consume Qty is limited to Qty.' : ''}
+                                      label={consumeRequest ? "Request Qty" : "Consume Qty"}
+                                      placeholder={consumeRequest ? "Request Qty" : "Consume Qty"}
+                                      helperText={validate([value])?.consumedQty ? `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.` : ''}
                                     />
                                   </TableCell>
                                 </TableRow>
@@ -300,7 +300,7 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
               <Button variant="outlined" disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
                 Cancel
               </Button>
-              {user?.user?.brandPolicy?.workOrderConsumableRequest ?
+              {consumeRequest ?
                 <Button
                   onClick={() => {
                     if (!validate(values.products).consumedQty && !validate(values.products).storageLocation) {

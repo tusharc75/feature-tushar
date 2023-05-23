@@ -37,7 +37,7 @@ import ManageContactDialog from '../../Contact/ManageContact';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 
-const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, onClose, onSuccess, open }) => {
+const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = null, onClose, onSuccess, open }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -133,9 +133,9 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
     }
     if (customerContactDropdownData) {
       setCustomerContactMainDataSource(customerContactDropdownData.option);
-      if (salesOrderId) {
+      if (demandOrderId) {
         setCustomerContactDataSource(
-          customerContactDropdownData.option.filter((d) => d.parentAccount === salesOrderData?.customerAccount.optionValue)
+          customerContactDropdownData.option.filter((d) => d.parentAccount === demandOrderData?.customerAccount.optionValue)
         );
       }
     }
@@ -157,7 +157,7 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
   useEffect(() => {
     setLoading(true);
     fetchFields();
-  }, [salesOrderId]);
+  }, [demandOrderId]);
 
   const fetchFields = async () => {
     try {
@@ -168,10 +168,10 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-      if (salesOrderId) {
+      if (demandOrderId) {
         try {
           let data;
-          const response: any = await axiosInstance().get(`${demandOrder.api}/` + salesOrderId);
+          const response: any = await axiosInstance().get(`${demandOrder.api}/` + demandOrderId);
           data = response?.data?.data;
 
           if (isClone) {
@@ -210,8 +210,8 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
 
   const handleSubmit = (values) => {
     setLoading(true);
-    if (salesOrderId && isClone === false) {
-      values._id = salesOrderId;
+    if (demandOrderId && isClone === false) {
+      values._id = demandOrderId;
       axiosInstance()
         .put(`${demandOrder.api}`, values)
         .then(({ data }) => {
@@ -277,7 +277,6 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
     }
   };
 
-
   return (
     <>
       <Dialog
@@ -305,9 +304,9 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
               <Fragment>
                 <CustomDialogHeader
                   title={
-                    !salesOrderId
+                    !demandOrderId
                       ? `Create ${routes.demandOrder.title}`
-                      : `${isClone ? `Clone - ${cloneHeading}` : `Update ${salesOrderData?.demandOrderNumber}`}`
+                      : `${isClone ? `Clone - ${cloneHeading}` : `Update ${demandOrderData?.demandOrderNumber}`}`
                   }
                   onClose={() => {
                     if (!isEqual(ref.current.values, salesData.initialValues)) {
@@ -336,10 +335,10 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
                               {form.sectionFields.map((field, index2) => (
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                   <FormTypes
-                                    isNew={Boolean(salesOrderId)}
+                                    isNew={Boolean(demandOrderId)}
                                     {...field}
                                     fieldData={field}
-                                    disabled={!isClone ? salesOrderId && field.disableOnEdit : false}
+                                    disabled={!isClone ? demandOrderId && field.disableOnEdit : false}
                                     values={values}
                                     errors={errors}
                                     touched={touched}
@@ -413,7 +412,7 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
             )}
           </Formik>
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

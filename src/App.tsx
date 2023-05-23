@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
-import { Grid, ThemeProvider } from '@material-ui/core';
+import { Grid, ThemeProvider, CssBaseline } from '@material-ui/core';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { theme } from './constants/AppConfig';
+import ColorModeProvider from './constants/AppConfig';
 import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToastContext';
 import { CustomNotificationCountContext } from './StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import axiosInstance from './axios/axiosInstance';
@@ -405,7 +405,8 @@ function App() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
+    <ColorModeProvider>
+      <CssBaseline />
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
           <Snackbar
@@ -1058,7 +1059,7 @@ function App() {
         isOffline ?
           <OfflineStatusDialog /> : null
       } */}
-    </ThemeProvider>
+    </ColorModeProvider>
   );
 }
 

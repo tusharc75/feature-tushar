@@ -14,59 +14,9 @@ import { BiCustomize } from 'react-icons/bi';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { useData } from '../../StateProvider/Provider';
 import { formatAmountWithCurrency } from '../../constants/helpers';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import DisplayData from 'src/CardDisplayData';
 
-const Accordion = withStyles({
-  root: {
-    border: '1px solid rgba(0, 0, 0, .125) !important',
-    boxShadow: 'none',
-    '&:not(:last-child)': {
-      borderBottom: 0
-    },
-    '&:before': {
-      display: 'none'
-    },
-    '&$expanded': {
-      margin: 'auto'
-    }
-  },
-  expanded: {}
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-  root: {
-    backgroundColor: '#e4e4e4',
-    borderBottom: '1px solid rgba(0, 0, 0, .125)',
-    '&$expanded': {
-      minHeight: 46
-    }
-  },
-  content: {
-    '&$expanded': {
-      margin: '12px 0'
-    }
-  },
-  expanded: {}
-})(MuiAccordionSummary);
-
-const AccordionDetails = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(1),
-    display: 'block'
-  }
-}))(MuiAccordionDetails);
-
-function DisplayData({ label, value, icon }) {
-  return (
-    <div style={{ flexGrow: 1 }}>
-      <List>
-        <ListItem>
-          <ListItemAvatar>{icon}</ListItemAvatar>
-          <ListItemText primary={value} secondary={label} />
-        </ListItem>
-      </List>
-    </div>
-  );
-}
 export default function AccordionOfOpportunity({ opportunity, expanded = true, recordsPerLine = 2 }) {
   const {
     state: { selectedEntity }
@@ -97,9 +47,9 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
   }, [opportunity]);
   return (
     <>
-      <Accordion expanded={expandOpportunity}>
+      <Accordion expanded={expandOpportunity} onChange={() => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-          <Grid container onClick={() => setExpandOpportunity(!expandOpportunity)}>
+          <Grid container>
             <Grid item xs={8}>
               <Box display="flex">
                 <Box>
@@ -112,7 +62,6 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
             </Grid>
           </Grid>
         </AccordionSummary>
-        <Box margin={0.5} />
         <AccordionDetails>
           <>
             {expandOpportunity && (
@@ -121,8 +70,8 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
                   <Grid container spacing={1}>
                     {
                       <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={1}>
-                        <Card style={{ minWidth: '100%' }}>
-                          <CardContent className="detailListing">
+                        <Card className="detailCard  card-v1" variant="outlined">
+                          <CardContent className="card-link">
                             <Grid container className="detailCardHeader">
                               <Grid item xs={12} sm={12}>
                                 <Grid item xs={12} sm={8}>

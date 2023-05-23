@@ -74,7 +74,6 @@ const CreateProjectSales = ({
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showAddAddresstDialog, setShowAddAddresstDialog] = useState(false);
   const [addressDataSource, setAddressDataSource] = useState([]);
@@ -146,13 +145,11 @@ const CreateProjectSales = ({
                   fields: newFields,
                   values: tempObjKeysWithValues
                 });
-                setFormValues(tempObjKeysWithValues);
               } else {
                 setInitialData({
                   fields: newFields,
                   values: getObjKeysWithValues(data, newFields)
                 });
-                setFormValues(getObjKeysWithValues(data, newFields));
               }
               setProductSalesName(data.projectName);
 
@@ -178,16 +175,13 @@ const CreateProjectSales = ({
             fields: createFields,
             values: tempObjKeysWithValues
           });
-          setFormValues(tempObjKeysWithValues);
         }
-
         setTimeout(() => setLoading(false), 500);
       })
       .catch((err) => {
         setLoading(false);
       });
   };
-  
 
   const handleSubmit = (values) => {
     if (projectSalesId && !isClone) {
@@ -924,7 +918,7 @@ const CreateProjectSales = ({
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

@@ -18,7 +18,6 @@ import { useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
-
 import Steps from '../WorkOrder/Service/Steps';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
@@ -228,6 +227,7 @@ const WorkOrderTechnician = () => {
             tempServiceData['assetNumber'] = tempSelected?.workOrderDetail?.serializedAsset?.optionLabel;
             tempServiceData['assetId'] = tempSelected?.workOrderDetail?.serializedAsset?.optionValue;
             tempServiceData['workOrderId'] = tempSelected?.workOrderDetail?._id;
+            tempServiceData['warehouse'] = tempSelected?.workOrderDetail?.warehouse;
             setSelectedService(tempServiceData);
           }
         }
@@ -258,6 +258,7 @@ const WorkOrderTechnician = () => {
     { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
     { accessor: 'stepData', title: 'Time', type: 'timer' }
   ];
+
 
   return (
     <Box className="main-container-v1">
@@ -374,6 +375,7 @@ const WorkOrderTechnician = () => {
               tempServiceData['assetNumber'] = data?.workOrderDetail?.serializedAsset?.optionLabel;
               tempServiceData['assetId'] = data?.workOrderDetail?.serializedAsset?.optionValue;
               tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
+              tempServiceData['warehouse'] = data?.workOrderDetail?.warehouse;
               setSelectedService(tempServiceData);
               setServiceOpen(true);
             }}
@@ -524,7 +526,7 @@ const WorkOrderTechnician = () => {
           <Box p={2}>
             <Steps
               workOrderId={selectedService?.workOrderId}
-              warehouse={selectedService?.workOrderDetail?.warehouse}
+              warehouse={selectedService?.warehouse}
               selectedService={selectedService}
               allowedToEdit={selectedService?.status === WORKORDER_TECHNICIAN_SERVICE_STATUS[0] ? false : true}
               setDisableCompleteFail={() => { }}

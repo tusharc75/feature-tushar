@@ -21,7 +21,7 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { MdSort, MdFilterList, ImCalendar, FaSuitcase } from 'react-icons/all';
@@ -174,44 +174,24 @@ function Budget() {
     }
   };
 
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-
-    if (field !== updatedField) return updatedField;
-
-    switch (field) {
-      case 'marketSegment':
-        return 'marketSegment.optionLabel';
-
-      case 'subMarketSegment':
-        return 'subMarketSegment.optionLabel';
-
-      case 'entity':
-        return 'entity.optionLabel';
-
-      default:
-        return field;
-    }
-  };
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    const updatedFilters = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {

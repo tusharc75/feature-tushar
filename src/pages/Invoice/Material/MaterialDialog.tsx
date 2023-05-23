@@ -17,6 +17,7 @@ import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
+
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
@@ -196,32 +197,28 @@ const MaterialDialog: FC<EditDialogProps> = ({
       });
       handleSaveData(rows, saveAndNext);
     } else {
-      if (rowData.parentId && !showConfirmationDialog) {
+      if (rowData.parentId !== null && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        if (rowData.parentId !== null && !showConfirmationDialog) {
-          setShowConfirmationDialog(true);
-        } else {
-          let rows: any = [{ ...rowData, ...values }];
-          if (rowData.parentId) {
-            const parent: any = material.filter((e) => e._id === rowData.parentId);
-            const sameParent: any = material.filter((e) => e.parentId === rowData.parentId);
-            sameParent.forEach((element) => {
-              if (element._id === rowData._id) {
-                for (var key in values) {
-                  element[key] = values[key];
-                }
+        let rows: any = [{ ...rowData, ...values }];
+        if (rowData.parentId) {
+          const parent: any = material.filter((e) => e._id === rowData.parentId);
+          const sameParent: any = material.filter((e) => e.parentId === rowData.parentId);
+          sameParent.forEach((element) => {
+            if (element._id === rowData._id) {
+              for (var key in values) {
+                element[key] = values[key];
               }
-            });
+            }
+          });
 
-            sumOnParent(parent, sameParent);
-            rows = [...rows, ...parent];
-          }
-          const child = material.filter((e) => e.parentId === rowData._id);
-          resetValueZero(child);
-          handleSaveData([...rows, ...child], saveAndNext);
-          setShowConfirmationDialog(false);
+          sumOnParent(parent, sameParent);
+          rows = [...rows, ...parent];
         }
+        const child = material.filter((e) => e.parentId === rowData._id);
+        resetValueZero(child);
+        handleSaveData([...rows, ...child], saveAndNext);
+        setShowConfirmationDialog(false);
       }
     }
   };
@@ -444,6 +441,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
                 >
                   {'Close'}
                 </Button>
+
                 {isBulkedit === false && showSaveAndNext && (
                   <CustomButton
                     loading={loadingEdit}
@@ -459,6 +457,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
                     Save & Next
                   </CustomButton>
                 )}
+
                 <CustomButton
                   loading={loading}
                   disabled={isEqual(ref?.current?.values, initialData.values)}
@@ -500,7 +499,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

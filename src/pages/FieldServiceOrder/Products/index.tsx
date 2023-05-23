@@ -109,7 +109,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                 {row.original.detail}
               </p>
             )}
-            {["product", "service", "package"]?.includes(row.original.type) &&
+            {['product', 'service', 'package']?.includes(row.original.type) && (
               <IconButton
                 size="small"
                 style={{ marginLeft: '10px' }}
@@ -124,7 +124,8 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                 }}
               >
                 <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>}
+              </IconButton>
+            )}
           </div>
         )
       }
@@ -167,29 +168,37 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     var data: any = [];
 
     const materialResponse = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`);
-    const materialData = materialResponse?.data?.data?.material
+    const materialData = materialResponse?.data?.data?.material;
 
     const addOnResponse: any = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/addon`);
-    const addOnData = addOnResponse?.data?.data
+    const addOnData = addOnResponse?.data?.data;
 
-    data = [...materialData, ...addOnData?.map((e) => { return { ...e, type: "Manual Entry" } })];
+    data = [
+      ...materialData,
+      ...addOnData?.map((e) => {
+        return { ...e, type: 'Manual Entry' };
+      })
+    ];
 
     let rows = data.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail =
-        parent.type === 'product' ? parent?.productDetail?.productName
-          : parent.type === 'service' ? parent?.serviceDetail?.serviceName
-            : parent.type === 'package' ? parent?.packageDetail?.packageName
-              : parent?.description;
+        parent.type === 'product'
+          ? parent?.productDetail?.productName
+          : parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageName
+          : parent?.description;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent?.description;
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent?.description;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data, parent);
     });
@@ -206,15 +215,22 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow.type === 'product' ? _subRow?.productDetail?.productName
-        : _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === 'package' ? _subRow?.packageDetail?.packageName
-            : _subRow?.description
+      _subRow.detail =
+        _subRow.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageName
+          : _subRow?.description;
       _subRow.description =
-        _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product' ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || ''
-              : _subRow?.description || ''
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : _subRow?.description || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -369,7 +385,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
               />
             </Box>
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
@@ -383,7 +399,6 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
           productId={null}
           handleCloseDialog={() => setAddProductDialog({ open: false, parentId: null })}
           assignedProducts={[]}
-          renderedFrom={renderedFrom}
           onSuccess={(row) => {
             handleAdd(row);
           }}

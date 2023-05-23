@@ -110,10 +110,9 @@
     column-gap: var(--ver-gap, 15px);
     row-gap: var(--hor-gap, 15px);
     .singlecard {
-      --card-border-radius: 6px;
-      --border-width: 4px;
+      --card-border-radius: 12px;
+      --border-width: 6px;
       display: grid;
-      background-color: var(--bg_color, #ffefee);
 
       @media all and (min-width: 1366px) {
         min-height: 219px;
@@ -122,11 +121,19 @@
       box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08), -3px 3px 6px rgba(220, 220, 220, 0.2), 3px -3px 6px rgba(220, 220, 220, 0.2),
         -3px -3px 6px rgba(255, 255, 255, 0.9), 3px 3px 8px rgba(220, 220, 220, 0.9), inset 1px 1px 2px rgba(255, 255, 255, 0.3),
         inset -1px -1px 2px rgba(220, 220, 220, 0.5);
+
       border-radius: var(--card-border-radius, 12px);
       position: relative;
       // isolation: isolate;
       border-left: var(--border-width, 4px) solid transparent;
       background: var(--bg_color, #fff);
+
+      [data-mode='dark'] & {
+        box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08);
+        background: var(--dark-primary);
+        -webkit-background-clip: padding-box;
+        background-clip: padding-box;
+      }
       -webkit-background-clip: padding-box;
       background-clip: padding-box;
 
@@ -157,6 +164,9 @@
         font-size: 14px;
         line-height: 22px;
         color: #737373;
+        [data-mode='dark'] & {
+          color: #bebebe;
+        }
       }
       .cardTop {
         display: flex;
@@ -182,6 +192,7 @@
     }
   }
 }
+
 .dialogContainer {
   --top-space: 28px;
   .dialogContentContainer {
@@ -198,6 +209,9 @@
     justify-content: space-between;
     align-items: center;
     max-width: 100%;
+    [data-mode='dark'] & {
+      background-color: var(--dark-primary) !important;
+    }
 
     button {
       flex-basis: 48px;
@@ -205,6 +219,9 @@
       border-radius: 50% !important;
       svg {
         color: #000 !important;
+        [data-mode='dark'] & {
+          color: #fff !important;
+        }
       }
     }
     .modalIconAndName {
@@ -228,12 +245,15 @@
         }
       }
       .modalTitle {
-        color: #2a3042 !important;
+        color: #2a3042;
         font-weight: 700;
         font-size: 17px;
         line-height: 157%;
         flex-basis: calc(100% - 32px);
         max-width: calc(100% - 32px);
+        [data-mode='dark'] & {
+          color: #fff;
+        }
       }
     }
   }
@@ -261,6 +281,9 @@
       line-height: 183%;
       text-align: center;
       color: #161924;
+      [data-mode='dark'] & {
+        color: #fff;
+      }
       transition: color 0.3s;
       svg {
         margin-right: 16px;
@@ -291,6 +314,9 @@
     font-size: 17.3279px;
     line-height: 29px;
     color: #2a3042;
+    [data-mode='dark'] & {
+      color: #fff;
+    }
   }
   svg {
     vertical-align: middle;
@@ -337,13 +363,18 @@
   }
 
   background: var(--sideCardBg, #fffaee);
-  border: 2.16598px solid #ebebeb;
   box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08), -3px 3px 6px rgba(220, 220, 220, 0.2), 3px -3px 6px rgba(220, 220, 220, 0.2),
     -3px -3px 6px rgba(255, 255, 255, 0.9), 3px 3px 8px rgba(220, 220, 220, 0.9), inset 1px 1px 2px rgba(255, 255, 255, 0.3),
     inset -1px -1px 2px rgba(220, 220, 220, 0.5);
-  border-radius: 6px;
+
+  border-radius: 12px;
   padding: var(--padding, 20px);
   cursor: pointer;
+  [data-mode='dark'] & {
+    box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08);
+    background: var(--dark-primary);
+    color: #fff;
+  }
   img {
     display: block;
     max-width: max-content;
@@ -358,13 +389,20 @@
     line-height: 24px;
     color: #2a3042;
     margin-bottom: 13px;
+    [data-mode='dark'] & {
+      color: #fff;
+    }
   }
   p {
     font-weight: 500;
     font-size: 15px;
     line-height: 30px;
     color: #737373;
+    [data-mode='dark'] & {
+      color: #bebebe;
+    }
   }
+
   .colabButton {
     display: block;
     border: 0;
@@ -373,11 +411,15 @@
     cursor: pointer;
     transition: color 0.3s;
     margin-top: var(--button-mt, 20px);
+
     span {
       font-weight: 600;
       font-size: 17.3279px;
       line-height: 29px;
       color: #2a3042;
+      [data-mode='dark'] & {
+        color: #fff;
+      }
     }
     &:hover {
       span {

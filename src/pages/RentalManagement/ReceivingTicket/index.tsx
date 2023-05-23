@@ -680,7 +680,6 @@ const ReceivingTicket = ({
 
           fieldNames: ['productName']
         },
-
         {
           resource: 'Serialized Asset',
 
@@ -772,8 +771,7 @@ const ReceivingTicket = ({
     if (rentalManagementData?.wellNumber) {
       if (rentalManagementData?.wellNumber?.optionValue) {
         data['wellNumber'] = rentalManagementData?.wellNumber?.optionValue;
-      }
-      else {
+      } else {
         data['wellNumber'] = rentalManagementData?.wellNumber?.map((e) => e?.optionValue);
       }
     }
@@ -790,7 +788,11 @@ const ReceivingTicket = ({
 
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
-      .post(`${repairJob.api}/${repairJobId}/assets`, { assets: selectedRecords?.map((s) => { return { _id: s._id, currentStatus: s.status } }) })
+      .post(`${repairJob.api}/${repairJobId}/assets`, {
+        assets: selectedRecords?.map((s) => {
+          return { _id: s._id, currentStatus: s.status };
+        })
+      })
       .then(({ data }) => {
         axiosInstance()
           .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
@@ -919,12 +921,19 @@ const ReceivingTicket = ({
       axiosInstance()
         .post(`${deliveryTicket.api}/updatebulk`, data)
         .then(({ data: { data } }) => {
-          fetchRecords();
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: `Receiving Successfully`
           });
+          if (receivingTicketId?.length && selectedRecords?.filter((e) => e.type === "Asset")?.length && user?.user?.brandPolicy?.workOrderAutoComplete) {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: 'Repair Order created for received assets'
+            });
+          }
+          fetchRecords();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -1530,9 +1539,16 @@ const ReceivingTicket = ({
               )}
           </Menu>
           {(repairJobCount > 0 || repairOrderCount > 0) && (
-            <IconButton onClick={openLinkActions} size="small" color="primary">
-              <ExpandMore fontSize="inherit" />
-            </IconButton>
+            <Button
+              onClick={openLinkActions}
+              variant="outlined"
+              color="default"
+              size="small"
+              aria-controls="action-menu"
+              endIcon={<ExpandMore fontSize="inherit" />}
+            >
+              Tickets
+            </Button>
           )}
           <Menu
             anchorEl={anchorLinkActionEl}
@@ -1661,7 +1677,7 @@ const ReceivingTicket = ({
             />
           )
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
@@ -1818,8 +1834,9 @@ const ReceivingTicket = ({
             _id: rentalManagementData._id,
             warehouse: selectedRecords[0].warehouseId,
             wellName: rentalManagementData?.wellName?.optionValue,
-            wellNumber: rentalManagementData?.wellNumber ?
-              rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue) : null,
+            wellNumber: rentalManagementData?.wellNumber
+              ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null,
             afeNumber: rentalManagementData?.afeNumber
           }}
           onClose={() => setShowRepairJobDialog(false)}

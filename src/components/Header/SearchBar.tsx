@@ -10,14 +10,16 @@ import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissa
 import { usePathname, useClickdOutside, useKeyPress } from 'src/hooks';
 import styles from './Header.module.scss';
 import CallMadeIcon from '@material-ui/icons/CallMade';
+import { useStore, SEARCH } from 'src/StateProvider/fastContext';
 
 import { filterReducerInitialState, filterReducer } from './helper';
 
 export const SearchBar = ({ user, selectedEntity, history }) => {
-  const {
-    state: { searchQuery },
-    dispatch
-  }: any = useData();
+  // const {
+  //   state: { searchQuery },
+  //   dispatch
+  // }: any = useData();
+  const [searchQuery, setStore] = useStore((store) => store[SEARCH]);
 
   const [sections, setSections] = useState([]);
   const [showCloseButton, setShowCloseButton] = useState(false);
@@ -77,7 +79,8 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   }, [user, selectedEntity]);
 
   const handleSearch = (value) => {
-    dispatch({ type: SET_SEARCH, payload: value });
+    // dispatch({ type: SET_SEARCH, payload: value });
+    setStore({ [SEARCH]: value });
     const searchedValueInLowerCase = value?.toLowerCase();
     const filteredItems = [];
 
@@ -93,7 +96,8 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   };
 
   const clearSearch = () => {
-    dispatch({ type: SET_SEARCH, payload: '' });
+    // dispatch({ type: SET_SEARCH, payload: '' });
+    setStore({ [SEARCH]: '' });
     setSearch('');
     setShowCloseButton(false);
   };
@@ -189,7 +193,7 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
       <div
         className={`${styles.filtered_data} `}
         ref={listContainerRef}
-        style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll', scrollPadding: '48px 0 0 0' }}
+        style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll', scrollPadding: '48px 0 0 0', marginBottom: 20 }}
       >
         {filteredData.length !== 0 ? (
           filteredData.map((section, pkey) => {
@@ -209,7 +213,7 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
                       <ListItemIcon className={styles.listIcon}>
                         <CallMadeIcon style={{ fontSize: 16 }} />
                       </ListItemIcon>
-                      <ListItemText primary={<span style={{ fontWeight: 500 }}>{item.resourceLabel}</span>} />
+                      <ListItemText primary={<span style={{ fontWeight: 500, fontSize: '15px' }}>{item.resourceLabel}</span>} />
                     </ListItem>
                   );
                 })}

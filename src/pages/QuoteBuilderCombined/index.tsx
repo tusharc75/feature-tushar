@@ -45,7 +45,7 @@ import CustomDialogComponent from "../../components/CustomDialog/CustomDialogCom
 import VersionStatus from "./VersionStatus";
 import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from "../../constants/useColumns"
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { quoteStepColors } from '../../constants/helpers';
@@ -407,39 +407,6 @@ const QuoteBuilders = () => {
     commonRenderer: CommonRenderer,
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case "createdBy":
-        return "createdBy.user.concatedName";
-
-      case "updatedBy":
-        return "updatedBy.user.concatedName";
-
-      default:
-        return field;
-    }
-  };
-
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-
-    if (field !== updatedField) return updatedField;
-
-    switch (field) {
-      case "owner":
-        return "owner.optionLabel";
-
-      case "customerAccountName":
-        return "customerAccountName.optionLabel";
-
-      case "supplierAccountName":
-        return "supplierAccountName.optionLabel";
-
-      default:
-        return field;
-    }
-  };
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterQuotes=${selectedType}`;
 
@@ -456,67 +423,56 @@ const QuoteBuilders = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
     }
 
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
+
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName("customerAccountName"),
-            term: accountDetails.accountId,
-          },
-        ])}`;
+        filterByIds.push({
+          field: "customerAccountName",
+          term: accountDetails.accountId,
+        })
       } else if (accountDetails.resource === supplierAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName("supplierAccountName"),
-            term: { $in: [accountDetails.accountId] },
-          },
-        ])}`;
+        filterByIds.push({
+          field: "supplierAccountName",
+          term: { $in: [accountDetails.accountId] },
+        })
       }
     }
 
     if (contactDetails.contactId) {
       if (contactDetails.resource === customerContact.contactResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName("customerContactName"),
-            term: contactDetails.contactId,
-          },
-        ])}`;
+        filterByIds.push({
+          field: "customerContactName",
+          term: contactDetails.contactId,
+        })
       } else if (contactDetails.resource === supplierContact.contactResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName("supplierContactName"),
-            term: { $in: [contactDetails.contactId] },
-          },
-        ])}`;
+        filterByIds.push({
+          field: "supplierContactName",
+          term: { $in: [contactDetails.contactId] },
+        })
       }
     }
 
     if (opportunityDetails.opportunityId) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-        {
-          field: "opportunity",
-          term: opportunityDetails.opportunityId
-        }
-      ])}`
+      filterByIds.push({
+        field: "opportunity",
+        term: opportunityDetails.opportunityId,
+      })
     }
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
 
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter,
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(
-        sorting[0].colId
-      )}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {

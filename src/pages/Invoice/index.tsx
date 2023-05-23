@@ -29,7 +29,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
@@ -199,39 +199,6 @@ const Invoice = () => {
     </>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
-
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-
-    if (field !== updatedField) return updatedField;
-
-    switch (field) {
-      case 'owner':
-        return 'owner.optionLabel';
-
-      case 'customerAccount':
-        return 'customerAccount.optionLabel';
-
-      case 'supplierAccountName':
-        return 'supplierAccountName.optionLabel';
-
-      default:
-        return field;
-    }
-  };
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (selectedType === 2) {
@@ -244,38 +211,36 @@ const Invoice = () => {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
+
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('customerAccount'),
-            term: accountDetails.accountId
-          }
-        ])}`;
+        filterByIds.push({
+          field: 'customerAccount',
+          term: accountDetails.accountId
+        })
       } else if (accountDetails.resource === supplierAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('supplierAccountName'),
-            term: { $in: [accountDetails.accountId] }
-          }
-        ])}`;
+        filterByIds.push({
+          field: 'supplierAccountName',
+          term: { $in: [accountDetails.accountId] }
+        })
       }
     }
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
 
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {

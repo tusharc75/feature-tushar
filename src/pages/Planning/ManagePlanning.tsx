@@ -129,8 +129,12 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
     try {
       const response = await axiosInstance().get('/field?resource=Planning');
       const data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate && !["rentalJob", "salesOrder", "fieldServiceOrder"]?.includes(obj.fieldData?.fieldName)).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !["rentalJob", "salesOrder", "fieldServiceOrder"]?.includes(obj.fieldData?.fieldName)).map((d: any) => d.fieldData);
+      let fieldsDataForCreate = data
+        .filter((obj) => obj.isCreate && !['rentalJob', 'salesOrder', 'fieldServiceOrder']?.includes(obj.fieldData?.fieldName))
+        .map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data
+        .filter((obj) => obj.isUpdate && !['rentalJob', 'salesOrder', 'fieldServiceOrder']?.includes(obj.fieldData?.fieldName))
+        .map((d: any) => d.fieldData);
 
       if (id) {
         axiosInstance()
@@ -155,7 +159,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
           });
       } else {
         const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
-        tempInitialData["planningNumber"] = `PLO_${generateUniqueIdOnly()}`;
+        tempInitialData['planningNumber'] = `PLO_${generateUniqueIdOnly()}`;
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           tempInitialData['currency'] = user.user?.brandCurrency;
         }
@@ -234,9 +238,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
     if (customerContactDropdownData) {
       setCustomerContactMainDataSource(customerContactDropdownData.option);
       if (id) {
-        setCustomerContactDataSource(
-          customerContactDropdownData?.option.filter((d) => d.parentAccount === initialData.values?.customerAccount)
-        );
+        setCustomerContactDataSource(customerContactDropdownData?.option.filter((d) => d.parentAccount === initialData.values?.customerAccount));
       }
     }
     setFormsData(setFieldsInAscendingOrder(initialData?.fields));
@@ -256,12 +258,12 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
       fullWidth
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          setShowConfirmDialog(true)
+          setShowConfirmDialog(true);
         }
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
@@ -269,12 +271,13 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
-                  : `Create ${routes?.planning?.title}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
+                    : `Create ${routes?.planning?.title}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -733,7 +736,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

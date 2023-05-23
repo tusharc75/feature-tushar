@@ -3,10 +3,9 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, CircularProgress, useMediaQuery, useTheme } from '@material-ui/core';
+import { Box, CircularProgress, useTheme } from '@material-ui/core';
 import SearchBox from '../../../components/Helpers/SearchBox';
 import routes from '../../../components/Helpers/Routes';
-import { Link, useHistory } from 'react-router-dom';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import {
   serializedAsset,
@@ -25,7 +24,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import { prepareDataForGrid } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import { groupBy, orderBy, sortBy, uniq, map } from 'lodash';
+import { uniq, map } from 'lodash';
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
 import { Autocomplete } from '@material-ui/lab';
 import TextField from '@material-ui/core/TextField';
@@ -46,7 +45,6 @@ const AddSerializedAsset = ({
   rentalId = null,
   repairJobId = null,
   transferAssetId = null,
-  salesOrderId = null,
   notIn = null,
   filterByPlant = null
 }) => {
@@ -93,7 +91,7 @@ const AddSerializedAsset = ({
       .then(({ data: { data, count } }) => {
         setPlantList(data);
       })
-      .catch((error) => { });
+      .catch((error) => {});
   }, []);
 
   const fetchGridColumns = () => {
@@ -212,8 +210,6 @@ const AddSerializedAsset = ({
       deepFilter = `${deepFilter}&repairJobId=${repairJobId}&notIn=${notIn}`;
     } else if (transferAssetId) {
       deepFilter = `${deepFilter}&transferAssetId=${transferAssetId}&notIn=${notIn}`;
-    } else if (salesOrderId) {
-      deepFilter = `${deepFilter}&salesOrder=${salesOrderId}&notIn=${notIn}`;
     } else {
       if (selectedPlant == null) {
         deepFilter = `${deepFilter}&entityWise=1`;
@@ -330,32 +326,32 @@ const AddSerializedAsset = ({
                     <Box style={{ display: 'inline' }}>
                       {serializedProducts.length > 0
                         ? serializedProducts.map((d) => (
-                          <Box
-                            m={0.5}
-                            p={1}
-                            border={1}
-                            className="cursor-pointer"
-                            borderColor="grey.300"
-                            onClick={() => {
-                              if (selectedProduct === d.id) {
-                                setSelectedProduct(null);
-                              } else {
-                                setSelectedProduct(d.id);
-                              }
-                            }}
-                            style={{ display: 'inline-block' }}
-                            bgcolor={d.id === selectedProduct && 'primary.main'}
-                            color={d.id === selectedProduct && 'white'}
-                          >
-                            {d?.qty < 0 ? (
-                              <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                            ) : d?.qty === 0 ? (
-                              <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                            ) : (
-                              <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                            )}
-                          </Box>
-                        ))
+                            <Box
+                              m={0.5}
+                              p={1}
+                              border={1}
+                              className="cursor-pointer"
+                              borderColor="grey.300"
+                              onClick={() => {
+                                if (selectedProduct === d.id) {
+                                  setSelectedProduct(null);
+                                } else {
+                                  setSelectedProduct(d.id);
+                                }
+                              }}
+                              style={{ display: 'inline-block' }}
+                              bgcolor={d.id === selectedProduct && 'primary.main'}
+                              color={d.id === selectedProduct && 'white'}
+                            >
+                              {d?.qty < 0 ? (
+                                <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                              ) : d?.qty === 0 ? (
+                                <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                              ) : (
+                                <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                              )}
+                            </Box>
+                          ))
                         : null}
                     </Box>
                   </Box>
@@ -473,10 +469,10 @@ const AddSerializedAsset = ({
                           getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()
                             ? 'Direct transfer to customer location'
                             : referenceType === 'Rental Job'
-                              ? 'Add to Job'
-                              : referenceType === 'ReplaceAsset'
-                                ? 'Replace'
-                                : 'Add'
+                            ? 'Add to Job'
+                            : referenceType === 'ReplaceAsset'
+                            ? 'Replace'
+                            : 'Add'
                         }
                       >
                         <Button
@@ -505,46 +501,6 @@ const AddSerializedAsset = ({
             </Box>
             <div className={'listing-grid'}>
               {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                // isMobile && !isTablet ?
-                //     <CustomSwipableList
-                //         allowSelection={true}
-                //         allowSwipe={true}
-                //         permissions={permissions}
-                //         primaryField={columns?.find(d => d.primaryField)}
-                //         onClick={(data) => {
-                //             history.push(`${routes.serializedAssetDetail.path}/${data._id}`)
-
-                //         }}
-                //         dataRows={dataRows}
-                //         selectedRecords={selectedRecords}
-                //         dispatch={dispatch}
-                //         onEdit={false}
-                //         extraParamsToCheckDelete={false}
-                //         onDelete={false}
-                //         rowCount={rowCount}
-                //         page={page}
-                //         loading={loading}
-                //         checkError={false}
-                //         chips={[
-                //             {
-                //                 label: "PO Number:",
-                //                 field: "purchaseOrder"
-                //             },
-                //             {
-                //                 label: "Product Category:",
-                //                 field: "productCategory"
-                //             },
-                //             {
-                //                 label: "Plant:",
-                //                 field: "warehouse"
-                //             }
-                //         ]}
-                //         onCreate={null}
-                //         showClone={false}
-                //         onClone={false}
-                //         fullHeight={true}
-                //         renderedFrom={renderedFrom}
-                //     /> :
                 <CustomAgGrid
                   columns={columns}
                   dataRows={dataRows}
@@ -563,7 +519,7 @@ const AddSerializedAsset = ({
                   refreshGrid={fetchProductInventory}
                 />
               ) : (
-                <Box p={2} height={500} bgcolor="white">
+                <Box p={2} height={500}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
               )}

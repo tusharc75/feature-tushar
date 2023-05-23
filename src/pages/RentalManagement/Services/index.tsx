@@ -24,7 +24,7 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 
 const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -468,6 +468,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
     setDeleteData(obj);
   };
 
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      inputField['qty'] = inputField['qtyDisplay'];
+    }
+    let rows: any = [{ ...rowData, ...updatedData }];
+    rows = await calculateRowsField(material, inputField, allFields, updatedData);
+    handleSaveData(rows);
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
@@ -560,15 +570,12 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             hideSelection={isOffline || !allowedToEdit}
             hideAction={isOffline || !allowedToEdit}
             renderedFrom="rental_management_sevices_1"
-            onSaveEdit={async (inputField, updatedData) => {
-              let rows = await calculateRowsField(material, inputField, allFields, updatedData);
-              handleSaveData(rows);
-            }}
+            onSaveEdit={onSaveInlineEdit}
             isClientSideGrid={true}
           />
         </Box>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

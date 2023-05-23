@@ -35,12 +35,7 @@ import ManageContactDialog from '../../Contact/ManageContact';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const ManageProductionOrder = ({
-  isClone = false,
-  productionOrderId = null,
-  onClose,
-  onSuccess,
-}) => {
+const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onClose, onSuccess }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -55,7 +50,6 @@ const ManageProductionOrder = ({
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [contactData, setContactData] = useState([]);
   const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
@@ -169,14 +163,12 @@ const ManageProductionOrder = ({
               fields: fieldsDataForCreate,
               values: getObjKeysWithValues(rest, fieldsDataForCreate)
             });
-            setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
             setLoading(false);
           } else {
             setInitialData({
               fields: fieldsDataForUpdate,
               values: getObjKeysWithValues(data, fieldsDataForUpdate)
             });
-            setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
             setLoading(false);
           }
         } catch (error) {
@@ -189,7 +181,6 @@ const ManageProductionOrder = ({
           fields: fieldsDataForCreate,
           values: initialData
         });
-        setFormValues(initialData);
         setLoading(false);
       }
     } catch (error) {
@@ -274,251 +265,248 @@ const ManageProductionOrder = ({
           validate={validate}
           onSubmit={handleSubmit}
         >
-          {({ values, errors, touched, setFieldValue, submitForm }) => ( 
+          {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
-        <CustomDialogHeader
-          title={
-          !productionOrderId
-            ? `Create ${routes.productionOrder.title}`
-            : `${isClone ? `Clone - ${cloneHeading}` : `Update ${productionOrderData?.productionOrderNumber || ''}`}`
-          }
-          onClose={(e, reason) => {
-            if (isEqual(initialData.values, values)) {
-              onClose();
-            } else {
-              setShowConfirmDialog(true);
-            }
-          }}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-          setFullScreen((prevState) => !prevState);
-          }}
-          showManimizeMaximize={true}
-          />
-          <CustomDialogContent>
+              <CustomDialogHeader
+                title={
+                  !productionOrderId
+                    ? `Create ${routes.productionOrder.title}`
+                    : `${isClone ? `Clone - ${cloneHeading}` : `Update ${productionOrderData?.productionOrderNumber || ''}`}`
+                }
+                onClose={(e, reason) => {
+                  if (isEqual(initialData.values, values)) {
+                    onClose();
+                  } else {
+                    setShowConfirmDialog(true);
+                  }
+                }}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              />
+              <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   {formsData &&
                     formsData.map((form, i) => {
-                      return (form.name && (
-                        <div key={i}>
-                          <div className={'detail-box-content'}>
-                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                          </div>
-                          <Box marginY={2}>
-                            <Grid spacing={3} container>
-                              {form.sectionFields.map((field) => (
-                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                  {field.fieldName == 'customerAccount' ? (
-                                    <Grid container spacing={1}>
-                                      <Grid
-                                        item
-                                        xs={permissions.customerAccount?.isCreate ? 11 : 11}
-                                        sm={permissions.customerAccount?.isCreate ? 11 : 11}
-                                        md={permissions.customerAccount?.isCreate ? 11 : 11}
-                                      >
-                                        <FormTypes
-                                          {...field}
-                                          isNew={!productionOrderId}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={accountData}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          doNotShowInfoTooltip={true}
-                                          onChange={(e, value) => {
-                                            setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                            if (initialData.fields.find((d) => d.fieldName === 'customerContact')) {
-                                              setFieldValue('customerContact', '');
+                      return (
+                        form.name && (
+                          <div key={i}>
+                            <div className={'detail-box-content'}>
+                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                            </div>
+                            <Box marginY={2}>
+                              <Grid spacing={3} container>
+                                {form.sectionFields.map((field) => (
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    {field.fieldName == 'customerAccount' ? (
+                                      <Grid container spacing={1}>
+                                        <Grid
+                                          item
+                                          xs={permissions.customerAccount?.isCreate ? 11 : 11}
+                                          sm={permissions.customerAccount?.isCreate ? 11 : 11}
+                                          md={permissions.customerAccount?.isCreate ? 11 : 11}
+                                        >
+                                          <FormTypes
+                                            {...field}
+                                            isNew={!productionOrderId}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={accountData}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={field?.isTooltip || false}
+                                            tooltipMessage={field?.tooltipMessage}
+                                            size="small"
+                                            doNotShowInfoTooltip={true}
+                                            onChange={(e, value) => {
+                                              setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
+                                              if (initialData.fields.find((d) => d.fieldName === 'customerContact')) {
+                                                setFieldValue('customerContact', '');
+                                              }
+                                            }}
+                                          />
+                                        </Grid>
+                                        {permissions.customerAccount?.isCreate && (
+                                          <Grid item xs={1} sm={1} md={1}>
+                                            <Tooltip title="Create Account" className="mt-1">
+                                              <IconButton
+                                                onClick={() => {
+                                                  setShowAddCustomerAccountDialog(true);
+                                                }}
+                                                size="small"
+                                              >
+                                                <AddIcon color={'primary'} />
+                                              </IconButton>
+                                            </Tooltip>
+                                          </Grid>
+                                        )}
+                                        {field?.tooltipMessage ? (
+                                          <Grid item xs={1} sm={1} md={1}>
+                                            <Tooltip title={field?.tooltipMessage ?? ''}>
+                                              <InfoIcon color="disabled" />
+                                            </Tooltip>
+                                          </Grid>
+                                        ) : null}
+                                      </Grid>
+                                    ) : field.fieldName === 'customerContact' ? (
+                                      <Grid container spacing={1}>
+                                        <Grid
+                                          item
+                                          xs={permissions.customerContact?.isCreate ? 11 : 11}
+                                          sm={permissions.customerContact?.isCreate ? 11 : 11}
+                                          md={permissions.customerContact?.isCreate ? 11 : 11}
+                                        >
+                                          <FormTypes
+                                            {...field}
+                                            isNew={!productionOrderId}
+                                            values={values}
+                                            errors={errors}
+                                            touched={touched}
+                                            label={field.fieldLabel}
+                                            name={field.fieldName}
+                                            type={field.type}
+                                            options={customerContactDataSource}
+                                            doNotShowInfoTooltip={true}
+                                            setFieldValue={(name, value) => {
+                                              setFieldValue(name, value);
+                                            }}
+                                            required={field.required}
+                                            fullWidth
+                                            isTooltip={false}
+                                            size="small"
+                                            onOpen={() => onCustomerContactDropdownOpen(values['customerAccount'])}
+                                            // onChange={(e, value) => {
+                                            //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+
+                                            // }}
+                                          />
+                                        </Grid>
+                                        {permissions.customerContact?.isCreate && (
+                                          <Grid item xs={1} sm={1} md={1}>
+                                            <Tooltip title="Create Contact" className="mt-1">
+                                              <IconButton
+                                                onClick={() => {
+                                                  setShowAddCustomerContactDialog(true);
+                                                }}
+                                                size="small"
+                                              >
+                                                <AddIcon color={'primary'} />
+                                              </IconButton>
+                                            </Tooltip>
+                                          </Grid>
+                                        )}
+                                        {field?.tooltipMessage ? (
+                                          <Grid item xs={1} sm={1} md={1}>
+                                            <Tooltip className="mt-2" title={field?.tooltipMessage ?? ''}>
+                                              <InfoIcon color="disabled" />
+                                            </Tooltip>
+                                          </Grid>
+                                        ) : null}
+                                      </Grid>
+                                    ) : field.fieldName === 'owner' ? (
+                                      <FormTypes
+                                        productionOrderId={productionOrderId}
+                                        {...field}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={ownerData}
+                                        onChange={(e, val) => {
+                                          setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
+
+                                          if (val && val.optionValue !== user?.user?._id) {
+                                            const checkOwnerAddedInCollaborator = values['collaborator'].find(
+                                              (d) => d?.optionValue === user?.user?._id
+                                            );
+                                            if (!checkOwnerAddedInCollaborator) {
+                                              setFieldValue('collaborator', [
+                                                ...values['collaborator'],
+                                                collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
+                                              ]);
                                             }
-                                          }}
-                                        />
-                                      </Grid>
-                                      {permissions.customerAccount?.isCreate && (
-                                        <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip title="Create Account" className="mt-1">
-                                            <IconButton
-                                              onClick={() => {
-                                                setShowAddCustomerAccountDialog(true);
-                                              }}
-                                              size="small"
-                                            >
-                                              <AddIcon
-                                                color={'primary'}
-                                              />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </Grid>
-                                      )}
-                                      {field?.tooltipMessage ? (
-                                        <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip title={field?.tooltipMessage ?? ''}>
-                                            <InfoIcon color="disabled" />
-                                          </Tooltip>
-                                        </Grid>
-                                      ) : null}
-                                    </Grid>
-                                  ) : field.fieldName === 'customerContact' ? (
-                                    <Grid container spacing={1}>
-                                      <Grid
-                                        item
-                                        xs={permissions.customerContact?.isCreate ? 11 : 11}
-                                        sm={permissions.customerContact?.isCreate ? 11 : 11}
-                                        md={permissions.customerContact?.isCreate ? 11 : 11}
-                                      >
-                                        <FormTypes
-                                          {...field}
-                                          isNew={!productionOrderId}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={customerContactDataSource}
-                                          doNotShowInfoTooltip={true}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={false}
-                                          size="small"
-                                          onOpen={() => onCustomerContactDropdownOpen(values['customerAccount'])}
-                                        // onChange={(e, value) => {
-                                        //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-
-                                        // }}
-                                        />
-                                      </Grid>
-                                      {permissions.customerContact?.isCreate && (
-                                        <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip title="Create Contact" className="mt-1">
-                                            <IconButton
-                                              onClick={() => {
-                                                setShowAddCustomerContactDialog(true);
-                                              }}
-                                              size="small"
-                                            >
-                                              <AddIcon
-                                                color={'primary'}
-                                              />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </Grid>
-                                      )}
-                                      {field?.tooltipMessage ? (
-                                        <Grid item xs={1} sm={1} md={1}>
-                                          <Tooltip className="mt-2" title={field?.tooltipMessage ?? ''}>
-                                            <InfoIcon color="disabled" />
-                                          </Tooltip>
-                                        </Grid>
-                                      ) : null}
-                                    </Grid>
-                                  ) : field.fieldName === 'owner' ? (
-                                    <FormTypes
-                                      productionOrderId={productionOrderId}
-                                      {...field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={ownerData}
-                                      onChange={(e, val) => {
-                                        setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-
-                                        if (val && val.optionValue !== user?.user?._id) {
-                                          const checkOwnerAddedInCollaborator = values['collaborator'].find(
-                                            (d) => d?.optionValue === user?.user?._id
-                                          );
-                                          if (!checkOwnerAddedInCollaborator) {
-                                            setFieldValue('collaborator', [
-                                              ...values['collaborator'],
-                                              collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                            ]);
                                           }
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        disabled={productionOrderId && field.disableOnEdit}
+                                        onOpen={() => {
+                                          onOwnerDropdownOpen(values['collaborator']);
+                                        }}
+                                      />
+                                    ) : field.fieldName === 'collaborator' ? (
+                                      <FormTypes
+                                        productionOrderId={productionOrderId}
+                                        {...field}
+                                        disabled={!productionOrderId && field.disableOnEdit}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={collaboratorData}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value);
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        onOpen={() => {
+                                          onCollabOwnerMultiselectOpen(values['owner']);
+                                        }}
+                                      />
+                                    ) : (
+                                      <FormTypes
+                                        productionOrderId={productionOrderId}
+                                        {...field}
+                                        fieldData={field}
+                                        fields={initialData?.fields}
+                                        disabled={productionOrderId && field.disableOnEdit}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value);
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        imageOrFileUploadCompletePercentage={
+                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                            ? (completePercentage) => {
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
+                                            : null
                                         }
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      disabled={productionOrderId && field.disableOnEdit}
-                                      onOpen={() => {
-                                        onOwnerDropdownOpen(values['collaborator']);
-                                      }}
-                                    />
-                                  ) : field.fieldName === 'collaborator' ? (
-                                    <FormTypes
-                                      productionOrderId={productionOrderId}
-                                      {...field}
-                                      disabled={!productionOrderId && field.disableOnEdit}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={collaboratorData}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      onOpen={() => {
-                                        onCollabOwnerMultiselectOpen(values['owner']);
-                                      }}
-                                    />
-                                  ) : (
-                                    <FormTypes
-                                      productionOrderId={productionOrderId}
-                                      {...field}
-                                      fieldData={field}
-                                      fields={initialData?.fields}
-                                      disabled={(productionOrderId && field.disableOnEdit)}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={
-                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                          ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          }
-                                          : null
-                                      }
-                                    />
-                                  )}
-                                </Grid>
-                              ))}
-                            </Grid>
-                          </Box>
-                        </div>
-                      )
+                                      />
+                                    )}
+                                  </Grid>
+                                ))}
+                              </Grid>
+                            </Box>
+                          </div>
+                        )
                       );
                     })}
                 </Form>
@@ -532,7 +520,7 @@ const ManageProductionOrder = ({
                   onClick={() => {
                     if (isEqual(initialData.values, values)) {
                       onClose();
-                    }else{
+                    } else {
                       setShowConfirmDialog(true);
                     }
                   }}
@@ -543,10 +531,7 @@ const ManageProductionOrder = ({
                   loading={loading}
                   variant="contained"
                   color="primary"
-                  disabled={
-                    uploadingImageOrFileProgress > 0 ||
-                    loading
-                  }
+                  disabled={uploadingImageOrFileProgress > 0 || loading}
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -614,9 +599,9 @@ const ManageProductionOrder = ({
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
-        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-      </Box>
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
       )}
     </Dialog>
   );

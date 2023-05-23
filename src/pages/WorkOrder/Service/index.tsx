@@ -54,7 +54,7 @@ const getTotalTime = (stepTimes: any) => {
       totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
     }
   });
-  stepTimes.forEach((item) => { });
+  stepTimes.forEach((item) => {});
   return { shouldTimerRun, totalTimes };
 };
 
@@ -171,26 +171,25 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       const services = isQuotation ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
 
       if (services?.length) {
-
         let pendingServiceIndex = services?.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
-        if (user?.brandPolicy?.workOrderServiceSequence) {
+        if (pendingServiceIndex === -1) {
+          let tempServiceSortedArray = reverse([...services]);
+          pendingServiceIndex = tempServiceSortedArray.findIndex((d) =>
+            [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
+          );
           if (pendingServiceIndex === -1) {
-            let tempServiceSortedArray = reverse([...services]);
-            pendingServiceIndex = tempServiceSortedArray.findIndex((d) =>
-              [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
-            );
-            if (pendingServiceIndex === -1) {
-              pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
-            } else {
-              pendingServiceIndex = services?.length - pendingServiceIndex;
-              if (services[pendingServiceIndex]?.type === 'quotation') {
-                pendingServiceIndex = pendingServiceIndex + 1;
-              }
+            pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
+          } else {
+            pendingServiceIndex = services?.length - pendingServiceIndex;
+            if (services[pendingServiceIndex]?.type === 'quotation') {
+              pendingServiceIndex = pendingServiceIndex + 1;
             }
           }
-          pendingServiceIndex = pendingServiceIndex > -1 ? pendingServiceIndex : 0;
-          const order = services[pendingServiceIndex]?.order;
-          services?.forEach((element, index) => {
+        }
+        pendingServiceIndex = pendingServiceIndex > -1 ? pendingServiceIndex : 0;
+        const order = services[pendingServiceIndex]?.order;
+        services?.forEach((element, index) => {
+          if (user?.brandPolicy?.workOrderServiceSequence) {
             if (element?.type === 'service') {
               if (element.order === order || index <= pendingServiceIndex) {
                 if (
@@ -205,13 +204,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 element.clickable = false;
               }
             }
-          });
-        }
-        else {
-          services?.forEach((element) => {
+          } else {
             element.clickable = true;
-          });
-        }
+          }
+        });
+
         if (isQuotation) {
           if (quotation && quotation?.status === QUOTATION_STATUS.acceptByCustomer) {
           } else {
@@ -231,7 +228,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       setServiceSteps(services);
       if (
         services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
-        services.filter((e) => e.type === 'service')?.length &&
+          services.filter((e) => e.type === 'service')?.length &&
         workOrderData?.status !== WORK_ORDER_STATUS.completed
       ) {
         fetchWorkOrderData();
@@ -458,12 +455,12 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           severity: 'success'
         });
         setAssignSteps(false);
-        setShowManagePurchaseOrder(false)
+        setShowManagePurchaseOrder(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const isAllowedToServiceEdit =
     !completed &&
@@ -487,14 +484,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 transition: 'width 300ms ease 0s, max-width 300ms ease 0s, flex-basis 300ms ease 0s'
               }}
             >
-              <Box
-                style={{
-                  border: '1px solid #EFEFEF',
-                  boxShadow: '0px 3.13009px 34.2857px rgba(0, 0, 0, 0.06)',
-                  borderRadius: '8px',
-                  padding: '20px'
-                }}
-              >
+              <Box className="container-with-border" p={'20px'}>
                 <Box
                   mb={1}
                   display="flex"
@@ -674,20 +664,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? '#E1FCE3'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                      ? '#fabebe'
-                                                      : '#FFF5DD',
+                                                    ? '#fabebe'
+                                                    : '#FFF5DD',
                                                 color:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? '#048E0A'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                      ? '#fa0202'
-                                                      : '#FF8C21',
+                                                    ? '#fa0202'
+                                                    : '#FF8C21',
                                                 background:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? '#E1FCE3'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                      ? '#fabebe'
-                                                      : '#FFF5DD',
+                                                    ? '#fabebe'
+                                                    : '#FFF5DD',
                                                 fontWeight: 700
                                               }}
                                             />
@@ -751,10 +741,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
             }}
           >
             <Box
+              className="container-with-border"
               style={{
-                border: '1px solid #EFEFEF',
-                boxShadow: '0px 3.13009px 34.2857px rgba(0, 0, 0, 0.06)',
-                borderRadius: '8px',
                 overflow: 'hidden',
                 minHeight: '100%'
               }}
@@ -763,10 +751,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 <>
                   {selectedService?.type === 'service' ? (
                     allowedToEdit ||
-                      (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
+                    (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                       <Steps
                         workOrderId={workOrderId}
-                        warehouse={workOrderData?.warehouse?.optionValue}
+                        warehouse={workOrderData?.warehouse}
                         selectedService={selectedService}
                         allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                         setDisableCompleteFail={setDisableCompleteFail}
@@ -926,20 +914,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                         data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                           ? '#E1FCE3'
                                                           : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                            ? '#fabebe'
-                                                            : '#FFF5DD',
+                                                          ? '#fabebe'
+                                                          : '#FFF5DD',
                                                       color:
                                                         data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                           ? '#048E0A'
                                                           : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                            ? '#fa0202'
-                                                            : '#FF8C21',
+                                                          ? '#fa0202'
+                                                          : '#FF8C21',
                                                       background:
                                                         data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                           ? '#E1FCE3'
                                                           : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                            ? '#fabebe'
-                                                            : '#FFF5DD',
+                                                          ? '#fabebe'
+                                                          : '#FFF5DD',
                                                       fontWeight: 700
                                                     }}
                                                   />
@@ -1111,7 +1099,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               >
                 Comments
               </MenuItem>
-              {user?.brandPolicy?.subcontractPurchaseOrder &&
+              {user?.brandPolicy?.subcontractPurchaseOrder && (
                 <MenuItem
                   onClick={() => {
                     setShowManagePurchaseOrder(true);
@@ -1120,12 +1108,12 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 >
                   Subcontract PO
                 </MenuItem>
-              }
+              )}
             </Menu>
           )}
         </Grid>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
@@ -1192,7 +1180,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           uniqueId={consumablesDialog.uniqueId}
           stepId={consumablesDialog.stepId}
           serviceName={consumablesDialog.serviceName}
-          warehouse={workOrderData?.warehouse?.optionValue}
+          warehouse={workOrderData?.warehouse}
         />
       )}
       {logsDialog && (
@@ -1211,10 +1199,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           workOrderId={workOrderId}
           uniqueId={selectedService?.uniqueId}
           serviceName={selectedService?.serviceName}
-          stepId={selectedService?.stepId}
+          stepId={null}
           handleClose={() => {
-          setCommentsDialog(false);
-        }}
+            setCommentsDialog(false);
+          }}
         />
       )}
       {openCompleteDialog && (
@@ -1255,7 +1243,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => {
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
-          handleSuccess={() => { }}
+          handleSuccess={() => {}}
         />
       )}
       {showManagePurchaseOrder && (
@@ -1264,14 +1252,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           purchaseOrderId={null}
           onClose={() => setShowManagePurchaseOrder(false)}
           onSuccess={(data: any) => {
-            handleUpdatePurchaseOrder(data)
+            handleUpdatePurchaseOrder(data);
           }}
           products={[]}
-          services={[{
-            service: selectedService?.materialId,
-            unit: isArray(selectedService?.unit) && selectedService?.unit?.length ? selectedService?.unit[0] : '',
-            qty: 1
-          }]}
+          services={[
+            {
+              service: selectedService?.materialId,
+              unit: isArray(selectedService?.unit) && selectedService?.unit?.length ? selectedService?.unit[0] : '',
+              qty: 1
+            }
+          ]}
           warehouseId={workOrderData?.warehouse?.optionValue}
         />
       )}

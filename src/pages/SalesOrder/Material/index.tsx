@@ -33,7 +33,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false,  showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
   const [recordToUpdate, setRecordToUpdate] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
@@ -84,12 +84,12 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
         Header: 'Detail',
         minWidth: 300,
         width: 300,
-        Cell: ({ row }) => (
+        Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {
               <p
                 onClick={() => {
-                  handleOpen(row.original);
+                  handleOpen(row, rows);
                 }}
                 className="link text-truncate"
                 title={row.original?.detail}
@@ -204,18 +204,19 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription
-            : parent?.serviceDetail?.serviceDescription;
+          ? parent?.packageDetail?.packageDescription
+          : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
@@ -234,18 +235,19 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${_subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
@@ -320,7 +322,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       });
   };
 
-  const handleSaveData = async (rows: any) => {
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
       delete element.srno;
       delete element.detail;
@@ -338,9 +340,24 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     setUpdating(true);
     axiosInstance()
       .put(`${salesOrder.api}/material/${salesOrderData._id}`, { material: rows })
-      .then(() => {
+      .then(({data}) => {
         setUpdating(false);
-        setIsProductEdit({ open: false, isBulkedit: false });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        if (saveAndNext) {
+          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          setRecordToUpdate(rowsData[rowIndex + 1]);
+          setIsProductEdit({
+            open: true,
+            isBulkedit: false,
+            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+          });
+        }else{
+          setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
+        }
         fetchMaterialData();
       })
       .catch((error) => {
@@ -365,9 +382,9 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       });
   };
 
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
-    setRecordToUpdate(rowData);
+  const handleOpen = (row, rows) => {
+    setIsProductEdit({ open: true, isBulkedit: false,  showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false  });
+    setRecordToUpdate(row.original);
   };
 
   const calculatePrice = (arr: any[]) => {
@@ -481,7 +498,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           >
             <MenuItem
               onClick={() => {
-                setIsProductEdit({ open: true, isBulkedit: true });
+                setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
                 closeActions();
               }}
             >
@@ -527,7 +544,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           </Box>
         </>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
@@ -544,7 +561,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
         <SalesOrderQtyDialog
           calculatePrice={calculatePrice}
           onClose={() => {
-            setIsProductEdit({ open: false, isBulkedit: false });
+            setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
             setRecordToUpdate(null);
           }}
           isBulkedit={isProductEdit.isBulkedit}
@@ -553,6 +570,8 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           material={material}
           selectedProducts={selectedProducts}
           salesOrderData={salesOrderData}
+          loadingEdit={isUpdating}
+          showSaveAndNext={isProductEdit?.showSaveAndNext}
         />
       )}
       {addchildDialog.open && (
@@ -621,7 +640,6 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           assignedProducts={[]}
-          renderedFrom={renderedFrom}
           onSuccess={(d) => {
             handleAdd(d);
           }}

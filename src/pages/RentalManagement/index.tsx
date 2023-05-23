@@ -9,9 +9,9 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { getLocalStorageArrayData, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { FaRegistered, FaSuitcase, FaAddressBook, FaAddressCard } from 'react-icons/fa';
+import { FaRegistered, FaSuitcase } from 'react-icons/fa';
 import { SiStatuspage } from 'react-icons/all';
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, rentalManagement } from '../../constants/helpers';
+import { gridLoadingTimeout, rentalManagement } from '../../constants/helpers';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
 import { useHistory } from 'react-router-dom';
@@ -21,7 +21,7 @@ import RentalManagementHeader from './RentalManagementHeader';
 import ManageRentalManagementDialog from './ManageRental';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
@@ -72,11 +72,7 @@ const RentalManagement = () => {
     show: false,
     rentalJobName: ''
   });
-  const [accountDetails, setAccountDetails] = useState({
-    accountId: history.location?.state?.accountId,
-    accountName: history.location?.state?.accountName,
-    resource: history.location?.state?.resource
-  });
+
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -172,7 +168,7 @@ const RentalManagement = () => {
     if (renderCount > 0) {
       fetchRentalManagement();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, isOffline, showFilteredRecordsOnly]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, isOffline, showFilteredRecordsOnly]);
 
   const handleSingleDeleteRentalManagement = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -239,59 +235,14 @@ const RentalManagement = () => {
     </>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-      default:
-        return field;
-    }
-  };
-
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-    if (field !== updatedField) return updatedField;
-    switch (field) {
-      case 'owner':
-        return 'owner.optionLabel';
-
-      case 'customerAccount':
-        return 'customerAccount.optionLabel';
-
-      case 'supplierAccountName':
-        return 'supplierAccountName.optionLabel';
-
-      default:
-        return field;
-    }
-  };
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
+
     if (selectedType === 2) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
       deepFilter = `?`;
-    }
-    if (accountDetails.accountId) {
-      if (accountDetails.resource === customerAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('customerAccount'),
-            term: accountDetails.accountId
-          }
-        ])}`;
-      } else if (accountDetails.resource === supplierAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('supplierAccountName'),
-            term: { $in: [accountDetails.accountId] }
-          }
-        ])}`;
-      }
     }
 
     if (showFilteredRecordsOnly) {
@@ -299,25 +250,24 @@ const RentalManagement = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: encodeURI(filters[field].filter)
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
-
     return deepFilter;
   };
 
@@ -496,20 +446,6 @@ const RentalManagement = () => {
               fetchRentalManagement={fetchRentalManagement}
               filters={filters}
             >
-              {accountDetails.accountId && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Account: ${accountDetails.accountName}`}
-                  onDelete={() => {
-                    setAccountDetails({
-                      accountId: null,
-                      accountName: null,
-                      resource: null
-                    });
-                  }}
-                />
-              )}
             </RentalManagementHeader>
           </div>
           {Object.keys(frameWorkComponent).length > 0 ? (
@@ -611,9 +547,8 @@ const RentalManagement = () => {
           {singleRentalManagementDelete.show ? (
             <ConfirmationDialog
               open={singleRentalManagementDelete.show}
-              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
-                singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-              }?`}
+              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+                }?`}
               onClose={() =>
                 setSingleRentalManagementDelete({
                   id: null,

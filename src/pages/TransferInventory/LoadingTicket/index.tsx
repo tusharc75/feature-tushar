@@ -28,11 +28,12 @@ import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -51,7 +52,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     fetchFields();
     if (user?.user?.brandPolicy?.storageLocation) {
       if (transferInventoryData?.transferFromPlant?.optionValue === transferInventoryData?.transfertoPlant?.optionValue) {
-        setInterPlantTransfer(true)
+        setInterPlantTransfer(true);
       }
     }
   }, []);
@@ -253,7 +254,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     }
     data['status'] = DELIVERY_TICKET_STATUS.indTransit;
 
-
     if (user?.user?.brandPolicy?.storageLocation) {
       if (transferInventoryData?.transferFromStorageLocation?.optionValue) {
         data['pickupFromStorageLocation'] = transferInventoryData?.transferFromStorageLocation.optionValue;
@@ -270,8 +270,13 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
 
   const handleInterPlantTransfer = () => {
     setLoadingInterPlantTransfer(true);
-    axiosInstance().put(`${routes.transferInventory.path}/${transferInventoryData._id}/transfer-inter-plant`,
-      dataRows?.map((e) => { return { product: e.productId, qty: e.qty } }))
+    axiosInstance()
+      .put(
+        `${routes.transferInventory.path}/${transferInventoryData._id}/transfer-inter-plant`,
+        dataRows?.map((e) => {
+          return { product: e.productId, qty: e.qty };
+        })
+      )
       .then(({ data: { data } }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -286,7 +291,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         setLoadingInterPlantTransfer(false);
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   return (
     <Fragment>
@@ -328,20 +333,22 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         >
           {downloadingFile ? 'Please wait...' : 'Preview'}
         </Button>
-        {interPlantTransfer ? <Box ml={1}>
-          {(allowedToEdit && canReceive && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered) &&
-            <Button
-              variant={'contained'}
-              color="primary"
-              onClick={() => {
-                setShowConfirmInterPlantTransfer(true);
-              }}
-              size="small"
-            >
-              {`Receive`}
-            </Button>}
-        </Box>
-          :
+        {interPlantTransfer ? (
+          <Box ml={1}>
+            {allowedToEdit && canReceive && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
+              <Button
+                variant={'contained'}
+                color="primary"
+                onClick={() => {
+                  setShowConfirmInterPlantTransfer(true);
+                }}
+                size="small"
+              >
+                {`Receive`}
+              </Button>
+            )}
+          </Box>
+        ) : (
           <Box ml={1}>
             {allowedToEdit && canLoad && (
               <Button
@@ -372,7 +379,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
               </Button>
             )}
           </Box>
-        }
+        )}
       </Box>
       <Box>
         {columns ? (
@@ -421,7 +428,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -444,7 +451,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
             />
           )
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

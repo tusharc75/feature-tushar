@@ -15,7 +15,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
-
 const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
     state: { user }
@@ -25,7 +24,7 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
   const [loading, setLoading] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
-  const [cloneHeading, setCloneHeading] = useState('')
+  const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   useEffect(() => {
@@ -41,23 +40,26 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (id) {
-        axiosInstance().get(`/support-ticket/${id}`).then(({ data: { data } }) => {
-          let fields = fieldsDataForUpdate
-          let tempData = data
-          if (isClone) {
-            fields = fieldsDataForCreate
-            const { supportTicketNumber, ...rest } = data;
-            rest.supportTicketNumber = `ST_${generateUniqueIdOnly()}`
-            setCloneHeading(supportTicketNumber);
-            tempData = rest;
-          }
-          setInitialData({
-            fields: fields,
-            values: getObjKeysWithValues(tempData, fields),
+        axiosInstance()
+          .get(`/support-ticket/${id}`)
+          .then(({ data: { data } }) => {
+            let fields = fieldsDataForUpdate;
+            let tempData = data;
+            if (isClone) {
+              fields = fieldsDataForCreate;
+              const { supportTicketNumber, ...rest } = data;
+              rest.supportTicketNumber = `ST_${generateUniqueIdOnly()}`;
+              setCloneHeading(supportTicketNumber);
+              tempData = rest;
+            }
+            setInitialData({
+              fields: fields,
+              values: getObjKeysWithValues(tempData, fields)
+            });
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
-        }).catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['supportTicketNumber'] = `ST_${generateUniqueIdOnly()}`;
@@ -67,7 +69,6 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
           values: tempInitialData
         });
       }
-
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -76,19 +77,22 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (id && !isClone) {
-      values._id = id
-      axiosInstance().put(`/support-ticket`, values).then(({ data }) => {
-        setSubmitting(false);
-        onSuccess()
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
+      values._id = id;
+      axiosInstance()
+        .put(`/support-ticket`, values)
+        .then(({ data }) => {
+          setSubmitting(false);
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     } else {
       axiosInstance()
         .post(`/support-ticket`, values)
@@ -98,18 +102,17 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
         })
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
           toastConfig.setToastConfig(error);
-        })
+        });
     }
   };
-
 
   return (
     <Dialog
@@ -126,11 +129,7 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
@@ -138,12 +137,13 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.supportTicketNumber ? `(${initialData.values?.supportTicketNumber})` : ''}`
-                  : `Create Support Ticket`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.supportTicketNumber ? `(${initialData.values?.supportTicketNumber})` : ''}`
+                    : `Create Support Ticket`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -151,7 +151,7 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
                 showManimizeMaximize={true}
               />
               <CustomDialogContent>
-                <Form autoComplete="off" autoCorrect="off" noValidate >
+                <Form autoComplete="off" autoCorrect="off" noValidate>
                   <InputField
                     errors={errors}
                     values={values}
@@ -206,12 +206,12 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
     </Dialog>
-  )
-}
+  );
+};
 
-export default ManageSupportTicket
+export default ManageSupportTicket;

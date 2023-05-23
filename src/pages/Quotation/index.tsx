@@ -3,7 +3,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaSuitcase } from 'react-icons/fa';
-import { GiHiveMind } from "react-icons/gi";
+import { GiHiveMind } from 'react-icons/gi';
 import { MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, FaWarehouse, SiStatuspage } from 'react-icons/all';
 import {
   isObjectEmpty,
@@ -25,22 +25,20 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import QuotationHeader from './QuotationHeader';
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { camelCase } from 'lodash'
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import { camelCase } from 'lodash';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 let quotationTimeout;
 
-
 const Quotation = () => {
-
   const QuotationType = [
     {
       key: `All ${routes.quotation.title}`,
@@ -52,7 +50,7 @@ const Quotation = () => {
     }
   ];
 
-  const renderedFrom = camelCase(routes?.quotation.title)
+  const renderedFrom = camelCase(routes?.quotation.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -83,7 +81,7 @@ const Quotation = () => {
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
   const [columns, setColumns] = useState(null);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   useEffect(() => {
     fetchGridColumns();
@@ -209,39 +207,6 @@ const Quotation = () => {
     </>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
-
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-
-    if (field !== updatedField) return updatedField;
-
-    switch (field) {
-      case 'owner':
-        return 'owner.optionLabel';
-
-      case 'customerAccount':
-        return 'customerAccount.optionLabel';
-
-      case 'supplierAccountName':
-        return 'supplierAccountName.optionLabel';
-
-      default:
-        return field;
-    }
-  };
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (selectedType === 2) {
@@ -250,45 +215,43 @@ const Quotation = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id))}`;
-    }
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
+
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('customerAccount'),
-            term: accountDetails.accountId
-          }
-        ])}`;
+        filterByIds.push({
+          field: 'customerAccount',
+          term: accountDetails.accountId
+        })
       } else if (accountDetails.resource === supplierAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('supplierAccountName'),
-            term: { $in: [accountDetails.accountId] }
-          }
-        ])}`;
+        filterByIds.push({
+          field: 'supplierAccountName',
+          term: { $in: [accountDetails.accountId] }
+        })
       }
     }
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
 
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+    }
+
+    if (showFilteredRecordsOnly) {
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
     }
 
     return deepFilter;
@@ -307,9 +270,9 @@ const Quotation = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject["isChecked"] = false;
-          finalObject["allowedToEdit"] = permissions?.quotation?.isUpdate;
-          finalObject["canDelete"] = permissions?.quotation?.isDelete;
+          finalObject['isChecked'] = false;
+          finalObject['allowedToEdit'] = permissions?.quotation?.isUpdate;
+          finalObject['canDelete'] = permissions?.quotation?.isDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -373,7 +336,7 @@ const Quotation = () => {
             type: 'success',
             message: data.message
           });
-          removeLocalStorage(localStorageSelectedRecords)
+          removeLocalStorage(localStorageSelectedRecords);
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
@@ -423,7 +386,7 @@ const Quotation = () => {
       </Grid>
       <CustomContainer>
         <div className="header-panel">
-          {columns &&
+          {columns && (
             <QuotationHeader
               selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
               onTypeChange={handleQuotationTypeSel}
@@ -456,23 +419,23 @@ const Quotation = () => {
                 />
               )}
             </QuotationHeader>
-          }
+          )}
         </div>
-        {(Object.keys(frameworkComponent).length > 0 && columns) ?
+        {Object.keys(frameworkComponent).length > 0 && columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.quotation}
-              primaryField={columns?.find(d => d.field === "quotationNumber")}
+              primaryField={columns?.find((d) => d.field === 'quotationNumber')}
               onClick={(data) => {
-                history.push(`${routes.quotationDetail.path}/${data._id}`)
+                history.push(`${routes.quotationDetail.path}/${data._id}`);
               }}
               dataRows={dataRows}
               selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.quotationDetail.path}/${data._id}?openEdit=true`)
+                history.push(`${routes.quotationDetail.path}/${data._id}?openEdit=true`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {
@@ -480,7 +443,7 @@ const Quotation = () => {
                   show: true,
                   id: data._id,
                   quotationNumber: `${data.quotationNumber}`
-                })
+                });
               }}
               rowCount={rowCount}
               page={page}
@@ -488,40 +451,42 @@ const Quotation = () => {
               additionalDetails={[
                 {
                   icon: <FaSuitcase size={18} />,
-                  field: "customerAccount"
-                },
+                  field: 'customerAccount'
+                }
               ]}
               chips={[
                 {
                   icon: <MdContactPhone />,
-                  label: "Customer Contact: ",
-                  field: "customerContact"
+                  label: 'Customer Contact: ',
+                  field: 'customerContact'
                 },
                 {
                   icon: <RiContactsBookUploadFill />,
-                  label: "Billing Address: ",
-                  field: "billingAddress"
+                  label: 'Billing Address: ',
+                  field: 'billingAddress'
                 },
                 {
                   icon: <RiShip2Fill />,
-                  label: "Shipping Address: ",
-                  field: "shippingAddress"
+                  label: 'Shipping Address: ',
+                  field: 'shippingAddress'
                 },
                 {
                   icon: <FaWarehouse />,
-                  label: "Plants: ",
-                  field: "plants"
+                  label: 'Plants: ',
+                  field: 'plants'
                 },
                 {
                   icon: <SiStatuspage />,
-                  label: "Status: ",
-                  field: "status:"
+                  label: 'Status: ',
+                  field: 'status:'
                 }
               ]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
-              onClone={(data) => { setShowManageQuotationDialog({ open: true, isClone: true, idToClone: data._id }) }}
+              onClone={(data) => {
+                setShowManageQuotationDialog({ open: true, isClone: true, idToClone: data._id });
+              }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -543,15 +508,20 @@ const Quotation = () => {
               showFilters={true}
               resource={sidebarResource.quotation}
             />
-          ) : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-        {showDeleteWarningConfirmBox &&
+          )
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+        {showDeleteWarningConfirmBox && (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
             message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
             onClose={() => setShowDeleteWarningConfirmBox(false)}
           />
-        }
-        {isConfirmDialogVisible &&
+        )}
+        {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
             message={`Are you sure you want to delete ${routes?.quotation?.title?.toLowerCase()} ${deleteRecord?.quotationNumber || ''} ?`}
@@ -562,7 +532,7 @@ const Quotation = () => {
             okBtnLoading={deleteLoading}
             onOk={handleDeleteQuotation}
           />
-        }
+        )}
         {singleQuotationDelete.show && (
           <ConfirmationDialog
             open={singleQuotationDelete.show}
