@@ -214,7 +214,7 @@ const DemandOrder = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(deepFilters)}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -475,7 +475,7 @@ const DemandOrder = () => {
         <ManageSalesOrderDialog
           isClone={showManageSalesOrderDialog.isClone}
           open={showManageSalesOrderDialog.open}
-          salesOrderId={showManageSalesOrderDialog.idToClone}
+          demandOrderId={showManageSalesOrderDialog.idToClone}
           onClose={() => setShowManageSalesOrderDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
             fetchData();

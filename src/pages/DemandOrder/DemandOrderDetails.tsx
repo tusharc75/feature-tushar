@@ -11,7 +11,7 @@ import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { ACTIVITY_RESOURCE, demandOrder } from '../../constants/helpers';
-import ManageSalesOrderDialog from './ManageDemandOrderDialog';
+import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
@@ -217,11 +217,11 @@ const DemandOrderDetails = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageSalesOrderDialog
+        <ManageDemandOrderDialog
           isClone={false}
           open={openUpdateDialog}
-          salesOrderId={id}
-          salesOrderData={salesOrderData}
+          demandOrderId={id}
+          demandOrderData={salesOrderData}
           onClose={() => {
             setOpenUpdateDialog(false);
           }}

@@ -108,6 +108,7 @@ const RoleDetailsPage = () => {
   const [dashboardName, setDashboardName] = useState([]);
   const [defaultResourceName, setDefaultResourceName] = useState([]);
   const [superAdminAccess, setSuperAdminAccess] = useState(false);
+  const [canAssignByAnyuser, setCanAssignByAnyuser] = useState(false);
 
   const policyResources = [
     {
@@ -282,6 +283,7 @@ const RoleDetailsPage = () => {
       setResourceOption([...copyOfDashBoardOption]);
       setDefaultResourceName(data?.defaultResource || '');
       setSuperAdminAccess(data?.superAdminAccess || false);
+      setCanAssignByAnyuser(data?.canAssignByAnyuser || false);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -343,7 +345,8 @@ const RoleDetailsPage = () => {
         policy: policyFieldCheckBox,
         dashBoards: dashBoardIds,
         defaultResource: defaultResourceName,
-        superAdminAccess: superAdminAccess
+        superAdminAccess: superAdminAccess,
+        canAssignByAnyuser: canAssignByAnyuser
       })
       .then(({ data }) => {
         fetchRoleData();
@@ -550,10 +553,28 @@ const RoleDetailsPage = () => {
                         permissions={permissions}
                       />
                     )}
+
                     {dashBoardOption?.length > 0 && (
                       <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} />
                     )}
                     <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} />
+
+                    <Box p={1}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="canAssignByAnyuser"
+                            checked={canAssignByAnyuser}
+                            onChange={(e) => {
+                              setCanAssignByAnyuser(e.target.checked);
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label="Can Assign By Anyuser"
+                      />
+                    </Box>
+
                     <Box p={1} pb={2}>
                       <FormControlLabel
                         control={

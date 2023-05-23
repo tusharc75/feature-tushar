@@ -942,7 +942,6 @@ export default function DeliveryTicketDetail(props) {
             transferAssetId={
               deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? deliveryTicketData?.transferAsset?.optionValue : ''
             }
-            salesOrderId={deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.salesOrder ? deliveryTicketData?.salesOrder?.optionValue : ''}
             notIn={deliveryTicketData.ticketType}
           />
         )}
