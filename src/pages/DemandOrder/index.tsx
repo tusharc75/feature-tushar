@@ -475,7 +475,7 @@ const DemandOrder = () => {
         <ManageSalesOrderDialog
           isClone={showManageSalesOrderDialog.isClone}
           open={showManageSalesOrderDialog.open}
-          salesOrderId={showManageSalesOrderDialog.idToClone}
+          demandOrderId={showManageSalesOrderDialog.idToClone}
           onClose={() => setShowManageSalesOrderDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
             fetchData();

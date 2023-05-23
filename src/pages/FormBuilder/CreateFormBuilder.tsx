@@ -325,7 +325,7 @@ const CreateFormBuilder = () => {
         <Box className={`detail-container-v1`}>
           {section ? (
             <Fragment>
-              <Box p={1} pb={0} ml={1} bgcolor="white">
+              <Box p={1} pb={0} ml={1}>
                 <Grid container spacing={1}>
                   <Grid item xs={2}>
                     <Typography variant="caption">Resource</Typography>

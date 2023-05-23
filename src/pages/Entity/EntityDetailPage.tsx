@@ -290,9 +290,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`
-      }))
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`
+        }))
       : [];
 
     setUserList(rows);
@@ -340,55 +340,49 @@ const EntityDetailsPage = () => {
                 <DetailsPage data={entityData} fields={fieldsToShowInDetailPage} />
               )}
             </Box>
-            <Box>
-              <Box width="100%" padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between">
-                <Grid container>
-                  <Grid item xs={8}>
-                    <Box display="flex">
-                      <Box padding="5px">
-                        <Typography variant="subtitle2">{'DOA Details '}</Typography>
-                      </Box>
-                    </Box>
-                  </Grid>
-                  <Grid item container xs={4} justify="flex-end">
-                    {permissions.entity?.isUpdate && user?.user?.permissions?.doaSetup && (
-                      <Button variant="contained" color="primary" size="small" onClick={() => setDoaDialogOpen(true)}>
-                        {doa.length > 0 ? 'Edit DOA' : 'Add DOA'}
-                      </Button>
-                    )}
+            <Box mt={2} className="single-form-v1 ">
+              <Box className="form-head-v1">
+                <Typography className="form-label-style-v1" component={'h3'}>
+                  {'DOA Details '}
+                </Typography>
+                {permissions.entity?.isUpdate && user?.user?.permissions?.doaSetup && (
+                  <Button variant="contained" className="float-right-button-v1" color="primary" size="small" onClick={() => setDoaDialogOpen(true)}>
+                    {doa.length > 0 ? 'Edit DOA' : 'Add DOA'}
+                  </Button>
+                )}
+              </Box>
+              <Box className="formdata-v1">
+                <Grid container style={{ padding: '8px' }} spacing={1}>
+                  <Grid item xs={12} sm={12}>
+                    <BoxWithBorder
+                      style={{
+                        padding: '0px'
+                      }}
+                    >
+                      {doa.length > 0 ? (
+                        <NewStepper heading={' '} steps={doa} doaCurrency={doaCurrency} doaApproveType={doaApproveType} />
+                      ) : (
+                        <Box textAlign="center" marginTop={2}>
+                          <Typography variant="body2">Entity doesn't have any DOA</Typography>
+                        </Box>
+                      )}
+                    </BoxWithBorder>
                   </Grid>
                 </Grid>
               </Box>
             </Box>
-            <Grid container style={{ padding: '8px' }} spacing={1}>
-              <Grid item xs={12} sm={12}>
-                <BoxWithBorder
-                  style={{
-                    padding: '0px'
-                  }}
-                >
-                  {doa.length > 0 ? (
-                    <NewStepper heading={' '} steps={doa} doaCurrency={doaCurrency} doaApproveType={doaApproveType} />
-                  ) : (
-                    <Box textAlign="center" marginTop={2}>
-                      <Typography variant="body2">Entity doesn't have any DOA</Typography>
-                    </Box>
-                  )}
-                </BoxWithBorder>
-              </Grid>
-            </Grid>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
-            <Paper style={{ overflow: 'hidden' }}>
-              <Box width="100%" padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between">
-                <Typography variant="subtitle2">Assigned Users ({users.length || 0})</Typography>
+            <Box style={{ overflow: 'hidden' }} className="single-form-v1">
+              <Box className="form-head-v1">
+                <Typography component={'h3'}>Assigned Users ({users.length || 0})</Typography>
                 {permissions.entity.isUpdate && (
-                  <IconButton title="Assign users" color="primary" size="small" onClick={userDialogOpen}>
+                  <IconButton className="float-right-button-v1" title="Assign users" color="primary" size="small" onClick={userDialogOpen}>
                     <ControlPoint />
                   </IconButton>
                 )}
               </Box>
-              <Box padding={1}>
+              <Box className="formdata-v1">
                 {usersLoading ? (
                   <Box display="flex">
                     {[1, 2].map((i) => (
@@ -412,25 +406,25 @@ const EntityDetailsPage = () => {
                   <>
                     <AssignedUsers permissions={permissions} user={users.slice(0, showUsers)} unassignEntity={handleUnassignUser} type="entity" />
 
-                    <Box marginY={1} />
                     {users.length > showRecordsBeforeViewAll && (
-                      <Box
-                        className="btn-view gap-1"
-                        p={1}
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                        onClick={() =>
-                          history.push(`/user`, {
-                            id: entityData._id,
-                            name: entityData?.entityName,
-                            type: 'entity',
-                            text: 'Entity'
-                          })
-                        }
-                      >
-                        <FaEye /> View All &#8599;
-                      </Box>
+                      <>
+                        <Box marginY={2} />
+                        <Button
+                          onClick={() =>
+                            history.push(`/user`, {
+                              id: entityData._id,
+                              name: entityData?.entityName,
+                              type: 'entity',
+                              text: 'Entity'
+                            })
+                          }
+                          variant="outlined"
+                          className="accordion-outlined-button"
+                          startIcon={<FaEye />}
+                        >
+                          View All &#8599;
+                        </Button>
+                      </>
                     )}
                   </>
                 ) : (
@@ -439,7 +433,7 @@ const EntityDetailsPage = () => {
                   </Box>
                 )}
               </Box>
-            </Paper>
+            </Box>
           </Grid>
         </Grid>
       </Box>

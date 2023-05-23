@@ -267,7 +267,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                         border={1}
                         mt={2}
                         mb={1}
-                        borderColor="grey.300"
+                        borderColor="var(--common-border-color)"
                         width={'100%'}
                       >
                         <Box p={1} bgcolor="grey.200">
@@ -294,7 +294,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                           </Grid>
                         </Box>
                         {leadTimeMasterSteps?.map((steps, index) => (
-                          <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                          <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                             <Grid container spacing={1}>
                               <Grid item xs={6}>
                                 <Autocomplete

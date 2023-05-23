@@ -101,7 +101,7 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
             key={index}
             border={1}
             onClick={() => handleOpenActivity(element._id)}
-            borderColor="grey.300"
+            borderColor="var(--common-border-color)"
             p={1.5}
             mb={1}
             boxShadow={1}

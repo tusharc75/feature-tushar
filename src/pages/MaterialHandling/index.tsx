@@ -71,7 +71,6 @@ const MaterialHandling = () => {
       });
   };
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -109,48 +108,66 @@ const MaterialHandling = () => {
         </Box>
         {workOrder ? (
           <Grid container spacing={2}>
-            <Grid item xs={12} md={3} sm={12}>
-              <Box style={{ height: 'calc(100vh - 220px)', overflow: 'auto' }}>
-                {workOrder?.map((data, index) => {
-                  return (
-                    <Box
-                      mb={2}
-                      key={index}
-                      onClick={() => {
-                        setSelectedWorkOrder(data);
-                      }}
-                      style={{
-                        cursor: 'pointer',
-                        backgroundColor: selectedWorkOrder === data ? '#0f9fa9' : 'white',
-                        color: selectedWorkOrder === data ? 'white' : 'black',
-                        border: '1px solid #ebebeb'
-                      }}
-                    >
-                      <Box p={2}>
-                        <Box display='flex'>
-                          <Typography variant='subtitle2'>{`Work Order : ${data?.workOrderNumber}`}</Typography>
-                          <Box pl={1}>
-                            <IconButton
-                              onClick={() => {
-                                window.open(`${routes.workOrderDetail.path}/${data?._id}`);
-                              }}
-                              aria-label="delete" size="small">
-                              <OpenInNewIcon fontSize="inherit" />
-                            </IconButton>
+            <Grid item xs={12} lg={3}>
+              <Box className="container-with-border " p={3}>
+                <Box style={{ height: 'calc(100vh - 220px)', overflow: 'auto' }}>
+                  {workOrder?.map((data, index) => {
+                    return (
+                      <Box
+                        mb={2}
+                        key={index}
+                        onClick={() => {
+                          setSelectedWorkOrder(data);
+                        }}
+                        style={
+                          {
+                            cursor: 'pointer',
+                            backgroundColor: selectedWorkOrder === data ? '#0f9fa9' : 'var(--dark-secondary, white)',
+                            '--card-color-primary': selectedWorkOrder === data ? 'white' : 'var(--dark-primary-text, #2A3042)',
+                            '--card-color-secondary': selectedWorkOrder === data ? 'white' : 'var(--dark-secondary-text, #5B5B5B)',
+                            border: '1px solid var(--common-border-color)',
+                            borderRadius: '8px'
+                          } as React.CSSProperties
+                        }
+                      >
+                        <Box p={2}>
+                          <Box display="flex">
+                            <Typography variant="subtitle2" style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8 }}>
+                              Work Order : <span style={{ color: 'var(--card-color-secondary)' }}>{data?.workOrderNumber}</span>
+                            </Typography>
+                            <Box pl={1}>
+                              <IconButton
+                                onClick={() => {
+                                  window.open(`${routes.workOrderDetail.path}/${data?._id}`);
+                                }}
+                                aria-label="delete"
+                                size="small"
+                              >
+                                <OpenInNewIcon fontSize="inherit" />
+                              </IconButton>
+                            </Box>
                           </Box>
+                          <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 500 }}>
+                            Product : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 400 }}>{data?.product?.optionLabel}</span>
+                          </Typography>
+                          <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 500 }}>
+                            Asset :{' '}
+                            <span style={{ color: 'var(--card-color-secondary)', fontWeight: 400 }}>{data?.serializedAsset?.optionLabel}</span>
+                          </Typography>
+                          <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 500 }}>
+                            {routes.warehouse.title} :{' '}
+                            <span style={{ color: 'var(--card-color-secondary)', fontWeight: 400 }}>{data?.warehouse?.optionLabel}</span>
+                          </Typography>
                         </Box>
-                        <Typography variant='body2'>{`Product : ${data?.product?.optionLabel}`}</Typography>
-                        <Typography variant='body2'>{`Asset : ${data?.serializedAsset?.optionLabel}`}</Typography>
-                        <Typography variant='body2'>{`${routes.warehouse.title} : ${data?.warehouse?.optionLabel}`}</Typography>
                       </Box>
-                    </Box>
-                  );
-                })}
+                    );
+                  })}
+                </Box>
               </Box>
             </Grid>
-            <Grid item xs={12} md={9} sm={12}>
+            <Grid item xs={12} lg={9}>
               {selectedWorkOrder && (
-                <Box p={2} style={{ border: '1px solid #ebebeb' }}>
+                <Box className="container-with-border " p={3}>
                   <Request workOrder={selectedWorkOrder?._id} />
                 </Box>
               )}

@@ -18,7 +18,6 @@ import HistoryIcon from '@material-ui/icons/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
 const Request = ({ workOrder }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
@@ -150,28 +149,38 @@ const Request = ({ workOrder }) => {
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-          {
-            accessor: 'storageLocation',
-            Header: 'Storage Location',
-            width: 200,
-            Cell: ({ row }) => {
-              return row?.original['storageLocation'] ?
-                <a className="link text-truncate" href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`} target="_blank">
-                  {row?.original['storageLocation']}
-                </a> : <NoDataCell />;
+            {
+              accessor: 'storageLocation',
+              Header: 'Storage Location',
+              width: 200,
+              Cell: ({ row }) => {
+                return row?.original['storageLocation'] ? (
+                  <a
+                    className="link text-truncate"
+                    href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
+                    target="_blank"
+                  >
+                    {row?.original['storageLocation']}
+                  </a>
+                ) : (
+                  <NoDataCell />
+                );
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'requestBy',
         Header: 'Requested By',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['requestBy'] ?
+          return row?.original['requestBy'] ? (
             <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestById']}`} target="_blank">
               {row?.original['requestBy']}
-            </a> : <NoDataCell />;
+            </a>
+          ) : (
+            <NoDataCell />
+          );
         }
       },
       {
@@ -191,10 +200,13 @@ const Request = ({ workOrder }) => {
         Header: 'Processed By',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['processBy'] ?
+          return row?.original['processBy'] ? (
             <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['processById']}`} target="_blank">
               {row?.original['processBy']}
-            </a> : <NoDataCell />;
+            </a>
+          ) : (
+            <NoDataCell />
+          );
         }
       },
       {
@@ -227,55 +239,57 @@ const Request = ({ workOrder }) => {
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => {
-        return <>
-          <Box display='flex'>
-            <Box display='flex' flexGrow={1}>
-              {row.original['status'] === MATERIAL_REQUEST_STATUS.requested && (
-                <Fragment>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    disabled={loading}
-                    onClick={() => {
-                      setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: row.original });
-                    }}
-                  >
-                    Process
-                  </Button>
-                  <Box pl={1} />
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    size="small"
-                    disabled={loading}
-                    onClick={() => {
-                      setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row.original });
-                    }}
-                  >
-                    Close
-                  </Button>
-                  <Box pl={1} />
-                </Fragment>
-              )}
+        return (
+          <>
+            <Box display="flex">
+              <Box display="flex" flexGrow={1}>
+                {row.original['status'] === MATERIAL_REQUEST_STATUS.requested && (
+                  <Fragment>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      disabled={loading}
+                      onClick={() => {
+                        setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: row.original });
+                      }}
+                    >
+                      Process
+                    </Button>
+                    <Box pl={1} />
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      size="small"
+                      disabled={loading}
+                      onClick={() => {
+                        setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row.original });
+                      }}
+                    >
+                      Close
+                    </Button>
+                    <Box pl={1} />
+                  </Fragment>
+                )}
+              </Box>
+              <Box>
+                {row.original['processesLogs'] && row.original['processesLogs']?.length > 0 && (
+                  <HtmlTooltip title="View Logs">
+                    <IconButton
+                      size="small"
+                      aria-label="Delete"
+                      onClick={() => {
+                        setOpenProcessLogs({ open: true, logs: row.original['processesLogs'], productName: row.original?.productName });
+                      }}
+                    >
+                      <HistoryIcon />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+              </Box>
             </Box>
-            <Box>
-              {row.original["processesLogs"] && row.original["processesLogs"]?.length > 0 && (
-                <HtmlTooltip title="View Logs">
-                  <IconButton
-                    size="small"
-                    aria-label="Delete"
-                    onClick={() => {
-                      setOpenProcessLogs({ open: true, logs: row.original["processesLogs"], productName: row.original?.productName });
-                    }}
-                  >
-                    <HistoryIcon />
-                  </IconButton>
-                </HtmlTooltip>
-              )}
-            </Box>
-          </Box>
-        </>
+          </>
+        );
       }
     });
     setColumns([...column, ...extracolumns]);
@@ -291,13 +305,16 @@ const Request = ({ workOrder }) => {
 
   return (
     <>
-      <Box display='flex' justifyContent={'space-between'} >
+      <Box display="flex" justifyContent={'space-between'}>
         <Box />
         <Box>
           <Button
-            disabled={selectedRecords?.length > 0 &&
+            disabled={
+              selectedRecords?.length > 0 &&
               selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
-              ? false : true}
+                ? false
+                : true
+            }
             variant={'outlined'}
             color="default"
             size="small"
@@ -322,15 +339,19 @@ const Request = ({ workOrder }) => {
             <MenuItem
               onClick={() => {
                 setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: null });
-                closeActions()
+                closeActions();
               }}
-            >Process</MenuItem>
+            >
+              Process
+            </MenuItem>
             <MenuItem
               onClick={() => {
                 setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: null });
-                closeActions()
+                closeActions();
               }}
-            >Close</MenuItem>
+            >
+              Close
+            </MenuItem>
           </Menu>
         </Box>
       </Box>
@@ -352,7 +373,7 @@ const Request = ({ workOrder }) => {
             />
           </Box>
         ) : (
-          <Box height={500} bgcolor="white">
+          <Box height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
@@ -371,33 +392,29 @@ const Request = ({ workOrder }) => {
                 [{ _id: qtyDialog.data?._id, uniqueId: qtyDialog.data?.uniqueId, qty: parseInt(data?.qty) }],
                 data.comment || ''
               );
-            }
-            else if (selectedRecords?.length) {
+            } else if (selectedRecords?.length) {
               let rows = selectedRecords?.map((item) => {
                 return {
                   _id: item?._id,
                   uniqueId: item?.uniqueId,
                   qty: item?.qty - (item?.processedQty || 0)
-                }
-              })
-              handleUpdateStatus(
-                qtyDialog.status,
-                rows,
-                data.comment || '');
+                };
+              });
+              handleUpdateStatus(qtyDialog.status, rows, data.comment || '');
             }
           }}
         />
       )}
 
-      {openProcessLogs.open &&
+      {openProcessLogs.open && (
         <ProcessLogs
           onClose={() => {
-            setOpenProcessLogs({ open: false, logs: [], productName: '' })
+            setOpenProcessLogs({ open: false, logs: [], productName: '' });
           }}
           logsData={openProcessLogs.logs}
           productName={openProcessLogs.productName}
         />
-      }
+      )}
     </>
   );
 };

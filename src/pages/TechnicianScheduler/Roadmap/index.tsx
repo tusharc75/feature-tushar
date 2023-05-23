@@ -11,7 +11,6 @@ import MapView from '../Map';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
-
   const scrollRef = React.useRef(null);
   const executeScroll = () => {
     var pageElement = document.getElementById('dayLiner');
@@ -94,20 +93,23 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
   };
 
   const handleSelect = (event, data, type) => {
-    if (type === "map") {
+    if (type === 'map') {
       setSelected(data?._id);
-    }
-    else if (selectedRecords?.length === 1) {
-      handleAssignTechnician(data)
+    } else if (selectedRecords?.length === 1) {
+      handleAssignTechnician(data);
     }
   };
 
-
   return !loadingRoadmap ? (
     <Box bgcolor="white">
-      <Box border={1} borderColor="grey.300" display="flex" height={height} style={{ position: 'relative' }}>
+      <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
         <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
-          <Box minWidth={isMobile && !isTablet ? 110 : 300} border={1} borderColor="grey.300" style={{ position: 'relative', overflow: 'hidden' }}>
+          <Box
+            minWidth={isMobile && !isTablet ? 110 : 300}
+            border={1}
+            borderColor="var(--common-border-color)"
+            style={{ position: 'relative', overflow: 'hidden' }}
+          >
             <Box height={60} bgcolor="grey.200" display="flex" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
               <Box p={2} display="flex" alignItems="center">
                 <Map />
@@ -129,7 +131,13 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
               <Box>
                 <ActivityList
                   fetchRoadmap={fetchRoadmap}
-                  activity={selectedRecords?.length === 1 ? activity.filter((item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel) : activity}
+                  activity={
+                    selectedRecords?.length === 1
+                      ? activity.filter(
+                          (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
+                        )
+                      : activity
+                  }
                   treeList={treeList}
                   expanded={expanded}
                   selected={selected}
@@ -141,13 +149,25 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
             </div>
           </Box>
           {!selected ? (
-            <Box id="scrollDayLiner" onScroll={onscroll} border={1} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
+            <Box
+              id="scrollDayLiner"
+              onScroll={onscroll}
+              border={1}
+              borderColor="var(--common-border-color)"
+              style={{ position: 'relative', overflow: 'auto' }}
+            >
               <Calendar calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
               <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
                 <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
                   <CalendarList
                     fetchRoadmap={fetchRoadmap}
-                    activity={selectedRecords?.length === 1 ? activity.filter((item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel) : activity}
+                    activity={
+                      selectedRecords?.length === 1
+                        ? activity.filter(
+                            (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
+                          )
+                        : activity
+                    }
                     expanded={expanded}
                     selected={selected}
                     handleSelect={handleSelect}
@@ -175,7 +195,13 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
               </Box>
             </Box>
           ) : (
-            <Box border={1} width={'100%'} height={'100%'} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
+            <Box
+              border={1}
+              width={'100%'}
+              height={'100%'}
+              borderColor="var(--common-border-color)"
+              style={{ position: 'relative', overflow: 'auto' }}
+            >
               <MapView technician={selected} />
               <IconButton
                 onClick={() => {

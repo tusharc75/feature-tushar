@@ -518,7 +518,12 @@ const ProductDetailsPage = () => {
                                   ) : inventoriesData?.length ? (
                                     inventoriesData?.map(({ products, warehouse, plant, count }, i) => (
                                       <Box key={i} pb={1}>
-                                        <Box display="flex" bgcolor="#f7f5f5" borderRadius="3px" borderBottom="1px solid #efe7e7">
+                                        <Box
+                                          display="flex"
+                                          bgcolor="var(--dark-secondary, #f7f5f5)"
+                                          borderRadius="3px"
+                                          borderBottom="1px solid var(--dark-mode-border-color, #efe7e7)"
+                                        >
                                           <Grid>
                                             <Grid item xs={8}>
                                               <Box display="flex" alignItems="center">
