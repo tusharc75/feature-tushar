@@ -149,25 +149,25 @@ const Request = ({ workOrder }) => {
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-            {
-              accessor: 'storageLocation',
-              Header: 'Storage Location',
-              width: 200,
-              Cell: ({ row }) => {
-                return row?.original['storageLocation'] ? (
-                  <a
-                    className="link text-truncate"
-                    href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
-                    target="_blank"
-                  >
-                    {row?.original['storageLocation']}
-                  </a>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'storageLocation',
+            Header: 'Storage Location',
+            width: 200,
+            Cell: ({ row }) => {
+              return row?.original['storageLocation'] ? (
+                <a
+                  className="link text-truncate"
+                  href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
+                  target="_blank"
+                >
+                  {row?.original['storageLocation']}
+                </a>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'requestBy',
@@ -306,12 +306,16 @@ const Request = ({ workOrder }) => {
   return (
     <>
       <Box display="flex" justifyContent={'space-between'}>
-        <Box />
+        <Box >
+          <Typography variant="subtitle2" style={{ color: 'var(--card-color-primary)', fontSize: 15 }}>
+            Consumables Requests
+          </Typography>
+        </Box>
         <Box>
           <Button
             disabled={
               selectedRecords?.length > 0 &&
-              selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                 ? false
                 : true
             }
