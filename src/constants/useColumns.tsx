@@ -371,7 +371,6 @@ export const gridFilterParser = (filters) => {
         });
       }
       else {
-        const term = filters[field].filter.replace('"', '\\"');
         deepFilters.push({
           field: field,
           term: Array.isArray(filters[field].filter) ? filters[field].filter : filters[field].filter
