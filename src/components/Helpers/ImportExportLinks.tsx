@@ -7,11 +7,8 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 
 import { ImportIcon, ExportIcon, DownloadIcon } from 'src/assets/svg/svgIcons';
 
-import { BsCloudDownload, CiImport, CiExport } from 'react-icons/all';
-
 const useStyles = makeStyles((theme) => ({
   root: {
-    // width: '100%',
     flexGrow: 1,
     display: 'flex',
     justifyContent: 'flex-end'
@@ -24,35 +21,9 @@ const useStyles = makeStyles((theme) => ({
       display: 'none'
     }
   },
-  // links: {
-  //   color: theme.palette.info.light, //  textDark
-  //   fontSize: 15
-  // },
-  // darkLinks: {
-  //   color: theme.palette.info.dark, //  textDark
-  //   fontSize: 15
-  // },
-  // linkDivider: {
-  //   backgroundColor: '#ffffff42', //  darkBg
-  //   margin: '0 10px'
-  // },
-  // darkLinkDivider: {
-  //   backgroundColor: 'grey', //  darkBg
-  //   margin: '0 10px'
-  // },
   delBtn: {
     color: 'red'
   }
-  // expandIcon: {
-  //   position: 'absolute',
-  //   right: '0',
-  //   color: 'white'
-  // },
-  // darkExpandIcon: {
-  //   position: 'absolute',
-  //   right: '0',
-  //   color: theme.palette.info.dark
-  // }
 }));
 
 export default function ImportExportLinks({
