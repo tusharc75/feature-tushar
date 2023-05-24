@@ -57,7 +57,6 @@ const WorkOrderDetails = () => {
 
   const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
 
-
   useEffect(() => {
     return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
@@ -111,7 +110,7 @@ const WorkOrderDetails = () => {
       .then(({ data: { data } }) => {
         var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         if (user?.role?.selectedEntity?.superAdminAccess) {
-          isAllowedToEdit = true
+          isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
         setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false);
@@ -179,7 +178,7 @@ const WorkOrderDetails = () => {
   };
 
   const updateJobStatus = (status, assetStatus = null) => {
-    const data: any = { status: status }
+    const data: any = { status: status };
     if (assetStatus) {
       data.assetStatus = assetStatus;
     }
@@ -229,15 +228,11 @@ const WorkOrderDetails = () => {
           <Box className="control-buttons-v1">
             {workOrderData ? (
               <>
-                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed &&
-                  <Button
-                    variant={'contained'}
-                    size="small"
-                    onClick={() => setShowConfirmBoxScrap(true)}
-                    className={'btn-outline-v1'}
-                  >
+                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
+                  <Button variant={'contained'} size="small" onClick={() => setShowConfirmBoxScrap(true)} className={'btn-outline-v1'}>
                     {`${INVENTORY_STATUS.scrap} Asset`}
-                  </Button>}
+                  </Button>
+                )}
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
                   workOrderData?.canComplete &&
@@ -251,43 +246,6 @@ const WorkOrderDetails = () => {
                       >
                         Complete
                       </Button>
-                      {/* <Button
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                      >
-                        {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        {statusOptions?.map((o, index) => {
-                          return (
-                            <MenuItem
-                              disabled={![WORK_ORDER_STATUS.completed]?.includes(o?.optionLabel)}
-                              onClick={() => {
-                                closeActions();
-                                handleStatusChange(o);
-                              }}
-                              value={o}
-                            >
-                              {o?.optionLabel}
-                            </MenuItem>
-                          );
-                        })}
-                      </Menu> */}
                     </Fragment>
                   )}
                 <Button
@@ -392,7 +350,7 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-          {workOrderData &&
+          {workOrderData && (
             <Consumables
               allowedToEdit={allowedToEdit && !completed}
               isCreate={false}
@@ -403,7 +361,7 @@ const WorkOrderDetails = () => {
               stepId={null}
               serviceName={null}
             />
-          }
+          )}
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
           <Box>
@@ -431,8 +389,8 @@ const WorkOrderDetails = () => {
             setShowConfirmBoxScrap(false);
           }}
           onOk={() => {
-            setShowConfirmBoxScrap(false)
-            updateJobStatus(WORK_ORDER_STATUS.completed, INVENTORY_STATUS.scrap)
+            setShowConfirmBoxScrap(false);
+            updateJobStatus(WORK_ORDER_STATUS.completed, INVENTORY_STATUS.scrap);
           }}
         />
       )}

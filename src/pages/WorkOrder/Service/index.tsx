@@ -380,7 +380,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderLeftWidth: '1px',
         borderRightWidth: '1px',
         borderStyle: 'solid',
-        borderColor: 'rgba(25, 24, 24, 0.19)',
+        borderColor: 'var(--dark-mode-border-color, rgba(25, 24, 24, 0.19))',
         cursor: allowedToEdit ? 'pointer' : 'not-allowed',
         // pointerEvents: 'none',
         opacity: '.5',
@@ -485,6 +485,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               }}
             >
               <Box className="container-with-border" p={'20px'}>
+                {/* ------------------ TOP BUTTONS ------------------ */}
                 <Box
                   mb={1}
                   display="flex"
@@ -528,6 +529,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                     </IconButton>
                   )}
                 </Box>
+                {/* ------------------ LEFT SIDE CONTENTS ------------------ */}
                 <Box
                   sx={{ height: mobScreen ? 'unset' : 'calc(100vh - 300px)', display: { xs: 'flex', sm: 'block' } }}
                   style={{
@@ -568,7 +570,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                     alignItems: 'center',
                                     position: 'relative',
                                     paddingLeft: !isColapsed && data?.type !== 'quotation' ? '20px' : '',
-                                    gap: '5px'
+                                    gap: '10px'
                                   }}
                                 >
                                   {/* Serial Number or Quote icon */}
@@ -609,7 +611,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                         }}
                                       >
                                         <Box ml={'10px'}>
-                                          <Typography>{data?.serviceName}</Typography>
+                                          <Typography style={{ fontWeight: 600 }}>{data?.serviceName}</Typography>
                                         </Box>
 
                                         {/* Icons */}
@@ -630,19 +632,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             )}
                                           </Box>
                                         )}
-                                        {/* PassFail */}
-                                        <>
-                                          {data?.type === 'service' && data?.serviceStatus && (
-                                            <Box ml={1}>
-                                              <RenderStatusIcon stepStatus={data?.serviceStatus} />
-                                            </Box>
-                                          )}
-                                          {data?.type === 'quotation' && quotationData && (
-                                            <Box ml={1}>
-                                              <RenderStatusIcon stepStatus={quotationData?.status} />
-                                            </Box>
-                                          )}
-                                        </>
+
                                         {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
                                           <Box ml={1}>
                                             <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
@@ -699,7 +689,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                 <>
                                   {data?.type === 'service' && (
                                     <Grid item xs={2} container justify="flex-end">
-                                      <div style={{ display: 'flex' }}>
+                                      <div>
                                         <IconButton
                                           size="small"
                                           color="primary"
@@ -712,6 +702,21 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                         >
                                           <MoreHorizIcon />
                                         </IconButton>
+                                        {/* PassFail */}
+                                        <>
+                                          {data?.type === 'service' && data?.serviceStatus && (
+                                            <RenderStatusIcon
+                                              style={{ width: 20, height: 20, margin: '5px auto 0' }}
+                                              stepStatus={data?.serviceStatus}
+                                            />
+                                          )}
+                                          {data?.type === 'quotation' && quotationData && (
+                                            <RenderStatusIcon
+                                              style={{ width: 20, height: 20, margin: '5px auto 0' }}
+                                              stepStatus={quotationData?.status}
+                                            />
+                                          )}
+                                        </>
                                       </div>
                                     </Grid>
                                   )}
@@ -822,7 +827,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                           alignItems: 'center',
                                           position: 'relative',
                                           paddingLeft: !isColapsed && data?.type !== 'quotation' ? '20px' : '',
-                                          gap: '5px'
+                                          gap: '10px'
                                         }}
                                       >
                                         {data?.type === 'service' ? (
@@ -1271,20 +1276,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
 
 export default Service;
 
-const RenderStatusIcon = ({ stepStatus }: { stepStatus: string }) => {
+const RenderStatusIcon = ({ stepStatus, style = {}, ...others }: { stepStatus: string; style?: React.CSSProperties }) => {
   return (
     <>
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.passed && (
         <HtmlTooltip title={stepStatus}>
-          <Box style={{ color: '#059825' }}>
-            <AiFillCheckCircle style={{ display: 'block' }} />
+          <Box style={{ ...style, color: '#059825' }} {...others}>
+            <AiFillCheckCircle style={{ display: 'block', width: '100%', height: '100%' }} />
           </Box>
         </HtmlTooltip>
       )}
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.failed && (
         <HtmlTooltip title={stepStatus}>
-          <Box style={{ color: '#F26969' }}>
-            <AiFillExclamationCircle style={{ display: 'block' }} />
+          <Box style={{ ...style, color: '#EE0E06' }} {...others}>
+            <AiFillExclamationCircle style={{ display: 'block', width: '100%', height: '100%' }} />
           </Box>
         </HtmlTooltip>
       )}
