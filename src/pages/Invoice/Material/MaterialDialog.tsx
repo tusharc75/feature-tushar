@@ -17,7 +17,7 @@ import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-
+import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
@@ -167,57 +167,16 @@ const MaterialDialog: FC<EditDialogProps> = ({
       });
     });
   };
-
   const handleSubmit = async (values) => {
     if (isBulkedit) {
-      for (const x in values) {
-        if (values[x] === '' || (Array.isArray(values[x]) && values[x].length === 0)) {
-          delete values[x];
-        }
-      }
-      let rows: any = [];
-      selectedProducts.forEach((element) => {
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-        rows.push({ ...element, ...calValues });
-
-        if (element.parentId) {
-          const parent: any = material.filter((e) => e._id === element.parentId);
-          const sameParent: any = material.filter((e) => e.parentId === element.parentId);
-          sameParent.forEach((element) => {
-            if (element._id === element._id) {
-              for (var key in values) {
-                element[key] = values[key];
-              }
-            }
-          });
-
-          sumOnParent(parent, sameParent);
-          rows = [...rows, ...parent];
-        }
-      });
-      handleSaveData(rows, saveAndNext);
+      const rows = bulkUpdate(values, selectedProducts, material, allFields, invoiceData?.currency);
+      handleSaveData(rows);
     } else {
-      if (rowData.parentId !== null && !showConfirmationDialog) {
+      if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        let rows: any = [{ ...rowData, ...values }];
-        if (rowData.parentId) {
-          const parent: any = material.filter((e) => e._id === rowData.parentId);
-          const sameParent: any = material.filter((e) => e.parentId === rowData.parentId);
-          sameParent.forEach((element) => {
-            if (element._id === rowData._id) {
-              for (var key in values) {
-                element[key] = values[key];
-              }
-            }
-          });
-
-          sumOnParent(parent, sameParent);
-          rows = [...rows, ...parent];
-        }
-        const child = material.filter((e) => e.parentId === rowData._id);
-        resetValueZero(child);
-        handleSaveData([...rows, ...child], saveAndNext);
+        const rows = await calculateRowsField(material, values, allFields, rowData);
+        handleSaveData(rows, saveAndNext);
         setShowConfirmationDialog(false);
       }
     }
@@ -454,7 +413,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
                       submitForm();
                     }}
                   >
-                    Save & Next
+                    {'Save & Next'}
                   </CustomButton>
                 )}
 
@@ -464,10 +423,12 @@ const MaterialDialog: FC<EditDialogProps> = ({
                   variant="contained"
                   color="primary"
                   type="submit"
-                  onClick={submitForm}
+                  onClick={() => {
+                    setSaveAndNext(false);
+                    submitForm();
+                  }}
                 >
-                  {' '}
-                  Save
+                  {'Save'}
                 </CustomButton>
               </CustomDialogFooter>
               {showConfirmationDialog && (
