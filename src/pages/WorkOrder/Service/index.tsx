@@ -44,6 +44,7 @@ import { isArray, reverse } from 'lodash';
 import AttachmentDialog from './AttachmentDialog';
 import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
+import { PassIcon, FailIcon } from 'src/assets/svg/svgIcons';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -658,13 +659,17 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                     : '#FFF5DD',
                                                 color:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                    ? '#048E0A'
+                                                    ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
+                                                      ? '#059825'
+                                                      : '#EE0E06'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
                                                     ? '#fa0202'
                                                     : '#FF8C21',
                                                 background:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                    ? '#E1FCE3'
+                                                    ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
+                                                      ? '#E1FCE3'
+                                                      : '#FFECEB'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
                                                     ? '#fabebe'
                                                     : '#FFF5DD',
@@ -706,13 +711,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                         <>
                                           {data?.type === 'service' && data?.serviceStatus && (
                                             <RenderStatusIcon
-                                              style={{ width: 20, height: 20, margin: '5px auto 0' }}
+                                              style={{ maxWidth: 24, height: 24, margin: '5px auto 0' }}
                                               stepStatus={data?.serviceStatus}
                                             />
                                           )}
                                           {data?.type === 'quotation' && quotationData && (
                                             <RenderStatusIcon
-                                              style={{ width: 20, height: 20, margin: '5px auto 0' }}
+                                              style={{ maxWidth: 24, height: 24, margin: '5px auto 0' }}
                                               stepStatus={quotationData?.status}
                                             />
                                           )}
@@ -1282,14 +1287,14 @@ const RenderStatusIcon = ({ stepStatus, style = {}, ...others }: { stepStatus: s
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.passed && (
         <HtmlTooltip title={stepStatus}>
           <Box style={{ ...style, color: '#059825' }} {...others}>
-            <AiFillCheckCircle style={{ display: 'block', width: '100%', height: '100%' }} />
+            <PassIcon style={{ display: 'block', width: '100%', height: '100%' }} />
           </Box>
         </HtmlTooltip>
       )}
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.failed && (
         <HtmlTooltip title={stepStatus}>
           <Box style={{ ...style, color: '#EE0E06' }} {...others}>
-            <AiFillExclamationCircle style={{ display: 'block', width: '100%', height: '100%' }} />
+            <FailIcon style={{ display: 'block', width: '100%', height: '100%' }} />
           </Box>
         </HtmlTooltip>
       )}
