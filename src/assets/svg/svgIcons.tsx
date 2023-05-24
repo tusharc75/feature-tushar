@@ -327,3 +327,35 @@ export const DownloadIcon: React.FC<svgInterface> = ({ width = 18, height = 18, 
     </svg>
   );
 };
+
+export const PassIcon: React.FC<svgInterface> = ({ width = 24, height = 24, ...other }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 20 20" {...other}>
+      <path
+        fill="currentcolor"
+        fillRule="evenodd"
+        d="M9.968.88C4.71.88.436 5.157.436 10.414c0 5.258 4.274 9.533 9.532 9.533S19.5 15.67 19.5 10.413c0-5.257-4.274-9.532-9.532-9.532z"
+        clipRule="evenodd"
+      ></path>
+      <path
+        fill="#fff"
+        d="M8.132 14.773c-1.217-1.218-2.427-2.447-3.649-3.665a.35.35 0 010-.491l1.404-1.404a.35.35 0 01.492 0l2.007 2.007 5.16-5.164a.355.355 0 01.496 0l1.407 1.407a.344.344 0 010 .492l-6.825 6.818a.344.344 0 01-.492 0z"
+      ></path>
+    </svg>
+  );
+};
+
+export const FailIcon: React.FC<svgInterface> = ({ width = 24, height = 24, ...other }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 22 22" {...other}>
+      <path
+        fill="currentcolor"
+        d="M10.776 21.47c5.725 0 10.366-4.642 10.366-10.367 0-5.725-4.641-10.367-10.366-10.367C5.05.736.409 5.378.409 11.103c0 5.725 4.641 10.366 10.367 10.366z"
+      ></path>
+      <path
+        fill="#fff"
+        d="M12.283 11.104l2.636 2.635a.5.5 0 010 .707l-.802.801a.5.5 0 01-.706 0l-2.635-2.636-2.636 2.636a.5.5 0 01-.706 0l-.802-.801a.5.5 0 010-.707l2.636-2.635-2.636-2.636a.5.5 0 010-.706l.802-.802a.5.5 0 01.706 0l2.636 2.636L13.41 6.96a.5.5 0 01.707 0l.8.802a.5.5 0 010 .706l-2.635 2.636z"
+      ></path>
+    </svg>
+  );
+};
