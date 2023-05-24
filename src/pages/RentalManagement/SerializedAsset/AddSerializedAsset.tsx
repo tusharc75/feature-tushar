@@ -50,7 +50,6 @@ const AddSerializedAsset = ({
 }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  const theme = useTheme();
   const toastConfig = useContext(CustomToastContext);
   const [serializedProducts, setSerializedProducts] = useState([]);
   const [gridApi, setGridApi] = useState(null);
@@ -65,8 +64,8 @@ const AddSerializedAsset = ({
 
   const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
 
-  const [plantList, setPlantList] = useState([]);
-  const [selectedPlant, setSelectedPlant] = useState(filterByPlant);
+  const [warehouseOption, setWarehouseOption] = useState([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [tabValue, setTabValue] = useState(0);
 
@@ -78,7 +77,7 @@ const AddSerializedAsset = ({
     searchTimeout = setTimeout(() => {
       fetchProductInventory();
     }, millisec);
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPlant, selectedProduct, tabValue]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedWarehouse, selectedProduct, tabValue]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -86,11 +85,10 @@ const AddSerializedAsset = ({
 
   useEffect(() => {
     axiosInstance()
-      .get(`/warehouse?noEntityWise=1`)
-      .then(({ data: { data, count } }) => {
-        setPlantList(data);
-      })
-      .catch((error) => { });
+      .get('/sa-formbuilder/lookup?lookupResource=Warehouse')
+      .then(({ data: { data } }) => {
+        setWarehouseOption(data['Warehouse']);
+      });
   }, []);
 
   const fetchGridColumns = () => {
@@ -148,11 +146,11 @@ const AddSerializedAsset = ({
       gridApi.setRowData([]);
     }
     let queryString = getQueryString();
-    let api = serializedAsset.api;
-    if (tabValue === 2) {
-      api = `${api}/in-use${queryString}`
+    let api = '';
+    if (Number(tabValue) === 2) {
+      api = `${serializedAsset.api}/in-use${queryString}`
     } else {
-      api = `${api}${queryString}`
+      api = `${serializedAsset.api}${queryString}`
     }
     if (selectedProducts.length > 0) {
       var updatedFilters = [];
@@ -165,7 +163,6 @@ const AddSerializedAsset = ({
       }
       queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterByIdType=or`;
     }
-
     axiosInstance()
       .get(api)
       .then(({ data }) => {
@@ -216,10 +213,10 @@ const AddSerializedAsset = ({
     } else if (transferAssetId) {
       deepFilter = `${deepFilter}&transferAssetId=${transferAssetId}&notIn=${notIn}`;
     } else {
-      if (selectedPlant == null) {
+      if (selectedWarehouse == null) {
         deepFilter = `${deepFilter}&entityWise=1`;
       } else {
-        deepFilter = `${deepFilter}&entityWise=0&plant=${selectedPlant}`;
+        deepFilter = `${deepFilter}&entityWise=0&plant=${selectedWarehouse}`;
       }
       if (referenceType === 'Repair Job') {
         deepFilter = `${deepFilter}&repairable=true`;
@@ -230,7 +227,7 @@ const AddSerializedAsset = ({
         deepFilter = `${deepFilter}&availableAsset=true`;
       }
     }
-    if (tabValue === 1) {
+    if (Number(tabValue) === 1) {
       deepFilter = `${deepFilter}&subleaseAsset=1`;
     } else {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
@@ -322,71 +319,71 @@ const AddSerializedAsset = ({
     };
   }
 
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
-  };
-
-  useEffect(() => {
     dispatch({ type: 'selection', selectedRecords: [] });
     localStorage.removeItem(localStorageSelectedRecords);
-    setSelectedPlant(null);
-  }, [tabValue])
+    if (newValue === 0) {
+      setSelectedWarehouse(filterByPlant);
+    } else {
+      setSelectedWarehouse(null);
+    }
+  };
 
   return (
     <Fragment>
-      {
-        <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-          <CustomDialogHeader
-            title={`${referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'} ${routes.serializedAsset.title}`}
-            onClose={handleSerializedAssetClose}
-          ></CustomDialogHeader>
-          <CustomDialogContent>
-            <Box pt={1} pb={1} className='main-container-v1'>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={5}>
-                  <Box display="flex">
-                    <Box style={{ display: 'inline' }}>
-                      {serializedProducts.length > 0
-                        ? serializedProducts.map((d) => (
-                          <Box
-                            m={0.5}
-                            p={1}
-                            border={1}
-                            className="cursor-pointer"
-                            borderColor="grey.300"
-                            onClick={() => {
-                              if (selectedProduct === d.id) {
-                                setSelectedProduct(null);
-                              } else {
-                                setSelectedProduct(d.id);
-                              }
-                            }}
-                            style={{ display: 'inline-block' }}
-                            bgcolor={d.id === selectedProduct && 'primary.main'}
-                            color={d.id === selectedProduct && 'white'}
-                          >
-                            {d?.qty < 0 ? (
-                              <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                            ) : d?.qty === 0 ? (
-                              <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                            ) : (
-                              <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                            )}
-                          </Box>
-                        ))
-                        : null}
-                    </Box>
+      <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
+        <CustomDialogHeader
+          title={`${referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'} ${routes.serializedAsset.title}`}
+          onClose={handleSerializedAssetClose}
+        ></CustomDialogHeader>
+        <CustomDialogContent>
+          <Box pt={1} pb={1} className='main-container-v1'>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={5}>
+                <Box display="flex">
+                  <Box style={{ display: 'inline' }}>
+                    {serializedProducts.length > 0
+                      ? serializedProducts.map((d) => (
+                        <Box
+                          m={0.5}
+                          p={1}
+                          border={1}
+                          className="cursor-pointer"
+                          borderColor="grey.300"
+                          onClick={() => {
+                            if (selectedProduct === d.id) {
+                              setSelectedProduct(null);
+                            } else {
+                              setSelectedProduct(d.id);
+                            }
+                          }}
+                          style={{ display: 'inline-block' }}
+                          bgcolor={d.id === selectedProduct && 'primary.main'}
+                          color={d.id === selectedProduct && 'white'}
+                        >
+                          {d?.qty < 0 ? (
+                            <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                          ) : d?.qty === 0 ? (
+                            <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                          ) : (
+                            <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                          )}
+                        </Box>
+                      ))
+                      : null}
                   </Box>
-                  {serializedProducts.length > 0 && serializedProducts.some((s) => s.qty < 0) ? (
-                    <div className="text-error font-weight-bold">You have selected more assets then needed.</div>
-                  ) : (
-                    ''
-                  )}
-                </Grid>
-                <Grid item xs={12} md={3}>
-                  {referenceType === 'Rental Job' && (
-                    <Grid container>
-                      {/* <Grid item xs={6} justifyContent={'flex-end'}>
+                </Box>
+                {serializedProducts.length > 0 && serializedProducts.some((s) => s.qty < 0) ? (
+                  <div className="text-error font-weight-bold">You have selected more assets then needed.</div>
+                ) : (
+                  ''
+                )}
+              </Grid>
+              <Grid item xs={12} md={3}>
+                {referenceType === 'Rental Job' && (
+                  <Grid container>
+                    {/* <Grid item xs={6} justifyContent={'flex-end'}>
                         {permissions?.sublease && (
                           <FormControlLabel
                             control={
@@ -398,9 +395,9 @@ const AddSerializedAsset = ({
                                   localStorage.removeItem(localStorageSelectedRecords);
                                   setSubleaseAsset(e.target.checked);
                                   if (e.target.checked) {
-                                    setSelectedPlant(null);
+                                    setSelectedWarehouse(null);
                                   } else {
-                                    setSelectedPlant(filterByPlant);
+                                    setSelectedWarehouse(filterByPlant);
                                   }
                                 }}
                                 color="primary"
@@ -410,187 +407,188 @@ const AddSerializedAsset = ({
                           />
                         )}
                       </Grid> */}
-                      <Grid item xs={12} justifyContent={'flex-end'}>
-                        <Autocomplete
-                          fullWidth
-                          options={plantList}
-                          getOptionLabel={(option: any) => (option ? option?.warehouseName : '')}
-                          getOptionSelected={(option: any, val) => option._id === val}
-                          value={
-                            plantList.filter((data) => data._id === selectedPlant).length
-                              ? plantList.filter((data) => data._id === selectedPlant)[0]
-                              : ''
+                    <Grid item xs={12} justifyContent={'flex-end'}>
+                      <Autocomplete
+                        fullWidth
+                        options={warehouseOption}
+                        getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                        getOptionSelected={(option: any, val) => option.optionValue === val}
+                        value={warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
+                          ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
+                          : ''
+                        }
+                        onChange={(e, val) => {
+                          if (selectedRecords.length > 0 && val?.optionValue !== selectedWarehouse) {
+                            toastConfig.setToastConfig({
+                              open: true,
+                              message: 'All pre-selected records will be deselected if you change the plant.',
+                              type: 'warning'
+                            });
+                            dispatch({
+                              type: 'selection',
+                              selectedRecords: []
+                            });
+                            localStorage.removeItem(localStorageSelectedRecords);
                           }
-                          onChange={(e, val) => {
-                            if (selectedRecords.length > 0 && val?._id !== selectedPlant) {
-                              toastConfig.setToastConfig({
-                                open: true,
-                                message: 'All pre-selected records will be deselected if you change the plant.',
-                                type: 'warning'
-                              });
-                              dispatch({
-                                type: 'selection',
-                                selectedRecords: []
-                              });
-                              localStorage.removeItem(localStorageSelectedRecords);
-                            }
-                            setSelectedPlant(val && val._id ? val._id : null);
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              margin="dense"
-                              name="plant"
-                              placeholder={routes.warehouse.title}
-                              label={routes.warehouse.title}
-                              variant="outlined"
-                              fullWidth
-                              className="m-0"
-                            />
-                          )}
-                        />
-                      </Grid>
-                    </Grid>
-                  )}
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <Box display="flex">
-                    <Box flexGrow={1}>
-                      <SearchBox
-                        onSearch={handleSearch}
-                        searchbox="terms_header_search_bar"
-                        value={search}
-                        width={isMobile && !isTablet ? '75%' : '100%'}
+                          setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            margin="dense"
+                            name="plant"
+                            placeholder={routes.warehouse.title}
+                            label={routes.warehouse.title}
+                            variant="outlined"
+                            fullWidth
+                            className="m-0"
+                          />
+                        )}
                       />
-                    </Box>
-                    {permissions?.transferAsset?.isCreate &&
-                      getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 &&
-                      !checkUniqWarehouse() && (
-                        <Box pl={1}>
+                    </Grid>
+                  </Grid>
+                )}
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Box display="flex">
+                  <Box flexGrow={1}>
+                    <SearchBox
+                      onSearch={handleSearch}
+                      searchbox="terms_header_search_bar"
+                      value={search}
+                      width={isMobile && !isTablet ? '75%' : '100%'}
+                    />
+                  </Box>
+                  {(Number(tabValue) === 0 || Number(tabValue) === 1) &&
+                    <Fragment>
+                      {permissions?.transferAsset?.isCreate &&
+                        getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 &&
+                        !checkUniqWarehouse() && (
+                          <Box pl={1}>
+                            <Button
+                              size="small"
+                              color="primary"
+                              onClick={() => {
+                                setShowTransferAssetDialog(true);
+                              }}
+                              variant={isMobile && !isTablet ? 'text' : 'contained'}
+                              disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
+                              className={isMobile && !isTablet ? 'mobile_button' : ''}
+                              endIcon={isAdding && <CircularProgress size={20} />}
+                            >
+                              {'Transfer to Job Plant'}
+                              {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                                ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
+                                : ''}
+                            </Button>
+                          </Box>
+                        )}
+                      <Box pl={1}>
+                        <HtmlTooltip
+                          title={
+                            getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()
+                              ? 'Direct transfer to customer location'
+                              : referenceType === 'Rental Job'
+                                ? 'Add to Job'
+                                : referenceType === 'ReplaceAsset'
+                                  ? 'Replace'
+                                  : 'Add'
+                          }
+                        >
                           <Button
-                            size="small"
                             color="primary"
-                            onClick={() => {
-                              setShowTransferAssetDialog(true);
-                            }}
+                            size="small"
+                            onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
                             variant={isMobile && !isTablet ? 'text' : 'contained'}
-                            disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
+                            disabled={
+                              getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 ||
+                              isAdding ||
+                              serializedProducts.some((d) => d?.qty < 0)
+                            }
                             className={isMobile && !isTablet ? 'mobile_button' : ''}
                             endIcon={isAdding && <CircularProgress size={20} />}
                           >
-                            {'Transfer to Job Plant'}
+                            {referenceType === 'Rental Job' ? 'Add to Job' : referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'}
                             {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                               ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
                               : ''}
                           </Button>
-                        </Box>
-                      )}
-                    <Box pl={1}>
-                      <HtmlTooltip
-                        title={
-                          getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()
-                            ? 'Direct transfer to customer location'
-                            : referenceType === 'Rental Job'
-                              ? 'Add to Job'
-                              : referenceType === 'ReplaceAsset'
-                                ? 'Replace'
-                                : 'Add'
-                        }
-                      >
-                        <Button
-                          color="primary"
-                          size="small"
-                          onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          disabled={
-                            getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 ||
-                            isAdding ||
-                            serializedProducts.some((d) => d?.qty < 0)
-                          }
-                          className={isMobile && !isTablet ? 'mobile_button' : ''}
-                          endIcon={isAdding && <CircularProgress size={20} />}
-                        >
-                          {referenceType === 'Rental Job' ? 'Add to Job' : referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'}
-                          {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                            ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
-                            : ''}
-                        </Button>
-                      </HtmlTooltip>
-                    </Box>
-                  </Box>
+                        </HtmlTooltip>
+                      </Box>
+                    </Fragment>
+                  }
+                </Box>
+              </Grid>
+            </Grid>
+            {referenceType === 'Rental Job' && (
+              <Grid container spacing={2}>
+                <Grid item >
+                  <Tabs
+                    className="new-tab-container-v1"
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    value={tabValue}
+                    onChange={handleMainTabChange}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    aria-label="Serialized Asset Tab"
+                    TabIndicatorProps={{
+                      style: {
+                        height: 0
+                      }
+                    }}
+                  >
+                    <Tab className={'tabLayout'}
+                      value={0}
+                      label={<div className="d-flex align-items-center tab-font">Assets</div>}
+                      {...a11yProps(0)}
+                    />
+                    {permissions?.sublease && (
+                      <Tab
+                        className={'tabLayout'}
+                        value={1}
+                        label={<div className="d-flex align-items-center tab-font">Sublease Assets</div>}
+                        {...a11yProps(1)}
+                      />
+                    )}
+                    <Tab
+                      className={'tabLayout'}
+                      value={2}
+                      label={<div className="d-flex align-items-center tab-font">In Use Assets</div>}
+                      {...a11yProps(2)}
+                    />
+                  </Tabs>
                 </Grid>
               </Grid>
-              {
-                referenceType === 'Rental Job' && (
-                  <Grid container spacing={2}>
-                    <Grid item >
-                      <Tabs
-                        className="new-tab-container-v1"
-                        variant="scrollable"
-                        scrollButtons="auto"
-                        value={tabValue}
-                        onChange={handleMainTabChange}
-                        indicatorColor="primary"
-                        textColor="primary"
-                        aria-label="Serialized Asset Tab"
-                        TabIndicatorProps={{
-                          style: {
-                            height: 0
-                          }
-                        }}
-                      >
-                        <Tab className={'tabLayout'} value={0} label={<div className="d-flex align-items-center tab-font">Assets</div>} {...a11yProps(0)} />
-
-                        {permissions?.sublease && (
-                          <Tab
-                            className={'tabLayout'}
-                            value={1}
-                            label={<div className="d-flex align-items-center tab-font">Sublease Assets</div>}
-                            {...a11yProps(1)}
-                          />
-                        )}
-
-                        <Tab
-                          className={'tabLayout'}
-                          value={2}
-                          label={<div className="d-flex align-items-center tab-font">In Use Assets</div>}
-                          {...a11yProps(2)}
-                        />
-
-                      </Tabs>
-                    </Grid>
-                  </Grid>
-                )}
-
-              <div className={'listing-grid'}>
-                {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                  <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    allowAction={false}
-                    loading={loading}
-                    customGridOptions={{ getRowStyle: getRowStyleScheduled }}
-                    renderedFrom={renderedFrom}
-                    showOnlyShowFilteredRecordSwitch={true}
-                    refreshGrid={fetchProductInventory}
-                  />
-                ) : (
-                  <Box p={2} height={500}>
-                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                  </Box>
-                )}
-              </div>
-            </Box>
-          </CustomDialogContent>
-        </Dialog>
-      }
+            )}
+            <div className={'listing-grid'}>
+              {Object.keys(frameWorkComponent).length > 0 && columns ? (
+                <CustomAgGrid
+                  columns={columns}
+                  dataRows={dataRows}
+                  frameworkComponents={frameWorkComponent}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  page={page}
+                  allowAction={false}
+                  loading={loading}
+                  customGridOptions={{ getRowStyle: getRowStyleScheduled }}
+                  renderedFrom={renderedFrom}
+                  showOnlyShowFilteredRecordSwitch={true}
+                  refreshGrid={fetchProductInventory}
+                />
+              ) : (
+                <Box p={2} height={500}>
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
+              )}
+            </div>
+          </Box>
+        </CustomDialogContent>
+      </Dialog>
       {showTransferAssetDialog && (
         <ManageTransferAsset
           isClone={false}
