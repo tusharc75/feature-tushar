@@ -8,12 +8,6 @@ import { CHART_TYPES, FILTERS_OPTIONS, KPIListType, GRAPH_TYPES, IFormDataType, 
 import axiosInstance from 'src/axios/axiosInstance';
 
 const useClasses = makeStyles(() => ({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    height: '100%'
-  },
   column: {
     flexDirection: 'row'
   }
@@ -102,7 +96,7 @@ const Builder = (props: Props) => {
   };
 
   return (
-    <Box component={Paper} p={1.5} className={classes.container}>
+    <Box className={'container-with-border'} p={2}>
       <div>
         <Box>
           <Autocomplete
@@ -244,17 +238,12 @@ const Builder = (props: Props) => {
               }
               label="Exports"
             />
-            {(formValues.chartType === 'Bar' && formValues.kpi.hasOwnProperty('stack')) && 
+            {formValues.chartType === 'Bar' && formValues.kpi.hasOwnProperty('stack') && (
               <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formValues.stack}
-                    onChange={(e) => handleChange('stack', e.target.checked)}
-                  />
-                }
+                control={<Checkbox checked={formValues.stack} onChange={(e) => handleChange('stack', e.target.checked)} />}
                 label="Stack"
               />
-            }
+            )}
           </FormGroup>
         </Box>
 

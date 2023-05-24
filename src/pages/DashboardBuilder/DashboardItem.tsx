@@ -15,6 +15,8 @@ const useClasses = makeStyles((theme: ThemeOptions) => ({
     justifyContent: 'space-between',
     flexDirection: 'column',
     position: 'relative',
+    border: '1px solid var(--common-border-color)',
+    borderRadius: '8px',
 
     '&:hover': {
       icons: {
@@ -25,7 +27,7 @@ const useClasses = makeStyles((theme: ThemeOptions) => ({
   title: {
     fontSize: '16px',
     fontWeight: 500,
-    color: '#555'
+    color: 'var(--dark-primary-text,#555)'
   },
   chartIcon: {
     fontSize: '120px'
@@ -88,14 +90,19 @@ const DashboardItem = ({ id, formData, findCard, moveCard, itemTypes, handleEdit
 
   return (
     <Grid ref={(node) => drag(drop(node))} item xs={formData.column}>
-      <Paper className={classes.paper} style={{ backgroundColor: isEditing ? '#dedede' : 'white' }}>
+      <Box
+        className={classes.paper}
+        style={{
+          backgroundColor: isEditing ? 'var(--dark-primary,#dedede)' : 'var(--dark-secondary, white)'
+        }}
+      >
         <Box style={{ opacity }}>
           <Typography className={classes.title}>{formData.chartTitle}</Typography>
           <p>
             col = {formData.column} ({CHART_TYPE})
           </p>
 
-          <Box mt={2} display='flex' flexDirection='column' alignItems='center'>
+          <Box mt={2} display="flex" flexDirection="column" alignItems="center">
             <RenderIcon type={CHART_TYPE} color="secondary" className={classes.chartIcon} />
             {isEditing && <Typography className={classes.title}>Editing...</Typography>}
           </Box>
@@ -111,7 +118,7 @@ const DashboardItem = ({ id, formData, findCard, moveCard, itemTypes, handleEdit
             </IconButton>
           </Box>
         )}
-      </Paper>
+      </Box>
     </Grid>
   );
 };
