@@ -645,6 +645,11 @@ const UserDetailsPage = () => {
                       setCurrentTabIndex(newValue);
                     }}
                     indicatorColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        display: 'none'
+                      }
+                    }}
                     textColor="primary"
                     aria-label="icon tabs example"
                     TabIndicatorProps={{

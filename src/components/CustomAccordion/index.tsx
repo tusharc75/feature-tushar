@@ -30,7 +30,7 @@ const AccordionSummary = withStyles({
     borderRadius: '3.54532px',
     '&$expanded': {
       minHeight: 48,
-      backgroundColor: 'var(--accordion-expanded-summary-bg, #EFFBF9)',
+      backgroundColor: 'var(--accordion-expanded-summary-bg, #f1f5ff)',
       borderRadius: '3.54532px 3.54532px 0px 0px'
     }
   },

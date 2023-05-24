@@ -37,9 +37,9 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null });
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
-
+  const [material, setMaterial] = useState([]);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
 
@@ -91,11 +91,15 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
+        Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p
               onClick={() => {
-                setIsProductEdit({ open: true, data: row.original });
+                setIsProductEdit({
+                  open: true,
+                  data: row.original,
+                  showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                });
               }}
               className="link text-truncate"
               title={row.original.detail}
@@ -190,7 +194,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
 
     const response = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`);
     data = response?.data?.data;
-
+    setMaterial(JSON.parse(JSON.stringify(data.material)));
     const responseTechnician = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/technician`);
     const technician = responseTechnician?.data?.data;
 
@@ -298,7 +302,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       });
   };
 
-  const handleSaveData = async (rows: any) => {
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
       delete element.srno;
       delete element.detail;
@@ -315,10 +319,24 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     setUpdating(true);
     axiosInstance()
       .put(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`, { material: rows })
-      .then(() => {
+      .then(({ data }) => {
         setUpdating(false);
-        setIsProductEdit({ open: false, data: null });
         fetchProductInventory();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        if (saveAndNext) {
+          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          setIsProductEdit({
+            open: true,
+            data: rowsData[rowIndex + 1],
+            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+          });
+        } else {
+          setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
+        }
       })
       .catch((error) => {
         setUpdating(false);
@@ -516,11 +534,16 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       {isProductEdit.open && (
         <ServiceOrderQty
           onClose={() => {
-            setIsProductEdit({ open: false, data: null });
+            setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
           }}
           rowData={isProductEdit.data}
           serviceOrderData={serviceOrderData}
           handleSaveData={handleSaveData}
+          showSaveAndNext={isProductEdit?.showSaveAndNext}
+          material={material}
+          selectedProducts={selectedProducts}
+          isBulkedit={openBulkEdit.open}
+          loadingEdit={isUpdating}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
