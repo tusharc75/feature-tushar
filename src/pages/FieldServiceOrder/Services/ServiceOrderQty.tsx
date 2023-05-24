@@ -16,26 +16,41 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import moment from 'moment';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
-
+import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
   serviceOrderData: any;
   rowData?: object | any;
+  showSaveAndNext: any;
+  material: any;
+  isBulkedit: any;
+  selectedProducts: any;
+  loadingEdit: any;
 }
 
-const ServiceOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, serviceOrderData, rowData }) => {
+const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
+  onClose,
+  handleSaveData,
+  serviceOrderData,
+  rowData,
+  showSaveAndNext,
+  material,
+  isBulkedit,
+  selectedProducts,
+  loadingEdit
+}) => {
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [saveAndNext, setSaveAndNext] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
     fetchData();
-  }, []);
-
+  }, [rowData]);
   const fetchData = async () => {
     var data = await fetch_service_order_detail_fields(serviceOrderData?.currency);
     let unitOptions: any = [];
@@ -55,10 +70,17 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, s
       }
     });
     let initialValues = getObjKeysWithValues(rowData, data);
-    setInitialData({
-      fields: data,
-      values: initialValues
-    });
+    if (isBulkedit) {
+      setInitialData({
+        fields: data,
+        values: { ...getObjKeys('', data), estimateStartDate: '', estimateEndDate: '', actualStartDate: '', actualEndDate: '', tenure: '' }
+      });
+    } else {
+      setInitialData({
+        fields: data,
+        values: initialValues
+      });
+    }
     EvaluteproductFields(data);
   };
 
@@ -85,7 +107,18 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, s
   };
 
   const handleSubmit = async (values) => {
-    handleSaveData([{ ...rowData, ...values }]);
+    if (isBulkedit) {
+      const rows = bulkUpdate(values, selectedProducts, material, fields, serviceOrderData?.currency);
+      handleSaveData(rows);
+    } else {
+      if (rowData.parentId !== null && !showConfirmationDialog) {
+        setShowConfirmationDialog(true);
+      } else {
+        const rows = await calculateRowsField(material, values, fields, rowData);
+        handleSaveData(rows, saveAndNext);
+        setShowConfirmationDialog(false);
+      }
+    }
   };
 
   function validate(values) {
@@ -107,7 +140,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, s
       open={true}
       fullWidth
     >
-      {initialData && initialData.fields.length ? (
+      {initialData && loadingEdit === false && initialData.fields.length ? (
         <Formik
           innerRef={ref}
           enableReinitialize={true}
@@ -135,6 +168,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, s
                 showManimizeMaximize={true}
               ></CustomDialogHeader>
               <CustomDialogContent>
+                {isBulkedit && <h6 className="form-label-style mb-2">* Please enter value you want to bulk update.</h6>}
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   {fields &&
                     fields.map((section, i) => (
@@ -169,7 +203,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, s
                                     tooltipMessage={field.tooltipMessage}
                                     size="small"
                                   />
-                                ) : ['estimateStartDate', 'estimateEndDate'].includes(field.fieldName) ? (
+                                ) : ['estimateStartDate', 'estimateEndDate'].includes(field.fieldName) && !isBulkedit ? (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
@@ -247,16 +281,34 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, s
                 >
                   {'Close'}
                 </Button>
+
+                {isBulkedit === false && showSaveAndNext && (
+                  <CustomButton
+                    disabled={isEqual(ref?.current?.values, initialData.values)}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(true);
+                      submitForm();
+                    }}
+                  >
+                    {'Save & Next'}
+                  </CustomButton>
+                )}
+
                 <CustomButton
                   loading={false}
                   disabled={isEqual(ref?.current?.values, initialData.values)}
                   variant="contained"
                   color="primary"
                   type="submit"
-                  onClick={submitForm}
+                  onClick={() => {
+                    setSaveAndNext(false);
+                    submitForm();
+                  }}
                 >
-                  {' '}
-                  Save
+                  {'Save'}
                 </CustomButton>
               </CustomDialogFooter>
               {showConfirmationDialog && (

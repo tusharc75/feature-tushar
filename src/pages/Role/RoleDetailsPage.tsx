@@ -53,12 +53,9 @@ const RoleDetailsPage = () => {
     state: { user, permissions, selectedEntity },
     dispatch
   }: any = useData();
-  const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [roleData, setRoleData] = useState(null);
-  const [currentData, setCurrentData] = useState(null);
-  const [updatedData, setUpdatedData] = useState(null);
   const [roleDeleteRec, setRoleDeleteRec] = useState(null);
   const [entityDeleteRec, setEntityDeleteRec] = useState(null);
   const [userDeleteRec, setUserDeleteRec] = useState(null);
@@ -184,7 +181,6 @@ const RoleDetailsPage = () => {
       field,
       resource
     };
-    setUpdatedData(JSON.stringify(data));
   }, [values, field, resource]);
 
   useEffect(() => {
@@ -255,7 +251,6 @@ const RoleDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/role/${id}`);
-      setHeadingLbl(data.name);
       setRoleData(data);
       setValues({ name: data.name, description: data.description });
       setField(data.field);
@@ -266,7 +261,6 @@ const RoleDetailsPage = () => {
         field: data.field,
         resource: data.resource
       };
-      setCurrentData(JSON.stringify(current));
       setCustomizedRoutes([routes.role, { title: data.name }]);
       if (data?.policy) {
         let copyOfResourcePolicy = {};
@@ -511,7 +505,6 @@ const RoleDetailsPage = () => {
                 value={values.name}
                 onChange={(e) => setValues({ ...values, name: e.target.value.trimStart() })}
               />
-
               <TextField
                 disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate}
                 required
@@ -553,28 +546,27 @@ const RoleDetailsPage = () => {
                         permissions={permissions}
                       />
                     )}
-
                     {dashBoardOption?.length > 0 && (
                       <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} />
                     )}
                     <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} />
-
-                    <Box p={1}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name="canAssignByAnyuser"
-                            checked={canAssignByAnyuser}
-                            onChange={(e) => {
-                              setCanAssignByAnyuser(e.target.checked);
-                            }}
-                            color="primary"
-                          />
-                        }
-                        label="Can Assign By Anyuser"
-                      />
-                    </Box>
-
+                    {!isEditDeleteDisable &&
+                      <Box p={1}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name="canAssignByAnyuser"
+                              checked={canAssignByAnyuser}
+                              onChange={(e) => {
+                                setCanAssignByAnyuser(e.target.checked);
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label="Can Assign By Anyuser"
+                        />
+                      </Box>
+                    }
                     <Box p={1} pb={2}>
                       <FormControlLabel
                         control={
@@ -593,9 +585,6 @@ const RoleDetailsPage = () => {
                   </>
                 )
               )}
-              {/* </TableBody>
-                  </Table>
-                </TableContainer> */}
             </Paper>
             <Box marginY={2} />
             {/* {roleData && roleData.type === 2 && (
@@ -790,10 +779,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-              : entityDeleteRec
-              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-              : ''
+                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+                : entityDeleteRec
+                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+                  : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

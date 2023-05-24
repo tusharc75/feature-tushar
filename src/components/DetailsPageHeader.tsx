@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(0.5, 1.5),
     borderRadius: '4px',
     boxShadow: '2px 2px 4px #747474',
-    backgroundColor: '#378280',
+    backgroundColor: 'var(--new_theme_color)',
     opacity: '0.95',
     border: '#03232e',
     // display: "flex",
