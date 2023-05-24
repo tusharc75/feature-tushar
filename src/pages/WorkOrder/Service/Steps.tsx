@@ -84,7 +84,7 @@ const useStyles = makeStyles((theme: Theme) =>
       fontSize: theme.typography.pxToRem(16)
     },
     accordion: {
-      border: '1px solid hsl(0deg 0% 85%)',
+      border: '1px solid var(--common-border-color)',
       '&::before': {
         content: 'unset !important',
         display: 'none'
@@ -140,7 +140,7 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: 'rgba(255,0,0,.1)'
     },
     white: {
-      backgroundColor: 'white'
+      backgroundColor: 'var(--dark-secondary, white)'
     },
     checkbox: {
       padding: '0',
@@ -191,7 +191,6 @@ const Steps = ({
   const [assignSteps, setAssignSteps] = useState(false);
   const [commentsDialog, setCommentsDialog] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
-
 
   const {
     state: {
@@ -595,7 +594,7 @@ const Steps = ({
 
   return serviceDetails ? (
     serviceDetails?.steps?.length ? (
-      <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'white' }}>
+      <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }}>
         {serviceDetails?.steps?.length > 0 && referencType !== 'workOrderTechnician' && (
           <Box p={1}>
             <Grid container justifyContent="flex-end" alignItems="flex-end">
@@ -621,7 +620,7 @@ const Steps = ({
               <Box
                 key={`${step._id}_${selectedService?.uniqueId}}`}
                 border={1}
-                borderColor={'grey.300'}
+                borderColor={'var(--common-border-color)'}
                 style={{
                   cursor: !stepData?.status ? 'default' : 'pointer',
                   transition: 'background .5s ease',
