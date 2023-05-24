@@ -637,7 +637,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                         {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
                                           <Box ml={1}>
                                             <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                              <PeopleIcon style={{ color: '#0A6461', maxWidth: '15px' }} />
+                                              <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
                                             </HtmlTooltip>
                                           </Box>
                                         )}
@@ -906,7 +906,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                               {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
                                                 <Box ml={1}>
                                                   <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                                    <PeopleIcon style={{ color: '#0A6461', maxWidth: '15px' }} />
+                                                    <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
                                                   </HtmlTooltip>
                                                 </Box>
                                               )}
