@@ -652,11 +652,6 @@ const UserDetailsPage = () => {
                     }}
                     textColor="primary"
                     aria-label="icon tabs example"
-                    TabIndicatorProps={{
-                      style: {
-                        display: 'none'
-                      }
-                    }}
                   >
                     <Tab
                       className={'tabLayout'}
