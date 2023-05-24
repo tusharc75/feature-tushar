@@ -26,6 +26,8 @@ import {
   sumOnParent
 } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
+import routes from 'src/components/Helpers/Routes';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -58,6 +60,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   isInlineEdit = false,
   showSaveAndNext = false
 }) => {
+  const toastConfig = useContext(CustomToastContext);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
@@ -71,9 +74,26 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const [fetchingData, setFetchingData] = useState(false);
   const ref = useRef(null);
   const { isOffline } = useContext(CustomOfflineContext);
+
   useEffect(() => {
     fetchData();
   }, [rowData]);
+
+  const allZipCodeWithPrice = async (zipcode: any) => {
+    try {
+      const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode/${zipcode}`);
+      const datas = response?.data?.data?.map((item: any) => {
+        return {
+          optionLabel: item?.taxCode,
+          optionValue: item?._id,
+          taxRate: item?.taxRate
+        };
+      });
+      return datas || [];
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+    }
+  };
 
   const fetchData = async () => {
     setFetchingData(true);
@@ -200,13 +220,23 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     }
   }, [initialData, ref.current, isInlineEdit]);
 
-  const EvaluteproductFields = (fields) => {
+  const EvaluteproductFields = async (fields) => {
     if (isQtyOnly) {
       fields = fields.filter((d) => d.fieldName === 'qty');
     }
     if (isBulkedit && (from === 'product' || from === 'service')) {
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
+    const zipCodeDatas = await allZipCodeWithPrice(rentalManagementData?.billingAddress?.zipCode);
+
+    fields = fields?.map((d) => {
+      if (d?.fieldName === 'taxCode') {
+        return {
+          ...d,
+          option: zipCodeDatas
+        };
+      } else return d;
+    });
     const sections = uniq(map(fields, 'sectionName'));
     const customData = sections.map((name) => {
       let sectionFields = fields.filter((field) => field.sectionName === name);
@@ -578,6 +608,35 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                           size="small"
                                           minDate={rentalManagementData?.estimateStartDate}
                                           maxDate={rentalManagementData?.estimateEndDate}
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Grid>
+                                ) : ['taxCode'].includes(field.fieldName) ? (
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Box display="flex">
+                                      <Box flexGrow={1}>
+                                        <FormTypes
+                                          {...field}
+                                          fields={initialData.fields}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                            const taxCode = field.option?.find((d) => d.optionValue === value);
+                                            setFieldValue('taxPercentage', taxCode?.taxRate || 0);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
                                         />
                                       </Box>
                                     </Box>
