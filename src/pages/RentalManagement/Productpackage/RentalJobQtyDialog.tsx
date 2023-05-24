@@ -79,7 +79,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     fetchData();
   }, [rowData]);
 
-  const allZipCodeWithPrice = async (zipcode: any) => {
+  const fetchTaxRate = async (zipcode: any) => {
     try {
       const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode/${zipcode}`);
       const datas = response?.data?.data?.map((item: any) => {
@@ -227,16 +227,16 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     if (isBulkedit && (from === 'product' || from === 'service')) {
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
-    const zipCodeDatas = await allZipCodeWithPrice(rentalManagementData?.billingAddress?.zipCode);
 
-    fields = fields?.map((d) => {
-      if (d?.fieldName === 'taxCode') {
-        return {
-          ...d,
-          option: zipCodeDatas
-        };
-      } else return d;
-    });
+    if (rentalManagementData?.billingAddress?.zipCode) {
+      const taxCodeOptions = await fetchTaxRate(rentalManagementData?.billingAddress?.zipCode);
+      fields?.forEach((e: any) => {
+        if (e?.fieldName === 'taxCode') {
+          e.option = taxCodeOptions;
+        }
+      })
+    }
+
     const sections = uniq(map(fields, 'sectionName'));
     const customData = sections.map((name) => {
       let sectionFields = fields.filter((field) => field.sectionName === name);
@@ -527,8 +527,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             field.fieldName === 'pricingMethod' && priceConditionList && values['pricingCondition']
                                               ? priceMethodList
                                               : field.fieldName === 'pricingCondition' && values['pricingMethod']
-                                              ? priceConditionList
-                                              : field.option
+                                                ? priceConditionList
+                                                : field.option
                                           }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
