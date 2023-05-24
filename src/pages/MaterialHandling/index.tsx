@@ -54,8 +54,8 @@ const MaterialHandling = () => {
   const fetchData = () => {
     setWorkOrder(null);
     setSelectedWorkOrder(null);
-    setWorkOrderOptions([])
-    setSelectedOptionWorkOrder(null)
+    setWorkOrderOptions([]);
+    setSelectedOptionWorkOrder(null);
     let api = `/material-handling`;
     const filterById: any = [];
     if (selectedWarehouse) {
@@ -72,9 +72,9 @@ const MaterialHandling = () => {
           setSelectedWorkOrder(data[0]);
           const workOrders: any = [];
           data?.forEach((e) => {
-            workOrders.push({ optionLabel: e.workOrderNumber, optionValue: e._id })
-          })
-          setWorkOrderOptions(workOrders)
+            workOrders.push({ optionLabel: e.workOrderNumber, optionValue: e._id });
+          });
+          setWorkOrderOptions(workOrders);
         }
       })
       .catch((error) => {
@@ -125,8 +125,7 @@ const MaterialHandling = () => {
                   setSelectedOptionWorkOrder(val);
                   if (val) {
                     setSelectedWorkOrder(workOrder?.find((e) => e._id === val?.optionValue));
-                  }
-                  else {
+                  } else {
                     if (workOrder?.length) {
                       setSelectedWorkOrder(workOrder[0]);
                     }
@@ -145,7 +144,7 @@ const MaterialHandling = () => {
         </Box>
         {workOrder ? (
           <Grid container spacing={2}>
-            {!selectedOptionWorkOrder &&
+            {!selectedOptionWorkOrder && (
               <Grid item xs={12} lg={3}>
                 <Box className="container-with-border" p={2}>
                   <Box style={{ height: 'calc(100vh - 220px)', overflow: 'auto' }}>
@@ -160,17 +159,20 @@ const MaterialHandling = () => {
                           style={
                             {
                               cursor: 'pointer',
-                              backgroundColor: selectedWorkOrder === data ? '#0f9fa9' : 'var(--dark-secondary, white)',
-                              '--card-color-primary': selectedWorkOrder === data ? 'white' : 'var(--dark-primary-text, #2A3042)',
-                              '--card-color-secondary': selectedWorkOrder === data ? 'white' : 'var(--dark-secondary-text, #5B5B5B)',
-                              border: '1px solid var(--common-border-color)',
+                              backgroundColor: 'var(--dark-secondary, white)',
+                              '--card-color-primary': 'var(--dark-primary-text, #2A3042)',
+                              '--card-color-secondary': 'var(--dark-secondary-text, #5B5B5B)',
+                              border: selectedWorkOrder === data ? '2px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
                               borderRadius: '8px'
                             } as React.CSSProperties
                           }
                         >
                           <Box p={2}>
                             <Box display="flex">
-                              <Typography variant="subtitle2" style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8 }}>
+                              <Typography
+                                variant="subtitle2"
+                                style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8, fontWeight: 600 }}
+                              >
                                 Work Order : <span style={{ color: 'var(--card-color-secondary)' }}>{data?.workOrderNumber}</span>
                               </Typography>
                               <Box pl={1}>
@@ -181,20 +183,20 @@ const MaterialHandling = () => {
                                   aria-label="delete"
                                   size="small"
                                 >
-                                  <OpenInNewIcon fontSize="inherit" />
+                                  <OpenInNewIcon fontSize="inherit" style={{ width: '24', height: '24' }} />
                                 </IconButton>
                               </Box>
                             </Box>
-                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 500 }}>
-                              Product : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 400 }}>{data?.product?.optionLabel}</span>
+                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                              Product : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.product?.optionLabel}</span>
                             </Typography>
-                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 500 }}>
+                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
                               Asset :{' '}
-                              <span style={{ color: 'var(--card-color-secondary)', fontWeight: 400 }}>{data?.serializedAsset?.optionLabel}</span>
+                              <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.serializedAsset?.optionLabel}</span>
                             </Typography>
-                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 500 }}>
+                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 600 }}>
                               {routes.warehouse.title} :{' '}
-                              <span style={{ color: 'var(--card-color-secondary)', fontWeight: 400 }}>{data?.warehouse?.optionLabel}</span>
+                              <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.warehouse?.optionLabel}</span>
                             </Typography>
                           </Box>
                         </Box>
@@ -203,7 +205,7 @@ const MaterialHandling = () => {
                   </Box>
                 </Box>
               </Grid>
-            }
+            )}
             <Grid item xs={12} lg={selectedOptionWorkOrder ? 12 : 9}>
               {selectedWorkOrder && (
                 <Box className="container-with-border " p={3}>
