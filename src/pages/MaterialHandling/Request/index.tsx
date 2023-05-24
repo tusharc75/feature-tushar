@@ -370,9 +370,9 @@ const Request = ({ workOrder }) => {
       </Box>
       <Box pt={2}>
         {rowsData && columns ? (
-          <Box zIndex={5} width={'100%'} height={'calc(100vh - 345px)'}>
+          <Box zIndex={5} width={'100%'} height={'calc(100vh - 290px)'}>
             <CustomReactTable
-              height={'calc(100vh - 280px)'}
+              height={'calc(100vh - 290px)'}
               columns={columns}
               data={rowsData}
               onSelect={setSelectedRecords}
