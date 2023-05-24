@@ -17,10 +17,11 @@
   background: var(--dark-secondary, #f1f5ff);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
   -webkit-gap: 0.5rem;
+  gap: 0.5rem;
   padding: 7% 11%;
   border-radius: 4px;
+  margin-bottom: 15px;
 }
 @supports (not (gap: 0.5rem)) and (not (-webkit-gap: 0.5rem)) {
   .userDetail > *:not(:nth-child(1)) {
