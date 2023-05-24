@@ -125,10 +125,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
 
   useEffect(() => {
-    fetchRepairOrderData();
-  }, []);
+    fetchServiceData();
+  }, [workOrderData]);
 
-  const fetchRepairOrderData = async () => {
+  const fetchServiceData = async () => {
     var quotation: any = null;
     var isQuotation: any = false;
 
@@ -256,7 +256,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/order`, { data: rows || [] })
       .then(({ data }) => {
-        fetchRepairOrderData();
+        fetchServiceData();
         setArrangeView(false);
         toastConfig.setToastConfig({
           open: true,
@@ -273,7 +273,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status, comment })
       .then(({ data: { data } }) => {
-        fetchRepairOrderData();
+        fetchServiceData();
         if (openCompleteDialog) {
           setOpenCompleteDialog(false);
         }
@@ -299,7 +299,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           createNewVersionQuote();
         } else {
-          fetchRepairOrderData();
+          fetchServiceData();
         }
       })
       .catch((err) => {
@@ -321,7 +321,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           createNewVersionQuote();
         } else {
-          fetchRepairOrderData();
+          fetchServiceData();
         }
         if (id === selectedService?.uniqueId) {
           setSelectedService(null);
@@ -336,7 +336,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     axiosInstance()
       .put(`/repair-order/${workOrderData?.repairOrder?.optionValue}/quotation/clone-version`)
       .then(() => {
-        fetchRepairOrderData();
+        fetchServiceData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -763,7 +763,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                         selectedService={selectedService}
                         allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                         setDisableCompleteFail={setDisableCompleteFail}
-                        fetchService={fetchRepairOrderData}
+                        fetchService={fetchServiceData}
                       />
                     ) : (
                       <Box textAlign="center">
@@ -1136,7 +1136,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
           handleSucess={() => {
             setUserAssignDialog(false);
-            fetchRepairOrderData();
+            fetchServiceData();
           }}
         />
       )}
@@ -1175,7 +1175,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         <ConsumablesDialog
           onSuccess={() => {
             setConsumablesDialog({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
-            fetchRepairOrderData();
+            fetchServiceData();
           }}
           handleClose={() => {
             setConsumablesDialog({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
