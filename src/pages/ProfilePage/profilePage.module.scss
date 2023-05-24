@@ -14,13 +14,12 @@
   }
 }
 .userDetail {
-  background: var(--dark-secondary, #ececec);
+  background: var(--dark-secondary, #f1f5ff);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   -webkit-gap: 0.5rem;
   padding: 7% 11%;
-  margin-right: 1rem;
   border-radius: 4px;
 }
 @supports (not (gap: 0.5rem)) and (not (-webkit-gap: 0.5rem)) {

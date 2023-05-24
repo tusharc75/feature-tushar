@@ -323,21 +323,26 @@ export default function ManageProfile(props) {
         ) : null}
         <div style={{ borderRadius: 8, minWidth: '300px' }}>
           {displayUserDetails ? (
-            <Box style={{ padding: '8px' }}>
+            <Box style={{ position: 'relative' }}>
               <Tooltip title="Edit">
-                <IconButton onClick={handleOpenUpdateDialog} style={{ float: 'right', marginBottom: '5px' }}>
+                <IconButton
+                  onClick={handleOpenUpdateDialog}
+                  style={{ position: 'absolute', zIndex: 2, right: '0', padding: '4px', margin: '8px', marginRight: '22px' }}
+                >
                   <HiOutlinePencilAlt color="primary" />
                 </IconButton>
               </Tooltip>
-              {loading || userLoading ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              ) : !userFields.length ? (
-                <Typography>No Data Found</Typography>
-              ) : (
-                <DetailsPage data={userData} fields={filteredUserFields} />
-              )}
+              <Box mb={2}>
+                {loading || userLoading ? (
+                  <Grid container spacing={2} style={{ padding: '8px' }}>
+                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  </Grid>
+                ) : !userFields.length ? (
+                  <Typography>No Data Found</Typography>
+                ) : (
+                  <DetailsPage data={userData} fields={filteredUserFields} />
+                )}
+              </Box>
               <div className="detail-box">
                 <div className={'detail-box-content'}>
                   <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
