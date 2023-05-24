@@ -149,25 +149,25 @@ const Request = ({ workOrder }) => {
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-          {
-            accessor: 'storageLocation',
-            Header: 'Storage Location',
-            width: 200,
-            Cell: ({ row }) => {
-              return row?.original['storageLocation'] ? (
-                <a
-                  className="link text-truncate"
-                  href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
-                  target="_blank"
-                >
-                  {row?.original['storageLocation']}
-                </a>
-              ) : (
-                <NoDataCell />
-              );
+            {
+              accessor: 'storageLocation',
+              Header: 'Storage Location',
+              width: 200,
+              Cell: ({ row }) => {
+                return row?.original['storageLocation'] ? (
+                  <a
+                    className="link text-truncate"
+                    href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
+                    target="_blank"
+                  >
+                    {row?.original['storageLocation']}
+                  </a>
+                ) : (
+                  <NoDataCell />
+                );
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'requestBy',
@@ -306,8 +306,17 @@ const Request = ({ workOrder }) => {
   return (
     <>
       <Box display="flex" justifyContent={'space-between'}>
-        <Box >
-          <Typography variant="subtitle2" style={{ color: 'var(--card-color-primary)', fontSize: 15 }}>
+        <Box>
+          <Typography
+            variant="subtitle2"
+            style={{
+              color: 'var(--card-color-primary)',
+              fontSize: 15,
+              background: 'var(--dark-secondary, #F1F5FF)',
+              padding: '8px 40px 8px 10px',
+              borderRadius: '8px 4px'
+            }}
+          >
             Consumables Requests
           </Typography>
         </Box>
@@ -315,7 +324,7 @@ const Request = ({ workOrder }) => {
           <Button
             disabled={
               selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+              selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -363,7 +372,7 @@ const Request = ({ workOrder }) => {
         {rowsData && columns ? (
           <Box zIndex={5} width={'100%'} height={'calc(100vh - 345px)'}>
             <CustomReactTable
-              height={'calc(100vh - 345px)'}
+              height={'calc(100vh - 280px)'}
               columns={columns}
               data={rowsData}
               onSelect={setSelectedRecords}
