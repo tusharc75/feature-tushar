@@ -667,7 +667,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                     : '#FF8C21',
                                                 background:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                    ? '#E1FCE3'
+                                                    ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
+                                                      ? '#E1FCE3'
+                                                      : '#FFECEB'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
                                                     ? '#fabebe'
                                                     : '#FFF5DD',
