@@ -44,6 +44,7 @@ import { isArray, reverse } from 'lodash';
 import AttachmentDialog from './AttachmentDialog';
 import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
+import { PassIcon, FailIcon } from 'src/assets/svg/svgIcons';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -125,10 +126,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
 
   useEffect(() => {
-    fetchRepairOrderData();
-  }, []);
+    fetchServiceData();
+  }, [workOrderData]);
 
-  const fetchRepairOrderData = async () => {
+  const fetchServiceData = async () => {
     var quotation: any = null;
     var isQuotation: any = false;
 
@@ -256,7 +257,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/order`, { data: rows || [] })
       .then(({ data }) => {
-        fetchRepairOrderData();
+        fetchServiceData();
         setArrangeView(false);
         toastConfig.setToastConfig({
           open: true,
@@ -273,7 +274,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status, comment })
       .then(({ data: { data } }) => {
-        fetchRepairOrderData();
+        fetchServiceData();
         if (openCompleteDialog) {
           setOpenCompleteDialog(false);
         }
@@ -299,7 +300,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           createNewVersionQuote();
         } else {
-          fetchRepairOrderData();
+          fetchServiceData();
         }
       })
       .catch((err) => {
@@ -321,7 +322,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           createNewVersionQuote();
         } else {
-          fetchRepairOrderData();
+          fetchServiceData();
         }
         if (id === selectedService?.uniqueId) {
           setSelectedService(null);
@@ -336,7 +337,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     axiosInstance()
       .put(`/repair-order/${workOrderData?.repairOrder?.optionValue}/quotation/clone-version`)
       .then(() => {
-        fetchRepairOrderData();
+        fetchServiceData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -380,7 +381,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderLeftWidth: '1px',
         borderRightWidth: '1px',
         borderStyle: 'solid',
-        borderColor: 'rgba(25, 24, 24, 0.19)',
+        borderColor: 'var(--dark-mode-border-color, rgba(25, 24, 24, 0.19))',
         cursor: allowedToEdit ? 'pointer' : 'not-allowed',
         // pointerEvents: 'none',
         opacity: '.5',
@@ -485,6 +486,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               }}
             >
               <Box className="container-with-border" p={'20px'}>
+                {/* ------------------ TOP BUTTONS ------------------ */}
                 <Box
                   mb={1}
                   display="flex"
@@ -528,6 +530,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                     </IconButton>
                   )}
                 </Box>
+                {/* ------------------ LEFT SIDE CONTENTS ------------------ */}
                 <Box
                   sx={{ height: mobScreen ? 'unset' : 'calc(100vh - 300px)', display: { xs: 'flex', sm: 'block' } }}
                   style={{
@@ -568,7 +571,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                     alignItems: 'center',
                                     position: 'relative',
                                     paddingLeft: !isColapsed && data?.type !== 'quotation' ? '20px' : '',
-                                    gap: '5px'
+                                    gap: '10px'
                                   }}
                                 >
                                   {/* Serial Number or Quote icon */}
@@ -609,7 +612,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                         }}
                                       >
                                         <Box ml={'10px'}>
-                                          <Typography>{data?.serviceName}</Typography>
+                                          <Typography style={{ fontWeight: 600 }}>{data?.serviceName}</Typography>
                                         </Box>
 
                                         {/* Icons */}
@@ -630,23 +633,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             )}
                                           </Box>
                                         )}
-                                        {/* PassFail */}
-                                        <>
-                                          {data?.type === 'service' && data?.serviceStatus && (
-                                            <Box ml={1}>
-                                              <RenderStatusIcon stepStatus={data?.serviceStatus} />
-                                            </Box>
-                                          )}
-                                          {data?.type === 'quotation' && quotationData && (
-                                            <Box ml={1}>
-                                              <RenderStatusIcon stepStatus={quotationData?.status} />
-                                            </Box>
-                                          )}
-                                        </>
+
                                         {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
                                           <Box ml={1}>
                                             <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                              <PeopleIcon style={{ color: '#0A6461', maxWidth: '15px' }} />
+                                              <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
                                             </HtmlTooltip>
                                           </Box>
                                         )}
@@ -668,13 +659,17 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                     : '#FFF5DD',
                                                 color:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                    ? '#048E0A'
+                                                    ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
+                                                      ? '#059825'
+                                                      : '#EE0E06'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
                                                     ? '#fa0202'
                                                     : '#FF8C21',
                                                 background:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                    ? '#E1FCE3'
+                                                    ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
+                                                      ? '#E1FCE3'
+                                                      : '#FFECEB'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
                                                     ? '#fabebe'
                                                     : '#FFF5DD',
@@ -699,7 +694,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                 <>
                                   {data?.type === 'service' && (
                                     <Grid item xs={2} container justify="flex-end">
-                                      <div style={{ display: 'flex' }}>
+                                      <div>
                                         <IconButton
                                           size="small"
                                           color="primary"
@@ -712,6 +707,21 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                         >
                                           <MoreHorizIcon />
                                         </IconButton>
+                                        {/* PassFail */}
+                                        <>
+                                          {data?.type === 'service' && data?.serviceStatus && (
+                                            <RenderStatusIcon
+                                              style={{ maxWidth: 24, height: 24, margin: '5px auto 0' }}
+                                              stepStatus={data?.serviceStatus}
+                                            />
+                                          )}
+                                          {data?.type === 'quotation' && quotationData && (
+                                            <RenderStatusIcon
+                                              style={{ maxWidth: 24, height: 24, margin: '5px auto 0' }}
+                                              stepStatus={quotationData?.status}
+                                            />
+                                          )}
+                                        </>
                                       </div>
                                     </Grid>
                                   )}
@@ -758,7 +768,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                         selectedService={selectedService}
                         allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                         setDisableCompleteFail={setDisableCompleteFail}
-                        fetchService={fetchRepairOrderData}
+                        fetchService={fetchServiceData}
                       />
                     ) : (
                       <Box textAlign="center">
@@ -822,7 +832,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                           alignItems: 'center',
                                           position: 'relative',
                                           paddingLeft: !isColapsed && data?.type !== 'quotation' ? '20px' : '',
-                                          gap: '5px'
+                                          gap: '10px'
                                         }}
                                       >
                                         {data?.type === 'service' ? (
@@ -896,7 +906,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                               {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
                                                 <Box ml={1}>
                                                   <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                                    <PeopleIcon style={{ color: '#0A6461', maxWidth: '15px' }} />
+                                                    <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
                                                   </HtmlTooltip>
                                                 </Box>
                                               )}
@@ -1131,7 +1141,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
           handleSucess={() => {
             setUserAssignDialog(false);
-            fetchRepairOrderData();
+            fetchServiceData();
           }}
         />
       )}
@@ -1170,7 +1180,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         <ConsumablesDialog
           onSuccess={() => {
             setConsumablesDialog({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
-            fetchRepairOrderData();
+            fetchServiceData();
           }}
           handleClose={() => {
             setConsumablesDialog({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
@@ -1271,20 +1281,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
 
 export default Service;
 
-const RenderStatusIcon = ({ stepStatus }: { stepStatus: string }) => {
+const RenderStatusIcon = ({ stepStatus, style = {}, ...others }: { stepStatus: string; style?: React.CSSProperties }) => {
   return (
     <>
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.passed && (
         <HtmlTooltip title={stepStatus}>
-          <Box style={{ color: '#059825' }}>
-            <AiFillCheckCircle style={{ display: 'block' }} />
+          <Box style={{ ...style, color: '#059825' }} {...others}>
+            <PassIcon style={{ display: 'block', width: '100%', height: '100%' }} />
           </Box>
         </HtmlTooltip>
       )}
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.failed && (
         <HtmlTooltip title={stepStatus}>
-          <Box style={{ color: '#F26969' }}>
-            <AiFillExclamationCircle style={{ display: 'block' }} />
+          <Box style={{ ...style, color: '#EE0E06' }} {...others}>
+            <FailIcon style={{ display: 'block', width: '100%', height: '100%' }} />
           </Box>
         </HtmlTooltip>
       )}
