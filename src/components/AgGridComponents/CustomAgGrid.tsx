@@ -20,6 +20,7 @@ import CustomGridFilterHeader from './CustomGridFilterHeader';
 
 // OTHER COMPONENTS
 import { ShowOnlySelected } from './GridButtons';
+import { Typography } from '@material-ui/core';
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -440,7 +441,7 @@ export default function CustomAgGrid({
       <div className="ag-grid-main custom-react-table-v1 ">
         {loading ? (
           <div className="loader">
-            <span>Loading</span>
+            <Typography>Loading</Typography>
           </div>
         ) : (
           ''
