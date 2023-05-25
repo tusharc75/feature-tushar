@@ -27,6 +27,7 @@ function ProcessLogs({ onClose, logsData, productName }) {
             {
                 accessor: 'qty',
                 Header: 'Processed Qty',
+                primaryField: true,
                 width: 150,
                 Cell: ({ row }) => {
                     return row?.original['qty'] ? <p className="text-truncate">{row?.original['qty']}</p> : <NoDataCell />;
