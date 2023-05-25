@@ -67,7 +67,7 @@ const CreateProductBuilder = () => {
   };
 
   return (
-    <Fragment>
+    <Box className="main-container-v1">
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs
@@ -89,7 +89,7 @@ const CreateProductBuilder = () => {
           <Formik initialValues={initialValues} validationSchema={ProductBuilderSchema} onSubmit={handleSave}>
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Form>
-                <Box p={1} bgcolor="white">
+                <Box p={1}>
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={3}>
                       <TextField fullWidth margin="dense" type="text" label="Name" name="name" variant="outlined" disabled={true} />
@@ -133,9 +133,19 @@ const CreateProductBuilder = () => {
                   </Grid>
                 </Box>
                 <Box p={1}>
-                  <Tabs className="oms-tab" indicatorColor="primary" textColor="primary" value={tabIndex} onChange={handleChange}>
-                    <Tab label="Product" />
-                    <Tab label="Cost" />
+                  <Tabs
+                    className="new-tab-container-v1"
+                    textColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        display: 'none'
+                      }
+                    }}
+                    value={tabIndex}
+                    onChange={handleChange}
+                  >
+                    <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Product</div>} />
+                    <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Cost</div>} />
                     {/* <Tab label="All" /> */}
                   </Tabs>
                 </Box>
@@ -273,7 +283,7 @@ const CreateProductBuilder = () => {
           </Box>
         )}
       </CustomContainer>
-    </Fragment>
+    </Box>
   );
 };
 

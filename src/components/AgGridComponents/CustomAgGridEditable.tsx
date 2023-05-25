@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TablePagination } from '@material-ui/core';
+import { TablePagination, Typography } from '@material-ui/core';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AgGridHeaderHeight, AgGridFloatingFiltersHeight, AgGridRowHeight, gridPageSizes } from '../../constants/helpers';
@@ -337,8 +337,8 @@ export default function CustomAgGridEditable({
               ? true
               : checkStaticField(renderedFrom, column.field)
             : column.hasOwnProperty('show') && !column?.show
-              ? true
-              : false
+            ? true
+            : false
         }
         valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
@@ -374,8 +374,8 @@ export default function CustomAgGridEditable({
               ? true
               : checkStaticField(renderedFrom, column.field)
             : column.hasOwnProperty('show') && !column?.show
-              ? true
-              : false
+            ? true
+            : false
         }
         valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
@@ -384,10 +384,10 @@ export default function CustomAgGridEditable({
 
   return (
     <>
-      <div className="ag-grid-main">
+      <div className="ag-grid-main custom-react-table-v1">
         {loading ? (
           <div className="loader">
-            <span>Loading</span>
+            <Typography>Loading</Typography>
           </div>
         ) : (
           ''
@@ -441,14 +441,14 @@ export default function CustomAgGridEditable({
                   rowClassRules
                     ? rowClassRules
                     : {
-                      'red-data-row':
-                        forProductBuilder &&
-                        function (params) {
-                          const tsp = params.data[`totalSalesPrice_${currency}`] || 0;
-                          const qty = params.data.qty;
-                          return qty === 0 || tsp === 0;
-                        }
-                    }
+                        'red-data-row':
+                          forProductBuilder &&
+                          function (params) {
+                            const tsp = params.data[`totalSalesPrice_${currency}`] || 0;
+                            const qty = params.data.qty;
+                            return qty === 0 || tsp === 0;
+                          }
+                      }
                 }
                 onGridReady={onGridReady}
                 suppressDragLeaveHidesColumns={true}
@@ -587,7 +587,7 @@ export default function CustomAgGridEditable({
                 suppressPaginationPanel={true}
                 paginationPageSize={limit}
                 rowDragManaged={enableRowDrag}
-              // stopEditingWhenCellsLoseFocus={true}
+                // stopEditingWhenCellsLoseFocus={true}
               >
                 {allowSelection && (
                   <AgGridColumn

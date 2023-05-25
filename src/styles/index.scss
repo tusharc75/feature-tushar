@@ -2747,6 +2747,17 @@ svg.MuiSvgIcon-root {
     font-size: 19px;
   }
 }
+.inverted {
+  .new-headerbox-button-v1 {
+    [data-mode='dark'] & {
+      background-color: var(--dark-secondary);
+      border: 1px solid var(--dark-secondary);
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.04);
+      }
+    }
+  }
+}
 
 // .MuiTextField-root {
 //   .MuiFormLabel-root {
