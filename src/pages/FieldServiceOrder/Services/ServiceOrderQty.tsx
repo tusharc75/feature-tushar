@@ -52,6 +52,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
     fetchData();
   }, [rowData]);
   const fetchData = async () => {
+    setInitialData({ fields: [], values: {} });
     var data = await fetch_service_order_detail_fields(serviceOrderData?.currency);
     let unitOptions: any = [];
     let pricingMethodOptions: any = [];
@@ -140,7 +141,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
       open={true}
       fullWidth
     >
-      {initialData && loadingEdit === false && initialData.fields.length ? (
+      {initialData && initialData.fields.length ? (
         <Formik
           innerRef={ref}
           enableReinitialize={true}
@@ -284,7 +285,8 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
 
                 {isBulkedit === false && showSaveAndNext && (
                   <CustomButton
-                    disabled={isEqual(ref?.current?.values, initialData.values)}
+                    loading={loadingEdit}
+                    disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
                     variant="contained"
                     color="primary"
                     type="submit"
@@ -298,8 +300,8 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
                 )}
 
                 <CustomButton
-                  loading={false}
-                  disabled={isEqual(ref?.current?.values, initialData.values)}
+                  loading={loadingEdit}
+                  disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
                   variant="contained"
                   color="primary"
                   type="submit"
