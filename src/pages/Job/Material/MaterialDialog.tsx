@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState, useRef } from 'react';
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
@@ -10,16 +10,17 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import axiosInstance from 'src/axios/axiosInstance';
 import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { uniq, map, orderBy } from 'lodash';
+import { uniq, map, orderBy, isEqual } from 'lodash';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const MaterialDialog = ({ onClose, materialData, jobData, handleUpdate, loadingEdit, bulkEdit }) => {
+const MaterialDialog = ({ onClose, materialData, jobData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [allFields, setAllFields] = useState([]);
+  const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
@@ -86,6 +87,7 @@ const MaterialDialog = ({ onClose, materialData, jobData, handleUpdate, loadingE
     >
       {initialData && initialData.fields.length ? (
         <Formik
+          innerRef={ref}
           enableReinitialize={true}
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
@@ -187,9 +189,25 @@ const MaterialDialog = ({ onClose, materialData, jobData, handleUpdate, loadingE
                 >
                   {'Close'}
                 </Button>
+                {bulkEdit === false && showSaveAndNext && (
+                  <CustomButton
+                    loading={loadingEdit}
+                    disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(true);
+                      submitForm();
+                    }}
+                  >
+                    {' '}
+                    Save & Next
+                  </CustomButton>
+                )}
                 <CustomButton
                   loading={loadingEdit}
-                  disabled={loadingEdit}
+                  disabled={isEqual(ref?.current?.values, initialData.values) || loadingEdit}
                   variant="contained"
                   color="primary"
                   type="submit"
