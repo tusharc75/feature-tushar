@@ -101,6 +101,7 @@ const Request = ({ workOrder }) => {
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
           width: 200,
+          primaryField: true,
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.product?.optionValue}`} target="_blank">
@@ -127,6 +128,7 @@ const Request = ({ workOrder }) => {
         accessor: 'qty',
         Header: 'Requested Qty',
         width: 150,
+        primaryField: true,
         Cell: ({ row }) => {
           return row.original['qty'] ? <p className="text-truncate">{row.original['qty']}</p> : <NoDataCell />;
         }
@@ -134,6 +136,7 @@ const Request = ({ workOrder }) => {
       {
         accessor: 'processedQty',
         Header: 'Processed Qty',
+        primaryField: true,
         width: 150,
         Cell: ({ row }) => {
           return row.original['processedQty'] ? <p className="text-truncate">{row.original['processedQty']}</p> : <NoDataCell />;
@@ -142,6 +145,7 @@ const Request = ({ workOrder }) => {
       {
         accessor: 'status',
         Header: 'Status',
+        primaryField: true,
         width: 200,
         Cell: ({ row }) => {
           return row.original['status'] ? <p className="text-truncate">{row.original['status']}</p> : <NoDataCell />;
@@ -149,25 +153,25 @@ const Request = ({ workOrder }) => {
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-          {
-            accessor: 'storageLocation',
-            Header: 'Storage Location',
-            width: 200,
-            Cell: ({ row }) => {
-              return row?.original['storageLocation'] ? (
-                <a
-                  className="link text-truncate"
-                  href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
-                  target="_blank"
-                >
-                  {row?.original['storageLocation']}
-                </a>
-              ) : (
-                <NoDataCell />
-              );
+            {
+              accessor: 'storageLocation',
+              Header: 'Storage Location',
+              width: 200,
+              Cell: ({ row }) => {
+                return row?.original['storageLocation'] ? (
+                  <a
+                    className="link text-truncate"
+                    href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
+                    target="_blank"
+                  >
+                    {row?.original['storageLocation']}
+                  </a>
+                ) : (
+                  <NoDataCell />
+                );
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'requestBy',
@@ -306,8 +310,17 @@ const Request = ({ workOrder }) => {
   return (
     <>
       <Box display="flex" justifyContent={'space-between'}>
-        <Box >
-          <Typography variant="subtitle2" style={{ color: 'var(--card-color-primary)', fontSize: 15 }}>
+        <Box>
+          <Typography
+            variant="subtitle2"
+            style={{
+              color: 'var(--card-color-primary)',
+              fontSize: 15,
+              background: 'var(--dark-secondary, #F1F5FF)',
+              padding: '8px 40px 8px 10px',
+              borderRadius: '8px 4px'
+            }}
+          >
             Consumables Requests
           </Typography>
         </Box>
@@ -315,7 +328,7 @@ const Request = ({ workOrder }) => {
           <Button
             disabled={
               selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+              selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -361,9 +374,9 @@ const Request = ({ workOrder }) => {
       </Box>
       <Box pt={2}>
         {rowsData && columns ? (
-          <Box zIndex={5} width={'100%'} height={'calc(100vh - 345px)'}>
+          <Box zIndex={5} width={'100%'} height={'calc(100vh - 290px)'}>
             <CustomReactTable
-              height={'calc(100vh - 345px)'}
+              height={'calc(100vh - 290px)'}
               columns={columns}
               data={rowsData}
               onSelect={setSelectedRecords}

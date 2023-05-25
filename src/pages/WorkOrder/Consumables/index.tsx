@@ -69,6 +69,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
           width: 200,
+          primaryField: true,
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
@@ -116,6 +117,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       {
         accessor: 'qty',
         Header: 'Qty',
+        primaryField: true,
         editable: allowedToEdit,
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
@@ -133,6 +135,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       {
         accessor: 'consumedQty',
         Header: 'Consumed Qty',
+        primaryField: true,
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
       },
