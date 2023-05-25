@@ -259,7 +259,7 @@ export default function useColumns() {
                 ? routes[joinedFieldName]?.path
                 : routes[`${joinedFieldName}Detail`]?.path
                   ? routes[`${joinedFieldName}Detail`]?.path
-                  : '';
+                  : `${camelCase(field?.lookupResource)}/detail`;
         }
         return {
           columnData: {
