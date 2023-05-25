@@ -10,13 +10,19 @@ import Request from './Request';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Autocomplete } from '@material-ui/lab';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import queryString from 'query-string';
+import { useHistory } from 'react-router-dom';
 
 const MaterialHandling = () => {
   const toastConfig = useContext(CustomToastContext);
 
+  const history = useHistory();
+
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
+
+  const { workOrder: workOrderId } = queryString.parse(window.location.search);
 
   const [workOrder, setWorkOrder] = useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
@@ -75,6 +81,9 @@ const MaterialHandling = () => {
             workOrders.push({ optionLabel: e.workOrderNumber, optionValue: e._id });
           });
           setWorkOrderOptions(workOrders);
+          if (workOrderId && workOrders?.find((e) => e.optionValue === workOrderId)) {
+            setSelectedOptionWorkOrder(workOrders?.find((e) => e.optionValue === workOrderId));
+          }
         }
       })
       .catch((error) => {
@@ -129,6 +138,9 @@ const MaterialHandling = () => {
                     if (workOrder?.length) {
                       setSelectedWorkOrder(workOrder[0]);
                     }
+                  }
+                  if(workOrderId){
+                    history.push(routes.materialHandling.path)
                   }
                 }}
                 size="small"
