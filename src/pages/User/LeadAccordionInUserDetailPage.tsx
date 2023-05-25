@@ -18,7 +18,7 @@ import ManageLeadDialog from '../Leads/ManageLeadDialog/ManageLeadDialog';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
 import { MoreVert } from '@material-ui/icons';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import DisplayData from 'src/CardDisplayData';
+import DisplayData from 'src/components/CardDisplayData';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 
 export default function LeadAccordionInUserDetailPage({ leads, expanded = true, recordsPerLine = 3, userId, onSuccess, isAllowedToEdit }) {

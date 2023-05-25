@@ -31,7 +31,7 @@ import { MoreVert } from '@material-ui/icons';
 import AssignProjectSalesDialog from '../AssignRolesDialog/AssignProjectSalesDialog';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
-import DisplayData from 'src/CardDisplayData';
+import DisplayData from 'src/components/CardDisplayData';
 
 export default function ProjectInAccordion({
   expanded = true,
