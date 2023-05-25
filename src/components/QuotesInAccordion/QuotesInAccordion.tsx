@@ -39,7 +39,7 @@ import routes from '../Helpers/Routes';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
-import DisplayData from 'src/CardDisplayData';
+import DisplayData from 'src/components/CardDisplayData';
 
 export default function QuotesInAccordion({
   expanded = false,

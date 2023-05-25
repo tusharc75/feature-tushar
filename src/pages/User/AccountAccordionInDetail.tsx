@@ -31,7 +31,7 @@ import { AiOutlinePhone } from 'react-icons/ai';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
 import { MoreVert } from '@material-ui/icons';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-import DisplayData from 'src/CardDisplayData';
+import DisplayData from 'src/components/CardDisplayData';
 
 export default function AccountAccordionDetail({ accounts, type, expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit }) {
   const {

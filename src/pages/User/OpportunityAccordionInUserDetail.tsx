@@ -32,7 +32,7 @@ import { MoreVert } from '@material-ui/icons';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-import DisplayData from 'src/CardDisplayData';
+import DisplayData from 'src/components/CardDisplayData';
 
 export default function OpportunityAccordionInUserDetail({ opportunities, expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit }) {
   const history = useHistory();
