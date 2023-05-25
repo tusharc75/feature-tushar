@@ -46,7 +46,8 @@ export default function ImportExportLinks({
   onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
-  extraImportExportLinks = []
+  extraImportExportLinks = [],
+  inverted = false
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -334,7 +335,7 @@ export default function ImportExportLinks({
   };
 
   return (
-    <div className={module !== 'builder' ? classes.root : classes.custom_root}>
+    <div className={`${module !== 'builder' ? classes.root : classes.custom_root} ${inverted ? 'inverted' : ''}`}>
       <div className={classes.linksContainer}>
         {permissions?.isCreate && (
           <label
