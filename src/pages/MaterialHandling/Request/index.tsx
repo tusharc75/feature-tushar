@@ -101,6 +101,7 @@ const Request = ({ workOrder }) => {
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
           width: 200,
+          primaryField: true,
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.product?.optionValue}`} target="_blank">
@@ -127,6 +128,7 @@ const Request = ({ workOrder }) => {
         accessor: 'qty',
         Header: 'Requested Qty',
         width: 150,
+        primaryField: true,
         Cell: ({ row }) => {
           return row.original['qty'] ? <p className="text-truncate">{row.original['qty']}</p> : <NoDataCell />;
         }
@@ -134,6 +136,7 @@ const Request = ({ workOrder }) => {
       {
         accessor: 'processedQty',
         Header: 'Processed Qty',
+        primaryField: true,
         width: 150,
         Cell: ({ row }) => {
           return row.original['processedQty'] ? <p className="text-truncate">{row.original['processedQty']}</p> : <NoDataCell />;
@@ -142,6 +145,7 @@ const Request = ({ workOrder }) => {
       {
         accessor: 'status',
         Header: 'Status',
+        primaryField: true,
         width: 200,
         Cell: ({ row }) => {
           return row.original['status'] ? <p className="text-truncate">{row.original['status']}</p> : <NoDataCell />;

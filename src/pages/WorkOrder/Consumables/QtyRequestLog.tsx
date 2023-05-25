@@ -42,6 +42,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName }) {
       {
         accessor: 'requestDate',
         Header: 'Requested Date',
+        primaryField: true,
         width: 200,
         Cell: ({ row }) => {
           return row?.original['requestDate'] ? (
@@ -65,6 +66,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName }) {
       {
         accessor: 'qty',
         Header: 'Requested Qty',
+        primaryField: true,
         width: 150,
         Cell: ({ row }) => {
           return row?.original['qty'] ? <p className="text-truncate">{row?.original['qty']}</p> : <NoDataCell />;
@@ -73,6 +75,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName }) {
       {
         accessor: 'processedQty',
         Header: 'Processed Qty',
+        primaryField: true,
         width: 150,
         Cell: ({ row }) => {
           return row?.original['processedQty'] ? <p className="text-truncate">{row?.original['processedQty']}</p> : <NoDataCell />;
@@ -81,6 +84,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName }) {
       {
         accessor: 'status',
         Header: 'Status',
+        primaryField: true,
         width: 150,
         Cell: ({ row }) => {
           return row?.original['status'] ? <p className="text-truncate">{row?.original['status']}</p> : <NoDataCell />;
