@@ -15,7 +15,7 @@ import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { useData } from '../../StateProvider/Provider';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-import DisplayData from 'src/CardDisplayData';
+import DisplayData from 'src/components/CardDisplayData';
 
 export default function AccordionOfOpportunity({ opportunity, expanded = true, recordsPerLine = 2 }) {
   const {
