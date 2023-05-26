@@ -302,7 +302,8 @@
 }
 
 .viewAll {
-  display: block;
+  display: flex;
+  align-items: center;
   border: 0;
   background-color: transparent;
   outline: none;
@@ -319,8 +320,8 @@
     }
   }
   svg {
-    vertical-align: middle;
-    margin-left: 6px;
+    display: block;
+    margin-left: 10px;
     transition: margin 0.3s, color 0.3s;
     color: inherit;
   }
@@ -352,8 +353,13 @@
     --hor-gap: 25px;
   }
   &:hover {
-    .viewAll svg {
-      margin-left: 10px;
+    .viewAll {
+      span {
+        color: var(--link);
+      }
+      svg {
+        margin-left: 15px;
+      }
     }
   }
   text-align: left;
@@ -380,7 +386,7 @@
     max-width: max-content;
   }
   .colabLogo {
-    max-width: 72px;
+    max-width: 60px;
     margin-bottom: var(--image-mb, 15px);
   }
   h2 {
