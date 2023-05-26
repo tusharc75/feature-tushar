@@ -17,7 +17,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 
-const History = ({ handleClose, product, productName, poId, _id }) => {
+const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueId }) => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
@@ -36,7 +36,7 @@ const History = ({ handleClose, product, productName, poId, _id }) => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${purchaseOrder.api}/${poId}/ledger/${_id}/${product}`)
+      .get(`/ledger/${referenceId}/${uniqueId}/${product}`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
@@ -193,4 +193,4 @@ const History = ({ handleClose, product, productName, poId, _id }) => {
   );
 };
 
-export default History;
+export default LedgerHistory;
