@@ -139,6 +139,15 @@ const Report = () => {
         cellRenderer: 'commonRenderer'
       });
     }
+    if (resourceStartCase === 'Work Order') {
+      columns.push({
+        field: 'totalConsumablesCost',
+        headerName: 'Total Consumables Cost',
+        show: true,
+        disabled: false,
+        cellRenderer: 'commonRenderer'
+      });
+    }
     setColumns([...columns]);
     setLoadingColumns(false);
   };
@@ -202,9 +211,17 @@ const Report = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
+    let api = null;
+    if (resourceCamelCase === 'workOrder') {
+      api = `${routes[resourceCamelCase].path}/${filterQuery}report=1`;
+    } else if (resourceCamelCase === 'quotes') {
+      api = `quote-builder/report${filterQuery}`;
+    } else {
+      api = `${routes[resourceCamelCase].path}/report${filterQuery}`;
+    }
 
     axiosInstance()
-      .get(`${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report${filterQuery}`, {
+      .get(api, {
         cancelToken: cancelTokenSource.token
       })
       .then(({ data: { data, count } }) => {
@@ -273,14 +290,12 @@ const Report = () => {
 
         forDeepFilter.forEach((key) => {
           const options = selectedData[key].value;
-          if (selectedData[key].type === "dropDown") {
+          if (selectedData[key].type === 'dropDown') {
             deepFilter.push({
               field: key,
               term: options.map((d: any) => d.optionValue)
             });
-
-          }
-          else {
+          } else {
             options.forEach((o: any) => {
               deepFilter.push({
                 field: key,
@@ -346,15 +361,19 @@ const Report = () => {
     }
     setExporting(true);
     let filterQuery = getFilter(true);
+    let api = null;
+    if (resourceCamelCase === 'workOrder') {
+      api = `${routes[resourceCamelCase].path}/template/${filterQuery}export=true&report=1`;
+    } else if (resourceCamelCase === 'quotes') {
+      api = `quote-builder/report/export?exportColumn=${JSON.stringify(columns)}&export=1&${filterQuery}`;
+    } else {
+      api = `${routes[resourceCamelCase].path}/report/export?exportColumn=${JSON.stringify(columns)}&export=1&${filterQuery}`;
+    }
+
     axiosInstance()
-      .get(
-        `${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report/export?exportColumn=${JSON.stringify(
-          columns
-        )}&export=1&${filterQuery}`,
-        {
-          responseType: 'arraybuffer'
-        }
-      )
+      .get(api, {
+        responseType: 'arraybuffer'
+      })
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
         downloadExcel(res.data, fileName);
@@ -479,7 +498,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => { }}
+                      onEdit={() => {}}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -494,8 +513,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => { }}
-                      onClone={(data) => { }}
+                      onDelete={(data) => {}}
+                      onClone={(data) => {}}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (

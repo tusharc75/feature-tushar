@@ -91,8 +91,24 @@ const WorkOrderDetails = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.workOrder}`)
       .then(({ data: { data } }) => {
-        setWorkOrderFields(data);
-        data.some((o) => {
+        const adjustedData = [
+          ...data,
+          {
+            fieldData: {
+              _id: '63106511ba8a0bc11ff780ad',
+              fieldLabel: 'Total Consumables Cost',
+              type: 'singleLine',
+              fieldName: 'totalConsumablesCost',
+              sectionName: 'Consumable Information',
+              resource: 'Work Order'
+            },
+            isCreate: true,
+            isRead: true,
+            isUpdate: true
+          }
+        ];
+        setWorkOrderFields(adjustedData);
+        adjustedData?.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
             setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue !== 'Deleted')]);
             return true;

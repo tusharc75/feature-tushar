@@ -2132,6 +2132,14 @@ export const REPORT_LIST = [
     type: 'averagePriceBySupplier',
     iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
     color: '#F3F8FF'
+  },
+  {
+    title: 'Work Order',
+    permission: 'workOrder',
+    key: 'workOrder',
+    type: 'dynamic',
+    iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
+    color: '#F3F8FF'
   }
 ];
 
