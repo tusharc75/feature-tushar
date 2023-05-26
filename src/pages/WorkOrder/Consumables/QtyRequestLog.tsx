@@ -214,7 +214,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName }) {
         }}
       >
         <CustomDialogHeader
-          title={`Logs - ${productName}`}
+          title={`Requests - ${productName}`}
           onClose={onClose}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
