@@ -6,6 +6,7 @@ import { kebabCase } from 'lodash';
 import styles from './Dashboard.module.scss';
 import './style.scss';
 import { SVGImages, IconConst } from '../../assets/dashboard_images';
+import { FiExternalLink } from 'react-icons/fi';
 
 import routes from 'src/components/Helpers/Routes';
 import { withStyles } from '@material-ui/core/styles';
@@ -18,6 +19,11 @@ import { HiArrowRight } from 'react-icons/hi';
 import { groupByKey, assignIconAndText } from './helpers';
 import Chart from './Chart';
 import { useAppTheme } from 'src/constants/AppConfig';
+
+const userManual = {
+  description: 'View our user manual in just a click.',
+  link: 'https://docs.equip-t.com/'
+};
 
 function Dashboard() {
   const history = useHistory();
@@ -74,6 +80,9 @@ function Dashboard() {
           <div className={styles.rightContainer}>
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
+            <a title="open equipt documentation" href={userManual.link} target="_blank">
+              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />
+            </a>
           </div>
         </div>
       </div>
@@ -207,13 +216,13 @@ const RenderDialog = ({ modalContent, handleClose, handleRoutes }) => {
   );
 };
 
-interface sidecardInterface {
+interface sidecardInterface extends React.HTMLAttributes<HTMLDivElement> {
   objBySectionName: any;
   handleRoutes: any;
-  mode: 'Collaboration Tools' | 'Setups & Administration';
+  mode: 'Collaboration Tools' | 'Setups & Administration' | 'User Manual';
 }
 
-const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration Tools' }: sidecardInterface) => {
+const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration Tools', ...others }: sidecardInterface) => {
   const [modalContent, setModalContent] = useState(null);
   const [colabData, setColabData] = useState(null);
   const style = { '--sideCardBg': '#FFFFFF' } as React.CSSProperties;
@@ -242,10 +251,11 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
           className={`${styles.rightInner} `}
           aria-label={`open ${mode}`}
           onClick={() => setModalContent({ items: colabData, title: mode, icon: <img src={SVGImages(mode)} alt={`${mode} Logo`} /> })}
+          {...others}
         >
           <img src={SVGImages(mode)} alt={`${mode} Logo`} className={styles.colabLogo} />
           <Typography component={'h2'}>{mode}</Typography>
-          <Typography component={'p'}>{description}</Typography>
+          <Typography component={'p'}>{mode !== 'User Manual' ? description : userManual.description}</Typography>
           {mode === 'Setups & Administration' && (
             <>
               {/* <ul className={styles.linkList}>
@@ -275,9 +285,17 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
               <Typography component="span">Start Collaborating</Typography>
             </button>
           )}
+          {mode === 'User Manual' && (
+            <Box pb={1} pt={5}>
+              <a title="open equipt documentation" href={userManual.link} target="_blank" className={styles.viewAll}>
+                <Typography component="span">Equipt user manual</Typography>
+                <FiExternalLink size={20} style={{ marginBottom: 4 }} />
+              </a>
+            </Box>
+          )}
         </div>
       ) : null}
-      <RenderDialog modalContent={modalContent} handleClose={handleClose} handleRoutes={handleRoutes} />
+      {mode !== 'User Manual' && <RenderDialog modalContent={modalContent} handleClose={handleClose} handleRoutes={handleRoutes} />}
     </>
   );
 };
