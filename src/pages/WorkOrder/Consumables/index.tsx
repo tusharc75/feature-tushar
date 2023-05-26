@@ -18,6 +18,9 @@ import ConsumablesQtyDialog from './ConsumablesQtyDialog';
 import QtyRequestLog from './QtyRequestLog';
 import HistoryIcon from '@material-ui/icons/History';
 import { useData } from 'src/StateProvider/Provider';
+import History from '../../ProductInventory/LedgerHistory';
+import TrackChangesIcon from '@material-ui/icons/TrackChanges';
+import SyncAltIcon from '@material-ui/icons/SyncAlt';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
 
@@ -30,6 +33,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null, data: null });
   const [consumeRequest, setConsumeRequest] = useState(false);
+  const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
 
   const {
     state: { user }
@@ -142,26 +146,42 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       {
         accessor: 'action',
         Header: 'Action',
-        width: 100,
-        minWidth: 100,
+        width: 150,
+        minWidth: 150,
         sticky: 'right',
         disableFilters: true,
         canDrag: false,
         Cell: ({ row }: any) => (
           <div style={{ display: 'flex', justifyContent: 'right' }}>
             {row.original?.isqtyRequestLog && (
-              <HtmlTooltip title="View Logs">
+              <HtmlTooltip title="View Requests">
                 <IconButton
                   size="small"
-                  aria-label="Delete"
+                  aria-label="Requests"
                   onClick={() => {
                     setOpenLogDialog({ open: true, uniqueId: row.original._id, data: row.original });
                   }}
                 >
-                  <HistoryIcon />
+                  <SyncAltIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
+            <HtmlTooltip title="History">
+              <IconButton
+                size="small"
+                aria-label="History"
+                onClick={() => {
+                  setHistoryDialog({
+                    open: true,
+                    _id: row?.original?._id,
+                    product: row?.original?.productId,
+                    productName: row?.original?.productName
+                  });
+                }}
+              >
+                <HistoryIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
             {allowedToEdit && (
               <HtmlTooltip title="Delete">
                 <IconButton
@@ -384,6 +404,15 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               });
               fetchData();
             }}
+          />
+        )}
+        {historyDialog.open && (
+          <History
+            handleClose={() => setHistoryDialog({ open: false, _id: '', product: '', productName: '' })}
+            productName={historyDialog.productName}
+            referenceId={workOrderId}
+            uniqueId={historyDialog._id}
+            product={historyDialog.product}
           />
         )}
       </Grid>

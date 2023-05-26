@@ -176,6 +176,9 @@ function GridFilter({
       }
       else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
         const options = coloums?.find((item) => item.fieldName == fieldName)?.option || []
+        if (col.type === 'multiSelect' && formValues[fieldName]?.length === 0) {
+          return
+        }
         filterModel[fieldName] = {
           filterType: 'text',
           operator: 'OR',
@@ -188,7 +191,7 @@ function GridFilter({
             filterType: 'text',
             type: 'contains',
             filter: 'dummy'
-          }   
+          }
         };
       }
       else if (['multiSelect', 'dropDown'].includes(col.type) && formValues[fieldName]) {

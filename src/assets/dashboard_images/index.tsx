@@ -12,6 +12,7 @@ import heroTextIcon from './heroTextIcon.svg';
 import sidebarCogIcon from './sidebarCogIcon.svg';
 import colabIcon from './colab.svg';
 import setupsIcon from './setups.svg';
+import docksIcon from './docksIcon.svg';
 
 import salesManagement from './salesManagement.svg';
 import rentalManagement from './rentalManagement.svg';
@@ -40,7 +41,8 @@ export const IconConst = {
   RENTAL_MANAGEMENT: 'Rental Management',
   ECOMMERCE: 'eCommerce',
   REPAIR_AND_MAINTENANCE_MANAGEMENT: 'Repair & Maintenance Management',
-  SERVICE_MANAGEMENT: 'Service Management'
+  SERVICE_MANAGEMENT: 'Service Management',
+  DOCKS: 'User Manual'
 };
 
 export const IMAGE_HEIGHT = 50;
@@ -104,6 +106,9 @@ export const SVGImages = (name) => {
       break;
     case IconConst.SERVICE_MANAGEMENT:
       return serviceManagement;
+      break;
+    case IconConst.DOCKS:
+      return docksIcon;
       break;
     default:
       return crm;

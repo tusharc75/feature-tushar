@@ -13,7 +13,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 
 function ProcessLogs({ onClose, logsData, productName }) {
 
-    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+    const [fullScreen, setFullScreen] = useState(true);
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState([]);
 
@@ -89,7 +89,7 @@ function ProcessLogs({ onClose, logsData, productName }) {
         }}
     >
         <CustomDialogHeader
-            title={`Logs - ${productName}`}
+            title={`Process Logs - ${productName}`}
             onClose={onClose}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
