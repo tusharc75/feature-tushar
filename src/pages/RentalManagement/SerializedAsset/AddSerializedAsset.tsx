@@ -75,7 +75,7 @@ const AddSerializedAsset = ({
       clearTimeout(searchTimeout);
     }
     searchTimeout = setTimeout(() => {
-      fetchProductInventory();
+      fetchAssets();
     }, millisec);
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedWarehouse, selectedProduct, tabValue]);
 
@@ -140,18 +140,12 @@ const AddSerializedAsset = ({
     setSerializedProducts(tempProducts);
   }, [selectedRecords]);
 
-  const fetchProductInventory = () => {
+  const fetchAssets = () => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
     let queryString = getQueryString();
-    let api = '';
-    if (Number(tabValue) === 2) {
-      api = `${serializedAsset.api}/in-use${queryString}`
-    } else {
-      api = `${serializedAsset.api}${queryString}`
-    }
     if (selectedProducts.length > 0) {
       var updatedFilters = [];
       if (selectedProduct) {
@@ -162,6 +156,12 @@ const AddSerializedAsset = ({
         });
       }
       queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterByIdType=or`;
+    }
+    let api = '';
+    if (Number(tabValue) === 2) {
+      api = `${serializedAsset.api}/in-use${queryString}`
+    } else {
+      api = `${serializedAsset.api}${queryString}`
     }
     axiosInstance()
       .get(api)
@@ -303,7 +303,7 @@ const AddSerializedAsset = ({
         manualStatus: INVENTORY_STATUS.reserved
       })
       .then(({ data }) => {
-        fetchProductInventory();
+        fetchAssets();
         setShowTransferAssetDialog(false);
         addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
       })
@@ -578,7 +578,7 @@ const AddSerializedAsset = ({
                   customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                   renderedFrom={renderedFrom}
                   showOnlyShowFilteredRecordSwitch={true}
-                  refreshGrid={fetchProductInventory}
+                  refreshGrid={fetchAssets}
                 />
               ) : (
                 <Box p={2} height={500}>
