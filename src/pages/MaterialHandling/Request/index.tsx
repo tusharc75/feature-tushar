@@ -17,6 +17,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
+import CustomTable from 'src/components/CustomTable';
+
 const Request = ({ workOrder }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -73,6 +75,7 @@ const Request = ({ workOrder }) => {
           e.requestBy = e?.requestBy?.optionLabel;
           e.processById = e?.processBy?.optionValue;
           e.processBy = e?.processBy?.optionLabel;
+          e.hideSelection = e?.status === MATERIAL_REQUEST_STATUS.requested ? false : true;
         });
         setRowsData(data);
       })
@@ -83,171 +86,159 @@ const Request = ({ workOrder }) => {
 
   const fetchColumn = async () => {
     setColumns(null);
-    const column = [];
-    const {
-      data: { data }
-    } = await axiosInstance().put(`/field/find-field-labels`, {
-      fields: [
-        {
-          resource: 'Product',
-          fieldNames: ['productName', 'productNumber', 'productDescription']
-        }
-      ]
-    });
-    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
-    productFields?.forEach((e) => {
-      if (e?.fieldName === 'productName') {
-        column.push({
-          accessor: e?.fieldName,
-          Header: e?.fieldLabel,
-          width: 200,
-          primaryField: true,
-          Cell: ({ row }) => {
-            return row.original[e?.fieldName] ? (
-              <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.product?.optionValue}`} target="_blank">
-                {row.original[e?.fieldName]}
-              </a>
-            ) : (
-              <NoDataCell />
-            );
-          }
-        });
-      } else {
-        column.push({
-          accessor: e?.fieldName,
-          Header: e?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => {
-            return row.original[e?.fieldName] ? <p className="text-truncate">{row.original[e?.fieldName]}</p> : <NoDataCell />;
-          }
-        });
-      }
-    });
-    const extracolumns: any = [
+    // const {
+    //   data: { data }
+    // } = await axiosInstance().put(`/field/find-field-labels`, {
+    //   fields: [
+    //     {
+    //       resource: 'Product',
+    //       fieldNames: ['productName', 'productNumber', 'productDescription']
+    //     }
+    //   ]
+    // });
+    // const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
+
+    const column: any = [
       {
-        accessor: 'qty',
-        Header: 'Requested Qty',
-        width: 150,
-        primaryField: true,
-        Cell: ({ row }) => {
-          return row.original['qty'] ? <p className="text-truncate">{row.original['qty']}</p> : <NoDataCell />;
+        header: 'Product',
+        width: 100,
+        render: ({ row }) => {
+          return (
+            <>
+              <Typography className="text-truncate new-table-font">
+                <a className="link" href={`${routes.productDetail.path}/${row?.product?.optionValue}`} target="_blank">
+                  {row['productName']}
+                </a>
+              </Typography>
+              <Typography className="text-truncate new-table-font">
+                <span>{row['productNumber']}</span>
+              </Typography>
+              <Typography className="text-truncate new-table-font">
+                <span>{row['productDescription']}</span>
+              </Typography>
+            </>
+          );
         }
       },
       {
-        accessor: 'processedQty',
-        Header: 'Processed Qty',
-        primaryField: true,
-        width: 150,
-        Cell: ({ row }) => {
-          return row.original['processedQty'] ? <p className="text-truncate">{row.original['processedQty']}</p> : <NoDataCell />;
+        header: 'Requested Qty',
+        width: 100,
+        render: ({ row }) => {
+          return (
+            <>
+              <Typography className="text-truncate new-table-font">
+                <Typography style={{ fontWeight: 500 }} component="span">
+                  {row['qty'] ? row['qty'] : <NoDataCell />}
+                </Typography>
+              </Typography>
+            </>
+          );
         }
       },
       {
-        accessor: 'status',
-        Header: 'Status',
-        primaryField: true,
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['status'] ? <p className="text-truncate">{row.original['status']}</p> : <NoDataCell />;
+        header: 'Processed Qty',
+        width: 100,
+        render: ({ row }) => {
+          return (
+            <>
+              <Typography className="text-truncate new-table-font" >
+                <Typography style={{ fontWeight: 500 }} component="span">
+                  {row['processedQty'] ? row['processedQty'] : <NoDataCell />}
+                </Typography>
+              </Typography>
+            </>
+          );
         }
       },
-      ...(user?.user?.brandPolicy?.storageLocation
-        ? [
-            {
-              accessor: 'storageLocation',
-              Header: 'Storage Location',
-              width: 200,
-              Cell: ({ row }) => {
-                return row?.original['storageLocation'] ? (
-                  <a
-                    className="link text-truncate"
-                    href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
-                    target="_blank"
-                  >
-                    {row?.original['storageLocation']}
+      {
+        header: 'Requested By',
+        width: 100,
+        render: ({ row }) => {
+          return (
+            <>
+              <Typography className="text-truncate new-table-font"  >
+                {row['requestBy'] ? (
+                  <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['requestById']}`} target="_blank">
+                    {row?.['requestBy']}
                   </a>
                 ) : (
                   <NoDataCell />
-                );
-              }
-            }
-          ]
-        : []),
-      {
-        accessor: 'requestBy',
-        Header: 'Requested By',
-        width: 200,
-        Cell: ({ row }) => {
-          return row?.original['requestBy'] ? (
-            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestById']}`} target="_blank">
-              {row?.original['requestBy']}
-            </a>
-          ) : (
-            <NoDataCell />
+                )}
+              </Typography>
+              <Typography className="text-truncate new-table-font ">
+                {row['requestDate'] ? <span>{moment(row['requestDate']).format(dateTimeFormat)}</span> : <NoDataCell />}
+              </Typography>
+            </>
           );
         }
       },
       {
-        accessor: 'requestDate',
-        Header: 'Requested Date',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['requestDate'] ? (
-            <p className="text-truncate">{moment(row.original['requestDate']).format(dateTimeFormat)}</p>
-          ) : (
-            <NoDataCell />
+        header: 'Processed By',
+        width: 100,
+        render: ({ row }) => {
+          return (
+            <>
+              {row['processBy'] ?
+                <>
+                  <Typography className="text-truncate new-table-font"  >
+                    <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['processById']}`} target="_blank">
+                      {row['processBy']}
+                    </a>
+                  </Typography>
+                  <Typography className="text-truncate new-table-font ">
+                    <span>{moment(row['processDate']).format(dateTimeFormat)}</span>
+                  </Typography>
+                </>
+                : (
+                  <NoDataCell />
+                )}
+            </>
           );
         }
       },
-      {
-        accessor: 'processBy',
-        Header: 'Processed By',
-        width: 200,
-        Cell: ({ row }) => {
-          return row?.original['processBy'] ? (
-            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['processById']}`} target="_blank">
-              {row?.original['processBy']}
-            </a>
-          ) : (
-            <NoDataCell />
-          );
-        }
-      },
-      {
-        accessor: 'processDate',
-        Header: 'Processed Date',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['processDate'] ? (
-            <p className="text-truncate">{moment(row.original['processDate']).format(dateTimeFormat)}</p>
-          ) : (
-            <NoDataCell />
-          );
-        }
-      },
-      {
-        accessor: 'comment',
-        Header: 'Comment',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['comment'] ? <p className="text-truncate">{row.original['comment']}</p> : <NoDataCell />;
-        }
-      }
     ];
-    extracolumns.push({
-      accessor: 'action',
-      Header: 'Action',
-      minWidth: 240,
-      width: 240,
+    if (user?.user?.brandPolicy?.storageLocation) {
+      column.push({
+        header: 'Storage Location',
+        width: 200,
+        render: ({ row }) => {
+          return row?.['storageLocation'] ? (
+            <Typography className="text-truncate new-table-font">
+              <a className="link" href={`${routes.storageLocationDetail.path}/${row?.['storageLocationId']}`} target="_blank"  >
+                {row?.['storageLocation']}
+              </a>
+            </Typography>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      });
+    }
+    column.push({
+      header: 'Comment',
+      width: 150,
+      render: ({ row }) => {
+        return row['comment'] ? <Typography className="text-truncate new-table-font">{row['comment']}</Typography> : <NoDataCell />;
+      }
+    });
+    column.push({
+      header: 'Status',
+      width: 150,
+      render: ({ row }) => {
+        return row['status'] ? <Typography className="text-truncate new-table-font">{row['status']}</Typography> : <NoDataCell />;
+      }
+    });
+    column.push({
+      header: 'Action',
+      minWidth: 250,
+      width: 250,
       sticky: 'right',
-      disableFilters: true,
-      canDrag: false,
-      Cell: ({ row }) => {
+      render: ({ row }) => {
         return (
           <>
             <Box display="flex">
               <Box display="flex" flexGrow={1}>
-                {row.original['status'] === MATERIAL_REQUEST_STATUS.requested && (
+                {row['status'] === MATERIAL_REQUEST_STATUS.requested && (
                   <Fragment>
                     <Button
                       variant="contained"
@@ -255,7 +246,7 @@ const Request = ({ workOrder }) => {
                       size="small"
                       disabled={loading}
                       onClick={() => {
-                        setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: row.original });
+                        setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: row });
                       }}
                     >
                       Process
@@ -267,7 +258,7 @@ const Request = ({ workOrder }) => {
                       size="small"
                       disabled={loading}
                       onClick={() => {
-                        setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row.original });
+                        setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row });
                       }}
                     >
                       Close
@@ -277,13 +268,13 @@ const Request = ({ workOrder }) => {
                 )}
               </Box>
               <Box>
-                {row.original['processesLogs'] && row.original['processesLogs']?.length > 0 && (
+                {row['processesLogs'] && row['processesLogs']?.length > 0 && (
                   <HtmlTooltip title="View Process Logs">
                     <IconButton
                       size="small"
                       aria-label="Delete"
                       onClick={() => {
-                        setOpenProcessLogs({ open: true, logs: row.original['processesLogs'], productName: row.original?.productName });
+                        setOpenProcessLogs({ open: true, logs: row['processesLogs'], productName: row?.productName });
                       }}
                     >
                       <HistoryIcon />
@@ -296,9 +287,8 @@ const Request = ({ workOrder }) => {
         );
       }
     });
-    setColumns([...column, ...extracolumns]);
+    setColumns([...column]);
   };
-
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -328,7 +318,7 @@ const Request = ({ workOrder }) => {
           <Button
             disabled={
               selectedRecords?.length > 0 &&
-              selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -375,18 +365,13 @@ const Request = ({ workOrder }) => {
       <Box pt={2}>
         {rowsData && columns ? (
           <Box zIndex={5} width={'100%'} height={'calc(100vh - 290px)'}>
-            <CustomReactTable
-              height={'calc(100vh - 290px)'}
-              columns={columns}
+            <CustomTable
               data={rowsData}
+              columns={columns}
+              uniqueKey={(data) => data._id}
               onSelect={setSelectedRecords}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              hideSelection={false}
-              hideAction={false}
-              hideExpander={true}
-              renderedFrom={camelCase(routes.materialHandling.title)}
-              isClientSideGrid={true}
+              checkBox={true}
+              height={'calc(100vh - 290px)'}
             />
           </Box>
         ) : (

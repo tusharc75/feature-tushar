@@ -296,10 +296,10 @@ const History = ({ product, warehouse, storageLocation }) => {
       });
   };
 
+  //|| (['Work Order'].includes(params.data.referenceType) && params.data.type?.toLowerCase() === 'debit')
   const ActionsRenderer = (params) => (
     <>
-      {(['Product Inventory', 'Reverted'].includes(params.data.referenceType)
-        || (['Work Order'].includes(params.data.referenceType) && params.data.type?.toLowerCase() === 'debit')) && !params?.data?.reverted ? (
+      {(['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted) && !params?.data?.reverted ? (
         <Box pl={1}>
           <HtmlTooltip title="Revert">
             <IconButton

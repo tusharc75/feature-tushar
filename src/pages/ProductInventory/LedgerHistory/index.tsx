@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, purchaseOrder } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, productInventory, purchaseOrder } from 'src/constants/helpers';
 import { CommonRenderer, NumberRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Dialog from '@material-ui/core/Dialog';
@@ -36,7 +36,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`/ledger/${referenceId}/${uniqueId}/${product}`)
+      .get(`${productInventory.api}/ledger/${referenceId}/${uniqueId}/${product}`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
