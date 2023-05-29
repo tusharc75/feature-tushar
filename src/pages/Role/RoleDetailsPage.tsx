@@ -472,12 +472,12 @@ const RoleDetailsPage = () => {
           <Box className="control-buttons-v1">
             {roleData ? (
               <>
-              {permissions?.role.isUpdate && !isEditDeleteDisable && !isEdit && (
+                {permissions?.role.isUpdate && !isEdit && (
                   <Button variant="contained" color="primary" size="medium" onClick={() => setIsEdit(true)}>
                     Edit
                   </Button>
                 )}
-                {permissions?.role.isUpdate && !isEditDeleteDisable && isEdit && (
+                {permissions?.role.isUpdate && isEdit && (
                   <Button disabled={isUpdating || checkError() || !isEdit} variant="contained" color="primary" size="medium" onClick={handleUpdateRole}>
                     {isUpdating ? <CircularProgress size={22} /> : 'Update'}
                   </Button>
@@ -503,7 +503,7 @@ const RoleDetailsPage = () => {
           <Grid item xs={12} sm={12} md={8} lg={8}>
             <Box display="flex" marginTop={2} marginBottom={2} gridGap={10} px={1}>
               <TextField
-                disabled={roleData?.type && roleData?.permission  ? true : !permissions?.role?.isUpdate || !isEdit}
+                disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                 required
                 variant="outlined"
                 size="small"
@@ -538,7 +538,7 @@ const RoleDetailsPage = () => {
                       resource={resource}
                       setField={setField}
                       setResource={setResource}
-                      isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit  ? true : false) : true }
+                      isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit ? true : false) : true}
                     />
                     {isPolicyTableVisible() && (
                       <PolicyResources
@@ -552,7 +552,7 @@ const RoleDetailsPage = () => {
                         setOpen={setOpen}
                         permissions={permissions}
                         isEdit={isEdit}
-                     
+
                       />
                     )}
                     {dashBoardOption?.length > 0 && (

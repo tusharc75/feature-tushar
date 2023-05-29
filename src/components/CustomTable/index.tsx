@@ -25,8 +25,8 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
       setSelected([]);
       onSelect([]);
     } else {
-      setSelected(data);
-      onSelect(data);
+      setSelected(data?.filter((e) => !e?.hideSelection));
+      onSelect(data?.filter((e) => !e?.hideSelection));
     }
   }, [selected.length, data.length]);
 
@@ -58,7 +58,7 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
       <table {...others} className={`${styles.table} ${className}`}>
         <thead>
           {checkBox && (
-            <th style={{ minWidth: '48px' }} className={`${styles.checkBox} `}>
+            <th style={{ minWidth: '48px' }} className={`${styles.checkBox}`}>
               <Checkbox
                 style={{ padding: '0' }}
                 inputProps={{ 'aria-label': 'Select all' }}
@@ -69,7 +69,7 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
           )}
           {columns.map((column, index) => {
             return (
-              <th key={column.header} {...column} style={{ width: `${column.width}px}`, minWidth: `${column.minWidth}px` }}>
+              <th key={column.header} {...column} style={{ width: `${column.width}px}`, maxWidth: `${column.width}px}`, minWidth: `${column.minWidth}px` }}>
                 <Typography component={'span'}>{column.header}</Typography>
               </th>
             );
@@ -79,17 +79,19 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
           {data.map((row, index) => (
             <tr key={uniqueKey(row)}>
               {checkBox && (
-                <td style={{ minWidth: '48px' }} className={`${styles.checkBox} `}>
-                  <Checkbox
-                    style={{ padding: '0' }}
-                    inputProps={{ 'aria-label': 'Select' }}
-                    checked={isChecked(row)}
-                    onChange={() => chekSingle(row)}
-                  />
+                <td style={{ minWidth: '48px' }} className={`${styles.checkBox}`}>
+                  {row?.hideSelection ? null :
+                    <Checkbox
+                      style={{ padding: '0' }}
+                      inputProps={{ 'aria-label': 'Select' }}
+                      checked={isChecked(row)}
+                      onChange={() => chekSingle(row)}
+                    />
+                  }
                 </td>
               )}
               {columns.map((column, index) => (
-                <td key={index} style={{ width: `${column.width}px}`, minWidth: `${column.minWidth}px` }}>
+                <td key={index} style={{ width: `${column.width}px}`, maxWidth: `${column.width}px}`, minWidth: `${column.minWidth}px` }}>
                   <div>{row ? column.render({ row }) : ''}</div>
                 </td>
               ))}
