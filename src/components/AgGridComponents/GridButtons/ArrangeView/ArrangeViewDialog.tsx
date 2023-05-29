@@ -50,6 +50,7 @@ interface ArrangeColumnsProps {
   saveColumnOptions: boolean;
   updateGridHiddenColumns: any;
   renderedFrom: string;
+  initialColumnOrder: any[];
 }
 
 const ItemTypes = {
@@ -57,7 +58,7 @@ const ItemTypes = {
 };
 
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
-  const { onClose, columns, setColumns, columnApi, isClientSideGrid, updateGridHiddenColumns, renderedFrom, saveColumnOptions } = props;
+  const { onClose, columns, setColumns, columnApi, isClientSideGrid, updateGridHiddenColumns, renderedFrom, saveColumnOptions, initialColumnOrder } = props;
   const classes = useStyles();
   const [sortedColumns, setSortedColumns] = React.useState([]);
   const [searchedColumns, setSearchedColumns] = React.useState([]);
@@ -157,6 +158,29 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     localStorage.setItem(renderedFrom, columnState);
     onClose();
   };
+
+  const resetColumnOrder = () => {
+    let oldColumnState = columnApi.getColumnState();
+    let newColumnsState = new Array();
+
+    initialColumnOrder.map((column: any) => {
+      const index = oldColumnState?.findIndex(col => col.colId === column?.field);
+      const colum = oldColumnState[index];
+      if (column?.show && colum.hide) {
+        colum.hide = false
+      }
+      newColumnsState.push(colum)
+    })
+
+    const extraColumn = oldColumnState.filter(col => col.colId === "actions" || col.colId === "0" || col.colId === "1")
+
+    newColumnsState = [...newColumnsState, ...extraColumn]
+    columnApi.setColumnState(newColumnsState);
+
+    const columnState = JSON.stringify(columnApi.getColumnState());
+    localStorage.setItem(renderedFrom, columnState)
+    onClose();
+  }
 
   /**
    *
@@ -273,6 +297,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       <CustomDialogFooter>
         <Button variant="outlined" color="primary" onClick={onClose}>
           Close
+        </Button>
+        <Button variant="outlined" color="primary" onClick={resetColumnOrder}>
+          Reset
         </Button>
         <Button variant="contained" color="primary" disableElevation disabled={!hasChanged} onClick={handleSaveChange}>
           Save changes
