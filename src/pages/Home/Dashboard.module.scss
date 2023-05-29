@@ -1,106 +1,3 @@
-// .dashboard_layout {
-//   display: grid;
-//   grid-template-columns: minmax(200px, 441px) minmax(350px, 900px);
-//   padding: 2.75rem 0 5.875rem;
-//   grid-gap: 40px;
-//   justify-content: space-between;
-// }
-
-// .hero_container {
-//   margin-top: 30px;
-// }
-
-// .hero_heading {
-//   font-weight: 700;
-//   line-height: 153%;
-//   color: #2a3042;
-//   margin: 0 0 24px;
-//   font-size: clamp(20px, 5vw, 30px);
-// }
-
-// .hero_paragraph {
-//   font-weight: 500;
-//   line-height: 135.02%;
-//   color: rgba(0, 0, 0, 0.5);
-//   font-size: clamp(16px, 3.5vw, 20px);
-// }
-
-// .crm_hero_image {
-//   max-width: 100%;
-//   display: block;
-//   margin-top: 99px;
-// }
-
-// .view_button {
-//   color: #43aea7 !important;
-//   margin: 20px 0 !important;
-//   padding: 0 !important;
-// }
-
-// .hover_list_box {
-//   margin: 0px;
-// }
-
-// .custom_form_button {
-//   padding: 12px 34px;
-//   background-color: #0f9fa9;
-//   color: #fff;
-//   font-weight: 600;
-//   font-size: 18px;
-//   line-height: 22px;
-//   margin-left: 14px;
-//   box-shadow: 0px 4px 10px rgba(65, 174, 170, 0.27);
-//   border-radius: 4px;
-//   transition: background 0.4s;
-//   cursor: pointer;
-//   outline: none;
-//   border: 0;
-
-//   &:hover {
-//     background-color: var(--primary);
-//   }
-// }
-
-// @media all and (max-width: 1286px) {
-//   .dashboard_layout {
-//     align-items: unset;
-//   }
-// }
-
-// @media all and (max-width: 1155px) {
-//   .dashboard_layout {
-//     grid-template-columns: 1fr;
-//   }
-
-//   .hero_container {
-//     // margin: 0 auto;
-//     // max-width: 600px;
-//     // text-align: center;
-//     display: none;
-//   }
-//   // .crm_hero_image {
-//   //   margin: 29px auto 0;
-//   // }
-//   // .hero_heading {
-//   //   margin-bottom: 5px;
-//   // }
-// }
-
-// // @media all and (max-width: 567px) {
-// //   .hero_container {
-// //     display: none;
-// //   }
-// // }
-
-// .list_component {
-//   margin: 0 !important;
-//   padding: 0;
-// }
-
-// .hover_list_box {
-//   margin: 0;
-// }
-
 .search_section {
   display: flex;
   margin-bottom: 1.875rem;
@@ -208,52 +105,51 @@
       --card-padding: 23px 18px 28px 18px;
     }
     display: grid;
+    isolation: isolate;
     grid-template-columns: var(--grid-columns, 1fr);
     column-gap: var(--ver-gap, 15px);
     row-gap: var(--hor-gap, 15px);
     .singlecard {
       --card-border-radius: 12px;
-      --border-width: 4px;
+      --border-width: 6px;
       display: grid;
-      background-color: var(--bg_color, #ffefee);
 
-      @media all and (min-width: 1600px) {
-        min-height: 178px;
+      @media all and (min-width: 1366px) {
+        min-height: 219px;
       }
       cursor: pointer;
       box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08), -3px 3px 6px rgba(220, 220, 220, 0.2), 3px -3px 6px rgba(220, 220, 220, 0.2),
         -3px -3px 6px rgba(255, 255, 255, 0.9), 3px 3px 8px rgba(220, 220, 220, 0.9), inset 1px 1px 2px rgba(255, 255, 255, 0.3),
         inset -1px -1px 2px rgba(220, 220, 220, 0.5);
+
       border-radius: var(--card-border-radius, 12px);
       position: relative;
-      isolation: isolate;
-      padding-left: var(--border-width, 4px);
+      // isolation: isolate;
+      border-left: var(--border-width, 4px) solid transparent;
+      background: var(--bg_color, #fff);
 
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        background: linear-gradient(var(--bg-gradient-colors, to bottom, #ffa800, #e35200));
-        z-index: -2;
-        border-radius: var(--card-border-radius, 12px);
+      [data-mode='dark'] & {
+        box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08);
+        background: var(--dark-primary);
+        -webkit-background-clip: padding-box;
+        background-clip: padding-box;
       }
+      -webkit-background-clip: padding-box;
+      background-clip: padding-box;
+
       &::after {
         content: '';
         position: absolute;
         top: 0;
-        left: 0;
         bottom: 0;
+        left: calc(var(--border-width, 4px) * -1);
         right: 0;
-        border-radius: var(--card-border-radius, 12px);
-        background-color: var(--bg_color, #ffefee);
-        margin-left: var(--border-width, 4px);
-
+        bottom: 0;
+        background: linear-gradient(var(--bg-gradient-colors, to bottom, #ffa800, #e35200));
         z-index: -1;
-        margin-right: -0.5px;
+        border-radius: var(--card-border-radius, 12px);
       }
+
       .cardContent {
         padding: var(--card-padding, 15px);
       }
@@ -268,6 +164,9 @@
         font-size: 14px;
         line-height: 22px;
         color: #737373;
+        [data-mode='dark'] & {
+          color: #bebebe;
+        }
       }
       .cardTop {
         display: flex;
@@ -293,6 +192,7 @@
     }
   }
 }
+
 .dialogContainer {
   --top-space: 28px;
   .dialogContentContainer {
@@ -309,6 +209,9 @@
     justify-content: space-between;
     align-items: center;
     max-width: 100%;
+    [data-mode='dark'] & {
+      background-color: var(--dark-primary) !important;
+    }
 
     button {
       flex-basis: 48px;
@@ -316,6 +219,9 @@
       border-radius: 50% !important;
       svg {
         color: #000 !important;
+        [data-mode='dark'] & {
+          color: #fff !important;
+        }
       }
     }
     .modalIconAndName {
@@ -339,12 +245,15 @@
         }
       }
       .modalTitle {
-        color: #2a3042 !important;
+        color: #2a3042;
         font-weight: 700;
         font-size: 17px;
         line-height: 157%;
         flex-basis: calc(100% - 32px);
         max-width: calc(100% - 32px);
+        [data-mode='dark'] & {
+          color: #fff;
+        }
       }
     }
   }
@@ -372,6 +281,9 @@
       line-height: 183%;
       text-align: center;
       color: #161924;
+      [data-mode='dark'] & {
+        color: #fff;
+      }
       transition: color 0.3s;
       svg {
         margin-right: 16px;
@@ -390,7 +302,8 @@
 }
 
 .viewAll {
-  display: block;
+  display: flex;
+  align-items: center;
   border: 0;
   background-color: transparent;
   outline: none;
@@ -402,10 +315,13 @@
     font-size: 17.3279px;
     line-height: 29px;
     color: #2a3042;
+    [data-mode='dark'] & {
+      color: #fff;
+    }
   }
   svg {
-    vertical-align: middle;
-    margin-left: 6px;
+    display: block;
+    margin-left: 10px;
     transition: margin 0.3s, color 0.3s;
     color: inherit;
   }
@@ -437,8 +353,13 @@
     --hor-gap: 25px;
   }
   &:hover {
-    .viewAll svg {
-      margin-left: 10px;
+    .viewAll {
+      span {
+        color: var(--link);
+      }
+      svg {
+        margin-left: 15px;
+      }
     }
   }
   text-align: left;
@@ -448,19 +369,24 @@
   }
 
   background: var(--sideCardBg, #fffaee);
-  border: 2.16598px solid #ebebeb;
   box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08), -3px 3px 6px rgba(220, 220, 220, 0.2), 3px -3px 6px rgba(220, 220, 220, 0.2),
     -3px -3px 6px rgba(255, 255, 255, 0.9), 3px 3px 8px rgba(220, 220, 220, 0.9), inset 1px 1px 2px rgba(255, 255, 255, 0.3),
     inset -1px -1px 2px rgba(220, 220, 220, 0.5);
-  border-radius: 10px;
+
+  border-radius: 12px;
   padding: var(--padding, 20px);
   cursor: pointer;
+  [data-mode='dark'] & {
+    box-shadow: 0px 3.30055px 40px rgba(0, 0, 0, 0.08);
+    background: var(--dark-primary);
+    color: #fff;
+  }
   img {
     display: block;
     max-width: max-content;
   }
   .colabLogo {
-    max-width: 72px;
+    max-width: 60px;
     margin-bottom: var(--image-mb, 15px);
   }
   h2 {
@@ -469,13 +395,20 @@
     line-height: 24px;
     color: #2a3042;
     margin-bottom: 13px;
+    [data-mode='dark'] & {
+      color: #fff;
+    }
   }
   p {
     font-weight: 500;
     font-size: 15px;
     line-height: 30px;
     color: #737373;
+    [data-mode='dark'] & {
+      color: #bebebe;
+    }
   }
+
   .colabButton {
     display: block;
     border: 0;
@@ -484,11 +417,15 @@
     cursor: pointer;
     transition: color 0.3s;
     margin-top: var(--button-mt, 20px);
+
     span {
       font-weight: 600;
       font-size: 17.3279px;
       line-height: 29px;
       color: #2a3042;
+      [data-mode='dark'] & {
+        color: #fff;
+      }
     }
     &:hover {
       span {

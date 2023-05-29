@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Chip, Box, Typography } from '@material-ui/core';
 import { purple } from '@material-ui/core/colors';
-import { getResActivityColor } from './utils';
 import { useHistory } from 'react-router-dom';
 import routes from '../../Helpers/Routes';
 
@@ -43,10 +42,6 @@ export const RelatedToDispay = ({ relatedTo, inline = false }) => {
               key={index}
               label={`${routes[_element?.type]?.title + ' - ' + _element.name} `}
               size="medium"
-              style={{
-                backgroundColor: getResActivityColor(index).background,
-                color: getResActivityColor(index).color
-              }}
               clickable={true}
               onClick={(e) => {
                 e.preventDefault();

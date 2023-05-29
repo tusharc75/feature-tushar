@@ -24,7 +24,7 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import queryString from 'query-string';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { useLocation, useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -135,8 +135,8 @@ const MarketSegment = () => {
   const ActionsRenderer = (params) => (
     <Fragment>
       <Tooltip
-        className={permissions.marketSegment.isCreate ? '' : 'cursor-stop'}
-        title={permissions.marketSegment.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
+        className={permissions?.marketSegment.isCreate ? '' : 'cursor-stop'}
+        title={permissions?.marketSegment.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
       >
         <IconButton
           size="small"
@@ -148,7 +148,7 @@ const MarketSegment = () => {
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
-      {permissions.marketSegment.isDelete ? (
+      {permissions?.marketSegment.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -170,39 +170,23 @@ const MarketSegment = () => {
     </Fragment>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      case 'parentMarketSegmentName':
-        return 'parentMarketSegment.optionLabel';
-
-      default:
-        return field;
-    }
-  };
-
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
 
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {
@@ -228,9 +212,9 @@ const MarketSegment = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions.marketSegment.isDelete;
+          finalObject['canDelete'] = permissions?.marketSegment.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions.marketSegment.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.marketSegment.isUpdate;
           return {
             ...finalObject
           };
@@ -375,7 +359,7 @@ const MarketSegment = () => {
                 />
 
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.marketSegment.isCreate && (
+                  {permissions?.marketSegment.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
@@ -389,7 +373,7 @@ const MarketSegment = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions.marketSegment.isDelete && (
+                  {permissions?.marketSegment.isDelete && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_submit_btn}`}
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -466,7 +450,7 @@ const MarketSegment = () => {
             owerCollaboratorInitialsOrImages=""
             onCreate={() => setOpen({ open: true, idToClone: null, isClone: null })}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (

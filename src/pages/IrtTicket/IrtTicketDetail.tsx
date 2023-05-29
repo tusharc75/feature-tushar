@@ -113,7 +113,7 @@ const IrtTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions.irtTicket?.isUpdate && allowedToEdit && (
+            {permissions?.irtTicket?.isUpdate && allowedToEdit && (
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
                 className={'btn-outline-v1'}

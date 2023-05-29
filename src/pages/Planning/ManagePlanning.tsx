@@ -17,7 +17,6 @@ import {
   generateUniqueIdOnly,
   getCollaboratorDropdownDataSource,
   getOwnerDropdownDataSource,
-  isFieldNotTouched,
   setFieldsInAscendingOrder
 } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -58,8 +57,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const [addressData, setAddressData] = useState([]);
   const [billingAddress, setBillingAddress] = useState([]);
   const [shippingAddress, setShippingAddress] = useState([]);
-  const [formValues, setFormValues] = useState({});
-  const ref = useRef(null);
   const history = useHistory();
 
   const updateAccountDropdown = (data) => {
@@ -132,8 +129,12 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
     try {
       const response = await axiosInstance().get('/field?resource=Planning');
       const data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate && !["rentalJob", "salesOrder", "serviceOrder"]?.includes(obj.fieldData?.fieldName)).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !["rentalJob", "salesOrder", "serviceOrder"]?.includes(obj.fieldData?.fieldName)).map((d: any) => d.fieldData);
+      let fieldsDataForCreate = data
+        .filter((obj) => obj.isCreate && !['rentalJob', 'salesOrder', 'fieldServiceOrder']?.includes(obj.fieldData?.fieldName))
+        .map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data
+        .filter((obj) => obj.isUpdate && !['rentalJob', 'salesOrder', 'fieldServiceOrder']?.includes(obj.fieldData?.fieldName))
+        .map((d: any) => d.fieldData);
 
       if (id) {
         axiosInstance()
@@ -158,7 +159,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
           });
       } else {
         const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
-        tempInitialData["planningNumber"] = `PLO_${generateUniqueIdOnly()}`;
+        tempInitialData['planningNumber'] = `PLO_${generateUniqueIdOnly()}`;
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           tempInitialData['currency'] = user.user?.brandCurrency;
         }
@@ -166,7 +167,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
           fields: fieldsDataForCreate,
           values: tempInitialData
         });
-        setFormValues(tempInitialData)
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -213,13 +213,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
     }
   };
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
-
   useEffect(() => {
     const ownerCollabOptions = initialData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
     if (ownerCollabOptions.length > 0) {
@@ -245,9 +238,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
     if (customerContactDropdownData) {
       setCustomerContactMainDataSource(customerContactDropdownData.option);
       if (id) {
-        setCustomerContactDataSource(
-          customerContactDropdownData?.option.filter((d) => d.parentAccount === initialData.values?.customerAccount)
-        );
+        setCustomerContactDataSource(customerContactDropdownData?.option.filter((d) => d.parentAccount === initialData.values?.customerAccount));
       }
     }
     setFormsData(setFieldsInAscendingOrder(initialData?.fields));
@@ -266,28 +257,27 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
       open={true}
       fullWidth
       onClose={(e, reason) => {
-        if (isFieldNotTouched(initialData.data, formValues)) onClose()
-        else setShowConfirmDialog(true)
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true);
+        }
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} innerRef={ref}>
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
-                  : `Create ${routes?.planning?.title}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
+                    : `Create ${routes?.planning?.title}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -346,9 +336,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                               if (initialData?.fields?.some((e) => e.fieldName === 'shippingAddress')) {
                                                 setFieldValue('shippingAddress', '');
                                               }
-                                              handleValuesChange({
-                                                [field.fieldName]: value && value.optionValue ? value.optionValue : ''
-                                              });
                                             }}
                                           />
                                         </Grid>
@@ -396,7 +383,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                             options={customerContactDataSource}
                                             doNotShowInfoTooltip={true}
                                             setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value });
                                               setFieldValue(name, value);
                                             }}
                                             disabled={!isClone ? id && field.disableOnEdit : false}
@@ -444,7 +430,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                         options={ownerData}
                                         onChange={(e, val) => {
                                           setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                          handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : '' });
 
                                           if (val && val.optionValue !== user?.user?._id) {
                                             const checkOwnerAddedInCollaborator = values['collaborator'].find(
@@ -455,9 +440,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                                 ...values['collaborator'],
                                                 collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
                                               ]);
-                                              handleValuesChange({
-                                                collaborator: collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                              });
                                             }
                                           }
                                         }}
@@ -485,7 +467,6 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                         type={field.type}
                                         options={collaboratorData}
                                         setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value });
                                           setFieldValue(name, value);
                                         }}
                                         required={field.required}
@@ -613,16 +594,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
+                    if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
@@ -764,7 +736,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

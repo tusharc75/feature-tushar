@@ -22,7 +22,6 @@ import { Link } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 
 const CycleCountDetermination = () => {
-
   const renderedFrom = camelCase(`${routes.cycleCountDetermination.title}`);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -98,35 +97,37 @@ const CycleCountDetermination = () => {
 
   const fetchCycleCountDetermination = () => {
     setLoading(true);
-    axiosInstance().get(`/cycle-count-determination?wareHouse=${warehouse}`).then(({ data: { data, count } }) => {
-      setLoading(false);
-      setEditData(data);
-      let rows = data?.map((u) => {
-        let finalObject = prepareDataForGrid(u);
-        return {
-          ...finalObject
-        };
-      });
-      if (appendRows) {
-        dispatch({
-          type: 'initialize',
-          data: [...dataRows, ...rows],
-          count: count,
-          selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+    axiosInstance()
+      .get(`/cycle-count-determination?wareHouse=${warehouse}`)
+      .then(({ data: { data, count } }) => {
+        setLoading(false);
+        setEditData(data);
+        let rows = data?.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          return {
+            ...finalObject
+          };
         });
-      } else {
-        dispatch({
-          type: 'initialize',
-          data: rows,
-          count: count,
-          selectedRecords: rows.filter((f) => f.isChecked === true)
-        });
-      }
-      dispatch({ type: 'initialize', data: rows, count: data.count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    })
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
+          });
+        }
+        dispatch({ type: 'initialize', data: rows, count: data.count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
 
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -136,7 +137,11 @@ const CycleCountDetermination = () => {
   };
 
   const NameRenderer = (params) => {
-    return (<Link className="link text-truncate" to={`${routes.productCategoryDetail.path}/${params.data._id}`}>{params.value}</Link>);
+    return (
+      <Link className="link text-truncate" to={`${routes.productCategoryDetail.path}/${params.data._id}`}>
+        {params.value}
+      </Link>
+    );
   };
 
   return (
@@ -169,7 +174,7 @@ const CycleCountDetermination = () => {
                     else fetchCycleCountDetermination();
                   }}
                   isDownloadExcel={false}
-                  additionalParams={'wareHouse='+warehouse}
+                  additionalParams={'wareHouse=' + warehouse}
                   onlyExport={false}
                 />
               </Grid>
@@ -186,7 +191,9 @@ const CycleCountDetermination = () => {
                 options={warehouseOption}
                 getOptionLabel={(option: any) => option?.warehouseName}
                 disableClearable
-                value={warehouseOption.filter((data) => data._id === warehouse).length ? warehouseOption.filter((data) => data._id === warehouse)[0] : ''}
+                value={
+                  warehouseOption.filter((data) => data._id === warehouse).length ? warehouseOption.filter((data) => data._id === warehouse)[0] : ''
+                }
                 onChange={(e, val) => {
                   if (val !== null) {
                     setWarehouse(val && val._id ? val._id : '');
@@ -237,13 +244,13 @@ const CycleCountDetermination = () => {
                 allowSwipe={true}
                 permissions={permissions.cycleCountDetermination}
                 primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => { }}
+                onClick={(data) => {}}
                 dataRows={dataRows}
                 selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                 dispatch={dispatch}
-                onEdit={(data) => { }}
+                onEdit={(data) => {}}
                 extraParamsToCheckDelete={true}
-                onDelete={(data) => { }}
+                onDelete={(data) => {}}
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
@@ -251,7 +258,7 @@ const CycleCountDetermination = () => {
                 chips={[]}
                 onCreate={false}
                 showClone={true}
-                onClone={(data) => { }}
+                onClone={(data) => {}}
                 renderedFrom={renderedFrom}
               />
             ) : (
@@ -278,7 +285,7 @@ const CycleCountDetermination = () => {
             )
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

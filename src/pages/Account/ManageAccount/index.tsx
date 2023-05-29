@@ -199,13 +199,6 @@ export default function ManageAccountDialog(props) {
     }
   };
 
-  const handleValuesChange = (name, value) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      [name]: value
-    }))
-  }
-
   return (
     <ManageAccount
       open={open}
@@ -218,7 +211,6 @@ export default function ManageAccountDialog(props) {
       collaborators={collaborators}
       fromProject={fromProject}
       formValues={formValues}
-      handleValuesChange={handleValuesChange}
       marketSegmentId={marketSegmentId}
       subMarketSegmentId={subMarketSegmentId}
       isClone={isClone}

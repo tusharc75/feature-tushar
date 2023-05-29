@@ -113,22 +113,22 @@ const ProductAuctionDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.product?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    onClick={() => {
-                      setOpenUpdateDialog(true);
-                    }}
-                    className={`btn-outline-v1`}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.productAuction?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
-              <ActivityButton referenceId={productAuctionData?._id} resource={ACTIVITY_RESOURCE.productAuction} />
+            <>
+              {permissions?.product?.isUpdate && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  size="small"
+                  onClick={() => {
+                    setOpenUpdateDialog(true);
+                  }}
+                  className={`btn-outline-v1`}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.productAuction?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            </>
+            <ActivityButton referenceId={productAuctionData?._id} resource={ACTIVITY_RESOURCE.productAuction} />
           </Box>
         </Box>
       </Box>
@@ -148,10 +148,6 @@ const ProductAuctionDetailsPage = () => {
             >
               <Tab
                 className={'tabLayout'}
-                style={{
-                  background: tabValue === 1 ? 'white' : '',
-                  color: tabValue === 1 ? '#163340' : '#163340'
-                }}
                 label={
                   <div className="d-flex align-items-center tab-font">
                     <FaWpforms className="mr-1" fontSize="inherit" /> Header
@@ -161,10 +157,6 @@ const ProductAuctionDetailsPage = () => {
               />
               <Tab
                 className={'tabLayout'}
-                style={{
-                  background: tabValue === 2 ? 'white' : '',
-                  color: tabValue === 2 ? 'blue' : '#163340'
-                }}
                 label={
                   <div className="d-flex align-items-center tab-font">
                     <BiFoodMenu className="mr-1" fontSize="inherit" /> Bids

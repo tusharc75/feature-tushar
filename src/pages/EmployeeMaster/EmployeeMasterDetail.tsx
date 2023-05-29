@@ -104,7 +104,7 @@ const EmployeeMasterDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
               <>
-                {permissions.employeeMaster?.isUpdate && (
+                {permissions?.employeeMaster?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     size="small"

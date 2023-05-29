@@ -29,7 +29,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   const [isUpdating, setUpdating] = useState(false);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
-  const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false });
+  const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [columns, setColumns] = useState(null);
@@ -65,11 +65,16 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
         Header: 'Detail',
         minWidth: 300,
         width: 300,
-        Cell: ({ row }) => (
+        Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p
               onClick={() => {
-                setMaterialEdit({ open: true, data: row.original, bulkedit: false });
+                setMaterialEdit({
+                  open: true,
+                  data: row.original,
+                  bulkedit: false,
+                  showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                });
               }}
               className="link text-truncate"
               title={row.original?.detail}
@@ -177,7 +182,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
       });
   };
 
-  const handleSaveData = async (rows: any) => {
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
     rows.forEach((element) => {
       delete element.index;
@@ -195,7 +200,17 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
           type: 'success',
           message: data.message
         });
-        setMaterialEdit({ open: false, data: null, bulkedit: false });
+        if (saveAndNext) {
+          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          setMaterialEdit({
+            open: true,
+            data: rowsData[rowIndex + 1],
+            bulkedit: false,
+            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+          });
+        } else {
+          setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
+        }
       })
       .catch((error) => {
         setUpdating(false);
@@ -262,7 +277,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
           >
             <MenuItem
               onClick={() => {
-                setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true });
+                setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
                 closeActions();
               }}
             >
@@ -307,7 +322,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
           />
         </Box>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
@@ -323,13 +338,14 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
       {materialEdit.open && (
         <MaterialDialog
           onClose={() => {
-            setMaterialEdit({ open: false, data: null, bulkedit: false });
+            setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
           }}
           materialData={materialEdit.data}
           jobData={jobData}
           handleUpdate={handleSaveData}
           loadingEdit={isUpdating}
           bulkEdit={materialEdit.bulkedit}
+          showSaveAndNext={materialEdit.showSaveAndNext}
         />
       )}
       {addDialog.open && addDialog.type === 'asset' && (

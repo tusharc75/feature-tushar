@@ -142,126 +142,121 @@ const LeadTimeMasterDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.leadTimeMaster?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.leadTimeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
+            <>
+              {permissions?.leadTimeMaster?.isUpdate && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className={'btn-outline-v1'}
+                  size="small"
+                  onClick={handleOpenUpdateDialog}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.leadTimeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            </>
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
         <Grid container spacing={1}>
           <Grid item xs={12} sm={12} md={8}>
-            <div>
-              <Paper style={{ height: '80vh' }}>
-                {leadTimeMasterData ? (
-                  <DetailsPageHeader heading={leadTimeMasterData?.leadTimeName} mainPoints={null} showHeading={true}>
-                    {permissions?.leadTimeMaster?.isUpdate && (
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        onClick={handleOpenUpdateDialog}
-                        className={'btn-outline-v1'}
-                      >
-                        {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                      </Button>
-                    )}
-                    {permissions?.leadTimeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                  </DetailsPageHeader>
-                ) : (
-                  <Skeleton variant="text" width="150px" height="40px" />
-                )}
-                <Box>
-                  {' '}
-                  {leadTimeMasterData && lTMFields.length ? (
-                    <DetailsPage data={leadTimeMasterData} fields={lTMFields} />
-                  ) : (
-                    <Grid container spacing={2} style={{ padding: '8px' }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
+            <Box style={{ height: '80vh' }}>
+              {leadTimeMasterData ? (
+                <DetailsPageHeader heading={leadTimeMasterData?.leadTimeName} mainPoints={null} showHeading={true}>
+                  {permissions?.leadTimeMaster?.isUpdate && (
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                      className={'btn-outline-v1'}
+                    >
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    </Button>
                   )}
-                </Box>
-              </Paper>
-            </div>
-            <Box my={1} />
+                  {permissions?.leadTimeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                </DetailsPageHeader>
+              ) : (
+                <Skeleton variant="text" width="150px" height="40px" />
+              )}
+              <Box>
+                {' '}
+                {leadTimeMasterData && lTMFields.length ? (
+                  <DetailsPage data={leadTimeMasterData} fields={lTMFields} />
+                ) : (
+                  <Grid container spacing={2} style={{ padding: '8px' }}>
+                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  </Grid>
+                )}
+              </Box>
+            </Box>
           </Grid>
           <Grid item xs={12} sm={12} md={4}>
-            <Paper style={{ overflow: 'hidden' }}>
-              <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                <Box display={'flex'}>
-                  <Box>
-                    <Typography variant="subtitle2">Lead Time</Typography>
-                  </Box>
-                </Box>
+            <Box className="single-form-v1">
+              <Box className="form-head-v1">
+                <Typography variant="subtitle2">Lead Time</Typography>
               </Box>
-              {leadTimeMasterData?.steps?.length ? (
-                <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-                  <Grid container>
-                    <Grid item xs={2}>
-                      <Typography variant="body1">#</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="body1">Status</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Typography variant="body1">Days</Typography>
-                    </Grid>
-                  </Grid>
-                </Box>
-              ) : null}
-              {leadTimeMasterData?.steps?.length ? (
-                leadTimeMasterData?.steps?.map((steps, index) => (
-                  <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+              <Box className="formdata-v1">
+                {leadTimeMasterData?.steps?.length ? (
+                  <Box p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                     <Grid container>
                       <Grid item xs={2}>
-                        <Typography variant="body2">{index + 1}</Typography>
+                        <Typography variant="body1">#</Typography>
                       </Grid>
                       <Grid item xs={6}>
-                        <Typography variant="body2">{steps?.leadTimeStatus || ''}</Typography>
+                        <Typography variant="body1">Status</Typography>
                       </Grid>
                       <Grid item xs={4}>
-                        <Typography variant="body2">{steps?.days || 0}</Typography>
+                        <Typography variant="body1">Days</Typography>
                       </Grid>
                     </Grid>
                   </Box>
-                ))
-              ) : (
-                <Box bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-                  <Grid container>
-                    <Grid item xs={6} justifyContent={'center'}>
-                      <Typography variant="body2">No Data Found</Typography>
+                ) : null}
+                {leadTimeMasterData?.steps?.length ? (
+                  leadTimeMasterData?.steps?.map((steps, index) => (
+                    <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
+                      <Grid container>
+                        <Grid item xs={2}>
+                          <Typography variant="body2">{index + 1}</Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography variant="body2">{steps?.leadTimeStatus || ''}</Typography>
+                        </Grid>
+                        <Grid item xs={4}>
+                          <Typography variant="body2">{steps?.days || 0}</Typography>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  ))
+                ) : (
+                  <Box p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
+                    <Grid container>
+                      <Grid item xs={6} justifyContent={'center'}>
+                        <Typography variant="body2">No Data Found</Typography>
+                      </Grid>
                     </Grid>
-                  </Grid>
-                </Box>
-              )}
-              {leadTimeMasterData?.steps?.length ? (
-                <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-                  <Grid container>
-                    <Grid item xs={2}>
-                      <Typography variant="body2"></Typography>
+                  </Box>
+                )}
+                {leadTimeMasterData?.steps?.length ? (
+                  <Box p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
+                    <Grid container>
+                      <Grid item xs={2}>
+                        <Typography variant="body2"></Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" style={{ fontWeight: 'bold' }}>
+                          Total
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Typography variant="body2">{leadTimeMasterData?.leadTimeDays || 0}</Typography>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="body2" style={{ fontWeight: 'bold' }}>
-                        Total
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Typography variant="body2">{leadTimeMasterData?.leadTimeDays || 0}</Typography>
-                    </Grid>
-                  </Grid>
-                </Box>
-              ) : null}
-            </Paper>
+                  </Box>
+                ) : null}
+              </Box>
+            </Box>
           </Grid>
         </Grid>
       </Box>

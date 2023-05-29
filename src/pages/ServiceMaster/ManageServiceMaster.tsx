@@ -188,7 +188,7 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
                                   isNew={Boolean(serviceMasterId)}
                                   {...field}
                                   fieldData={field}
-                                  allFields={initialData.fields}
+                                  fields={initialData.fields}
                                   disabled={(Boolean(serviceMasterId) && field.disableOnEdit && !isClone) || false}
                                   values={values}
                                   errors={errors}
@@ -263,7 +263,7 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

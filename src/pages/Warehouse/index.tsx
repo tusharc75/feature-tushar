@@ -26,7 +26,7 @@ import EntitySelectionsDialog from 'src/components/EntitySelections';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import Chip from '@material-ui/core/Chip';
-import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from 'src/constants/useColumns';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
@@ -54,8 +54,7 @@ const Warehouse = () => {
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [open, setOpen] = useState({ open: false, isClone: false });
-  const [addressResource, setAddressResource] = useState(null);
+  const [open, setOpen] = useState({ open: false, isClone: false, id: null });
   const [anchorEl, setAnchorEl] = useState(null);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
   const [warehouseId, setWarehouseId] = useState('');
@@ -71,14 +70,6 @@ const Warehouse = () => {
     state;
   const [sortOpen, setSortOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
-
-  useEffect(() => {
-    const parsedParams = queryString.parse(location?.search);
-    if (parsedParams?.id) {
-      setAddressResource({ id: parsedParams?.id });
-      setOpen({ open: true, isClone: false });
-    }
-  }, [location]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -172,8 +163,7 @@ const Warehouse = () => {
             aria-label="Clone"
             disabled={!permissions?.warehouse?.isCreate}
             onClick={() => {
-              setAddressResource(params.data);
-              setOpen({ open: true, isClone: true });
+              setOpen({ open: true, isClone: true, id: params.data._id });
             }}
           >
             <FileCopyIcon fontSize="small" color={permissions?.warehouse?.isCreate ? 'primary' : 'inherit'} />
@@ -233,36 +223,24 @@ const Warehouse = () => {
     </>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
 
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {
@@ -419,8 +397,7 @@ const Warehouse = () => {
                   {permissions?.warehouse?.isCreate && (
                     <Button
                       onClick={() => {
-                        setAddressResource(null);
-                        setOpen({ open: true, isClone: false });
+                        setOpen({ open: true, isClone: false, id: null });
                       }}
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       size="small"
@@ -569,11 +546,11 @@ const Warehouse = () => {
         )}
         {open?.open && (
           <ManageWarehouse
-            addressResource={addressResource}
+            warehouseId={open.id}
             open={open?.open}
-            close={() => setOpen({ open: false, isClone: false })}
+            close={() => setOpen({ open: false, isClone: false, id: null })}
             onSuccess={() => {
-              setOpen({ open: false, isClone: false });
+              setOpen({ open: false, isClone: false, id: null });
               fetchWarehouses();
             }}
             isClone={open?.isClone}

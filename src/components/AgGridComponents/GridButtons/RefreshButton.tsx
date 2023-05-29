@@ -3,20 +3,16 @@ import { Tooltip, IconButton } from '@material-ui/core';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const RefreshButton = ({ isOffline, refreshGrid = null, style = {}, ...otherProps }) => {
+const RefreshButton = ({ isOffline, className = '', refreshGrid = null, style = {}, ...otherProps }) => {
   return refreshGrid ? (
-    <HtmlTooltip title="Refresh" placement="top">
+    <HtmlTooltip title="Refresh" placement="top" arrow>
       <IconButton
         {...otherProps}
+        className={`refresh-arrange-button ${className}`}
         style={{
-          width: '46px',
-          height: '32px',
-          background: 'white',
-          padding: '11px',
-          border: '1px solid #DEDEDE',
-          color: '#424242',
           ...style
         }}
+        color="primary"
         disabled={isOffline}
         size="small"
         onClick={() => {

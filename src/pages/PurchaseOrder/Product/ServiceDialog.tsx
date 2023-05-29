@@ -16,7 +16,6 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { fetch_po_service_fields } from 'src/components/PurchaseOrder/helper';
 
 const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, serviceData, bulkEdit, showSaveAndNext, loadingEdit }) => {
-
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -28,14 +27,14 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
   }, [serviceData]);
 
   const fetchField = async () => {
-    setInitialData({ fields: [], values: {} })
+    setInitialData({ fields: [], values: {} });
     var poFields = await fetch_po_service_fields(purchaseOrderData?.currency);
-    setAllFields(JSON.parse(JSON.stringify(poFields)))
+    setAllFields(JSON.parse(JSON.stringify(poFields)));
     if (bulkEdit) {
-      let unitArray: any = []
-      serviceData?.forEach(element => {
+      let unitArray: any = [];
+      serviceData?.forEach((element) => {
         if (element?.serviceDetail?.unit) {
-          unitArray.push([...element?.serviceDetail?.unit])
+          unitArray.push([...element?.serviceDetail?.unit]);
         }
       });
       let unit: any = unitArray?.shift()?.filter(function (v) {
@@ -43,9 +42,9 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
           return a.indexOf(v) !== -1;
         });
       });
-      const unitOptions: any = arrayToDropwdownOption(unit)
+      const unitOptions: any = arrayToDropwdownOption(unit);
       poFields.forEach((element) => {
-        if (element.fieldName === "unit") {
+        if (element.fieldName === 'unit') {
           element.option = unitOptions;
           if (unitOptions?.length) {
             element.isDefaultValue = true;
@@ -55,29 +54,28 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
-      })
-      poFields = poFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
+      });
+      poFields = poFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       setInitialData({
         fields: poFields,
-        values: { ...getObjKeys("", poFields), expectedDelivery: "" },
+        values: { ...getObjKeys('', poFields), expectedDelivery: '' }
       });
-    }
-    else {
+    } else {
       poFields.filter((_f) => {
-        if (["unit"].includes(_f.fieldName.toLowerCase())) {
+        if (['unit'].includes(_f.fieldName.toLowerCase())) {
           if (serviceData?.serviceDetail?.unit) {
-            _f.option = arrayToDropwdownOption(serviceData?.serviceDetail?.unit)
+            _f.option = arrayToDropwdownOption(serviceData?.serviceDetail?.unit);
           }
         }
-      })
-      let tempObjKeysWithValues = getObjKeysWithValues(serviceData, poFields)
+      });
+      let tempObjKeysWithValues = getObjKeysWithValues(serviceData, poFields);
       setInitialData({
         fields: poFields,
-        values: tempObjKeysWithValues,
+        values: tempObjKeysWithValues
       });
     }
     EvaluteproductFields(poFields);
-  }
+  };
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
@@ -90,20 +88,19 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
   };
 
   const handleSubmit = (values) => {
-    let returnData = []
+    let returnData = [];
     if (bulkEdit) {
       for (const x in values) {
-        if (values[x] === "" || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
-          delete values[x]
+        if (values[x] === '' || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
+          delete values[x];
         }
       }
-      serviceData.forEach(element => {
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-        returnData.push({ _id: element._id, ...calValues })
-      })
+      serviceData.forEach((element) => {
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        returnData.push({ _id: element._id, ...calValues });
+      });
       handleUpdateService(returnData);
-    }
-    else {
+    } else {
       returnData = [{ ...values, _id: serviceData._id }];
       handleUpdateService(returnData, saveAndNext);
     }
@@ -129,7 +126,7 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={bulkEdit ? "Bulk Edit" : `Edit - ${serviceData?.index} (${serviceData?.detail || ""})`}
+                title={bulkEdit ? 'Bulk Edit' : `Edit - ${serviceData?.index} (${serviceData?.detail || ''})`}
                 onClose={() => {
                   onClose();
                 }}
@@ -219,7 +216,7 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
                 >
                   {'Close'}
                 </Button>
-                {bulkEdit === false && showSaveAndNext &&
+                {bulkEdit === false && showSaveAndNext && (
                   <CustomButton
                     loading={loadingEdit}
                     disabled={loadingEdit}
@@ -228,10 +225,13 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
                     type="submit"
                     onClick={() => {
                       setSaveAndNext(true);
-                      submitForm()
+                      submitForm();
                     }}
-                  > Save & Next
-                  </CustomButton>}
+                  >
+                    {' '}
+                    Save & Next
+                  </CustomButton>
+                )}
                 <CustomButton
                   loading={loadingEdit}
                   disabled={loadingEdit}
@@ -240,7 +240,7 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
                   type="submit"
                   onClick={() => {
                     setSaveAndNext(false);
-                    submitForm()
+                    submitForm();
                   }}
                 >
                   Save
@@ -250,7 +250,7 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

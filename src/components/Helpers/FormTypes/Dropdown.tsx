@@ -9,7 +9,9 @@ import { getNestedlookupDependentOn, sidebarResource } from 'src/constants/helpe
 import ManageWellMaster from 'src/pages/WellMaster/ManageWellMaster';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
+import ManageCompetencyType from "src/pages/CompetencyType/ManageCompetencyType"
 import { camelCase } from 'lodash';
+import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
 
 function Dropdown({
     InfoLabel,
@@ -21,7 +23,6 @@ function Dropdown({
     type,
     onChange,
     label,
-    lookup,
     name,
     addFieldOption,
     setOptionsList,
@@ -35,7 +36,7 @@ function Dropdown({
     setOptionSaveDialog,
     AddOptionDialog,
     setFieldValue,
-    allFields = [] }) {
+    fields = [] }) {
 
     const { state: { permissions } }: any = useData();
 
@@ -53,14 +54,14 @@ function Dropdown({
                         <Autocomplete
                             {...rest}
                             multiple
-                            freeSolo={!lookup}
+                            freeSolo={!fieldData?.lookup}
                             disableCloseOnSelect={true}
                             options={(fieldData && fieldData?.isDependentDropdown) ?
                                 option?.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn]) :
                                 (fieldData && fieldData?.lookupDependentOn) ?
                                     option?.filter((_f) =>
                                         values[fieldData?.lookupDependentOn]
-                                        && _f[camelCase(allFields?.find((e) => e.fieldName === fieldData?.lookupDependentOn)?.lookupResource) || fieldData?.lookupDependentOn]?.includes(values[fieldData?.lookupDependentOn])) :
+                                        && _f[camelCase(fields?.find((e) => e.fieldName === fieldData?.lookupDependentOn)?.lookupResource) || fieldData?.lookupDependentOn]?.includes(values[fieldData?.lookupDependentOn])) :
                                     option?.filter(f => f?.optionLabel)}
                             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                             value={values[name] ? option.filter((data: any) => values[name].includes(data.optionValue)) : []}
@@ -70,7 +71,7 @@ function Dropdown({
                                     ? onChange
                                     : (e, value: any, reason) => {
                                         if (setFieldValue) {
-                                            if (!lookup) {
+                                            if (!fieldData?.lookup) {
                                                 if (reason === 'clear') {
                                                     setFieldValue(name, []);
                                                 } else if (reason === 'remove-option' && values[name].length === 1) {
@@ -143,7 +144,7 @@ function Dropdown({
                                 if (
                                     params.inputValue !== '' &&
                                     !option.find((o) => o?.optionValue.includes(params.inputValue)) &&
-                                    !lookup &&
+                                    !fieldData?.lookup &&
                                     (addAdditionalOption || fieldData?.addAdditionalOption)
                                 ) {
                                     filtered.push({
@@ -179,9 +180,9 @@ function Dropdown({
                                 (fieldData && fieldData?.lookupDependentOn) ?
                                     option?.filter((_f) =>
                                         values[fieldData?.lookupDependentOn]
-                                        && _f[camelCase(allFields?.find((e) => e.fieldName === fieldData?.lookupDependentOn)?.lookupResource) || fieldData?.lookupDependentOn]?.includes(values[fieldData?.lookupDependentOn])) :
+                                        && _f[camelCase(fields?.find((e) => e.fieldName === fieldData?.lookupDependentOn)?.lookupResource) || fieldData?.lookupDependentOn]?.includes(values[fieldData?.lookupDependentOn])) :
                                     option?.filter(f => f?.optionLabel)}
-                            freeSolo={type === 'dropDown' && !lookup}
+                            freeSolo={type === 'dropDown' && !fieldData?.lookup}
                             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                             getOptionSelected={(option: any, val) => option.optionValue === val}
                             value={option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''}
@@ -190,7 +191,7 @@ function Dropdown({
                                     ? onChange
                                     : (e, val) => {
                                         if (setFieldValue) {
-                                            if (!lookup) {
+                                            if (!fieldData?.lookup) {
                                                 if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
                                                     const newOption = {
                                                         order: option.length,
@@ -245,7 +246,7 @@ function Dropdown({
                                                 }
                                             } else {
                                                 handleChange(name, val && val.optionValue ? val.optionValue : '');
-                                                const fieldChange: any = getNestedlookupDependentOn(allFields, name);
+                                                const fieldChange: any = getNestedlookupDependentOn(fields, name);
                                                 fieldChange?.forEach((val: any) => {
                                                     setFieldValue(val.fieldName, val.value);
                                                 })
@@ -259,7 +260,7 @@ function Dropdown({
                                 if (
                                     params.inputValue !== '' &&
                                     !option.find((o) => o?.optionValue.includes(params.inputValue)) &&
-                                    !lookup &&
+                                    !fieldData?.lookup &&
                                     (addAdditionalOption || fieldData?.addAdditionalOption)
                                 ) {
                                     filtered.push({
@@ -291,7 +292,7 @@ function Dropdown({
                         />}
                 </InfoLabel>
             </Box>
-            {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
+            {!fieldData?.lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
                 <Box>
                     <HtmlTooltip title={`Add ${fieldData?.lookupResource}`} className="formActionButton">
                         <>
@@ -305,7 +306,7 @@ function Dropdown({
             )}
             {rest?.hidelookupAddButton ? null :
                 <Fragment>
-                    {lookup && fieldData?.lookupResource === sidebarResource.wellMaster && permissions?.wellMaster?.isCreate && (
+                    {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.wellMaster && permissions?.wellMaster?.isCreate && (
                         <Box>
                             <HtmlTooltip title={`Add ${name}`} className="formActionButton">
                                 <>
@@ -345,7 +346,7 @@ function Dropdown({
                                 </>
                             </HtmlTooltip>
                         </Box>)}
-                    {lookup && fieldData?.lookupResource === sidebarResource.wellNumber && permissions?.wellNumber?.isCreate && (
+                    {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.wellNumber && permissions?.wellNumber?.isCreate && (
                         <Box>
                             <HtmlTooltip title={`Add ${name}`} className="formActionButton">
                                 <>
@@ -388,7 +389,7 @@ function Dropdown({
                                 </>
                             </HtmlTooltip>
                         </Box>)}
-                    {lookup && fieldData?.lookupResource === sidebarResource.warehouse && permissions?.warehouse?.isCreate && (
+                    {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.warehouse && permissions?.warehouse?.isCreate && (
                         <Box>
                             <HtmlTooltip title={`Add ${name}`} className="formActionButton">
                                 <>
@@ -398,6 +399,7 @@ function Dropdown({
                                     {lookupDialog &&
                                         <ManageWarehouse
                                             open={lookupDialog}
+                                            warehouseId={null}
                                             close={() => setLookupDialog(false)}
                                             isClone={false}
                                             onSuccess={({ data }) => {
@@ -418,7 +420,7 @@ function Dropdown({
                                 </>
                             </HtmlTooltip>
                         </Box>)}
-                    {lookup && fieldData?.lookupResource === sidebarResource.storageLocation && permissions?.warehouse?.isCreate && (
+                    {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.storageLocation && permissions?.warehouse?.isCreate && (
                         <Box>
                             <HtmlTooltip title={`Add ${name}`} className="formActionButton">
                                 <>
@@ -445,6 +447,79 @@ function Dropdown({
                                             }
                                         }}
                                     />}
+                                </>
+                            </HtmlTooltip>
+                        </Box>)}
+                        {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.competencyType && permissions?.competencyType?.isCreate && (
+                        <Box>
+                            <HtmlTooltip title={`Add ${name}`} className="formActionButton">
+                                <>
+                                    <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                                        <AddCircleIcon />
+                                    </IconButton>
+                                    {lookupDialog &&
+                                        <ManageCompetencyType
+                                            id={null}
+                                            onClose={() => setLookupDialog(false)}
+                                            isClone={false}
+                                            onSuccess={(data) => {
+                                                setLookupDialog(false)
+                                                if (data.competencyType && data._id) {
+                                                    let tempNewOption = {
+                                                        default: false,
+                                                        optionLabel: data.competencyType,
+                                                        optionValue: data._id,
+                                                        order: option.length
+                                                    }
+                                                    addFieldOption(tempNewOption);
+                                                    setOptionsList([tempNewOption, ...option]);
+                                                    handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                                }
+                                            }}
+                                        />}
+                                </>
+                            </HtmlTooltip>
+                        </Box>)}
+                        {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.competencies && permissions?.competencies?.isCreate && (
+                        <Box>
+                            <HtmlTooltip title={`Add ${name}`} className="formActionButton">
+                                <>
+                                    <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                                        <AddCircleIcon />
+                                    </IconButton>
+                                    {lookupDialog &&
+                                        <ManageCompetencies
+                                            referenceData={{ competencyType: values[fieldData.lookupDependentOn] }}
+                                            isClone={false}
+                                            onClose={() => setLookupDialog(false)}
+                                            onSuccess={(data) => {
+                                                setLookupDialog(false)
+                                                if (data.competencyName && data._id) {
+                                                    let tempNewOption = {
+                                                        default: false,
+                                                        optionLabel: data.competencyName,
+                                                        optionValue: data._id,
+                                                        order: option.length,
+                                                        competencyType: data.competencyType
+                                                    }
+                                                    addFieldOption(tempNewOption);
+                                                    setOptionsList([tempNewOption, ...option]);
+                                                    if (fieldData.lookupDependentOn) {
+                                                        if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
+                                                            if (type === "multiSelect") {
+                                                                handleChange(name, tempNewOption && tempNewOption.optionValue ? [tempNewOption.optionValue] : []);
+                                                            }
+                                                            else {
+                                                                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                                            }
+                                                        }
+                                                    }
+                                                    else {
+                                                        handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                                                    }
+                                                }
+                                            }}
+                                        />}
                                 </>
                             </HtmlTooltip>
                         </Box>)}

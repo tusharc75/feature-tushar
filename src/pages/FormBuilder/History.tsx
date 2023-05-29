@@ -8,48 +8,43 @@ import { camelCase, startCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CommonRenderer, CreatedByRenderer, DateTimeRenderer, LinkRenderer  } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import { CommonRenderer, CreatedByRenderer, DateTimeRenderer, LinkRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import LogDialog from './LogDialog';
-
 
 const HistoryLogs = ({ onClose, open, resource }) => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const renderedFrom = camelCase(routes?.formBuilder.title);
   const [gridApi, setGridApi] = useState(null);
   const toastConfig = useContext(CustomToastContext);
-  const [openDialog, setOpenDialog] = useState({open:false, log:null})
+  const [openDialog, setOpenDialog] = useState({ open: false, log: null });
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const columns = [
     { field: 'date', headerName: 'Date Time', show: true, cellRenderer: 'dateTimeRenderer' },
-     { field: 'user', headerName: 'User', show: true, cellRenderer: 'nameRenderer' },
+    { field: 'user', headerName: 'User', show: true, cellRenderer: 'nameRenderer' }
   ];
 
   const ActionsRenderer = (params) => (
     <>
       <HtmlTooltip title="View Changes">
-        <IconButton onClick={()=>setOpenDialog({open: true, log:params?.data?.log})}>
-        <VisibilityIcon color="primary" fontSize='small' />
+        <IconButton onClick={() => setOpenDialog({ open: true, log: params?.data?.log })}>
+          <VisibilityIcon color="primary" fontSize="small" />
         </IconButton>
       </HtmlTooltip>
     </>
-  )
+  );
 
   const NameRenderer = (params) => {
-    return (
-      <span>
-          {params?.value?.optionLabel}
-      </span>
-    );
+    return <span>{params?.value?.optionLabel}</span>;
   };
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     dateTimeRenderer: DateTimeRenderer,
-    actionsRenderer:ActionsRenderer,
+    actionsRenderer: ActionsRenderer
   };
   useEffect(() => {
     fetchHistory();
@@ -63,7 +58,7 @@ const HistoryLogs = ({ onClose, open, resource }) => {
         dispatch({
           type: 'initialize',
           data: data,
-          count: data?.length,
+          count: data?.length
         });
         dispatch({ type: 'loading', loading: false });
       })
@@ -74,13 +69,7 @@ const HistoryLogs = ({ onClose, open, resource }) => {
   };
 
   return (
-    <Dialog
-      fullScreen={true}
-      TransitionComponent={CustomDialogTransition}
-      aria-labelledby="customized-dialog-title"
-      open={open}
-      fullWidth
-    >
+    <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={open} fullWidth>
       <CustomDialogHeader showRequiredLabel={false} title={`History`} onClose={onClose}></CustomDialogHeader>
       <div className="listing-grid p-3">
         {columns && frameworkComponents ? (
@@ -103,18 +92,12 @@ const HistoryLogs = ({ onClose, open, resource }) => {
             renderedFrom={renderedFrom}
           />
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
       </div>
-      {openDialog?.open && (
-        <LogDialog  
-        open={openDialog?.open}
-        onClose={()=>setOpenDialog({open:false, log:null})}
-        log={openDialog?.log}
-        />
-      )}
+      {openDialog?.open && <LogDialog open={openDialog?.open} onClose={() => setOpenDialog({ open: false, log: null })} log={openDialog?.log} />}
     </Dialog>
   );
 };

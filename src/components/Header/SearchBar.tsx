@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useReducer } from 'react';
-import { IconButton, ListItem, ListItemText, List } from '@material-ui/core';
+import { IconButton, ListItem, ListItemText, List, ListItemIcon } from '@material-ui/core';
 import { Clear as ClearIcon } from '@material-ui/icons';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SEARCH } from '../../StateProvider/actionTypes';
@@ -9,19 +9,31 @@ import { staticHiddenResource } from '../../constants/helpers';
 import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
 import { usePathname, useClickdOutside, useKeyPress } from 'src/hooks';
 import styles from './Header.module.scss';
+import CallMadeIcon from '@material-ui/icons/CallMade';
+import { useStore, SEARCH } from 'src/StateProvider/fastContext';
 
 import { filterReducerInitialState, filterReducer } from './helper';
 
 export const SearchBar = ({ user, selectedEntity, history }) => {
-  const {
-    state: { searchQuery },
-    dispatch
-  }: any = useData();
+  // const {
+  //   state: { searchQuery },
+  //   dispatch
+  // }: any = useData();
+  const [searchQuery, setStore] = useStore((store) => store[SEARCH]);
 
   const [sections, setSections] = useState([]);
   const [showCloseButton, setShowCloseButton] = useState(false);
   const [search, setSearch] = useState('');
   const [filterState, filterDispatch] = useReducer(filterReducer, filterReducerInitialState);
+  const isSlashPressed = useKeyPress({ targetKey: '/' });
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (isSlashPressed) {
+      filterDispatch({ type: 'resetIndex' });
+      inputRef?.current.focus();
+    }
+  }, [isSlashPressed]);
 
   useEffect(() => {
     filterDispatch({ type: 'resetIndex' });
@@ -67,7 +79,8 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   }, [user, selectedEntity]);
 
   const handleSearch = (value) => {
-    dispatch({ type: SET_SEARCH, payload: value });
+    // dispatch({ type: SET_SEARCH, payload: value });
+    setStore({ [SEARCH]: value });
     const searchedValueInLowerCase = value?.toLowerCase();
     const filteredItems = [];
 
@@ -83,7 +96,8 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   };
 
   const clearSearch = () => {
-    dispatch({ type: SET_SEARCH, payload: '' });
+    // dispatch({ type: SET_SEARCH, payload: '' });
+    setStore({ [SEARCH]: '' });
     setSearch('');
     setShowCloseButton(false);
   };
@@ -102,6 +116,7 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
     <div className={styles.searchContainer}>
       <div className={`${styles.search_input}`} style={{ borderRadius: showCloseButton ? '4px 4px 0 0' : '4px' }}>
         <input
+          ref={inputRef}
           type="text"
           value={search}
           placeholder="Search"
@@ -178,12 +193,12 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
       <div
         className={`${styles.filtered_data} `}
         ref={listContainerRef}
-        style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll', scrollPadding: '37px 0 0 0' }}
+        style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll', scrollPadding: '48px 0 0 0', marginBottom: 20 }}
       >
         {filteredData.length !== 0 ? (
           filteredData.map((section, pkey) => {
             return (
-              <List key={pkey} subheader={<h6 className={`${styles.list_header}`}>{section.head}</h6>}>
+              <List key={pkey} className={styles.resultUL} subheader={<h6 className={`${styles.list_header}`}>{section.head}</h6>}>
                 {section.items.map((item, ckey) => {
                   return (
                     <ListItem
@@ -195,7 +210,10 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
                       }}
                       className={styles.heaaderResults}
                     >
-                      <ListItemText primary={item.resourceLabel} style={{ fontSize: '14px' }} />
+                      <ListItemIcon className={styles.listIcon}>
+                        <CallMadeIcon style={{ fontSize: 16 }} />
+                      </ListItemIcon>
+                      <ListItemText primary={<span style={{ fontWeight: 500, fontSize: '15px' }}>{item.resourceLabel}</span>} />
                     </ListItem>
                   );
                 })}

@@ -11,8 +11,8 @@ const AntTabs = withStyles((theme) => ({
     backgroundColor: theme.palette.primary.main, //  dargBg
     display: 'none'
   },
-  "&.Component-root.Component-selected" :{
-      color:"red !important"
+  '&.Component-root.Component-selected': {
+    color: 'red !important'
   }
 }))(Tabs);
 
@@ -25,19 +25,20 @@ const AntTab = withStyles((theme: Theme) =>
       marginRight: theme.spacing(4),
 
       '&:hover': {
-        color: "var(--secondary)", //  dargBg
+        color: 'var(--secondary)', //  dargBg
         opacity: 1
       },
       '&$selected': {
         color: theme.palette.primary.main, //  dargBg
-        fontWeight: theme.typography.fontWeightMedium
+        fontWeight: theme.typography.fontWeightMedium,
+        pointerEvents: 'none'
       },
       '&:focus': {
         color: theme.palette.primary.main //  darkBg
       }
     },
     selected: {
-      color:"#43AEAA !important"
+      color: '#43AEAA !important'
     }
   })
 )((props: StyledTabProps) => <Tab className="AntTab" icon={props.label === 'Board' ? <DeveloperBoard /> : <Map />} disableRipple {...props} />);

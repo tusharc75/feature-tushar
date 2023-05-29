@@ -17,7 +17,7 @@ import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import Steps2, { getIndex } from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 import Material from './Material';
 import Invoice from './Invoice';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -306,7 +306,7 @@ const InvoiceDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps2
+          <Steps
             isNextStep={false}
             nextStep={nextStep}
             steps={invoiceProcessSteps}

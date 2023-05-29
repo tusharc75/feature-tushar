@@ -67,7 +67,7 @@ export const purchaseRequisitionSteps = ['Add Products'];
 
 export const productionOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' }
 ];
 
 export const jobProcessSteps: stepInterface[] = [
@@ -185,8 +185,8 @@ export const userType = {
   brandAdmin: 2
 };
 
-export const AgGridHeaderHeight = 40;
-export const AgGridRowHeight = 40;
+export const AgGridHeaderHeight = 45;
+export const AgGridRowHeight = 45;
 export const AgGridFloatingFiltersHeight = 38;
 
 export const gridPageSizes = [25, 50, 75];
@@ -282,7 +282,7 @@ export const sidebarResource = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
-  serviceOrder: 'Service Order',
+  fieldServiceOrder: 'Field Service Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
@@ -313,7 +313,7 @@ export const sidebarResource = {
   wellNumber: 'Well Number',
   planningView: 'Planning View',
   taxMaster: 'Tax Master',
-  competencies: 'Competencies',
+  competencies: 'Competencies'
 };
 
 export const primaryFields = {
@@ -400,7 +400,7 @@ export const RESOURCE_LABEL = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
-  serviceOrder: 'Service Order',
+  fieldServiceOrder: 'Field Service Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
@@ -429,6 +429,7 @@ export const RESOURCE_LABEL = {
   wellNumber: 'Well Number',
   taxMaster: 'Tax Master',
   competencies: 'Competencies',
+  materialHandling: 'Material Handling'
 };
 
 export const CHILD_RESOURCE = {
@@ -448,10 +449,10 @@ export const CHILD_RESOURCE = {
   quotationCost: 'Quotation Cost',
   quotationService: 'Quotation Service',
   repairOrderProduct: 'Repair Order Product',
-  serviceOrderDetails: 'Service Order Detail',
   planningMaterial: 'Planning Material',
   purchaseRequisition: 'Purchase Requisition Detail',
-  serviceOrderAddon: 'Service Order Addon',
+  fieldServiceOrderDetails: 'Field Service Order Detail',
+  fieldServiceOrderAddon: 'Field Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',
   jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
@@ -525,9 +526,9 @@ export const productionOrder = {
   api: '/production-order'
 };
 
-export const serviceOrder = {
-  resource: 'serviceOrder',
-  api: '/service-order'
+export const fieldServiceOrder = {
+  resource: 'fieldServiceOrder',
+  api: '/field-service-order'
 };
 
 export const employeeMaster = {
@@ -1129,10 +1130,6 @@ interface IPermission {
   };
 }
 
-export const isFieldNotTouched = (data, values) => {
-  return Object.values(simplifyValues(data.initialValues, data.fields)).toString() === Object.values(simplifyValues(values, data.fields)).toString();
-};
-
 export const getPermissions = (user, selectedEntity = undefined): IPermission | null => {
   if (user) {
     let permissions = {};
@@ -1239,29 +1236,6 @@ export const downloadExcel = (fileDetails, fileName) => {
     document.body.removeChild(a);
   }
 };
-
-export const simplifyValues = (obj, fields) => {
-  const newObj = {};
-  if (obj) {
-    for (const fieldData of fields) {
-      // if (fieldData.type === "multiSelect") {
-      //     if (Array.isArray(obj[fieldData.fieldName])) {
-      //         newObj[fieldData.fieldName] = obj[fieldData.fieldName].reduce
-      //     }
-      // } else if (
-      if (fieldData.type === 'switch' || fieldData.type === 'checkBox') {
-        newObj[fieldData.fieldName] = obj[fieldData.fieldName] ? 'Active' : 'Inactive';
-      } else {
-        newObj[fieldData.fieldName] = obj[fieldData.fieldName] ? obj[fieldData.fieldName] : '';
-      }
-    }
-  }
-  return newObj;
-};
-
-// export const review = {
-//   reviewsApi: '/product/review'
-// };
 
 export const getUniqueCurrencies = () => {
   return uniqBy(currencies, 'currencyCode');
@@ -1987,7 +1961,7 @@ export const ACTIVITY_RESOURCE = {
   quotation: 'quotation',
   repairOrder: 'repairOrder',
   productionOrder: 'productionOrder',
-  serviceOrder: 'serviceOrder',
+  fieldServiceOrder: 'fieldServiceOrder',
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
   fieldTicket: 'fieldTicket',
@@ -2037,7 +2011,7 @@ export const LOG_RESOURCE = {
   repairJob: sidebarResource.repairJob,
   repairType: sidebarResource.repairType,
   employeeMaster: sidebarResource.employeeMaster,
-  serviceOrder: sidebarResource.serviceOrder,
+  fieldServiceOrder: sidebarResource.fieldServiceOrder,
   product: sidebarResource.product,
   demandOrder: sidebarResource.demandOrder,
   address: sidebarResource.address,
@@ -2158,6 +2132,14 @@ export const REPORT_LIST = [
     type: 'averagePriceBySupplier',
     iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
     color: '#F3F8FF'
+  },
+  {
+    title: 'Work Order',
+    permission: 'workOrder',
+    key: 'workOrder',
+    type: 'dynamic',
+    iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
+    color: '#F3F8FF'
   }
 ];
 
@@ -2183,7 +2165,7 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.invoice, value: sidebarResource.invoice, key: 'invoice' },
   { title: sidebarResource.demandOrder, value: sidebarResource.demandOrder, key: 'demandOrder' },
   { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
-  { title: sidebarResource.serviceOrder, value: sidebarResource.serviceOrder, key: 'serviceOrder' },
+  { title: sidebarResource.fieldServiceOrder, value: sidebarResource.fieldServiceOrder, key: 'fieldServiceOrder' },
   { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' },
   { title: sidebarResource.job, value: sidebarResource.job, key: 'job' },
   { title: sidebarResource.purchaseRequisition, value: sidebarResource.purchaseRequisition, key: 'purchaseRequisition' },
@@ -2379,6 +2361,12 @@ export const SERVICE_ORDER_STATUS = {
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
   completed: 'Completed'
+};
+
+export const MATERIAL_REQUEST_STATUS = {
+  requested: 'Requested',
+  processed: 'Processed',
+  closed: 'Closed'
 };
 
 export const convertMsToTime = (milliseconds: any) => {

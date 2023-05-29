@@ -10,23 +10,23 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, isFieldNotTouched } from './../../constants/helpers';
+import { CustomDialogTransition } from './../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import { isEqual } from 'lodash';
 
 const CreateZone = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const { zoneId, onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [formValues, setFormValues] = useState({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [saveClick, setSaveClick] = useState(false);
-  const [cloneHeading,setCloneHeading]= useState('')
+  const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
     axiosInstance()
@@ -40,23 +40,19 @@ const CreateZone = (props) => {
             .get(`/zone/` + zoneId)
             .then(({ data: { data } }) => {
               let tempOptionArray = fieldsDataForUpdate.find((d) => d.fieldName === 'name').option;
-              fieldsDataForUpdate.find((d) => d.fieldName === 'name').option = tempOptionArray.filter(
-                (data) => data.optionValue !== zoneId
-              );
+              fieldsDataForUpdate.find((d) => d.fieldName === 'name').option = tempOptionArray.filter((data) => data.optionValue !== zoneId);
               const { name, ...rest } = data;
-              setCloneHeading(name)
+              setCloneHeading(name);
               if (isClone) {
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
                 });
-                setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
               } else {
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
                 });
-                setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
               }
             })
             .catch((error) => {
@@ -67,7 +63,6 @@ const CreateZone = (props) => {
             fields: fieldsDataForCreate,
             values: getObjKeys('', fieldsDataForCreate)
           });
-          setFormValues(getObjKeys('', fieldsDataForCreate));
         }
       })
       .catch((error) => {
@@ -110,13 +105,6 @@ const CreateZone = (props) => {
     }
   };
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
-
   return (
     <Dialog
       maxWidth="md"
@@ -152,16 +140,7 @@ const CreateZone = (props) => {
                     : 'Create ' + routes.zone.title
                 }
                 onClose={() => {
-                  if (
-                    isFieldNotTouched(
-                      {
-                        initialValues: initialData.values,
-                        fields: initialData.fields
-                      },
-                      values
-                    )
-                  )
-                    onClose();
+                  if (isEqual(values, initialData.values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
                 isMinimized={!fullScreen}
@@ -177,7 +156,6 @@ const CreateZone = (props) => {
                     errors={errors}
                     values={values}
                     setFieldValue={(name, value) => {
-                      handleValuesChange({ [name]: value });
                       setFieldValue(name, value);
                     }}
                     touched={touched}
@@ -192,16 +170,7 @@ const CreateZone = (props) => {
                   size="small"
                   color="primary"
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
+                    if (isEqual(values, initialData.values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
@@ -231,7 +200,7 @@ const CreateZone = (props) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

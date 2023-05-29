@@ -32,7 +32,6 @@ const WarehouseDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [warehouseFields, setWarehouseFields] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [addressResource, setAddressResource] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.warehouse]);
   const [tabValue, setTabValue] = useState(0);
 
@@ -51,7 +50,6 @@ const WarehouseDetailsPage = () => {
       } = await axiosInstance().get(`/warehouse/${id}`);
       setHeadingLbl(data.warehouseName);
       setWarehouseData(data);
-      setAddressResource({ id: data._id });
       setCustomizedRoutes([routes.warehouse, { title: data.warehouseName }]);
       setLoading(false);
     } catch (error) {
@@ -160,14 +158,14 @@ const WarehouseDetailsPage = () => {
         </Tabs>
         {tabValue === 0 && (
           <Box>
-          {loading || !warehouseFields.length ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
-          ) : (
-            <DetailsPage data={warehouseData} fields={warehouseFields} />
-          )}
-        </Box>
+            {loading || !warehouseFields.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={warehouseData} fields={warehouseFields} />
+            )}
+          </Box>
         )}
         {tabValue === 1 && <StorageLocation warehouse={id} />}
       </Box>
@@ -175,10 +173,7 @@ const WarehouseDetailsPage = () => {
         <ManageWarehouse
           open={openUpdateDialog}
           close={closeUpdateDialog}
-          fetchData={() => {
-            fetchWarehouseData();
-          }}
-          addressResource={addressResource}
+          warehouseId={id}
           isClone={false}
           onSuccess={() => {
             fetchWarehouseData();

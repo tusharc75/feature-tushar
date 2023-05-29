@@ -1,6 +1,6 @@
 import { Box, Button, Chip, CircularProgress, Dialog, TextField } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { isEqual } from 'lodash';
+import { isEqual, update } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,17 +11,22 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, generateUniqueIdOnly, isFieldNotTouched, serviceMaster } from 'src/constants/helpers';
+import { CustomDialogTransition, generateUniqueIdOnly, serviceMaster } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { FaDiceOne } from 'react-icons/fa';
+import { findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { is } from 'date-fns/locale';
+import moment from 'moment';
 
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
     state: { user }
   }: any = useData();
+  const { isOffline } = useContext(CustomOfflineContext);
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
@@ -29,7 +34,6 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const ref = useRef(null);
   const [stepOptions, setStepOptions] = useState(referenceData?.steps || []);
   const [completeSteps, setCompleteSteps] = useState([]);
 
@@ -39,55 +43,64 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   }, []);
 
   const fetchServiceSteps = (serviceId) => {
-    axiosInstance()
-      .get(`${serviceMaster.api}/steps/${serviceId}`)
-      .then(({ data: { data } }) => {
-        const steps = data?.map((d) => ({ optionLabel: d.stepName, optionValue: d._id }));
-        setStepOptions(steps || []);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    if (!isOffline) {
+      axiosInstance()
+        .get(`${serviceMaster.api}/steps/${serviceId}`)
+        .then(({ data: { data } }) => {
+          const steps = data?.map((d) => ({ optionLabel: d.stepName, optionValue: d._id }));
+          setStepOptions(steps || []);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    } else {
+      const steps = referenceData?.steps || [];
+      setStepOptions(steps);
+    }
   };
 
   const fetchFields = async () => {
     try {
       let data;
-      const response = await axiosInstance().get('/field?resource=Field Ticket');
-      data = response?.data?.data;
+      if (isOffline) {
+        data = await findOne(objectStore.resource, objectStore.fieldTicket);
+      } else {
+        const response = await axiosInstance().get('/field?resource=Field Ticket');
+        data = response?.data?.data;
+      }
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (id) {
-        axiosInstance()
-          .get(`${routes?.fieldTicket?.path}/${id}`)
-          .then(({ data: { data } }) => {
-            let fields = fieldsDataForUpdate;
-            let tempData = data;
-            if (isClone) {
-              fields = fieldsDataForCreate;
-              const { fieldTicketNumber, ...rest } = data;
-              rest.fieldTicketNumber = `FT_${generateUniqueIdOnly()}`;
-              setCloneHeading(fieldTicketNumber);
-              tempData = rest;
-            }
-            fetchServiceSteps(tempData?.service?.optionValue);
-            setCompleteSteps(tempData?.steps || []);
-            setInitialData({
-              fields: fields,
-              values: getObjKeysWithValues(tempData, fields)
-            });
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
+        let mainData;
+        if (isOffline) {
+          mainData = await findOne(objectStore.fieldTicket, id);
+        } else {
+          const response = await axiosInstance().get(`${routes?.fieldTicket?.path}/${id}`);
+          mainData = response?.data?.data;
+        }
+        let fields = fieldsDataForUpdate;
+        let tempData = mainData;
+        if (isClone) {
+          fields = fieldsDataForCreate;
+          const { fieldTicketNumber, ...rest } = mainData;
+          rest.fieldTicketNumber = `FT_${generateUniqueIdOnly()}`;
+          setCloneHeading(fieldTicketNumber);
+          tempData = rest;
+        }
+        fetchServiceSteps(tempData?.service?.optionValue);
+        setCompleteSteps(tempData?.steps || []);
+        setInitialData({
+          fields: fields,
+          values: getObjKeysWithValues(tempData, fields)
+        });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
 
         if (referenceData) {
           tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
-          tempInitialData['serviceOrder'] = referenceData?.serviceOrder;
+          tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;
           tempInitialData['service'] = referenceData?.service;
           tempInitialData['startDateTime'] = referenceData?.startDateTime;
           tempInitialData['endDateTime'] = referenceData?.endDateTime;
@@ -106,10 +119,55 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     }
   };
 
-  const handleSubmit = (values) => {
+  const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
+    const obj = { ...dataObj };
+    fields.forEach((field) => {
+      if (field.type === 'dropDown' && field.lookup) {
+        let filter: any = field?.option?.filter((e) => e.optionValue === dataObj[field.fieldName]);
+        if (filter.length) {
+          obj[field.fieldName] = {
+            optionLabel: filter[0].optionLabel,
+            optionValue: filter[0].optionValue
+          };
+        }
+      } else if (field.type === 'multiSelect') {
+        if (dataObj[field.fieldName] && dataObj[field.fieldName].length) {
+          let option = [];
+          dataObj[field.fieldName].forEach((e: any) => {
+            option.push({
+              optionLabel: e,
+              optionValue: e
+            });
+          });
+          obj[field.fieldName] = option;
+        }
+      } else if (field.type === 'date') {
+        obj[field.fieldName] = moment(dataObj[field.fieldName]).format('YYYY-MM-DD');
+      } else {
+        obj[field.fieldName] = dataObj[field.fieldName];
+      }
+    });
+    return obj;
+  };
+
+  const handleSubmit = async (values) => {
     setSubmitting(true);
     values.steps = completeSteps;
-    if (id && !isClone) {
+    if (isOffline) {
+      setSubmitting(true);
+      const _id: any = id || Math.floor(Math.random() * 1000000).toString();
+      const formattedValue: any = restoreObjKeysWithValues(values, initialData.fields);
+      formattedValue._id = _id;
+      await insertUpdate(objectStore.fieldTicket, _id, formattedValue);
+      if (id) {
+        await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...values, _id, offlineSyncStatus: 'update' } });
+      } else {
+        await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...values, _id, offlineSyncStatus: 'new' } });
+      }
+
+      onSuccess();
+      setSubmitting(false);
+    } else if (id && !isClone) {
       values._id = id;
       axiosInstance()
         .put(`${routes.fieldTicket?.path}`, values)
@@ -147,11 +205,6 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     }
   };
 
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
-
   return (
     <Dialog
       maxWidth="md"
@@ -167,22 +220,13 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-          validate={validate}
-          innerRef={ref}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
                 title={`${
                   id
@@ -252,16 +296,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
+                    if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
@@ -298,7 +333,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

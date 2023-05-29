@@ -30,7 +30,7 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, selectedRecords, serviceName }) => {
+const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, selectedRecords, serviceName, consumeRequest }) => {
 
   const classes = useClasses();
   const toastConfig = useContext(CustomToastContext);
@@ -43,6 +43,90 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
   const [fullScreen, setFullScreen] = useState(true);
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
 
+  useEffect(() => {
+    if (user?.user?.brandPolicy?.storageLocation) {
+      getStorageLocation();
+    }
+  }, []);
+
+  const getStorageLocation = () => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
+      .then(({ data: { data } }) => {
+        if (data[sidebarResource.storageLocation]) {
+          const storageLocationOption = data[sidebarResource.storageLocation]?.filter((e) => e.warehouse === warehouse?.optionValue);
+          setStorageLocationOptions(storageLocationOption);
+        }
+      });
+  };
+
+  const handleSubmit = (values) => {
+    const data: any = {};
+    const products: any = [];
+    values?.products?.forEach((e) => {
+      if (parseInt(e?.consumedQty)) {
+        products.push({
+          _id: e?._id,
+          product: e?.materialId,
+          qty: parseInt(e?.consumedQty),
+          storageLocation: user?.user?.brandPolicy?.storageLocation ? e?.storageLocation : null
+        });
+      }
+    });
+    data.products = products;
+    if (products?.length) {
+      setIsSubmitting(true);
+      axiosInstance()
+        .put(`${workOrder.api}/${workOrderId}/consumable/consume`, data)
+        .then(({ data }) => {
+          onSuccess();
+          setIsSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
+  const handleRequest = (values) => {
+    const data: any = {};
+    const products: any = [];
+    values?.products?.forEach((e) => {
+      if (parseInt(e?.consumedQty)) {
+        products.push({
+          _id: e?._id,
+          product: e?.materialId,
+          qty: parseInt(e?.consumedQty),
+          storageLocation: user?.user?.brandPolicy?.storageLocation ? e?.storageLocation : null
+        });
+      }
+    });
+    data.products = products;
+    if (products?.length) {
+      setIsSubmitting(true);
+      axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/request`, data)
+        .then(({ data }) => {
+          onSuccess();
+          setIsSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
   const validate = (values) => {
     let errors: any = {};
     if (values?.length > 0) {
@@ -53,63 +137,14 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
           }
         }
         let tempProduct = selectedRecords.find((u) => u._id === d._id);
-        let qty = tempProduct.qty - (tempProduct?.consumedQty || 0);
+        let qty = tempProduct.qty - ((tempProduct?.consumedQty || 0) + (tempProduct?.requestedQty || 0));
         if (tempProduct && d.consumedQty > qty) {
-          errors.consumedQty = 'Consume Qty is limited to Qty.';
+          errors.consumedQty = `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.`;
         }
       });
     }
     return errors;
   };
-
-  const handleSubmit = (values) => {
-    const data: any = {}
-    const products: any = []
-    values?.products?.forEach((e) => {
-      if (parseInt(e?.consumedQty)) {
-        products.push({
-          _id: e?._id,
-          product: e?.materialId,
-          qty: parseInt(e?.consumedQty),
-          storageLocation: user?.user?.brandPolicy?.storageLocation ? e?.storageLocation : null
-        })
-      }
-    })
-    data.products = products;
-    if (products?.length) {
-      setIsSubmitting(true)
-      axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/consumable-consume`, data).then(({ data }) => {
-        onSuccess();
-        setIsSubmitting(false)
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-        .catch((error) => {
-          setIsSubmitting(false)
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
-
-  const getStorageLocation = () => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
-      .then(({ data: { data } }) => {
-        if (data[sidebarResource.storageLocation]) {
-          const storageLocationOption = data[sidebarResource.storageLocation]?.filter(e => e.warehouse === warehouse);
-          setStorageLocationOptions(storageLocationOption);
-        }
-      });
-  };
-
-  useEffect(() => {
-    if (user?.user?.brandPolicy?.storageLocation) {
-      getStorageLocation();
-    }
-  }, [])
 
   return (
     <Dialog
@@ -138,7 +173,7 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
             _id: item?._id,
             materialId: item?.materialId,
             product: item?.product,
-            qty: item.qty - (item?.consumedQty || 0),
+            qty: item.qty - ((item?.consumedQty || 0) + (item?.requestedQty || 0)),
             consumedQty: 0,
             storageLocation: null
           }))
@@ -146,7 +181,7 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
         enableReinitialize={true}
         onSubmit={() => { }}
       >
-        {({ values, setFieldValue, errors }) => (
+        {({ values }) => (
           <>
             <CustomDialogContent>
               {values?.products && values?.products?.length ? (
@@ -161,11 +196,9 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
                               <TableRow>
                                 <TableCell>Index</TableCell>
                                 <TableCell align="left">Product</TableCell>
-                                {user?.user?.brandPolicy?.storageLocation &&
-                                  <TableCell align="left">Storage Location</TableCell>
-                                }
+                                {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">Storage Location</TableCell>}
                                 <TableCell align="left">{'Qty'}</TableCell>
-                                <TableCell align="left">{'Consume Qty'}</TableCell>
+                                <TableCell align="left">{consumeRequest ? 'Request Qty' : 'Consume Qty'}</TableCell>
                               </TableRow>
                             </TableHead>
                             <TableBody>
@@ -175,21 +208,24 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
                                     {index + 1}
                                   </TableCell>
                                   <TableCell align="left">{value['product']}</TableCell>
-                                  {
-                                    user?.user?.brandPolicy?.storageLocation &&
+                                  {user?.user?.brandPolicy?.storageLocation && (
                                     <TableCell align="left">
                                       <Autocomplete
                                         options={storageLocationOptions}
-                                        getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                                        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                                         getOptionSelected={(option: any, val) => option.optionValue === val}
-                                        value={storageLocationOptions.filter((data) => data.optionValue === value['storageLocation']).length ? storageLocationOptions.filter((data) => data.optionValue === value['storageLocation'])[0] : ''}
+                                        value={
+                                          storageLocationOptions.filter((data) => data.optionValue === value['storageLocation']).length
+                                            ? storageLocationOptions.filter((data) => data.optionValue === value['storageLocation'])[0]
+                                            : ''
+                                        }
                                         onChange={(e, val) => {
                                           arrayHelpers.replace(index, {
                                             ...values.products[index],
                                             storageLocation: val?.optionValue
                                           });
                                         }}
-                                        renderInput={(params) =>
+                                        renderInput={(params) => (
                                           <TextField
                                             {...params}
                                             style={{ minWidth: '200px' }}
@@ -203,10 +239,10 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
                                             error={validate([value])?.storageLocation}
                                             helperText={validate([value])?.storageLocation ? 'Storage Location is required' : ''}
                                           />
-                                        }
+                                        )}
                                       />
                                     </TableCell>
-                                  }
+                                  )}
                                   <TableCell align="left">
                                     <TextField
                                       fullWidth
@@ -240,9 +276,9 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
                                           consumedQty: value
                                         });
                                       }}
-                                      label="Consume Qty"
-                                      placeholder="Consume Qty"
-                                      helperText={validate([value])?.consumedQty ? 'Consume Qty is limited to Qty.' : ''}
+                                      label={consumeRequest ? "Request Qty" : "Consume Qty"}
+                                      placeholder={consumeRequest ? "Request Qty" : "Consume Qty"}
+                                      helperText={validate([value])?.consumedQty ? `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.` : ''}
                                     />
                                   </TableCell>
                                 </TableRow>
@@ -261,27 +297,37 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
               )}
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                variant="outlined"
-                disabled={isSubmitting}
-                size="small"
-                color="primary"
-                onClick={onClose}>
+              <Button variant="outlined" disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
                 Cancel
               </Button>
-              <Button
-                onClick={() => {
-                  if (!validate(values.products).consumedQty && !validate(values.products).storageLocation) {
-                    handleSubmit(values);
-                  }
-                }}
-                size="small"
-                variant="contained"
-                disabled={isSubmitting}
-                color="primary"
-              >
-                Save
-              </Button>
+              {consumeRequest ?
+                <Button
+                  onClick={() => {
+                    if (!validate(values.products).consumedQty && !validate(values.products).storageLocation) {
+                      handleRequest(values);
+                    }
+                  }}
+                  size="small"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  color="primary"
+                >
+                  Request
+                </Button> :
+                <Button
+                  onClick={() => {
+                    if (!validate(values.products).consumedQty && !validate(values.products).storageLocation) {
+                      handleSubmit(values);
+                    }
+                  }}
+                  size="small"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  color="primary"
+                >
+                  Save
+                </Button>
+              }
             </CustomDialogFooter>
           </>
         )}

@@ -784,12 +784,7 @@ export default function AccountDetailPage(props) {
     const entityList = user.entity?.map((entity) => entity._id);
     return entityList.includes(id);
   };
-  const handleValuesChange = (name, value) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      [name]: value
-    }));
-  };
+
   const handleUpdate = (account) => {
     if (account._id) {
       axiosInstance()
@@ -1162,7 +1157,6 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={accountData?._id}
           formValues={formValues}
-          handleValuesChange={handleValuesChange}
         />
       ) : openUpdateDialog ? (
         <ManageAccount
@@ -1184,7 +1178,6 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleValuesChange={handleValuesChange}
           handleAddressDataSource={() => {}}
         />
       ) : null}

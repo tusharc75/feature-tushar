@@ -12,7 +12,6 @@ import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import { Link } from 'react-router-dom';
 
 function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selectedRecords, setSelectedRecords }) {
-
   const toastConfig = useContext(CustomToastContext);
   const [rowsData, setRowsData] = useState(null);
 
@@ -29,7 +28,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
           const obj: any = {};
           obj.index = index + 1;
           obj._id = ele._id;
-          obj.serviceOrderNumber = ele?.serviceOrderNumber;
+          obj.fieldServiceOrderNumber = ele?.fieldServiceOrderNumber;
           obj.serviceName = ele?.service?.serviceName;
           obj.serviceId = ele?.service?._id;
           obj.competencyType = ele?.service?.competencyType?.optionLabel;
@@ -56,20 +55,24 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
       Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
     },
     {
-      accessor: 'serviceOrderNumber',
-      Header: 'Service Order',
+      accessor: 'fieldServiceOrderNumber',
+      Header: 'Field Service Order',
       width: 200,
-      Cell: ({ row }) => <Link className="link text-truncate" to={`${routes.serviceOrderDetail.path}/${row.original._id}`}>
-        {row.original.serviceOrderNumber}
-      </Link>
+      Cell: ({ row }) => (
+        <Link className="link text-truncate" to={`${routes.fieldServiceOrderDetail.path}/${row.original._id}`}>
+          {row.original.fieldServiceOrderNumber}
+        </Link>
+      )
     },
     {
       accessor: 'serviceName',
       Header: 'Service Name',
       width: 250,
-      Cell: ({ row }) => <Link className="link text-truncate" to={`${routes.serviceMasterDetail.path}/${row.original.serviceId}`}>
-        {row.original.serviceName}
-      </Link>
+      Cell: ({ row }) => (
+        <Link className="link text-truncate" to={`${routes.serviceMasterDetail.path}/${row.original.serviceId}`}>
+          {row.original.serviceName}
+        </Link>
+      )
     },
     {
       accessor: 'competencyType',
@@ -87,9 +90,14 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
       accessor: 'customerAccount',
       Header: 'Customer Account',
       width: 250,
-      Cell: ({ row }) => (row.original['customerAccount'] ? <Link className="link text-truncate" to={`${routes.customerAccountDetail.path}/${row.original.customerAccountId}`}>
-        {row.original['customerAccount']}
-      </Link> : <NoDataCell />)
+      Cell: ({ row }) =>
+        row.original['customerAccount'] ? (
+          <Link className="link text-truncate" to={`${routes.customerAccountDetail.path}/${row.original.customerAccountId}`}>
+            {row.original['customerAccount']}
+          </Link>
+        ) : (
+          <NoDataCell />
+        )
     },
     {
       accessor: 'estimateStartDate',
@@ -145,10 +153,10 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
           selectedServiceOrder={selectedRecords}
           handleSucess={() => {
             fetchData();
-            handleSucess()
+            handleSucess();
           }}
           handleClose={() => {
-            handleClose()
+            handleClose();
           }}
         />
       )}

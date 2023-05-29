@@ -9,6 +9,7 @@ import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { MdEmail } from 'react-icons/all';
+import { IoMdDownload } from 'react-icons/io';
 
 const InvoiceFacility = ({ invoiceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -145,13 +146,13 @@ const InvoiceFacility = ({ invoiceData }) => {
               type="button"
               size="small"
               disabled={downlodingFile === 'Download' ? true : false}
-              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
               onClick={(e) => {
                 setDownlodingFile('Download');
                 handleClick(e);
               }}
             >
-              {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === 'Download' ? 'Please wait...' : 'Download'}
+              {isMobile && !isTablet ? <IoMdDownload size={22} /> : downlodingFile === 'Download' ? 'Please wait...' : 'Download'}
             </Button>
           )}
           <Menu

@@ -22,7 +22,7 @@ import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import Receive from './Receive';
 import Reject from './Reject';
 import Logs from './Logs';
-import History from './History';
+import History from 'src/pages/ProductInventory/LedgerHistory';
 
 const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -450,7 +450,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             />
           </Box>
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
@@ -503,8 +503,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         <History
           handleClose={() => setHistoryDialog({ open: false, _id: '', product: '', productName: '' })}
           productName={historyDialog.productName}
-          poId={purchaseOrderData._id}
-          _id={historyDialog._id}
+          referenceId={purchaseOrderData._id}
+          uniqueId={historyDialog._id}
           product={historyDialog.product}
         />
       )}

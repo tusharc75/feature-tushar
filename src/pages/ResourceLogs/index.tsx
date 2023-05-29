@@ -238,6 +238,7 @@ const ResourceLogs = () => {
                 value={selectedResource}
                 onChange={(event, newValue) => {
                   setSelectedResource(newValue);
+                  setSelectedOption(null);
                 }}
                 size="small"
                 renderInput={(params) => <TextField {...params} label="Select Resource" variant="outlined" />}

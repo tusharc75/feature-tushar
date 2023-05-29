@@ -13,19 +13,16 @@ import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityD
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import { useData } from '../../StateProvider/Provider'
+import { useData } from '../../StateProvider/Provider';
 import RoleEngine from '../../components/Shared/RoleEngine';
 
-export default function AssignedEntities({
-  entities,
-  permissions,
-  userId,
-  onSuccess,
-  loggedInUser,
-  entityAccessIds = [],
-  roleAccessIds = [],
-}) {
-  const { state: { selectedEntity, user: { user } } } = useData()
+export default function AssignedEntities({ entities, permissions, userId, onSuccess, loggedInUser, entityAccessIds = [], roleAccessIds = [] }) {
+  const {
+    state: {
+      selectedEntity,
+      user: { user }
+    }
+  } = useData();
   const [currentEntity, setCurrentEntity] = useState(entities[0]);
   const [unionRoleData, setUnionRoleData] = useState(null);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
@@ -35,20 +32,20 @@ export default function AssignedEntities({
 
   useEffect(() => {
     if (currentEntity?.entity || currentEntity?.role.length) {
-      getRoleUnion()
+      getRoleUnion();
     }
     // eslint-disable-next-line
   }, [currentEntity]);
 
   const handleUnassignRole = (value) => {
-    let entityArray = []
+    let entityArray = [];
     if (entities) {
-      entities.forEach(d => {
+      entities.forEach((d) => {
         entityArray.push({
           entity: d.entity?._id,
-          role: currentEntity?.entity._id === d.entity?._id ? d.role?.filter(d => d._id !== value._id).map(r => r._id) : d.role?.map(r => r._id)
-        })
-      })
+          role: currentEntity?.entity._id === d.entity?._id ? d.role?.filter((d) => d._id !== value._id).map((r) => r._id) : d.role?.map((r) => r._id)
+        });
+      });
     }
     let dataObj = {
       user: userId,
@@ -58,9 +55,9 @@ export default function AssignedEntities({
       .put(`/user/assign-entity`, dataObj)
       .then(() => {
         toastConfig.setToastConfig({
-          message: `${showConfirmBox ? "Entity unassigned successfully." : "Role removed successfully"}`,
-          type: "success",
-          open: true,
+          message: `${showConfirmBox ? 'Entity unassigned successfully.' : 'Role removed successfully'}`,
+          type: 'success',
+          open: true
         });
         onSuccess();
       })
@@ -74,16 +71,16 @@ export default function AssignedEntities({
   };
 
   const DeleteEntity = () => {
-    let entityArray = []
+    let entityArray = [];
     if (entities) {
-      entities.forEach(d => {
+      entities.forEach((d) => {
         if (currentEntity.entity?._id !== d.entity?._id) {
           entityArray.push({
             entity: d.entity?._id,
-            role: d.role?.map(r => r._id)
-          })
+            role: d.role?.map((r) => r._id)
+          });
         }
-      })
+      });
     }
     let dataObj = {
       user: userId,
@@ -93,9 +90,9 @@ export default function AssignedEntities({
       .put(`/user/assign-entity`, dataObj)
       .then(() => {
         toastConfig.setToastConfig({
-          message: `${showConfirmBox ? "Entity unassigned successfully." : "Role removed successfully"}`,
-          type: "success",
-          open: true,
+          message: `${showConfirmBox ? 'Entity unassigned successfully.' : 'Role removed successfully'}`,
+          type: 'success',
+          open: true
         });
         onSuccess();
       })
@@ -105,12 +102,11 @@ export default function AssignedEntities({
   };
 
   const handleCloseDialog = () => {
-    setShowAssignEntityDialog(false)
+    setShowAssignEntityDialog(false);
   };
 
   const handleAssignRole = (rec) => {
-    setShowAssignEntityDialog(true)
-
+    setShowAssignEntityDialog(true);
   };
   const getRoleUnion = () => {
     axiosInstance()
@@ -124,15 +120,8 @@ export default function AssignedEntities({
   };
   return (
     <>
-
       {showAssignEntityDialog && (
-        <Dialog
-          fullWidth
-          maxWidth="sm"
-          open={showAssignEntityDialog}
-          onClose={handleCloseDialog}
-          aria-labelledby="assign-roles-dialog"
-        >
+        <Dialog fullWidth maxWidth="sm" open={showAssignEntityDialog} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
           <AssignEntityDialog
             entitiesDialogOpen={showAssignEntityDialog}
             handleCloseDialog={handleCloseDialog}
@@ -160,12 +149,12 @@ export default function AssignedEntities({
       ) : null}
       <BoxWithBorder
         style={{
-          padding: "5px",
+          padding: '5px'
         }}
       >
         <Box>
-          <>{
-            isMobile || isTablet ?
+          <>
+            {isMobile || isTablet ? (
               <FormControl fullWidth margin="dense" variant="outlined">
                 <InputLabel id="demo-simple-select-outlined-label">Select Entity</InputLabel>
                 <Select
@@ -173,19 +162,23 @@ export default function AssignedEntities({
                   id="demo-simple-select-outlined"
                   value={currentTabIndex}
                   onChange={(index, values: any) => {
-                    const { props: { value } } = values;
+                    const {
+                      props: { value }
+                    } = values;
                     setCurrentTabIndex(value);
-                    setCurrentEntity(entities[value])
+                    setCurrentEntity(entities[value]);
                   }}
                   label="Section Name"
                   name="sectionName"
                 >
                   {entities.map((c, i) => (
-                    <MenuItem key={i} value={i}>{c?.entity?.entityName}</MenuItem>
+                    <MenuItem key={i} value={i}>
+                      {c?.entity?.entityName}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
-              :
+            ) : (
               <Tabs
                 variant="scrollable"
                 scrollButtons="auto"
@@ -193,62 +186,44 @@ export default function AssignedEntities({
                 value={currentTabIndex}
                 onChange={(index, newValue) => {
                   setCurrentTabIndex(newValue);
-                  setCurrentEntity(entities[newValue])
+                  setCurrentEntity(entities[newValue]);
                 }}
                 indicatorColor="primary"
                 textColor="primary"
                 aria-label="icon tabs example"
               >
-                {entities.map((c, i) => (
-                  currentTabIndex === i ?
+                {entities.map((c, i) =>
+                  currentTabIndex === i ? (
                     <>
-                      <Tab
-                        key={i}
-                        tabIndex={i}
-                        label={c?.entity?.entityName}
-                        aria-controls={`a11y-tabpanel-${i}`}
-                        id={`a11y-tab-${i}`}
-                      />
+                      <Tab key={i} tabIndex={i} label={c?.entity?.entityName} aria-controls={`a11y-tabpanel-${i}`} id={`a11y-tab-${i}`} />
                       {permissions?.user?.isDelete && !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
                         <IconButton aria-label="delete" onClick={() => handleDeleteEntity()}>
                           <Delete color="error" />
-                        </IconButton>) : null}
+                        </IconButton>
+                      ) : null}
                     </>
-                    : <Tab
-                      key={i}
-                      tabIndex={i}
-                      label={c?.entity?.entityName}
-                      aria-controls={`a11y-tabpanel-${i}`}
-                      id={`a11y-tab-${i}`}
-                    />
-                ))}
+                  ) : (
+                    <Tab key={i} tabIndex={i} label={c?.entity?.entityName} aria-controls={`a11y-tabpanel-${i}`} id={`a11y-tab-${i}`} />
+                  )
+                )}
               </Tabs>
-          }
-            <Box style={{ padding: "0px", minHeight: "300px" }}>
-              <Box display="flex" padding={1} bgcolor="grey.200">
+            )}
+            <Box style={{ padding: '0px', minHeight: '300px' }}>
+              <Box display="flex" padding={1} bgcolor="var(--dark-secondary, var(--accordion-expanded-summary-bg, #EFFBF9))">
                 <Grid container>
                   <Grid item xs={10}>
                     <Box display="flex">
                       <Grid container>
                         <Grid item xs={4}>
-                          <Typography variant="subtitle2">
-                            Assigned Roles ({currentEntity?.role?.length || "0"})
-                          </Typography>
+                          <Typography variant="subtitle2">Assigned Roles ({currentEntity?.role?.length || '0'})</Typography>
                         </Grid>
-                        <Grid item xs={8} justify="flex-start">
-
-                        </Grid>
+                        <Grid item xs={8} justify="flex-start"></Grid>
                       </Grid>
-
                     </Box>
                   </Grid>
                   <Grid item xs={2} container justify="flex-end">
                     {permissions?.user?.isUpdate && (
-                      <IconButton
-                        color="primary"
-                        size="small"
-                        onClick={handleAssignRole}
-                      >
+                      <IconButton color="primary" size="small" onClick={handleAssignRole}>
                         <ControlPoint />
                       </IconButton>
                     )}
@@ -260,15 +235,15 @@ export default function AssignedEntities({
                 <Grid item xs={12} sm={12} md={4}>
                   <BoxWithBorder
                     style={{
-                      padding: "0px",
-                      height: "352px",
+                      padding: '0px',
+                      height: '352px'
                     }}
                   >
                     {
                       <Box
                         style={{
-                          height: "100%",
-                          overflowY: "auto",
+                          height: '100%',
+                          overflowY: 'auto'
                         }}
                       >
                         {currentEntity.role && (
@@ -278,19 +253,17 @@ export default function AssignedEntities({
                             unassignRole={handleUnassignRole}
                             loggedInUser={loggedInUser}
                             currentUserId={userId}
-
                           />
                         )}
                       </Box>
-
                     }
                   </BoxWithBorder>
                 </Grid>
                 <Grid item xs={12} sm={12} md={8} lg={8}>
                   <BoxWithBorder
                     style={{
-                      padding: "0px",
-                      height: "352px",
+                      padding: '0px',
+                      height: '352px'
                     }}
                   >
                     <RoleEngine

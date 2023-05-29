@@ -16,6 +16,7 @@ import {
 import { sidebarResourceObjectFromValues } from './helpers';
 import { useData } from '../StateProvider/Provider';
 import moment from 'moment';
+import { isEmpty } from 'lodash';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -258,7 +259,7 @@ export default function useColumns() {
                 ? routes[joinedFieldName]?.path
                 : routes[`${joinedFieldName}Detail`]?.path
                   ? routes[`${joinedFieldName}Detail`]?.path
-                  : '';
+                  : `${camelCase(field?.lookupResource)}/detail`;
         }
         return {
           columnData: {
@@ -355,3 +356,28 @@ export default function useColumns() {
   };
   return { getColumnData };
 }
+
+export const gridFilterParser = (filters) => {
+
+  const filterByIds: any = []
+  const deepFilters: any = []
+
+  if (!isEmpty(filters)) {
+    Object.keys(filters).forEach((field) => {
+      if (filters[field].operator && filters[field].condition1) {
+        filterByIds.push({
+          field: field,
+          term: { $in: filters[field].condition1?.filter?.map((e) => e.optionValue) }
+        });
+      }
+      else {
+        deepFilters.push({
+          field: field,
+          term: Array.isArray(filters[field].filter) ? filters[field].filter : filters[field].filter
+        });
+      }
+    });
+  }
+
+  return { filterByIds, deepFilters }
+};

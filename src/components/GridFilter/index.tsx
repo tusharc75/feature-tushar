@@ -1,17 +1,15 @@
-import React, { useState, useEffect, useRef, useContext, Fragment } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, TextField, Grid, Button, IconButton, Dialog, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { TransitionProps } from '@material-ui/core/transitions';
 import { AiFillEdit } from 'react-icons/ai';
 import { RiDeleteBin6Fill } from 'react-icons/ri';
-import CloseIcon from '@material-ui/icons/Close';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import FormTypes from '../Helpers/FormTypes';
-import { dateFormat, dateTimeFormat } from 'src/constants/helpers';
+import { dateFormat } from 'src/constants/helpers';
 import moment from 'moment';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -19,6 +17,7 @@ import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import SaveFilterDialog from './SaveFilterDialog';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { isEmpty } from 'lodash';
 
 function GridFilter({
   resource,
@@ -26,8 +25,6 @@ function GridFilter({
   handleClose,
   setSelectedFilter,
   selectedFilter,
-  presentFilter = null,
-  // setChipData,
   currentFomValue,
   setCurrentFomValue
 }) {
@@ -46,29 +43,34 @@ function GridFilter({
   const [statusTimeFrame, setStatusTimeFrame] = useState<any>({});
   const [betweenDate, setBetweenDate] = useState(null);
 
-  // const statusTimeFrame = {};
   useEffect(() => {
     fetchColumns();
     fetchUserFilters();
-
-    // THIS STATE WILL RESTORE PREVIOUS FILTER VALUES
     setFormValues(currentFomValue || {});
-    // THIS STATE WILL RESTORE PREVIOUS USERFILTER
     setSelectedUserFilter(selectedFilter);
   }, []);
 
-  const FILTER_NOT_APPLIED = ['fileUpload', 'multiFileUpload', 'imageUpload', 'multiImageUpload', 'richTextEditor', 'signature', 'colorPicker', 'number', 'decimal'];
+  const FILTER_NOT_APPLIED = [
+    'fileUpload',
+    'multiFileUpload',
+    'imageUpload',
+    'multiImageUpload',
+    'richTextEditor',
+    'signature',
+    'colorPicker',
+    'number',
+    'decimal'
+  ];
 
   const fetchColumns = () => {
     axiosInstance()
       .get(`/field?resource=${resource}`)
       .then(({ data: { data } }) => {
         const coloum = data?.filter((e) => !FILTER_NOT_APPLIED.includes(e?.fieldData?.type));
-        // for now, we are not supporting multiSelect in filter, we are just modifing the type to dropDown
         const modifiedColumn = coloum?.map((col: any) => {
           const d = col.fieldData;
-          if (d?.type === 'multiSelect') {
-            d.type = 'dropDown';
+          if (d?.type === 'dropDown') {
+            d.type = 'multiSelect';
           }
           return d;
         });
@@ -149,32 +151,14 @@ function GridFilter({
     }
   };
 
-  //   THIS FUNCTION WILL GET ENTIRE OBJECT FROM SELECTED OPTION'S ID
-  const getDataFromFormValue = (id, key) => {
-    if (!id || !key) {
-      return;
-    }
-    let result = null;
-    if (typeof id === 'string') {
-      result = coloums?.filter((item) => item.fieldName == key)[0]?.option?.filter((singleOption) => singleOption.optionValue == id)[0] || null;
-    } else {
-      if (id.length === 0) {
-        return null;
-      }
-      result = coloums?.filter((item) => item.fieldName == key)[0]?.option?.filter((singleOption) => id.includes(singleOption.optionValue)) || null;
-    }
-    return result;
-  };
 
   const createFilterModel = () => {
     const filterModel = {};
-    const chipData = [];
     const colNames = Object.keys(formValues);
 
     for (let i = 0; i < coloums.length; i++) {
       const col = coloums[i];
       const fieldName = col?.fieldName;
-      const fieldLabel = col?.fieldLabel;
 
       if (
         !(colNames.includes(fieldName) || colNames.includes(`from_${fieldName}`) || colNames.includes(`to_${fieldName}`)) &&
@@ -184,22 +168,40 @@ function GridFilter({
       }
 
       if (['singleLine', 'multiLine', 'email', 'mobileNumber']?.includes(col.type) && formValues[fieldName]) {
-        chipData.push({ title: fieldLabel, value: formValues[fieldName], name: fieldName });
         filterModel[fieldName] = {
           filterType: 'text',
           type: 'contains',
           filter: formValues[fieldName]
         };
       }
-      if (col.type === 'dropDown' && formValues[fieldName]) {
-        chipData.push({ title: fieldLabel, value: getDataFromFormValue(formValues[fieldName], fieldName)?.optionLabel, name: fieldName });
+      else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
+        const options = coloums?.find((item) => item.fieldName == fieldName)?.option || []
+        if (col.type === 'multiSelect' && formValues[fieldName]?.length === 0) {
+          return
+        }
+        filterModel[fieldName] = {
+          filterType: 'text',
+          operator: 'OR',
+          condition1: {
+            filterType: 'text',
+            type: 'contains',
+            filter: options?.filter((e) => formValues[fieldName]?.includes(e?.optionValue))
+          },
+          condition2: {
+            filterType: 'text',
+            type: 'contains',
+            filter: 'dummy'
+          }
+        };
+      }
+      else if (['multiSelect', 'dropDown'].includes(col.type) && formValues[fieldName]) {
         filterModel[fieldName] = {
           filterType: 'text',
           type: 'contains',
-          filter: getDataFromFormValue(formValues[fieldName], fieldName)?.optionLabel || null
+          filter: formValues[fieldName],
         };
       }
-      if (col.type === 'dateTime' || col.type === 'date') {
+      else if (['dateTime', 'date'].includes(col.type)) {
         const from = `from_${fieldName}`;
         const to = `to_${fieldName}`;
 
@@ -207,17 +209,6 @@ function GridFilter({
         const toDate = formValues[to] ? formValues[to] : null;
 
         if (fromDate || toDate) {
-          chipData.push({
-            title: fieldLabel,
-            value:
-              fromDate && toDate
-                ? `${fromDate ? moment(fromDate).format('DD/MM/YYYY') : null} - ${toDate ? moment(toDate).format('DD/MM/YYYY') : null}`
-                : fromDate || toDate
-                  ? `${fromDate ? `${moment(fromDate).format('DD/MM/YYYY')} (From Date)` : ''} ${toDate ? `${moment(toDate).format('DD/MM/YYYY')} (To Date)` : ''
-                  }`
-                  : null,
-            name: fieldName
-          });
           filterModel[fieldName] = {
             filterType: 'date',
             type: 'contains',
@@ -228,46 +219,8 @@ function GridFilter({
           };
         }
       }
-      if (col.type === 'multiSelect' && formValues[fieldName]) {
-        const multiChipData = [];
-        const createMultiSelectModel = (items) => {
-          // EDGE CASES
-          if (!items) {
-            return;
-          }
-          if (items.length === 1) {
-            multiChipData.push(items[0].optionLabel);
-            chipData.push({ title: fieldLabel, value: multiChipData.join(', '), name: fieldName });
-            return {
-              filterType: 'text',
-              type: 'contains',
-              filter: items[0].optionLabel
-            };
-          }
-          // OTHERWISE
-          const obj = {
-            filterType: 'text',
-            operator: 'AND'
-          };
-          items.forEach((item, index) => {
-            multiChipData.push(item.optionLabel);
-            obj[`condition${index + 1}`] = {
-              filterType: 'text',
-              type: 'contains',
-              filter: item.optionLabel
-            };
-          });
-
-          chipData.push({ title: fieldLabel, value: multiChipData.join(', '), name: fieldName });
-          return obj;
-        };
-        filterModel[fieldName] = {
-          ...createMultiSelectModel(getDataFromFormValue(formValues[fieldName], fieldName))
-        };
-      }
-      if (col.type === 'checkBox') {
+      else if (col.type === 'checkBox') {
         if (formValues[fieldName] === true || formValues[fieldName] === false) {
-          chipData.push({ title: fieldLabel, value: formValues[fieldName] === true ? 'Yes' : 'No', name: fieldName });
           filterModel[fieldName] = {
             filterType: 'text',
             type: 'contains',
@@ -445,7 +398,6 @@ function GridFilter({
                             touched={{}}
                             label={field.fieldLabel}
                             name={field.fieldName}
-                            // type={field.type === 'dropDown' ? 'multiSelect' : field.type}
                             type={field.type}
                             options={field.option}
                             setFieldValue={handleSelectFilter}
@@ -459,7 +411,7 @@ function GridFilter({
                   );
                 })
               ) : (
-                <Box p={2} height={500} bgcolor="white">
+                <Box p={2} height={500}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
               )}
@@ -471,6 +423,7 @@ function GridFilter({
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedUserFilter });
             }}
+            disabled={isEmpty(formValues) ? true : false}
             size="small"
             color="primary"
             variant="contained"
@@ -500,6 +453,7 @@ function GridFilter({
             setIsSaveFilter({ open: false, data: null });
             setFormValues({});
             fetchUserFilters();
+            setSelectedUserFilter(null);
           }}
           filterData={isSaveFilter.data}
           filterValue={formValues}

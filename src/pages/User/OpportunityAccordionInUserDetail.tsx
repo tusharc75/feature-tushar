@@ -12,14 +12,12 @@ import {
   ListItemText,
   Tooltip,
   Menu,
-  MenuItem
+  MenuItem,
+  ListItemIcon,
+  Button
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
-import { withStyles } from '@material-ui/core/styles';
 import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
@@ -33,61 +31,8 @@ import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { MoreVert } from '@material-ui/icons';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-
-const Accordion = withStyles({
-  root: {
-    border: '1px solid rgba(0, 0, 0, .125)',
-    '&:not(:last-child)': {
-      borderBottom: 0
-    },
-    '&:before': {
-      display: 'none'
-    },
-    '&$expanded': {
-      margin: 'auto'
-    }
-  },
-  expanded: {}
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-  root: {
-    backgroundColor: 'white',
-    borderBottom: '1px solid #f1ece8',
-    background: '#ffffff',
-    fontWeight: 'bold',
-    padding: '0px',
-    '&$expanded': {
-      minHeight: 46
-    }
-  },
-  content: {
-    '&$expanded': {
-      margin: '12px 0'
-    }
-  },
-  expanded: {}
-})(MuiAccordionSummary);
-
-const AccordionDetails = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(1),
-    display: 'block'
-  }
-}))(MuiAccordionDetails);
-
-function DisplayData({ key, label, value, icon }) {
-  return (
-    <div style={{ flexGrow: 1 }}>
-      <List>
-        <ListItem key={key}>
-          <ListItemAvatar>{icon}</ListItemAvatar>
-          <ListItemText primary={value ? value : '-'} secondary={label} />
-        </ListItem>
-      </List>
-    </div>
-  );
-}
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import DisplayData from 'src/components/CardDisplayData';
 
 export default function OpportunityAccordionInUserDetail({ opportunities, expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit }) {
   const history = useHistory();
@@ -148,10 +93,9 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
 
   return (
     <>
-      <Accordion expanded={expandOpportunity} className="omsAccordian accordOpportunity">
+      <Accordion expanded={expandOpportunity} className="accordOpportunity" onChange={(event) => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container className="pos_rel">
-            <div className="clicker_div" onClick={(event) => setExpandOpportunity(!expandOpportunity)}></div>
             <Grid item xs={8}>
               <Box display="flex" alignItems="center">
                 <Box>
@@ -206,8 +150,8 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
                   <Grid container spacing={1}>
                     {opportunities.slice(0, maxRecordsToShow).map((obj, index) => (
                       <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
-                        <Card className="detailCard">
-                          <CardContent className="detailListing">
+                        <Card className="detailCard  card-v1" variant="outlined">
+                          <CardContent className="card-link">
                             <Grid container className="detailCardHeader">
                               <Grid item xs={7} sm={8}>
                                 {hasAccessToEntity(obj.entity) ? (
@@ -275,24 +219,21 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
                 )}
               </>
             )}
+            {opportunities?.length > 0 && opportunities.length > maxRecordsToShow && (
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Button
+                  onClick={() => {
+                    setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
+                  }}
+                  endIcon={<FaArrowAltCircleDown size={25} />}
+                  className="accordion-outlined-button"
+                >
+                  <span className="show_more_text">Show More</span>
+                </Button>
+              </Box>
+            )}
           </>
         </AccordionDetails>
-        {opportunities?.length > 0 && opportunities.length > maxRecordsToShow && (
-          <Box
-            margin={1}
-            className="btn-view gap-1 expander"
-            onClick={() => {
-              setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
-            }}
-            p={1}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <span className="show_more_text">Show More</span>
-            <FaArrowAltCircleDown size={25} />
-          </Box>
-        )}
       </Accordion>
 
       {showCreateOpportunityDialog && (

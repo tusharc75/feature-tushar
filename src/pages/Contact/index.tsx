@@ -39,7 +39,7 @@ import { sidebarResource } from '../../constants/helpers';
 import IconButton from '@material-ui/core/IconButton';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -423,7 +423,7 @@ export default function Contact(props) {
 
   const ActionsRenderer = (params) => (
     <>
-      {contactPermissions.isCreate ? (
+      {contactPermissions?.isCreate ? (
         <HtmlTooltip title="Clone">
           <IconButton
             size="small"
@@ -443,7 +443,7 @@ export default function Contact(props) {
         </HtmlTooltip>
       )}
       <GridDeleteIcon
-        hasDeletePermission={contactPermissions.isDelete}
+        hasDeletePermission={contactPermissions?.isDelete}
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
         onDelete={() => {
@@ -456,7 +456,7 @@ export default function Contact(props) {
         entity="contact"
       />
 
-      {contactPermissions.isUpdate && params.data?.isAllowedToUpdate ? (
+      {contactPermissions?.isUpdate && params.data?.isAllowedToUpdate ? (
         <HtmlTooltip title="Entity">
           <IconButton
             size="small"
@@ -493,42 +493,6 @@ export default function Contact(props) {
     </>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      case 'lead':
-        return 'staticData.lead.concatedName';
-
-      default:
-        return field;
-    }
-  };
-
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-
-    if (field !== updatedField) return updatedField;
-
-    switch (field) {
-      case 'owner':
-        return 'owner.optionLabel';
-
-      case 'accountName':
-        return 'accountName.optionLabel';
-
-      case 'entity':
-        return 'entity.optionLabel';
-
-      default:
-        return field;
-    }
-  };
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterContacts=${queryType === 'My Accounts' ? 2 : selectedType}`;
     if (isExport) {
@@ -538,24 +502,24 @@ export default function Contact(props) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    if (accountDetails.accountId) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: replaceFieldName('accountName'), term: accountDetails.accountId }])}`;
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if(accountDetails.accountId) {
+      filterByIds.push({ field: 'accountName', term: accountDetails.accountId })
     }
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {
@@ -890,7 +854,7 @@ export default function Contact(props) {
                 </Grid>
 
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {contactPermissions.isCreate && (
+                  {contactPermissions?.isCreate && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -905,7 +869,7 @@ export default function Contact(props) {
                     </>
                   )}
 
-                  {(contactPermissions.isDelete || contactPermissions.isUpdate) && (
+                  {(contactPermissions?.isDelete || contactPermissions?.isUpdate) && (
                     <>
                       <Button
                         disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
@@ -931,7 +895,7 @@ export default function Contact(props) {
                         open={Boolean(anchorEl)}
                         onClose={closeActions}
                       >
-                        {contactPermissions.isDelete && (
+                        {contactPermissions?.isDelete && (
                           <MenuItem
                             disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                             onClick={() => {
@@ -958,7 +922,7 @@ export default function Contact(props) {
                             Give Access to Portal
                           </MenuItem>
                         )}
-                        {contactPermissions.isUpdate && contactResource === 'customerContact' && permissions?.productInventory && (
+                        {contactPermissions?.isUpdate && contactResource === 'customerContact' && permissions?.productInventory && (
                           <MenuItem
                             disabled={
                               getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 ||
@@ -973,7 +937,7 @@ export default function Contact(props) {
                             <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
                           </MenuItem>
                         )}
-                        {contactPermissions.isUpdate && (
+                        {contactPermissions?.isUpdate && (
                           <MenuItem
                             disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                             onClick={() => {

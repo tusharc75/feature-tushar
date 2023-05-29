@@ -22,7 +22,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, FaSuitcase } from 'react-icons/all';
 import PricingConditionsDialog from './PricingConditionsDialog';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { startCase } from 'lodash';
@@ -104,9 +104,9 @@ const PricingConditions = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions.pricingCondition.isDelete;
+          finalObject['canDelete'] = permissions?.pricingCondition.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions.pricingCondition.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.pricingCondition.isUpdate;
           return {
             ...finalObject
           };
@@ -140,7 +140,7 @@ const PricingConditions = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions.pricingCondition.isDelete && (
+      {permissions?.pricingCondition?.isDelete && (
         <Tooltip title="Delete">
           <IconButton
             size="small"
@@ -157,45 +157,24 @@ const PricingConditions = () => {
     </>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      default:
-        return field;
-    }
-  };
-
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-    if (field !== updatedField) return updatedField;
-    switch (field) {
-      case 'product':
-        return 'product.optionLabel';
-
-      case 'warehouse':
-        return 'warehouse.optionLabel';
-
-      case 'customer':
-        return 'entity.optionLabel';
-
-      default:
-        return field;
-    }
-  };
-
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-    const updatedFilters = [];
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
+
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
@@ -446,7 +425,7 @@ const PricingConditions = () => {
             </Box>
           )
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

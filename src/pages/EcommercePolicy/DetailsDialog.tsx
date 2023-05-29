@@ -8,23 +8,20 @@ import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
-import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, isFieldNotTouched } from './../../constants/helpers';
+import { CustomDialogTransition } from './../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@material-ui/core';
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import { isEqual } from 'lodash';
 
 const DetailsDialog = (props) => {
-
   const toastConfig = useContext(CustomToastContext);
   const { onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
 
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [formValues, setFormValues] = useState({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [saveClick, setSaveClick] = useState(false);
@@ -52,15 +49,17 @@ const DetailsDialog = (props) => {
   }, []);
 
   const handleSubmit = (values) => {
-    axiosInstance().put(`/e-commerce-policy`, values).then(({ data: { data } }) => {
-      setLoading(false);
-      onSuccess(data);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: 'Updated Successfully'
-      });
-    })
+    axiosInstance()
+      .put(`/e-commerce-policy`, values)
+      .then(({ data: { data } }) => {
+        setLoading(false);
+        onSuccess(data);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Updated Successfully'
+        });
+      })
       .catch((error) => {
         setLoading(false);
         toastConfig.setToastConfig(error);
@@ -93,7 +92,7 @@ const DetailsDialog = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={"Update"}
+                title={'Update'}
                 onClose={() => {
                   onClose();
                 }}
@@ -124,16 +123,7 @@ const DetailsDialog = (props) => {
                   size="small"
                   color="primary"
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
+                    if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
@@ -150,7 +140,7 @@ const DetailsDialog = (props) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

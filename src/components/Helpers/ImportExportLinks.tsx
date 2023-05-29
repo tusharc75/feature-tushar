@@ -5,9 +5,10 @@ import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
+import { ImportIcon, ExportIcon, DownloadIcon } from 'src/assets/svg/svgIcons';
+
 const useStyles = makeStyles((theme) => ({
   root: {
-    // width: '100%',
     flexGrow: 1,
     display: 'flex',
     justifyContent: 'flex-end'
@@ -20,35 +21,9 @@ const useStyles = makeStyles((theme) => ({
       display: 'none'
     }
   },
-  // links: {
-  //   color: theme.palette.info.light, //  textDark
-  //   fontSize: 15
-  // },
-  // darkLinks: {
-  //   color: theme.palette.info.dark, //  textDark
-  //   fontSize: 15
-  // },
-  // linkDivider: {
-  //   backgroundColor: '#ffffff42', //  darkBg
-  //   margin: '0 10px'
-  // },
-  // darkLinkDivider: {
-  //   backgroundColor: 'grey', //  darkBg
-  //   margin: '0 10px'
-  // },
   delBtn: {
     color: 'red'
   }
-  // expandIcon: {
-  //   position: 'absolute',
-  //   right: '0',
-  //   color: 'white'
-  // },
-  // darkExpandIcon: {
-  //   position: 'absolute',
-  //   right: '0',
-  //   color: theme.palette.info.dark
-  // }
 }));
 
 export default function ImportExportLinks({
@@ -254,8 +229,9 @@ export default function ImportExportLinks({
       >
         {permissions?.isCreate && imptExptDnldMenuDta.action === 'import' && (
           <MenuItem>
+            {ImportInput}
             <label htmlFor="importFromExcel" className="cursor-pointer">
-              {title !== '' ? `${title} Import ` : `Import from Excel`}
+              <span>{title !== '' ? `${title} Import ` : `Import from Excel`}</span>
             </label>
           </MenuItem>
         )}
@@ -352,6 +328,7 @@ export default function ImportExportLinks({
         >
           {permissions?.isCreate && !onlyExport && (
             <MenuItem>
+              {ImportInput}
               <label htmlFor="importFromExcel">{title !== '' ? `Import ${title}` : `Import from Excel`}</label>
             </MenuItem>
           )}
@@ -430,7 +407,8 @@ export default function ImportExportLinks({
                 className={`new-headerbox-button-v1`}
               >
                 {/* {extraImportExportLinks.length > 0 || ImportInput} */}
-                Import from Excel
+                <span>Import from Excel</span>
+                <ImportIcon />
               </label>
               {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
             </>
@@ -445,8 +423,11 @@ export default function ImportExportLinks({
             }}
             className={`new-headerbox-button-v1`}
           >
-            Export to Excel{' '}
-            {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
+            <span>
+              Export to Excel{' '}
+              {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
+            </span>
+            <ExportIcon />
           </label>
           {isDownloadExcel && !onlyExport && (
             <>
@@ -461,7 +442,8 @@ export default function ImportExportLinks({
                 }}
                 className={`new-headerbox-button-v1`}
               >
-                Download Template
+                <span>Download Template</span>
+                <DownloadIcon />
               </label>
             </>
           )}

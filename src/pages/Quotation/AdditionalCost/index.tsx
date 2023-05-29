@@ -22,17 +22,16 @@ import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 
 const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, allowedToEdit }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
 
   const versionId = quotationData?.versions[version]?._id || null;
-
+  const [isUpdating, setUpdating] = useState(false);
   const [columns, setColumns] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
-  const [showCostDialog, setShowCostDialog] = useState(false);
+  const [showCostDialog, setShowCostDialog] = useState({open: false, showSaveAndNext: false});
   const [selectedCostData, setSelectedCostData] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -43,11 +42,16 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
 
   useEffect(() => {
     fetchFields();
-    fetchData()
+    fetchData();
   }, [quotationData, allowedToEdit]);
 
+  const handleOpen = (row, rows) => {
+    setShowCostDialog({open: true, showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false });
+    setSelectedCostData(row.original);
+ };
+
   const fetchFields = async () => {
-    setColumns(null)
+    setColumns(null);
     var data = [];
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.quotationCost}`);
     data = response?.data?.data;
@@ -75,7 +79,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) =>
+      Cell: ({ row, rows }) =>
         allowedToEdit && (
           <Fragment>
             <HtmlTooltip title="Edit">
@@ -83,8 +87,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
                 size="small"
                 aria-label="Clone"
                 onClick={() => {
-                  setShowCostDialog(true);
-                  setSelectedCostData(row.original);
+                handleOpen(row, rows)
                 }}
               >
                 <EditIcon color="primary" />
@@ -133,40 +136,55 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
   };
 
   const handleAddCost = (rows) => {
+    setUpdating(true);
     axiosInstance()
       .post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/add`, { additionalCost: rows })
       .then(({ data }) => {
+        setUpdating(false);
         fetchData();
-        setShowCostDialog(false);
+        setShowCostDialog({open: false, showSaveAndNext:false});
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
       })
       .catch((error) => {
+        setUpdating(false);
         toastConfig.setToastConfig(error);
       });
   };
 
-  const handleUpdateCost = (rows) => {
+  const handleUpdateCost = (rows:any, saveAndNext = false) => {
     rows.forEach((element) => {
       delete element.index;
       delete element.isValid;
       delete element.hideSelection;
     });
+    setUpdating(true);
     axiosInstance()
       .put(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/update`, { additionalCost: rows })
       .then(({ data }) => {
-        fetchData();
-        setShowCostDialog(false);
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
+        setUpdating(false);
+        if(saveAndNext) {
+          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          setSelectedCostData(rowsData[rowIndex + 1]);
+          setShowCostDialog({
+            open: true,
+            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+          });
+        } else {
+          setShowCostDialog({open:false, showSaveAndNext: false});
+        }
+        fetchData();
       })
       .catch((error) => {
+        setUpdating(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -176,11 +194,11 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
       .post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/delete`, { ids: deleteRecords })
       .then(({ data }) => {
         fetchData();
-        setShowDeleteConfirmBox(false)
+        setShowDeleteConfirmBox(false);
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
       })
       .catch((error) => {
@@ -212,7 +230,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
             color="primary"
             size="small"
             onClick={() => {
-              setShowCostDialog(true);
+              setShowCostDialog({open: true, showSaveAndNext: false});
               setSelectedCostData(null);
             }}
           >
@@ -278,20 +296,22 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
           />
         </Box>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {showCostDialog && (
+      {showCostDialog.open && (
         <AdditionalCostDialog
           onClose={() => {
-            setShowCostDialog(false);
+            setShowCostDialog({open: false, showSaveAndNext:false});
             setSelectedCostData(null);
           }}
           handleAddCost={handleAddCost}
           handleUpdateCost={handleUpdateCost}
           currency={quotationData?.currency}
           costData={selectedCostData}
+          loadingEdit={isUpdating}
+          showSaveAndNext={showCostDialog.showSaveAndNext}
         />
       )}
       {showDeleteConfirmBox && (

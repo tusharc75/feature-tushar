@@ -98,8 +98,8 @@ const Roles: FC = () => {
   const ActionsRenderer = (params) => (
     <>
       <Tooltip
-        className={permissions.role.isCreate ? '' : 'cursor-stop'}
-        title={permissions.role.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
+        className={permissions?.role.isCreate ? '' : 'cursor-stop'}
+        title={permissions?.role.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
       >
         <IconButton
           size="small"
@@ -111,7 +111,7 @@ const Roles: FC = () => {
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
-      {permissions.role.isDelete ? (
+      {permissions?.role.isDelete ? (
         <span title="Delete Role">
           {rolePermissionArray.indexOf(params.data.permission) >= 0 ? (
             <Tooltip
@@ -200,9 +200,9 @@ const Roles: FC = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions.role.isDelete;
+          finalObject['canDelete'] = permissions?.role.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions.role.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.role.isUpdate;
           return {
             ...finalObject,
             type: `${u.type === roleTypes.find((d) => d.key === 'Global')?.value ? 'Global' : 'Regional'} Role`

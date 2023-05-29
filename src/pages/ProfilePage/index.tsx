@@ -1,162 +1,167 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react'
-import { Grid, Paper } from '@material-ui/core'
-import { makeStyles } from '@material-ui/core/styles'
+import React, { useState, useEffect, useContext, Fragment } from 'react';
+import { Box, Grid, Paper } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import ProfileSidebar from './components/ProfileSidebar'
-import { profileMenuItems } from '../../constants/helpers'
-import ManageProfile from './components/ManageProfile'
-import NotificationPreference from './components/NotificationPreference'
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import ProfileSidebar from './components/ProfileSidebar';
+import { profileMenuItems } from '../../constants/helpers';
+import ManageProfile from './components/ManageProfile';
+import NotificationPreference from './components/NotificationPreference';
+import axiosInstance from '../../axios/axiosInstance';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomContainer from '../../components/CustomContainer';
 import { useData } from '../../StateProvider/Provider';
 
 const useStyles = makeStyles((theme) => ({
-    paper: {
-        padding: theme.spacing(1),
-        textAlign: 'center',
-        color: theme.palette.text.secondary,
-        whiteSpace: 'nowrap',
-        marginBottom: theme.spacing(1),
-    },
-    profileContainer: {
-        width: '90%',
-        margin: theme.spacing(4),
-        borderRadius: '8px',
-        textAlign: 'center',
-        backgroundColor: theme.palette.common.white,
-    },
-    profileSidebar: {
-        position: "fixed",
-        width: "23%",
-        height: "calc(100vh - 142px)",
-        background: "#ececec !important",
-        borderRadius: "6px"
-        // borderRight: `2px solid ${theme.palette.primary.light}`
-    }
+  paper: {
+    padding: theme.spacing(1),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+    whiteSpace: 'nowrap',
+    marginBottom: theme.spacing(1)
+  },
+  profileContainer: {
+    width: '90%',
+    margin: theme.spacing(4),
+    borderRadius: '8px',
+    textAlign: 'center',
+    backgroundColor: theme.palette.common.white
+  },
+  profileSidebar: {
+    position: 'fixed',
+    width: '23%',
+    height: 'calc(100vh - 142px)',
+    background: '#ececec !important',
+    borderRadius: '6px'
+    // borderRight: `2px solid ${theme.palette.primary.light}`
+  }
 }));
 export default function ProfilePage(props) {
+  const {
+    state: { user }
+  }: any = useData();
+  const { profileBreadCrumbs } = props;
+  const [activeItem, setActiveItem] = useState(profileMenuItems.profile);
+  const [userData, setUserData] = useState(null);
+  const [proxyBy, setProxyBy] = useState([]);
+  const [otherDetails, setOtherDetails] = useState(null);
+  const [notificationPreferenceData, setNotificationPreferenceData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [userLoading, setUserLoading] = useState(false);
+  const [userFields, setUserFields] = useState([]);
+  const classes = useStyles();
+  const toastConfig = useContext(CustomToastContext);
 
-    const {
-        state: { user }
-    }: any = useData();
-    const { profileBreadCrumbs } = props
-    const [activeItem, setActiveItem] = useState(profileMenuItems.profile)
-    const [userData, setUserData] = useState(null)
-    const [proxyBy, setProxyBy] = useState([]);
-    const [otherDetails, setOtherDetails] = useState(null)
-    const [notificationPreferenceData, setNotificationPreferenceData] = useState([])
-    const [loading, setLoading] = useState(false);
-    const [userLoading, setUserLoading] = useState(false);
-    const [userFields, setUserFields] = useState([]);
-    const classes = useStyles();
-    const toastConfig = useContext(CustomToastContext);
+  const handleItemClick = (obj) => {
+    if (obj.id) setActiveItem(obj.id);
+  };
 
-    const handleItemClick = obj => {
-        if (obj.id) setActiveItem(obj.id)
+  useEffect(() => {
+    if (userFields.length === 0) {
+      getUserFields();
+      fetchUserData();
+      getLoggedInUserData();
     }
+  }, []);
 
-    useEffect(() => {
-        if (userFields.length === 0) {
-            getUserFields()
-            fetchUserData()
-            getLoggedInUserData()
+  const fetchUserData = () => {
+    setUserLoading(true);
+    axiosInstance()
+      .get(`/user/me`)
+      .then(({ data: { data } }) => {
+        if (data?.user) {
+          setOtherDetails({
+            Email: data.user.email ?? '',
+            EmployeeNumber: data.user?.employeeNumber ?? ''
+          });
+          let { blocked, updatedBy, employeeNumber, ...userData } = data.user;
+          setUserData(userData);
+          setNotificationPreferenceData(data.user.notificationPref);
         }
-    }, [])
+        if (data?.proxyBy) {
+          setProxyBy(data.proxyBy);
+        }
+        setUserLoading(false);
+      })
+      .catch((error) => {
+        setUserLoading(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
 
-    const fetchUserData = () => {
-        setUserLoading(true)
-        axiosInstance()
-            .get(`/user/me`)
-            .then(({ data: { data } }) => {
-                if (data?.user) {
-                    setOtherDetails({
-                        Email: data.user.email ?? '',
-                        EmployeeNumber: data.user?.employeeNumber ?? ''
-                    })
-                    let { blocked, updatedBy, employeeNumber, ...userData } = data.user
-                    setUserData(userData)
-                    setNotificationPreferenceData(data.user.notificationPref)
-                }
-                if (data?.proxyBy) {
-                    setProxyBy(data.proxyBy);
-                }
-                setUserLoading(false)
-            })
-            .catch((error) => {
-                setUserLoading(false)
-                toastConfig.setToastConfig(error);
-            });
-    }
+  const getUserFields = () => {
+    setLoading(true);
+    axiosInstance()
+      .get('/field?resource=User')
+      .then(({ data }) => {
+        data.data =
+          data.data && data.data.length
+            ? data.data.filter((field) => ['blocked', 'email', 'employeeNumber'].indexOf(field?.fieldData?.fieldName) < 0)
+            : [];
+        setUserFields(data.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setLoading(false);
+      });
+  };
 
-    const getUserFields = () => {
+  const getLoggedInUserData = async () => {
+    axiosInstance()
+      .get(`user/${user.user?._id}`)
+      .then(({ data: { data } }) => {
+        if (data?.quotePDFTemplate) {
+          setUserData((prevState) => ({ ...prevState, quotePDFTemplate: data?.quotePDFTemplate }));
+        }
+      });
+  };
 
-        setLoading(true)
-        axiosInstance()
-            .get("/field?resource=User")
-            .then(({ data }) => {
-                data.data = data.data && data.data.length ? data.data.filter(field => ["blocked", "email", "employeeNumber"].indexOf(field?.fieldData?.fieldName) < 0) : []
-                setUserFields(data.data)
-                setLoading(false)
-            })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-                setLoading(false)
-            });
-    };
-
-    const getLoggedInUserData = async () => {
-        axiosInstance()
-            .get(`user/${user.user?._id}`)
-            .then(({ data: { data } }) => {
-                if (data?.quotePDFTemplate) {
-                    setUserData((prevState) => ({ ...prevState, 'quotePDFTemplate': data?.quotePDFTemplate }))
-
-                }
-            })
-    }
-
-    return <Fragment>
-        <Grid container className="headerbox">
-            <Grid item md={12} sm={12} xs={12}>
-                <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
-            </Grid>
+  return (
+    <Fragment>
+      <Grid container className="headerbox">
+        <Grid item md={12} sm={12} xs={12}>
+          <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
         </Grid>
-        <CustomContainer>
-            <Grid container className="p-3">
-                <Grid item sm={3} lg={3} md={3}  >
-                    <div>
-                        <ProfileSidebar onItemClick={handleItemClick}
-                            activeLink={activeItem}
-                            userData={userData}
-                            onFetchUserData={fetchUserData}
-                            otherDetails={otherDetails}
-                        />
-                    </div>
-                </Grid>
-                <Grid item sm={9} md={9} lg={9} className="bgbox">
-                    {
-                        activeItem === profileMenuItems.profile ?
-                            <ManageProfile displayUserDetails={true}
-                                userFields={userFields}
-                                userData={userData}
-                                userProxy={proxyBy}
-                                loading={loading}
-                                userLoading={userLoading}
-                                onFetchUserData={fetchUserData}
-                                otherDetails={otherDetails}
-                            /> :
-                            activeItem === profileMenuItems.notification ?
-                                <NotificationPreference notificationPreferenceData={notificationPreferenceData} user={userData._id} onSuccess={fetchUserData} />
-                                : activeItem === profileMenuItems.setting ?
-                                    <Paper className={classes.paper}>setting</Paper>
-                                    : activeItem === profileMenuItems.users ?
-                                        <Paper className={classes.paper}>users</Paper>
-                                        : activeItem === profileMenuItems.securityPrivacy ?
-                                            <Paper className={classes.paper}>securityPrivacy</Paper> : null
-                    }
-                </Grid>
+      </Grid>
+      <CustomContainer>
+        <Box p={{ xs: 0, md: 2 }}>
+          <Grid container spacing={3}>
+            <Grid item sm={12} md={4} lg={3}>
+              <div>
+                <ProfileSidebar
+                  onItemClick={handleItemClick}
+                  activeLink={activeItem}
+                  userData={userData}
+                  onFetchUserData={fetchUserData}
+                  otherDetails={otherDetails}
+                />
+              </div>
             </Grid>
-        </CustomContainer>
-    </Fragment >
+            <Grid item sm={12} md={8} lg={9} className="bgbox">
+              {activeItem === profileMenuItems.profile ? (
+                <ManageProfile
+                  displayUserDetails={true}
+                  userFields={userFields}
+                  userData={userData}
+                  userProxy={proxyBy}
+                  loading={loading}
+                  userLoading={userLoading}
+                  onFetchUserData={fetchUserData}
+                  otherDetails={otherDetails}
+                />
+              ) : activeItem === profileMenuItems.notification ? (
+                <NotificationPreference notificationPreferenceData={notificationPreferenceData} user={userData._id} onSuccess={fetchUserData} />
+              ) : activeItem === profileMenuItems.setting ? (
+                <Paper className={classes.paper}>setting</Paper>
+              ) : activeItem === profileMenuItems.users ? (
+                <Paper className={classes.paper}>users</Paper>
+              ) : activeItem === profileMenuItems.securityPrivacy ? (
+                <Paper className={classes.paper}>securityPrivacy</Paper>
+              ) : null}
+            </Grid>
+          </Grid>
+        </Box>
+      </CustomContainer>
+    </Fragment>
+  );
 }

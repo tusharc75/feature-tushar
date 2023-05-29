@@ -45,8 +45,8 @@ function Roadmap({ type, filter }) {
   const today = new Date();
   // let startDate = moment(today).subtract(365, 'days');
   // let endDate = moment(today).add(365, 'days');
-  let startDate = moment("2021-01-01");
-  let endDate = moment("2023-12-31");
+  let startDate = moment('2021-01-01');
+  let endDate = moment('2023-12-31');
   let totalDay = endDate.diff(startDate, 'days');
 
   var dayPixel = 0;
@@ -82,9 +82,14 @@ function Roadmap({ type, filter }) {
 
   return activity ? (
     <Box bgcolor="white">
-      <Box border={1} borderColor="grey.300" display="flex" height={height} style={{ position: 'relative' }}>
+      <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
         <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
-          <Box minWidth={isMobile && !isTablet ? 110 : 300} border={1} borderColor="grey.300" style={{ position: 'relative', overflow: 'hidden' }}>
+          <Box
+            minWidth={isMobile && !isTablet ? 110 : 300}
+            border={1}
+            borderColor="var(--common-border-color)"
+            style={{ position: 'relative', overflow: 'hidden' }}
+          >
             <Box height={60} bgcolor="grey.200" display="flex" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
               <Box p={2} display="flex" alignItems="center">
                 <Map />
@@ -118,7 +123,13 @@ function Roadmap({ type, filter }) {
               </Box>
             </div>
           </Box>
-          <Box id="scrollDayLiner" onScroll={onscroll} border={1} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
+          <Box
+            id="scrollDayLiner"
+            onScroll={onscroll}
+            border={1}
+            borderColor="var(--common-border-color)"
+            style={{ position: 'relative', overflow: 'auto' }}
+          >
             <Calendar calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
             <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
               <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>

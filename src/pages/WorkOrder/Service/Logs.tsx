@@ -15,14 +15,14 @@ import { FaUser as UserIcon } from 'react-icons/fa';
 import { MdBolt } from 'react-icons/md';
 
 const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) => {
-
-  const { state: { selectedEntity } }: any = useData();
+  const {
+    state: { selectedEntity }
+  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState(null);
   const [rows, setRows] = useState(null);
   const [keys, setKeys] = useState(null);
-
 
   useEffect(() => {
     fetchData();
@@ -43,9 +43,8 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
       .then(({ data: { data } }) => {
         if (data && data?.length) {
           setData(data);
-        }
-        else {
-          setData([])
+        } else {
+          setData([]);
         }
       })
       .catch((err) => {
@@ -160,8 +159,8 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
         break;
       case operations.consumed:
         message = `<span>Consumed</span><br><strong>Products</strong>`;
-        consumedProducts?.forEach(element => {
-          message = message + `<br><strong>${element?.productName} : ${element?.qty}</strong>`
+        consumedProducts?.forEach((element) => {
+          message = message + `<br><strong>${element?.productName} : ${element?.qty}</strong>`;
         });
         break;
       case operations.valueUpdated:
@@ -221,7 +220,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
             <h5>No log found.</h5>
           )
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

@@ -53,12 +53,9 @@ const RoleDetailsPage = () => {
     state: { user, permissions, selectedEntity },
     dispatch
   }: any = useData();
-  const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [roleData, setRoleData] = useState(null);
-  const [currentData, setCurrentData] = useState(null);
-  const [updatedData, setUpdatedData] = useState(null);
   const [roleDeleteRec, setRoleDeleteRec] = useState(null);
   const [entityDeleteRec, setEntityDeleteRec] = useState(null);
   const [userDeleteRec, setUserDeleteRec] = useState(null);
@@ -67,6 +64,7 @@ const RoleDetailsPage = () => {
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
   const [roleUsers, setRoleUsers] = useState([]);
+  const [isEdit, setIsEdit] = useState(false)
   const [values, setValues] = useState({
     name: '',
     description: ''
@@ -107,7 +105,8 @@ const RoleDetailsPage = () => {
   const [dashBoardOption, setDashBoardOption] = useState([]);
   const [dashboardName, setDashboardName] = useState([]);
   const [defaultResourceName, setDefaultResourceName] = useState([]);
-  const [superAdminAccess, setSuperAdminAccess] = useState(false)
+  const [superAdminAccess, setSuperAdminAccess] = useState(false);
+  const [canAssignByAnyuser, setCanAssignByAnyuser] = useState(false);
 
   const policyResources = [
     {
@@ -183,7 +182,6 @@ const RoleDetailsPage = () => {
       field,
       resource
     };
-    setUpdatedData(JSON.stringify(data));
   }, [values, field, resource]);
 
   useEffect(() => {
@@ -254,7 +252,6 @@ const RoleDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/role/${id}`);
-      setHeadingLbl(data.name);
       setRoleData(data);
       setValues({ name: data.name, description: data.description });
       setField(data.field);
@@ -265,7 +262,6 @@ const RoleDetailsPage = () => {
         field: data.field,
         resource: data.resource
       };
-      setCurrentData(JSON.stringify(current));
       setCustomizedRoutes([routes.role, { title: data.name }]);
       if (data?.policy) {
         let copyOfResourcePolicy = {};
@@ -282,6 +278,7 @@ const RoleDetailsPage = () => {
       setResourceOption([...copyOfDashBoardOption]);
       setDefaultResourceName(data?.defaultResource || '');
       setSuperAdminAccess(data?.superAdminAccess || false);
+      setCanAssignByAnyuser(data?.canAssignByAnyuser || false);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -343,7 +340,8 @@ const RoleDetailsPage = () => {
         policy: policyFieldCheckBox,
         dashBoards: dashBoardIds,
         defaultResource: defaultResourceName,
-        superAdminAccess: superAdminAccess
+        superAdminAccess: superAdminAccess,
+        canAssignByAnyuser: canAssignByAnyuser
       })
       .then(({ data }) => {
         fetchRoleData();
@@ -354,6 +352,7 @@ const RoleDetailsPage = () => {
         });
 
         setUpdating(false);
+        setIsEdit(false)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -473,12 +472,17 @@ const RoleDetailsPage = () => {
           <Box className="control-buttons-v1">
             {roleData ? (
               <>
-                {permissions.role.isUpdate && (
-                  <Button disabled={isUpdating || checkError()} variant="contained" color="primary" size="medium" onClick={handleUpdateRole}>
+                {permissions?.role.isUpdate && !isEdit && (
+                  <Button variant="contained" color="primary" size="medium" onClick={() => setIsEdit(true)}>
+                    Edit
+                  </Button>
+                )}
+                {permissions?.role.isUpdate && isEdit && (
+                  <Button disabled={isUpdating || checkError() || !isEdit} variant="contained" color="primary" size="medium" onClick={handleUpdateRole}>
                     {isUpdating ? <CircularProgress size={22} /> : 'Update'}
                   </Button>
                 )}
-                {permissions.role.isDelete && !isEditDeleteDisable && (
+                {permissions?.role.isDelete && !isEditDeleteDisable && (
                   <DeleteButton
                     text="Delete"
                     onClick={() => {
@@ -499,7 +503,7 @@ const RoleDetailsPage = () => {
           <Grid item xs={12} sm={12} md={8} lg={8}>
             <Box display="flex" marginTop={2} marginBottom={2} gridGap={10} px={1}>
               <TextField
-                disabled={roleData?.type && roleData?.permission ? true : !permissions.role.isUpdate}
+                disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                 required
                 variant="outlined"
                 size="small"
@@ -508,9 +512,8 @@ const RoleDetailsPage = () => {
                 value={values.name}
                 onChange={(e) => setValues({ ...values, name: e.target.value.trimStart() })}
               />
-
               <TextField
-                disabled={roleData?.type && roleData?.permission ? true : !permissions.role.isUpdate}
+                disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                 required
                 variant="outlined"
                 size="small"
@@ -535,7 +538,7 @@ const RoleDetailsPage = () => {
                       resource={resource}
                       setField={setField}
                       setResource={setResource}
-                      isDisable={permissions.role.isUpdate ? (isEditDeleteDisable ? true : false) : true}
+                      isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit ? true : false) : true}
                     />
                     {isPolicyTableVisible() && (
                       <PolicyResources
@@ -548,12 +551,32 @@ const RoleDetailsPage = () => {
                         open={open}
                         setOpen={setOpen}
                         permissions={permissions}
+                        isEdit={isEdit}
+
                       />
                     )}
                     {dashBoardOption?.length > 0 && (
-                      <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} />
+                      <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} isEdit={isEdit} />
                     )}
-                    <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} />
+                    <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} isEdit={isEdit} />
+                    {!isEditDeleteDisable &&
+                      <Box p={1}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name="canAssignByAnyuser"
+                              checked={canAssignByAnyuser}
+                              onChange={(e) => {
+                                setCanAssignByAnyuser(e.target.checked);
+                              }}
+                              color="primary"
+                              disabled={!isEdit}
+                            />
+                          }
+                          label="Can Assign By Anyuser"
+                        />
+                      </Box>
+                    }
                     <Box p={1} pb={2}>
                       <FormControlLabel
                         control={
@@ -561,9 +584,10 @@ const RoleDetailsPage = () => {
                             name="superAdminAccess"
                             checked={superAdminAccess}
                             onChange={(e) => {
-                              setSuperAdminAccess(e.target.checked)
+                              setSuperAdminAccess(e.target.checked);
                             }}
                             color="primary"
+                            disabled={!isEdit}
                           />
                         }
                         label="Super Admin Access"
@@ -572,9 +596,6 @@ const RoleDetailsPage = () => {
                   </>
                 )
               )}
-              {/* </TableBody>
-                  </Table>
-                </TableContainer> */}
             </Paper>
             <Box marginY={2} />
             {/* {roleData && roleData.type === 2 && (
@@ -663,74 +684,76 @@ const RoleDetailsPage = () => {
               )} */}
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Paper>
-              <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                <Typography variant="subtitle2">Assigned Users ({roleUsers.length || 0})</Typography>
+            <Box mt={2} className="single-form-v1 ">
+              <Box className="form-head-v1">
+                <Typography component={'h3'}>Assigned Users ({roleUsers.length || 0})</Typography>
 
-                {permissions.role.isUpdate && (
-                  <IconButton title="Assign users" color="primary" size="small" onClick={userDialogOpen}>
+                {permissions?.role.isUpdate && (
+                  <IconButton className="float-right-button-v1" title="Assign users" color="primary" size="small" onClick={userDialogOpen}>
                     <ControlPoint />
                   </IconButton>
                 )}
               </Box>
-              {roleUsers && (
-                <Box>
-                  {loading ? (
-                    [1, 2].map((i) => (
-                      <BoxWithBorder
-                        key={i}
-                        style={{
-                          margin: '8px'
-                        }}
-                      >
-                        <Box padding={1}>
-                          <Skeleton variant="text" width="100px" height="20px" />
-                          <Box marginTop={1} />
-                          <Skeleton variant="text" width="100%" height="15px" />
-                        </Box>
-                      </BoxWithBorder>
-                    ))
-                  ) : roleUsers.length ? (
-                    <>
-                      <AssignedUsers
-                        permissions={permissions}
-                        unassignRole={handleUnassignUser}
-                        data={roleUsers && roleUsers.slice(0, showUsers)}
-                        currentUser={user?.user._id}
-                        type={roleData?.type}
-                      />
-                      <Box marginY={1} />
-                      {roleUsers.length > showRecordsBeforeViewAll && (
-                        <Box
-                          className="btn-view gap-1"
-                          p={1}
-                          display="flex"
-                          justifyContent="center"
-                          alignItems="center"
-                          onClick={() =>
-                            history.push(`/user`, {
-                              id: roleData._id,
-                              name: roleData.name,
-                              type: roleData.type === roleTypes.find((d) => d.key === 'Global')?.value ? 'globalRole' : 'regionalRole',
-                              text:
-                                roleData.type === roleTypes.find((d) => d.key === 'Global')?.value
-                                  ? 'Company wide role'
-                                  : 'Region wide functional role'
-                            })
-                          }
+              <Box className="formdata-v1">
+                {roleUsers && (
+                  <Box>
+                    {loading ? (
+                      [1, 2].map((i) => (
+                        <BoxWithBorder
+                          key={i}
+                          style={{
+                            margin: '8px'
+                          }}
                         >
-                          <FaEye /> View All &#8599;
-                        </Box>
-                      )}
-                    </>
-                  ) : (
-                    <Box textAlign="center" padding={2}>
-                      <Typography>No users has been assigned </Typography>
-                    </Box>
-                  )}
-                </Box>
-              )}
-            </Paper>
+                          <Box padding={1}>
+                            <Skeleton variant="text" width="100px" height="20px" />
+                            <Box marginTop={1} />
+                            <Skeleton variant="text" width="100%" height="15px" />
+                          </Box>
+                        </BoxWithBorder>
+                      ))
+                    ) : roleUsers.length ? (
+                      <>
+                        <AssignedUsers
+                          permissions={permissions}
+                          unassignRole={handleUnassignUser}
+                          data={roleUsers && roleUsers.slice(0, showUsers)}
+                          currentUser={user?.user._id}
+                          type={roleData?.type}
+                        />
+                        {roleUsers.length > showRecordsBeforeViewAll && (
+                          <>
+                            <Box marginY={2} />
+                            <Button
+                              variant="outlined"
+                              className="accordion-outlined-button"
+                              startIcon={<FaEye />}
+                              onClick={() =>
+                                history.push(`/user`, {
+                                  id: roleData._id,
+                                  name: roleData.name,
+                                  type: roleData.type === roleTypes.find((d) => d.key === 'Global')?.value ? 'globalRole' : 'regionalRole',
+                                  text:
+                                    roleData.type === roleTypes.find((d) => d.key === 'Global')?.value
+                                      ? 'Company wide role'
+                                      : 'Region wide functional role'
+                                })
+                              }
+                            >
+                              View All &#8599;
+                            </Button>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <Box textAlign="center" padding={2}>
+                        <Typography>No users has been assigned </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+              </Box>
+            </Box>
           </Grid>
         </Grid>
       </Box>

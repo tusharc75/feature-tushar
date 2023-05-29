@@ -146,7 +146,7 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
             <ViewAll type="email" relatedTo={relatedTo} />
           </Fragment>
         ) : (
-          <Box p={1} border={1} borderColor="grey.300" textAlign="center">
+          <Box p={1} border={1} borderColor="var(--common-border-color)" textAlign="center">
             <Typography variant="subtitle2">No Past Email</Typography>
           </Box>
         )}

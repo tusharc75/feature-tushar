@@ -3,12 +3,11 @@ import TextField from "@material-ui/core/TextField";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
-import { CustomDialogTransition } from "../../constants/helpers"
+import { CustomDialogTransition, INVENTORY_STATUS } from "../../constants/helpers"
 import Dialog from "@material-ui/core/Dialog"
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader"
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent"
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import { values } from "lodash";
 
 export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) {
     const [value, setValue] = React.useState("");
@@ -30,21 +29,24 @@ export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) 
         >
             <CustomDialogHeader
                 onClose={onClose}
-                title={status === "Scrap" ? "Scrapping Reason" : "Lost Reason"}></CustomDialogHeader>
+                title={status === INVENTORY_STATUS.scrap ? "Scrapping Reason" : status === INVENTORY_STATUS.lost ? "Lost Reason" : "Comment"}></CustomDialogHeader>
             <CustomDialogContent>
                 <Box>
                     <Box pt={3} pb={3}>
                         <Grid container spacing={3} >
-                            <Grid item xs={10} sm={11} md={11}>
+                            <Grid item xs={12} sm={12} md={12}>
                                 <TextField
                                     id="outlined-multiline-static"
-                                    label="Reason"
-                                    placeholder={`Add a ${status === "Scrap" ? "scrapping" : "lost"} reason`}
+                                    label={status === INVENTORY_STATUS.scrap ? "Scrapping Reason" : status === INVENTORY_STATUS.lost ? "Lost Reason" : "Comment"}
+                                    placeholder={status === INVENTORY_STATUS.scrap ? "Scrapping Reason" : status === INVENTORY_STATUS.lost ? "Lost Reason" : "Comment"}
                                     fullWidth
                                     value={value}
+                                    required
                                     onChange={handleChange}
                                     variant="outlined"
-                                    helperText="At least more then 10 character"
+                                    multiline={true}
+                                    rows={3}
+                                    size="small"
                                 />
                             </Grid>
                         </Grid>
@@ -55,7 +57,7 @@ export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) 
                 <Button color="primary" size="small"
                     onClick={onClose}>Cancel</Button>
                 <Button
-                    disabled={!Boolean(value) || values.length > 10}
+                    disabled={!Boolean(value)}
                     type="button"
                     color="primary"
                     variant="contained" onClick={() => { onAddReason(value) }}>Save</Button>

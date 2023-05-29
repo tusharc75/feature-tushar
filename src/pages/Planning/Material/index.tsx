@@ -444,7 +444,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload resource={RESOURCE_LABEL.planning} referenceId={planningData._id} columns={columns} />
+            <PreviewDownload resource={RESOURCE_LABEL.planning} referenceId={planningData._id} columns={columns} isSendEmail={true} />
             <Box mr={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
@@ -528,7 +528,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           />
         </Box>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
@@ -562,7 +562,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           assignedProducts={[]}
-          renderedFrom={renderedFrom}
           onSuccess={(d) => {
             handleAdd(d);
           }}

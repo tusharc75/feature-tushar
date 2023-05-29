@@ -1,31 +1,31 @@
-import { makeStyles } from "@material-ui/core/styles";
-import List from "@material-ui/core/List";
-import { Typography } from "@material-ui/core";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import ListItemText from "@material-ui/core/ListItemText";
-import IconButton from "@material-ui/core/IconButton";
-import DeleteIcon from "@material-ui/icons/Delete";
-import { Link } from "react-router-dom";
-import BoxWithBorder from "../../components/BoxWithBorder";
-import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
-import { roleTypes, userType } from "../../constants/helpers";
+import { makeStyles } from '@material-ui/core/styles';
+import List from '@material-ui/core/List';
+import { Typography } from '@material-ui/core';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { Link } from 'react-router-dom';
+import BoxWithBorder from '../../components/BoxWithBorder';
+import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
+import { roleTypes, userType } from '../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   demo: {
     backgroundColor: theme.palette.background.paper,
-    width: "100%",
+    width: '100%'
   },
   title: {
-    margin: theme.spacing(4, 0, 2),
+    margin: theme.spacing(4, 0, 2)
   },
   list: {
-    width: "100%",
-    padding: 0,
-  },
+    width: '100%',
+    padding: 0
+  }
 }));
 
 const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) => {
@@ -36,51 +36,50 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) =
       <List disablePadding>
         {data && data.length
           ? data.map((obj) => (
-            <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
-              <ListItem disableGutters className={classes.list}>
-                <div>
-                  <ListItemText
-                    primary={
-                      <Typography>
-                        <Link
-                          className="link"
-                          to={`/user/detail/${obj._id}`}
-                        >
-                          {`${obj.firstName} ${obj.lastName}` || ""}
-                        </Link>
-                      </Typography>
-                    }
-                    secondary={obj.email}
-                  />
-                </div>
+              <BoxWithBorder key={obj._id} style={{ marginBottom: '8px' }}>
+                <ListItem disableGutters className={classes.list}>
+                  <div>
+                    <ListItemText
+                      primary={
+                        <Typography>
+                          <Link className="link" to={`/user/detail/${obj._id}`}>
+                            {`${obj.firstName} ${obj.lastName}` || ''}
+                          </Link>
+                        </Typography>
+                      }
+                      secondary={obj.email}
+                    />
+                  </div>
 
-                <CopyToClipboard textToCopy={obj.email} className="ml-1 mt-4" />
-                {permissions.role.isUpdate && (
-                  <ListItemSecondaryAction
-                    title={
-                      currentUser === obj._id
-                        ? "Primary user can't be unassigned"
-                        : obj.userType && obj.userType === userType.brandAdmin ? "Brand Admin Can not be deleted" : "Unassign User"
-                    }
-                  >
-                    {type === roleTypes.find((d) => d.key === "Global")?.value && (
-                      <IconButton
-                        size="small"
-                        disabled={currentUser === obj._id || (obj.userType && obj.userType === userType.brandAdmin)}
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => unassignRole(obj)}
-                      >
-                        <DeleteIcon
-                          color={currentUser === obj._id || (obj.userType && obj.userType === userType.brandAdmin) ? "disabled" : "error"}
-                        />
-                      </IconButton>
-                    )}
-                  </ListItemSecondaryAction>
-                )}
-              </ListItem>
-            </BoxWithBorder>
-          ))
+                  <CopyToClipboard textToCopy={obj.email} className="ml-1 mt-4" />
+                  {permissions?.role?.isUpdate && (
+                    <ListItemSecondaryAction
+                      title={
+                        currentUser === obj._id
+                          ? "Primary user can't be unassigned"
+                          : obj.userType && obj.userType === userType.brandAdmin
+                          ? 'Brand Admin Can not be deleted'
+                          : 'Unassign User'
+                      }
+                    >
+                      {type === roleTypes.find((d) => d.key === 'Global')?.value && (
+                        <IconButton
+                          size="small"
+                          disabled={currentUser === obj._id || (obj.userType && obj.userType === userType.brandAdmin)}
+                          edge="end"
+                          aria-label="delete"
+                          onClick={() => unassignRole(obj)}
+                        >
+                          <DeleteIcon
+                            color={currentUser === obj._id || (obj.userType && obj.userType === userType.brandAdmin) ? 'disabled' : 'error'}
+                          />
+                        </IconButton>
+                      )}
+                    </ListItemSecondaryAction>
+                  )}
+                </ListItem>
+              </BoxWithBorder>
+            ))
           : null}
       </List>
     </div>

@@ -18,10 +18,8 @@ import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import Steps from '../RentalManagement/Steps';
 import Material from './Material';
 import AdditionalCost from './AdditionalCost';
-import SerializedAsset from './SerializedAsset';
 import LoadingTicket from './LoadingTicket';
 import Invoice from './Invoice';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -30,7 +28,7 @@ import { GrStatusInfo, RiFlowChart } from 'react-icons/all';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import Steps2, { getIndex } from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 import Process from './Process';
 import SalesOrderView from './View';
 
@@ -326,7 +324,7 @@ const SalesOrderDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps2
+          <Steps
             isNextStep={false}
             nextStep={nextStep}
             steps={salesOrderProcessSteps}

@@ -9,7 +9,9 @@ import { isMobile, isTablet } from 'react-device-detect';
 const useStyles = makeStyles((theme) => ({
   root: {
     margin: 0,
-    padding: theme.spacing(1.5, 1.5, 1.5, 2)
+    padding: theme.spacing(1.5, 1.5, 1.5, 2),
+    display: 'flex'
+
     // borderBottom: `1px solid #daf5ff`
   },
   closeButton: {
@@ -19,7 +21,8 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.grey[500]
   },
   dialogTitle: {
-    fontSize: '1.2rem'
+    fontSize: '1.2rem',
+    display: 'inline-block'
   }
 }));
 
@@ -29,23 +32,41 @@ function CustomDialogHeader({
   showManimizeMaximize = false,
   showRequiredLabel = true,
   isMinimized = true,
-  onMinimizeMaximize = () => { },
+  onMinimizeMaximize = () => {},
   style = {},
   additionalTitle = null
 }) {
   const classes = useStyles();
 
+  const maxWidth = React.useMemo(() => {
+    let tempWidth = 0;
+    const onCloseButtonWidth = 30;
+    const showManimizeMaximizeWidth = 32;
+    const showRequiredLabelWidth = 121;
+    if (onClose) {
+      tempWidth += onCloseButtonWidth;
+    }
+    if (showManimizeMaximize) {
+      tempWidth += showManimizeMaximizeWidth;
+    }
+    if (showRequiredLabel) {
+      tempWidth += showRequiredLabelWidth;
+    }
+    return tempWidth;
+  }, [showRequiredLabel, showManimizeMaximize, onClose, title, additionalTitle]);
+
   return (
     <React.Fragment>
       <MuiDialogTitle disableTypography className={classes.root}>
-        <Box display={'flex'}>
-          <Box>
-            <Typography variant="h6" className={`${classes.dialogTitle} title-layout text-truncate`} style={style}>
-              {title}
-            </Typography>
-          </Box>
-          {additionalTitle && additionalTitle}
-        </Box>
+        <Typography
+          variant="h6"
+          className={`${classes.dialogTitle} title-layout text-truncate`}
+          style={{ ...style, maxWidth: `calc(100% - ${maxWidth}px)` }}
+          title={title}
+        >
+          {title}
+          {additionalTitle && <span className="text-truncate">{additionalTitle}</span>}
+        </Typography>
         <div className={`${classes.closeButton} close`}>
           {showRequiredLabel && (
             <span className="form-label-style required-text mr-2" style={{ borderBottom: 'none' }}>
