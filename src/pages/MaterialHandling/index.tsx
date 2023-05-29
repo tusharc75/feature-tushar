@@ -40,7 +40,8 @@ const MaterialHandling = () => {
         const warehouses: any = [];
         if (data['Warehouse'] && data['Warehouse']?.length) {
           data['Warehouse']?.forEach((ele) => {
-            if (ele?.manager && ele?.manager?.includes(user?.user?._id)) {
+            if ((ele?.manager && ele?.manager?.includes(user?.user?._id))
+              || (ele?.materialHandlers && ele?.materialHandlers?.includes(user?.user?._id))) {
               warehouses.push(ele);
             }
           });
@@ -139,7 +140,7 @@ const MaterialHandling = () => {
                       setSelectedWorkOrder(workOrder[0]);
                     }
                   }
-                  if(workOrderId){
+                  if (workOrderId) {
                     history.push(routes.materialHandling.path)
                   }
                 }}
