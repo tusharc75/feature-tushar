@@ -9,6 +9,8 @@ import { disabledColumns, getSortedColumns } from '../../constants/useColumns';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import ArrangeViewDialog from './ArrangeViewDialog';
 import ReportArrangeView from './ReportArrangeView';
+import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 import { BsArrowLeftRight } from 'react-icons/bs';
 
@@ -112,7 +114,7 @@ export default function CustomReactTableHeaderOptions({
 
   return (
     <>
-      <Tooltip title="Arrange View" placement="top">
+      <HtmlTooltip title="Arrange View" placement="top" arrow>
         <IconButton
           aria-describedby="columnSelection"
           size="small"
@@ -123,9 +125,9 @@ export default function CustomReactTableHeaderOptions({
             setOpenColumnSelectionAnchorEl(event.currentTarget);
           }}
         >
-          <BsArrowLeftRight />
+          <SwapHorizIcon />
         </IconButton>
-      </Tooltip>
+      </HtmlTooltip>
       {showOnlyShowFilteredRecordSwitch && (
         <Box className="ag-grid-listing-grid-header-options border px-2 py-1 d-flex gap-2 justify-content-space-between">
           <div className="d-flex gap-2">
