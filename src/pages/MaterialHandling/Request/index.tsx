@@ -141,7 +141,7 @@ const Request = ({ workOrder }) => {
         render: ({ row }) => {
           return (
             <>
-              <Typography className="text-truncate new-table-font" >
+              <Typography className="text-truncate new-table-font">
                 <Typography style={{ fontWeight: 500 }} component="span">
                   {row['processedQty'] ? row['processedQty'] : <NoDataCell />}
                 </Typography>
@@ -156,7 +156,7 @@ const Request = ({ workOrder }) => {
         render: ({ row }) => {
           return (
             <>
-              <Typography className="text-truncate new-table-font"  >
+              <Typography className="text-truncate new-table-font">
                 {row['requestBy'] ? (
                   <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['requestById']}`} target="_blank">
                     {row?.['requestBy']}
@@ -178,9 +178,9 @@ const Request = ({ workOrder }) => {
         render: ({ row }) => {
           return (
             <>
-              {row['processBy'] ?
+              {row['processBy'] ? (
                 <>
-                  <Typography className="text-truncate new-table-font"  >
+                  <Typography className="text-truncate new-table-font">
                     <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['processById']}`} target="_blank">
                       {row['processBy']}
                     </a>
@@ -189,13 +189,13 @@ const Request = ({ workOrder }) => {
                     <span>{moment(row['processDate']).format(dateTimeFormat)}</span>
                   </Typography>
                 </>
-                : (
-                  <NoDataCell />
-                )}
+              ) : (
+                <NoDataCell />
+              )}
             </>
           );
         }
-      },
+      }
     ];
     if (user?.user?.brandPolicy?.storageLocation) {
       column.push({
@@ -204,7 +204,7 @@ const Request = ({ workOrder }) => {
         render: ({ row }) => {
           return row?.['storageLocation'] ? (
             <Typography className="text-truncate new-table-font">
-              <a className="link" href={`${routes.storageLocationDetail.path}/${row?.['storageLocationId']}`} target="_blank"  >
+              <a className="link" href={`${routes.storageLocationDetail.path}/${row?.['storageLocationId']}`} target="_blank">
                 {row?.['storageLocation']}
               </a>
             </Typography>
@@ -230,8 +230,6 @@ const Request = ({ workOrder }) => {
     });
     column.push({
       header: 'Action',
-      minWidth: 250,
-      width: 250,
       sticky: 'right',
       render: ({ row }) => {
         return (
@@ -318,7 +316,7 @@ const Request = ({ workOrder }) => {
           <Button
             disabled={
               selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+              selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                 ? false
                 : true
             }
