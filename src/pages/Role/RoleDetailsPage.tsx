@@ -64,6 +64,7 @@ const RoleDetailsPage = () => {
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
   const [roleUsers, setRoleUsers] = useState([]);
+  const [isEdit, setIsEdit] = useState(false)
   const [values, setValues] = useState({
     name: '',
     description: ''
@@ -351,6 +352,7 @@ const RoleDetailsPage = () => {
         });
 
         setUpdating(false);
+        setIsEdit(false)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -470,8 +472,13 @@ const RoleDetailsPage = () => {
           <Box className="control-buttons-v1">
             {roleData ? (
               <>
-                {permissions?.role.isUpdate && (
-                  <Button disabled={isUpdating || checkError()} variant="contained" color="primary" size="medium" onClick={handleUpdateRole}>
+              {permissions?.role.isUpdate && !isEditDeleteDisable && !isEdit && (
+                  <Button variant="contained" color="primary" size="medium" onClick={() => setIsEdit(true)}>
+                    Edit
+                  </Button>
+                )}
+                {permissions?.role.isUpdate && !isEditDeleteDisable && isEdit && (
+                  <Button disabled={isUpdating || checkError() || !isEdit} variant="contained" color="primary" size="medium" onClick={handleUpdateRole}>
                     {isUpdating ? <CircularProgress size={22} /> : 'Update'}
                   </Button>
                 )}
@@ -496,7 +503,7 @@ const RoleDetailsPage = () => {
           <Grid item xs={12} sm={12} md={8} lg={8}>
             <Box display="flex" marginTop={2} marginBottom={2} gridGap={10} px={1}>
               <TextField
-                disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate}
+                disabled={roleData?.type && roleData?.permission  ? true : !permissions?.role?.isUpdate || !isEdit}
                 required
                 variant="outlined"
                 size="small"
@@ -506,7 +513,7 @@ const RoleDetailsPage = () => {
                 onChange={(e) => setValues({ ...values, name: e.target.value.trimStart() })}
               />
               <TextField
-                disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate}
+                disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                 required
                 variant="outlined"
                 size="small"
@@ -531,7 +538,7 @@ const RoleDetailsPage = () => {
                       resource={resource}
                       setField={setField}
                       setResource={setResource}
-                      isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable ? true : false) : true}
+                      isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit  ? true : false) : true }
                     />
                     {isPolicyTableVisible() && (
                       <PolicyResources
@@ -544,12 +551,14 @@ const RoleDetailsPage = () => {
                         open={open}
                         setOpen={setOpen}
                         permissions={permissions}
+                        isEdit={isEdit}
+                     
                       />
                     )}
                     {dashBoardOption?.length > 0 && (
-                      <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} />
+                      <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} isEdit={isEdit} />
                     )}
-                    <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} />
+                    <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} isEdit={isEdit} />
                     {!isEditDeleteDisable &&
                       <Box p={1}>
                         <FormControlLabel
@@ -561,6 +570,7 @@ const RoleDetailsPage = () => {
                                 setCanAssignByAnyuser(e.target.checked);
                               }}
                               color="primary"
+                              disabled={!isEdit}
                             />
                           }
                           label="Can Assign By Anyuser"
@@ -577,6 +587,7 @@ const RoleDetailsPage = () => {
                               setSuperAdminAccess(e.target.checked);
                             }}
                             color="primary"
+                            disabled={!isEdit}
                           />
                         }
                         label="Super Admin Access"
