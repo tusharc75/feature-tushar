@@ -631,6 +631,16 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             setFieldValue(name, value);
                                             const taxCode = field.option?.find((d) => d.optionValue === value);
                                             setFieldValue('taxPercentage', taxCode?.taxRate || 0);
+                                            const result = autoCalculateSpecificFields(
+                                              { ['taxPercentage']: taxCode?.taxRate || 0 },
+                                              values,
+                                              initialData.fields
+                                            );
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
+                                            }
                                           }}
                                           required={field.required}
                                           fullWidth
