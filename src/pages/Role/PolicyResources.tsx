@@ -13,7 +13,8 @@ const PolicyResources = (
         handlePolicyCheckBox,
         open,
         setOpen,
-        permissions
+        permissions,
+        isEdit
     }
 ) => {
     return (<TableContainer style={{ paddingTop: 50 }}>
@@ -28,7 +29,7 @@ const PolicyResources = (
                     <TableCell align="center">
                         <FormControlLabel
                             control={<Checkbox
-                                disabled={false}
+                                disabled={!isEdit}
                                 checked={isPolicyCheckBoxChecked}
                                 onChange={(e) => {
                                     handlePolicyCheckBox("Select-All", e)
@@ -60,6 +61,7 @@ const PolicyResources = (
                             <TableCell align="center">
                                 <Checkbox
                                     checked={resourceCheckbox[camelCase(resource)]}
+                                    disabled={!isEdit}
                                     onChange={(e) => {
                                         handlePolicyCheckBox("Policy-CheckBox", e, resource)
                                     }}
@@ -76,7 +78,7 @@ const PolicyResources = (
                                 </TableCell>
                                 <TableCell align="center">
                                     <Checkbox
-                                        disabled={false}
+                                        disabled={!isEdit}
                                         checked={policyFieldCheckBox[obj.field]}
                                         onChange={(e) => {
                                             handlePolicyCheckBox("Fields", e, obj, resource)
