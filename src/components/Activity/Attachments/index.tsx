@@ -29,6 +29,14 @@ import { FiEdit2 } from 'react-icons/fi';
 import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
+const order = ['file', 'folder'];
+
+const sortFileStructure = (a, b) => {
+  const aOrder = order.indexOf(a.type);
+  const bOrder = order.indexOf(b.type);
+  return aOrder - bOrder;
+};
+
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
   const [loading, setLoading] = useState(false);
@@ -77,6 +85,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           const folders = [];
           const files = [];
           data
+            .sort(sortFileStructure)
             ?.filter((item) => !item.parentFolder)
             .forEach((_attachment, idx) => {
               if (_attachment?.type === 'folder') {
@@ -86,7 +95,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                     <TreeItem
                       nodeId={_attachment._id}
                       style={{
-                        background: '#FFFFFF',
+                        background: 'var(--dark-secondary,#FFFFFF)',
                         borderLeft: '4px solid #298B88',
                         boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.08)',
                         borderRadius: '4px',
@@ -102,29 +111,22 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                             padding: '0 10px'
                           }}
                         >
-                          <div
-                            style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', cursor: 'pointer' }}
-                            // onClick={() => {
-                            //   setAttachmentId(_attachment._id);
-                            //   setOpen({
-                            //     open: true,
-                            //     type: _attachment.type === 'folder' ? 'folder' : 'file',
-                            //     parentFolder: null,
-                            //     purpose: 'edit'
-                            //   });
-                            // }}
-                          >
-                            <FolderOpenIcon className="mr-2" style={{ maxWidth: '18px', color: '#5B5B5B' }} />
-                            <Typography style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: '#5B5B5B' }}>
-                              {` ${_attachment?.name} ${childTree?.length ? `(${childTree?.length})` : ''}`}
+                          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', cursor: 'pointer' }}>
+                            <FolderOpenIcon className="mr-2" style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
+                            <Box>
+                              <Typography
+                                style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: 'var(--dark-primary-text,#5B5B5B)' }}
+                              >
+                                {` ${_attachment?.name} ${childTree?.length ? `(${childTree?.length})` : ''}`}
+                              </Typography>
                               <Typography
                                 variant="body2"
-                                component={'span'}
-                                style={{ fontSize: '0.8rem', paddingTop: '2px', paddingLeft: '6px', color: '#7b898e' }}
+                                component={'p'}
+                                style={{ fontSize: '0.8rem', paddingTop: '2px', color: 'var(--dark-secondary-text,#7b898e)' }}
                               >
                                 Created: {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
                               </Typography>
-                            </Typography>
+                            </Box>
                           </div>
 
                           <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
@@ -156,8 +158,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                         <Box>
                           <Grid container>
                             <Grid item xs={9} className="d-flex align-items-center gap-1">
-                              <Typography
-                                variant="subtitle2"
+                              <Box
                                 className="cursor-pointer"
                                 style={{ display: 'flex', alignItems: 'center' }}
                                 onClick={() => {
@@ -171,15 +172,21 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                 }}
                               >
                                 <AiOutlineFile style={{ marginRight: '8px' }} />
-                                {_attachment?.name ?? ''}
-                                <Typography
-                                  variant="body2"
-                                  component={'span'}
-                                  style={{ fontSize: '0.8rem', paddingTop: '2px', paddingLeft: '6px', color: '#7b898e' }}
-                                >
-                                  Created: {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
-                                </Typography>
-                              </Typography>
+                                <Box>
+                                  <Typography
+                                    style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: 'var(--dark-primary-text,#5B5B5B)' }}
+                                  >
+                                    {_attachment?.name ?? ''}
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    component={'span'}
+                                    style={{ fontSize: '0.8rem', paddingTop: '2px', color: 'var(--dark-secondary-text,#7b898e)' }}
+                                  >
+                                    Created: {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
+                                  </Typography>
+                                </Box>
+                              </Box>
                             </Grid>
                             {permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
                               <Grid item xs={3} container justify="flex-end" alignItems="center">
@@ -273,16 +280,18 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                 >
                   <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', cursor: 'pointer' }}>
                     <FolderOpenIcon className="mr-2" style={{ maxWidth: '18px', color: '#5B5B5B' }} />
-                    <Typography style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: '#5B5B5B' }}>
-                      {` ${_attachment?.name} ${childTree?.length ? `(${childTree?.length})` : ''}`}
+                    <Box>
+                      <Typography style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: 'var(--dark-primary-text,#5B5B5B)' }}>
+                        {` ${_attachment?.name} ${childTree?.length ? `(${childTree?.length})` : ''}`}
+                      </Typography>
                       <Typography
                         variant="body2"
                         component={'span'}
-                        style={{ fontSize: '0.8rem', paddingTop: '2px', paddingLeft: '6px', color: '#7b898e' }}
+                        style={{ fontSize: '0.8rem', paddingTop: '2px', color: 'var(--dark-secondary-text,#7b898e)' }}
                       >
                         Created: {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
                       </Typography>
-                    </Typography>
+                    </Box>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                     <HtmlTooltip title={'Options'}>
@@ -306,8 +315,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                 <Box>
                   <Grid container>
                     <Grid item xs={9} className="d-flex align-items-center gap-1">
-                      <Typography
-                        variant="subtitle2"
+                      <Box
                         className="cursor-pointer"
                         style={{ display: 'flex', alignItems: 'center' }}
                         onClick={() => {
@@ -321,15 +329,19 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                         }}
                       >
                         <AiOutlineFile style={{ marginRight: '8px' }} />
-                        {_attachment?.name ?? ''}
-                        <Typography
-                          variant="body2"
-                          component={'span'}
-                          style={{ fontSize: '0.8rem', paddingTop: '2px', paddingLeft: '6px', color: '#7b898e' }}
-                        >
-                          Created: {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
-                        </Typography>
-                      </Typography>
+                        <Box>
+                          <Typography style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: 'var(--dark-primary-text,#5B5B5B)' }}>
+                            {_attachment?.name ?? ''}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            component={'span'}
+                            style={{ fontSize: '0.8rem', paddingTop: '2px', color: 'var(--dark-secondary-text,#7b898e)' }}
+                          >
+                            Created: {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
+                          </Typography>
+                        </Box>
+                      </Box>
                     </Grid>
                     {permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
                       <Grid item xs={3} container justify="flex-end" alignItems="center">
@@ -381,13 +393,13 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                     ) : null}
                   </Grid>
                 </Box>
-                <Box pt={1}>
+                {/* <Box pt={1}>
                   <Grid container>
                     <Grid item xs={12}>
                       <ListRelatedTo relatedTo={_attachment.relatedTo} originRelatedTo={relatedTo} />
                     </Grid>
                   </Grid>
-                </Box>
+                </Box> */}
               </Box>
             }
           />
@@ -415,6 +427,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   };
 
   const handleDelete = (event) => {
+    setAnchorEl(null);
     if (attachmentId) {
       event.stopPropagation();
       axiosInstance()
