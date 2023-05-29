@@ -23,6 +23,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import update from 'immutability-helper';
 import { isMobile, isTablet } from 'react-device-detect';
+
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -49,8 +50,6 @@ interface ArrangeColumnsProps {
   saveColumnOptions: boolean;
   updateGridHiddenColumns: any;
   renderedFrom: string;
-  refreshGrid:any
-  defaultColumns: any[];
 }
 
 const ItemTypes = {
@@ -58,7 +57,7 @@ const ItemTypes = {
 };
 
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
-  const { onClose, columns, setColumns, columnApi, isClientSideGrid, updateGridHiddenColumns, renderedFrom, saveColumnOptions, refreshGrid, defaultColumns } = props;
+  const { onClose, columns, setColumns, columnApi, isClientSideGrid, updateGridHiddenColumns, renderedFrom, saveColumnOptions } = props;
   const classes = useStyles();
   const [sortedColumns, setSortedColumns] = React.useState([]);
   const [searchedColumns, setSearchedColumns] = React.useState([]);
@@ -68,6 +67,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [allChecked, setAllChecked] = React.useState(false);
   const [hasChanged, setHasChanged] = React.useState(false);
   const [isMinimized, setMinimized] = React.useState(true);
+
   const [lockedItem, setLockedItem] = React.useState([]);
 
   React.useEffect(() => {
@@ -78,6 +78,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     gridLayedCols = gridLayedCols.filter((col) => col.pinned === null);
 
     let layedCols = gridLayedCols.map((col: any) => col.colId);
+
     columns.forEach((col) => {
       const index = layedCols.indexOf(col.field);
       if (index > -1) {
@@ -177,26 +178,6 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     [sortedColumns]
   );
 
-
-  const handleReset = () => {
-    refreshGrid();
-    onClose();
-    delete localStorage[renderedFrom];
-    const newColumns = [...defaultColumns];
-    setSortedColumns(newColumns);
-    setNewData(JSON.stringify(newColumns));
-    setColumns(newColumns);
-    const colIds = newColumns.map((col) => col.field);
-    const oldColumnState = columnApi.getColumnState();
-    let newColumnsState = [];
-
-    for (const d of oldColumnState) {
-      const index = colIds.indexOf(d.colId);
-      newColumnsState.splice(index, 0, { ...d });
-    }
-    columnApi.setColumnState(newColumnsState);
-  }
-
   useEffect(() => {
     if (!searchVal) return;
 
@@ -292,9 +273,6 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       <CustomDialogFooter>
         <Button variant="outlined" color="primary" onClick={onClose}>
           Close
-        </Button>
-        <Button variant="outlined" color="primary" onClick={handleReset}>
-          Reset
         </Button>
         <Button variant="contained" color="primary" disableElevation disabled={!hasChanged} onClick={handleSaveChange}>
           Save changes
