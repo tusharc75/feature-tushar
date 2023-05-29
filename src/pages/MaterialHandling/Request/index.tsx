@@ -17,6 +17,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
+import CustomTable from 'src/components/CustomTable';
+
 const Request = ({ workOrder }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -95,159 +97,188 @@ const Request = ({ workOrder }) => {
       ]
     });
     const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
-    productFields?.forEach((e) => {
-      if (e?.fieldName === 'productName') {
-        column.push({
-          accessor: e?.fieldName,
-          Header: e?.fieldLabel,
-          width: 200,
-          primaryField: true,
-          Cell: ({ row }) => {
-            return row.original[e?.fieldName] ? (
-              <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.product?.optionValue}`} target="_blank">
-                {row.original[e?.fieldName]}
+    column.push({
+      header: 'Product',
+      width: 300,
+      render: ({ row }) => {
+        return (
+          <>
+            <Typography
+              className="text-truncate new-table-font "
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
+            >
+              <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
+                Product Name:
+              </Typography>
+              <a className="link" href={`${routes.productDetail.path}/${row?.product?.optionValue}`} target="_blank">
+                {row['productName'] || <NoDataCell />}
               </a>
-            ) : (
-              <NoDataCell />
-            );
-          }
-        });
-      } else {
-        column.push({
-          accessor: e?.fieldName,
-          Header: e?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => {
-            return row.original[e?.fieldName] ? <p className="text-truncate">{row.original[e?.fieldName]}</p> : <NoDataCell />;
-          }
-        });
+            </Typography>
+            <Typography
+              className="text-truncate new-table-font "
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
+            >
+              <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
+                Part Number:
+              </Typography>
+              <span>{row['productNumber'] || <NoDataCell />}</span>
+            </Typography>
+            <Typography
+              className="text-truncate new-table-font "
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
+            >
+              <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
+                Description:
+              </Typography>
+              <span>{row['productDescription'] || <NoDataCell />}</span>
+            </Typography>
+          </>
+        );
       }
     });
+
     const extracolumns: any = [
       {
-        accessor: 'qty',
-        Header: 'Requested Qty',
-        width: 150,
-        primaryField: true,
-        Cell: ({ row }) => {
-          return row.original['qty'] ? <p className="text-truncate">{row.original['qty']}</p> : <NoDataCell />;
+        header: 'Qty',
+        width: 300,
+        render: ({ row }) => {
+          return (
+            <>
+              <Typography
+                className="text-truncate new-table-font "
+                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
+              >
+                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
+                  Requested Qty:
+                </Typography>
+                {row['qty'] ? <span>{row['qty']}</span> : <NoDataCell />}
+              </Typography>
+              <Typography
+                className="text-truncate new-table-font "
+                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
+              >
+                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
+                  Processed Qty:
+                </Typography>
+                {row['processedQty'] ? <span>{row['processedQty']}</span> : <NoDataCell />}
+              </Typography>
+            </>
+          );
         }
       },
+
       {
-        accessor: 'processedQty',
-        Header: 'Processed Qty',
-        primaryField: true,
-        width: 150,
-        Cell: ({ row }) => {
-          return row.original['processedQty'] ? <p className="text-truncate">{row.original['processedQty']}</p> : <NoDataCell />;
-        }
-      },
-      {
-        accessor: 'status',
-        Header: 'Status',
-        primaryField: true,
+        header: 'Details',
         width: 200,
-        Cell: ({ row }) => {
-          return row.original['status'] ? <p className="text-truncate">{row.original['status']}</p> : <NoDataCell />;
-        }
-      },
-      ...(user?.user?.brandPolicy?.storageLocation
-        ? [
-            {
-              accessor: 'storageLocation',
-              Header: 'Storage Location',
-              width: 200,
-              Cell: ({ row }) => {
-                return row?.original['storageLocation'] ? (
-                  <a
-                    className="link text-truncate"
-                    href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
-                    target="_blank"
-                  >
-                    {row?.original['storageLocation']}
+        render: ({ row }) => {
+          return (
+            <>
+              <Typography
+                className="text-truncate new-table-font "
+                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
+              >
+                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
+                  Requested By:
+                </Typography>
+                {row['requestBy'] ? (
+                  <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['requestById']}`} target="_blank">
+                    {row?.['requestBy']}
                   </a>
                 ) : (
                   <NoDataCell />
-                );
-              }
-            }
-          ]
-        : []),
-      {
-        accessor: 'requestBy',
-        Header: 'Requested By',
-        width: 200,
-        Cell: ({ row }) => {
-          return row?.original['requestBy'] ? (
-            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestById']}`} target="_blank">
-              {row?.original['requestBy']}
-            </a>
-          ) : (
-            <NoDataCell />
+                )}
+              </Typography>
+              <Typography
+                className="text-truncate new-table-font "
+                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
+              >
+                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
+                  Processed By:
+                </Typography>
+                {row['processBy'] ? (
+                  <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['processById']}`} target="_blank">
+                    {row?.['processBy']}
+                  </a>
+                ) : (
+                  <NoDataCell />
+                )}
+              </Typography>
+              <Typography
+                className="text-truncate new-table-font "
+                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
+              >
+                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
+                  Comment:
+                </Typography>
+                {row['comment'] ? <span>{row['comment']}</span> : <NoDataCell />}
+              </Typography>
+            </>
           );
         }
       },
+
       {
-        accessor: 'requestDate',
-        Header: 'Requested Date',
+        header: 'Date',
         width: 200,
-        Cell: ({ row }) => {
-          return row.original['requestDate'] ? (
-            <p className="text-truncate">{moment(row.original['requestDate']).format(dateTimeFormat)}</p>
-          ) : (
-            <NoDataCell />
+        render: ({ row }) => {
+          return (
+            <>
+              <Typography className="text-truncate new-table-font ">
+                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
+                  Requested Date:
+                </Typography>
+                {row['requestDate'] ? <span>{moment(row['requestDate']).format(dateTimeFormat)}</span> : <NoDataCell />}
+              </Typography>
+              <Typography className="text-truncate new-table-font ">
+                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
+                  Processed Date:
+                </Typography>
+                {row['processDate'] ? <span>{moment(row['processDate']).format(dateTimeFormat)}</span> : <NoDataCell />}
+              </Typography>
+            </>
           );
-        }
-      },
-      {
-        accessor: 'processBy',
-        Header: 'Processed By',
-        width: 200,
-        Cell: ({ row }) => {
-          return row?.original['processBy'] ? (
-            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['processById']}`} target="_blank">
-              {row?.original['processBy']}
-            </a>
-          ) : (
-            <NoDataCell />
-          );
-        }
-      },
-      {
-        accessor: 'processDate',
-        Header: 'Processed Date',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['processDate'] ? (
-            <p className="text-truncate">{moment(row.original['processDate']).format(dateTimeFormat)}</p>
-          ) : (
-            <NoDataCell />
-          );
-        }
-      },
-      {
-        accessor: 'comment',
-        Header: 'Comment',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['comment'] ? <p className="text-truncate">{row.original['comment']}</p> : <NoDataCell />;
         }
       }
     ];
+
+    if (user?.user?.brandPolicy?.storageLocation) {
+      extracolumns.push({
+        header: 'Storage Location',
+        width: 250,
+        render: ({ row }) => {
+          return row?.['storageLocation'] ? (
+            <a
+              className="link text-truncate new-table-font "
+              href={`${routes.storageLocationDetail.path}/${row?.['storageLocationId']}`}
+              target="_blank"
+            >
+              {row?.['storageLocation']}
+            </a>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      });
+    }
     extracolumns.push({
-      accessor: 'action',
-      Header: 'Action',
+      header: 'Status',
+      primaryField: true,
+      width: 200,
+      render: ({ row }) => {
+        return row['status'] ? <p className="text-truncate new-table-font ">{row['status']}</p> : <NoDataCell />;
+      }
+    });
+    extracolumns.push({
+      header: 'Action',
       minWidth: 240,
       width: 240,
       sticky: 'right',
-      disableFilters: true,
-      canDrag: false,
-      Cell: ({ row }) => {
+      render: ({ row }) => {
         return (
           <>
             <Box display="flex">
               <Box display="flex" flexGrow={1}>
-                {row.original['status'] === MATERIAL_REQUEST_STATUS.requested && (
+                {row['status'] === MATERIAL_REQUEST_STATUS.requested && (
                   <Fragment>
                     <Button
                       variant="contained"
@@ -255,7 +286,7 @@ const Request = ({ workOrder }) => {
                       size="small"
                       disabled={loading}
                       onClick={() => {
-                        setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: row.original });
+                        setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: row });
                       }}
                     >
                       Process
@@ -267,7 +298,7 @@ const Request = ({ workOrder }) => {
                       size="small"
                       disabled={loading}
                       onClick={() => {
-                        setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row.original });
+                        setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.closed, data: row });
                       }}
                     >
                       Close
@@ -277,13 +308,13 @@ const Request = ({ workOrder }) => {
                 )}
               </Box>
               <Box>
-                {row.original['processesLogs'] && row.original['processesLogs']?.length > 0 && (
+                {row['processesLogs'] && row['processesLogs']?.length > 0 && (
                   <HtmlTooltip title="View Process Logs">
                     <IconButton
                       size="small"
                       aria-label="Delete"
                       onClick={() => {
-                        setOpenProcessLogs({ open: true, logs: row.original['processesLogs'], productName: row.original?.productName });
+                        setOpenProcessLogs({ open: true, logs: row['processesLogs'], productName: row?.productName });
                       }}
                     >
                       <HistoryIcon />
@@ -298,7 +329,6 @@ const Request = ({ workOrder }) => {
     });
     setColumns([...column, ...extracolumns]);
   };
-
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -375,7 +405,15 @@ const Request = ({ workOrder }) => {
       <Box pt={2}>
         {rowsData && columns ? (
           <Box zIndex={5} width={'100%'} height={'calc(100vh - 290px)'}>
-            <CustomReactTable
+            <CustomTable
+              data={rowsData}
+              columns={columns}
+              uniqueKey={(data) => data._id}
+              onSelect={setSelectedRecords}
+              checkBox={true}
+              height={'calc(100vh - 290px)'}
+            />
+            {/* <CustomReactTable
               height={'calc(100vh - 290px)'}
               columns={columns}
               data={rowsData}
@@ -387,7 +425,7 @@ const Request = ({ workOrder }) => {
               hideExpander={true}
               renderedFrom={camelCase(routes.materialHandling.title)}
               isClientSideGrid={true}
-            />
+            /> */}
           </Box>
         ) : (
           <Box height={500}>
