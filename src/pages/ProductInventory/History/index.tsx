@@ -17,6 +17,7 @@ import { Autorenew } from '@material-ui/icons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { Autocomplete } from '@material-ui/lab';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const History = ({ product, warehouse, storageLocation }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -75,9 +76,9 @@ const History = ({ product, warehouse, storageLocation }) => {
       let tempWarehouse =
         selectedWarehouse === 'All'
           ? warehouseOptions
-              ?.filter((d) => d.optionValue !== 'All')
-              .map((d) => d.optionValue)
-              .toString()
+            ?.filter((d) => d.optionValue !== 'All')
+            .map((d) => d.optionValue)
+            .toString()
           : selectedWarehouse;
 
       deepFilter = `${deepFilter}&warehouse=${tempWarehouse}`;
@@ -156,15 +157,15 @@ const History = ({ product, warehouse, storageLocation }) => {
     { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
     ...(warehouse && warehouse?.split(',')?.length === 1
       ? [
-          {
-            field: 'finalAvgPrice',
-            headerName: 'Final Average Price',
-            show: true,
-            cellRenderer: 'commonRenderer',
-            filter: false,
-            sortable: false
-          }
-        ]
+        {
+          field: 'finalAvgPrice',
+          headerName: 'Final Average Price',
+          show: true,
+          cellRenderer: 'commonRenderer',
+          filter: false,
+          sortable: false
+        }
+      ]
       : []),
     {
       field: 'warehouse',
@@ -176,15 +177,15 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(user?.user?.brandPolicy?.storageLocation
       ? [
-          {
-            field: 'storageLocation',
-            headerName: 'Storage Location',
-            show: true,
-            filter: false,
-            sortable: false,
-            cellRenderer: 'storageLocationRenderer'
-          }
-        ]
+        {
+          field: 'storageLocation',
+          headerName: 'Storage Location',
+          show: true,
+          filter: false,
+          sortable: false,
+          cellRenderer: 'storageLocationRenderer'
+        }
+      ]
       : []),
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer', filter: true, sortable: false },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
@@ -295,11 +296,12 @@ const History = ({ product, warehouse, storageLocation }) => {
       });
   };
 
+  //|| (['Work Order'].includes(params.data.referenceType) && params.data.type?.toLowerCase() === 'debit')
   const ActionsRenderer = (params) => (
     <>
-      {['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted ? (
+      {(['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted) && !params?.data?.reverted ? (
         <Box pl={1}>
-          <Tooltip title="Revert">
+          <HtmlTooltip title="Revert">
             <IconButton
               size="small"
               aria-label="revert"
@@ -309,7 +311,7 @@ const History = ({ product, warehouse, storageLocation }) => {
             >
               <Autorenew fontSize="small" color="primary" />
             </IconButton>
-          </Tooltip>
+          </HtmlTooltip>
         </Box>
       ) : null}
     </>

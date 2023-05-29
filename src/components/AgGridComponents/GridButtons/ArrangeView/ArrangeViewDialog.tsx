@@ -50,7 +50,8 @@ interface ArrangeColumnsProps {
   saveColumnOptions: boolean;
   updateGridHiddenColumns: any;
   renderedFrom: string;
-  initialColumnOrder: any[];
+  refreshGrid: any;
+  defaultColumns: any[]
 }
 
 const ItemTypes = {
@@ -58,7 +59,7 @@ const ItemTypes = {
 };
 
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
-  const { onClose, columns, setColumns, columnApi, isClientSideGrid, updateGridHiddenColumns, renderedFrom, saveColumnOptions, initialColumnOrder } = props;
+  const { onClose, columns, setColumns, columnApi, isClientSideGrid, updateGridHiddenColumns, renderedFrom, saveColumnOptions, refreshGrid, defaultColumns, } = props;
   const classes = useStyles();
   const [sortedColumns, setSortedColumns] = React.useState([]);
   const [searchedColumns, setSearchedColumns] = React.useState([]);
@@ -159,28 +160,28 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     onClose();
   };
 
-  const resetColumnOrder = () => {
-    let oldColumnState = columnApi.getColumnState();
-    let newColumnsState = new Array();
+  // const resetColumnOrder = () => {
+  //   let oldColumnState = columnApi.getColumnState();
+  //   let newColumnsState = new Array();
 
-    initialColumnOrder.map((column: any) => {
-      const index = oldColumnState?.findIndex(col => col.colId === column?.field);
-      const colum = oldColumnState[index];
-      if (column?.show && colum.hide) {
-        colum.hide = false
-      }
-      newColumnsState.push(colum)
-    })
+  //   initialColumnOrder.map((column: any) => {
+  //     const index = oldColumnState?.findIndex(col => col.colId === column?.field);
+  //     const colum = oldColumnState[index];
+  //     if (column?.show && colum.hide) {
+  //       colum.hide = false
+  //     }
+  //     newColumnsState.push(colum)
+  //   })
 
-    const extraColumn = oldColumnState.filter(col => col.colId === "actions" || col.colId === "0" || col.colId === "1")
+  //   const extraColumn = oldColumnState.filter(col => col.colId === "actions" || col.colId === "0" || col.colId === "1")
 
-    newColumnsState = [...newColumnsState, ...extraColumn]
-    columnApi.setColumnState(newColumnsState);
+  //   newColumnsState = [...newColumnsState, ...extraColumn]
+  //   columnApi.setColumnState(newColumnsState);
 
-    const columnState = JSON.stringify(columnApi.getColumnState());
-    localStorage.setItem(renderedFrom, columnState)
-    onClose();
-  }
+  //   const columnState = JSON.stringify(columnApi.getColumnState());
+  //   localStorage.setItem(renderedFrom, columnState)
+  //   onClose();
+  // }
 
   /**
    *
@@ -201,6 +202,41 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     },
     [sortedColumns]
   );
+
+
+  const handleReset = () => {
+    refreshGrid();
+    onClose();
+    delete localStorage[renderedFrom];
+    const newColumns = [...defaultColumns];
+    newColumns?.forEach((e: any) => {
+      if (!e.disabled) {
+        e.show = true;
+      }
+    });
+    setSortedColumns(newColumns);
+    setNewData(JSON.stringify(newColumns));
+    setColumns(newColumns);
+    const colIds = newColumns.map((col) => col.field);
+    const oldColumnState = columnApi.getColumnState();
+    let newColumnsState = [];
+
+    for (const d of oldColumnState) {
+      const index = colIds.indexOf(d.colId);
+      newColumnsState.splice(index, 0, { ...d });
+    }
+    columnApi.setColumnState(newColumnsState);
+     const hiddenColumns = newColumns.filter((d) => !d.show).map((m) => m.field);
+    const nonHiddenColumns = newColumns.filter((d) => d.show).map((m) => m.field);
+    columnApi.setColumnsVisible(hiddenColumns, false);
+    columnApi.setColumnsVisible(nonHiddenColumns, true);
+
+    if (!isClientSideGrid || saveColumnOptions) {
+      let tempColumnState = columnApi.getColumnState();
+      let hidedColumns = tempColumnState.filter((o) => o?.hide).map((o) => o?.colId);
+      updateGridHiddenColumns(hidedColumns);
+    }
+  }
 
   useEffect(() => {
     if (!searchVal) return;
@@ -298,7 +334,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         <Button variant="outlined" color="primary" onClick={onClose}>
           Close
         </Button>
-        <Button variant="outlined" color="primary" onClick={resetColumnOrder}>
+        <Button variant="outlined" color="primary" onClick={handleReset}>
           Reset
         </Button>
         <Button variant="contained" color="primary" disableElevation disabled={!hasChanged} onClick={handleSaveChange}>

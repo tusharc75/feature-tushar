@@ -28,7 +28,12 @@ const ArrangeView = ({
   reportSave = false,
   className = '',
   style = {},
+<<<<<<< HEAD
   initialColumnOrder = [],
+=======
+  refreshGrid,
+  defaultColumns,
+>>>>>>> 1f4dbbe642a96855a375391844fb1d9b345cf685
   ...otherProps
 }) => {
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
@@ -124,7 +129,8 @@ const ArrangeView = ({
               columnApi={columnApi}
               isClientSideGrid={isClientSideGrid}
               renderedFrom={renderedFrom}
-              initialColumnOrder={initialColumnOrder}
+              refreshGrid={refreshGrid} 
+              defaultColumns={defaultColumns}
             />
           )}
         </>

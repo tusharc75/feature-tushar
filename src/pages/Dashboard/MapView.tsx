@@ -52,11 +52,14 @@ const MapView = (props: MapViewProps) => {
 
   if (!window.google || typeof window.google !== 'object') return <div>Loading...</div>;
 
-  if(!data || !Array.isArray(data) || data.length === 0) return <div>No data</div>;
+  if (!data || !Array.isArray(data) || data.length === 0) return <div>No data</div>;
 
   return (
     <Box height={height} borderRadius={4} overflow="hidden" className="">
       <GoogleMap
+        onClick={() => {
+          selectedBase && setSelectedBase(null);
+        }}
         options={{
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           mapTypeControlOptions: {
@@ -88,26 +91,28 @@ const MapView = (props: MapViewProps) => {
       >
         <MarkerClusterer>
           {(clusterer) =>
-            data.length > 0 ? data.map(
-              (asset: locationType) =>
-                asset?._id && (
-                  <Marker
-                    key={asset._id}
-                    label={{
-                      text: asset.count.toString(),
-                      fontWeight: 'bold',
-                      color: 'black',
-                      fontSize: '14px'
-                    }}
-                    onClick={() => {
-                      setCenter(new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude));
-                      fetchLocationData(asset._id, asset);
-                    }}
-                    position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
-                    clusterer={clusterer}
-                  />
+            data.length > 0
+              ? data.map(
+                  (asset: locationType) =>
+                    asset?._id && (
+                      <Marker
+                        key={asset._id}
+                        label={{
+                          text: asset.count.toString(),
+                          fontWeight: 'bold',
+                          color: 'black',
+                          fontSize: '14px'
+                        }}
+                        onClick={() => {
+                          // setCenter(new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude));
+                          fetchLocationData(asset._id, asset);
+                        }}
+                        position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
+                        clusterer={clusterer}
+                      />
+                    )
                 )
-            ) : null
+              : null
           }
         </MarkerClusterer>
 
