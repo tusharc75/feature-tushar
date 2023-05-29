@@ -234,7 +234,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         if (e?.fieldName === 'taxCode') {
           e.option = taxCodeOptions;
         }
-      })
+      });
     }
 
     const sections = uniq(map(fields, 'sectionName'));
@@ -377,7 +377,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
           setPriceConditionListConst(tempPriceData);
           setPriceMethodList(
             tempPriceData
-              .filter((d) => d.conditionId === rowData['pricingCondition'])
+              .filter((d) => d.conditionId === rowData['pricingCondition']?.optionValue)
               .map((d) => {
                 return {
                   optionLabel: d?.pricingMethod,
@@ -527,8 +527,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             field.fieldName === 'pricingMethod' && priceConditionList && values['pricingCondition']
                                               ? priceMethodList
                                               : field.fieldName === 'pricingCondition' && values['pricingMethod']
-                                                ? priceConditionList
-                                                : field.option
+                                              ? priceConditionList
+                                              : field.option
                                           }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
@@ -631,6 +631,16 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             setFieldValue(name, value);
                                             const taxCode = field.option?.find((d) => d.optionValue === value);
                                             setFieldValue('taxPercentage', taxCode?.taxRate || 0);
+                                            const result = autoCalculateSpecificFields(
+                                              { ['taxPercentage']: taxCode?.taxRate || 0 },
+                                              values,
+                                              initialData.fields
+                                            );
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
+                                            }
                                           }}
                                           required={field.required}
                                           fullWidth
