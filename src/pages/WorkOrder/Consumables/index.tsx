@@ -1,12 +1,11 @@
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
 import { workOrder } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
-import { camelCase, set } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -19,8 +18,7 @@ import QtyRequestLog from './QtyRequestLog';
 import HistoryIcon from '@material-ui/icons/History';
 import { useData } from 'src/StateProvider/Provider';
 import History from '../../ProductInventory/LedgerHistory';
-import TrackChangesIcon from '@material-ui/icons/TrackChanges';
-import SyncAltIcon from '@material-ui/icons/SyncAlt';
+import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
 
@@ -163,7 +161,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
                     setOpenLogDialog({ open: true, uniqueId: row.original._id, data: row.original });
                   }}
                 >
-                  <SyncAltIcon fontSize="small" color={'primary'} />
+                  <FormatListBulletedIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
