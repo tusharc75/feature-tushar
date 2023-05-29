@@ -29,8 +29,7 @@ const CustomGridFilterHeader = (props) => {
     buttonGap = '8px',
     dispatch,
     showOnlyShowFilteredRecordSwitch = false,
-    selectedRecords = null,
-    defaultColumns,
+    selectedRecords = null
   } = props;
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
@@ -111,8 +110,6 @@ const CustomGridFilterHeader = (props) => {
             isClientSideGrid={isClientSideGrid}
             dispatch={dispatch}
             style={{ marginRight: buttonGap }}
-            refreshGrid={refreshGrid} 
-            defaultColumns={defaultColumns}
           />
           <RefreshButton isOffline={isOffline} refreshGrid={refreshGrid} />
         </div>

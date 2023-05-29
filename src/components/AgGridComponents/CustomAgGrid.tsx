@@ -183,7 +183,7 @@ export default function CustomAgGrid({
 }) {
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
-  
+
   const [searchQuery] = useStore((store) => store[SEARCH]);
 
   useEffect(() => {
@@ -473,7 +473,6 @@ export default function CustomAgGrid({
             dispatch={dispatch}
             selectedRecords={selectedRecords}
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
-            defaultColumns={cols}
           />
 
           <div className="table-container-v1">
