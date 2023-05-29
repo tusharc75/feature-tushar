@@ -237,6 +237,13 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     onClose();
   };
 
+  const resetColumnOrder = () => {
+    localStorage.removeItem(renderedFrom)
+    setColumnOrder([])
+    setHiddenColumns([])
+    onClose()
+  }
+
   /**
    *
    *  Drag'n'Drop function
@@ -374,6 +381,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       <CustomDialogFooter>
         <Button variant="outlined" color="primary" onClick={onClose}>
           Close
+        </Button>
+        <Button variant="outlined" color="primary" onClick={resetColumnOrder}>
+          Reset
         </Button>
         <Button variant="contained" color="primary" disableElevation
           disabled={isEqual(oldData, sortedColumns.map(d => {
