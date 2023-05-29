@@ -1089,7 +1089,6 @@ body::-webkit-scrollbar-thumb {
 
   .activity {
     padding: 6px 10px;
-    background: #ffffff;
     border-left: 4px solid #0f9fa9;
     box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.08);
     border-radius: 4px;
@@ -3533,7 +3532,7 @@ body {
   .MuiTreeItem-root.Mui-selected > .MuiTreeItem-content .MuiTreeItem-label:hover,
   .MuiTreeItem-root.Mui-selected:focus > .MuiTreeItem-content .MuiTreeItem-label,
   .MuiTreeItem-root.Mui-selected > .MuiTreeItem-content .MuiTreeItem-label {
-    background-color: white;
+    background-color: var(--dark-secondary, white);
   }
 }
 

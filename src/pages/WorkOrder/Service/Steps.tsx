@@ -785,7 +785,7 @@ const Steps = ({
                                     handleStartEnd('reopen', step._id);
                                   }}
                                 >
-                                  Re-open
+                                  Re-Open/Test
                                 </Button>
                               </>
                             ) : step?.fields?.length ? (

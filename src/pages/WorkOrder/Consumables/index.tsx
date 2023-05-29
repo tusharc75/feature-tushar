@@ -42,7 +42,8 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   useEffect(() => {
     var allowRequest = false;
     if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
-      if (warehouse?.manager && warehouse?.manager?.includes(user?.user?._id)) {
+      if ((warehouse?.manager && warehouse?.manager?.includes(user?.user?._id))
+        || (warehouse?.materialHandlers && warehouse?.materialHandlers?.includes(user?.user?._id))) {
         allowRequest = false;
       }
       else {
