@@ -473,6 +473,7 @@ export default function CustomAgGrid({
             dispatch={dispatch}
             selectedRecords={selectedRecords}
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
+            defaultColumns={cols}
           />
 
           <div className="table-container-v1">
