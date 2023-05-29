@@ -104,3 +104,9 @@ tbody {
     color: var(--link) !important;
   }
 }
+.stickyRight {
+  border-left: 1px solid var(--common-border-color);
+}
+.stickyLeft {
+  border-right: 1px solid var(--common-border-color);
+}

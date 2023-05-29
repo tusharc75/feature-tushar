@@ -15,6 +15,7 @@ interface columnsInterface extends React.HTMLAttributes<HTMLTableCellElement> {
   minWidth?: number;
   width?: number;
   render: (data: any) => ReactNode;
+  sticky?: 'right' | 'left';
 }
 
 const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, className, checkBox, onSelect = null, height, ...others }) => {
@@ -69,7 +70,17 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
           )}
           {columns.map((column, index) => {
             return (
-              <th key={column.header} {...column} style={{ width: `${column.width}px}`, maxWidth: `${column.width}px}`, minWidth: `${column.minWidth}px` }}>
+              <th
+                key={column.header}
+                {...column}
+                style={{
+                  width: `${column.width}px}`,
+                  maxWidth: `${column.width}px}`,
+                  minWidth: `${column.minWidth}px`,
+                  position: column.sticky ? 'sticky' : 'relative',
+                  [column.sticky]: 0
+                }}
+              >
                 <Typography component={'span'}>{column.header}</Typography>
               </th>
             );
@@ -80,18 +91,28 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
             <tr key={uniqueKey(row)}>
               {checkBox && (
                 <td style={{ minWidth: '48px' }} className={`${styles.checkBox}`}>
-                  {row?.hideSelection ? null :
+                  {row?.hideSelection ? null : (
                     <Checkbox
                       style={{ padding: '0' }}
                       inputProps={{ 'aria-label': 'Select' }}
                       checked={isChecked(row)}
                       onChange={() => chekSingle(row)}
                     />
-                  }
+                  )}
                 </td>
               )}
               {columns.map((column, index) => (
-                <td key={index} style={{ width: `${column.width}px}`, maxWidth: `${column.width}px}`, minWidth: `${column.minWidth}px` }}>
+                <td
+                  className={column.sticky ? (column.sticky === 'right' ? styles.stickyRight : styles.stickyLeft) : ''}
+                  key={index}
+                  style={{
+                    width: `${column.width}px}`,
+                    maxWidth: `${column.width}px}`,
+                    minWidth: `${column.minWidth}px`,
+                    position: column.sticky ? 'sticky' : 'relative',
+                    [column.sticky]: 0
+                  }}
+                >
                   <div>{row ? column.render({ row }) : ''}</div>
                 </td>
               ))}
