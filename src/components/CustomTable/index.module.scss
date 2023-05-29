@@ -1,14 +1,17 @@
 .tableWrapper {
   background-color: var(--dark-secondary, #f1f5ff);
-  padding-left: 8px;
-  padding-right: 8px;
+
   position: relative;
   border-radius: 12px;
+  position: relative;
   overflow: auto;
+}
+.tableContainer {
+  margin-left: 8px;
+  margin-right: 8px;
 }
 
 .table {
-  overflow: auto;
   display: block;
   border-collapse: separate;
   border-spacing: 0px 8px;
@@ -94,6 +97,7 @@ tr {
 }
 
 tbody {
+  min-height: 200px;
   tr {
     margin-bottom: 5px;
   }
@@ -102,5 +106,19 @@ tbody {
 .checkBox {
   svg {
     color: var(--link) !important;
+  }
+}
+.stickyRight {
+  border-left: 1px solid var(--common-border-color);
+}
+.stickyLeft {
+  border-right: 1px solid var(--common-border-color);
+}
+.noData {
+  padding: 80px;
+  p {
+    position: absolute;
+    top: calc(50% + 30px);
+    left: 50%;
   }
 }
