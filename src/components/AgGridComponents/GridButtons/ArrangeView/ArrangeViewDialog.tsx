@@ -50,6 +50,8 @@ interface ArrangeColumnsProps {
   saveColumnOptions: boolean;
   updateGridHiddenColumns: any;
   renderedFrom: string;
+  refreshGrid: any;
+  defaultColumns: any[]
 }
 
 const ItemTypes = {
@@ -57,7 +59,7 @@ const ItemTypes = {
 };
 
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
-  const { onClose, columns, setColumns, columnApi, isClientSideGrid, updateGridHiddenColumns, renderedFrom, saveColumnOptions } = props;
+  const { onClose, columns, setColumns, columnApi, isClientSideGrid, updateGridHiddenColumns, renderedFrom, saveColumnOptions, refreshGrid, defaultColumns, } = props;
   const classes = useStyles();
   const [sortedColumns, setSortedColumns] = React.useState([]);
   const [searchedColumns, setSearchedColumns] = React.useState([]);
@@ -178,6 +180,41 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     [sortedColumns]
   );
 
+
+  const handleReset = () => {
+    refreshGrid();
+    onClose();
+    delete localStorage[renderedFrom];
+    const newColumns = [...defaultColumns];
+    newColumns?.forEach((e: any) => {
+      if (!e.disabled) {
+        e.show = true;
+      }
+    });
+    setSortedColumns(newColumns);
+    setNewData(JSON.stringify(newColumns));
+    setColumns(newColumns);
+    const colIds = newColumns.map((col) => col.field);
+    const oldColumnState = columnApi.getColumnState();
+    let newColumnsState = [];
+
+    for (const d of oldColumnState) {
+      const index = colIds.indexOf(d.colId);
+      newColumnsState.splice(index, 0, { ...d });
+    }
+    columnApi.setColumnState(newColumnsState);
+     const hiddenColumns = newColumns.filter((d) => !d.show).map((m) => m.field);
+    const nonHiddenColumns = newColumns.filter((d) => d.show).map((m) => m.field);
+    columnApi.setColumnsVisible(hiddenColumns, false);
+    columnApi.setColumnsVisible(nonHiddenColumns, true);
+
+    if (!isClientSideGrid || saveColumnOptions) {
+      let tempColumnState = columnApi.getColumnState();
+      let hidedColumns = tempColumnState.filter((o) => o?.hide).map((o) => o?.colId);
+      updateGridHiddenColumns(hidedColumns);
+    }
+  }
+
   useEffect(() => {
     if (!searchVal) return;
 
@@ -273,6 +310,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       <CustomDialogFooter>
         <Button variant="outlined" color="primary" onClick={onClose}>
           Close
+        </Button>
+        <Button variant="outlined" color="primary" onClick={handleReset}>
+          Reset
         </Button>
         <Button variant="contained" color="primary" disableElevation disabled={!hasChanged} onClick={handleSaveChange}>
           Save changes
