@@ -22,7 +22,7 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
   const [selected, setSelected] = useState<any>([]);
 
   const selectAll = useCallback(() => {
-    if (selected.length === data.length) {
+    if (selected.length === data?.filter((e) => !e?.hideSelection).length) {
       setSelected([]);
       onSelect([]);
     } else {
@@ -64,7 +64,7 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
                 <Checkbox
                   style={{ padding: '0' }}
                   inputProps={{ 'aria-label': 'Select all' }}
-                  checked={selected.length === data.length}
+                  checked={selected.length === data?.filter((e) => !e?.hideSelection).length}
                   onChange={selectAll}
                 />
               </th>
