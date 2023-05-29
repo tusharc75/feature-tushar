@@ -75,6 +75,7 @@ const Request = ({ workOrder }) => {
           e.requestBy = e?.requestBy?.optionLabel;
           e.processById = e?.processBy?.optionValue;
           e.processBy = e?.processBy?.optionLabel;
+          e.hideSelection = e?.status === MATERIAL_REQUEST_STATUS.requested ? false : true;
         });
         setRowsData(data);
       })
@@ -85,101 +86,77 @@ const Request = ({ workOrder }) => {
 
   const fetchColumn = async () => {
     setColumns(null);
-    const column = [];
-    const {
-      data: { data }
-    } = await axiosInstance().put(`/field/find-field-labels`, {
-      fields: [
-        {
-          resource: 'Product',
-          fieldNames: ['productName', 'productNumber', 'productDescription']
-        }
-      ]
-    });
-    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
-    column.push({
-      header: 'Product',
-      width: 300,
-      render: ({ row }) => {
-        return (
-          <>
-            <Typography
-              className="text-truncate new-table-font "
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
-            >
-              <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
-                Product Name:
-              </Typography>
-              <a className="link" href={`${routes.productDetail.path}/${row?.product?.optionValue}`} target="_blank">
-                {row['productName'] || <NoDataCell />}
-              </a>
-            </Typography>
-            <Typography
-              className="text-truncate new-table-font "
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
-            >
-              <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
-                Part Number:
-              </Typography>
-              <span>{row['productNumber'] || <NoDataCell />}</span>
-            </Typography>
-            <Typography
-              className="text-truncate new-table-font "
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
-            >
-              <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
-                Description:
-              </Typography>
-              <span>{row['productDescription'] || <NoDataCell />}</span>
-            </Typography>
-          </>
-        );
-      }
-    });
+    // const {
+    //   data: { data }
+    // } = await axiosInstance().put(`/field/find-field-labels`, {
+    //   fields: [
+    //     {
+    //       resource: 'Product',
+    //       fieldNames: ['productName', 'productNumber', 'productDescription']
+    //     }
+    //   ]
+    // });
+    // const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
 
-    const extracolumns: any = [
+    const column: any = [
       {
-        header: 'Qty',
-        width: 300,
+        header: 'Product',
+        width: 100,
         render: ({ row }) => {
           return (
             <>
-              <Typography
-                className="text-truncate new-table-font "
-                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
-              >
-                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
-                  Requested Qty:
-                </Typography>
-                {row['qty'] ? <span>{row['qty']}</span> : <NoDataCell />}
+              <Typography className="text-truncate new-table-font">
+                <a className="link" href={`${routes.productDetail.path}/${row?.product?.optionValue}`} target="_blank">
+                  {row['productName']}
+                </a>
               </Typography>
-              <Typography
-                className="text-truncate new-table-font "
-                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
-              >
-                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
-                  Processed Qty:
-                </Typography>
-                {row['processedQty'] ? <span>{row['processedQty']}</span> : <NoDataCell />}
+              <Typography className="text-truncate new-table-font">
+                <span>{row['productNumber']}</span>
+              </Typography>
+              <Typography className="text-truncate new-table-font">
+                <span>{row['productDescription']}</span>
               </Typography>
             </>
           );
         }
       },
-
       {
-        header: 'Details',
-        width: 200,
+        header: 'Requested Qty',
+        width: 100,
         render: ({ row }) => {
           return (
             <>
-              <Typography
-                className="text-truncate new-table-font "
-                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
-              >
-                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
-                  Requested By:
+              <Typography className="text-truncate new-table-font">
+                <Typography style={{ fontWeight: 500 }} component="span">
+                  {row['qty'] ? row['qty'] : <NoDataCell />}
                 </Typography>
+              </Typography>
+            </>
+          );
+        }
+      },
+      {
+        header: 'Processed Qty',
+        width: 100,
+        render: ({ row }) => {
+          return (
+            <>
+              <Typography className="text-truncate new-table-font" >
+                <Typography style={{ fontWeight: 500 }} component="span">
+                  {row['processedQty'] ? row['processedQty'] : <NoDataCell />}
+                </Typography>
+              </Typography>
+            </>
+          );
+        }
+      },
+      {
+        header: 'Requested By',
+        width: 100,
+        render: ({ row }) => {
+          return (
+            <>
+              <Typography className="text-truncate new-table-font"  >
                 {row['requestBy'] ? (
                   <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['requestById']}`} target="_blank">
                     {row?.['requestBy']}
@@ -188,90 +165,73 @@ const Request = ({ workOrder }) => {
                   <NoDataCell />
                 )}
               </Typography>
-              <Typography
-                className="text-truncate new-table-font "
-                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
-              >
-                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
-                  Processed By:
-                </Typography>
-                {row['processBy'] ? (
-                  <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['processById']}`} target="_blank">
-                    {row?.['processBy']}
-                  </a>
-                ) : (
-                  <NoDataCell />
-                )}
-              </Typography>
-              <Typography
-                className="text-truncate new-table-font "
-                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minWidth: 'max-content' }}
-              >
-                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
-                  Comment:
-                </Typography>
-                {row['comment'] ? <span>{row['comment']}</span> : <NoDataCell />}
+              <Typography className="text-truncate new-table-font ">
+                {row['requestDate'] ? <span>{moment(row['requestDate']).format(dateTimeFormat)}</span> : <NoDataCell />}
               </Typography>
             </>
           );
         }
       },
-
       {
-        header: 'Date',
-        width: 200,
+        header: 'Processed By',
+        width: 100,
         render: ({ row }) => {
           return (
             <>
-              <Typography className="text-truncate new-table-font ">
-                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
-                  Requested Date:
-                </Typography>
-                {row['requestDate'] ? <span>{moment(row['requestDate']).format(dateTimeFormat)}</span> : <NoDataCell />}
-              </Typography>
-              <Typography className="text-truncate new-table-font ">
-                <Typography style={{ fontWeight: 500, marginRight: 3 }} component="span">
-                  Processed Date:
-                </Typography>
-                {row['processDate'] ? <span>{moment(row['processDate']).format(dateTimeFormat)}</span> : <NoDataCell />}
-              </Typography>
+              {row['processBy'] ?
+                <>
+                  <Typography className="text-truncate new-table-font"  >
+                    <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['processById']}`} target="_blank">
+                      {row['processBy']}
+                    </a>
+                  </Typography>
+                  <Typography className="text-truncate new-table-font ">
+                    <span>{moment(row['processDate']).format(dateTimeFormat)}</span>
+                  </Typography>
+                </>
+                : (
+                  <NoDataCell />
+                )}
             </>
           );
         }
-      }
+      },
     ];
-
     if (user?.user?.brandPolicy?.storageLocation) {
-      extracolumns.push({
+      column.push({
         header: 'Storage Location',
-        width: 250,
+        width: 200,
         render: ({ row }) => {
           return row?.['storageLocation'] ? (
-            <a
-              className="link text-truncate new-table-font "
-              href={`${routes.storageLocationDetail.path}/${row?.['storageLocationId']}`}
-              target="_blank"
-            >
-              {row?.['storageLocation']}
-            </a>
+            <Typography className="text-truncate new-table-font">
+              <a className="link" href={`${routes.storageLocationDetail.path}/${row?.['storageLocationId']}`} target="_blank"  >
+                {row?.['storageLocation']}
+              </a>
+            </Typography>
           ) : (
             <NoDataCell />
           );
         }
       });
     }
-    extracolumns.push({
-      header: 'Status',
-      primaryField: true,
-      width: 200,
+    column.push({
+      header: 'Comment',
+      width: 150,
       render: ({ row }) => {
-        return row['status'] ? <p className="text-truncate new-table-font ">{row['status']}</p> : <NoDataCell />;
+        return row['comment'] ? <Typography className="text-truncate new-table-font">{row['comment']}</Typography> : <NoDataCell />;
       }
     });
-    extracolumns.push({
+    column.push({
+      header: 'Status',
+      width: 150,
+      render: ({ row }) => {
+        return row['status'] ? <Typography className="text-truncate new-table-font">{row['status']}</Typography> : <NoDataCell />;
+      }
+    });
+    column.push({
       header: 'Action',
-      minWidth: 240,
-      width: 240,
+      minWidth: 250,
+      width: 250,
       sticky: 'right',
       render: ({ row }) => {
         return (
@@ -327,7 +287,7 @@ const Request = ({ workOrder }) => {
         );
       }
     });
-    setColumns([...column, ...extracolumns]);
+    setColumns([...column]);
   };
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -358,7 +318,7 @@ const Request = ({ workOrder }) => {
           <Button
             disabled={
               selectedRecords?.length > 0 &&
-              selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -413,19 +373,6 @@ const Request = ({ workOrder }) => {
               checkBox={true}
               height={'calc(100vh - 290px)'}
             />
-            {/* <CustomReactTable
-              height={'calc(100vh - 290px)'}
-              columns={columns}
-              data={rowsData}
-              onSelect={setSelectedRecords}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              hideSelection={false}
-              hideAction={false}
-              hideExpander={true}
-              renderedFrom={camelCase(routes.materialHandling.title)}
-              isClientSideGrid={true}
-            /> */}
           </Box>
         ) : (
           <Box height={500}>
