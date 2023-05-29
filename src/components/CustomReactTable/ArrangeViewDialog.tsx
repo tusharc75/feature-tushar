@@ -22,7 +22,6 @@ import { XYCoord } from 'dnd-core';
 import { DndProvider, useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
-
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
@@ -59,19 +58,6 @@ const ItemTypes = {
   CARD: 'card'
 };
 
-// const IndeterminateCheckbox = React.forwardRef(
-//   ({ indeterminate, ...rest }: any, ref) => {
-//     const defaultRef = React.useRef()
-//     const resolvedRef: any = ref || defaultRef
-
-//     React.useEffect(() => {
-//       resolvedRef.current.indeterminate = indeterminate
-//     }, [resolvedRef, indeterminate])
-
-//     return <Switch size="small" ref={resolvedRef} {...rest} />
-//     // return <input type="checkbox" ref={resolvedRef} {...rest} />
-//   }
-// )
 
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const {
@@ -93,147 +79,62 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [searchedColumns, setSearchedColumns] = React.useState([]);
   const [searchVal, setSearchVal] = React.useState('');
   const [oldData, setOldData] = React.useState([]);
-  const [newData, setNewData] = React.useState('');
   const [allChecked, setAllChecked] = React.useState(true);
-  const [hasChanged, setHasChanged] = React.useState(false);
   const [isMinimized, setMinimized] = React.useState(true);
 
-  const [lockedItem, setLockedItem] = React.useState([]);
-
   React.useEffect(() => {
-    //   if (!columnApi) return;
-    //   let newCols = new Array();
-
-    //   let gridLayedCols = columnApi.getAllGridColumns();
-    //   gridLayedCols = gridLayedCols.filter((col) => col.pinned === null);
-
-    //   let layedCols = gridLayedCols.map((col: any) => col.colId);
-
-    //   columns.forEach((col) => {
-    //     const index = layedCols.indexOf(col.field);
-    //     if (index > -1) {
-    //       const _col = gridLayedCols.find((_c) => _c.colId === col.field);
-    //       col = { ...col, isVisible: _col ? _col.isVisible : col.isVisible };
-
-    //       newCols[index] = col;
-    //     }
-    //     if (col.hasOwnProperty('pivotIndex') || (col.hasOwnProperty('lockPosition') && col.lockPosition)) {  
-    //       setLockedItem((prevState) => [...prevState, col]);
-    //     }
-    //   });
-
-    //   newCols = newCols.filter((item) => item);
-    // setSortedColumns([...columns.filter(f => typeof f.Header === "string" && f.Header)]);
-
     try {
       const storedColumns = localStorage.getItem(renderedFrom)
       if (storedColumns) {
         const latestColumns = [...JSON.parse(storedColumns)];
         setSortedColumns(latestColumns);
-
         if (latestColumns.filter(f => f.sticky === undefined).some(s => s.isVisible === false)) {
           setAllChecked(false)
         }
-
       } else {
         setSortedColumns([...columns]);
       }
     } catch (ex) {
       setSortedColumns([...columns]);
-      console.error(`Error while getting stored data from local storage - ${renderedFrom}`)
     }
-
-
-
-    // setColumns([...columns]);
     setOldData([...columns].map(d => {
       return { [d.id]: d.isVisible }
     }));
-    // setNewData(JSON.stringify([...columns]));
   }, []);
 
-  // React.useEffect(() => {
-  //   if (oldData === newData) {
-  //     setHasChanged(false);
-  //   } else {
-  //     setHasChanged(true);
-  //   }
-
-  //   const allColumnShow = sortedColumns.filter((col) => col.isVisible === false).length === 0;
-  //   setAllChecked(allColumnShow);
-  // }, [oldData, newData, sortedColumns]);
 
   const handleToggle = (column: any, event: React.ChangeEvent<HTMLInputElement>) => {
     const newColumns = [...sortedColumns];
     const getFieldIndex = sortedColumns.findIndex((d) => d.id === column.id);
     newColumns[getFieldIndex].isVisible = event.target.checked;
-
     setSortedColumns(newColumns);
-    // setNewData(JSON.stringify(newColumns));
   };
 
   const handleToggleAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newColumns = [...sortedColumns];
     newColumns?.forEach((e: any) => {
-      if (!e.disabled && !e.primaryField) {
+      if (!e.disabled && !e.primaryField && !e.sticky) {
         e.isVisible = event.target.checked;
       }
     });
-    // setSortedColumns(newColumns);
     setAllChecked(event.target.checked);
-
-    // setHiddenColumns(event.target.checked ? [] : [...newColumns.map(m => m.id)])
-
-    // setNewData(JSON.stringify(newColumns));
   };
 
   const handleSaveChange = () => {
-    // const newColumns = [...sortedColumns];
-    // newColumns.splice(lockedItem.index, 0, lockedItem.column);
-    // setColumns(newColumns);
-    // const colIds = newColumns.map((col) => col.field);
-    // const oldColumnState = columnApi.getColumnState();
-    // let newColumnsState = new Array();
-
-    // for (const d of oldColumnState) {
-    //   const index = colIds.indexOf(d.colId);
-    //   newColumnsState.splice(index, 0, { ...d });
-    // }
-    // columnApi.setColumnState(newColumnsState);
-
-    // const hiddenColumns = newColumns.filter((d) => !d.isVisible).map((m) => m.field);
-    // const nonHiddenColumns = newColumns.filter((d) => d.isVisible).map((m) => m.field);
-    // columnApi.setColumnsVisible(hiddenColumns, false);
-    // columnApi.setColumnsVisible(nonHiddenColumns, true);
-
-    // if (!isClientSideGrid || saveColumnOptions) {
-    //   let tempColumnState = columnApi.getColumnState();
-    //   let hidedColumns = tempColumnState.filter((o) => o?.hide).map((o) => o?.colId);
-    //   updateGridHiddenColumns(hidedColumns);
-    // }
-
-
     let dataToStore = [];
     sortedColumns.forEach((f) => {
-
       let object = {};
-
       Object.keys(f).forEach((ff) => {
         if (typeof f[ff] !== "function" && typeof f[ff] !== "object") {
           object[ff] = f[ff];
         }
       })
-
       dataToStore.push(object);
-
     })
-
     const columnState = JSON.stringify([...dataToStore]);
     localStorage.setItem(renderedFrom, columnState);
-
     setColumnOrder([...sortedColumns.map(m => m.id)])
     setHiddenColumns([...sortedColumns].filter(f => f.sticky === undefined && f.isVisible === false).map(m => m.id))
-
     onClose();
   };
 
@@ -244,23 +145,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     onClose()
   }
 
-  /**
-   *
-   *  Drag'n'Drop function
-   *
-   */
   const moveItem = React.useCallback(
     (dragIndex: number, hoverIndex: number) => {
       const dragCard = sortedColumns[dragIndex];
-      // const updatedIndexColumns = update(sortedColumns, {
-      //   $splice: [
-      //     [dragIndex, 1],
-      //     [hoverIndex, 0, dragCard]
-      //   ]
-      // });
-
-      // setColumnOrder([...updatedIndexColumns.map(m => m.id)])
-
       const columnsForGrid = update(sortedColumns, {
         $splice: [
           [dragIndex, 1],
@@ -275,12 +162,10 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
   useEffect(() => {
     if (!searchVal) return;
-
     const matchedColumns = sortedColumns.filter((col) => {
       const fieldName = typeof col.Header === "string" ? col.Header.toLowerCase() : "";
       return fieldName.includes(searchVal.toLowerCase());
     });
-
     setSearchedColumns(matchedColumns);
   }, [searchVal]);
 
