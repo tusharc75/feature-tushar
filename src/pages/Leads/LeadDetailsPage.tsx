@@ -123,10 +123,10 @@ const LeadDetailsPage = () => {
 
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-            user?.user?.permissions?.convertLeadToOpportunity &&
-            isAllowedToUpdate &&
-            data[processFieldName] &&
-            data[processFieldName].toLowerCase() === 'qualified'
+              user?.user?.permissions?.convertLeadToOpportunity &&
+              isAllowedToUpdate &&
+              data[processFieldName] &&
+              data[processFieldName].toLowerCase() === 'qualified'
           );
           setIsLeadAlreadyConvertedToOpportunity(
             data.staticData && data.staticData['convertedToOpportunity'] ? data.staticData['convertedToOpportunity'] : false
@@ -375,11 +375,7 @@ const LeadDetailsPage = () => {
               </Button>
             )}
             {leadsPermissions.isDelete && allowedToDelete && (
-              <DeleteButton
-                text={isMobile && !isTablet ?
-                  <MdDelete size={20} /> : 'Delete'}
-                onClick={() => setShowConfirmBox(true)}
-              />
+              <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
             <ActivityButton referenceId={leadData?._id} resource={ACTIVITY_RESOURCE.lead} />
           </Box>
@@ -415,7 +411,7 @@ const LeadDetailsPage = () => {
         ) : (
           <DetailsPage data={leadData} fields={filteredLeadFields} />
         )}
-        <Box pt={3} className="modified_style_of_accordion">
+        <Box pt={3}>
           <AccordionOfOpportunity recordsPerLine={3} opportunity={leadData?.staticData?.opportunity} />
         </Box>
       </Box>

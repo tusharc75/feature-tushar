@@ -470,10 +470,10 @@ const Email = () => {
               </Grid>
               <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
                 <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Box style={{ flexGrow: 1, flexBasis: 'calc(100% - 171px)' }}>
+                  <Box style={{ flexGrow: 1, flexBasis: 'calc(100% - 177px)' }}>
                     <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'large' }} activityName="email" />
                   </Box>
-                  <Box style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', flexBasis: '163px' }}>
+                  <Box style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', flexBasis: '168px' }}>
                     {
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -518,7 +518,7 @@ const Email = () => {
                           showConfirmBox(null);
                           closeActions();
                         }}
-                        disabled={!permissions.email.isDelete}
+                        disabled={!permissions?.email?.isDelete}
                       >
                         Delete
                       </MenuItem>

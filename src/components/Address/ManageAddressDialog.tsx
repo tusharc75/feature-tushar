@@ -11,12 +11,13 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
 import { address, CustomDialogTransition, setFieldsInAscendingOrder } from '../../constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched } from '../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
+import { isEqual } from 'lodash';
 
 const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -238,19 +239,8 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
               <CustomDialogHeader
                 title={addressData ? 'Edit Address' : 'Add Address'}
                 onClose={() => {
-                  if (
-                    isFieldNotTouched(
-                      {
-                        fields: initialData.fields,
-                        initialValues: initialData.values
-                      },
-                      values
-                    )
-                  ) {
-                    onClose();
-                  } else {
-                    setShowConfirmDialog(true);
-                  }
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -404,19 +394,8 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
                   size="small"
                   color="primary"
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          fields: initialData.fields,
-                          initialValues: initialData.values
-                        },
-                        values
-                      )
-                    ) {
-                      onClose();
-                    } else {
-                      setShowConfirmDialog(true);
-                    }
+                    if (isEqual(initialData.values, values)) onClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
@@ -444,7 +423,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null }) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

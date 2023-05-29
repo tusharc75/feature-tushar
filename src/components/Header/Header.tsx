@@ -13,7 +13,8 @@ import {
   useMediaQuery,
   ButtonBase,
   Popover,
-  Tooltip
+  Tooltip,
+  Button
 } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
@@ -37,6 +38,7 @@ import { CustomChatNotificationCountContext } from '../../StateProvider/CustomCh
 import { backendApi } from '../../config';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { AiOutlineClear } from 'react-icons/ai';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 import { useScrollDirection } from 'src/hooks/useScroll';
 
@@ -44,6 +46,8 @@ import styles from './Header.module.scss';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
 import { IoMdNotificationsOutline } from 'react-icons/io';
 import { FiMessageSquare } from 'react-icons/fi';
+
+import { BsMoon, BsSun } from 'react-icons/all';
 
 import { SearchBar } from './SearchBar';
 
@@ -90,6 +94,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Header = ({ toggleDrawer, isDrawerOpen }) => {
+  const [themeColor, toggleThemeColor] = useAppTheme();
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
 
@@ -927,9 +932,9 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
       <AppBar
         position="relative"
         className={` ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`}
-        style={{ backgroundColor: '#fff' }}
+        style={{ backgroundColor: themeColor === 'light' ? '#fff' : 'var(--dark-primary)' }}
       >
-        <Toolbar className={` ${styles.mainConainer}`}>
+        <Toolbar className={` ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
           <Box
             component="div"
             className={`${isDrawerOpen ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${styles.flexAlignCenter}`}
@@ -985,6 +990,23 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                     </Tooltip>
                   </IconButton>
                 )}
+                <Tooltip title={themeColor === 'light' ? 'Turn off the light' : 'Turn on the light'}>
+                  <IconButton
+                    onClick={() => {
+                      toggleThemeColor();
+                    }}
+                    aria-describedby={`current theme ${themeColor}`}
+                    aria-label="Them switcher"
+                    color="inherit"
+                    className={styles.showIconLayout}
+                    style={{
+                      opacity: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 1 : 0,
+                      pointerEvents: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 'all' : 'none'
+                    }}
+                  >
+                    {themeColor === 'light' ? <BsMoon size={19} /> : <BsSun size={19} />}
+                  </IconButton>
+                </Tooltip>
 
                 <IconButton
                   id="notificationButton"
@@ -1071,7 +1093,25 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
               </IconButton>
             </div>
           )}
-
+          {isMobile && (
+            <Tooltip title={themeColor === 'light' ? 'Turn off the light' : 'Turn on the light'}>
+              <IconButton
+                onClick={() => {
+                  toggleThemeColor();
+                }}
+                aria-describedby={`current theme ${themeColor}`}
+                aria-label="Them switcher"
+                color="inherit"
+                className={styles.showIconLayout}
+                style={{
+                  opacity: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 1 : 0,
+                  pointerEvents: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 'all' : 'none'
+                }}
+              >
+                {themeColor === 'light' ? <BsMoon size={19} /> : <BsSun size={19} />}
+              </IconButton>
+            </Tooltip>
+          )}
           <Box className={styles.profile}>
             <UserProfile anchorRef={anchorRef} open={open} onToggle={handleToggle} onClose={handleClose} onListKeyDown={handleListKeyDown} />
           </Box>

@@ -38,8 +38,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
 
-  // const [recordToUpdate, setRecordToUpdate] = useState(null);
-
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
 
@@ -654,7 +652,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           />
         </Box>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
@@ -672,8 +670,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           onClose={() => {
             setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
             setIsBulkEdit(false);
-            // setRecordToUpdate(null);
-
             if (isInlineEdit) {
               setIsInlineEdit(false);
             }

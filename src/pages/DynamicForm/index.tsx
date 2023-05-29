@@ -13,18 +13,13 @@ import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import {
-  isObjectEmpty,
-  gridLoadingTimeout,
-  getLocalStorageArrayData,
-  removeLocalStorage
-} from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
@@ -36,7 +31,6 @@ import ManageDynamicForm from './ManageDynamicForm';
 import { useParams, useHistory } from 'react-router-dom';
 
 const DynamicForm = () => {
-
   const { route } = useParams();
 
   const resource = startCase(route?.replace(/-/g, ' '));
@@ -101,7 +95,8 @@ const DynamicForm = () => {
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
-      }).catch((error) => {
+      })
+      .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
@@ -154,22 +149,25 @@ const DynamicForm = () => {
       });
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    let filterById = [];
-    if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+
+    if (isExport) {
+      deepFilter = `?`;
     }
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -190,13 +188,16 @@ const DynamicForm = () => {
     } else {
       ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
     }
-    axiosInstance().put(`/dynamic-form/remove`, { ids: ids },
-      {
-        headers: {
-          Resource: resource
+    axiosInstance()
+      .put(
+        `/dynamic-form/remove`,
+        { ids: ids },
+        {
+          headers: {
+            Resource: resource
+          }
         }
-      }
-    )
+      )
       .then(() => {
         removeLocalStorage(localStorageSelectedRecords);
         fetchData();
@@ -500,7 +501,7 @@ const DynamicForm = () => {
             )
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

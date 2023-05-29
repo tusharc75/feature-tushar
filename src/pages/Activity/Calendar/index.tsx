@@ -26,10 +26,10 @@ import { GetReferenceName } from '../../../axios/activity';
 
 const useStyles = makeStyles((theme) => ({
   topbar: {
-    backgroundColor: '#fff'
+    backgroundColor: 'var(--dark-primary,#fff)'
   },
   whiteBg: {
-    backgroundColor: '#fff'
+    backgroundColor: 'var(--dark-secondary,#fff)'
   },
   indicators: {
     padding: '8px 16px',
@@ -146,10 +146,22 @@ const BigCalendar = () => {
                     <>
                       <Box
                         display="flex"
-                        bgcolor={item === 'Event' ? 'rgba(255, 232, 204, 1)' : item === 'Task' ? 'rgba(234, 239, 254, 1)' : 'rgba(253, 220, 228, 1)'}
+                        bgcolor={
+                          item === 'Event'
+                            ? 'var(--dark-secondary,rgba(255, 232, 204, 1))'
+                            : item === 'Task'
+                            ? 'var(--dark-secondary,rgba(234, 239, 254, 1))'
+                            : 'var(--dark-secondary,rgba(253, 220, 228, 1))'
+                        }
                         className={`${classes.indicators}`}
                         style={{
-                          color: `${item === 'Event' ? 'rgba(236, 85, 0, 1)' : item === 'Task' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)'}`
+                          color: `${
+                            item === 'Event'
+                              ? 'rgba(236, 85, 0, 1)'
+                              : item === 'Task'
+                              ? 'var(--dark-secondary-text,rgba(4, 50, 161, 1))'
+                              : 'rgba(165, 4, 43, 1)'
+                          }`
                         }}
                       >
                         {item}

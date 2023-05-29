@@ -55,9 +55,10 @@ const ProductsTable = ({ packageId, packageData }) => {
         rows.forEach((parent, i) => {
           parent.index = i + 1;
           parent.type = 'product';
-          parent.detail = parent.productName;
-          parent.description = parent.productDescription;
-          parent.productCategory = parent.productCategory?.optionLabel;
+          parent.detail = parent?.productName;
+          parent.description = parent?.productDescription;
+          parent.productNumber = parent?.productNumber;
+          parent.productCategory = parent?.productCategory?.optionLabel;
           parent.parentId = null;
           parent.qty = parent.qty;
           parent.assetQty = assets?.filter((i) => i.product === parent._id)?.length;
@@ -84,7 +85,20 @@ const ProductsTable = ({ packageId, packageData }) => {
     return subRows;
   };
 
-  const fetchColumns = () => {
+  const fetchColumns = async () => {
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+          fieldNames: ['productName', 'productNumber', 'productDescription', 'serializedProduct']
+        }
+      ]
+    });
+
+    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
+
     let coloum: any = [
       {
         accessor: 'index',
@@ -128,6 +142,14 @@ const ProductsTable = ({ packageId, packageData }) => {
         width: 200,
         Cell: ({ row }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'productNumber',
+        Header: productFields?.find((e) => e.fieldName === 'productNumber')?.fieldLabel || 'Product Number',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['productNumber'] ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />;
         }
       },
       {
@@ -226,6 +248,7 @@ const ProductsTable = ({ packageId, packageData }) => {
         .catch((err) => {
           setRemovingProducts(false);
           setShowProductConfirmBox(false);
+          setSelectedRecords([]);
           setToastConfig(err);
         });
     }
@@ -235,11 +258,13 @@ const ProductsTable = ({ packageId, packageData }) => {
         .then(() => {
           setRemovingProducts(false);
           setShowProductConfirmBox(false);
+          setSelectedRecords([]);
           fetchData();
         })
         .catch((err) => {
           setRemovingProducts(false);
           setShowProductConfirmBox(false);
+          setSelectedRecords([]);
           setToastConfig(err);
         });
     }
@@ -365,7 +390,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           onSaveEdit={onSaveInlineEdit}
         />
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
@@ -377,7 +402,6 @@ const ProductsTable = ({ packageId, packageData }) => {
           productId={packageId}
           handleCloseDialog={() => setShowProductAssignDialog(false)}
           assignedProducts={[...rowsData?.map((e) => e._id)]}
-          renderedFrom={`${renderedFrom}_sub-1`}
           onSuccess={() => {
             fetchData();
             setShowProductAssignDialog(false);
@@ -390,6 +414,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           message={`Are you sure you want to delete ?`}
           onClose={() => {
             setShowProductConfirmBox(false);
+            setSelectedRecords([]);
           }}
           okBtnLoading={isRemovingProducts}
           onOk={removeProducts}

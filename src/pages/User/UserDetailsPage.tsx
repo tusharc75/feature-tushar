@@ -380,9 +380,9 @@ const UserDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`
-        }))
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`
+      }))
       : [];
 
     setUserList(rows);
@@ -645,6 +645,11 @@ const UserDetailsPage = () => {
                       setCurrentTabIndex(newValue);
                     }}
                     indicatorColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        display: 'none'
+                      }
+                    }}
                     textColor="primary"
                     aria-label="icon tabs example"
                   >
@@ -751,7 +756,13 @@ const UserDetailsPage = () => {
                     </Box>
                   )}
                   <Box hidden={userData?.proxyDOA ? currentTabIndex !== 3 : currentTabIndex !== 2}>
-                    <Box width="100%" padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between">
+                    <Box
+                      width="100%"
+                      padding={1}
+                      bgcolor="var(--dark-secondary, var(--accordion-expanded-summary-bg, #EFFBF9))"
+                      display="flex"
+                      justifyContent="space-between"
+                    >
                       <Grid container>
                         <Grid item xs={8}>
                           <Box display="flex">
@@ -769,7 +780,13 @@ const UserDetailsPage = () => {
                             <Grid item xs={12} sm={4}>
                               <FormControl fullWidth size="small" variant="outlined">
                                 <InputLabel id="duration">Select Duration</InputLabel>
-                                <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)} label="Select Duration">
+                                <Select
+                                  labelId="duration"
+                                  id="time-duration"
+                                  value={timeFrame}
+                                  onChange={(e) => setTimeFrame(e.target.value)}
+                                  label="Select Duration"
+                                >
                                   <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                                   <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
                                   <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
@@ -835,7 +852,13 @@ const UserDetailsPage = () => {
                   <Box hidden={userData?.proxyDOA ? currentTabIndex !== 4 : currentTabIndex !== 3}>
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={12} md={12} lg={12}>
-                        <Box width="100%" padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between">
+                        <Box
+                          width="100%"
+                          padding={1}
+                          bgcolor="var(--dark-secondary, var(--accordion-expanded-summary-bg, #EFFBF9))"
+                          display="flex"
+                          justifyContent="space-between"
+                        >
                           <Typography variant="subtitle2">Assigned Entity ({entities?.length || 0})</Typography>
                           {permissions?.entity?.isUpdate && permissions?.role?.isUpdate && (
                             <IconButton title="Assign entities" color="primary" size="small" onClick={entityDialogOpen}>
@@ -928,82 +951,94 @@ const UserDetailsPage = () => {
                 </>
               )}
             </Box>
-            <div className="pt-3 modified_style_of_accordion">
+            <div className="pt-3 ">
               {permissions?.[opportunity.opportunityResource]?.isRead && (
-                <OpportunityAccordionInUserDetail
-                  opportunities={[...(opportunityRelatedData?.Owner ?? []), ...(opportunityRelatedData?.Collaborator ?? [])]}
-                  recordsPerLine={3}
-                  expanded={false}
-                  userId={id}
-                  onSuccess={() => {
-                    fetchUserRelatedDetail();
-                  }}
-                  isAllowedToEdit={false}
-                />
+                <Box mb={2}>
+                  <OpportunityAccordionInUserDetail
+                    opportunities={[...(opportunityRelatedData?.Owner ?? []), ...(opportunityRelatedData?.Collaborator ?? [])]}
+                    recordsPerLine={3}
+                    expanded={false}
+                    userId={id}
+                    onSuccess={() => {
+                      fetchUserRelatedDetail();
+                    }}
+                    isAllowedToEdit={false}
+                  />
+                </Box>
               )}
               {permissions?.[lead.leadResource]?.isRead && (
-                <LeadAccordionInUserDetailPage
-                  leads={[...(leadsRelatedData?.Owner ?? []), ...(leadsRelatedData?.Collaborator ?? [])]}
-                  recordsPerLine={3}
-                  expanded={false}
-                  userId={id}
-                  onSuccess={() => {
-                    fetchUserRelatedDetail();
-                  }}
-                  isAllowedToEdit={false}
-                />
+                <Box mb={2}>
+                  <LeadAccordionInUserDetailPage
+                    leads={[...(leadsRelatedData?.Owner ?? []), ...(leadsRelatedData?.Collaborator ?? [])]}
+                    recordsPerLine={3}
+                    expanded={false}
+                    userId={id}
+                    onSuccess={() => {
+                      fetchUserRelatedDetail();
+                    }}
+                    isAllowedToEdit={false}
+                  />
+                </Box>
               )}
               {permissions?.[customerAccount.accountResource]?.isRead && (
-                <AccountAccordionDetail
-                  type="customer"
-                  accounts={[...(customerAccountRelatedData?.Owner ?? []), ...(customerAccountRelatedData?.Collaborator ?? [])]}
-                  recordsPerLine={3}
-                  expanded={false}
-                  userId={id}
-                  onSuccess={() => {
-                    fetchUserRelatedDetail();
-                  }}
-                  isAllowedToEdit={false}
-                />
+                <Box mb={2}>
+                  <AccountAccordionDetail
+                    type="customer"
+                    accounts={[...(customerAccountRelatedData?.Owner ?? []), ...(customerAccountRelatedData?.Collaborator ?? [])]}
+                    recordsPerLine={3}
+                    expanded={false}
+                    userId={id}
+                    onSuccess={() => {
+                      fetchUserRelatedDetail();
+                    }}
+                    isAllowedToEdit={false}
+                  />
+                </Box>
               )}
               {permissions?.[supplierAccount.accountResource]?.isRead && (
-                <AccountAccordionDetail
-                  type="supplier"
-                  accounts={[...(supplierAccountRelatedData?.Owner ?? []), ...(supplierAccountRelatedData?.Collaborator ?? [])]}
-                  recordsPerLine={3}
-                  expanded={false}
-                  userId={id}
-                  onSuccess={() => {
-                    fetchUserRelatedDetail();
-                  }}
-                  isAllowedToEdit={false}
-                />
+                <Box mb={2}>
+                  <AccountAccordionDetail
+                    type="supplier"
+                    accounts={[...(supplierAccountRelatedData?.Owner ?? []), ...(supplierAccountRelatedData?.Collaborator ?? [])]}
+                    recordsPerLine={3}
+                    expanded={false}
+                    userId={id}
+                    onSuccess={() => {
+                      fetchUserRelatedDetail();
+                    }}
+                    isAllowedToEdit={false}
+                  />
+                </Box>
               )}
               {permissions?.[customerContact.contactResource]?.isRead && (
-                <ContactAccordionInDetailPage
-                  type="customer"
-                  contacts={[...(customerContactRelatedData?.Owner ?? []), ...(customerContactRelatedData?.Collaborator ?? [])]}
-                  recordsPerLine={3}
-                  expanded={false}
-                  userId={id}
-                  onSuccess={() => {
-                    fetchUserRelatedDetail();
-                  }}
-                  isAllowedToEdit={false}
-                />
+                <Box mb={2}>
+                  <ContactAccordionInDetailPage
+                    type="customer"
+                    contacts={[...(customerContactRelatedData?.Owner ?? []), ...(customerContactRelatedData?.Collaborator ?? [])]}
+                    recordsPerLine={3}
+                    expanded={false}
+                    userId={id}
+                    onSuccess={() => {
+                      fetchUserRelatedDetail();
+                    }}
+                    isAllowedToEdit={false}
+                  />
+                </Box>
               )}
               {permissions?.[supplierContact.contactResource]?.isRead && (
-                <ContactAccordionInDetailPage
-                  type="supplier"
-                  contacts={[...(supplierContactRelatedData?.Owner ?? []), ...(supplierContactRelatedData?.Collaborator ?? [])]}
-                  recordsPerLine={3}
-                  expanded={false}
-                  userId={id}
-                  onSuccess={() => {
-                    fetchUserRelatedDetail();
-                  }}
-                  isAllowedToEdit={false}
-                />
+                <Box mb={2}>
+                  <ContactAccordionInDetailPage
+                    type="supplier"
+                    contacts={[...(supplierContactRelatedData?.Owner ?? []), ...(supplierContactRelatedData?.Collaborator ?? [])]}
+                    recordsPerLine={3}
+                    expanded={false}
+                    userId={id}
+                    onSuccess={() => {
+                      fetchUserRelatedDetail();
+                    }}
+                    isAllowedToEdit={false}
+                  />
+                </Box>
               )}
               {permissions?.[quoteBuilder.qbResource]?.isRead && (
                 <QuotesInAccordion
@@ -1075,8 +1110,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
               : roleDeleteRec
-              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
-              : ''
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
+                : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

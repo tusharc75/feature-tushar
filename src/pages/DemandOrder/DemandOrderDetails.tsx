@@ -11,12 +11,12 @@ import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { ACTIVITY_RESOURCE, demandOrder } from '../../constants/helpers';
-import ManageSalesOrderDialog from './ManageDemandOrderDialog';
+import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
-import {  BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import Material from './Material';
 import { camelCase } from 'lodash';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -33,7 +33,6 @@ const DemandOrderDetails = () => {
   const {
     state: { user, permissions }
   }: any = useData();
-
 
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
@@ -132,11 +131,11 @@ const DemandOrderDetails = () => {
             {salesOrderData ? (
               <>
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (
-                  <Button  
-                  className="btn-outline-v1" 
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small" 
-                  onClick={handleOpenUpdateDialog}
+                  <Button
+                    className="btn-outline-v1"
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    size="small"
+                    onClick={handleOpenUpdateDialog}
                   >
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
@@ -147,7 +146,7 @@ const DemandOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-              <ActivityButton referenceId={salesOrderData?._id} resource={ACTIVITY_RESOURCE.demandOrder} />
+            <ActivityButton referenceId={salesOrderData?._id} resource={ACTIVITY_RESOURCE.demandOrder} />
           </Box>
         </Box>
       </Box>
@@ -165,10 +164,6 @@ const DemandOrderDetails = () => {
         >
           <Tab
             className={'tabLayout'}
-            style={{
-              background: tabValue === 1 ? 'white' : '',
-              color: tabValue === 1 ? '#163340' : '#163340'
-            }}
             label={
               <div className="d-flex align-items-center tab-font">
                 <FaWpforms className="mr-1" fontSize="inherit" /> Header
@@ -178,10 +173,6 @@ const DemandOrderDetails = () => {
           />
           <Tab
             className={'tabLayout'}
-            style={{
-              background: tabValue === 2 ? 'white' : '',
-              color: tabValue === 2 ? 'blue' : '#163340'
-            }}
             label={
               <div className="d-flex align-items-center tab-font">
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
@@ -204,13 +195,13 @@ const DemandOrderDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-            {salesOrderData && (
-              <Material
-                salesOrderData={salesOrderData}
-                renderedFrom={`${renderedFrom}_grid-1`}
-                allowedToEdit={allowedToEdit && permissions?.demandOrder?.isUpdate ? true : false}
-              />
-            )}
+          {salesOrderData && (
+            <Material
+              salesOrderData={salesOrderData}
+              renderedFrom={`${renderedFrom}_grid-1`}
+              allowedToEdit={allowedToEdit && permissions?.demandOrder?.isUpdate ? true : false}
+            />
+          )}
         </TabPanel>
       </Box>
       {showConfirmBox && (
@@ -226,11 +217,11 @@ const DemandOrderDetails = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageSalesOrderDialog
+        <ManageDemandOrderDialog
           isClone={false}
           open={openUpdateDialog}
-          salesOrderId={id}
-          salesOrderData={salesOrderData}
+          demandOrderId={id}
+          demandOrderData={salesOrderData}
           onClose={() => {
             setOpenUpdateDialog(false);
           }}

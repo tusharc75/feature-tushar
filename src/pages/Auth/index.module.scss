@@ -1,0 +1,187 @@
+@function scaleFunc($base) {
+  $scale: 1;
+  $result: calc($base * $scale);
+  @return $base * $scale;
+}
+
+.main {
+  --left-padding: 60px 75px 60px 45px;
+  --right-padding: 60px 75px 60px 45px;
+  --grid-cols: 2fr 1.6fr;
+  @media all and (max-width: 768px) {
+    --left-padding: 30px 20px;
+    --grid-cols: 1fr;
+  }
+
+  svg {
+    max-width: 100%;
+  }
+
+  .bg {
+    width: 100%;
+    height: 100vh;
+    background-color: #eff2fd;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    padding-left: 20px;
+    padding-right: 20px;
+    [data-mode='dark'] & {
+      background-color: var(--dark-secondary);
+    }
+  }
+  .contentContainer {
+    margin-left: auto;
+    margin-right: auto;
+    display: grid;
+    grid-template-columns: var(--grid-cols);
+    min-width: Min(scaleFunc(955px), 100%);
+    max-width: scaleFunc(955px);
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #fff;
+    border-radius: 4px;
+    [data-mode='dark'] & {
+      background-color: var(--dark-primary);
+    }
+  }
+
+  .logo {
+    max-width: scaleFunc(129px);
+    max-height: scaleFunc(35px);
+    margin-bottom: scaleFunc(31px);
+    svg {
+      max-width: scaleFunc(129px);
+      max-height: scaleFunc(35px);
+    }
+  }
+  .or {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 19px;
+    &::before,
+    &::after {
+      content: '';
+      height: 1px;
+      background-color: #dbe0e8;
+      display: block;
+      flex-grow: 1;
+      [data-mode='dark'] & {
+        background-color: #555555;
+      }
+    }
+    p {
+      font-weight: 400;
+      font-size: scaleFunc(13px);
+      line-height: 1.3;
+    }
+    margin: scaleFunc(19px) 0 scaleFunc(24px);
+  }
+  .fields {
+    margin-bottom: scaleFunc(18px);
+  }
+  .input {
+    margin-bottom: scaleFunc(24px);
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+  .formBottomText {
+    margin: scaleFunc(20px) 0 scaleFunc(36px);
+    text-align: right;
+    color: #2a3547;
+    font-weight: 500;
+    font-size: scaleFunc(13px);
+    line-height: 19px;
+    [data-mode='dark'] & {
+      color: #fff;
+    }
+    & a {
+      display: inline-flex;
+      align-items: center;
+      gap: scaleFunc(14px);
+      color: inherit;
+    }
+    & a:hover {
+      color: var(--link);
+    }
+  }
+  .formBottomTextleft {
+    margin: scaleFunc(18px) 0 0;
+    color: #2a3547;
+    font-weight: 500;
+    font-size: scaleFunc(13px);
+    line-height: 19px;
+    [data-mode='dark'] & {
+      color: #fff;
+    }
+    & a {
+      display: inline-flex;
+      align-items: center;
+      gap: scaleFunc(14px);
+      color: inherit;
+    }
+    & a:hover {
+      color: var(--link);
+    }
+  }
+  .right,
+  .left {
+    // display: grid;
+    // align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .left {
+    padding: var(--left-padding, 30px 20px);
+    border-right: 1px solid #e2e2e2;
+    [data-mode='dark'] & {
+      border-right: 1px solid rgba(255, 255, 255, 0.17);
+    }
+  }
+  .right {
+    @media all and (max-width: 768px) {
+      display: none;
+    }
+    padding: var(--right-padding);
+    .illustration {
+      margin-bottom: scaleFunc(46px);
+      max-width: max-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    h2 {
+      font-size: scaleFunc(20px);
+      line-height: 190%;
+      text-align: center;
+      color: #2a3042;
+      font-weight: 600;
+      margin-bottom: scaleFunc(14px);
+      max-width: 281px;
+      margin-left: auto;
+      margin-right: auto;
+      [data-mode='dark'] & {
+        color: #fff;
+      }
+    }
+    p {
+      font-weight: 400;
+      font-size: scaleFunc(13px);
+      line-height: 192%;
+      text-align: center;
+      color: #545454;
+      [data-mode='dark'] & {
+        color: #b8b8b8;
+      }
+    }
+  }
+  .submitButton {
+    border-radius: 6px !important;
+    min-height: scaleFunc(38px) !important;
+    box-shadow: none !important;
+  }
+}

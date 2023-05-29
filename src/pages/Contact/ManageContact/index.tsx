@@ -204,13 +204,6 @@ export default function ManageContactDialog(props) {
     }
   };
 
-  const handleValuesChange = (name, value) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      [name]: value
-    }))
-  }
-
   return (
     <>
       <ManageContact
@@ -230,7 +223,6 @@ export default function ManageContactDialog(props) {
         owners={owners}
         fromProject={fromProject}
         formValues={formValues}
-        handleValuesChange={handleValuesChange}
         isClone={isClone}
         isAccountFieldDisable={isAccountFieldDisable}
         contactApi={contactApi}

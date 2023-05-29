@@ -934,8 +934,6 @@ const CreateProduct = (props) => {
                                 color="primary"
                                 type="submit"
                                 disabled={uploadingImageOrFileProgress > 0 || submitting}
-                                // disabled={Object.values(simplifyValues(initialData.values, initialData.fields)).toString() ===
-                                //     Object.values(simplifyValues(values, initialData.fields)).toString()}
                                 onClick={(e) => {
                                     e.preventDefault();
                                     handleScroll(errors)
@@ -961,7 +959,7 @@ const CreateProduct = (props) => {
                     </Fragment>
                 )}
             </Formik> :
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500} >
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
         }

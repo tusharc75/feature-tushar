@@ -25,7 +25,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
 import ManageSalesOrderDialog from './ManageDemandOrderDialog';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
@@ -195,38 +195,6 @@ const DemandOrder = () => {
     </>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
-
-  const replaceFieldNameForSorting = (field) => {
-    const updatedField = replaceFieldName(field);
-
-    if (field !== updatedField) return updatedField;
-
-    switch (field) {
-      case 'owner':
-        return 'owner.optionLabel';
-
-      case 'customerAccount':
-        return 'customerAccount.optionLabel';
-
-      case 'supplierAccountName':
-        return 'supplierAccountName.optionLabel';
-
-      default:
-        return field;
-    }
-  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -240,23 +208,20 @@ const DemandOrder = () => {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    let filterById = [];
-    if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
-    }
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
@@ -510,7 +475,7 @@ const DemandOrder = () => {
         <ManageSalesOrderDialog
           isClone={showManageSalesOrderDialog.isClone}
           open={showManageSalesOrderDialog.open}
-          salesOrderId={showManageSalesOrderDialog.idToClone}
+          demandOrderId={showManageSalesOrderDialog.idToClone}
           onClose={() => setShowManageSalesOrderDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
             fetchData();

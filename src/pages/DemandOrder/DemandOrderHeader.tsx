@@ -130,7 +130,7 @@ function DemandOrderHeader(props) {
                 contentPart={toggleInner}
                 columns={columns}
                 dispatch={dispatch}
-                title={routes?.serviceOrder?.title}
+                title={routes?.fieldServiceOrder?.title}
                 filters={filters}
               />
             </Grid>

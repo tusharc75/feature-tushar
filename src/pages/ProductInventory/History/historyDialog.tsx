@@ -11,13 +11,15 @@ import History from './index';
 import CalendarView from './CalendarView';
 
 const HistoryDialog = ({ close, product, warehouse, storageLocation, productName }) => {
+
   const [currentView, setCurrentView] = useState('list');
 
   return (
     <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
       <CustomDialogHeader title={`History - ${productName}`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent>
-        <Box display="flex" justifyContent="flex-end" alignItems="center">
+        <Box display="flex" justifyContent="flex-end" alignItems="center"
+          style={(isMobile && !isTablet) || currentView === "calendar" ? {} : { position: 'absolute', top: '65px', right: '10px' }}>
           <Box display="flex">
             <ToggleButtonGroup
               size="small"

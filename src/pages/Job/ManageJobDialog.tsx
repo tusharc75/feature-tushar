@@ -17,7 +17,6 @@ import {
   getObjKeys,
   getObjKeysWithValues,
   getOwnerDropdownDataSource,
-  isFieldNotTouched,
   setFieldsInAscendingOrder,
   yupSchema,
   generateUniqueIdOnly
@@ -25,7 +24,6 @@ import {
 import axiosInstance from '../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import routes from '../../components/Helpers/Routes';
 import { FaDiceOne } from 'react-icons/fa';
@@ -52,7 +50,6 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
   const {
     state: { user, permissions }
   }: any = useData();
-  const [formValues, setFormValues] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [contactData, setContactData] = useState([]);
@@ -186,7 +183,6 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
               fields: fieldsDataForCreate,
               values: getObjKeysWithValues(rest, fieldsDataForCreate)
             });
-            setFormValues(getObjKeysWithValues(rest, fieldsDataForCreate));
             setLoading(false);
           } else {
             setJobDetails(data);
@@ -194,7 +190,6 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
               fields: fieldsDataForUpdate,
               values: getObjKeysWithValues(data, fieldsDataForUpdate)
             });
-            setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
             setLoading(false);
           }
         } catch (error) {
@@ -212,7 +207,6 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
           fields: fieldsDataForCreate,
           values: initialData
         });
-        setFormValues(initialData);
         setLoading(false);
       }
     } catch (error) {
@@ -388,7 +382,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
                                               }}
                                             />
                                           </Grid>
-                                          {permissions.customerAccount?.isCreate && (
+                                          {permissions?.customerAccount?.isCreate && (
                                             <Grid item xs={1} sm={1} md={1}>
                                               <Tooltip title="Create Account" className="mt-1">
                                                 <IconButton
@@ -666,7 +660,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
                     onClick={() => {
                       if (isEqual(initialData.values, values)) {
                         onClose();
-                      }else{
+                      } else {
                         setShowConfirmDialog(true);
                       }
                     }}
@@ -812,7 +806,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
             )}
           </Formik>
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

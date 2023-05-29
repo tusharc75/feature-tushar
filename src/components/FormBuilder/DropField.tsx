@@ -12,11 +12,11 @@ import { Properties } from './Properties';
 import { checkFieldDependency } from '../../constants/formulaUtility';
 import FieldList from './FieldList';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from "../CustomTooltipTitle";
+import HtmlTooltip from '../CustomTooltipTitle';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
 const style = {
-  backgroundColor: 'white',
+  // backgroundColor: 'white',
   cursor: 'move'
 };
 
@@ -48,9 +48,9 @@ export const DropField = ({
   const ref = useRef(null);
   const toastConfig = useContext(CustomToastContext);
 
-  const [{ }, drop] = useDrop({
+  const [{}, drop] = useDrop({
     accept: ['fieldmove', 'field'],
-    drop: () => { },
+    drop: () => {},
     hover: (item: any, monitor) => {
       if (!ref.current) {
         return;
@@ -208,7 +208,7 @@ export const DropField = ({
         <div ref={ref} style={{ ...dropstyle }}></div>
       ) : (
         <div ref={ref}>
-          <Box border={1} p={0.5} borderColor="grey.300" style={{ ...style, opacity }}>
+          <Box border={1} p={0.5} borderColor="var(--common-border-color)" style={{ ...style, opacity }}>
             <Grid container spacing={1}>
               <Grid item xs={5}>
                 {data.editAble ? (
@@ -232,9 +232,15 @@ export const DropField = ({
                 </Box>
               </Grid>
               <Grid item xs={2} container justify="flex-end">
-                <Box mt={1} style={{ cursor: "pointer" }} onClick={() => { navigator.clipboard.writeText(data?.fieldName) }}>
+                <Box
+                  mt={1}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(data?.fieldName);
+                  }}
+                >
                   <HtmlTooltip title={`Field Name - ${data?.fieldName}`}>
-                    <InfoOutlinedIcon fontSize="small" color='primary' />
+                    <InfoOutlinedIcon fontSize="small" color="primary" />
                   </HtmlTooltip>
                 </Box>
                 <IconButton aria-label="setting" onClick={handleClick}>
@@ -245,8 +251,10 @@ export const DropField = ({
                     <MenuItem onClick={() => handleClickOpenPropertie(data)}>Edit Properties</MenuItem>
                     <MenuItem onClick={() => handleClone(data)}>Clone</MenuItem>
                   </Fragment>
-                  {((["product-template", "price-template"].includes(module) && data.editAble) ||
-                    ["form-builder-master"].includes(module) || data.deletAble || true) && <MenuItem onClick={() => deleteField(data._id)}>Delete</MenuItem>}
+                  {((['product-template', 'price-template'].includes(module) && data.editAble) ||
+                    ['form-builder-master'].includes(module) ||
+                    data.deletAble ||
+                    true) && <MenuItem onClick={() => deleteField(data._id)}>Delete</MenuItem>}
                 </Menu>
                 {propertie_open ? (
                   <Properties

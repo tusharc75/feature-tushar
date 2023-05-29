@@ -18,13 +18,12 @@ import { FaWpforms } from 'react-icons/fa';
 import { TbFileInvoice } from 'react-icons/tb';
 import ManageJobDialog from './ManageJobDialog';
 import Material from './Material';
-import Steps from '../RentalManagement/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { ACTIVITY_RESOURCE, jobProcessSteps } from 'src/constants/helpers';
 import Fleet from './Fleet';
 import Invoice from './Invoice';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import Steps2, { getIndex } from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 
 const JobDetail = () => {
   const renderedFrom = camelCase(routes?.job.title);
@@ -214,7 +213,7 @@ const JobDetail = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Steps2
+          <Steps
             isNextStep={false}
             nextStep={nextStep}
             steps={jobProcessSteps}

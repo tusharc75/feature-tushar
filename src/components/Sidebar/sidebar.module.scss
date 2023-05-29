@@ -11,6 +11,10 @@
   .listItem {
     padding-left: 31px;
     padding-block: 12px;
+    background-color: transparent !important;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.8) !important;
+    }
     svg {
       color: #ffffff;
     }
@@ -60,6 +64,9 @@
       right: 0;
       border-radius: 100vh 0 0 100vh;
       background-color: #f1f5ff;
+      [data-mode='dark'] & {
+        background-color: #24243e;
+      }
       top: 0;
       bottom: 0;
     }
@@ -68,6 +75,9 @@
       position: absolute;
       width: 100%;
       background-color: #f1f5ff;
+      [data-mode='dark'] & {
+        background-color: #24243e;
+      }
       height: var(--height, 10px);
       left: 0;
       &::before {

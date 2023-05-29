@@ -14,22 +14,20 @@ import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, storageLocation = null }) => {
-
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
   const toastConfig = useContext(CustomToastContext);
 
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
-  const [selectedStorageLocation, setSelectedStorageLocation] = useState(null)
-  const [currentInventory, setCurrentInventory] = useState(null)
-  const [loadingInitialData, setLoadingInitialData] = useState(false)
+  const [selectedStorageLocation, setSelectedStorageLocation] = useState(null);
+  const [currentInventory, setCurrentInventory] = useState(null);
+  const [loadingInitialData, setLoadingInitialData] = useState(false);
   const [initialData, setInitialData] = useState({
     qty: 1,
     comment: '',
     storageLocation: storageLocation
-  })
+  });
 
   const {
     state: { user }
@@ -61,31 +59,33 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
     if (user?.user?.brandPolicy?.storageLocation) {
       getStorageLocation();
     }
-  }, [warehouse])
+  }, [warehouse]);
 
   const getStorageLocation = () => {
-    setLoadingInitialData(true)
+    setLoadingInitialData(true);
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
         if (data[sidebarResource.storageLocation]) {
-          const storageLocationOption = data[sidebarResource.storageLocation]?.filter(e => e.warehouse === warehouse);
+          const storageLocationOption = data[sidebarResource.storageLocation]?.filter((e) => e.warehouse === warehouse);
           setStorageLocationOptions(storageLocationOption);
           if (!storageLocation) {
-            setInitialData((preVal) => { return ({ ...preVal, storageLocation: storageLocationOption[0]?.optionValue }) })
-            setSelectedStorageLocation(storageLocationOption[0]?.optionValue)
+            setInitialData((preVal) => {
+              return { ...preVal, storageLocation: storageLocationOption[0]?.optionValue };
+            });
+            setSelectedStorageLocation(storageLocationOption[0]?.optionValue);
           } else {
-            setSelectedStorageLocation(storageLocation)
+            setSelectedStorageLocation(storageLocation);
           }
         }
-        setLoadingInitialData(false)
+        setLoadingInitialData(false);
       });
   };
 
   const getCurrentInventory = () => {
     let api = `${productInventory.api}/current-inventory?warehouse=${warehouse}&product=${product[0]._id}`;
     if (selectedStorageLocation) {
-      api = `${api}&storageLocation=${selectedStorageLocation}`
+      api = `${api}&storageLocation=${selectedStorageLocation}`;
     }
     if (product?.length === 1) {
       axiosInstance()
@@ -97,11 +97,11 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
           toastConfig.setToastConfig(err);
         });
     }
-  }
+  };
 
   useEffect(() => {
-    getCurrentInventory()
-  }, [selectedStorageLocation])
+    getCurrentInventory();
+  }, [selectedStorageLocation]);
 
   const handleSubmit = (values) => {
     const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers'].indexOf(item?.serialNumber) > -1);
@@ -170,7 +170,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
       }}
       aria-labelledby="assign-roles-dialog"
     >
-      {!loadingInitialData ?
+      {!loadingInitialData ? (
         <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
@@ -207,19 +207,23 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                     />
                   </ListItem>
                 </List>
-                {user?.user?.brandPolicy?.storageLocation &&
+                {user?.user?.brandPolicy?.storageLocation && (
                   <Box m={1}>
                     <Autocomplete
                       disableClearable
                       options={storageLocationOptions}
-                      getOptionLabel={(option: any) => option ? option.optionLabel : ''}
+                      getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                       getOptionSelected={(option: any, val) => option.optionValue === val}
-                      value={storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0] : ''}
+                      value={
+                        storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length
+                          ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0]
+                          : ''
+                      }
                       onChange={(e, val) => {
                         setFieldValue('storageLocation', val?.optionValue);
-                        setSelectedStorageLocation(val?.optionValue)
+                        setSelectedStorageLocation(val?.optionValue);
                       }}
-                      renderInput={(params) =>
+                      renderInput={(params) => (
                         <TextField
                           {...params}
                           margin="dense"
@@ -231,10 +235,10 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                           error={touched['storageLocation'] && Boolean(errors['storageLocation'])}
                           helperText={touched['storageLocation'] && errors['storageLocation']}
                         />
-                      }
+                      )}
                     />
                   </Box>
-                }
+                )}
                 {product?.length === 1 ? (
                   <Fragment>
                     <Box my={2} mx={1}>
@@ -270,10 +274,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                 ) : null}
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  color="primary"
-                  size="small"
-                  onClick={handleClose}>
+                <Button color="primary" size="small" onClick={handleClose}>
                   Cancel
                 </Button>
                 <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
@@ -282,10 +283,12 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
               </CustomDialogFooter>
             </Form>
           )}
-        </Formik> :
-        <Box p={2} height={500} bgcolor="white">
+        </Formik>
+      ) : (
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        </Box>
+      )}
     </Dialog>
   );
 };

@@ -8,7 +8,7 @@ import routes from 'src/components/Helpers/Routes';
 import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
@@ -119,56 +119,42 @@ const Competencies = () => {
       });
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
-
   const getQueryString = (isExport = false) => {
     let deepFilter =  `?page=${page}&limit=${limit}` ;
+
     if (isExport) {
       deepFilter = `?`
     }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    let filterById = [];
-    if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
-    }
-    
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
 
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
+
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
+
     return deepFilter;
   };
 
@@ -270,7 +256,7 @@ const Competencies = () => {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.competencies}
+            permissions={permissions?.competencies}
             module="competencies"
             api={'competencies'}
             afterImportCompleted={() => {
@@ -309,7 +295,7 @@ const Competencies = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions.competencies.isCreate && (
+                  {permissions?.competencies?.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {

@@ -185,9 +185,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-
       parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
-
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
@@ -438,7 +436,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
           </Box>
         </>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
@@ -472,7 +470,6 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
           productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           assignedProducts={[]}
-          renderedFrom={renderedFrom}
           onSuccess={(d) => {
             handleAdd(d);
           }}

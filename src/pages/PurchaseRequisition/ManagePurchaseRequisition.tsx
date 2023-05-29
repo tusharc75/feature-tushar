@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -12,14 +12,16 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, generateUniqueIdOnly, isFieldNotTouched } from 'src/constants/helpers';
+import { CustomDialogTransition, generateUniqueIdOnly } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
 const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const history = useHistory();
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,6 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
@@ -50,7 +51,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
             if (isClone) {
               fields = fieldsDataForCreate;
               const { purchaseRequisitionNumber, ...rest } = data;
-              rest.purchaseRequisitionNumber = `PR_${generateUniqueIdOnly()}`
+              rest.purchaseRequisitionNumber = `PR_${generateUniqueIdOnly()}`;
               setCloneHeading(purchaseRequisitionNumber);
               tempData = rest;
             }
@@ -62,8 +63,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
-      }
-      else {
+      } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['purchaseRequisitionNumber'] = `PR_${generateUniqueIdOnly()}`;
         setInitialData({
@@ -79,38 +79,41 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (id && !isClone) {
-      values._id = id
-      axiosInstance().put(`${routes.purchaseRequisition?.path}`, values).then(({ data }) => {
-        setSubmitting(false);
-        onSuccess()
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
+      values._id = id;
+      axiosInstance()
+        .put(`${routes.purchaseRequisition?.path}`, values)
+        .then(({ data }) => {
+          setSubmitting(false);
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     } else {
       axiosInstance()
         .post(`${routes.purchaseRequisition?.path}`, values)
         .then(({ data: { data, message } }) => {
           setLoading(false);
           history.push(`${routes.purchaseRequisitionDetail.path}/${data._id}`);
-         onSuccess(data.data);
+          onSuccess(data.data);
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: message,
+            type: 'success',
+            message: message
           });
         })
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
           toastConfig.setToastConfig(error);
-        })
+        });
     }
   };
 
@@ -134,29 +137,24 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-          validate={validate}
-          innerRef={ref}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} validate={validate}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
+                  if (isEqual(values, initialData.values)) {
                     onClose();
+                  } else {
+                    setShowConfirmDialog(true);
                   }
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
-                  : `Create ${routes?.purchaseRequisition?.title}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
+                    : `Create ${routes?.purchaseRequisition?.title}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -175,8 +173,6 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                     fullWidth
                   />
                 </Form>
-
-
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button
@@ -184,17 +180,11 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
+                    if (isEqual(values, initialData.values)) {
                       onClose();
-                    else setShowConfirmDialog(true);
+                    } else {
+                      setShowConfirmDialog(true);
+                    }
                   }}
                 >
                   Cancel
@@ -230,7 +220,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

@@ -1,6 +1,5 @@
 import { Chip, Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { getResActivityColor } from './utils';
 import routes from '../../Helpers/Routes';
 
 const useStyles = makeStyles((theme) => ({
@@ -29,15 +28,7 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
           (_element, index) =>
             _element.type === filter[0].type && (
               <Box mr={1} mb={1} key={index}>
-                <Chip
-                  className="custom-chip"
-                  label={routes[_element?.type]?.title + ' - ' + _element.name}
-                  size="small"
-                  style={{
-                    backgroundColor: getResActivityColor(index).background,
-                    color: getResActivityColor(index).color
-                  }}
-                />
+                <Chip className="custom-chip" label={routes[_element?.type]?.title + ' - ' + _element.name} size="small" />
               </Box>
             )
         )}
@@ -47,15 +38,7 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
       {relatedTo &&
         relatedTo.map((_element, index) => (
           <Box mr={1} mb={1} key={index}>
-            <Chip
-              className={`${classes.chipStyle} chip-text`}
-              label={` ${routes[_element?.type]?.title + ' - ' + _element.name}`}
-              size="small"
-              style={{
-                backgroundColor: getResActivityColor(index).background,
-                color: getResActivityColor(index).color
-              }}
-            />
+            <Chip className={`${classes.chipStyle} chip-text`} label={` ${routes[_element?.type]?.title + ' - ' + _element.name}`} size="small" />
           </Box>
         ))}
     </Box>

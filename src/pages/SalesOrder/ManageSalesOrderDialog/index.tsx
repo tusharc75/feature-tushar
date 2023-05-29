@@ -161,7 +161,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
       const response: any = await axiosInstance().get('/field?resource=Sales Order');
       fieldData = response?.data?.data;
 
-      fieldData = fieldData?.filter((e) => !["quotation"].includes(e?.fieldData?.fieldName))
+      fieldData = fieldData?.filter((e) => !['quotation'].includes(e?.fieldData?.fieldName));
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -274,7 +274,6 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
       setCountryBillToDropDown([]);
     }
   };
-
 
   function validate(values) {
     const errors = {};
@@ -425,7 +424,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                                             onOpen={() => onCustomerContactDropdownOpen(values['customerAccount'])}
                                           />
                                         </Grid>
-                                        {permissions.customerContact?.isCreate && (
+                                        {permissions?.customerContact?.isCreate && (
                                           <Grid item xs={1} sm={1} md={1}>
                                             <Tooltip title="Create Contact" className="mt-1">
                                               <IconButton
@@ -608,7 +607,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                   onClick={() => {
                     if (isEqual(initialData.values, values)) {
                       onClose();
-                    }else{
+                    } else {
                       setShowConfirmDialog(true);
                     }
                   }}
@@ -619,10 +618,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                   loading={loading}
                   variant="contained"
                   color="primary"
-                  disabled={
-                    uploadingImageOrFileProgress > 0 ||
-                    loading
-                  }
+                  disabled={uploadingImageOrFileProgress > 0 || loading}
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
@@ -691,7 +687,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

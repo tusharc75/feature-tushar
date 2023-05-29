@@ -7,10 +7,10 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import SelectionDialog from './SelectionDialog';
 import { isEmpty } from 'lodash';
 import { useEffect } from 'react';
+import { ImportIcon, ExportIcon, DownloadIcon } from 'src/assets/svg/svgIcons';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: '100%',
     flexGrow: 1,
     display: 'flex',
     justifyContent: 'flex-end'
@@ -28,31 +28,8 @@ const useStyles = makeStyles((theme) => ({
       display: 'none'
     }
   },
-  links: {
-    color: theme.palette.info.light, //  textDark
-    fontSize: 15
-  },
-  custom_links: {
-    color: '#484848',
-    fontSize: '12px',
-    fontWeight: 'bold'
-  },
-  linkDivider: {
-    backgroundColor: '#9582822e', //  darkBg
-    margin: '0 10px'
-  },
   delBtn: {
     color: 'red'
-  },
-  expandIcon: {
-    position: 'absolute',
-    right: '0',
-    color: '#3e3e3e'
-  },
-  custom_expandIcon: {
-    position: 'absolute',
-    right: '0',
-    color: 'black'
   }
 }));
 
@@ -69,7 +46,8 @@ export default function ImportExportLinks({
   onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
-  extraImportExportLinks = []
+  extraImportExportLinks = [],
+  inverted = false
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -281,9 +259,7 @@ export default function ImportExportLinks({
               handleCloseMenu();
             }}
           >
-            <label htmlFor="importFromExcel" className="cursor-pointer">
-              {api === 'product' ? `Product Import` : `Import from Excel`}
-            </label>
+            <label htmlFor="importFromExcel">{api === 'product' ? `Product Import` : `Import from Excel`}</label>
           </MenuItem>
         )}
         {imptExptDnldMenuDta.action === 'export' && (
@@ -359,7 +335,7 @@ export default function ImportExportLinks({
   };
 
   return (
-    <div className={module !== 'builder' ? classes.root : classes.custom_root}>
+    <div className={`${module !== 'builder' ? classes.root : classes.custom_root} ${inverted ? 'inverted' : ''}`}>
       <div className={classes.linksContainer}>
         {permissions?.isCreate && (
           <label
@@ -373,9 +349,10 @@ export default function ImportExportLinks({
               }
             }}
             htmlFor={api === 'product' ? '' : 'importFromExcel'}
-            className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}
+            className={` new-headerbox-button-v1`}
           >
             Import from Excel
+            <ImportIcon />
           </label>
         )}
         <label
@@ -386,10 +363,11 @@ export default function ImportExportLinks({
               exportToExcel();
             }
           }}
-          className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}
+          className={` new-headerbox-button-v1`}
         >
           Export to Excel
           {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? ' (All)' : ` (${recordsToExport})`) : null}
+          <ExportIcon />
         </label>
         <label
           onClick={(e) => {
@@ -399,13 +377,29 @@ export default function ImportExportLinks({
               setIsSelection(true);
             }
           }}
-          className={`${module !== 'builder' ? classes.links : classes.custom_links} cursor-pointer new-headerbox-button-v1`}
+          className={` new-headerbox-button-v1`}
         >
           Download Template
+          <DownloadIcon />
         </label>
         {extraImportExportLinks?.length > 0 && api !== 'product' && (
           <>
-            <Menu id="import-export-extra-links" anchorEl={anchorExtraEl} keepMounted open={Boolean(anchorExtraEl)} onClose={handleExtraClose}>
+            <Menu
+              id="import-export-extra-links"
+              getContentAnchorEl={null}
+              anchorEl={anchorExtraEl}
+              keepMounted
+              open={Boolean(anchorExtraEl)}
+              onClose={handleExtraClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right'
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right'
+              }}
+            >
               {extraImportExportLinks?.map((d, idx) => {
                 if (d.type === 'import') {
                   return (
@@ -443,13 +437,28 @@ export default function ImportExportLinks({
               })}
             </Menu>
             <Box ml={1} />
-            <IconButton onClick={handleExtraClick}>
-              <IoIosArrowDropdown className={module !== 'builder' ? classes.expandIcon : classes.custom_expandIcon} />
+            <IconButton onClick={handleExtraClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
+              <IoIosArrowDropdown />
             </IconButton>
           </>
         )}
       </div>
-      <Menu id="import-export-links" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+      <Menu
+        id="import-export-links"
+        anchorEl={anchorEl}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
         {permissions?.isCreate && (
           <MenuItem
             onClick={() => {
@@ -517,8 +526,8 @@ export default function ImportExportLinks({
         })}
       </Menu>
       {isMobile && (
-        <IconButton onClick={handleClick}>
-          <IoIosArrowDropdown className={module !== 'builder' ? classes.expandIcon : classes.custom_expandIcon} />
+        <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
+          <IoIosArrowDropdown />
         </IconButton>
       )}
       {isSelection && (

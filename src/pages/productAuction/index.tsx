@@ -15,13 +15,20 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, productAuction, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import {
+  isObjectEmpty,
+  gridLoadingTimeout,
+  getLocalStorageArrayData,
+  productAuction,
+  removeLocalStorage,
+  sidebarResource
+} from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { MdAdd, MdSort, MdFilterList, RiAuctionFill } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
@@ -33,7 +40,6 @@ import { camelCase } from 'lodash';
 import ManageProductAuction from './ManageProductAuction';
 
 const ProductAuction = () => {
-
   let renderedFrom = camelCase(routes.productAuction?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -49,7 +55,8 @@ const ProductAuction = () => {
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   const [isOpenDialog, setisOpenDialog] = useState(false);
 
@@ -138,20 +145,19 @@ const ProductAuction = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-    let filterById = [];
-    if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+   
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
     }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -175,7 +181,7 @@ const ProductAuction = () => {
     axiosInstance()
       .put(`${productAuction.api}/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords)
+        removeLocalStorage(localStorageSelectedRecords);
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -230,16 +236,6 @@ const ProductAuction = () => {
     setAnchorEl(null);
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-      default:
-        return field;
-    }
-  };
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -458,7 +454,7 @@ const ProductAuction = () => {
             )
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

@@ -3,7 +3,7 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
-import ConfirmationDialog from "../Helpers/ConfirmationDialog";
+import ConfirmationDialog from '../Helpers/ConfirmationDialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -35,7 +35,6 @@ import InfoIcon from '@material-ui/icons/Info';
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
 const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, handleSaveProduct, stage }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [productFields, setProductFields] = useState([]);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -377,8 +376,8 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                               ? true
                                               : false
                                             : ['productCategory', 'productTemplate', 'entity', 'priceTemplate'].includes(field.fieldName)
-                                              ? true
-                                              : false
+                                            ? true
+                                            : false
                                         }
                                       />
                                     ) : field.fieldName === 'supplier' ? (
@@ -403,7 +402,7 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                             size="small"
                                             doNotShowInfoTooltip={true}
                                           />
-                                          {permissions.supplierAccount.isCreate && (
+                                          {permissions?.supplierAccount?.isCreate && (
                                             <Grid>
                                               <Tooltip title="Create Account" className="mt-1">
                                                 <IconButton
@@ -462,14 +461,14 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                                     ? true
                                                     : false
                                                   : ['productCategory', 'productTemplate', 'entity', 'priceTemplate'].includes(field.fieldName)
-                                                    ? true
-                                                    : false
+                                                  ? true
+                                                  : false
                                               }
                                               imageOrFileUploadCompletePercentage={
                                                 ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                                   ? (completePercentage) => {
-                                                    setUploadingImageOrFileProgress(completePercentage);
-                                                  }
+                                                      setUploadingImageOrFileProgress(completePercentage);
+                                                    }
                                                   : null
                                               }
                                               setValues={setValues}
@@ -576,7 +575,7 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

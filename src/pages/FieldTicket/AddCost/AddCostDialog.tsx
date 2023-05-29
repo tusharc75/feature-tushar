@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, isFieldNotTouched, yupSchema } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { isEqual } from 'lodash';
@@ -22,7 +22,6 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
-  const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
@@ -32,7 +31,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
     setInitialData({ fields: [], values: {} });
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`);
     var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || "USD");
+    data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
     if (costData) {
       setInitialData({
         fields: data,
@@ -47,7 +46,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
   };
 
   const handleSubmit = (values) => {
-    setSubmitting(true)
+    setSubmitting(true);
     if (costData) {
       axiosInstance()
         .put(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [{ ...values, _id: costData._id }])
@@ -87,7 +86,6 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
     }
   };
 
-
   return (
     <Dialog
       maxWidth="md"
@@ -103,21 +101,13 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-          innerRef={ref}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
                 title={costData ? `Edit ${costData.description}` : `Add Cost`}
                 isMinimized={!fullScreen}
@@ -145,16 +135,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
+                    if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
@@ -190,12 +171,12 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
     </Dialog>
-  )
-}
+  );
+};
 
-export default AddCostDialog
+export default AddCostDialog;

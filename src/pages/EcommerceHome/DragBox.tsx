@@ -9,8 +9,7 @@ const style = {
 };
 
 const DragBox = ({ type, label, setFormData }) => {
-
-  const item = { _id: (Math.random() * 100000).toString(), type, label, column: "12" };
+  const item = { _id: (Math.random() * 100000).toString(), type, label, column: '12' };
 
   const [{ isDragging }, drag] = useDrag({
     item: item,
@@ -30,7 +29,7 @@ const DragBox = ({ type, label, setFormData }) => {
 
   return (
     <Grid ref={drag} style={{ ...style, opacity }} item xs={12} sm={12}>
-      <Box border={1} p={1} borderColor="grey.300" className="text-truncate">
+      <Box border={1} p={1} borderColor="var(--common-border-color)" className="text-truncate">
         <Typography variant="body2" className="text-truncate">
           {label}
         </Typography>

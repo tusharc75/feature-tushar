@@ -215,12 +215,13 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   };
 
   const columns = [
-    { field: 'detail', headerName: 'Detail', show: true, cellRenderer: 'detailRenderer' },
-    { field: 'materialType', headerName: 'Type', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'conditionType', headerName: 'Condition Type', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'unit', headerName: 'Unit', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'pricingMethod', headerName: 'Pricing Method', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'detail', headerName: 'Detail', show: true, disabled: true, cellRenderer: 'detailRenderer' },
+    { field: 'materialType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'conditionType', headerName: 'Condition Type', disabled: true, show: true, cellRenderer: 'commonRenderer' },
+    { field: 'unit', headerName: 'Unit', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'pricingMethod', headerName: 'Pricing Method', show: true, disabled: true, cellRenderer: 'commonRenderer' }
   ];
+
   const uploadData = (event) => {
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
@@ -433,7 +434,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             refreshGrid={fetchCondition}
           />
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}

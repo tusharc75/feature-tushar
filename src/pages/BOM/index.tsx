@@ -306,7 +306,7 @@ const BOMTable = () => {
               onCellValueChanged={handleValueUpdate}
             />
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
@@ -329,7 +329,6 @@ const BOMTable = () => {
           productId={id}
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
           assignedProducts={[...parts?.map((p) => p.childProduct), id]}
-          renderedFrom={`${renderedFrom}_grid-sub-1`}
           onSuccess={() => {
             if (permissions?.serializedAsset) {
               fetchBOMData();

@@ -1,58 +1,50 @@
-import React, { useState, useContext } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import {
-  Container,
-  CssBaseline,
-  Grid,
-  Paper,
-  Button,
-  CircularProgress,
-  TextField,
-} from "@material-ui/core";
-import { Formik, Form } from "formik";
-import queryString from "query-string";
-import { useHistory, Redirect } from "react-router-dom";
+import React, { useState, useContext } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import { Container, CssBaseline, Grid, Paper, Button, CircularProgress, TextField } from '@material-ui/core';
+import { Formik, Form } from 'formik';
+import queryString from 'query-string';
+import { useHistory, Redirect } from 'react-router-dom';
 
-import demoImg from "../../assets/clip-hardworking-man.png";
-import axiosInstance from "../../axios/axiosInstance";
+import demoImg from '../../assets/clip-hardworking-man.png';
+import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const useStyles = makeStyles((theme) => ({
   container: {
     marginTop: theme.spacing(5),
-    [theme.breakpoints.up("xs")]: {
-      marginTop: theme.spacing(10),
-    },
+    [theme.breakpoints.up('xs')]: {
+      marginTop: theme.spacing(10)
+    }
   },
   formContainer: {
-    textAlign: "center",
-    padding: theme.spacing(10, 5),
+    textAlign: 'center',
+    padding: theme.spacing(10, 5)
   },
   form: {
     marginTop: theme.spacing(5),
-    display: "flex",
-    flexDirection: "column",
+    display: 'flex',
+    flexDirection: 'column'
   },
 
   image: {
-    display: "none",
-    [theme.breakpoints.up("md")]: {
-      display: "grid",
-      placeItems: "center",
-    },
+    display: 'none',
+    [theme.breakpoints.up('md')]: {
+      display: 'grid',
+      placeItems: 'center'
+    }
   },
   FormControl: {
-    marginBottom: theme.spacing(3),
+    marginBottom: theme.spacing(3)
   },
   button: {
     marginTop: theme.spacing(2),
     background: theme.palette.primary.main, //  darkBg
-    color: "#fff",
+    color: '#fff',
 
-    "&:hover": {
-      backgroundColor: theme.palette.primary.main, //  darkBg
-    },
-  },
+    '&:hover': {
+      backgroundColor: theme.palette.primary.main //  darkBg
+    }
+  }
 }));
 
 const PasswordSetup = () => {
@@ -66,20 +58,17 @@ const PasswordSetup = () => {
     setIsSubmitting(true);
 
     axiosInstance(null, { Authorization: `Bearer ${token}` })
-      .post(
-        `/user/create-password`,
-        {
-          password: values.password,
-        },
-      )
+      .post(`/user/create-password`, {
+        password: values.password
+      })
       .then(({ data }) => {
         setIsSubmitting(false);
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
-        history.push("/login");
+        history.push('/login');
       })
       .catch((err) => {
         setIsSubmitting(false);
@@ -91,27 +80,13 @@ const PasswordSetup = () => {
     const errors: any = {};
     if (!values.password) {
       errors.password = 'Required field';
-    }
-    else if (!values.confirmPassword) {
+    } else if (!values.confirmPassword) {
       errors.confirmPassword = 'Required field';
-    }
-    else if (
-      !/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(
-        values.password,
-      )
-    ) {
-      errors.password =
-        'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
-    }
-    else if (
-      !/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(
-        values.confirmPassword,
-      )
-    ) {
-      errors.confirmPassword =
-        'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
-    }
-    else if (values.confirmPassword !== values.password) {
+    } else if (!/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(values.password)) {
+      errors.password = 'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
+    } else if (!/^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/.test(values.confirmPassword)) {
+      errors.confirmPassword = 'Minimum eight characters, at least one uppercase, one lowercase, one number and one special character';
+    } else if (values.confirmPassword !== values.password) {
       errors.confirmPassword = 'Password and confirm Password does not match';
     }
     return errors;
@@ -131,7 +106,7 @@ const PasswordSetup = () => {
                 initialValues={{
                   email,
                   password: '',
-                  confirmPassword: '',
+                  confirmPassword: ''
                 }}
                 validate={validateForm}
                 onSubmit={handleSubmit}
@@ -145,7 +120,7 @@ const PasswordSetup = () => {
                       disabled
                       variant="outlined"
                       required
-                      value={values["email"]}
+                      value={values['email']}
                       error={touched['email'] && Boolean(errors['email'])}
                       helperText={touched['email'] && errors['email']}
                       onChange={(e) => {
@@ -159,7 +134,7 @@ const PasswordSetup = () => {
                       name="password"
                       variant="outlined"
                       required
-                      value={values["password"]}
+                      value={values['password']}
                       error={touched['password'] && Boolean(errors['password'])}
                       helperText={touched['password'] && errors['password']}
                       onChange={(e) => {
@@ -168,12 +143,12 @@ const PasswordSetup = () => {
                     />
                     <br />
                     <TextField
-                      type='password'
-                      label='Confirm Password'
-                      name='confirmPassword'
-                      variant='outlined'
+                      type="password"
+                      label="Confirm Password"
+                      name="confirmPassword"
+                      variant="outlined"
                       required
-                      value={values["confirmPassword"]}
+                      value={values['confirmPassword']}
                       error={touched['confirmPassword'] && Boolean(errors['confirmPassword'])}
                       helperText={touched['confirmPassword'] && errors['confirmPassword']}
                       onChange={(e) => {
@@ -187,7 +162,7 @@ const PasswordSetup = () => {
                       size="small"
                       disabled={isSubmitting}
                       onClick={submitForm}
-                      startIcon={isSubmitting && <CircularProgress size={20} color='inherit' />}
+                      startIcon={isSubmitting && <CircularProgress size={20} color="inherit" />}
                     >
                       Submit
                     </Button>
@@ -196,7 +171,7 @@ const PasswordSetup = () => {
               </Formik>
             </Grid>
             <Grid item xs={12} sm={12} md={6} className={classes.image}>
-              <img src={demoImg} alt="illustration" style={{ width: "100%" }} />
+              <img src={demoImg} alt="illustration" style={{ width: '100%' }} />
             </Grid>
           </Grid>
         </Paper>

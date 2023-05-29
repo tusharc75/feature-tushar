@@ -549,7 +549,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
           </Box>
         </>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
@@ -641,7 +641,6 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
           productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           assignedProducts={[]}
-          renderedFrom={renderedFrom}
           onSuccess={(d) => {
             handleAdd(d);
           }}

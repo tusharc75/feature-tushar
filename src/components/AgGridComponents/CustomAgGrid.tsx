@@ -12,6 +12,7 @@ import { checkStaticField, staticColumns } from '../../constants/useColumns';
 import { GridApi } from 'ag-grid-community';
 import { uniqBy } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
+import { useStore, SEARCH } from 'src/StateProvider/fastContext';
 
 import ArrangeView from './GridButtons/ArrangeView/ArrangeView';
 
@@ -19,6 +20,7 @@ import CustomGridFilterHeader from './CustomGridFilterHeader';
 
 // OTHER COMPONENTS
 import { ShowOnlySelected } from './GridButtons';
+import { Typography } from '@material-ui/core';
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -166,7 +168,7 @@ export default function CustomAgGrid({
   customGridOptions = null,
   actionLabel = null,
   actionEditable = false,
-  onCellValueChanged = () => { },
+  onCellValueChanged = () => {},
   showOnlyShowFilteredRecordSwitch = false,
   idProperty = '_id',
   allowHeaderSelection = true,
@@ -182,9 +184,7 @@ export default function CustomAgGrid({
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
 
-  const {
-    state: { searchQuery }
-  }: any = useData();
+  const [searchQuery] = useStore((store) => store[SEARCH]);
 
   useEffect(() => {
     let timer;
@@ -386,15 +386,15 @@ export default function CustomAgGrid({
                 ? true
                 : checkStaticField(renderedFrom, column.field)
               : column.hasOwnProperty('show') && !column?.show
-                ? true
-                : false
+              ? true
+              : false
           }
           floatingFilterComponent="customFloatingFilter"
           valueGetter={column.valueGetter ?? null}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+          // floatingFilterComponent={column.floatingFilterComponent ?? null}
+          // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+          //   suppressFilterButton: true,
+          // }}
         ></AgGridColumn>
       )
     ) : column.isAction ? (
@@ -420,18 +420,18 @@ export default function CustomAgGrid({
               ? true
               : checkStaticField(renderedFrom, column.field)
             : column.hasOwnProperty('show') && !column?.show
-              ? true
-              : false
+            ? true
+            : false
         }
         comparator={() => {
           return 0;
         }}
         floatingFilterComponent="customFloatingFilter"
         valueGetter={column.valueGetter ?? null}
-      // floatingFilterComponent={column.floatingFilterComponent ?? null}
-      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-      //   suppressFilterButton: true,
-      // }}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
       ></AgGridColumn>
     );
   });
@@ -441,7 +441,7 @@ export default function CustomAgGrid({
       <div className="ag-grid-main custom-react-table-v1 ">
         {loading ? (
           <div className="loader">
-            <span>Loading</span>
+            <Typography>Loading</Typography>
           </div>
         ) : (
           ''

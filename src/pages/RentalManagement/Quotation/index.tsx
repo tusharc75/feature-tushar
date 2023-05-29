@@ -330,7 +330,9 @@ const Quotation = ({
     const response = await axiosInstance().get(
       `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
     );
-    const additionalCost = await axiosInstance().get(`${quotation.api}/additionalcost/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
+    const additionalCost = await axiosInstance().get(
+      `${quotation.api}/additionalcost/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
+    );
     const additionalCostData = additionalCost?.data?.data?.map((e) => {
       const detail = e?.description;
       return {
@@ -740,7 +742,7 @@ const Quotation = ({
           />
         </Box>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

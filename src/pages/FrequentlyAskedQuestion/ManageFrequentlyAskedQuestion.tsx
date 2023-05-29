@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -10,7 +10,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
-import { CustomDialogTransition, isFieldNotTouched } from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -24,11 +24,8 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
   const [loading, setLoading] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
-  const [cloneHeading, setCloneHeading] = useState('')
+  const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const ref = useRef(null);
-
-
 
   useEffect(() => {
     fetchFields();
@@ -43,22 +40,25 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (id) {
-        axiosInstance().get(`/frequently-asked-question/${id}`).then(({ data: { data } }) => {
-          let fields = fieldsDataForUpdate
-          let tempData = data
-          if (isClone) {
-            fields = fieldsDataForCreate
-            const { label, ...rest } = data
-            setCloneHeading(label);
-            tempData = { ...rest, label }
-          }
-          setInitialData({
-            fields: fields,
-            values: getObjKeysWithValues(tempData, fields),
+        axiosInstance()
+          .get(`/frequently-asked-question/${id}`)
+          .then(({ data: { data } }) => {
+            let fields = fieldsDataForUpdate;
+            let tempData = data;
+            if (isClone) {
+              fields = fieldsDataForCreate;
+              const { label, ...rest } = data;
+              setCloneHeading(label);
+              tempData = { ...rest, label };
+            }
+            setInitialData({
+              fields: fields,
+              values: getObjKeysWithValues(tempData, fields)
+            });
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
-        }).catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         setInitialData({
@@ -66,7 +66,6 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
           values: tempInitialData
         });
       }
-
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -75,19 +74,22 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (id && !isClone) {
-      values._id = id
-      axiosInstance().put(`/frequently-asked-question`, values).then(({ data }) => {
-        setSubmitting(false);
-        onSuccess()
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
+      values._id = id;
+      axiosInstance()
+        .put(`/frequently-asked-question`, values)
+        .then(({ data }) => {
+          setSubmitting(false);
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     } else {
       axiosInstance()
         .post(`/frequently-asked-question`, values)
@@ -97,22 +99,17 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
         })
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
           toastConfig.setToastConfig(error);
-        })
+        });
     }
   };
-
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
 
   return (
     <Dialog
@@ -129,29 +126,21 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-          validate={validate}
-          innerRef={ref}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
-                title={`${id
+                title={`${
+                  id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
                     : `Create Frequently Asked Question`
-                  }`}
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -159,7 +148,7 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
                 showManimizeMaximize={true}
               />
               <CustomDialogContent>
-                <Form autoComplete="off" autoCorrect="off" noValidate >
+                <Form autoComplete="off" autoCorrect="off" noValidate>
                   <InputField
                     errors={errors}
                     values={values}
@@ -177,15 +166,7 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    ) onClose();
+                    if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
@@ -222,7 +203,7 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

@@ -21,7 +21,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from 'src/constants/useColumns';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import ManageTransferAsset from './ManageTransferAsset';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -148,27 +148,22 @@ const TransferAsset = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
+
     if (fromRental) {
-      let filterById = [];
-      filterById.push({ field: 'rentalJob', term: fromRental?._id });
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+      filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
     }
 
-    if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
     }
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -177,6 +172,11 @@ const TransferAsset = () => {
 
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+    }
+
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
     return deepFilter;
@@ -275,19 +275,6 @@ const TransferAsset = () => {
 
   const closeActions = () => {
     setAnchorEl(null);
-  };
-
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
   };
 
   const handleOpen = () => {
@@ -510,7 +497,7 @@ const TransferAsset = () => {
                 dataRows={dataRows}
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
-                onEdit={() => { }}
+                onEdit={() => {}}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {
                   setDeleteRecord(data);
@@ -577,7 +564,7 @@ const TransferAsset = () => {
             )
           ) : null
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
@@ -597,8 +584,9 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

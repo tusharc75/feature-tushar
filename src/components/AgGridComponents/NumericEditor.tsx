@@ -144,6 +144,7 @@ export default forwardRef((props: any, ref) => {
             type="number"
             onBlur={() => props.stopEditing()}
             onChange={(event) => setValue(event.target.value)}
+            onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
             //onKeyDown={(event) => onKeyDown(event)}
             style={{ width: '100%' }}
         />

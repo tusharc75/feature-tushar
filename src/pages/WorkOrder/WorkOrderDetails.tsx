@@ -11,7 +11,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS } from 'src/constants/helpers';
+import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, INVENTORY_STATUS } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
@@ -55,6 +55,8 @@ const WorkOrderDetails = () => {
   const [statusOptions, setStatusOptions] = useState([]);
   const [completed, setCompleted] = useState(false);
 
+  const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
+
   useEffect(() => {
     return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
@@ -89,8 +91,24 @@ const WorkOrderDetails = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.workOrder}`)
       .then(({ data: { data } }) => {
-        setWorkOrderFields(data);
-        data.some((o) => {
+        const adjustedData = [
+          ...data,
+          {
+            fieldData: {
+              _id: '63106511ba8a0bc11ff780ad',
+              fieldLabel: 'Total Consumables Cost',
+              type: 'singleLine',
+              fieldName: 'totalConsumablesCost',
+              sectionName: 'Consumable Information',
+              resource: 'Work Order'
+            },
+            isCreate: true,
+            isRead: true,
+            isUpdate: true
+          }
+        ];
+        setWorkOrderFields(adjustedData);
+        adjustedData?.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
             setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue !== 'Deleted')]);
             return true;
@@ -108,7 +126,7 @@ const WorkOrderDetails = () => {
       .then(({ data: { data } }) => {
         var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         if (user?.role?.selectedEntity?.superAdminAccess) {
-          isAllowedToEdit = true
+          isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
         setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false);
@@ -175,9 +193,13 @@ const WorkOrderDetails = () => {
       });
   };
 
-  const updateJobStatus = (status) => {
+  const updateJobStatus = (status, assetStatus = null) => {
+    const data: any = { status: status };
+    if (assetStatus) {
+      data.assetStatus = assetStatus;
+    }
     axiosInstance()
-      .patch(`${workOrder.api}/status/${id}`, { status: status })
+      .patch(`${workOrder.api}/status/${id}`, data)
       .then(({ data: { data } }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -186,7 +208,6 @@ const WorkOrderDetails = () => {
         });
         fetchWorkOrderData();
       })
-
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -223,6 +244,11 @@ const WorkOrderDetails = () => {
           <Box className="control-buttons-v1">
             {workOrderData ? (
               <>
+                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
+                  <Button variant={'contained'} size="small" onClick={() => setShowConfirmBoxScrap(true)} className={'btn-outline-v1'}>
+                    {`${INVENTORY_STATUS.scrap} Asset`}
+                  </Button>
+                )}
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
                   workOrderData?.canComplete &&
@@ -236,53 +262,13 @@ const WorkOrderDetails = () => {
                       >
                         Complete
                       </Button>
-                      {/* <Button
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                      >
-                        {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        {statusOptions?.map((o, index) => {
-                          return (
-                            <MenuItem
-                              disabled={![WORK_ORDER_STATUS.completed]?.includes(o?.optionLabel)}
-                              onClick={() => {
-                                closeActions();
-                                handleStatusChange(o);
-                              }}
-                              value={o}
-                            >
-                              {o?.optionLabel}
-                            </MenuItem>
-                          );
-                        })}
-                      </Menu> */}
                     </Fragment>
                   )}
                 <Button
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  color="primary"
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
                   size="small"
                   onClick={previewWorkOrderPdf}
-                  className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  endIcon={previewPdf ? <CircularProgress size={20} /> : null}
+                  className={'btn-outline-v1'}
                   disabled={previewPdf}
                 >
                   {isMobile && !isTablet ? <VisibilityIcon color="primary" /> : 'Preview'}
@@ -380,18 +366,18 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-          {workOrderData &&
+          {workOrderData && (
             <Consumables
               allowedToEdit={allowedToEdit && !completed}
               isCreate={false}
               workOrderId={id}
-              warehouse={workOrderData?.warehouse?.optionValue}
+              warehouse={workOrderData?.warehouse}
               service={null}
               uniqueId={null}
               stepId={null}
               serviceName={null}
             />
-          }
+          )}
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
           <Box>
@@ -409,6 +395,19 @@ const WorkOrderDetails = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showConfirmBoxScrap && (
+        <ConfirmationDialog
+          open={showConfirmBoxScrap}
+          message={`Are you sure you want to scrap asset: ${workOrderData?.serializedAsset?.optionLabel} ?`}
+          onClose={() => {
+            setShowConfirmBoxScrap(false);
+          }}
+          onOk={() => {
+            setShowConfirmBoxScrap(false);
+            updateJobStatus(WORK_ORDER_STATUS.completed, INVENTORY_STATUS.scrap);
+          }}
         />
       )}
       {openUpdateDialog && (

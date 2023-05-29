@@ -48,7 +48,7 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
         {consumables?.length &&
           consumables?.map((item, index) => {
             return (
-              <Box key={index} p={2} mb={2} border={1} borderColor="grey.300">
+              <Box key={index} p={2} mb={2} border={1} borderColor="var(--common-border-color)">
                 <Typography variant="subtitle1">{item.productName}</Typography>
                 <Box mt={1}>
                   <Autocomplete

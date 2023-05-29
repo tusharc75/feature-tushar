@@ -12,14 +12,16 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, isFieldNotTouched } from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
 const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,6 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const ref = useRef(null);
 
   useEffect(() => {
     fetchFields();
@@ -36,7 +37,7 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
   const fetchFields = async () => {
     try {
       let data;
-      const response:any = await axiosInstance().get('/field?resource=Competencies');
+      const response: any = await axiosInstance().get('/field?resource=Competencies');
       data = response?.data?.data;
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -44,7 +45,7 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
       if (id) {
         axiosInstance()
           .get(`${routes?.competencies?.path}/${id}`)
-          .then(({ data: { data } }:any) => {
+          .then(({ data: { data } }: any) => {
             let fields = fieldsDataForUpdate;
             let tempData = data;
             if (isClone) {
@@ -55,11 +56,11 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
             } else {
               if (referenceData?.competencyType) {
                 fields?.forEach((e) => {
-                  if (e.fieldName === "competencyType") {
-                    e.disableOnEdit = true
+                  if (e.fieldName === 'competencyType') {
+                    e.disableOnEdit = true;
                     e.isUneditable = true;
                   }
-                })
+                });
               }
             }
             setInitialData({
@@ -70,17 +71,16 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
-      }
-      else {
-        const tempInitialData:any = getObjKeys('', fieldsDataForCreate);
+      } else {
+        const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
         if (referenceData?.competencyType) {
           fieldsDataForCreate?.forEach((e) => {
-            if (e.fieldName === "competencyType") {
+            if (e.fieldName === 'competencyType') {
               tempInitialData.competencyType = referenceData?.competencyType;
-              e.disableOnEdit = true
+              e.disableOnEdit = true;
               e.isUneditable = true;
             }
-          })
+          });
         }
         setInitialData({
           fields: fieldsDataForCreate,
@@ -95,49 +95,47 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (id && !isClone) {
-      values._id = id
-      axiosInstance().put(`${routes.competencies?.path}`, values).then(({ data }:any) => {
-        setSubmitting(false);
-        onSuccess()
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
+      values._id = id;
+      axiosInstance()
+        .put(`${routes.competencies?.path}`, values)
+        .then(({ data }: any) => {
+          setSubmitting(false);
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     } else {
       axiosInstance()
         .post(`${routes.competencies?.path}`, values)
-        .then(({ data: { data, message } }:any) => {
+        .then(({ data: { data, message } }: any) => {
           setLoading(false);
           if (referenceData) {
-            onSuccess(data.data);
-          }else{
+            onSuccess(data);
+          } else {
             history.push(`${routes.competenciesDetail.path}/${data._id}`);
-            onSuccess(data.data);
+            onSuccess(data);
           }
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: message,
+            type: 'success',
+            message: message
           });
         })
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
           toastConfig.setToastConfig(error);
-        })
+        });
     }
   };
-
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
 
   return (
     <Dialog
@@ -154,29 +152,21 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
       }}
     >
       {initialData.fields.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          onSubmit={handleSubmit}
-          validate={validate}
-          innerRef={ref}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.competencyName ? `(${initialData.values?.competencyName})` : ''}`
-                  : `Create ${routes?.competencies?.title}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.competencyName ? `(${initialData.values?.competencyName})` : ''}`
+                    : `Create ${routes?.competencies?.title}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -202,16 +192,7 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (
-                      isFieldNotTouched(
-                        {
-                          initialValues: initialData.values,
-                          fields: initialData.fields
-                        },
-                        values
-                      )
-                    )
-                      onClose();
+                    if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
@@ -248,7 +229,7 @@ const ManageCompetencies = ({ onClose, onSuccess, isClone = false, id = null, re
           )}
         </Formik>
       ) : (
-        <Box p={2} height={500} bgcolor="white">
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

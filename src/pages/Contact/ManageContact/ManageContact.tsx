@@ -5,7 +5,6 @@ import {
   CustomDialogTransition,
   getCollaboratorDropdownDataSource,
   getOwnerDropdownDataSource,
-  simplifyValues,
   yupSchema,
   setFieldsInAscendingOrder
 } from '../../../constants/helpers';
@@ -26,6 +25,7 @@ import ManageContactDialog from './index';
 import ManageAddressDialog from "../../../components/Address/ManageAddressDialog"
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from 'src/components/Helpers/Routes';
+import { isEqual } from 'lodash';
 
 const arr = [...Array(9).keys()];
 
@@ -54,7 +54,6 @@ export default function ManageContact(props) {
     contactId = null,
     accountId = null,
     formValues = {},
-    handleValuesChange = null,
     isClone = false,
     isAccountFieldDisable = false,
     contactApi,
@@ -186,7 +185,6 @@ export default function ManageContact(props) {
       setCollaboratorDataSource(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorCommonDataSource));
     }
   };
-  //  Owner, Collaborator Code - End
 
   const onReportsToDropdownOpen = (selectedAccount) => {
     setReportsToDataSource(reportsToMainDataSource.filter((d) => d.parentAccount === selectedAccount));
@@ -211,6 +209,7 @@ export default function ManageContact(props) {
       setReportsToDataSource(tempReportsToMainDataSource.filter((d) => d.parentAccount === selectedAccount));
     }
   };
+
   const onSubmit = (values) => {
     handleSubmit(values, false);
   };
@@ -231,7 +230,6 @@ export default function ManageContact(props) {
     const err = Object.keys(errors);
     if (err.length) {
       const input = document.querySelector(`input[name=${err[0]}]`);
-
       input.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
@@ -239,15 +237,6 @@ export default function ManageContact(props) {
       });
     }
   };
-
-  const isFieldNotTouched = (contactData, values) => {
-    return (
-      Object.values(simplifyValues(contactData.initialValues, contactData.fields)).toString() ===
-      Object.values(simplifyValues(values, contactData.fields)).toString()
-    );
-  };
-
-
 
   return (
     <>
@@ -264,46 +253,42 @@ export default function ManageContact(props) {
         fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
       >
-        <CustomDialogHeader
-          onClose={() => {
-            if (isFieldNotTouched(contactData, formValues)) {
-              onClose();
-            } else {
-              setShowConfirmDialog(true);
-            }
-          }}
-          title={isClone ? `Clone - ${cloneHeading}` : isNew
-            ? contactResource === 'customerContact' ? `Add ${routes?.customerContact?.title}` : `Add ${routes?.supplierContact?.title}`
-            : `Editing ${contactData?.initialValues?.firstName ?? ''} ${contactData?.initialValues?.lastName ?? ''}`
-          }
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
-          }}
-          showManimizeMaximize={true}
-        />
-
         {contactData.fields.length > 0 ? (
           <>
             <Formik
               initialValues={contactData.initialValues}
               validationSchema={yupSchema(contactData.fields)}
-              // validate={(values) => formValidation(values, contactData.fields)}
               validateOnMount
               onSubmit={onSubmit}
             >
               {({
                 submitForm,
-
                 values,
                 errors,
                 touched,
                 setFieldValue
               }) => (
                 <>
+                  <CustomDialogHeader
+                    onClose={() => {
+                      if (isEqual(contactData.initialValues, values)) {
+                        onClose();
+                      } else {
+                        setShowConfirmDialog(true);
+                      }
+                    }}
+                    title={isClone ? `Clone - ${cloneHeading}` : isNew
+                      ? contactResource === 'customerContact' ? `Add ${routes?.customerContact?.title}` : `Add ${routes?.supplierContact?.title}`
+                      : `Editing ${contactData?.initialValues?.firstName ?? ''} ${contactData?.initialValues?.lastName ?? ''}`
+                    }
+                    isMinimized={!fullScreen}
+                    onMinimizeMaximize={() => {
+                      setFullScreen((prevState) => !prevState);
+                    }}
+                    showManimizeMaximize={true}
+                  />
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
-                      {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                       {formsData &&
                         formsData
                           .filter((item) => item.name !== additionalFieldName)
@@ -329,9 +314,7 @@ export default function ManageContact(props) {
                                           type={field.type}
                                           options={ownerDataSource}
                                           onChange={(e, val) => {
-                                            handleValuesChange(field.fieldName, val && val.optionValue ? val.optionValue : '');
                                             setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-
                                             if (val && val.optionValue !== user?.user?._id) {
                                               const checkOwnerAddedInCollaborator = values['collaborator'].find(
                                                 (d) => d?.optionValue === user?.user?._id
@@ -340,11 +323,6 @@ export default function ManageContact(props) {
                                                 const newCollaboratorDataSource = fromProject
                                                   ? collaborators.filter((c) => c.optionValue !== values['owner'])
                                                   : collaboratorDataSource;
-
-                                                handleValuesChange(
-                                                  'collaborator',
-                                                  newCollaboratorDataSource.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                                );
                                                 setFieldValue('collaborator', [
                                                   ...values['collaborator'],
                                                   newCollaboratorDataSource.find((d) => d?.optionValue === user?.user?._id).optionValue
@@ -392,7 +370,7 @@ export default function ManageContact(props) {
                                               />
                                             </Grid>
 
-                                            {permissions.customerContact?.isCreate && (
+                                            {permissions?.customerContact?.isCreate && (
                                               <Grid item xs={1} sm={1} md={1}>
                                                 <Tooltip title="Add Address" className="mt-1">
                                                   <IconButton
@@ -432,7 +410,6 @@ export default function ManageContact(props) {
                                           type={field.type}
                                           options={collaboratorDataSource}
                                           setFieldValue={(name, value) => {
-                                            handleValuesChange(name, value);
                                             setFieldValue(name, value);
                                           }}
                                           required={field.required}
@@ -471,9 +448,7 @@ export default function ManageContact(props) {
                                               size="small"
                                               doNotShowInfoTooltip={true}
                                               onChange={(e, value) => {
-                                                handleValuesChange(field.fieldName, value && value.optionValue ? value.optionValue : '');
                                                 setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                                handleValuesChange('reportsTo', '');
                                                 setFieldValue('reportsTo', '');
                                               }}
                                             />
@@ -525,7 +500,6 @@ export default function ManageContact(props) {
                                               type={field.type}
                                               options={reportsToDataSource}
                                               setFieldValue={(name, value) => {
-                                                handleValuesChange(name, value);
                                                 setFieldValue(name, value);
                                               }}
                                               required={field.required}
@@ -573,17 +547,10 @@ export default function ManageContact(props) {
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
                                           onChange={(e, value) => {
-                                            handleValuesChange(
-                                              field.fieldName,
-                                              value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
-                                            );
                                             setFieldValue(
                                               field.fieldName,
                                               value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
                                             );
-
-                                            handleValuesChange('owner', '');
-                                            handleValuesChange('collaborator', []);
                                             setFieldValue('owner', '');
                                             setFieldValue('collaborator', []);
                                           }}
@@ -601,7 +568,6 @@ export default function ManageContact(props) {
                                           type={field.type}
                                           options={field.option}
                                           setFieldValue={(name, value) => {
-                                            handleValuesChange(name, value);
                                             setFieldValue(name, value);
                                           }}
                                           required={field.required}
@@ -672,7 +638,7 @@ export default function ManageContact(props) {
                   <CustomDialogFooter>
                     <Button
                       onClick={() => {
-                        if (isFieldNotTouched(contactData, values)) onClose();
+                        if (isEqual(contactData.initialValues, values)) onClose();
                         else setShowConfirmDialog(true);
                       }}
                       variant="outlined"
@@ -681,15 +647,11 @@ export default function ManageContact(props) {
                     >
                       Cancel
                     </Button>
-
                     <Button
                       variant="contained"
                       color="primary"
                       size="small"
-                      disabled={
-                        loading || uploadingImageOrFileProgress > 0
-                        // isFieldNotTouched(contactData, values)
-                      }
+                      disabled={loading || uploadingImageOrFileProgress > 0}
                       onClick={(e) => {
                         e.preventDefault();
                         handleScroll(errors);
