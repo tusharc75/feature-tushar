@@ -3655,3 +3655,9 @@ body {
   overflow: hidden;
   min-height: 100%;
 }
+.new-table-font {
+  font-size: 14px !important;
+  * {
+    font-size: 14px !important;
+  }
+}
