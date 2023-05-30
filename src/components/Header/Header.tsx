@@ -141,6 +141,13 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
 
   const [modalContent, setModalContent] = useState<ModalContent | null>(null);
 
+  const openHelperModal = () => {
+    setModalContent({ title: 'Welcometo the Equipt', icon: <img src={SVG('LogoNewShort')} alt="equipt logo" /> });
+  };
+  const handleCloseHelperModal = () => {
+    setModalContent(null);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -843,7 +850,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem>
+      <MenuItem onClick={openHelperModal}>
         <HelpOutline style={{ maxWidth: 19 }} />
         <Box component="span" mx={1} my={2} />
         <p>Help</p>
@@ -931,13 +938,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   //     }
   //   });
   // };
-
-  const openHelperModal = () => {
-    setModalContent({ title: 'Welcometo the Equipt', icon: <img src={SVG('LogoNewShort')} alt="equipt logo" /> });
-  };
-  const handleCloseHelperModal = () => {
-    setModalContent(null);
-  };
 
   return (
     <div>
