@@ -29,7 +29,7 @@ const Request = ({ workOrder }) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [qtyDialog, setQtyDialog] = useState({ open: false, status: null, data: null });
-  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [], productName: '' });
+  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [], productName: '', data: null });
 
   const {
     state: { user }
@@ -272,7 +272,7 @@ const Request = ({ workOrder }) => {
                       size="small"
                       aria-label="Delete"
                       onClick={() => {
-                        setOpenProcessLogs({ open: true, logs: row['processesLogs'], productName: row?.productName });
+                        setOpenProcessLogs({ open: true, logs: row['processesLogs'], productName: row?.productName, data: row });
                       }}
                     >
                       <HistoryIcon />
@@ -409,10 +409,13 @@ const Request = ({ workOrder }) => {
       {openProcessLogs.open && (
         <ProcessLogs
           onClose={() => {
-            setOpenProcessLogs({ open: false, logs: [], productName: '' });
+            setOpenProcessLogs({ open: false, logs: [], productName: '', data: null });
+            fetchData();
           }}
           logsData={openProcessLogs.logs}
           productName={openProcessLogs.productName}
+          data={openProcessLogs.data}
+          workOrderId={workOrder}
         />
       )}
     </>
