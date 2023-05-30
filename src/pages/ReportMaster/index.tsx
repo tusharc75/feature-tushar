@@ -78,7 +78,13 @@ const ReportMaster = () => {
                   <Link
                     to={`/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`}
                   >
-                    <DashBoardCardShell background={'#fff'} gradientColors={colors.gradient} className={styles.cardInner} minHeight={false}>
+                    <DashBoardCardShell
+                      darkThemeBackgroundColor="var(--dark-secondary)"
+                      background={'#fff'}
+                      gradientColors={colors.gradient}
+                      className={styles.cardInner}
+                      minHeight={false}
+                    >
                       <ReportIcon colors={colors.iconGradient} className={styles.floatIcon} />
                       <Typography variant="h6">{report.type === 'dynamic' ? routes[report.key]?.title : report.title}</Typography>
                       <Typography variant="body2">{/* {report.text} */}</Typography>
@@ -105,7 +111,13 @@ const ReportMaster = () => {
                   return (
                     <Box key={index} className={styles.singleCard}>
                       <Link to={`/reports/custom-report/${item._id}`}>
-                        <DashBoardCardShell background={'#fff'} gradientColors={colors.gradient} className={styles.cardInner} minHeight={false}>
+                        <DashBoardCardShell
+                          darkThemeBackgroundColor="var(--dark-secondary)"
+                          background={'#fff'}
+                          gradientColors={colors.gradient}
+                          className={styles.cardInner}
+                          minHeight={false}
+                        >
                           <ReportIcon colors={colors.iconGradient} className={styles.floatIcon} />
                           <Typography variant="h6">{item.customReportName}</Typography>
                           <Typography variant="body2" className={styles.withoutDetails}>
