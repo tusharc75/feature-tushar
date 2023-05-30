@@ -1,14 +1,14 @@
 .tableWrapper {
   background-color: var(--dark-secondary, #f1f5ff);
-
+  overflow-y: auto;
   position: relative;
   border-radius: 12px;
   position: relative;
-  overflow: auto;
 
   .tableContainer {
     margin-left: 8px;
     margin-right: 8px;
+    overflow-x: auto;
 
     .table {
       display: block;
@@ -119,6 +119,7 @@
         position: absolute;
         top: calc(50% + 30px);
         left: 50%;
+        transform: translateX(-50%);
       }
     }
   }

@@ -40,8 +40,10 @@ const MaterialHandling = () => {
         const warehouses: any = [];
         if (data['Warehouse'] && data['Warehouse']?.length) {
           data['Warehouse']?.forEach((ele) => {
-            if ((ele?.manager && ele?.manager?.includes(user?.user?._id))
-              || (ele?.materialHandlers && ele?.materialHandlers?.includes(user?.user?._id))) {
+            if (
+              (ele?.manager && ele?.manager?.includes(user?.user?._id)) ||
+              (ele?.materialHandlers && ele?.materialHandlers?.includes(user?.user?._id))
+            ) {
               warehouses.push(ele);
             }
           });
@@ -141,7 +143,7 @@ const MaterialHandling = () => {
                     }
                   }
                   if (workOrderId) {
-                    history.push(routes.materialHandling.path)
+                    history.push(routes.materialHandling.path);
                   }
                 }}
                 size="small"
@@ -159,9 +161,9 @@ const MaterialHandling = () => {
           workOrder?.length > 0 ? (
             <Grid container spacing={2}>
               {!selectedOptionWorkOrder && (
-                <Grid item xs={12} lg={3}>
+                <Grid item xs={12} md={4} lg={3}>
                   <Box className="container-with-border" p={2}>
-                    <Box style={{ height: 'calc(100vh - 220px)', overflow: 'auto' }}>
+                    <Box style={{ maxHeight: 'calc(100vh - 220px)', overflow: 'auto' }}>
                       {workOrder?.map((data, index) => {
                         return (
                           <Box
@@ -220,7 +222,7 @@ const MaterialHandling = () => {
                   </Box>
                 </Grid>
               )}
-              <Grid item xs={12} lg={selectedOptionWorkOrder ? 12 : 9}>
+              <Grid item xs={12} md={8} lg={selectedOptionWorkOrder ? 12 : 9}>
                 {selectedWorkOrder && (
                   <Box className="container-with-border " p={3}>
                     <Request workOrder={selectedWorkOrder?._id} />
