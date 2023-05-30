@@ -677,12 +677,10 @@ const ReceivingTicket = ({
       fields: [
         {
           resource: 'Product',
-
           fieldNames: ['productName']
         },
         {
           resource: 'Serialized Asset',
-
           fieldNames: ['serialNumber']
         }
       ]
