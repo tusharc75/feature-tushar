@@ -75,10 +75,11 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
                   key={column.header}
                   {...column}
                   style={{
+                    ...column.style,
                     width: `${column.width}px}`,
                     maxWidth: `${column.width}px}`,
                     minWidth: `${column.minWidth}px`,
-                    position: column.sticky ? 'sticky' : 'unset',
+                    position: column.sticky ? 'sticky' : 'static',
                     [column.sticky]: 0
                   }}
                 >
@@ -111,11 +112,13 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
                   <td
                     className={column.sticky ? (column.sticky === 'right' ? styles.stickyRight : styles.stickyLeft) : ''}
                     key={index}
+                    {...column}
                     style={{
+                      ...column.style,
                       width: `${column.width}px}`,
                       maxWidth: `${column.width}px}`,
                       minWidth: `${column.minWidth}px`,
-                      position: column.sticky ? 'sticky' : 'unset',
+                      position: column.sticky ? 'sticky' : 'static',
                       [column.sticky]: 0
                     }}
                   >
