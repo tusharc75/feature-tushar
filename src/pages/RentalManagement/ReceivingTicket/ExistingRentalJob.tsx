@@ -5,7 +5,7 @@ import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridCo
 import Grid from "@material-ui/core/Grid/Grid";
 import { Button, Dialog, IconButton } from "@material-ui/core";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, gridLoadingTimeout, deliveryTicket, rentalManagement, INVENTORY_STATUS } from "../../../constants/helpers";
+import { CustomDialogTransition, gridLoadingTimeout, deliveryTicket, rentalManagement, ASSET_STATUS } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from "../../../components/Helpers/Routes";
@@ -236,7 +236,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     axiosInstance().post(`${rentalManagement.api}/clone-rental-detail`, data)
       .then(({ data }) => {
         let isOnlyAssetAdd = false;
-        if (productInventory.some((e) => e.status === INVENTORY_STATUS.inUse)) {
+        if (productInventory.some((e) => e.status === ASSET_STATUS.inUse)) {
           isOnlyAssetAdd = false
         }
         else {
@@ -269,7 +269,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
             color="primary"
             onClick={() => {
               let isOnlyAssetAdd = false;
-              if (productInventory.some((e) => e.status === INVENTORY_STATUS.inUse)) {
+              if (productInventory.some((e) => e.status === ASSET_STATUS.inUse)) {
                 isOnlyAssetAdd = false
               }
               else {
