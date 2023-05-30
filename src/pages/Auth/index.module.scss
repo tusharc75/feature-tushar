@@ -167,6 +167,11 @@
       [data-mode='dark'] & {
         color: #fff;
       }
+      @media all and (max-width: 900px) {
+        br {
+          display: none;
+        }
+      }
     }
     p {
       font-weight: 400;
@@ -176,6 +181,11 @@
       color: #545454;
       [data-mode='dark'] & {
         color: #b8b8b8;
+      }
+      @media all and (max-width: 900px) {
+        br {
+          display: none;
+        }
       }
     }
   }

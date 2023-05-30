@@ -19,6 +19,7 @@ import { HiArrowRight } from 'react-icons/hi';
 import { groupByKey, assignIconAndText } from './helpers';
 import Chart from './Chart';
 import { useAppTheme } from 'src/constants/AppConfig';
+import DashBoardCardShell from 'src/components/DashBoardCardShell';
 
 const userManual = {
   description: 'View our user manual in just a click.',
@@ -108,19 +109,16 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
             section.head === 'Setups & Administration' ||
             section.head === 'Collaboration Tools' ||
             section.head === 'Activities'
-          )
+          ) {
             return <></>;
-          const style = {
-            '--bg_color': section.color,
-            textAlign: 'left',
-            '--bg-gradient-colors': `to bottom, ${section.gradient.join(', ')}`
-          } as React.CSSProperties;
+          }
           return (
-            <div
+            <DashBoardCardShell
               key={section.head}
               role="button"
               className={styles.singlecard}
-              style={style}
+              background={section.color}
+              gradientColors={section.gradient}
               aria-label={`open ${section.head}`}
               onClick={() => section.items.length > 0 && setModalContent({ items: section.items, title: section.head, icon: section.icon })}
             >
@@ -138,7 +136,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
                   {section.items.length > 0 ? section.text : 'Coming Soon.'}
                 </Typography>
               </div>
-            </div>
+            </DashBoardCardShell>
           );
         })}
       </div>
