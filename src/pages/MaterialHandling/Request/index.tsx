@@ -17,7 +17,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
-import CustomTable from 'src/components/CustomTable';
+import CustomTable, { ColumnsInterface } from 'src/components/CustomTable';
 
 const Request = ({ workOrder }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -98,7 +98,7 @@ const Request = ({ workOrder }) => {
     // });
     // const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
 
-    const column: any = [
+    const column: ColumnsInterface[] = [
       {
         header: 'Product',
         width: 100,

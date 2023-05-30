@@ -4,13 +4,13 @@ import { Checkbox, Typography } from '@material-ui/core';
 
 interface TableInterface extends React.HTMLAttributes<HTMLTableElement> {
   data: any[];
-  columns: columnsInterface[];
+  columns: ColumnsInterface[];
   uniqueKey: (data: any) => string;
   checkBox?: boolean;
   onSelect?: any;
   height?: string;
 }
-interface columnsInterface extends React.HTMLAttributes<HTMLTableCellElement> {
+export interface ColumnsInterface extends React.HTMLAttributes<HTMLTableCellElement> {
   header: string;
   minWidth?: number;
   width?: number;
@@ -56,7 +56,7 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
 
   return (
     <div className={styles.tableWrapper}>
-      <div className={styles.tableContainer} style={{ maxHeight: height }}>
+      <div className={styles.tableContainer} style={{ maxHeight: height ?? 'calc(100vh - 290px)' }}>
         <table {...others} className={`${styles.table} ${className}`}>
           <thead>
             {checkBox && (
@@ -75,10 +75,11 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
                   key={column.header}
                   {...column}
                   style={{
+                    ...column.style,
                     width: `${column.width}px}`,
                     maxWidth: `${column.width}px}`,
                     minWidth: `${column.minWidth}px`,
-                    position: column.sticky ? 'sticky' : 'unset',
+                    position: column.sticky ? 'sticky' : 'static',
                     [column.sticky]: 0
                   }}
                 >
@@ -111,11 +112,13 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
                   <td
                     className={column.sticky ? (column.sticky === 'right' ? styles.stickyRight : styles.stickyLeft) : ''}
                     key={index}
+                    {...column}
                     style={{
+                      ...column.style,
                       width: `${column.width}px}`,
                       maxWidth: `${column.width}px}`,
                       minWidth: `${column.minWidth}px`,
-                      position: column.sticky ? 'sticky' : 'unset',
+                      position: column.sticky ? 'sticky' : 'static',
                       [column.sticky]: 0
                     }}
                   >
