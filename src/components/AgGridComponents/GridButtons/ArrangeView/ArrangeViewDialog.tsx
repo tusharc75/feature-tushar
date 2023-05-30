@@ -182,8 +182,8 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
 
   const handleReset = () => {
-    refreshGrid();
-    onClose();
+    // refreshGrid();
+  
     delete localStorage[renderedFrom];
     const newColumns = [...defaultColumns];
     newColumns?.forEach((e: any) => {
@@ -198,12 +198,26 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     const oldColumnState = columnApi.getColumnState();
     let newColumnsState = [];
 
-    for (const d of oldColumnState) {
-      const index = colIds.indexOf(d.colId);
-      newColumnsState.splice(index, 0, { ...d });
-    }
+    newColumns.map((column: any) => {
+      const index = oldColumnState?.findIndex(col => col.colId === column?.field);
+      const colum = oldColumnState[index];
+      // if (column?.show && colum.hide) {
+      //   colum.hide = false
+      // }
+      newColumnsState.push(colum)
+    })
+
+    const extraColumn = oldColumnState.filter(col => col.colId === "actions" || col.colId === "0" || col.colId === "1")
+
+    newColumnsState = [...newColumnsState, ...extraColumn]
     columnApi.setColumnState(newColumnsState);
-     const hiddenColumns = newColumns.filter((d) => !d.show).map((m) => m.field);
+
+    // for (const d of oldColumnState) {
+    //   const index = colIds.indexOf(d.colId);
+    //   newColumnsState.splice(index, 0, { ...d });
+    // }
+    // columnApi.setColumnState(newColumnsState);
+    const hiddenColumns = newColumns.filter((d) => !d.show).map((m) => m.field);
     const nonHiddenColumns = newColumns.filter((d) => d.show).map((m) => m.field);
     columnApi.setColumnsVisible(hiddenColumns, false);
     columnApi.setColumnsVisible(nonHiddenColumns, true);
@@ -213,6 +227,8 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       let hidedColumns = tempColumnState.filter((o) => o?.hide).map((o) => o?.colId);
       updateGridHiddenColumns(hidedColumns);
     }
+
+    onClose();
   }
 
   useEffect(() => {
