@@ -12,6 +12,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import styles from './index.module.scss';
 import { ReportIcon } from 'src/assets/svg/svgIcons';
 import { HiArrowRight } from 'react-icons/hi';
+import { getColors } from '../Home/helpers';
+import DashBoardCardShell from 'src/components/DashBoardCardShell';
 
 const colorPalette = [
   { iconsColor: ['#059825', '#059825 ', '#60D778'], color: '#F9FDEC' },
@@ -69,14 +71,15 @@ const ReportMaster = () => {
       <div className="detail-container-v1">
         <Box className={styles.reportGrid}>
           {REPORT_LIST.map((report: any, index: any) => {
+            const colors = getColors(index);
             return (
               permissions[report.permission]?.isRead && (
-                <Box key={index} className={styles.singleCard}>
+                <div key={index} className={styles.singleCard}>
                   <Link
                     to={`/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`}
                   >
-                    <Box className={styles.cardInner} style={{ backgroundColor: report.color }}>
-                      <ReportIcon colors={report.iconsColor} className={styles.floatIcon} />
+                    <DashBoardCardShell background={'#fff'} gradientColors={colors.gradient} className={styles.cardInner} minHeight={false}>
+                      <ReportIcon colors={colors.iconGradient} className={styles.floatIcon} />
                       <Typography variant="h6">{report.type === 'dynamic' ? routes[report.key]?.title : report.title}</Typography>
                       <Typography variant="body2">{/* {report.text} */}</Typography>
                       <Link
@@ -84,9 +87,9 @@ const ReportMaster = () => {
                       >
                         View <HiArrowRight className={styles.arrow} />
                       </Link>
-                    </Box>
+                    </DashBoardCardShell>
                   </Link>
-                </Box>
+                </div>
               )
             );
           })}
@@ -98,11 +101,12 @@ const ReportMaster = () => {
               <Box className={styles.reportGrid}>
                 {customReports?.map((item, index) => {
                   let accessor = index % colorPalette.length;
+                  const colors = getColors(index);
                   return (
                     <Box key={index} className={styles.singleCard}>
                       <Link to={`/reports/custom-report/${item._id}`}>
-                        <Box className={styles.cardInner} style={{ backgroundColor: colorPalette[accessor].color }}>
-                          <ReportIcon colors={colorPalette[accessor].iconsColor} className={styles.floatIcon} />
+                        <DashBoardCardShell background={'#fff'} gradientColors={colors.gradient} className={styles.cardInner} minHeight={false}>
+                          <ReportIcon colors={colors.iconGradient} className={styles.floatIcon} />
                           <Typography variant="h6">{item.customReportName}</Typography>
                           <Typography variant="body2" className={styles.withoutDetails}>
                             {' '}
@@ -112,7 +116,7 @@ const ReportMaster = () => {
                             View
                             <HiArrowRight className={styles.arrow} />
                           </Link>
-                        </Box>
+                        </DashBoardCardShell>
                       </Link>
                     </Box>
                   );
