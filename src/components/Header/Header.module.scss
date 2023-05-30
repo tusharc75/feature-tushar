@@ -290,3 +290,38 @@
     height: 112px;
   }
 }
+
+.viewAll {
+  display: flex;
+  align-items: center;
+  border: 0;
+  background-color: transparent;
+  outline: none;
+  cursor: pointer;
+  transition: color 0.3s;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+  span {
+    font-weight: 600;
+    font-size: 17.3279px;
+    line-height: 29px;
+    color: #2a3042;
+    [data-mode='dark'] & {
+      color: #fff;
+    }
+  }
+  svg {
+    display: block;
+    margin-left: 10px;
+    transition: margin 0.3s, color 0.3s;
+    color: inherit;
+  }
+  &:hover {
+    svg,
+    span {
+      color: var(--link);
+    }
+  }
+}

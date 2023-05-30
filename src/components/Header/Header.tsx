@@ -50,6 +50,10 @@ import { FiMessageSquare } from 'react-icons/fi';
 import { BsMoon, BsSun } from 'react-icons/all';
 
 import { SearchBar } from './SearchBar';
+import DashboardModal, { ModalContent } from '../DashboardModal';
+import { userManual } from 'src/pages/Home';
+import { FiExternalLink } from 'react-icons/fi';
+import { SVG } from 'src/assets';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -134,6 +138,8 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   // For FullScreen Notification - Start
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
   const scrollPos = useScrollDirection(40);
+
+  const [modalContent, setModalContent] = useState<ModalContent | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -909,21 +915,28 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     }
   }
 
-  const startTour = () => {
-    const paths = pathname.split('/').filter((x: string) => x);
-    let path: string;
-    if (paths.includes('detail')) {
-      paths.splice(paths.length - 1, 1);
-      path = paths.join('/');
-    }
-    dispatch({
-      type: SET_START_TOUR,
-      payload: {
-        path: paths.includes('detail') ? `/${path}` : pathname,
-        start: true,
-        stepIndex: 0
-      }
-    });
+  // const startTour = () => {
+  //   const paths = pathname.split('/').filter((x: string) => x);
+  //   let path: string;
+  //   if (paths.includes('detail')) {
+  //     paths.splice(paths.length - 1, 1);
+  //     path = paths.join('/');
+  //   }
+  //   dispatch({
+  //     type: SET_START_TOUR,
+  //     payload: {
+  //       path: paths.includes('detail') ? `/${path}` : pathname,
+  //       start: true,
+  //       stepIndex: 0
+  //     }
+  //   });
+  // };
+
+  const openHelperModal = () => {
+    setModalContent({ title: 'Welcometo the Equipt', icon: <img src={SVG('LogoNewShort')} alt="equipt logo" /> });
+  };
+  const handleCloseHelperModal = () => {
+    setModalContent(null);
   };
 
   return (
@@ -1088,7 +1101,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                 </Popover>
               </div>
 
-              <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour} className={styles.showIconLayout} title="Help">
+              <IconButton id="helpButton" aria-label="help" color="inherit" onClick={openHelperModal} className={styles.showIconLayout} title="Help">
                 <HelpOutline className="setIcon" style={{ maxWidth: 19 }} />
               </IconButton>
             </div>
@@ -1132,6 +1145,12 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
           {is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
         </Toolbar>
       </AppBar>
+      <DashboardModal modalContent={modalContent} handleClose={handleCloseHelperModal} style={{ position: 'relative' }}>
+        <a title="open equipt documentation" href={userManual.link} target="_blank" className={styles.viewAll} onClick={handleCloseHelperModal}>
+          <Typography component="span">Equipt - User Manual</Typography>
+          <FiExternalLink size={20} style={{ marginBottom: 4 }} />
+        </a>
+      </DashboardModal>
       {renderMobileMenu}
       {supportMenu}
       {arcelorMenu}
