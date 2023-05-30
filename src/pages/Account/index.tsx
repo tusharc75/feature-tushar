@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useReducer } from 'react';
 import { useData } from '../../StateProvider/Provider';
 import { Button, Menu, MenuItem, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link, useHistory,} from 'react-router-dom';
 import { ExpandMore, AddOutlined } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
@@ -25,7 +25,6 @@ import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from 'react-icons/md';
 import {
   gridLoadingTimeout,
-  entity,
   sidebarResource,
   prepareDataForGrid,
   getLocalStorageArrayData,
@@ -34,7 +33,6 @@ import {
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from './../../components/Helpers/Routes';
-import { isObjectEmpty } from '../../constants/helpers';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import ToggleButton from '@material-ui/lab/ToggleButton';
@@ -44,17 +42,13 @@ import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import EntitySelectionsDialog from '../../components/EntitySelections';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import { HiBadgeCheck } from 'react-icons/hi';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
-import { useLocation } from 'react-router-dom';
-import queryString from 'query-string';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import { GridApi } from 'ag-grid-community';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { MdAdd } from 'react-icons/all';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
-import { IoFilterCircle, MdFilterList, MdSort, MdWeb } from 'react-icons/all';
+import {  MdFilterList, MdSort, MdWeb } from 'react-icons/all';
 import { FaSuitcase, FaAddressBook, FaAddressCard } from 'react-icons/fa';
 import { camelCase } from 'lodash';
 import WarhouseList from './Warehouse/WarhouseList';
@@ -73,25 +67,11 @@ const AccTypes = [
 
 const options = ['All', 'Approved', 'Disapproved'];
 
-let accountTimeout;
 export default function Account(props) {
-  const location = useLocation();
-
-  let queryParams = queryString.parse(location.search);
-  let queryType: string = queryParams.type as string;
-  let queryApproval: string = queryParams.approval as string;
-  let querySearch: string = queryParams.search as string;
-  let queryPage: string = queryParams.page as string;
-  let queryColFilter: string = queryParams.colFilter as string;
 
   const toastConfig = useContext(CustomToastContext);
   const { getColumnData } = useColumns();
-
-  const {
-    account: { accountApi, accountResource, accountRoute }
-  } = props;
-
-  const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
+  const { account: { accountApi, accountResource, accountRoute }} = props;
   const {
     state: { user, permissions, selectedEntity },
     dispatch: entityDispatch
@@ -99,8 +79,7 @@ export default function Account(props) {
   const history = useHistory();
   const [cloneId, setCloneId] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
-  const [type, setType] = useState(options[queryApproval === 'Approved' ? 1 : queryApproval === 'Disapproved' ? 2 : 0]);
-  const [renderCount, setRenderCount] = useState(0);
+  const [type, setType] = useState(options[0]);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [isAccDialogVisible, setIsAccDialogVisible] = useState(false);
@@ -110,6 +89,7 @@ export default function Account(props) {
   const [openAddPlantsDialog, setOpenAddPlantsDialog] = React.useState(false);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
   const [isAddingWarehouse, setAddingWarehouse] = useState(false);
+  const [isOpenDialog, setisOpenDialog] = useState(false);
   let renderedFrom = camelCase(accountResource);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -136,8 +116,8 @@ export default function Account(props) {
   const [open, setOpen] = React.useState(false);
   const [entities, setEntities] = useState([]);
   const anchorRef = React.useRef<HTMLDivElement>(null);
-  const [selectedIndex, setSelectedIndex] = React.useState(queryApproval === 'Approved' ? 1 : queryApproval === 'Disapproved' ? 2 : 0);
-  const [filter, setFilter] = useState(queryType ? queryType : 'All Accounts');
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [filter, setFilter] = useState('All Accounts');
   const [accountNameForClone, setAccountNameForClone] = useState('');
 
   //  Grid Variables - Start
@@ -148,119 +128,14 @@ export default function Account(props) {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
 
-  const columnState = JSON.parse(localStorage.getItem(accountResource));
-
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId == item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-
   useEffect(() => {
-    if (queryPage === undefined) {
-      sessionStorage.removeItem('page');
-      history.replace(`?page=${page}`);
-    }
-    if (page > 0) {
-      sessionStorage.setItem('page', JSON.stringify(page));
-      history.replace(
-        queryType && queryApproval && queryColFilter && querySearch
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
-          : queryType && queryApproval && queryColFilter
-            ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
-            : queryType && queryApproval && querySearch
-              ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
-              : queryType && querySearch && queryColFilter
-                ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
-                : queryApproval && querySearch && queryColFilter
-                  ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&seach=${search}`
-                  : queryType && queryApproval
-                    ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
-                    : queryType && queryColFilter
-                      ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-                      : queryType && querySearch
-                        ? `?page=${page}&type=${queryType}&search=${querySearch}`
-                        : queryApproval && queryColFilter
-                          ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
-                          : queryApproval && querySearch
-                            ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
-                            : queryColFilter && querySearch
-                              ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-                              : queryType
-                                ? `?page=${page}&type=${queryType}`
-                                : queryApproval
-                                  ? `?page=${page}&approval=${queryApproval}`
-                                  : queryColFilter
-                                    ? `?page=${page}&colFilter=${queryColFilter}`
-                                    : querySearch
-                                      ? `?page=${page}&search=${querySearch}`
-                                      : `?page=${page}`
-      );
-    } else {
-      history.replace(
-        queryType && queryApproval && queryColFilter && querySearch
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
-          : queryType && queryApproval && queryColFilter
-            ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
-            : queryType && queryApproval && querySearch
-              ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
-              : queryType && querySearch && queryColFilter
-                ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
-                : queryApproval && querySearch && queryColFilter
-                  ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&seach=${search}`
-                  : queryType && queryApproval
-                    ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
-                    : queryType && queryColFilter
-                      ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-                      : queryType && querySearch
-                        ? `?page=${page}&type=${queryType}&search=${querySearch}`
-                        : queryApproval && queryColFilter
-                          ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
-                          : queryApproval && querySearch
-                            ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
-                            : queryColFilter && querySearch
-                              ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-                              : queryType
-                                ? `?page=${page}&type=${queryType}`
-                                : queryApproval
-                                  ? `?page=${page}&approval=${queryApproval}`
-                                  : queryColFilter
-                                    ? `?page=${page}&colFilter=${queryColFilter}`
-                                    : querySearch
-                                      ? `?page=${page}&search=${querySearch}`
-                                      : `?page=${page}`
-      );
-    }
-  }, [page, queryPage]);
-
-  useEffect(() => {
-    if (JSON.parse(sessionStorage.getItem('page')) !== null && queryPage !== '0') {
-      let savedPage = JSON.parse(sessionStorage.getItem('page'));
-      // history.replace(`?page=${savedPage}`);
-      dispatch({ type: 'pageChange', page: savedPage });
-    }
     fetchGridColumns();
   }, []);
 
   const fetchGridColumns = async () => {
     let data;
-    if (isOffline) {
-      data = offlineFieldsData[accountResource] ?? [];
-    } else {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`);
-
       data = response?.data?.data;
-      try {
-        updateFieldsData(accountResource, data);
-      } catch (ex) {
-        console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`);
-      }
-    }
-
     let columns = [];
     let rendererNames = [];
 
@@ -300,17 +175,8 @@ export default function Account(props) {
     if (accountResource.includes('customer')) {
       columns = [...columns, { field: 'lead', headerName: 'Related Lead', show: true, cellRenderer: 'leadRenderer' }];
     }
-
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.projectSales.title, field));
-    });
+    columns = [...columns, ...getStaticFields()];
     setColumns([...columns]);
-
-    if (JSON.parse(sessionStorage.getItem('filters')) !== null) {
-      let savedFilter = JSON.parse(sessionStorage.getItem('filters'));
-      dispatch({ type: 'filter', filters: savedFilter });
-    }
   };
 
   useEffect(() => {
@@ -320,125 +186,10 @@ export default function Account(props) {
   }, [permissions]);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    fetchAccounts();
+  },  [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly, type]);
 
-    if (accountTimeout) {
-      clearTimeout(accountTimeout);
-    }
-
-    accountTimeout = setTimeout(() => {
-      fetchAccounts();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    if (renderCount > 0) {
-      fetchAccounts();
-    } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, type, sorting, selectedEntity, location, showFilteredRecordsOnly]);
-
-  useEffect(() => {
-    if (search) {
-      history.replace(
-        queryType && queryApproval && queryColFilter
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
-          : queryType && queryApproval
-            ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${search}`
-            : queryType && queryColFilter
-              ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${search}`
-              : queryApproval && queryColFilter
-                ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
-                : queryType
-                  ? `?page=${page}&type=${queryType}&search=${search}`
-                  : queryApproval
-                    ? `?page=${page}&approval=${queryApproval}&search=${search}`
-                    : queryColFilter
-                      ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
-                      : `?page=${page}&search=${search}`
-      );
-    } else {
-      history.replace(
-        queryType && queryApproval && queryColFilter
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=${queryColFilter}`
-          : queryType && queryApproval
-            ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
-            : queryType && queryColFilter
-              ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-              : queryApproval && queryColFilter
-                ? `?page=${page}&approval=${queryApproval}&colFilter=${queryColFilter}`
-                : queryType
-                  ? `?page=${page}&type=${queryType}`
-                  : queryApproval
-                    ? `?page=${page}&approval=${queryApproval}`
-                    : queryColFilter
-                      ? `?page=${page}&colFilter=${queryColFilter}`
-                      : `?page=${page}`
-      );
-    }
-  }, [search]);
-
-  useEffect(() => {
-    if (querySearch) {
-      dispatch({ type: 'search', search: querySearch });
-    }
-  }, [querySearch]);
-
-  useEffect(() => {
-    if (Object.keys(filters).length > 0) {
-      sessionStorage.setItem('filters', JSON.stringify(filters));
-
-      let serialize = function (obj) {
-        var str = [];
-        for (var p in obj)
-          if (obj.hasOwnProperty(p)) {
-            str.push('{colName=' + encodeURI(p) + ',' + 'colValue=' + encodeURI(obj[p].filter) + '}');
-          }
-        return str.join(',');
-      };
-
-      history.replace(
-        queryType && queryApproval && querySearch
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-          : queryType && queryApproval
-            ? `?page=${page}&type=${queryType}&approval=${queryApproval}&colFilter=[${serialize(filters)}]`
-            : queryType && querySearch
-              ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-              : queryApproval && querySearch
-                ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-                : queryType
-                  ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
-                  : queryApproval
-                    ? `?page=${page}&approval=${queryApproval}&colFilter=[${serialize}]`
-                    : querySearch
-                      ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-                      : `?page=${page}&colFilter=[${serialize(filters)}]`
-      );
-    }
-
-    if (Object.keys(filters).length === 0 && queryColFilter !== undefined) {
-      history.replace(
-        queryType && queryApproval && querySearch
-          ? `?page=${page}&type=${queryType}&approval=${queryApproval}&search=${querySearch}`
-          : queryType && queryApproval
-            ? `?page=${page}&type=${queryType}&approval=${queryApproval}`
-            : queryType && querySearch
-              ? `?page=${page}&type=${queryType}&search=${querySearch}`
-              : queryApproval && querySearch
-                ? `?page=${page}&approval=${queryApproval}&search=${querySearch}`
-                : queryType
-                  ? `?page=${page}&type=${queryType}`
-                  : queryApproval
-                    ? `?page=${page}&approval=${queryApproval}`
-                    : querySearch
-                      ? `?page=${page}&search=${querySearch}`
-                      : `?page=${page}`
-      );
-    }
-    if (Object.keys(filters).length === 0 && queryColFilter === undefined) {
-      sessionStorage.removeItem('filters');
-    }
-  }, [filters]);
-
+ 
   const AccountNameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
       <Link className="link" to={`/${accountRoute}/detail/${params.data._id}`}>
@@ -479,28 +230,6 @@ export default function Account(props) {
           <CustomRenderCell value={params.value} />
         </span>
       )
-    ) : (
-      <NoDataCell />
-    );
-
-  const EntityRenderer = (params) => (
-    <h5 className="createBy d-flex">
-      {params.value ? (
-        <Link className="link" title={params.value} to={`${routes.entity.path}/detail/${params.data.entityId}`}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-      {params.data?.restentity?.length > 0 && <span className="createdAtTime badge-date">{`+${params.data?.restentity.length} more..`}</span>}
-    </h5>
-  );
-
-  const ParentAccountRenderer = (params) =>
-    params.value ? (
-      <Link className="link" to={`/${accountRoute}/detail/${params.data.parentAccountId}`} title={params.value}>
-        <CustomRenderCell value={params.value} />
-      </Link>
     ) : (
       <NoDataCell />
     );
@@ -619,7 +348,15 @@ export default function Account(props) {
 
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}&filterAccounts=${queryType === 'My Accounts' ? 2 : selectedType}` : '?';
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
+    if (isExport) {
+      deepFilter = `?`;
+    }
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -664,23 +401,6 @@ export default function Account(props) {
     setSelectedIndex(index);
     menuOptionSelection(index);
     setOpen(false);
-    history.replace(
-      queryType && queryColFilter && querySearch
-        ? `?page=${page}&type=${queryType}&approval=${encodeURI(options[index])}&colFilter=${queryColFilter}&search=${querySearch}`
-        : queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&approval=${encodeURI(options[index])}&colFilter=${queryColFilter}`
-          : queryType && querySearch
-            ? `?page=${page}&type=${queryType}&approval=${encodeURI(options[index])}&search=${search}`
-            : querySearch && queryColFilter
-              ? `?page=${page}&approval=${encodeURI(options[index])}&colFilter=${queryColFilter}&search=${search}`
-              : queryType
-                ? `?page=${page}&type=${queryType}&approval=${encodeURI(options[index])}`
-                : queryColFilter
-                  ? `?page=${page}&approval=${encodeURI(options[index])}&colFilter=${queryColFilter}`
-                  : querySearch
-                    ? `?page=${page}&approval=${encodeURI(options[index])}&search=${search}`
-                    : `?page=${page}&approval=${encodeURI(options[index])}`
-    );
   };
 
   const handleToggle = () => {
@@ -706,21 +426,10 @@ export default function Account(props) {
 
     let data, count;
 
-    if (!isOffline) {
       const response: any = await axiosInstance().get(`${accountApi}${queryString}`);
 
       data = response?.data?.data;
       count = response?.data?.count;
-    } else {
-      data = (offlineGridData && offlineGridData[accountResource]) || [];
-      count = (offlineGridData && offlineGridData[accountResource]?.length) || 0;
-    }
-
-    try {
-      updateOfflineGridData(accountResource, data);
-    } catch (ex) {
-      console.error(`${accountResource}: Error while storing data for Offline context. Error: ${ex.message}`);
-    }
 
     let rows = data.map((u) => {
       let finalObject = prepareDataForGrid(u, user);
@@ -911,23 +620,6 @@ export default function Account(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       handleAccountSelect(AccTypes.find((d) => d.key === newFilter).value);
-      history.replace(
-        queryApproval && queryColFilter && querySearch
-          ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&colFilter=${queryColFilter}&search=${search}`
-          : queryApproval && queryColFilter
-            ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&colFilter=${queryColFilter}`
-            : queryApproval && querySearch
-              ? `?page=${page}&type=${newFilter}&approval=${queryApproval}&search=${search}`
-              : queryColFilter && querySearch
-                ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}&search=${search}`
-                : queryApproval
-                  ? `?page=${page}&type=${newFilter}&approval=${queryApproval}`
-                  : queryColFilter
-                    ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
-                    : querySearch
-                      ? `?page=${page}&type=${newFilter}&search=${search}`
-                      : `?page=${page}&type=${newFilter}`
-      );
       handleFilterClose();
     }
   };
@@ -959,8 +651,6 @@ export default function Account(props) {
       })}
     </ToggleButtonGroup>
   );
-
-  const [isOpenDialog, setisOpenDialog] = useState(false);
 
   return (
     <>
@@ -1059,9 +749,6 @@ export default function Account(props) {
                   </>
                 )}
 
-                {isOffline ? (
-                  <></>
-                ) : (
                   <div className={`align-items-center gap-1  layout-for-mobile`}>
                     {AccTypes && (
                       <ToggleButtonGroup
@@ -1091,7 +778,7 @@ export default function Account(props) {
                       ref={anchorRef}
                       aria-label="small outlined button group"
                     >
-                      <Button>{queryApproval ? queryApproval : options[selectedIndex]}</Button>
+                      <Button>{options[selectedIndex]}</Button>
                       <Button
                         color="primary"
                         size="small"
@@ -1133,7 +820,6 @@ export default function Account(props) {
                       )}
                     </Popper>
                   </div>
-                )}
               </div>
             </Grid>
             <Grid
@@ -1151,7 +837,6 @@ export default function Account(props) {
                 style={isMobile && !isTablet ? { flex: 1 } : {}}
               >
                 <Grid style={{ display: 'flex', flex: 1 }}>
-                  {!isOffline && (
                     <SearchBox
                       onSearch={handleSearch}
                       searchbox={isMobile ? accountClass.search_box_input : ''}
@@ -1159,7 +844,6 @@ export default function Account(props) {
                       value={search}
                       width={isMobile ? '200px' : 'auto'}
                     />
-                  )}
                 </Grid>
 
                 <Grid style={{ display: 'flex', gap: '5px' }}>
@@ -1175,8 +859,6 @@ export default function Account(props) {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-
-                  {!isOffline && (accountPermissions?.isDelete || accountPermissions?.approveAccount) && (
                     <Button
                       disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -1189,7 +871,6 @@ export default function Account(props) {
                     >
                       {isMobile && !isTablet ? '' : 'Actions'}
                     </Button>
-                  )}
                   <Menu
                     anchorEl={anchorEl}
                     keepMounted
@@ -1296,17 +977,6 @@ export default function Account(props) {
               </div>
             </Grid>
           </Grid>
-
-          {/* <CustomHeader
-              total={rowCount}
-              heading={sidebarResource[accountResource]}
-              selectedType={selectedType}
-              onTypeChange={handleAccountSelect}
-              options={AccTypes}
-              secondHeading="Account"
-              icon={<MdAccountCircle className="headerLogo" />}
-            >
-            </CustomHeader> */}
         </div>
 
         {Object.keys(frameWorkComponent).length > 0 ? (
@@ -1358,22 +1028,7 @@ export default function Account(props) {
                   label: 'ShippingAddress',
                   field: 'shippingAddress'
                 }
-
-                // {
-
-                //     logo: "accountLogo:",
-                //     field: "accountLogo",
-
-                // },
               ]}
-              // avatarLogo={[
-              //   {
-
-              //     label: "accountLogo:",
-              //     field: "accountLogo",
-
-              // }
-              // ]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
@@ -1396,9 +1051,8 @@ export default function Account(props) {
               loading={loading}
               renderedFrom={renderedFrom}
               refreshGrid={fetchAccounts}
-              isClientSideGrid={isOffline}
-              allowAction={!isOffline}
-              allowSelection={!isOffline}
+              allowAction={true}
+              allowSelection={true}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
               resource={sidebarResource[accountResource]}
