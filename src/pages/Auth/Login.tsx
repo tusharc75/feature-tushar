@@ -284,8 +284,11 @@ const Login = () => {
               <div className={styles.illustration}>
                 <LoginImage />
               </div>
-              <Typography component="h2">Enhancing your ERP and B2B System</Typography>
-              <Typography component="p">Unleash the potential with our all in one platform that provides ERP and B2B solutions at ease. </Typography>
+              <Typography component="h2">Modernizing Business Transactions</Typography>
+              <Typography component="p">
+                Making B2B transactions and operations as <br />
+                easy as consumer apps
+              </Typography>
             </div>
           </div>
         </div>
