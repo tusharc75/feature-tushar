@@ -11,7 +11,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, INVENTORY_STATUS } from 'src/constants/helpers';
+import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, ASSET_STATUS } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
@@ -246,7 +246,7 @@ const WorkOrderDetails = () => {
               <>
                 {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
                   <Button variant={'contained'} size="small" onClick={() => setShowConfirmBoxScrap(true)} className={'btn-outline-v1'}>
-                    {`${INVENTORY_STATUS.scrap} Asset`}
+                    {`${ASSET_STATUS.scrap} Asset`}
                   </Button>
                 )}
                 {permissions?.workOrder?.isUpdate &&
@@ -406,7 +406,7 @@ const WorkOrderDetails = () => {
           }}
           onOk={() => {
             setShowConfirmBoxScrap(false);
-            updateJobStatus(WORK_ORDER_STATUS.completed, INVENTORY_STATUS.scrap);
+            updateJobStatus(WORK_ORDER_STATUS.completed, ASSET_STATUS.scrap);
           }}
         />
       )}

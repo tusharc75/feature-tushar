@@ -16,7 +16,7 @@ import {
   gridLoadingTimeout,
   rentalManagement,
   sidebarResource,
-  INVENTORY_STATUS,
+  ASSET_STATUS,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
@@ -281,8 +281,8 @@ const LoadingTicket = ({
         d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
         d['isChecked'] = false;
         d['hideSelection'] =
-          [INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status) ||
-          d?.manualStatus === INVENTORY_STATUS.reserved ||
+          [ASSET_STATUS.repair, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.underReview].includes(d.status) ||
+          d?.manualStatus === ASSET_STATUS.reserved ||
           d?.isReplaced;
 
         d['isReplaceable'] = true;
@@ -425,7 +425,7 @@ const LoadingTicket = ({
       cellRenderer: 'inventoryRenderer',
       cellStyle: (params) => {
         if (
-          [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)
+          [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)
         ) {
           return { backgroundColor: COLOUR_MASTER.lostAssets.background };
         }
@@ -715,7 +715,7 @@ const LoadingTicket = ({
             <MenuItem
               onClick={() => {
                 setAnchorEl(null);
-                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: '' });
+                setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
               }}
             >
               Scrap
@@ -723,7 +723,7 @@ const LoadingTicket = ({
             <MenuItem
               onClick={() => {
                 setAnchorEl(null);
-                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: '' });
+                setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
               }}
             >
               Lost
@@ -804,7 +804,7 @@ const LoadingTicket = ({
                       f.hasOwnProperty('loadingTicketId') &&
                       f?.type === 'Asset' &&
                       f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
-                      f?.status === INVENTORY_STATUS.inUse &&
+                      f?.status === ASSET_STATUS.inUse &&
                       f?.isReplaceable
                   )?.length === selectedRecords?.length && (
                     <MenuItem

@@ -7,7 +7,7 @@ import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, INVENTORY_STATUS, serializedAsset } from '../../../constants/helpers';
+import { gridLoadingTimeout, ASSET_STATUS, serializedAsset } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
@@ -93,7 +93,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
     let rows = response?.data?.data.map((u) => {
       if (
         u?.currentOwner?.optionValue !== subleaseData?.supplierAccount?.optionValue ||
-        [INVENTORY_STATUS.reserved, INVENTORY_STATUS.inUse, INVENTORY_STATUS.repair].includes(u.status)
+        [ASSET_STATUS.reserved, ASSET_STATUS.inUse, ASSET_STATUS.repair].includes(u.status)
       ) {
         isComplate = false;
       }
@@ -257,7 +257,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
                         (f) =>
                           f.hasOwnProperty('warehouse') ||
                           f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount ||
-                          [INVENTORY_STATUS.reserved].includes(f.status)
+                          [ASSET_STATUS.reserved].includes(f.status)
                       )
                     }
                   >

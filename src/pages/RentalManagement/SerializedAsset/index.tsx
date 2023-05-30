@@ -9,7 +9,7 @@ import { Delete } from '@material-ui/icons';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import AddSerializedAsset from './AddSerializedAsset';
-import { rentalManagement, sidebarResource, treeToFlatArray, INVENTORY_STATUS } from '../../../constants/helpers';
+import { rentalManagement, sidebarResource, treeToFlatArray, ASSET_STATUS } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
@@ -420,13 +420,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       }
       var canRemove = false;
       if (user?.user?.brandPolicy?.rentalPlanning) {
-        if (_inventory?.status === INVENTORY_STATUS.reserved) {
+        if (_inventory?.status === ASSET_STATUS.reserved) {
           canRemove = true;
         }
       } else {
         if (
-          [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.reserved].includes(_inventory?.inventoryDetail?.status) &&
-          (!_inventory?.status || _inventory?.status === INVENTORY_STATUS.reserved)
+          [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.reserved].includes(_inventory?.inventoryDetail?.status) &&
+          (!_inventory?.status || _inventory?.status === ASSET_STATUS.reserved)
         ) {
           canRemove = true;
         }
@@ -443,7 +443,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         manualStatus: _inventory.inventoryDetail?.manualStatus,
         warehouse: _inventory.inventoryDetail?.warehouse,
         _id: _inventory.inventory,
-        isValid: _inventory.inventoryDetail?.manualStatus === INVENTORY_STATUS.reserved ? false : true,
+        isValid: _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved ? false : true,
         isTransferAsset: isTransferAsset,
         transferData: transferData,
         isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset,

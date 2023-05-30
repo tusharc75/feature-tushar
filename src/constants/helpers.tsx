@@ -1790,7 +1790,7 @@ export const arrayToDropwdownOption = (array) => {
   return option;
 };
 
-export const INVENTORY_STATUS = {
+export const ASSET_STATUS = {
   new: 'New',
   available: 'Available',
   reserved: 'Reserved',
