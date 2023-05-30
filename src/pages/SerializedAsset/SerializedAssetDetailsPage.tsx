@@ -14,7 +14,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import {
   serializedAsset,
   getObjKeysWithValues,
-  INVENTORY_STATUS,
+  ASSET_STATUS,
   repairJob,
   INVENTORY_OWNER_TYPE,
   INVENTORY_HISTORY_TYPE
@@ -291,7 +291,7 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleStatusChange = (o) => {
-    if (o.optionValue === INVENTORY_STATUS.scrap || o.optionValue === INVENTORY_STATUS.lost) {
+    if (o.optionValue === ASSET_STATUS.scrap || o.optionValue === ASSET_STATUS.lost) {
       setStatus(o.optionValue);
       setShowReasonDialog(true);
     } else {
@@ -339,20 +339,20 @@ const SerializedAssetDetailsPage = () => {
 
   useEffect(() => {
     if (productInventoryData) {
-      if (productInventoryData.status === INVENTORY_STATUS.underReview) {
+      if (productInventoryData.status === ASSET_STATUS.underReview) {
         setManualStatus([
-          INVENTORY_STATUS.available,
-          INVENTORY_STATUS.scrap,
-          INVENTORY_STATUS.lost,
-          INVENTORY_STATUS.needRepair,
-          INVENTORY_STATUS.needRecert
+          ASSET_STATUS.available,
+          ASSET_STATUS.scrap,
+          ASSET_STATUS.lost,
+          ASSET_STATUS.needRepair,
+          ASSET_STATUS.needRecert
         ]);
-      } else if (productInventoryData.status === INVENTORY_STATUS.scrap) {
-        setManualStatus([INVENTORY_STATUS.lost, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert]);
-      } else if (productInventoryData.status === INVENTORY_STATUS.lost) {
-        setManualStatus([INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.scrap]);
+      } else if (productInventoryData.status === ASSET_STATUS.scrap) {
+        setManualStatus([ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]);
+      } else if (productInventoryData.status === ASSET_STATUS.lost) {
+        setManualStatus([ASSET_STATUS.available, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.scrap]);
       } else {
-        setManualStatus([INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert]);
+        setManualStatus([ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]);
       }
     }
   }, [productInventoryData]);
@@ -371,7 +371,7 @@ const SerializedAssetDetailsPage = () => {
                   <>
                     {permissions?.repairJob?.isCreate &&
                       productInventoryData?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
-                      [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(
+                      [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
                         productInventoryData.status
                       ) && (
                         <Button variant="outlined" color="default" size="small" onClick={() => setShowRepairJobDialog(true)}>
@@ -379,13 +379,13 @@ const SerializedAssetDetailsPage = () => {
                         </Button>
                       )}
                     {allowUpdateStatus ? (
-                      productInventoryData.status === INVENTORY_STATUS.lost ? (
+                      productInventoryData.status === ASSET_STATUS.lost ? (
                         <Button
                           variant="outlined"
                           color="default"
                           size="small"
                           onClick={() => {
-                            setStatus(INVENTORY_STATUS.available);
+                            setStatus(ASSET_STATUS.available);
                             setShowReasonDialog(true);
                           }}
                           aria-controls="action-menu"

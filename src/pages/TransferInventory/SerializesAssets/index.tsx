@@ -13,7 +13,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { Delete } from '@material-ui/icons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
-import { INVENTORY_STATUS } from 'src/constants/helpers';
+import { ASSET_STATUS } from 'src/constants/helpers';
 
 const SerialzedAssets = ({ allowedToEdit, transferInventoryData, setNextStep, renderedFrom, stepFullScreen, canLoad }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -54,7 +54,7 @@ const SerialzedAssets = ({ allowedToEdit, transferInventoryData, setNextStep, re
               <Link className="link" title={row.original.detail} to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}>
                 <p>{row.original.detail}</p>
               </Link>
-              {allowedToEdit && row.original.status === INVENTORY_STATUS.reserved && (
+              {allowedToEdit && row.original.status === ASSET_STATUS.reserved && (
                 <HtmlTooltip title={`Remove`}>
                   <IconButton
                     size="small"

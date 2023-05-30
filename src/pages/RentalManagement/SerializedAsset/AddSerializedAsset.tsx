@@ -13,7 +13,7 @@ import {
   gridLoadingTimeout,
   CustomDialogTransition,
   getLocalStorageArrayData,
-  INVENTORY_STATUS,
+  ASSET_STATUS,
   transferAsset
 } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -260,11 +260,11 @@ const AddSerializedAsset = ({
       return {
         'background-color': '#FAEAE9'
       };
-    } else if ([INVENTORY_STATUS.available, INVENTORY_STATUS.new]?.includes(params?.data?.status)) {
+    } else if ([ASSET_STATUS.available, ASSET_STATUS.new]?.includes(params?.data?.status)) {
       return {
         'background-color': '#DBF8DB'
       };
-    } else if ([INVENTORY_STATUS.inUse]?.includes(params?.data?.status)) {
+    } else if ([ASSET_STATUS.inUse]?.includes(params?.data?.status)) {
       return {
         'background-color': '#FFD580'
       };
@@ -300,7 +300,7 @@ const AddSerializedAsset = ({
             currentStatus: s.status
           };
         }),
-        manualStatus: INVENTORY_STATUS.reserved
+        manualStatus: ASSET_STATUS.reserved
       })
       .then(({ data }) => {
         fetchAssets();
