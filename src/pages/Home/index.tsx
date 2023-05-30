@@ -218,7 +218,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
           {mode === 'User Manual' && (
             <Box pb={1} pt={5}>
               <a title="open equipt documentation" href={userManual.link} target="_blank" className={styles.viewAll}>
-                <Typography component="span">Equipt user manual</Typography>
+                <Typography component="span">Equipt - User Manual</Typography>
                 <FiExternalLink size={20} style={{ marginBottom: 4 }} />
               </a>
             </Box>
