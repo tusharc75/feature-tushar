@@ -198,7 +198,7 @@ const Layout = ({ children, width }) => {
 
   return (
     <div ref={contentRef}>
-      <Joyride
+      {/* <Joyride
         continuous
         callback={handleJoyrideCallback}
         getHelpers={getHelpers}
@@ -215,7 +215,7 @@ const Layout = ({ children, width }) => {
             zIndex: 10000
           }
         }}
-      />
+      /> */}
       <Sidebar toggleDrawer={toggleDrawer} setToggleDrawer={setToggleDrawer} />
       <Toolbar />
       <Box display="flex">
