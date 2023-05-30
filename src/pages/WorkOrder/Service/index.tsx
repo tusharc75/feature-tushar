@@ -794,7 +794,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                     let isTechnician = data?.assignedUsers?.some((u: any) => u?.optionValue === user?._id);
                     const style = stylesForEveryTab(selectedService, data, index, mobScreen);
                     return (
-                      Boolean(allowedToEdit || isTechnician) && (
+                      Boolean(allowedToEdit || isTechnician) ? (
                         <Tab
                           key={index}
                           content={
@@ -982,7 +982,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                             </Box>
                           }
                         ></Tab>
-                      )
+                      ) 
+                      :
+                      <Tab key={index}></Tab>
                     );
                   })}
                 </Tabs>
