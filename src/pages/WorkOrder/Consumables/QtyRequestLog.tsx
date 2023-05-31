@@ -17,7 +17,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import QtyWithdrawalDialog from './QtyWithdrawalDialog';
 
-function QtyRequestLog({ onClose, workOrderId, uniqueId, productName }) {
+function QtyRequestLog({ onClose, workOrderId, uniqueId, productName, product }) {
 
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
@@ -255,6 +255,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName }) {
             }}
             logsData={openProcessLogs.logs}
             productName={productName}
+            product={product}
           />
         }
       </Dialog>

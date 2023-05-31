@@ -18,6 +18,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { Autocomplete } from '@material-ui/lab';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import RevertQtyDialog from './RevertQtyDialog';
 
 const History = ({ product, warehouse, storageLocation }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -36,6 +37,10 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse && warehouse?.split(',')?.length === 1 ? warehouse : 'All');
   const [selectedStorageLocation, setSelectedStorageLocation] = useState(storageLocation);
+
+
+  const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
+
 
   const renderedFrom = 'Product_Inventory_History';
 
@@ -296,24 +301,39 @@ const History = ({ product, warehouse, storageLocation }) => {
       });
   };
 
-  //|| (['Work Order'].includes(params.data.referenceType) && params.data.type?.toLowerCase() === 'debit')
   const ActionsRenderer = (params) => (
     <>
-      {(['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted) && !params?.data?.reverted ? (
-        <Box pl={1}>
-          <HtmlTooltip title="Revert">
-            <IconButton
-              size="small"
-              aria-label="revert"
-              onClick={() => {
-                setIsRevertConfirmation({ open: true, _id: params?.data?._id, product: params?.data?.product });
-              }}
-            >
-              <Autorenew fontSize="small" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-        </Box>
-      ) : null}
+      {((['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted)
+        || (['Work Order'].includes(params.data.referenceType)
+          && params.data.type?.toLowerCase() === 'debit'
+          && ((params.data.qty - (params.data?.revertedQty || 0)) > 0)))
+        ? (
+          <Box pl={1}>
+            <HtmlTooltip title="Revert">
+              <IconButton
+                size="small"
+                aria-label="revert"
+                onClick={() => {
+                  if (params.data.referenceType === "Work Order") {
+                    setRevertQtyDialog({
+                      open: true,
+                      productName: '',
+                      product: params.data.product,
+                      qty: params.data.qty,
+                      revertedQty: params?.data?.revertedQty || 0,
+                      ledgerId: params.data._id
+                    })
+                  }
+                  else {
+                    setIsRevertConfirmation({ open: true, _id: params?.data?._id, product: params?.data?.product });
+                  }
+                }}
+              >
+                <Autorenew fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          </Box>
+        ) : null}
     </>
   );
 
@@ -407,6 +427,24 @@ const History = ({ product, warehouse, storageLocation }) => {
           }}
           okBtnLoading={revertLoading}
           onOk={handleRevert}
+        />
+      )}
+      {revertQtyDialog.open && (
+        <RevertQtyDialog
+          referenceType="productInventory"
+          productName={revertQtyDialog.productName}
+          product={revertQtyDialog.product}
+          qty={revertQtyDialog.qty}
+          revertedQty={revertQtyDialog.revertedQty}
+          ledgerId={revertQtyDialog.ledgerId}
+          onClose={() => {
+            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' })
+          }}
+          onSuccess={() => {
+            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' })
+            dispatch({ type: 'initialize', data: [], count: 0 });
+            fetchRecords();
+          }}
         />
       )}
     </>

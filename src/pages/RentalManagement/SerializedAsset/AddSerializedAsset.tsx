@@ -194,7 +194,7 @@ const AddSerializedAsset = ({
     }
     let api = '';
     if (Number(tabValue) === 2) {
-      api = `${serializedAsset.api}/in-use${queryString}`
+      api = `${serializedAsset.api}/in-use${queryString}&rental=${referenceData?._id}`
     } else {
       api = `${serializedAsset.api}${queryString}`
     }
