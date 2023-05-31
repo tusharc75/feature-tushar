@@ -1,26 +1,26 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, IconButton } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import moment from 'moment';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { MATERIAL_REQUEST_STATUS, dateTimeFormat } from 'src/constants/helpers';
+import { dateTimeFormat } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import { isMobile, isTablet } from 'react-device-detect';
-import QtyDialog from './QtyDialog';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Autorenew } from '@material-ui/icons';
+import RevertQtyDialog from 'src/pages/ProductInventory/History/RevertQtyDialog';
 
-function ProcessLogs({ onClose, logsData, productName, data = null, workOrderId = null }) {
-  console.log('logsData', logsData, data);
-  const toastConfig = useContext(CustomToastContext);
+
+function ProcessLogs({ onClose, logsData, productName, product }) {
+
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState([]);
-  const [qtyDialog, setQtyDialog] = useState({ open: false, status: null, data: null, logData: null });
+
+  const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, qty: 0, revertedQty: 0, ledgerId: '' });
 
   useEffect(() => {
     fetchColumn();
@@ -81,37 +81,36 @@ function ProcessLogs({ onClose, logsData, productName, data = null, workOrderId 
     column.push({
       accessor: 'action',
       Header: 'Action',
-      minWidth: 100,
-      width: 100,
+      minWidth: 80,
+      width: 80,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) =>
-        (!row.original?.revertedQty || data?.processedQty > row.original?.revertedQty) &&
-        data &&
-        workOrderId && (
-          <Box display="flex">
-            <Box display="flex" flexGrow={1}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                //   disabled={loading}
-                onClick={() => {
-                  setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: data, logData: row?.original });
-                }}
-              >
-                Revert
-              </Button>
-            </Box>
-          </Box>
-        )
+      Cell: ({ row }) => ((row.original?.qty - (row.original?.revertedQty || 0)) > 0) &&
+        <Box>
+          <HtmlTooltip title="Revert">
+            <IconButton
+              size="small"
+              aria-label="revert"
+              onClick={() => {
+                setRevertQtyDialog({
+                  open: true,
+                  qty: row.original?.qty,
+                  revertedQty: row.original?.revertedQty || 0,
+                  ledgerId: row.original?._id
+                })
+              }}
+            >
+              <Autorenew fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        </Box>
     });
     setColumns([...column]);
   };
 
   const fetchData = () => {
-    const data = [...logsData];
+    const data = JSON.parse(JSON.stringify(logsData));
     data?.forEach((e) => {
       e.userId = e?.user?.optionValue;
       e.user = e?.user?.optionLabel;
@@ -149,7 +148,7 @@ function ProcessLogs({ onClose, logsData, productName, data = null, workOrderId 
                 height={'calc(100vh - 200px)'}
                 columns={columns}
                 data={rowsData}
-                onSelect={() => {}}
+                onSelect={() => { }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
@@ -165,25 +164,20 @@ function ProcessLogs({ onClose, logsData, productName, data = null, workOrderId 
           </Box>
         )}
       </CustomDialogContent>
-      {qtyDialog.open && (
-        <QtyDialog
-          open={qtyDialog.open}
-          loading={false}
-          onClose={() => setQtyDialog({ open: false, status: null, data: null, logData: null })}
-          data={qtyDialog.data}
-          logData={qtyDialog.logData}
-          onSuccess={(data) => {
-            data.consumeReqId = qtyDialog.data._id;
-            data.processLogId = qtyDialog.logData._id;
-            axiosInstance()
-              .put(`/material-handling/revert/${workOrderId}`, data)
-              .then((res) => {
-                setQtyDialog({ open: false, status: null, data: null, logData: null });
-                onClose();
-              })
-              .catch((err) => {
-                toastConfig.setToastConfig(err);
-              });
+      {revertQtyDialog.open && (
+        <RevertQtyDialog
+          referenceType="workOrder"
+          productName={productName}
+          product={product}
+          qty={revertQtyDialog.qty}
+          revertedQty={revertQtyDialog.revertedQty}
+          ledgerId={revertQtyDialog.ledgerId}
+          onClose={() => {
+            setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '' })
+          }}
+          onSuccess={() => {
+            setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '' })
+            onClose()
           }}
         />
       )}

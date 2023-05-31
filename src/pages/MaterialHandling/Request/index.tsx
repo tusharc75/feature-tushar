@@ -29,7 +29,7 @@ const Request = ({ workOrder }) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [qtyDialog, setQtyDialog] = useState({ open: false, status: null, data: null });
-  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [], productName: '', data: null });
+  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [], productName: '', product: '', data: null });
 
   const {
     state: { user }
@@ -272,7 +272,13 @@ const Request = ({ workOrder }) => {
                       size="small"
                       aria-label="Delete"
                       onClick={() => {
-                        setOpenProcessLogs({ open: true, logs: row['processesLogs'], productName: row?.productName, data: row });
+                        setOpenProcessLogs({
+                          open: true,
+                          logs: row['processesLogs'],
+                          productName: row?.productName,
+                          product: row?.product?.optionValue,
+                          data: row
+                        });
                       }}
                     >
                       <HistoryIcon />
@@ -316,7 +322,7 @@ const Request = ({ workOrder }) => {
           <Button
             disabled={
               selectedRecords?.length > 0 &&
-              selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -405,17 +411,15 @@ const Request = ({ workOrder }) => {
           }}
         />
       )}
-
       {openProcessLogs.open && (
         <ProcessLogs
           onClose={() => {
-            setOpenProcessLogs({ open: false, logs: [], productName: '', data: null });
+            setOpenProcessLogs({ open: false, logs: [], productName: '', product: '', data: null });
             fetchData();
           }}
           logsData={openProcessLogs.logs}
           productName={openProcessLogs.productName}
-          data={openProcessLogs.data}
-          workOrderId={workOrder}
+          product={openProcessLogs.product}
         />
       )}
     </>
