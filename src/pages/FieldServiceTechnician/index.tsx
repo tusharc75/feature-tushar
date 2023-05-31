@@ -15,7 +15,7 @@ import Consumables from './Consumables';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { clearAll, deleteOne, findAll, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 
 const status = {
   completed: 'Completed',
@@ -222,7 +222,7 @@ const FieldServiceTechnician = () => {
                           onClick={(e) => openActions(data._id, e)}
                           aria-controls={`action-menu-${data._id}`}
                         >
-                          <MoreVertIcon />
+                          <MoreHorizIcon />
                         </IconButton>
                         <Menu
                           anchorEl={anchorEl[data._id]}
