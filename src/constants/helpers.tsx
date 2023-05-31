@@ -1797,6 +1797,7 @@ export const ASSET_STATUS = {
   reserved: 'Reserved',
   inSale: 'In Sale',
   inUse: 'In-Use',
+  delivered: 'Delivered',
   indTransit: 'In-Transit',
   underReview: 'Under Review',
   repair: 'Repair',
