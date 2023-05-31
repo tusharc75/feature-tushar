@@ -19,12 +19,13 @@
 }
 .mainContainer {
   --icon-size: 19px;
-  --spacing: 15px;
+  --spacing: 25px;
   --left-right-icon-spacing: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
   max-width: max-content;
+  margin-inline: auto;
 }
 .iconButton {
   flex-basis: calc(var(--icon-size) + var(--left-right-icon-spacing, 15px));
@@ -71,8 +72,24 @@
   background: #ffffff;
   border: 1px solid #e1e1e1;
   border-radius: 11px;
-  padding: 15px 10px 13px;
+  padding: 13px 10px 13px;
   text-align: center;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 3px;
+    width: var(--spacing, 10px);
+    background-color: var(--line-color, gray);
+    left: calc(100% + 1px);
+  }
+  &:last-of-type {
+    &::after {
+      content: unset;
+    }
+  }
 
   [data-mode='dark'] & {
     background: #282845;
@@ -85,15 +102,22 @@
     right: -8px;
     width: 18px;
     height: 18px;
+    color: var(--new_theme_color);
   }
   .stepIcon {
+    --icon-size: 15px;
+    width: 38px;
+    height: 38px;
+    margin-inline: auto;
+    background: linear-gradient(to bottom, var(--icon-color, #727272, #727272));
+    border-radius: 5px;
+    display: grid;
+    place-items: center;
     svg {
-      margin-inline: auto;
-      display: block;
-      width: 28px;
-      height: 28px;
+      width: var(--icon-size, 15px);
+      height: var(--icon-size, 15px);
     }
-    margin-bottom: 16px;
+    margin-bottom: 9px;
   }
   .fullScrceen {
     position: absolute;
@@ -121,10 +145,7 @@
 }
 
 .currentStep {
-  border: 2.11609px solid #0f9fa9;
-  [data-mode='dark'] & {
-    border: 2.11609px solid #0f9fa9;
-  }
+  border: 2.11609px solid #f99336;
 }
 .inActiveStep {
   background-color: #f4f4f4;
