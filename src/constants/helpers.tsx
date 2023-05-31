@@ -27,6 +27,7 @@ import { stepIconInterface } from 'src/components/Steps/icons';
 interface stepInterface extends stepIconInterface {
   name: string;
   title: string;
+  date?: Date;
 }
 
 export const staticHiddenResource = ['Dashboard', 'Report'];
