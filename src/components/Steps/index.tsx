@@ -127,7 +127,7 @@ const Steps = ({
                 {
                   '--flex-basis': isStepEnded ? '100%' : 'calc(100% - calc(calc(var(--icon-size) + var(--left-right-icon-spacing, 15px)) * 2))',
                   marginLeft: isStepEnded ? '8px' : 'unset',
-                  padding: isStepEnded ? '9px 8px 0 0' : 'unset'
+                  padding: '9px 8px 0 0'
                 } as React.CSSProperties
               }
               ref={containerRef}
@@ -135,26 +135,32 @@ const Steps = ({
               {steps.map((step, i) => {
                 const Icon = getIcon(step.icon);
                 return (
-                  <Box
+                  <div
                     className={`
-
                     ${styles.singleStep} 
-
                     ${i < currentStep || isStepEnded ? styles.activeSteps : ''}
                     ${i === currentStep && !isStepEnded ? styles.currentStep : ''}
                     ${i > currentStep && !isStepEnded ? styles.inActiveStep : ''}
                     single-step-item
                 `}
+                    style={{ '--line-color': i < currentStep ? 'var(--new_theme_color)' : 'unset' } as React.CSSProperties}
                     key={step.name}
                   >
-                    {isStepEnded && (
+                    {(isStepEnded || i < currentStep) && (
                       <Box className={styles.stepCompleteIcon}>
                         <StepCompleteIcon />
                       </Box>
                     )}
 
-                    <Box className={styles.stepIcon}>
-                      <Icon colors={i > currentStep && !isStepEnded ? null : getColorOficon(i) || ['#FAC94B', '#FF9B04']} />
+                    <Box
+                      className={styles.stepIcon}
+                      style={
+                        {
+                          '--icon-color': i > currentStep && !isStepEnded ? null : getColorOficon(i) || ['#FAC94B', '#FF9B04']
+                        } as React.CSSProperties
+                      }
+                    >
+                      <Icon colors={['#fff', '#ffff']} />
                     </Box>
                     <Typography className={styles.label}>{step.title}</Typography>
                     {!isStepEnded && setStepFullScreen && currentStep === i && (
@@ -166,7 +172,7 @@ const Steps = ({
                         </Box>
                       </HtmlTooltip>
                     )}
-                  </Box>
+                  </div>
                 );
               })}
             </div>
