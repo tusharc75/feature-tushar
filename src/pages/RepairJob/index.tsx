@@ -41,7 +41,7 @@ const RepairJob = () => {
     }
   ];
 
-  
+
   const renderedFrom = camelCase(routes?.repairJob.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -70,9 +70,8 @@ const RepairJob = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
-  const [isAllChecked, setIsAllChecked] = useState(false);
   const [frameworkComponents, setFrameworkComponents] = useState({});
-  const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
+  const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState([]);
   const pageTitle = camelCase(`${routes.repairJob.title}`)
   const localStorageSelectedRecords = `${renderedFrom}_selected`
@@ -255,7 +254,7 @@ const RepairJob = () => {
     if (fromRental) {
       filterByIds.push({ field: "rentalJob", term: fromRental?._id });
     }
-   
+
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -266,7 +265,7 @@ const RepairJob = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
