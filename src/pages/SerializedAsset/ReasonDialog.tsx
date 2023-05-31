@@ -3,7 +3,7 @@ import TextField from "@material-ui/core/TextField";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
-import { CustomDialogTransition, INVENTORY_STATUS } from "../../constants/helpers"
+import { CustomDialogTransition, ASSET_STATUS } from "../../constants/helpers"
 import Dialog from "@material-ui/core/Dialog"
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader"
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent"
@@ -29,7 +29,7 @@ export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) 
         >
             <CustomDialogHeader
                 onClose={onClose}
-                title={status === INVENTORY_STATUS.scrap ? "Scrapping Reason" : status === INVENTORY_STATUS.lost ? "Lost Reason" : "Comment"}></CustomDialogHeader>
+                title={status === ASSET_STATUS.scrap ? "Scrapping Reason" : status === ASSET_STATUS.lost ? "Lost Reason" : "Comment"}></CustomDialogHeader>
             <CustomDialogContent>
                 <Box>
                     <Box pt={3} pb={3}>
@@ -37,8 +37,8 @@ export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) 
                             <Grid item xs={12} sm={12} md={12}>
                                 <TextField
                                     id="outlined-multiline-static"
-                                    label={status === INVENTORY_STATUS.scrap ? "Scrapping Reason" : status === INVENTORY_STATUS.lost ? "Lost Reason" : "Comment"}
-                                    placeholder={status === INVENTORY_STATUS.scrap ? "Scrapping Reason" : status === INVENTORY_STATUS.lost ? "Lost Reason" : "Comment"}
+                                    label={status === ASSET_STATUS.scrap ? "Scrapping Reason" : status === ASSET_STATUS.lost ? "Lost Reason" : "Comment"}
+                                    placeholder={status === ASSET_STATUS.scrap ? "Scrapping Reason" : status === ASSET_STATUS.lost ? "Lost Reason" : "Comment"}
                                     fullWidth
                                     value={value}
                                     required

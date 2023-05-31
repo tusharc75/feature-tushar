@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React, { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
-import { DELIVERY_TICKET_TYPE, INVENTORY_STATUS, rentalManagement, RENTAL_STATUS, COLOUR_MASTER } from '../../../constants/helpers';
+import { DELIVERY_TICKET_TYPE, ASSET_STATUS, rentalManagement, RENTAL_STATUS, COLOUR_MASTER } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -353,8 +353,8 @@ const RentalManagementViews = (props) => {
           },
           position: { x: xPosition, y: beforeLoadingAssetIdx * 80 },
           style:
-            item?.inventoryDetail?.status === INVENTORY_STATUS.scrap || item?.inventoryDetail?.status === INVENTORY_STATUS.lost
-              ? item?.inventoryDetail?.status === INVENTORY_STATUS.scrap
+            item?.inventoryDetail?.status === ASSET_STATUS.scrap || item?.inventoryDetail?.status === ASSET_STATUS.lost
+              ? item?.inventoryDetail?.status === ASSET_STATUS.scrap
                 ? customNodeStyles.scrapAssets
                 : customNodeStyles.lostAssets
               : customNodeStyles.productAssets
@@ -501,8 +501,8 @@ const RentalManagementViews = (props) => {
             },
             position: { x: xPosition + 300, y: loadingAssets * 80 },
             style:
-              productsWithStatus[product.optionValue] === INVENTORY_STATUS.lost || productsWithStatus[product.optionValue] === INVENTORY_STATUS.scrap
-                ? productsWithStatus[product.optionValue] === INVENTORY_STATUS.lost
+              productsWithStatus[product.optionValue] === ASSET_STATUS.lost || productsWithStatus[product.optionValue] === ASSET_STATUS.scrap
+                ? productsWithStatus[product.optionValue] === ASSET_STATUS.lost
                   ? customNodeStyles.lostAssets
                   : customNodeStyles.scrapAssets
                 : customNodeStyles.productAssets

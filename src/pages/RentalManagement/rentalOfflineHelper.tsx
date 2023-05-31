@@ -1,7 +1,7 @@
 
 import { objectStore, insertUpdate, findOne, findAll, clearAll } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
-import { INVENTORY_STATUS, rentalManagement } from '../../constants/helpers';
+import { ASSET_STATUS, rentalManagement } from '../../constants/helpers';
 
 export const rentalJobOfflineUpdate = async (ids) => {
     try {
@@ -95,7 +95,7 @@ export const addAssetsInRental = async (id, assets) => {
     try {
         const offlineDataSync = await findOne(objectStore.offlineDataSync, id);
         assets?.forEach(element => {
-            element.status = INVENTORY_STATUS.reserved
+            element.status = ASSET_STATUS.reserved
         });
         if (offlineDataSync) {
             await insertUpdate(objectStore.offlineDataSync, id, { _id: id, type: "assets", data: [...offlineDataSync.data, ...assets] });

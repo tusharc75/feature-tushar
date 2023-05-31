@@ -4,7 +4,7 @@ import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flo
 import axiosInstance from '../../../axios/axiosInstance';
 import {
   DELIVERY_TICKET_TYPE,
-  INVENTORY_STATUS,
+  ASSET_STATUS,
   rentalManagement,
   RENTAL_STATUS,
   COLOUR_MASTER,

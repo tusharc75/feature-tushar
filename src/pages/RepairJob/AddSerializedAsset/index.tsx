@@ -9,7 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import AddSerializedAsset from '../../RentalManagement/SerializedAsset/AddSerializedAsset';
 import {
   sidebarResource,
-  INVENTORY_STATUS,
+  ASSET_STATUS,
   CHILD_RESOURCE,
   REPAIR_JOB_STATUS,
   repairJob,
@@ -137,10 +137,10 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       .get(`${repairJob.api}/${repairJobData._id}/assets`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
-          u['hideSelection'] = u.status === INVENTORY_STATUS.lost;
+          u['hideSelection'] = u.status === ASSET_STATUS.lost;
           let finalObject = prepareDataForGrid(u, user);
           finalObject['allowedToEdit'] = allowedToEdit && permissions?.repairJob?.isUpdate;
-          finalObject['canDelete'] = u?.status === INVENTORY_STATUS.reserved;
+          finalObject['canDelete'] = u?.status === ASSET_STATUS.reserved;
           finalObject['isChecked'] = false;
           finalObject['productName'] = u?.product?.optionLabel;
           finalObject['productDescription'] = u?.productDetail?.productDescription;
@@ -182,7 +182,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
           </IconButton>
         </Tooltip>
       }
-      {params.data?.status === INVENTORY_STATUS.reserved ? (
+      {params.data?.status === ASSET_STATUS.reserved ? (
         <GridDeleteIcon
           hasDeletePermission={permissions?.repairJob?.isUpdate}
           ownerId={user?.user?._id}
@@ -322,7 +322,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
                 {'Bulk Edit'}
               </MenuItem>
               <MenuItem
-                disabled={selectedRecords.length === 0 || selectedRecords.some((s) => s.status !== INVENTORY_STATUS.reserved)}
+                disabled={selectedRecords.length === 0 || selectedRecords.some((s) => s.status !== ASSET_STATUS.reserved)}
                 onClick={() => {
                   setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: selectedRecords.map((m) => m._id) });
                 }}
@@ -389,7 +389,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               isClientSideGrid={true}
               rowClassRules={{
                 'red-data-row': function (params) {
-                  return [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].some((s) => s === params.data.status);
+                  return [ASSET_STATUS.lost, ASSET_STATUS.scrap].some((s) => s === params.data.status);
                 }
               }}
               refreshGrid={fetchRecords}

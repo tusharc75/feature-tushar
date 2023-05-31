@@ -21,7 +21,7 @@ import {
   gridLoadingTimeout,
   product,
   warehouse as warehouseHelper,
-  INVENTORY_STATUS,
+  ASSET_STATUS,
   COLOUR_MASTER,
   getLocalStorageArrayData,
   removeLocalStorage,
@@ -171,7 +171,7 @@ const SerializedAsset = () => {
             e.cellRenderer = 'assetNumberRenderer';
             e.cellStyle = (params) => {
               if (
-                [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(
+                [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
                   params?.data?.status
                 )
               ) {
@@ -681,7 +681,7 @@ const SerializedAsset = () => {
                     </MenuItem>
                     {permissions?.serializedAsset?.isUpdate &&
                       allowUpdateStatus &&
-                      [INVENTORY_STATUS.available].map((status) => (
+                      [ASSET_STATUS.available].map((status) => (
                         <MenuItem
                           onClick={() => {
                             closeActions();
@@ -689,7 +689,7 @@ const SerializedAsset = () => {
                           }}
                           disabled={
                             [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) =>
-                              [INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(o.status)
+                              [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(o.status)
                             ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
                               ? false
                               : true
@@ -705,60 +705,60 @@ const SerializedAsset = () => {
                           <MenuItem
                             onClick={() => {
                               closeActions();
-                              handleStatusUpdate(INVENTORY_STATUS.needRepair);
+                              handleStatusUpdate(ASSET_STATUS.needRepair);
                             }}
                             disabled={
                               [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter(
-                                (o) => ![INVENTORY_STATUS.needRepair].includes(o.status)
+                                (o) => ![ASSET_STATUS.needRepair].includes(o.status)
                               ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
                                 ? false
                                 : true
                             }
                           >
-                            {`Status Change - ${INVENTORY_STATUS.needRepair}`}
+                            {`Status Change - ${ASSET_STATUS.needRepair}`}
                           </MenuItem>
                           <MenuItem
                             onClick={() => {
                               closeActions();
-                              handleStatusUpdate(INVENTORY_STATUS.needRecert);
+                              handleStatusUpdate(ASSET_STATUS.needRecert);
                             }}
                             disabled={
                               [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter(
-                                (o) => ![INVENTORY_STATUS.needRecert].includes(o.status)
+                                (o) => ![ASSET_STATUS.needRecert].includes(o.status)
                               ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
                                 ? false
                                 : true
                             }
                           >
-                            {`Status Change - ${INVENTORY_STATUS.needRecert}`}
+                            {`Status Change - ${ASSET_STATUS.needRecert}`}
                           </MenuItem>
                           <MenuItem
                             onClick={() => {
                               closeActions();
-                              handleStatusUpdate(INVENTORY_STATUS.scrap);
+                              handleStatusUpdate(ASSET_STATUS.scrap);
                             }}
                             disabled={
-                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![INVENTORY_STATUS.scrap].includes(o.status))
+                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status))
                                 .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
                                 ? false
                                 : true
                             }
                           >
-                            {`Status Change - ${INVENTORY_STATUS.scrap}`}
+                            {`Status Change - ${ASSET_STATUS.scrap}`}
                           </MenuItem>
                           <MenuItem
                             onClick={() => {
                               closeActions();
-                              handleStatusUpdate(INVENTORY_STATUS.lost);
+                              handleStatusUpdate(ASSET_STATUS.lost);
                             }}
                             disabled={
-                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![INVENTORY_STATUS.lost].includes(o.status))
+                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.lost].includes(o.status))
                                 .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
                                 ? false
                                 : true
                             }
                           >
-                            {`Status Change - ${INVENTORY_STATUS.lost}`}
+                            {`Status Change - ${ASSET_STATUS.lost}`}
                           </MenuItem>
                         </>
                       )}

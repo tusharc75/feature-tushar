@@ -13,8 +13,14 @@ import {
   gridLoadingTimeout,
   CustomDialogTransition,
   getLocalStorageArrayData,
-  INVENTORY_STATUS,
-  transferAsset
+  ASSET_STATUS,
+  transferAsset,
+  DELIVERY_FROM_TO_TYPE,
+  DELIVERY_TICKET_STATUS,
+  DELIVERY_TICKET_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  rentalManagement,
+  deliveryTicket
 } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { useData } from '../../../StateProvider/Provider';
@@ -31,6 +37,9 @@ import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import { Link } from 'react-router-dom';
+import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
+
 
 let searchTimeout;
 
@@ -46,7 +55,8 @@ const AddSerializedAsset = ({
   repairJobId = null,
   transferAssetId = null,
   notIn = null,
-  filterByPlant = null
+  filterByPlant = null,
+  handleSuccess = null
 }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -69,6 +79,9 @@ const AddSerializedAsset = ({
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [tabValue, setTabValue] = useState(0);
 
+  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {}, assets: [] });
+
+
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 600;
     if (searchTimeout) {
@@ -81,7 +94,7 @@ const AddSerializedAsset = ({
 
   useEffect(() => {
     fetchGridColumns();
-  }, []);
+  }, [tabValue]);
 
   useEffect(() => {
     axiosInstance()
@@ -92,6 +105,7 @@ const AddSerializedAsset = ({
   }, []);
 
   const fetchGridColumns = () => {
+    setColumns(null)
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
@@ -110,11 +124,32 @@ const AddSerializedAsset = ({
         tempFrameworkComponent = {
           ...tempFrameworkComponent
         };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
+        setFrameWorkComponent({ ...tempFrameworkComponent, rentalJobRenderer: RentalJobRenderer });
+
+        const inUseColoumns: any = [{
+          field: 'Rental Job',
+          headerName: 'Rental Job',
+          show: true,
+          filter: true,
+          sortable: true,
+          cellRenderer: 'rentalJobRenderer'
+        }];
+
+        if (Number(tabValue) === 2) {
+          columns = [...inUseColoumns, ...columns, ...getStaticFields(),];
+        }
+        else {
+          columns = [...columns, ...getStaticFields()];
+        }
         setColumns([...columns]);
       });
   };
+
+  const RentalJobRenderer = (params) => (
+    <Link className="link text-truncate" to={`${routes.rentalManagementDetail.path}/${params.data?.loadingTicket?.rentalJob?.optionValue}`}>
+      {params?.data?.loadingTicket?.rentalJob?.optionLabel}
+    </Link>
+  );
 
   useEffect(() => {
     let tempProducts = serializedProducts;
@@ -169,6 +204,9 @@ const AddSerializedAsset = ({
         data.data = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = false;
+          if (Number(tabValue) === 2) {
+            finalObject['loadingTicket'] = u.loadingTicket;
+          }
           return finalObject;
         });
         dispatch({ type: 'initialize', data: data.data, count: data.count });
@@ -260,11 +298,11 @@ const AddSerializedAsset = ({
       return {
         'background-color': '#FAEAE9'
       };
-    } else if ([INVENTORY_STATUS.available, INVENTORY_STATUS.new]?.includes(params?.data?.status)) {
+    } else if ([ASSET_STATUS.available, ASSET_STATUS.new]?.includes(params?.data?.status)) {
       return {
         'background-color': '#DBF8DB'
       };
-    } else if ([INVENTORY_STATUS.inUse]?.includes(params?.data?.status)) {
+    } else if ([ASSET_STATUS.inUse]?.includes(params?.data?.status)) {
       return {
         'background-color': '#FFD580'
       };
@@ -291,6 +329,16 @@ const AddSerializedAsset = ({
     }
   };
 
+  const checkUniqRentalJob = () => {
+    if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0) {
+      return true;
+    } else if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), 'loadingTicket.rentalJob.optionLabel')).length === 1) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
   const handleAddAssetToTransferAsset = (transferAssetId) => {
     axiosInstance()
       .put(`${transferAsset.api}/add-asset/${transferAssetId}`, {
@@ -300,7 +348,7 @@ const AddSerializedAsset = ({
             currentStatus: s.status
           };
         }),
-        manualStatus: INVENTORY_STATUS.reserved
+        manualStatus: ASSET_STATUS.reserved
       })
       .then(({ data }) => {
         fetchAssets();
@@ -329,6 +377,81 @@ const AddSerializedAsset = ({
       setSelectedWarehouse(null);
     }
   };
+
+  const handleTicketDialog = () => {
+
+    const loadingTicket = getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0].loadingTicket
+
+    const assetsAdd: any = []
+    const assets = [...getLocalStorageArrayData(`${localStorageSelectedRecords}`)];
+    selectedProducts?.forEach((e: any) => {
+      if (e.type === 'product') {
+        let qty = e.realAssetQty - e.realAssetAssignedQty;
+        while (qty) {
+          const result = assets.filter((f) => f.productId === e.materialId && !f.isCounted);
+          if (result.length) {
+            let obj: any = {};
+            obj._id = e._id;
+            obj.inventory = result[0]._id;
+            obj.product = e.materialId;
+            assetsAdd.push(obj);
+            result[0].isCounted = true;
+          }
+          qty--;
+        }
+      }
+    });
+    
+    if (assetsAdd?.length === 0) {
+      return
+    }
+
+    const data = {};
+    data['ticketName'] = loadingTicket?.rentalJob?.optionLabel;
+    data['referenceId'] = loadingTicket?.rentalJob?.optionValue;
+
+    data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
+    data['pickupFrom'] = loadingTicket?.deliveryTo;
+    data['pickupFromAddress'] = loadingTicket?.deliveryToAddress;
+    data['isPickupFromDisable'] = true;
+
+    data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.customer;
+    data['deliveryTo'] = referenceData?.customerAccount;
+    data['deliveryToAddress'] = referenceData?.shippingAddress;
+    data['isDeliveryToDisable'] = true;
+
+    data['startDate'] = referenceData?.fromDate;
+    data['endDate'] = referenceData?.toDate;
+    data['wellName'] = referenceData?.wellName;
+    if (referenceData?.wellNumber) {
+      data['wellNumber'] = referenceData?.wellNumber;
+    }
+    data['afeNumber'] = referenceData?.afeNumber;
+    if (referenceData?.processor) {
+      data['processor'] = referenceData?.processor;
+    }
+    data['status'] = DELIVERY_TICKET_STATUS.delivered;
+
+    setShowTicketDialog({ open: true, data: data, assets: assetsAdd });
+  };
+
+  const handleCreateLoadingTicketAddAsstes = (data) => {
+    const deliveryTicketData: any = {};
+    deliveryTicketData._id = data._id;
+    deliveryTicketData.rentalJob = referenceData?._id;
+    deliveryTicketData.ticketType = DELIVERY_TICKET_TYPE.loading;
+    axiosInstance().post(`${rentalManagement.api}/${referenceData?._id}/inventory`, { "products": showTicketDialog.assets })
+      .then(({ data }) => {
+        axiosInstance().post(`${deliveryTicket.api}/auto-create-ticket`, deliveryTicketData).then(({ data }) => {
+          setShowTicketDialog({ open: false, data: {}, assets: [] });
+          handleSuccess()
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   return (
     <Fragment>
@@ -517,6 +640,28 @@ const AddSerializedAsset = ({
                       </Box>
                     </Fragment>
                   }
+                  {(Number(tabValue) === 2) &&
+                    <Box ml={2}>
+                      <HtmlTooltip title={'Add to Job'} >
+                        <Button
+                          color="primary"
+                          size="small"
+                          onClick={() => {
+                            handleTicketDialog()
+                          }}
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          disabled={isAdding || checkUniqRentalJob()}
+                          className={isMobile && !isTablet ? 'mobile_button' : ''}
+                          endIcon={isAdding && <CircularProgress size={20} />}
+                        >
+                          {`Add to Job`}
+                          {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                            ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
+                            : ''}
+                        </Button>
+                      </HtmlTooltip>
+                    </Box>
+                  }
                 </Box>
               </Grid>
             </Grid>
@@ -551,12 +696,12 @@ const AddSerializedAsset = ({
                         {...a11yProps(1)}
                       />
                     )}
-                    {/* <Tab
+                    <Tab
                       className={'tabLayout'}
                       value={2}
                       label={<div className="d-flex align-items-center tab-font">In Use Assets</div>}
                       {...a11yProps(2)}
-                    /> */}
+                    />
                   </Tabs>
                 </Grid>
               </Grid>
@@ -605,6 +750,19 @@ const AddSerializedAsset = ({
             wellName: referenceData?.wellName,
             wellNumber: referenceData?.wellNumber,
             afeNumber: referenceData?.afeNumber
+          }}
+        />
+      )}
+      {showTicketDialog.open && (
+        <ManageDeliveryTicket
+          ticketType={DELIVERY_TICKET_TYPE.receiving}
+          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
+          referenceData={showTicketDialog.data}
+          productInventory={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
+          products={[]}
+          onClose={() => setShowTicketDialog({ open: false, data: {}, assets: [] })}
+          onSuccess={(data) => {
+            handleCreateLoadingTicketAddAsstes(data)
           }}
         />
       )}
