@@ -1,22 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Box, Button, Grid, Typography, IconButton, Paper, Card, CardContent, List, useMediaQuery, ListItemIcon, Tooltip } from '@material-ui/core';
-import { isMobile, isTablet } from 'react-device-detect';
+import { Box, Button, Grid, Typography, IconButton, Card, CardContent, List, ListItemIcon, Tooltip } from '@material-ui/core';
+import { isMobile } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
-import { camelCase, reverse as _reverse } from 'lodash';
-import { Alert, Skeleton } from '@material-ui/lab';
+import { reverse as _reverse } from 'lodash';
+import { Skeleton } from '@material-ui/lab';
 import { accountPage } from '../../routes/Accounts';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from '../../StateProvider/Provider';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import BoxWithBorder from '../../components/BoxWithBorder';
 import RelatedContacts from './RelatedContacts';
 import axiosInstance from './../../axios/axiosInstance';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AccountHierarchy from './AccountHierarchy';
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import accountClass from './account.module.scss';
 import ManageContactDialog from '../Contact/ManageContact/index';
 import DeleteButton from '../../components/Helpers/DeleteButton';
@@ -28,12 +26,6 @@ import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
 import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
 import {
-  FcFlowChart,
-  FcContacts,
-  FcBinoculars,
-  FcConferenceCall,
-  FcMultipleSmartphones,
-  FcMoneyTransfer,
   FcApproval,
   FcDisapprove
 } from 'react-icons/fc';
@@ -43,7 +35,6 @@ import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccord
 import { Link } from 'react-router-dom';
 import { BsPerson } from 'react-icons/bs';
 import ListItem from '@material-ui/core/ListItem/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
 import routes from './../../components/Helpers/Routes';
 import CustomNodalStructure from '../../components/CustomNodalStructure/CustomNodalStructure';
@@ -51,12 +42,10 @@ import ProcessFlow from '../../components/ProcessFlow';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import queryString from 'query-string';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { BiEdit } from 'react-icons/bi';
 import Warehouse from './Warehouse';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import AddIcon from '@material-ui/icons/Add';
-
 import { AccountHierarchyIcon, ProjectsIcon, OpportunityIcon, QuoteIcon, AccountsTeamsIcon, ContactsIcon } from 'src/assets/svg/svgIcons';
 
 function DisplayData({ label, value, icon, highlightsHead = false }) {
@@ -104,7 +93,6 @@ export default function AccountDetailPage(props) {
     accountBreadcrumb,
     contact: { contactResource, contactRoute, contactApi }
   } = props;
-  const { isOffline, offlineFieldsData, offlineGridData, updateOfflineGridData } = useContext(CustomOfflineContext);
 
   const {
     state: { user, permissions, selectedEntity, tour },
@@ -139,9 +127,7 @@ export default function AccountDetailPage(props) {
   const [showAtLast, setShowAtLast] = useState(false);
   const [deleteAccount, setDeleteAccountId] = useState<any>({});
   const [additionalFieldName, setAdditionalFieldName] = useState('');
-  const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [showAccountHierarchyInFullScreenDialog, setShowAccountHierarchyInFullScreenDialog] = useState(false);
-  const [isInOfflineSaveQueue, setIsInOfflineSaveQueue] = useState(false);
 
   const [loadingGraphData, setLoadingGraphData] = useState(false);
   const [graphData, setGraphData] = useState({
@@ -300,25 +286,8 @@ export default function AccountDetailPage(props) {
 
     let data;
 
-    if (!isOffline) {
       const response: any = await axiosInstance().get(`/${accountApi}/${id}`);
       data = response?.data?.data;
-    } else {
-      data = offlineGridData ? offlineGridData[accountResource]?.find((d) => d._id === id) : null;
-    }
-
-    if (localStorage.getItem('offlineDataToSave')) {
-      const offlineDataToSave = JSON.parse(localStorage.getItem('offlineDataToSave'));
-      if (offlineDataToSave[accountResource]) {
-        setIsInOfflineSaveQueue(offlineDataToSave[accountResource]?.some((d) => d.values._id === id));
-      }
-    }
-
-    try {
-      updateOfflineGridData(accountResource, [data], []);
-    } catch (ex) {
-      console.error(`${accountResource}: Error while adding/updating data for Offline context. Error: ${ex.message}`);
-    }
 
     setCustomizedRoutes([accountBreadcrumb, { title: data.accountName }]);
     handleMainPonts(data);
@@ -360,8 +329,6 @@ export default function AccountDetailPage(props) {
               }
             : null,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
-          // parentAccountName: data.parentAccount?.optionLabel,
-          // parentAccount: data.parentAccount?.optionValue
         }
       ];
       let newData = [];
@@ -387,12 +354,6 @@ export default function AccountDetailPage(props) {
         } else {
           updatedAccount['type'] = 'parent';
         }
-        // if (isAllowedToEdit && openEdit === 'true') {
-        //   setOpenUpdateDialog(true);
-        //   const params = new URLSearchParams();
-        //   params.delete('openEdit');
-        //   history.push({ search: params.toString() });
-        // }
         newData.push(updatedAccount);
       });
 
@@ -443,13 +404,8 @@ export default function AccountDetailPage(props) {
 
   const getAccountFields = async (accountData = {}) => {
     let data;
-    if (!isOffline) {
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`);
-      data = response?.data?.data;
-    } else {
-      data = offlineFieldsData[accountResource];
-    }
-
+    const response: any = await axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`);
+    data = response?.data?.data;
     setAccountFields(data.filter((d) => d.isUpdate || d.isRead));
     setFormValues(
       getObjKeysWithValues(
@@ -628,8 +584,6 @@ export default function AccountDetailPage(props) {
     } else {
       updatedData._id = accountData._id;
     }
-
-    if (!isOffline) {
       axiosInstance()
         .put(`/${accountApi}`, updatedData)
         .then(({ data }) => {
@@ -647,34 +601,6 @@ export default function AccountDetailPage(props) {
           toastConfig.setToastConfig(error);
           setLoading(false);
         });
-    } else {
-      let storedData = {};
-
-      if (localStorage.getItem('offlineDataToSave')) {
-        storedData = JSON.parse(localStorage.getItem('offlineDataToSave'));
-      }
-
-      const dataToSave = {
-        api: `/${accountApi}`,
-        method: 'put',
-        values: updatedData
-      };
-
-      if (!storedData[accountResource]) {
-        storedData[accountResource] = [];
-      }
-      storedData[accountResource].push(dataToSave);
-
-      localStorage.setItem('offlineDataToSave', JSON.stringify(storedData));
-
-      setLoading(false);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'info',
-        message: 'Updates are in offline state, it will be affected once you will be in network'
-      });
-      setOpenUpdateDialog(false);
-    }
   };
 
   const goBackToListing = () => {
@@ -728,7 +654,6 @@ export default function AccountDetailPage(props) {
       .put(`${accountApi}`, updatedData)
       .then(() => {
         fetchAccountData();
-        // setActiveStep(activeStep + 1)
         setIsProcessing(false);
       })
       .catch((error) => {
@@ -762,7 +687,6 @@ export default function AccountDetailPage(props) {
         .put(`${accountApi}`, updatedData)
         .then(() => {
           fetchAccountData();
-          // setActiveStep(activeStep + 1)
           setIsProcessing(false);
         })
         .catch((error) => {
@@ -771,9 +695,6 @@ export default function AccountDetailPage(props) {
         });
     }
 
-    // if (activeStep === steps.length - 2 && showAdditionalField) {
-    //   setOpenAdditionalDialog(true);
-    // }
   };
 
   const handleEntityChange = (id) => {
@@ -800,8 +721,6 @@ export default function AccountDetailPage(props) {
     setShowCreateAccountDialog(true);
   };
 
-  const tourPaths = ['/customer-account/detail', '/supplier-account/detail'];
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -810,7 +729,7 @@ export default function AccountDetailPage(props) {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {!isOffline && permissions && permissions[accountResource] && permissions[accountResource].approveAccount && (
+            {permissions && permissions[accountResource] && permissions[accountResource].approveAccount && (
               <>
                 <Button
                   id="detailApproveButton"
@@ -851,8 +770,7 @@ export default function AccountDetailPage(props) {
                 </Button>
               </>
             )}
-            {!isOffline &&
-            permissions &&
+            {permissions &&
             permissions[accountResource] &&
             permissions[accountResource].isDelete &&
             accountData?.owner?.optionValue &&
@@ -908,14 +826,6 @@ export default function AccountDetailPage(props) {
             </Tabs>
             <TabPanel value={tabValue} index={0}>
               <Box>
-                {isInOfflineSaveQueue && (
-                  <div className="px-3 mt-2">
-                    <Alert variant="filled" severity="info">
-                      Updates are in offline state, it will be affected once you will be in network
-                    </Alert>
-                  </div>
-                )}
-
                 {showAtLast ? (
                   <DetailsPage data={accountData} fields={accountFields} />
                 ) : (
@@ -956,7 +866,7 @@ export default function AccountDetailPage(props) {
                 />
               </Box>
             </TabPanel>
-            {!isOffline && accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
+            {accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
               <TabPanel value={tabValue} index={3}>
                 <Warehouse reference={accountResource} api={accountApi} id={id} />
               </TabPanel>
@@ -1237,36 +1147,6 @@ export default function AccountDetailPage(props) {
         />
       ) : null}
       {openAdditionalDialog && (
-        // <Dialog
-        //   disableBackdropClick={true}
-        //   fullWidth
-        //   maxWidth="sm"
-        //   open={openAdditionalDialog}
-        //   onClose={() => setOpenAdditionalDialog(false)}
-        //   aria-labelledby="form-dialog-title"
-        //   fullScreen={isMobile || isTablet}
-        // >
-        //   <CustomDialogHeader
-        //     title="Additonal Information"
-        //     onClose={() => setOpenAdditionalDialog(false)}
-        //   ></CustomDialogHeader>
-        //   {sectionFields.map((item) => (
-        //     <CustomDialogContent>{item}</CustomDialogContent>
-        //   ))}
-
-        //   <CustomDialogFooter>
-        //     <Button
-        //       color="primary"
-        //       size="small"
-        //       onClick={() => setOpenAdditionalDialog(false)}
-        //     >
-        //       Close
-        //     </Button>
-        //     <Button color="primary" size="small" onClick={handleSave}>
-        //       Save
-        //     </Button>
-        //   </CustomDialogFooter>
-        // </Dialog>
         <AdditionalDialogPopUp
           open={openAdditionalDialog}
           close={() => setOpenAdditionalDialog(false)}
