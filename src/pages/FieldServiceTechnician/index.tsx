@@ -15,6 +15,8 @@ import Consumables from './Consumables';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { clearAll, deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 const status = {
   completed: 'Completed',
@@ -72,6 +74,7 @@ const FieldServiceTechnician = () => {
   const [selectedFieldService, setSelectedFieldService] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [offlineStore, setOfflineStore] = useState([]);
+  const [anchorEl, setAnchorEl] = useState({});
 
   const fieldRef: any = useRef();
 
@@ -144,13 +147,23 @@ const FieldServiceTechnician = () => {
   const handleAddOffline = async (fieldService) => {
     await insertUpdate(objectStore.fieldServiceTechnician, fieldService._id, fieldService);
     fieldRef.current.triggerChildFunction();
+    closeActions();
     findAllStoredData();
   };
 
   const handleRemoveOffline = async (fieldService) => {
     deleteOne(objectStore.fieldServiceTechnician, fieldService._id);
     fieldRemoveRef.current.triggerChildFunction();
+    closeActions();
     findAllStoredData();
+  };
+
+  const openActions = (id, event) => {
+    setAnchorEl({ ...anchorEl, [id]: event.currentTarget });
+  };
+
+  const closeActions = () => {
+    setAnchorEl({});
   };
 
   return (
@@ -180,7 +193,7 @@ const FieldServiceTechnician = () => {
                     }}
                     sx={{ position: 'relative' }}
                   >
-                    <Box p={3} pt={5}>
+                    <Box p={3}>
                       <Box sx={style.serviceHead}>
                         <Typography>
                           <span>{data?.fieldServiceOrderNumber}</span>
@@ -203,18 +216,33 @@ const FieldServiceTechnician = () => {
                       </Box>
                     </Box>
                     {!isOffline && (
-                      <Box>
-                        <Button
-                          style={{ position: 'absolute', right: '5px', top: '5px' }}
-                          variant="outlined"
-                          color="primary"
+                      <Box style={{ position: 'absolute', right: '5px', bottom: '5px' }}>
+                        <IconButton
+                          style={{ color: 'white' }}
                           size="small"
-                          onClick={() => {
-                            offlineStore?.includes(data._id) ? handleRemoveOffline(data) : handleAddOffline(data);
-                          }}
+                          onClick={(e) => openActions(data._id, e)}
+                          aria-controls={`action-menu-${data._id}`}
                         >
-                          {offlineStore?.includes(data._id) ? 'Remove Offline' : 'Add Offline'}
-                        </Button>
+                          <MoreVertIcon />
+                        </IconButton>
+                        <Menu
+                          anchorEl={anchorEl[data._id]}
+                          keepMounted
+                          getContentAnchorEl={null}
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left'
+                          }}
+                          id={`action-menu-${data._id}`}
+                          open={Boolean(anchorEl[data._id])}
+                          onClose={closeActions}
+                        >
+                          {!offlineStore?.includes(data._id) ? (
+                            <MenuItem onClick={() => handleAddOffline(data)}>Add Offline</MenuItem>
+                          ) : (
+                            <MenuItem onClick={() => handleRemoveOffline(data)}>Remove Offline</MenuItem>
+                          )}
+                        </Menu>
                       </Box>
                     )}
                   </Box>
