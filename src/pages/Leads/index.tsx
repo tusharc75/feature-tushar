@@ -145,7 +145,7 @@ const Leads = () => {
 
     let columns = [];
     let rendererNames = [];
-    data.forEach((o) => {
+    data?.forEach((o) => {
       let currentColumn = getColumnData(leadResource, o?.fieldData, routes.leadDetail.path);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
