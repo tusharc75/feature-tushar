@@ -60,7 +60,7 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
         showManimizeMaximize={false}
         showRequiredLabel={false} />
       <Formik
-        initialValues={{ revertQty: (qty - revertedQty) }}
+        initialValues={{ revertQty: (qty - revertedQty), comment: 'Reverted' }}
         onSubmit={handleSubmit}
         validateOnMount
         validate={validate}

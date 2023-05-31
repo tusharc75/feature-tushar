@@ -216,10 +216,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-              ? element?.productDetail?.productDescription || ''
-              : element.type === 'package'
-              ? element?.packageDetail?.packageDescription || ''
-              : '';
+                ? element?.productDetail?.productDescription || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -248,10 +248,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-              ? element?.productDetail?.productDescription || ''
-              : element.type === 'package'
-              ? element?.packageDetail?.packageDescription || ''
-              : '';
+                ? element?.productDetail?.productDescription || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.assetNumber = element?.productDetail?.productName;
@@ -639,6 +639,23 @@ const LoadingTicket = ({
     }
   };
 
+  const handleChangeStatusInUse = () => {
+    const assets = selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id);
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse`, { assets })
+      .then(({ data }) => {
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+
   return (
     <>
       <Box display="flex" justifyContent="flex-end" m={1}>
@@ -776,9 +793,23 @@ const LoadingTicket = ({
                 >
                   Delivered to Customer
                 </MenuItem>
+
+                {(selectedRecords.length > 0 &&
+                  selectedRecords.filter((e: any) =>
+                    e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && e?.status === ASSET_STATUS.delivered).length === selectedRecords.length) &&
+                  <MenuItem
+                    onClick={() => {
+                      handleChangeStatusInUse();
+                      closeActions();
+                    }}
+                  >
+                    Assets In-Use
+                  </MenuItem>
+                }
+
                 {selectedRecords.length &&
-                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
-                  ?.length === selectedRecords?.length ? (
+                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
+                    ?.length === selectedRecords?.length ? (
                   <Fragment>
                     <MenuItem
                       onClick={() => {
@@ -832,7 +863,7 @@ const LoadingTicket = ({
                   )}
               </Menu>
               {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
                 <Fragment>
                   <Tooltip title="Remove Assets From Loading Ticket(s)">
@@ -908,7 +939,7 @@ const LoadingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
