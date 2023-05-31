@@ -1,5 +1,5 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem, Paper, Tab, Tabs, Typography } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Box, Button, Grid, IconButton, Menu, MenuItem, Tab, Tabs, Typography } from '@material-ui/core';
+import { useContext, useEffect, useRef, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -13,9 +13,8 @@ import EventNoteIcon from '@material-ui/icons/EventNote';
 import TabPanel from 'src/components/TabPanel';
 import Consumables from './Consumables';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { clearAll, deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
+import { clearAll, deleteOne, findAll, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import ExpandMore from '@material-ui/icons/ExpandMore';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 const status = {
