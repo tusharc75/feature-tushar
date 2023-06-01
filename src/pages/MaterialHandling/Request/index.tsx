@@ -156,7 +156,7 @@ const Request = ({ workOrder }) => {
         render: ({ row }) => {
           return (
             <>
-              <Typography className="text-truncate new-table-font">
+              <Typography className="text-truncate new-table-font" style={{ marginBottom: '5px' }}>
                 {row['requestBy'] ? (
                   <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['requestById']}`} target="_blank">
                     {row?.['requestBy']}
@@ -165,7 +165,7 @@ const Request = ({ workOrder }) => {
                   <NoDataCell />
                 )}
               </Typography>
-              <Typography className="text-truncate new-table-font ">
+              <Typography className="text-truncate new-table-font-small ">
                 {row['requestDate'] ? <span>{moment(row['requestDate']).format(dateTimeFormat)}</span> : <NoDataCell />}
               </Typography>
             </>
@@ -180,12 +180,12 @@ const Request = ({ workOrder }) => {
             <>
               {row['processBy'] ? (
                 <>
-                  <Typography className="text-truncate new-table-font">
+                  <Typography className="text-truncate new-table-font" style={{ marginBottom: '5px' }}>
                     <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['processById']}`} target="_blank">
                       {row['processBy']}
                     </a>
                   </Typography>
-                  <Typography className="text-truncate new-table-font ">
+                  <Typography className="text-truncate new-table-font-small ">
                     <span>{moment(row['processDate']).format(dateTimeFormat)}</span>
                   </Typography>
                 </>
@@ -322,7 +322,7 @@ const Request = ({ workOrder }) => {
           <Button
             disabled={
               selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+              selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                 ? false
                 : true
             }
