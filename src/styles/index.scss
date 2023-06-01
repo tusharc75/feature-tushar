@@ -181,6 +181,9 @@ body {
 }
 
 .poppins {
+  & * {
+    font-family: 'Poppins', sans-serif, Nunito Sans, sans-serif !important;
+  }
   font-family: 'Poppins', sans-serif, Nunito Sans, sans-serif !important;
 }
 

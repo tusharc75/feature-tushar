@@ -941,7 +941,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   // };
 
   return (
-    <div>
+    <div className="poppins">
       <div className={styles.filler}></div>
       <AppBar
         position="relative"
