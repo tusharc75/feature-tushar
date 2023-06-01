@@ -192,7 +192,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
-      Header: '',
+      Header: 'Action',
       minWidth: 50,
       width: 50,
       sticky: 'right',

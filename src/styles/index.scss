@@ -180,6 +180,13 @@ body {
   font-family: 'Poppins', sans-serif, Nunito Sans, sans-serif !important;
 }
 
+.poppins {
+  & * {
+    font-family: 'Poppins', sans-serif, Nunito Sans, sans-serif !important;
+  }
+  font-family: 'Poppins', sans-serif, Nunito Sans, sans-serif !important;
+}
+
 body > iframe {
   z-index: -1 !important;
 }
