@@ -1,22 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import clsx from 'clsx';
-import {
-  withStyles,
-  Grid,
-  Typography,
-  Accordion as MuiAccordion,
-  AccordionSummary as MuiAccordionSummary,
-  AccordionDetails as MuiAccordionDetails,
-  makeStyles,
-  Paper,
-  Box,
-  IconButton,
-  Tabs,
-  Tab,
-  Menu,
-  MenuItem,
-  Button
-} from '@material-ui/core';
+import { withStyles, Grid, Typography, makeStyles, Paper, Box, IconButton, Tabs, Tab, Menu, MenuItem, Button } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 
 import { Delete, ExpandMore, MoreVert } from '@material-ui/icons';
@@ -41,6 +25,8 @@ import { MdDelete } from 'react-icons/md';
 import { AiFillCaretLeft, AiFillCaretRight } from 'react-icons/ai';
 import { isMobile, isTablet } from 'react-device-detect';
 
+import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
+
 function TabPanel(props) {
   const { children, value, index, classes, ...other } = props;
 
@@ -60,55 +46,10 @@ function a11yProps(index) {
   };
 }
 
-const Accordion = withStyles({
-  root: {
-    border: '1px solid rgba(0, 0, 0, .125)',
-    backgroundColor: '#F6F6F6',
-    // boxShadow: "none",
-    '&:not(:last-child)': {
-      borderBottom: 0
-    },
-    '&:before': {
-      display: 'none'
-    },
-    '&$expanded': {
-      margin: 'auto'
-    },
-    width: '100%'
-  },
-  expanded: {}
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-  root: {
-    backgroundColor: 'f5f5f5',
-    borderRadius: '10px 10px 0 0',
-    // borderBottom: "1px solid rgba(0, 0, 0, .125)",
-    marginBottom: -1,
-    minHeight: 46,
-    '&$expanded': {
-      minHeight: 46
-    }
-  },
-  content: {
-    '&$expanded': {
-      margin: '12px 0'
-    }
-  },
-  expanded: {}
-})(MuiAccordionSummary);
-
-const AccordionDetails = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(2),
-    backgroundColor: '#fff',
-    borderRadius: '0 0 10px 10px'
-  }
-}))(MuiAccordionDetails);
-
 const useStyles = makeStyles((theme) => ({
   root: {
-    background: '#f5f5f5',
+    border: '1px solid var(--common-border-color)',
+    borderRadius: '5px',
     marginBottom: 12
   },
   expand: {
@@ -124,8 +65,7 @@ const useStyles = makeStyles((theme) => ({
     // marginLeft: "auto",
   },
   cusName: {
-    fontWeight: 700,
-    color: 'var(--primary)'
+    fontWeight: 700
   },
   tabProject: {
     // position:"static",
@@ -507,14 +447,9 @@ const CustomerAccounts = (props) => {
           fromProject={true}
         />
       )}
-      <Paper className={`${classes.root} ${'p-3 pannel_layout'}`}>
-        {/*<Accordion*/}
-        {/*  square={false}*/}
-        {/*  expanded={expandedParent}*/}
-        {/*  onChange={() => setExpandedParent(!expandedParent)}*/}
-        {/*>*/}
-        <div className="customer_account_box">
-          <AccordionSummary aria-controls="panel1d-content" id="panel1d-header" style={{ background: 'white' }}>
+      <Box className={`${classes.root} ${'pannel_layout'}`}>
+        <div>
+          <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
             <Box
               display="flex"
               alignItems="center"
@@ -663,130 +598,130 @@ const CustomerAccounts = (props) => {
 
                   {customerAccounts.map((c, i) => (
                     <Box hidden={currentTabIndex !== i} key={c._id}>
-                      <Grid container className="modified_style_of_accordion sales_accordions">
-                        <Grid item xs={12}>
-                          <Accordion expanded={expandCustomerContact} className="omsAccordian accordAccount">
-                            <AccordionSummary aria-controls="user-panel-content" id="user-panel-header" className="pos_rel">
-                              <div className="clicker_div" onClick={() => setExpandCustomerContact(!expandCustomerContact)}></div>
-                              <Grid container>
-                                <Grid item xs={8}>
-                                  <Box component="div" display="flex" alignItems="center" flexGrow={1}>
-                                    <IconButton size="small" onClick={(e) => e.preventDefault()}>
-                                      {expandCustomerContact === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                                    </IconButton>
-                                    <Box>
-                                      <Typography variant="subtitle2">
-                                        Customer Contacts ({customerContacts.filter((ca) => ca.accountName === c._id).length})
-                                      </Typography>
-                                    </Box>
+                      <Box mb={2}>
+                        <Accordion expanded={expandCustomerContact} onChange={() => setExpandCustomerContact(!expandCustomerContact)}>
+                          <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+                            <Grid container>
+                              <Grid item xs={8}>
+                                <Box component="div" display="flex" alignItems="center" flexGrow={1}>
+                                  <IconButton size="small" onClick={(e) => e.preventDefault()}>
+                                    {expandCustomerContact === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                  </IconButton>
+                                  <Box>
+                                    <Typography variant="subtitle2">
+                                      Customer Contacts ({customerContacts.filter((ca) => ca.accountName === c._id).length})
+                                    </Typography>
                                   </Box>
-                                </Grid>
-                                <Grid item xs={4} container justify="flex-end" alignItems="center">
-                                  <Typography variant="subtitle2">
-                                    {(permissions?.isUpdate && isTeamMember) || isManager ? (
-                                      <IconButton
-                                        aria-haspopup="true"
-                                        color="primary"
-                                        size="small"
-                                        onClick={(e) => {
-                                          handleClick(e, 'customer-contact');
-                                          setAccId(c._id);
-                                        }}
-                                      >
-                                        <MoreVert />
-                                      </IconButton>
-                                    ) : null}
-                                  </Typography>
-                                </Grid>
+                                </Box>
                               </Grid>
-                            </AccordionSummary>
-                            <Box margin={0.5} />
-                            <AccordionDetails>
-                              <Box style={{ width: '100%' }}>
-                                {loading ? (
-                                  [1, 2].map((i) => (
-                                    <BoxWithBorder key={i} style={{ marginBottom: '8px' }}>
-                                      <Box padding={1}>
-                                        <Skeleton variant="text" width="100px" height="20px" />
+                              <Grid item xs={4} container justify="flex-end" alignItems="center">
+                                <Typography variant="subtitle2">
+                                  {(permissions?.isUpdate && isTeamMember) || isManager ? (
+                                    <IconButton
+                                      aria-haspopup="true"
+                                      color="primary"
+                                      size="small"
+                                      onClick={(e) => {
+                                        handleClick(e, 'customer-contact');
+                                        setAccId(c._id);
+                                      }}
+                                    >
+                                      <MoreVert />
+                                    </IconButton>
+                                  ) : null}
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <Box style={{ width: '100%' }}>
+                              {loading ? (
+                                [1, 2].map((i) => (
+                                  <BoxWithBorder key={i} style={{ marginBottom: '8px' }}>
+                                    <Box padding={1}>
+                                      <Skeleton variant="text" width="100px" height="20px" />
 
-                                        <Skeleton variant="text" width="100%" height="15px" />
-                                      </Box>
-                                    </BoxWithBorder>
-                                  ))
-                                ) : customerContacts.filter((ca) => ca.accountName === c._id).length ? (
-                                  <CustomerContacts
-                                    contacts={customerContacts.filter((ca) => ca.accountName === c._id)}
-                                    accountId={c._id}
-                                    accountName={c.accountName}
-                                    contactRoute="customer-contact"
-                                    handleRemoveContact={handleRemoveContact}
-                                  />
-                                ) : (
-                                  <Box pb="6px">
-                                    <Typography variant="subtitle1">No Contacts To Show</Typography>
-                                  </Box>
-                                )}
-                              </Box>
-                            </AccordionDetails>
-                          </Accordion>
+                                      <Skeleton variant="text" width="100%" height="15px" />
+                                    </Box>
+                                  </BoxWithBorder>
+                                ))
+                              ) : customerContacts.filter((ca) => ca.accountName === c._id).length ? (
+                                <CustomerContacts
+                                  contacts={customerContacts.filter((ca) => ca.accountName === c._id)}
+                                  accountId={c._id}
+                                  accountName={c.accountName}
+                                  contactRoute="customer-contact"
+                                  handleRemoveContact={handleRemoveContact}
+                                />
+                              ) : (
+                                <Box pb="6px">
+                                  <Typography variant="subtitle1">No Contacts To Show</Typography>
+                                </Box>
+                              )}
+                            </Box>
+                          </AccordionDetails>
+                        </Accordion>
+                      </Box>
 
-                          {/*TODO: Heirarchy Table */}
-                          {permissions?.isRead && (
-                            <OpportunityAccordianProjectSales
-                              opportunities={opportunities.filter((o) => o.customerAccount === c._id)}
-                              onNewOpportunityAdd={(id) => {
-                                saveOppToProject(id);
-                              }}
-                              permissions={permissions}
-                              accountId={c._id}
-                              accountName={c.accountName}
-                              resource={'customerAccount'}
-                              isRedirect={false}
-                              expanded={false}
-                              collaborators={collaborators}
-                              users={collaborators.map((u) => ({
-                                ...u,
-                                default: u.optionValue === ownerId
-                              }))}
-                              projectId={projectId}
-                              addExisting={handleOpenDialog}
-                              fetchProjectData={fetchProjectData}
-                              isTeamMember={isTeamMember}
-                              isManager={isManager}
-                            />
-                          )}
-                          {permissions?.isRead && (
-                            <QuotesAccordionInProjectSale
-                              expanded={false}
-                              quotes={quotes.filter((q) => q.customerAccountName === c._id)}
-                              recordsPerLine={3}
-                              accountId={c._id}
-                              accountResource={'customerAccount'}
-                              permissions={permissions}
-                              projectId={projectId}
-                              addExisting={handleOpenDialog}
-                              fetchProjectData={fetchProjectData}
-                              isTeamMember={isTeamMember}
-                              isManager={isManager}
-                              onNewQuoteAdd={(id) => {
-                                saveQuoteToProject(id);
-                              }}
-                              currency={currency}
-                              estimatedAmount={estimatedAmount}
-                              marketSegmentId={marketSegmentId}
-                              subMarketSegmentId={subMarketSegmentId}
-                              isFromProjectSales={true}
-                              projectSalesTeam={collaborators}
-                            />
-                          )}
-                          {/* <QuotesInAccordion /> */}
-                          {/* <ProjectInAccordion
+                      {/*TODO: Heirarchy Table */}
+                      {permissions?.isRead && (
+                        <Box mb={2}>
+                          <OpportunityAccordianProjectSales
+                            opportunities={opportunities.filter((o) => o.customerAccount === c._id)}
+                            onNewOpportunityAdd={(id) => {
+                              saveOppToProject(id);
+                            }}
+                            permissions={permissions}
+                            accountId={c._id}
+                            accountName={c.accountName}
+                            resource={'customerAccount'}
+                            isRedirect={false}
+                            expanded={false}
+                            collaborators={collaborators}
+                            users={collaborators.map((u) => ({
+                              ...u,
+                              default: u.optionValue === ownerId
+                            }))}
+                            projectId={projectId}
+                            addExisting={handleOpenDialog}
+                            fetchProjectData={fetchProjectData}
+                            isTeamMember={isTeamMember}
+                            isManager={isManager}
+                          />
+                        </Box>
+                      )}
+                      {permissions?.isRead && (
+                        <Box>
+                          <QuotesAccordionInProjectSale
+                            expanded={false}
+                            quotes={quotes.filter((q) => q.customerAccountName === c._id)}
+                            recordsPerLine={3}
+                            accountId={c._id}
+                            accountResource={'customerAccount'}
+                            permissions={permissions}
+                            projectId={projectId}
+                            addExisting={handleOpenDialog}
+                            fetchProjectData={fetchProjectData}
+                            isTeamMember={isTeamMember}
+                            isManager={isManager}
+                            onNewQuoteAdd={(id) => {
+                              saveQuoteToProject(id);
+                            }}
+                            currency={currency}
+                            estimatedAmount={estimatedAmount}
+                            marketSegmentId={marketSegmentId}
+                            subMarketSegmentId={subMarketSegmentId}
+                            isFromProjectSales={true}
+                            projectSalesTeam={collaborators}
+                          />
+                        </Box>
+                      )}
+                      {/* <QuotesInAccordion /> */}
+                      {/* <ProjectInAccordion
                             recordsPerLine={3}
                             projectSales={null} /> */}
 
-                          {/* <ProductBuilderInAccordion /> */}
-                        </Grid>
-                      </Grid>
+                      {/* <ProductBuilderInAccordion /> */}
                     </Box>
                   ))}
                 </>
@@ -797,7 +732,7 @@ const CustomerAccounts = (props) => {
           </AccordionDetails>
         </div>
         {/*</Accordion>*/}
-      </Paper>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialogRaw
           open={showConfirmBox}
