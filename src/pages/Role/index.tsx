@@ -318,7 +318,7 @@ const Roles: FC = () => {
             onSuccess={() => {
               userDialogClose();
             }}
-            selectedEntity={selectedEntity || ''}
+            selectedEntity={[selectedEntity] || []}
           />
         ) : (
           <AssignRegionalRolesUserDialog
