@@ -73,7 +73,7 @@ const User: FC = () => {
   const [userList, setUserList] = useState<any[]>([]);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteUser, setDeleteUser] = useState<any>([])
@@ -230,6 +230,11 @@ const User: FC = () => {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&withoutRoleLookup=true`;
 
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+    }
+
     const { filterByIds, deepFilters } = gridFilterParser(filters)
 
     if (entityRoleRedirectDetails?.id) {
@@ -285,7 +290,7 @@ const User: FC = () => {
     if (renderCount > 0) {
       fetchUsers();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, entityRoleRedirectDetails]);
+  }, [page, limit, filters, sorting, entityRoleRedirectDetails, showFilteredRecordsOnly]);
 
   const fetchLoggedInUserRole = async () => {
     let roleIds = [];
