@@ -144,9 +144,6 @@
   }
 }
 
-.currentStep {
-  border: 2.11609px solid #f99336;
-}
 .inActiveStep {
   background-color: #f4f4f4;
   [data-mode='dark'] & {
@@ -160,4 +157,11 @@
       color: gray;
     }
   }
+}
+
+.currentStep {
+  [data-mode='dark'] & {
+    border: 2.11609px solid #f99336;
+  }
+  border: 2.11609px solid #f99336;
 }
