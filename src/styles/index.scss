@@ -81,6 +81,7 @@
   --card-body: var(--dark-secondary);
   --dark-primary-text: #fff;
   --dark-secondary-text: #b8b8b8;
+  --dark-error: hsl(0, 52%, 36%);
 }
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
@@ -3667,4 +3668,8 @@ body {
   * {
     font-size: 14px !important;
   }
+}
+.new-table-font-small {
+  font-size: 12px !important;
+  color: var(--dark-secondary-text, #5b5b5b);
 }

@@ -9,6 +9,7 @@ interface TableInterface extends React.HTMLAttributes<HTMLTableElement> {
   checkBox?: boolean;
   onSelect?: any;
   height?: string;
+  dense?: boolean;
 }
 export interface ColumnsInterface extends React.HTMLAttributes<HTMLTableCellElement> {
   header: string;
@@ -18,7 +19,17 @@ export interface ColumnsInterface extends React.HTMLAttributes<HTMLTableCellElem
   sticky?: 'right' | 'left';
 }
 
-const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, className, checkBox, onSelect = null, height, ...others }) => {
+const CustomTable: React.FC<TableInterface> = ({
+  data,
+  columns,
+  uniqueKey,
+  className,
+  checkBox,
+  onSelect = null,
+  height,
+  dense = false,
+  ...others
+}) => {
   const [selected, setSelected] = useState<any>([]);
 
   const selectAll = useCallback(() => {
@@ -60,7 +71,7 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
         <table {...others} className={`${styles.table} ${className}`}>
           <thead>
             {checkBox && (
-              <th style={{ minWidth: '48px' }} className={`${styles.checkBox}`}>
+              <th style={{ minWidth: dense ? '48px' : '60px', textAlign: 'center' }} className={`${styles.checkBox}`}>
                 <Checkbox
                   style={{ padding: '0' }}
                   inputProps={{ 'aria-label': 'Select all' }}
@@ -97,7 +108,7 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
             {data?.map((row, index) => (
               <tr key={uniqueKey(row)}>
                 {checkBox && (
-                  <td style={{ minWidth: '48px' }} className={`${styles.checkBox}`}>
+                  <td style={{ minWidth: dense ? '48px' : '60px', textAlign: 'center' }} className={`${styles.checkBox}`}>
                     {row?.hideSelection ? null : (
                       <Checkbox
                         style={{ padding: '0' }}
@@ -119,6 +130,7 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
                       maxWidth: `${column.width}px}`,
                       minWidth: `${column.minWidth}px`,
                       position: column.sticky ? 'sticky' : 'static',
+                      padding: dense ? '6px 16px' : '18px 16px',
                       [column.sticky]: 0
                     }}
                   >

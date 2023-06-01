@@ -143,7 +143,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   const [modalContent, setModalContent] = useState<ModalContent | null>(null);
 
   const openHelperModal = () => {
-    setModalContent({ title: 'Welcometo the Equipt', icon: <img src={SVG('LogoNewShort')} alt="equipt logo" /> });
+    setModalContent({ title: 'Equipt - User Manual', icon: <img src={SVG('LogoNewShort')} alt="equipt logo" /> });
   };
   const handleCloseHelperModal = () => {
     setModalContent(null);
