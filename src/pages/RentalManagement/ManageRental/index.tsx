@@ -229,7 +229,7 @@ const ManageRentalManagementDialog = ({
         }
         initialData['actualStartDate'] = '';
         initialData['actualEndDate'] = '';
-        if (fieldsDataForCreate?.some((e) => e.fieldName === 'rentalJobName')) {
+        if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
           initialData['rentalJobName'] = `RJ_${generateUniqueIdOnly()}`;
         }
         if (referenceData) {
