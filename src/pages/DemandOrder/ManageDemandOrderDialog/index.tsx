@@ -176,7 +176,7 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
 
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, demandOrderNumber, updatedBy, ...rest } = data;
-            if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
               rest.demandOrderNumber = `DO_${generateUniqueIdOnly()}`;
             }
             setCloneHeading(demandOrderNumber);
@@ -198,7 +198,7 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-        if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
           initialData['demandOrderNumber'] = `DO_${generateUniqueIdOnly()}`;
         }
         setSalesData({

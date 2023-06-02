@@ -73,7 +73,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
               setBulkAssetCreationData(data);
               if (isClone) {
                 const { _id, createdBy, updatedBy, serialNumber, baNumber, ...rest } = data;
-                if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+                if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
                   rest['baNumber'] = `BA_${generateUniqueIdOnly()}`;
                 }
                 rest['status'] = 'New';
@@ -98,7 +98,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
           if (fieldsDataForCreate.some((e) => e.fieldName === 'currency')) {
             createValues['currency'] = user.user?.brandCurrency;
           }
-          if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+          if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
             createValues['baNumber'] = `BA_${generateUniqueIdOnly()}`;
           }
           if (refrenceData) {

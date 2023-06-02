@@ -145,7 +145,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
             if (isClone) {
               fields = fieldsDataForCreate;
               const { planningNumber, ...rest } = data;
-              if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+              if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
                 rest.planningNumber = `PLO_${generateUniqueIdOnly()}`;
               }
               setCloneHeading(planningNumber);
@@ -161,7 +161,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
           });
       } else {
         const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
-        if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
           tempInitialData['planningNumber'] = `PLO_${generateUniqueIdOnly()}`;
         }
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {

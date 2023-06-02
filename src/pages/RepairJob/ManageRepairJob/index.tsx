@@ -68,7 +68,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
               if (isClone) {
                 const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
                 setTitle(`Clone - ${repairJobName}`);
-                if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+                if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
                   rest.repairJobName = `RJ_${generateUniqueIdOnly()}`;
                 }
                 rest.status = `New`;
@@ -107,7 +107,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
         } else {
           setTitle(`Create ${routes.repairJob.title}`);
           let initialData = getObjKeys('', fieldsDataForCreate);
-          if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+          if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
             initialData['repairJobName'] = `RJ_${generateUniqueIdOnly()}`;
           }
           if (fieldsDataForCreate?.some((e) => e.fieldName === 'expectedCompletionDate')) {

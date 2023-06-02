@@ -96,7 +96,7 @@ const ManageSublease = ({
               setSubleaseData(data);
               if (isClone) {
                 const { _id, createdBy, updatedBy, serialNumber, ...rest } = data;
-                if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+                if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
                   rest['subleaseName'] = `SL_${generateUniqueIdOnly()}`;
                 }
                 rest['status'] = 'New';
@@ -129,7 +129,7 @@ const ManageSublease = ({
         } else {
           fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate'].includes(obj.fieldName));
           let createValues: any = getObjKeys('', fieldsDataForCreate);
-          if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+          if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
             createValues['subleaseName'] = `SL_${generateUniqueIdOnly()}`;
           }
           if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {

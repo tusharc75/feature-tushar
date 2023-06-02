@@ -175,7 +175,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, salesOrderNo, updatedBy, ...rest } = data;
             rest.status = 'New';
-            if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
               rest.salesOrderNo = `SO_${generateUniqueIdOnly()}`;
             }
             setCloneHeading(salesOrderNo);
@@ -197,7 +197,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate), currency: user.user?.brandCurrency || '' };
-        if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
           initialData['salesOrderNo'] = `SO_${generateUniqueIdOnly()}`;
         }
         setInitialData({

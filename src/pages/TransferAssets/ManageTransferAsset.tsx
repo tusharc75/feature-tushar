@@ -111,7 +111,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
               if (isClone) {
                 const { _id, createdBy, updatedBy, entity, transferAssetNumber, ...rest } = data;
                 let oldValues = { ...rest };
-                if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+                if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
                   oldValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`;
                 }
                 oldValues.status = 'New';
@@ -134,7 +134,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
         } else {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
           setAllFields(fieldsDataForCreate);
-          if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+          if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
             createValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`;
           }
           if (referenceType === 'Rental Job') {

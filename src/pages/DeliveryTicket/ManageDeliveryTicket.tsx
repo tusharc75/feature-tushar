@@ -275,7 +275,7 @@ const ManageDeliveryTicket = ({
               (e) => !['pickupFromStorageLocation', 'deliveryToStorageLocation']?.includes(e.fieldName)
             );
           }
-          if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+          if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
             tempInitialData['ticketName'] = `${referenceData?.ticketName}_${generateUniqueIdOnly()}`;
           }
           tempInitialData['type'] = referenceType;

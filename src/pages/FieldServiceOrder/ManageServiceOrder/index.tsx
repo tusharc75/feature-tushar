@@ -189,7 +189,7 @@ const ManageServiceOrderDialog = ({
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, fieldServiceOrderNumber, updatedBy, ...rest } = data;
             rest['status'] = 'New';
-            if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
               rest['fieldServiceOrderNumber'] = `FSO_${generateUniqueIdOnly()}`;
             }
             setCloneHeading(fieldServiceOrderNumber);
@@ -214,7 +214,7 @@ const ManageServiceOrderDialog = ({
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           initialData['currency'] = user.user?.brandCurrency;
         }
-        if (fieldsDataForCreate?.some((e) =>  e.primaryField && e.isSystemGenerate )) {
+        if (fieldsDataForCreate?.some((e) =>  e?.primaryField && e?.isSystemGenerate )) {
           initialData['fieldServiceOrderNumber'] = `FSO_${generateUniqueIdOnly()}`;
         }
         setInitialData({

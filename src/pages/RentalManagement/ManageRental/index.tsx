@@ -189,7 +189,7 @@ const ManageRentalManagementDialog = ({
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, rentalJobName, updatedBy, ...rest } = data;
             rest['status'] = 'New';
-            if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
               rest['rentalJobName'] = `RJ_${generateUniqueIdOnly()}`;
             }
             rest['estimateStartDate'] = new Date();
@@ -231,7 +231,7 @@ const ManageRentalManagementDialog = ({
         }
         initialData['actualStartDate'] = '';
         initialData['actualEndDate'] = '';
-        if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
           initialData['rentalJobName'] = `RJ_${generateUniqueIdOnly()}`;
         }
         if (referenceData) {
