@@ -696,12 +696,12 @@ const AddSerializedAsset = ({
                         {...a11yProps(1)}
                       />
                     )}
-                    <Tab
+                    {/* <Tab
                       className={'tabLayout'}
                       value={2}
                       label={<div className="d-flex align-items-center tab-font">In Use Assets</div>}
                       {...a11yProps(2)}
-                    />
+                    /> */}
                   </Tabs>
                 </Grid>
               </Grid>
