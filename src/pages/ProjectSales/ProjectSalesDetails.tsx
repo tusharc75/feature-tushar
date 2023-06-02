@@ -104,7 +104,6 @@ const ProjectSalesDetails = () => {
     setTabValue(newValue);
   };
 
-
   useEffect(() => {
     //  When it is nodal structure tab
     initializeGraphData();
@@ -405,17 +404,17 @@ const ProjectSalesDetails = () => {
               </Box>
             )}
             {currentTabIndex === 2 && (
-              <Paper>
-                <Box style={{ padding: '0px' }}>
-                  <Box width="100%" padding={1} bgcolor="grey.200" display="flex" alignItems="center" justifyContent="space-between">
-                    <Typography variant="subtitle2">Project Team</Typography>
+              <Box className="form-v1">
+                <Box className="single-form-v1">
+                  <Box className="form-head-v1">
+                    <Typography component={'h3'}>Project Team</Typography>
                     {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
-                      <IconButton color="primary" size="small" onClick={() => handleOpenDialog('user')}>
+                      <IconButton color="primary" size="small" className="float-right-button-v1 " onClick={() => handleOpenDialog('user')}>
                         <ControlPoint />
                       </IconButton>
                     ) : null}
                   </Box>
-                  <Box padding={1}>
+                  <Box className="formdata-v1">
                     {loading ? (
                       [1, 2].map((i) => (
                         <BoxWithBorder key={i} style={{ marginBottom: '8px' }}>
@@ -443,7 +442,7 @@ const ProjectSalesDetails = () => {
                     )}
                   </Box>
                 </Box>
-              </Paper>
+              </Box>
             )}
             {currentTabIndex === 3 && (
               <Box>
