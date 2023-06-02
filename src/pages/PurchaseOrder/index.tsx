@@ -74,8 +74,8 @@ const PurchaseOrder = () => {
   const [fromRental, setFromRental] = useState(history.location?.state?.rental);
   const [fromSalesOrder, setFromSalesOrder] = useState(history.location?.state?.salesOrder);
 
-  const [plantOptions, setPlantOptions] = useState([]);
-  const [plantId, setPlantId] = useState(null);
+  const [warehouseOptions, setWarehouseOptions] = useState([]);
+  const [warehouse, setWarehouse] = useState(null);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -89,13 +89,13 @@ const PurchaseOrder = () => {
 
   useEffect(() => {
     fetchPurchaseOrder();
-  }, [page, limit, filters, sorting, search, selectedEntity, fromRental, fromSalesOrder, selectedType, showFilteredRecordsOnly, plantId]);
+  }, [page, limit, filters, sorting, search, selectedEntity, fromRental, fromSalesOrder, selectedType, showFilteredRecordsOnly, warehouse]);
 
   const getPlants = () => {
     axiosInstance()
-      .get(`/warehouse`)
+      .get(`/sa-formbuilder/lookup?lookupResource=Warehouse`)
       .then(({ data: { data } }) => {
-        setPlantOptions(data);
+        setWarehouseOptions(data['Warehouse']);
       });
   };
 
@@ -181,8 +181,8 @@ const PurchaseOrder = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters)
 
-    if (plantId && plantId !== '') {
-      filterByIds.push({ field: 'warehouse', term: plantId });
+    if (warehouse && warehouse !== '') {
+      filterByIds.push({ field: 'warehouse', term: warehouse });
     }
     if (fromRental) {
       filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
@@ -421,12 +421,12 @@ const PurchaseOrder = () => {
               )}
               <Autocomplete
                 style={{ width: '250px' }}
-                options={plantOptions}
-                getOptionLabel={(option: any) => option.warehouseName}
-                getOptionSelected={(option: any, val) => option._id === val}
-                value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
+                options={warehouseOptions}
+                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionSelected={(option: any, val) => option.optionValue === val}
+                value={warehouseOptions.filter((data) => data.optionValue === warehouse).length ? warehouseOptions.filter((data) => data.optionValue === warehouse)[0] : ''}
                 onChange={(e, val) => {
-                  setPlantId(val && val._id ? val._id : '');
+                  setWarehouse(val && val.optionValue ? val.optionValue : '');
                 }}
                 renderInput={(params) =>
                   isMobile && !isTablet ? (
