@@ -1,24 +1,21 @@
 import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
 import { Box, Button, Menu, MenuItem, Grid, Dialog } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import AddIcon from '@material-ui/icons/Add';
 import ManageContactDialog from './ManageContact/index';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import SearchBox from '../../components/Helpers/SearchBox';
 import CustomContainer from '../../components/CustomContainer';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import styles from '../Leads/Header.module.scss';
-import style from './contact.module.scss';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
 import {
-  isObjectEmpty,
   gridLoadingTimeout,
   prepareDataForGrid,
   userType,
@@ -43,10 +40,9 @@ import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, 
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
-import queryString from 'query-string';
 import { MdAdd } from 'react-icons/all';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
-import { FaSuitcase, MdFilterList, MdSort, MdWeb } from 'react-icons/all';
+import { FaSuitcase, MdFilterList, MdSort } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
@@ -64,15 +60,7 @@ const ContactTypes = [
   }
 ];
 
-let contactTimeout;
 export default function Contact(props) {
-  const location = useLocation();
-  let queryParams = queryString.parse(location.search);
-  let queryPage: string = queryParams.page as string;
-  let queryType: string = queryParams.type as string;
-  let querySearch: string = queryParams.search as string;
-  let queryColFilter: string = queryParams.colFilter as string;
-
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -112,8 +100,7 @@ export default function Contact(props) {
   const [showEntityDialog, setShowEntityDialog] = useState(false);
   const [openAddPlantsDialog, setOpenAddPlantsDialog] = useState(false);
   const [isAddingWarehouse, setAddingWarehouse] = useState(false);
-
-  const [filter, setFilter] = useState(queryType ? queryType : 'All Contacts');
+  const [filter, setFilter] = useState('All Contacts');
   const [entities, setEntities] = useState([]);
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
@@ -131,56 +118,6 @@ export default function Contact(props) {
   const localStorageSelectedRecords = `${contactResource}_selected`;
 
   useEffect(() => {
-    if (queryPage === undefined) {
-      sessionStorage.removeItem('page');
-      history.push(`?page=${page}`);
-    }
-    if (page > 0) {
-      sessionStorage.setItem('page', JSON.stringify(page));
-      history.replace(
-        queryType && querySearch && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
-          : queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-          : queryType && querySearch
-          ? `?page=${page}&type=${queryType}&search=${querySearch}`
-          : queryColFilter && querySearch
-          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-          : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}`
-          : querySearch
-          ? `?page=${page}&search=${querySearch}`
-          : `?page=${page}`
-      );
-    } else {
-      history.replace(
-        queryType && querySearch && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${querySearch}`
-          : queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-          : queryType && querySearch
-          ? `?page=${page}&type=${queryType}&search=${querySearch}`
-          : queryColFilter && querySearch
-          ? `?page=${page}&colFilter=${queryColFilter}&search=${querySearch}`
-          : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}`
-          : querySearch
-          ? `?page=${page}&search=${querySearch}`
-          : `?page=${page}`
-      );
-    }
-  }, [page, queryPage]);
-
-  useEffect(() => {
-    if (JSON.parse(sessionStorage.getItem('page')) !== null && queryPage !== '0') {
-      let savedPage = JSON.parse(sessionStorage.getItem('page'));
-      // history.replace(`?page=${savedPage}`);
-      dispatch({ type: 'pageChange', page: savedPage });
-    }
     fetchGridColumns();
     fetchLoggedInUserEntities();
     fetchLoggedInUserRole();
@@ -219,11 +156,6 @@ export default function Contact(props) {
       columns.push(checkStaticField(routes.projectSales.title, field));
     });
     setColumns([...columns]);
-
-    if (JSON.parse(sessionStorage.getItem('filters')) !== null) {
-      let savedFilter = JSON.parse(sessionStorage.getItem('filters'));
-      dispatch({ type: 'filter', filters: savedFilter });
-    }
   };
   //  Grid Variables - End
   if (columnState) {
@@ -240,16 +172,6 @@ export default function Contact(props) {
     if (newFilter !== null) {
       setFilter(newFilter);
       handleContactSelect(ContactTypes.find((d) => d.key === newFilter).value);
-      history.replace(
-        querySearch && queryColFilter
-          ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}&search=${search}`
-          : queryColFilter
-          ? `?page=${page}&type=${newFilter}&colFilter=${queryColFilter}`
-          : querySearch
-          ? `?page=${page}&type=${newFilter}&search=${search}`
-          : `?page=${page}&type=${newFilter}`
-      );
-      sessionStorage.setItem('filterSuccess', JSON.stringify('filterSuccess'));
     }
   };
 
@@ -270,92 +192,8 @@ export default function Contact(props) {
   }, [user]);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-
-    if (contactTimeout) {
-      clearTimeout(contactTimeout);
-    }
-
-    contactTimeout = setTimeout(() => {
-      getContacts();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    if (renderCount > 0) {
-      getContacts();
-    } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, location, showFilteredRecordsOnly]);
-
-  useEffect(() => {
-    if (search) {
-      history.replace(
-        queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}&search=${search}`
-          : queryType
-          ? `?page=${page}&type=${queryType}&search=${search}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}&search=${search}`
-          : `?page=${page}&search=${search}`
-      );
-    } else {
-      history.replace(
-        queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&colFilter=${queryColFilter}`
-          : queryType
-          ? `?page=${page}&type=${queryType}`
-          : queryColFilter
-          ? `?page=${page}&colFilter=${queryColFilter}`
-          : `?page=${page}`
-      );
-    }
-  }, [search]);
-
-  useEffect(() => {
-    if (querySearch) {
-      dispatch({ type: 'search', search: querySearch });
-    }
-  }, [querySearch]);
-
-  useEffect(() => {
-    if (Object.keys(filters).length > 0) {
-      sessionStorage.setItem('filters', JSON.stringify(filters));
-
-      let serialize = function (obj) {
-        var str = [];
-        for (var p in obj)
-          if (obj.hasOwnProperty(p)) {
-            str.push('{colName=' + encodeURI(p) + ',' + 'colValue=' + encodeURI(obj[p].filter) + '}');
-          }
-        return str.join(',');
-      };
-
-      history.replace(
-        queryType && querySearch
-          ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-          : queryType
-          ? `?page=${page}&type=${queryType}&colFilter=[${serialize(filters)}]`
-          : querySearch
-          ? `?page=${page}&colFilter=[${serialize(filters)}]&search=${querySearch}`
-          : `?page=${page}&colFilter=[${serialize(filters)}]`
-      );
-    }
-
-    if (Object.keys(filters).length === 0 && queryColFilter !== undefined) {
-      history.replace(
-        queryType && querySearch
-          ? `?page=${page}&type=${queryType}&search=${querySearch}`
-          : queryType
-          ? `?page=${page}&type=${queryType}`
-          : querySearch
-          ? `?page=${page}&search=${querySearch}`
-          : `?page=${page}`
-      );
-    }
-    if (Object.keys(filters).length === 0 && queryColFilter === undefined) {
-      sessionStorage.removeItem('filters');
-    }
-  }, [filters]);
+    getContacts();
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
 
   const handleEntityChange = (entityId) => {
     entityDispatch({ type: SET_SELECTED_ENTITY, payload: entityId });
@@ -494,18 +332,24 @@ export default function Contact(props) {
   );
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterContacts=${queryType === 'My Accounts' ? 2 : selectedType}`;
-    if (isExport) {
-      deepFilter = `filterContacts=${queryType === 'My Accounts' ? 2 : selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
+
+    if (isExport) {
+      deepFilter = `?`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if(accountDetails.accountId) {
-      filterByIds.push({ field: 'accountName', term: accountDetails.accountId })
+    if (accountDetails.accountId) {
+      filterByIds.push({ field: 'accountName', term: accountDetails.accountId });
     }
 
     if (filterByIds?.length) {

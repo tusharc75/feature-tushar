@@ -1,4 +1,4 @@
-import { INVENTORY_STATUS } from 'src/constants/helpers';
+import { ASSET_STATUS } from 'src/constants/helpers';
 
 const QuoteOptions = [
   { optionLabel: 'Open', optionValue: 'open' },
@@ -12,9 +12,9 @@ const CustomerRentalStatus = [
   { optionLabel: 'Close', optionValue: 'close' }
 ];
 
-const RentalStatus = Object.keys(INVENTORY_STATUS).map((key) => ({
-  optionValue: INVENTORY_STATUS[key],
-  optionLabel: INVENTORY_STATUS[key]
+const RentalStatus = Object.keys(ASSET_STATUS).map((key) => ({
+  optionValue: ASSET_STATUS[key],
+  optionLabel: ASSET_STATUS[key]
 }));
 
 export default [

@@ -175,7 +175,7 @@ const Steps = ({
   allowedToEdit,
   setDisableCompleteFail,
   fetchService,
-  referencType = '',
+  referencType,
   handelClose = null
 }) => {
   const classes = useStyles();
@@ -695,8 +695,8 @@ const Steps = ({
                                 {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
                                   ? 'Resume'
                                   : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                                  ? 'Pause'
-                                  : 'Restart'}
+                                    ? 'Pause'
+                                    : 'Restart'}
                               </Button>
                             ))}
                           {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
@@ -765,9 +765,9 @@ const Steps = ({
                             )
                           ) : null}
                           {stepData?.status &&
-                          ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                          ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                          (isMeTechnician || !isAnyTechnician) ? (
+                            ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                            ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                            (isMeTechnician || !isAnyTechnician) ? (
                             [
                               WORKORDER_SERVICE_STEP_STATUS.passed,
                               WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -865,21 +865,22 @@ const Steps = ({
               >
                 Upload Documents
               </MenuItem>
-              <MenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setConsumablesDialog({
-                    open: true,
-                    uniqueId: selectedService.uniqueId,
-                    service: selectedService._id,
-                    stepId: selectedStep?._id,
-                    serviceName: `${selectedService.serviceName} - ${selectedStep.stepName}`
-                  });
-                  setAnchorEl(null);
-                }}
-              >
-                Add/Consume Products
-              </MenuItem>
+              {(referencType === 'workOrder' || (referencType === 'workOrderTechnician' && user?.brandPolicy?.workOrderTechnicianConsumable)) &&
+                <MenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setConsumablesDialog({
+                      open: true,
+                      uniqueId: selectedService.uniqueId,
+                      service: selectedService._id,
+                      stepId: selectedStep?._id,
+                      serviceName: `${selectedService.serviceName} - ${selectedStep.stepName}`
+                    });
+                    setAnchorEl(null);
+                  }}
+                >
+                  Add/Consume Products
+                </MenuItem>}
               <MenuItem
                 onClick={(e) => {
                   e.stopPropagation();
@@ -985,16 +986,15 @@ const Steps = ({
             open={true}
             message={
               addServiceConfirmation.type === 'returnToStepOnFail'
-                ? `As per the logic applied on this step, we need to return to step ${
-                    addServiceConfirmation.step?.stepName || ''
-                  }. Do you want to continue ?`
+                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
+                }. Do you want to continue ?`
                 : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                ? ` Step fail requires Quote Revision. Do you confirm on this?`
-                : addServiceConfirmation.type === 'jumpStep'
-                ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                    ?.map((e) => e.serviceName)
-                    ?.toString()} has been added. Do you want to Add ? `
+                  ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                  : addServiceConfirmation.type === 'jumpStep'
+                    ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                      ?.map((e) => e.serviceName)
+                      ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
@@ -1038,7 +1038,7 @@ const Steps = ({
             handleClose={() => {
               setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
             }}
-            handleSuccess={() => {}}
+            handleSuccess={() => { }}
           />
         )}
         {consumablesDialog.open && (
@@ -1113,13 +1113,13 @@ export const RenderPassFailChip = ({ status, className = '', ...others }) => {
         background: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
           ? '#e1fce3'
           : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-          ? '#D3D3D3'
-          : '#FAD9D4',
+            ? '#D3D3D3'
+            : '#FAD9D4',
         color: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
           ? '#048e0a'
           : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-          ? 'inherit'
-          : '#D13925'
+            ? 'inherit'
+            : '#D13925'
       }}
     />
   );

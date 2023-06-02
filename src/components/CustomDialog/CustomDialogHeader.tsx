@@ -22,7 +22,8 @@ const useStyles = makeStyles((theme) => ({
   },
   dialogTitle: {
     fontSize: '1.2rem',
-    display: 'inline-block'
+    display: 'inline-flex',
+    alignItems: 'center'
   }
 }));
 

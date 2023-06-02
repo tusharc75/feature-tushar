@@ -17,7 +17,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
-import CustomTable from 'src/components/CustomTable';
+import CustomTable, { ColumnsInterface } from 'src/components/CustomTable';
 
 const Request = ({ workOrder }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -29,7 +29,7 @@ const Request = ({ workOrder }) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [qtyDialog, setQtyDialog] = useState({ open: false, status: null, data: null });
-  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [], productName: '' });
+  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [], productName: '', product: '', data: null });
 
   const {
     state: { user }
@@ -98,7 +98,7 @@ const Request = ({ workOrder }) => {
     // });
     // const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
 
-    const column: any = [
+    const column: ColumnsInterface[] = [
       {
         header: 'Product',
         width: 100,
@@ -156,7 +156,7 @@ const Request = ({ workOrder }) => {
         render: ({ row }) => {
           return (
             <>
-              <Typography className="text-truncate new-table-font">
+              <Typography className="text-truncate new-table-font" style={{ marginBottom: '5px' }}>
                 {row['requestBy'] ? (
                   <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['requestById']}`} target="_blank">
                     {row?.['requestBy']}
@@ -165,7 +165,7 @@ const Request = ({ workOrder }) => {
                   <NoDataCell />
                 )}
               </Typography>
-              <Typography className="text-truncate new-table-font ">
+              <Typography className="text-truncate new-table-font-small ">
                 {row['requestDate'] ? <span>{moment(row['requestDate']).format(dateTimeFormat)}</span> : <NoDataCell />}
               </Typography>
             </>
@@ -180,12 +180,12 @@ const Request = ({ workOrder }) => {
             <>
               {row['processBy'] ? (
                 <>
-                  <Typography className="text-truncate new-table-font">
+                  <Typography className="text-truncate new-table-font" style={{ marginBottom: '5px' }}>
                     <a className="link text-truncate new-table-font " href={`${routes.userDetail.path}/${row?.['processById']}`} target="_blank">
                       {row['processBy']}
                     </a>
                   </Typography>
-                  <Typography className="text-truncate new-table-font ">
+                  <Typography className="text-truncate new-table-font-small ">
                     <span>{moment(row['processDate']).format(dateTimeFormat)}</span>
                   </Typography>
                 </>
@@ -272,7 +272,13 @@ const Request = ({ workOrder }) => {
                       size="small"
                       aria-label="Delete"
                       onClick={() => {
-                        setOpenProcessLogs({ open: true, logs: row['processesLogs'], productName: row?.productName });
+                        setOpenProcessLogs({
+                          open: true,
+                          logs: row['processesLogs'],
+                          productName: row?.productName,
+                          product: row?.product?.optionValue,
+                          data: row
+                        });
                       }}
                     >
                       <HistoryIcon />
@@ -405,14 +411,15 @@ const Request = ({ workOrder }) => {
           }}
         />
       )}
-
       {openProcessLogs.open && (
         <ProcessLogs
           onClose={() => {
-            setOpenProcessLogs({ open: false, logs: [], productName: '' });
+            setOpenProcessLogs({ open: false, logs: [], productName: '', product: '', data: null });
+            fetchData();
           }}
           logsData={openProcessLogs.logs}
           productName={openProcessLogs.productName}
+          product={openProcessLogs.product}
         />
       )}
     </>

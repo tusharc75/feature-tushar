@@ -16,7 +16,7 @@ import {
   gridLoadingTimeout,
   rentalManagement,
   sidebarResource,
-  INVENTORY_STATUS,
+  ASSET_STATUS,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
@@ -216,10 +216,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-              ? element?.productDetail?.productDescription || ''
-              : element.type === 'package'
-              ? element?.packageDetail?.packageDescription || ''
-              : '';
+                ? element?.productDetail?.productDescription || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -248,10 +248,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-              ? element?.productDetail?.productDescription || ''
-              : element.type === 'package'
-              ? element?.packageDetail?.packageDescription || ''
-              : '';
+                ? element?.productDetail?.productDescription || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.assetNumber = element?.productDetail?.productName;
@@ -281,8 +281,8 @@ const LoadingTicket = ({
         d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
         d['isChecked'] = false;
         d['hideSelection'] =
-          [INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status) ||
-          d?.manualStatus === INVENTORY_STATUS.reserved ||
+          [ASSET_STATUS.repair, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.underReview].includes(d.status) ||
+          d?.manualStatus === ASSET_STATUS.reserved ||
           d?.isReplaced;
 
         d['isReplaceable'] = true;
@@ -425,7 +425,7 @@ const LoadingTicket = ({
       cellRenderer: 'inventoryRenderer',
       cellStyle: (params) => {
         if (
-          [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)
+          [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)
         ) {
           return { backgroundColor: COLOUR_MASTER.lostAssets.background };
         }
@@ -639,6 +639,23 @@ const LoadingTicket = ({
     }
   };
 
+  const handleChangeStatusInUse = () => {
+    const assets = selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id);
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse`, { assets })
+      .then(({ data }) => {
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+
   return (
     <>
       <Box display="flex" justifyContent="flex-end" m={1}>
@@ -715,7 +732,7 @@ const LoadingTicket = ({
             <MenuItem
               onClick={() => {
                 setAnchorEl(null);
-                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: '' });
+                setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
               }}
             >
               Scrap
@@ -723,7 +740,7 @@ const LoadingTicket = ({
             <MenuItem
               onClick={() => {
                 setAnchorEl(null);
-                setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: '' });
+                setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
               }}
             >
               Lost
@@ -776,9 +793,23 @@ const LoadingTicket = ({
                 >
                   Delivered to Customer
                 </MenuItem>
+
+                {(selectedRecords.length > 0 &&
+                  selectedRecords.filter((e: any) =>
+                    e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && e?.status === ASSET_STATUS.delivered).length === selectedRecords.length) &&
+                  <MenuItem
+                    onClick={() => {
+                      handleChangeStatusInUse();
+                      closeActions();
+                    }}
+                  >
+                    Assets In-Use
+                  </MenuItem>
+                }
+
                 {selectedRecords.length &&
-                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
-                  ?.length === selectedRecords?.length ? (
+                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
+                    ?.length === selectedRecords?.length ? (
                   <Fragment>
                     <MenuItem
                       onClick={() => {
@@ -804,7 +835,7 @@ const LoadingTicket = ({
                       f.hasOwnProperty('loadingTicketId') &&
                       f?.type === 'Asset' &&
                       f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
-                      f?.status === INVENTORY_STATUS.inUse &&
+                      f?.status === ASSET_STATUS.inUse &&
                       f?.isReplaceable
                   )?.length === selectedRecords?.length && (
                     <MenuItem
@@ -832,7 +863,7 @@ const LoadingTicket = ({
                   )}
               </Menu>
               {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
                 <Fragment>
                   <Tooltip title="Remove Assets From Loading Ticket(s)">
@@ -908,7 +939,7 @@ const LoadingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (

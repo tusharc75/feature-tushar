@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, IconButton } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -9,122 +9,180 @@ import { dateTimeFormat } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import { isMobile, isTablet } from 'react-device-detect';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Autorenew } from '@material-ui/icons';
+import RevertQtyDialog from 'src/pages/ProductInventory/History/RevertQtyDialog';
 
-function ProcessLogs({ onClose, logsData, productName }) {
 
-    const [fullScreen, setFullScreen] = useState(true);
-    const [columns, setColumns] = useState(null);
-    const [rowsData, setRowsData] = useState([]);
+function ProcessLogs({ onClose, logsData, productName, product }) {
 
-    useEffect(() => {
-        fetchColumn();
-        fetchData();
-    }, []);
+  const [fullScreen, setFullScreen] = useState(true);
+  const [columns, setColumns] = useState(null);
+  const [rowsData, setRowsData] = useState([]);
 
-    const fetchColumn = async () => {
-        const column: any = [
-            {
-                accessor: 'qty',
-                Header: 'Processed Qty',
-                primaryField: true,
-                width: 150,
-                Cell: ({ row }) => {
-                    return row?.original['qty'] ? <p className="text-truncate">{row?.original['qty']}</p> : <NoDataCell />;
-                }
-            },
-            {
-                accessor: 'user',
-                Header: 'Processed By',
-                width: 200,
-                Cell: ({ row }) => {
-                    return row?.original['user'] ?
-                        <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['userId']}`} target="_blank">
-                            {row?.original['user']}
-                        </a> : <NoDataCell />;
-                }
-            },
-            {
-                accessor: 'date',
-                Header: 'Processed Date',
-                width: 200,
-                Cell: ({ row }) => {
-                    return row?.original['date'] ? (
-                        <p className="text-truncate">{moment(row?.original['date']).format(dateTimeFormat)}</p>
-                    ) : (
-                        <NoDataCell />
-                    );
-                }
-            },
-            {
-                accessor: 'comment',
-                Header: 'Comment',
-                width: 200,
-                Cell: ({ row }) => {
-                    return row?.original['comment'] ? <p className="text-truncate">{row?.original['comment']}</p> : <NoDataCell />;
-                }
-            }
-        ];
-        setColumns([...column]);
-    };
+  const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, qty: 0, revertedQty: 0, ledgerId: '' });
 
-    const fetchData = () => {
-        const data = [...logsData];
-        data?.forEach((e) => {
-            e.userId = e?.user?.optionValue;
-            e.user = e?.user?.optionLabel;
-        });
-        setRowsData(data);
-    };
+  useEffect(() => {
+    fetchColumn();
+    fetchData();
+  }, []);
 
-    return (<Dialog
-        open
-        fullScreen={fullScreen}
-        maxWidth="md"
-        fullWidth
-        onClose={(e, reason) => {
-            if (reason !== 'backdropClick') {
-                onClose();
-            }
-        }}
+  const fetchColumn = async () => {
+    const column: any = [
+      {
+        accessor: 'qty',
+        Header: 'Processed Qty',
+        primaryField: true,
+        width: 150,
+        Cell: ({ row }) => {
+          return row?.original['qty'] ? <p className="text-truncate">{row?.original['qty']}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'revertedQty',
+        Header: 'Reverted Qty',
+        primaryField: true,
+        width: 150,
+        Cell: ({ row }) => {
+          return row?.original['revertedQty'] ? <p className="text-truncate">{row?.original['revertedQty']}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'user',
+        Header: 'Processed By',
+        width: 200,
+        Cell: ({ row }) => {
+          return row?.original['user'] ? (
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['userId']}`} target="_blank">
+              {row?.original['user']}
+            </a>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'date',
+        Header: 'Processed Date',
+        width: 200,
+        Cell: ({ row }) => {
+          return row?.original['date'] ? <p className="text-truncate">{moment(row?.original['date']).format(dateTimeFormat)}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'comment',
+        Header: 'Comment',
+        width: 200,
+        Cell: ({ row }) => {
+          return row?.original['comment'] ? <p className="text-truncate">{row?.original['comment']}</p> : <NoDataCell />;
+        }
+      }
+    ];
+    column.push({
+      accessor: 'action',
+      Header: 'Action',
+      minWidth: 80,
+      width: 80,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => ((row.original?.qty - (row.original?.revertedQty || 0)) > 0) &&
+        <Box>
+          <HtmlTooltip title="Revert">
+            <IconButton
+              size="small"
+              aria-label="revert"
+              onClick={() => {
+                setRevertQtyDialog({
+                  open: true,
+                  qty: row.original?.qty,
+                  revertedQty: row.original?.revertedQty || 0,
+                  ledgerId: row.original?._id
+                })
+              }}
+            >
+              <Autorenew fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        </Box>
+    });
+    setColumns([...column]);
+  };
+
+  const fetchData = () => {
+    const data = JSON.parse(JSON.stringify(logsData));
+    data?.forEach((e) => {
+      e.userId = e?.user?.optionValue;
+      e.user = e?.user?.optionLabel;
+    });
+    setRowsData(data);
+  };
+
+  return (
+    <Dialog
+      open
+      fullScreen={fullScreen}
+      maxWidth="md"
+      fullWidth
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          onClose();
+        }
+      }}
     >
-        <CustomDialogHeader
-            title={`Process Logs - ${productName}`}
-            onClose={onClose}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-                setFullScreen((prevState) => !prevState);
-            }}
-            showRequiredLabel={false}
-            showManimizeMaximize={true}
+      <CustomDialogHeader
+        title={`Process Logs - ${productName}`}
+        onClose={onClose}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen((prevState) => !prevState);
+        }}
+        showRequiredLabel={false}
+        showManimizeMaximize={true}
+      />
+      <CustomDialogContent>
+        {rowsData && columns ? (
+          <Box p={2}>
+            <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                columns={columns}
+                data={rowsData}
+                onSelect={() => { }}
+                childrenProperty="subRows"
+                uniqueKey="_id"
+                hideSelection={true}
+                hideExpander={true}
+                renderedFrom={'workOrder_consumables_request_process_logs'}
+                isClientSideGrid={true}
+              />
+            </Box>
+          </Box>
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </CustomDialogContent>
+      {revertQtyDialog.open && (
+        <RevertQtyDialog
+          referenceType="workOrder"
+          productName={productName}
+          product={product}
+          qty={revertQtyDialog.qty}
+          revertedQty={revertQtyDialog.revertedQty}
+          ledgerId={revertQtyDialog.ledgerId}
+          onClose={() => {
+            setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '' })
+          }}
+          onSuccess={() => {
+            setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '' })
+            onClose()
+          }}
         />
-        <CustomDialogContent>
-            {rowsData && columns ? (
-                <Box p={2}>
-                    <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
-                        <CustomReactTable
-                            height={'calc(100vh - 200px)'}
-                            columns={columns}
-                            data={rowsData}
-                            onSelect={() => { }}
-                            childrenProperty="subRows"
-                            uniqueKey="_id"
-                            hideSelection={true}
-                            hideAction={true}
-                            hideExpander={true}
-                            renderedFrom={"workOrder_consumables_request_process_logs"}
-                            isClientSideGrid={true}
-                        />
-                    </Box>
-                </Box>
-            ) : (
-                <Box p={2} height={500} bgcolor="white">
-                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Box>
-            )}
-        </CustomDialogContent>
+      )}
     </Dialog>
-    );
+  );
 }
 
 export default ProcessLogs;

@@ -107,10 +107,6 @@ const DemandOrder = () => {
       columns.push(checkStaticField(routes.projectSales.title, field));
     });
     setColumns([...columns]);
-    if (JSON.parse(sessionStorage.getItem('filters')) !== null) {
-      let savedFilter = JSON.parse(sessionStorage.getItem('filters'));
-      dispatch({ type: 'filter', filters: savedFilter });
-    }
   };
 
   useEffect(() => {

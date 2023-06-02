@@ -29,7 +29,6 @@ import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { FaDiceOne } from 'react-icons/fa';
 import moment from 'moment';
 import AddIcon from '@material-ui/icons/AddCircle';
@@ -52,7 +51,6 @@ const ManageRentalManagementDialog = ({
 }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline, offlineFieldsData, offlineGridData } = useContext(CustomOfflineContext);
 
   const [loading, setLoading] = useState(false);
 
@@ -175,13 +173,9 @@ const ManageRentalManagementDialog = ({
   const fetchFields = async () => {
     try {
       let fieldData;
-      if (navigator.onLine) {
-        const response: any = await axiosInstance().get('/field?resource=Rental Management');
-        fieldData = response?.data?.data;
-      } else {
-        fieldData = offlineFieldsData?.rentalManagement || [];
-      }
-
+      const response: any = await axiosInstance().get('/field?resource=Rental Management');
+      fieldData = response?.data?.data;
+      
       fieldData = fieldData?.filter((e) => !['quotation'].includes(e?.fieldData?.fieldName));
 
       var fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -190,12 +184,8 @@ const ManageRentalManagementDialog = ({
       if (rentalManagementId) {
         try {
           let data;
-          if (!isOffline) {
-            const response: any = await axiosInstance().get(`${rentalManagement.api}/` + rentalManagementId);
-            data = response?.data?.data;
-          } else {
-            data = offlineGridData?.rentalManagement?.find((d) => d._id === rentalManagementId);
-          }
+          const response: any = await axiosInstance().get(`${rentalManagement.api}/` + rentalManagementId);
+          data = response?.data?.data;
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, rentalJobName, updatedBy, ...rest } = data;
             rest['status'] = 'New';
@@ -503,10 +493,10 @@ const ManageRentalManagementDialog = ({
                                             isTooltip={false}
                                             size="small"
                                             onOpen={() => onCustomerContactDropdownOpen(values['customerAccount'])}
-                                            // onChange={(e, value) => {
-                                            //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
+                                          // onChange={(e, value) => {
+                                          //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
 
-                                            // }}
+                                          // }}
                                           />
                                         </Grid>
                                         {permissions.customerContact?.isCreate && (
@@ -768,10 +758,10 @@ const ManageRentalManagementDialog = ({
                                               ? true
                                               : false
                                             : field.fieldName === 'warehouse'
-                                            ? rentalDetails && rentalDetails?.productInventory?.length
-                                              ? true
-                                              : false
-                                            : rentalManagementId && field.disableOnEdit && !isClone
+                                              ? rentalDetails && rentalDetails?.productInventory?.length
+                                                ? true
+                                                : false
+                                              : rentalManagementId && field.disableOnEdit && !isClone
                                         }
                                         values={values}
                                         errors={errors}
@@ -791,8 +781,8 @@ const ManageRentalManagementDialog = ({
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                             : null
                                         }
                                         fields={rentalData.fields}

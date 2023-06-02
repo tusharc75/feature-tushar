@@ -132,11 +132,7 @@ export default function MobileSortDialog({ isOpen, handleClose, contentPart, sec
       type: "success",
       message: 'Sorted Successfully',
     });
-
-    // sessionStorage.setItem('sortSuccess',JSON.stringify('sortSuccess'));
     handleClose()
-
-
   };
 
   const handleListItemClick = (event, index) => {

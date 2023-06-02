@@ -417,6 +417,7 @@ export default function CustomAgGridEditable({
             dispatch={dispatch}
             selectedRecords={selectedRecords}
             showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
+            defaultColumns={cols}
           />
           {/* {showOnlyShowFilteredRecordSwitch && (
             <ShowOnlySelected dispatch={dispatch} renderedFrom={renderedFrom} selectedRecords={selectedRecords} style={{ padding: '0 0 10px' }} />

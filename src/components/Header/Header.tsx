@@ -18,7 +18,7 @@ import {
 } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
-import { MoreVert as MoreIcon, Clear as ClearIcon, Notifications, HelpOutline, ExpandMore, Brightness1 } from '@material-ui/icons';
+import { MoreVert as MoreIcon, Clear as ClearIcon, Notifications, ExpandMore, Brightness1 } from '@material-ui/icons';
 import SyncIcon from '@material-ui/icons/Sync';
 import io, { Socket } from 'socket.io-client';
 import { useHistory, Link, useLocation } from 'react-router-dom';
@@ -44,12 +44,17 @@ import { useScrollDirection } from 'src/hooks/useScroll';
 
 import styles from './Header.module.scss';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
-import { IoMdNotificationsOutline } from 'react-icons/io';
-import { FiMessageSquare } from 'react-icons/fi';
-
-import { BsMoon, BsSun } from 'react-icons/all';
 
 import { SearchBar } from './SearchBar';
+import DashboardModal, { ModalContent } from '../DashboardModal';
+import { userManual } from 'src/pages/Home';
+import { FiExternalLink } from 'react-icons/fi';
+import { SVG } from 'src/assets';
+
+import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
+import NotificationsNoneIcon from '@material-ui/icons/NotificationsNone';
+import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -134,6 +139,15 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   // For FullScreen Notification - Start
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
   const scrollPos = useScrollDirection(40);
+
+  const [modalContent, setModalContent] = useState<ModalContent | null>(null);
+
+  const openHelperModal = () => {
+    setModalContent({ title: 'Equipt - User Manual', icon: <img src={SVG('LogoNewShort')} alt="equipt logo" /> });
+  };
+  const handleCloseHelperModal = () => {
+    setModalContent(null);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -771,7 +785,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
           color="secondary"
           aria-describedby={mobileScreenChatNotificationId}
         >
-          <FiMessageSquare style={{ maxWidth: 19 }} />
+          <ChatBubbleOutlineOutlinedIcon style={{ maxWidth: 22 }} />
         </Badge>
         <Box component="span" mx={1} />
         <p>Chat Notifications</p>
@@ -808,7 +822,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
           color="secondary"
           aria-describedby={mobileScreenNotificationId}
         >
-          <IoMdNotificationsOutline style={{ maxWidth: 19 }} />
+          <NotificationsNoneIcon />
         </Badge>
         <Box component="span" mx={1} />
         <p>Notifications</p>
@@ -837,8 +851,8 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem>
-        <HelpOutline style={{ maxWidth: 19 }} />
+      <MenuItem onClick={openHelperModal}>
+        <HelpOutlineIcon />
         <Box component="span" mx={1} my={2} />
         <p>Help</p>
       </MenuItem>
@@ -909,25 +923,25 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     }
   }
 
-  const startTour = () => {
-    const paths = pathname.split('/').filter((x: string) => x);
-    let path: string;
-    if (paths.includes('detail')) {
-      paths.splice(paths.length - 1, 1);
-      path = paths.join('/');
-    }
-    dispatch({
-      type: SET_START_TOUR,
-      payload: {
-        path: paths.includes('detail') ? `/${path}` : pathname,
-        start: true,
-        stepIndex: 0
-      }
-    });
-  };
+  // const startTour = () => {
+  //   const paths = pathname.split('/').filter((x: string) => x);
+  //   let path: string;
+  //   if (paths.includes('detail')) {
+  //     paths.splice(paths.length - 1, 1);
+  //     path = paths.join('/');
+  //   }
+  //   dispatch({
+  //     type: SET_START_TOUR,
+  //     payload: {
+  //       path: paths.includes('detail') ? `/${path}` : pathname,
+  //       start: true,
+  //       stepIndex: 0
+  //     }
+  //   });
+  // };
 
   return (
-    <div>
+    <div className="poppins">
       <div className={styles.filler}></div>
       <AppBar
         position="relative"
@@ -962,9 +976,9 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                     color="inherit"
                     onClick={openEntitiesMenu}
                     title={curEntity && `Selected entity - ${curEntity.entityName}`}
-                    className={`${styles.flexAlignCenter} `}
+                    className={`${styles.flexAlignCenter} poppins`}
                   >
-                    <span className={''}>{curEntity && curEntity.entityName}</span>
+                    <span className={'poppins'}>{curEntity && curEntity.entityName}</span>
                     <Box component="span" mr={1} />
                     <ExpandMore />
                   </Box>
@@ -1004,7 +1018,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                       pointerEvents: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 'all' : 'none'
                     }}
                   >
-                    {themeColor === 'light' ? <BsMoon size={19} /> : <BsSun size={19} />}
+                    {themeColor === 'light' ? <MoonIcon /> : <SunIcon />}
                   </IconButton>
                 </Tooltip>
 
@@ -1018,7 +1032,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                   className={styles.showIconLayout}
                 >
                   <Badge variant="dot" overlap="circular" badgeContent={notification ? notification.count : 0} color="secondary">
-                    <IoMdNotificationsOutline className="setIcon" style={{ maxWidth: 19 }} />
+                    <NotificationsNoneIcon className="setIcon" />
                   </Badge>
                 </IconButton>
                 <Popover
@@ -1059,7 +1073,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                   className={styles.showIconLayout}
                 >
                   <Badge variant="dot" overlap="circular" badgeContent={chatNotification ? chatNotification.count : 0} color="secondary">
-                    <FiMessageSquare className="setIcon" style={{ maxWidth: 19 }} />
+                    <ChatBubbleOutlineOutlinedIcon className="setIcon" style={{ maxWidth: 22 }} />
                   </Badge>
                 </IconButton>
 
@@ -1088,8 +1102,8 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                 </Popover>
               </div>
 
-              <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour} className={styles.showIconLayout} title="Help">
-                <HelpOutline className="setIcon" style={{ maxWidth: 19 }} />
+              <IconButton id="helpButton" aria-label="help" color="inherit" onClick={openHelperModal} className={styles.showIconLayout} title="Help">
+                <HelpOutlineIcon className="setIcon" />
               </IconButton>
             </div>
           )}
@@ -1108,7 +1122,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                   pointerEvents: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 'all' : 'none'
                 }}
               >
-                {themeColor === 'light' ? <BsMoon size={19} /> : <BsSun size={19} />}
+                {themeColor === 'light' ? <MoonIcon /> : <SunIcon />}
               </IconButton>
             </Tooltip>
           )}
@@ -1132,6 +1146,12 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
           {is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
         </Toolbar>
       </AppBar>
+      <DashboardModal modalContent={modalContent} handleClose={handleCloseHelperModal} style={{ position: 'relative' }}>
+        <a title="open equipt documentation" href={userManual.link} target="_blank" className={styles.viewAll} onClick={handleCloseHelperModal}>
+          <Typography component="span">Equipt - User Manual</Typography>
+          <FiExternalLink size={20} style={{ marginBottom: 4 }} />
+        </a>
+      </DashboardModal>
       {renderMobileMenu}
       {supportMenu}
       {arcelorMenu}

@@ -29,7 +29,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
-  const [openLogDialog, setOpenLogDialog] = useState({ open: false, uniqueId: null, data: null });
+  const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [consumeRequest, setConsumeRequest] = useState(false);
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
 
@@ -158,7 +158,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
                   size="small"
                   aria-label="Requests"
                   onClick={() => {
-                    setOpenLogDialog({ open: true, uniqueId: row.original._id, data: row.original });
+                    setOpenLogDialog({ open: true, product: row?.original?.productId, uniqueId: row.original._id, data: row.original });
                   }}
                 >
                   <FormatListBulletedIcon fontSize="small" color={'primary'} />
@@ -395,10 +395,12 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             uniqueId={openLogDialog.uniqueId}
             workOrderId={workOrderId}
             productName={openLogDialog?.data?.productName}
+            product={openLogDialog?.product}
             onClose={() => {
               setOpenLogDialog({
                 open: false,
                 uniqueId: null,
+                product: null,
                 data: null
               });
               fetchData();

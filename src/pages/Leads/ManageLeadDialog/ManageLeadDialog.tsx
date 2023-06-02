@@ -51,7 +51,7 @@ export default function ManageLeadDialog({
     state: { user, selectedEntity, permissions }
   }: any = useData();
   const [disableOwnerSelection] = useState(!isNew && user.user._id !== dataToUpdate.owner.optionValue);
-  const { isOffline, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const [initialData, setInitialData] = useState({
     fields: [],
@@ -158,9 +158,7 @@ export default function ManageLeadDialog({
       setLoadingData(true);
 
       let data;
-      if (isOffline) {
-        data = offlineFieldsData['lead'] ?? [];
-      } else {
+      if (!isOffline) {
         if (selectedEntity) {
           const response = await axiosInstance().get(`/field?resource=Lead&entity=${selectedEntity}`);
 
@@ -168,17 +166,11 @@ export default function ManageLeadDialog({
         } else {
           data = [];
         }
-
-        try {
-          updateFieldsData('lead', data);
-        } catch (ex) {
-          console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`);
-        }
       }
 
       const newFields = [];
 
-      const filterData = isNew ? data.filter((d) => d.isCreate) : data.filter((d) => d.isUpdate);
+      const filterData = isNew ? data?.filter((d) => d.isCreate) : data.filter((d) => d.isUpdate);
 
       //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
       const marketSegmentDropdownData = filterData.map((m) => m.fieldData).find((d) => d.fieldName === formFieldNames.marketSegment);

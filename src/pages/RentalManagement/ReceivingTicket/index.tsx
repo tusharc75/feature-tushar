@@ -16,7 +16,7 @@ import {
   deliveryTicket,
   rentalManagement,
   serializedAsset as productInventoryHelperObject,
-  INVENTORY_STATUS,
+  ASSET_STATUS,
   DELIVERY_TICKET_STATUS,
   RENTAL_INTERNAL_ASSET_STATUS,
   DELIVERY_TICKET_TYPE,
@@ -464,8 +464,8 @@ const ReceivingTicket = ({
         d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
         d['isChecked'] = false;
         d['hideSelection'] =
-          [INVENTORY_STATUS.lost].includes(d.status) ||
-            d?.manualStatus === INVENTORY_STATUS.reserved ||
+          [ASSET_STATUS.lost].includes(d.status) ||
+            d?.manualStatus === ASSET_STATUS.reserved ||
             (d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)
             ? false
             : true;
@@ -482,12 +482,12 @@ const ReceivingTicket = ({
         productAssets.filter(
           (e) =>
             [
-              INVENTORY_STATUS.underReview,
-              INVENTORY_STATUS.available,
-              INVENTORY_STATUS.repair,
-              INVENTORY_STATUS.scrap,
-              INVENTORY_STATUS.lost,
-              INVENTORY_STATUS.notApplied
+              ASSET_STATUS.underReview,
+              ASSET_STATUS.available,
+              ASSET_STATUS.repair,
+              ASSET_STATUS.scrap,
+              ASSET_STATUS.lost,
+              ASSET_STATUS.notApplied
             ].includes(e.status) ||
             [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
               e.rentalAssetStatus
@@ -677,12 +677,10 @@ const ReceivingTicket = ({
       fields: [
         {
           resource: 'Product',
-
           fieldNames: ['productName']
         },
         {
           resource: 'Serialized Asset',
-
           fieldNames: ['serialNumber']
         }
       ]
@@ -706,7 +704,7 @@ const ReceivingTicket = ({
       cellRenderer: 'inventoryRenderer',
       cellStyle: (params) => {
         if (
-          [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)
+          [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)
         ) {
           return { backgroundColor: COLOUR_MASTER.lostAssets.background };
         }
@@ -874,10 +872,10 @@ const ReceivingTicket = ({
   const checkTransferValid = () => {
     if (selectedRecords.length === 0) {
       return false;
-    } else if (selectedRecords.some((f) => !f.hasOwnProperty('loadingTicketId') || [INVENTORY_STATUS.lost].includes(f.status))) {
+    } else if (selectedRecords.some((f) => !f.hasOwnProperty('loadingTicketId') || [ASSET_STATUS.lost].includes(f.status))) {
       return false;
     } else if (
-      selectedRecords.filter((f) => [INVENTORY_STATUS.inUse].includes(f.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(f.rentalAssetStatus))
+      selectedRecords.filter((f) => [ASSET_STATUS.inUse].includes(f.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(f.rentalAssetStatus))
         .length === selectedRecords.length
     ) {
       return true;
@@ -885,8 +883,8 @@ const ReceivingTicket = ({
       selectedRecords.filter(
         (f) =>
           [
-            INVENTORY_STATUS.available,
-            INVENTORY_STATUS.underReview,
+            ASSET_STATUS.available,
+            ASSET_STATUS.underReview,
             RENTAL_INTERNAL_ASSET_STATUS.complete,
             RENTAL_INTERNAL_ASSET_STATUS.consumed
           ].includes(f.status) && [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.consumed].includes(f.rentalAssetStatus)
@@ -1199,50 +1197,50 @@ const ReceivingTicket = ({
                   (f) =>
                     ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                       (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
-                    [INVENTORY_STATUS.underReview].includes(f.status)
+                    [ASSET_STATUS.underReview].includes(f.status)
                 )?.length === selectedRecords?.length && (
                     <Fragment>
                       <MenuItem
                         onClick={() => {
                           setAnchorEl(null);
-                          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: '' });
+                          setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.available, message: '' });
                         }}
                       >
-                        {INVENTORY_STATUS.available}
+                        {ASSET_STATUS.available}
                       </MenuItem>
                     </Fragment>
                   )}
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
-                    setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.scrap, message: '' });
+                    setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
                   }}
                 >
-                  {INVENTORY_STATUS.scrap}
+                  {ASSET_STATUS.scrap}
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
-                    setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.lost, message: '' });
+                    setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
                   }}
                 >
-                  {INVENTORY_STATUS.lost}
+                  {ASSET_STATUS.lost}
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
-                    setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.needRepair, message: '' });
+                    setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.needRepair, message: '' });
                   }}
                 >
-                  {INVENTORY_STATUS.needRepair}
+                  {ASSET_STATUS.needRepair}
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
-                    setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.needRecert, message: '' });
+                    setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.needRecert, message: '' });
                   }}
                 >
-                  {INVENTORY_STATUS.needRecert}
+                  {ASSET_STATUS.needRecert}
                 </MenuItem>
               </Fragment>
             )}
@@ -1279,13 +1277,13 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('receivingTicketId') ||
                     f.hasOwnProperty('returnTicketId') ||
                     !f.hasOwnProperty('loadingTicketId') ||
-                    [INVENTORY_STATUS.lost].includes(f.status) ||
+                    [ASSET_STATUS.lost].includes(f.status) ||
                     ![
-                      INVENTORY_STATUS.inUse,
-                      INVENTORY_STATUS.scrap,
-                      INVENTORY_STATUS.needRepair,
-                      INVENTORY_STATUS.needRecert,
-                      INVENTORY_STATUS.notApplied
+                      ASSET_STATUS.inUse,
+                      ASSET_STATUS.scrap,
+                      ASSET_STATUS.needRepair,
+                      ASSET_STATUS.needRecert,
+                      ASSET_STATUS.notApplied
                     ].includes(f.status)
                 )
               }
@@ -1323,14 +1321,14 @@ const ReceivingTicket = ({
                     !f.hasOwnProperty('loadingTicketId') ||
                     f.hasOwnProperty('receivingTicketId') ||
                     f.hasOwnProperty('returnTicketId') ||
-                    [INVENTORY_STATUS.lost].includes(f.status) ||
+                    [ASSET_STATUS.lost].includes(f.status) ||
                     ![
-                      INVENTORY_STATUS.inUse,
-                      INVENTORY_STATUS.reserved,
-                      INVENTORY_STATUS.scrap,
-                      INVENTORY_STATUS.needRepair,
-                      INVENTORY_STATUS.needRecert,
-                      INVENTORY_STATUS.notApplied
+                      ASSET_STATUS.inUse,
+                      ASSET_STATUS.reserved,
+                      ASSET_STATUS.scrap,
+                      ASSET_STATUS.needRepair,
+                      ASSET_STATUS.needRecert,
+                      ASSET_STATUS.notApplied
                     ].includes(f.status)
                 )
               }
@@ -1369,8 +1367,8 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('receivingTicketId') ||
                     f.hasOwnProperty('returnTicketId') ||
                     !f.subleaseAsset ||
-                    [INVENTORY_STATUS.lost].includes(f.status) ||
-                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)
+                    [ASSET_STATUS.lost].includes(f.status) ||
+                    ![ASSET_STATUS.inUse, ASSET_STATUS.scrap].includes(f.status)
                 )
               }
             >
@@ -1393,13 +1391,13 @@ const ReceivingTicket = ({
                 (f) =>
                   ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                     (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    f.status === INVENTORY_STATUS.scrap) &&
+                    f.status === ASSET_STATUS.scrap) &&
                   [
-                    INVENTORY_STATUS.underReview,
-                    INVENTORY_STATUS.scrap,
-                    INVENTORY_STATUS.available,
-                    INVENTORY_STATUS.needRecert,
-                    INVENTORY_STATUS.needRepair
+                    ASSET_STATUS.underReview,
+                    ASSET_STATUS.scrap,
+                    ASSET_STATUS.available,
+                    ASSET_STATUS.needRecert,
+                    ASSET_STATUS.needRepair
                   ].includes(f.status) &&
                   !f.subleaseAsset &&
                   checkUniqWarehouse()
@@ -1421,13 +1419,13 @@ const ReceivingTicket = ({
                 (f) =>
                   ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                     (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    f.status === INVENTORY_STATUS.scrap) &&
+                    f.status === ASSET_STATUS.scrap) &&
                   [
-                    INVENTORY_STATUS.underReview,
-                    INVENTORY_STATUS.scrap,
-                    INVENTORY_STATUS.available,
-                    INVENTORY_STATUS.needRecert,
-                    INVENTORY_STATUS.needRepair
+                    ASSET_STATUS.underReview,
+                    ASSET_STATUS.scrap,
+                    ASSET_STATUS.available,
+                    ASSET_STATUS.needRecert,
+                    ASSET_STATUS.needRepair
                   ].includes(f.status) &&
                   !f.subleaseAsset &&
                   checkUniqWarehouse()
@@ -1787,7 +1785,7 @@ const ReceivingTicket = ({
           />
           <CustomDialogContent>
             <Box className="my-2">
-              {[INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(statusToUpdate.status) ? (
+              {[ASSET_STATUS.available, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(statusToUpdate.status) ? (
                 <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
               ) : (
                 <TextField

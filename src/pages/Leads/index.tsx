@@ -69,7 +69,7 @@ const Leads = () => {
   });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const { isOffline, offlineGridData, offlineFieldsData, updateOfflineGridData, updateFieldsData } = useContext(CustomOfflineContext);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -133,9 +133,7 @@ const Leads = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    if (isOffline) {
-      data = offlineFieldsData['lead'] ?? [];
-    } else {
+    if (!isOffline) {
       if (selectedEntity) {
         const response = await axiosInstance().get(`/field?resource=Lead&entity=${selectedEntity}&view=true`);
 
@@ -143,17 +141,11 @@ const Leads = () => {
       } else {
         data = [];
       }
-
-      try {
-        updateFieldsData('lead', data);
-      } catch (ex) {
-        console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`);
-      }
     }
 
     let columns = [];
     let rendererNames = [];
-    data.forEach((o) => {
+    data?.forEach((o) => {
       let currentColumn = getColumnData(leadResource, o?.fieldData, routes.leadDetail.path);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
@@ -274,15 +266,6 @@ const Leads = () => {
 
           data = response?.data?.data;
           count = response?.data?.count;
-        } else {
-          data = offlineGridData[leadResource] || [];
-          count = offlineGridData[leadResource]?.length || 0;
-        }
-
-        try {
-          updateOfflineGridData(leadResource, data);
-        } catch (ex) {
-          console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`);
         }
 
         let rows = data.map((u) => {

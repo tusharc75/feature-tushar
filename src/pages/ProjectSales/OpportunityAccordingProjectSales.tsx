@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import {
   Grid,
+  Button,
   Box,
   IconButton,
   Typography,
@@ -39,61 +40,8 @@ import { useData } from '../../StateProvider/Provider';
 import { formatAmountWithCurrency } from '../../constants/helpers';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import styles from './ProjectSales.module.scss';
-
-const Accordion = withStyles({
-  root: {
-    border: '1px solid rgba(0, 0, 0, .125)',
-    '&:not(:last-child)': {
-      borderBottom: 0
-    },
-    '&:before': {
-      display: 'none'
-    },
-    '&$expanded': {
-      margin: 'auto'
-    }
-  },
-  expanded: {}
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-  root: {
-    backgroundColor: 'white',
-    borderBottom: '1px solid #f1ece8',
-    background: '#ffffff',
-    fontWeight: 'bold',
-    padding: '0px',
-    '&$expanded': {
-      minHeight: 46
-    }
-  },
-  content: {
-    '&$expanded': {
-      margin: '12px 0'
-    }
-  },
-  expanded: {}
-})(MuiAccordionSummary);
-
-const AccordionDetails = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(1),
-    display: 'block'
-  }
-}))(MuiAccordionDetails);
-
-function DisplayData({ key, label, value, icon }) {
-  return (
-    <div style={{ flexGrow: 1 }}>
-      <List>
-        <ListItem key={key}>
-          <ListItemAvatar>{icon}</ListItemAvatar>
-          <ListItemText primary={value ? value : '-'} secondary={label} />
-        </ListItem>
-      </List>
-    </div>
-  );
-}
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import DisplayData from 'src/components/CardDisplayData';
 
 export default function OpportunityAccordianProjectSales({
   opportunities,
@@ -215,7 +163,7 @@ export default function OpportunityAccordianProjectSales({
           Add Exisiting
         </MenuItem>
       </Menu>
-      <Accordion expanded={expandOpportunity} className="omsAccordian accordOpportunity" onChange={() => setExpandOpportunity(!expandOpportunity)}>
+      <Accordion expanded={expandOpportunity} onChange={() => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container>
             <Grid item xs={8}>
@@ -239,7 +187,6 @@ export default function OpportunityAccordianProjectSales({
             </Grid>
           </Grid>
         </AccordionSummary>
-        <Box margin={0.5} />
         <AccordionDetails>
           <>
             {expandOpportunity && (
@@ -255,9 +202,8 @@ export default function OpportunityAccordianProjectSales({
                         key={index}
                         className={styles.opportunity_layout_container}
                       >
-                        <Card className={styles.detail_card_view}>
-                          <CardContent className="detailListing">
-                            {/* <div style={{ width: '0px', backgroundColor: 'var(--secondary)', marginBottom: '10px', borderRadius: '5px' }}> </div> */}
+                        <Card className="detailCard  card-v1" variant="outlined">
+                          <CardContent className="card-link">
                             <Grid item xs={12}>
                               <Grid container className="detailCardHeader">
                                 <Grid item xs={7} sm={8}>
@@ -345,24 +291,20 @@ export default function OpportunityAccordianProjectSales({
                 )}
               </>
             )}
+            {opportunities?.length > 0 && opportunities.length > maxRecordsToShow && (
+              <Button
+                onClick={() => {
+                  setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
+                }}
+                className="accordion-outlined-button"
+                endIcon={<FaArrowAltCircleDown size={25} />}
+                style={{ margin: '10px auto 0', display: 'flex' }}
+              >
+                <span className="show_more_text">Show More</span>
+              </Button>
+            )}
           </>
         </AccordionDetails>
-        {opportunities?.length > 0 && opportunities.length > maxRecordsToShow && (
-          <Box
-            margin={1}
-            className="btn-view gap-1 expander"
-            onClick={() => {
-              setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
-            }}
-            p={1}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <span className="show_more_text">Show More</span>
-            <FaArrowAltCircleDown size={25} />
-          </Box>
-        )}
       </Accordion>
       {showConfirmBox ? (
         <ConfirmationDialog

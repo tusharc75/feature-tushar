@@ -11,7 +11,7 @@ import {
   DELIVERY_TICKET_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_FROM_TO_TYPE,
-  INVENTORY_STATUS,
+  ASSET_STATUS,
   COLOUR_MASTER
 } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -129,7 +129,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         cellRenderer: 'assetRenderer',
         cellStyle: (params) => {
           if (
-            [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)
+            [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)
           ) {
             return { backgroundColor: COLOUR_MASTER.lostAssets.background };
           }
