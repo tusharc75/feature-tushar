@@ -82,6 +82,7 @@
   --dark-primary-text: #fff;
   --dark-secondary-text: #b8b8b8;
   --dark-error: hsl(0, 52%, 36%);
+  --dark-active-border-color: #f99336;
 }
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
@@ -2735,7 +2736,7 @@ svg.MuiSvgIcon-root {
   [data-mode='dark'] & {
     color: #fff;
     background-color: var(--dark-primary);
-    border: 1px solid var(--dark-primary);
+    border: 1px solid var(--common-border-color) !important;
   }
 
   &:last-of-type {
@@ -2790,7 +2791,7 @@ svg.MuiSvgIcon-root {
   [data-mode='dark'] & {
     background-color: #282845 !important;
     color: white !important;
-    border: 1px solid #282845 !important;
+    border: 1px solid var(--common-border-color) !important;
     &:disabled {
       opacity: 0.6 !important;
     }
