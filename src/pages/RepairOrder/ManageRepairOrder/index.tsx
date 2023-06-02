@@ -173,7 +173,7 @@ const ManageRepairOrder = ({
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, repairOrderNumber, updatedBy, ...rest } = data;
             rest.status = 'New';
-            if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
               rest.repairOrderNumber = `RO_${generateUniqueIdOnly()}`;
             }
             setCloneHeading(repairOrderNumber);
@@ -194,7 +194,7 @@ const ManageRepairOrder = ({
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-        if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
           initialData['repairOrderNumber'] = `RO_${generateUniqueIdOnly()}`;
         }
         if (referenceType === 'rentalJob') {
