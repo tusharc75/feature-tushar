@@ -101,7 +101,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
   };
 
   return !loadingRoadmap ? (
-    <Box bgcolor="white">
+    <Box bgcolor="var(--dark-secondary, white)">
       <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
         <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
           <Box
@@ -110,7 +110,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
             borderColor="var(--common-border-color)"
             style={{ position: 'relative', overflow: 'hidden' }}
           >
-            <Box height={60} bgcolor="grey.200" display="flex" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+            <Box height={60} bgcolor="var(--dark-secondary, grey.200)" display="flex" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
               <Box p={2} display="flex" alignItems="center">
                 <Map />
                 <Box mr={1} />

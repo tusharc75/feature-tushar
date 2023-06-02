@@ -56,7 +56,13 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
   return (
     dates &&
     calType === calendarType && (
-      <Box height={60} display="flex" width={totalDay * dayPixel} bgcolor="grey.200" style={{ position: 'sticky', top: 0, zIndex: 2 }}>
+      <Box
+        height={60}
+        display="flex"
+        width={totalDay * dayPixel}
+        bgcolor="var(--dark-secondary, grey.200)"
+        style={{ position: 'sticky', top: 0, zIndex: 2 }}
+      >
         {calendarType === 'week'
           ? Array.from(dates, (date, index) => {
               return (
