@@ -7,7 +7,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { productInventory, sidebarResource } from 'src/constants/helpers';
+import { convertDateInDateTime, productInventory, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
 import { dateFormatForInputControl } from '../../../constants/helpers';
@@ -287,7 +287,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                     }
                     maxDate={new Date()}
                     onChange={(value) => {
-                      setFieldValue('rejectDate', value);
+                      setFieldValue('rejectDate', convertDateInDateTime(value));
                     }}
                   />
                 </Box>
