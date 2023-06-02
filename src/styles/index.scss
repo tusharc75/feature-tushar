@@ -1570,7 +1570,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .red-data-row {
-  background-color: #ffcccb !important;
+  background-color: var(--dark-error, #ffcccb) !important;
 }
 
 .scrap-data-row {
