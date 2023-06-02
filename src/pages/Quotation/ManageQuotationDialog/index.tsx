@@ -177,7 +177,9 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, quotationNumber, updatedBy, ...rest } = data;
             rest.status = 'New';
-            rest.quotationNumber = `QN_${generateUniqueIdOnly()}`;
+            if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+              rest.quotationNumber = `QN_${generateUniqueIdOnly()}`;
+            }
             setCloneHeading(quotationNumber);
             setInitialData({
               fields: fieldsDataForCreate,
@@ -197,7 +199,9 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate), currency: user.user?.brandCurrency || '' };
-        initialData['quotationNumber'] = `QN_${generateUniqueIdOnly()}`;
+        if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+          initialData['quotationNumber'] = `QN_${generateUniqueIdOnly()}`;
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData

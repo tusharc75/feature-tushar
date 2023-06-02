@@ -171,7 +171,9 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, invoiceNumber, updatedBy, ...rest } = data;
             rest.status = 'New';
-            rest.invoiceNumber = `IN_${generateUniqueIdOnly()}`;
+            if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+              rest.invoiceNumber = `IN_${generateUniqueIdOnly()}`;
+            }
             setCloneHeading(invoiceNumber);
             setInitialData({
               fields: fieldsDataForCreate,
@@ -191,7 +193,9 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate), currency: user.user?.brandCurrency || '' };
-        initialData['invoiceNumber'] = `IN_${generateUniqueIdOnly()}`;
+        if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+          initialData['invoiceNumber'] = `IN_${generateUniqueIdOnly()}`;
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData

@@ -73,7 +73,9 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
               setBulkAssetCreationData(data);
               if (isClone) {
                 const { _id, createdBy, updatedBy, serialNumber, baNumber, ...rest } = data;
-                rest['baNumber'] = `BA_${generateUniqueIdOnly()}`;
+                if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+                  rest['baNumber'] = `BA_${generateUniqueIdOnly()}`;
+                }
                 rest['status'] = 'New';
                 setInitialData({
                   fields: fieldsDataForCreate,
@@ -93,9 +95,11 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
             });
         } else {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
-          createValues.baNumber = `BA_${generateUniqueIdOnly()}`;
           if (fieldsDataForCreate.some((e) => e.fieldName === 'currency')) {
             createValues['currency'] = user.user?.brandCurrency;
+          }
+          if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+            createValues['baNumber'] = `BA_${generateUniqueIdOnly()}`;
           }
           if (refrenceData) {
             createValues['rentalJob'] = referenceId;

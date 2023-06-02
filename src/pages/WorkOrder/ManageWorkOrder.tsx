@@ -117,7 +117,9 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
         setAssetOptions(assetOptionsData.filter((i) => i.warehouse === data?.warehouse?.optionValue));
         if (isClone) {
           const { _id, createdBy, updatedBy, workOrderNumber, status, ...rest } = data;
-          rest['workOrderNumber'] = `WO_${generateUniqueIdOnly()}`;
+          if (fieldsDataForUpdate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+            rest['workOrderNumber'] = `WO_${generateUniqueIdOnly()}`;
+          }
           rest['status'] = 'New';
           rest['estimateCompleteDate'] = new Date();
           rest['createDate'] = new Date();
@@ -134,7 +136,9 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         if (referenceType && referenceData) {
-          tempInitialData['workOrderNumber'] = `WO_${generateUniqueIdOnly()}`;
+          if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+            tempInitialData['workOrderNumber'] = `WO_${generateUniqueIdOnly()}`;
+          }
           tempInitialData['type'] = referenceType;
           tempInitialData['product'] = referenceData?.product;
           if (referenceType === 'Repair Order') {
@@ -144,7 +148,9 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
             tempInitialData['serializedAsset'] = referenceData.serializedAsset;
           }
         } else {
-          tempInitialData['workOrderNumber'] = `WO_${generateUniqueIdOnly()}`;
+          if (fieldsDataForCreate?.some((e) => e.primaryField && e.isSystemGenerate)) {
+            tempInitialData['workOrderNumber'] = `WO_${generateUniqueIdOnly()}`;
+          }
         }
         setInitialData({
           fields: fieldsDataForCreate,
