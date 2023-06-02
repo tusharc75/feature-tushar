@@ -1077,7 +1077,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             color="primary"
                           />
                         }
-                        label="System Generate"
+                        label="System Generated"
                       />
                     )}
                     {fieldData.type === 'imageUpload' && values['isDefaultValue'] ? (
