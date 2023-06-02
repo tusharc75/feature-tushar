@@ -198,7 +198,7 @@ const EcommerceHome = () => {
       <Box className={`detail-container-v1`}>
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
           <Grid container spacing={2}>
-            <Grid item xs={12} md={3} sm={4}>
+            <Grid item xs={12} sm={5} md={4} lg={3}>
               <Box
                 bgcolor="var(--dark-secondary, #f5f5f5)"
                 p={3}
@@ -212,7 +212,7 @@ const EcommerceHome = () => {
                 </Grid>
               </Box>
             </Grid>
-            <Grid item xs={12} md={9} sm={8}>
+            <Grid item xs={12} sm={7} md={8} lg={9}>
               {loading ? (
                 <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
                   <CircularProgress size={30} color="inherit" />
