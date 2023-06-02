@@ -2,7 +2,7 @@
   .singleUserRoadmap {
     position: relative;
     min-height: 100px;
-    border-bottom: 1px solid lightgray;
+    border-bottom: 1px solid var(--common-border-color, lightgray);
   }
 
   .singleService {
@@ -70,6 +70,20 @@
     &.high {
       // background-color: hsl(342deg, 100%, 97%);
       background-color: hsl(342deg, 100%, 90%);
+    }
+
+    [data-mode='dark'] & {
+      &.low {
+        background-color: hsl(206deg, 100%, 60%);
+      }
+
+      &.medium {
+        background-color: hsl(46deg, 95%, 50%);
+      }
+
+      &.high {
+        background-color: hsl(342deg, 100%, 60%);
+      }
     }
   }
 }

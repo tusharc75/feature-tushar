@@ -4,8 +4,7 @@ import PropTypes from 'prop-types';
 
 const style = {
   cursor: 'pointer',
-  backgroundColor: 'white',
-  paddingTop: '8px'
+  backgroundColor: 'var(--dark-primary, white)'
 };
 
 const DragBox = ({ type, label, setFormData }) => {
@@ -28,8 +27,8 @@ const DragBox = ({ type, label, setFormData }) => {
   const opacity = isDragging ? 0.4 : 1;
 
   return (
-    <Grid ref={drag} style={{ ...style, opacity }} item xs={12} sm={12}>
-      <Box border={1} p={1} borderColor="var(--common-border-color)" className="text-truncate">
+    <Grid ref={drag} style={{ opacity }} item xs={12} sm={12}>
+      <Box border={1} p={1} style={{ ...style }} borderColor="var(--common-border-color)" className="text-truncate">
         <Typography variant="body2" className="text-truncate">
           {label}
         </Typography>

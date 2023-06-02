@@ -21,7 +21,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
 
   const { state: { user, selectedEntity } }: any = useData();
 
-  const [wareHouseOptions, setwareHouseOptions] = useState(null);
+  const [warehouseOptions, setwareHouseOptions] = useState(null);
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
 
   const [defaultWareHouse, setDefaultWareHouse] = useState(null);
@@ -31,10 +31,10 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
 
   useEffect(() => {
     axiosInstance()
-      .get(`/warehouse`)
+      .get(`/sa-formbuilder/lookup?lookupResource=Warehouse`)
       .then(({ data: { data } }) => {
-        setDefaultWareHouse(data.find((d) => d?._id === purchaseOrderData?.warehouse?.optionValue));
-        setwareHouseOptions(data);
+        setwareHouseOptions(data['Warehouse']);
+        setDefaultWareHouse(data['Warehouse']?.find((d) => d?.optionValue === purchaseOrderData?.warehouse?.optionValue));
       });
     fetchSettingsData();
   }, []);
@@ -61,7 +61,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
           _id: element._id,
           product: element.productId,
           serializedProduct: element.serializedProduct,
-          warehouse: element?.warehouse?._id,
+          warehouse: element?.warehouse?.optionValue,
           storageLocation: user?.user?.brandPolicy?.storageLocation ? element?.storageLocation?.optionValue : null,
           inventoryQuantity: parseInt(element?.inventoryQuantity),
           assetQuantity: parseInt(element?.assetQuantity),
@@ -97,7 +97,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
         if (data[sidebarResource.storageLocation]) {
-          const storageLocationOption = data[sidebarResource.storageLocation]?.filter(e => e?.warehouse === defaultWareHouse?._id);
+          const storageLocationOption = data[sidebarResource.storageLocation]?.filter(e => e?.warehouse === defaultWareHouse?.optionValue);
           setStorageLocationOptions(storageLocationOption);
         }
       });
@@ -246,7 +246,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
           {({ values, setFieldValue, errors }) => (
             <>
               <CustomDialogContent>
-                {values.seriaizedAsset && values.seriaizedAsset.length && wareHouseOptions ? (
+                {values.seriaizedAsset && values.seriaizedAsset.length && warehouseOptions ? (
                   <Box p={2}>
                     <Form>
                       <Grid direction="row" justify="space-evenly" alignItems="center">
@@ -284,10 +284,8 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                               <Autocomplete
                                                 size="small"
                                                 value={data.warehouse}
-                                                options={wareHouseOptions}
-                                                getOptionLabel={(option: any) =>
-                                                  option ? option?.warehouseName || option?.warehouseID || option?.address : ''
-                                                }
+                                                options={warehouseOptions}
+                                                getOptionLabel={(option: any) => option ? option?.optionLabel : ''}
                                                 disabled
                                                 onChange={(_, newValue) => {
                                                   arrayHelpers.replace(index, {
