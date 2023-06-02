@@ -202,7 +202,7 @@ const EcommerceHome = () => {
               <Box
                 bgcolor="var(--dark-secondary, #f5f5f5)"
                 p={3}
-                style={{ height: 'calc(100vh - 200px)' }}
+                style={{ maxHeight: 'calc(100vh - 200px)', height: '100%', overflow: 'auto' }}
                 border={'1px solid var(--common-border-color)'}
               >
                 <Grid container spacing={1}>
