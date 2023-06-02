@@ -22,7 +22,7 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 function PreviewDownload({ resource, referenceId, columns, isSendEmail = false }) {
   const toastConfig = useContext(CustomToastContext);
   const columnFilter = ['Action'];
-  const allColumn = columns?.filter((d) => !columnFilter.includes(d.Header))?.map((d) => d.Header) || [];
+  const allColumn = columns?.filter((d) => !columnFilter.includes(d.Header || d.headerName))?.map((d) => d.Header || d.headerName) || [];
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -36,12 +36,13 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false }
 
   const handleViewPdf = (type, PDFType, visibleColumns) => {
     let tempColumns = columns
-      .filter((d) => visibleColumns?.includes(d?.Header) && d?.Header !== 'Action')
+      .filter((d) => visibleColumns?.includes(d?.Header || d?.headerName) && (d?.Header || d?.headerName) !== 'Action')
       .map((d) => {
-        if (d?.accessor === 'qtyDisplay') {
+        let k = d?.accessor || d?.field;
+        if (k === 'qtyDisplay') {
           return 'qty';
         } else {
-          return d?.accessor.split('_')[0];
+          return k.split('_')[0];
         }
       });
     if (PDFType === 'Regular') {
@@ -96,7 +97,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false }
 
   const fetchEmailAttachment = () => {
     let tempColumns = columns
-      .filter((d) => visibleColumnsExcel?.includes(d?.Header))
+      .filter((d) => visibleColumnsExcel?.includes(d?.Header || d?.headerName))
       .map((d) => {
         if (d?.accessor === 'qtyDisplay') {
           return 'qty';

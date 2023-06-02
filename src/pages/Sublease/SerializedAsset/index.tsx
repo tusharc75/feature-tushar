@@ -7,7 +7,7 @@ import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, ASSET_STATUS, serializedAsset } from '../../../constants/helpers';
+import { gridLoadingTimeout, ASSET_STATUS, serializedAsset, RESOURCE_LABEL } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
@@ -28,6 +28,7 @@ import { AiFillFilePdf } from 'react-icons/ai';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, renderedFrom, allowedToEdit, isProcessor }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -181,7 +182,8 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
             />
           </Box>
         )}
-        <Box>
+        <PreviewDownload resource={RESOURCE_LABEL.serializedAsset} referenceId={subleaseData?._id} columns={columns} />
+        {/* <Box>
           {!isMobile && (
             <Button
               onClick={() => {
@@ -230,7 +232,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               )}
             </Button>
           )}
-        </Box>
+        </Box> */}
         {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
           <Fragment>
             {/* {currentStep === 1 && (

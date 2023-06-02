@@ -341,7 +341,7 @@ export const RESOURCE_LABEL = {
   field: 'Fields',
   productCategory: 'Product Categories',
   productInventory: 'Product Inventory',
-  serializedAsset: 'Serialized Assets',
+  serializedAsset: 'Serialized Asset',
   priceTemplate: 'Price Templates',
   product: 'Product Master',
   productTemplate: 'Product Templates',
