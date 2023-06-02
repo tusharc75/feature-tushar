@@ -148,6 +148,7 @@ const useStyles = makeStyles(() => ({
 const WorkOrderTechnician = () => {
   const classes = useStyles();
 
+
   const [serviceOpen, setServiceOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
   const [serviceData, setServiceData] = useState([]);
@@ -163,7 +164,7 @@ const WorkOrderTechnician = () => {
   const [cardData, setCardData] = useState(null);
 
   const {
-    state: { permissions }
+    state: { permissions, user }
   }: any = useData();
 
   const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed'];
@@ -252,11 +253,11 @@ const WorkOrderTechnician = () => {
   //   return stepTimes;
   // };
 
-  const cardDataRows: datarowInterface[] = [
+  const cardDataRows: any[] = [
     { accessor: 'serviceName', type: 'title' },
     { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
     { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
-    { accessor: 'stepData', title: 'Time', type: 'timer' }
+    ...(user?.user?.brandPolicy?.workOrderTimer ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : [])
   ];
 
 
