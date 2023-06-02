@@ -197,30 +197,39 @@ const EcommerceHome = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-          <Box bgcolor="#f5f5f5" p={1}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={3} sm={4}>
-                <Box bgcolor="white" p={3} style={{ height: '80vh' }}>
-                  <Grid container spacing={1}>
-                    {ECOM_SECTIONS?.map((i, index) => (
-                      <DragBox key={index} type={i.type} label={i.label} setFormData={setFormData} />
-                    ))}
-                  </Grid>
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={9} sm={8}>
-                {loading ? (
-                  <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
-                    <CircularProgress size={30} color="inherit" />
-                  </Box>
-                ) : (
-                  <Box border={1} p={2} bgcolor="grey.100" borderColor="var(--common-border-color)" className={classes.screenHeightAuto}>
-                    <DropBox formData={formData} setFormData={setFormData} handleRemove={handleRemove} findCard={findCard} moveCard={moveCard} />
-                  </Box>
-                )}
-              </Grid>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={3} sm={4}>
+              <Box
+                bgcolor="var(--dark-secondary, #f5f5f5)"
+                p={3}
+                style={{ height: 'calc(100vh - 200px)' }}
+                border={'1px solid var(--common-border-color)'}
+              >
+                <Grid container spacing={1}>
+                  {ECOM_SECTIONS?.map((i, index) => (
+                    <DragBox key={index} type={i.type} label={i.label} setFormData={setFormData} />
+                  ))}
+                </Grid>
+              </Box>
             </Grid>
-          </Box>
+            <Grid item xs={12} md={9} sm={8}>
+              {loading ? (
+                <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
+                  <CircularProgress size={30} color="inherit" />
+                </Box>
+              ) : (
+                <Box
+                  border={1}
+                  p={2}
+                  bgcolor="var(--dark-secondary, #f5f5f5)"
+                  borderColor="var(--common-border-color)"
+                  className={classes.screenHeightAuto}
+                >
+                  <DropBox formData={formData} setFormData={setFormData} handleRemove={handleRemove} findCard={findCard} moveCard={moveCard} />
+                </Box>
+              )}
+            </Grid>
+          </Grid>
         </DndProvider>
       </Box>
     </Box>
