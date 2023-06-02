@@ -138,6 +138,7 @@ const Users = ({ warehouse }) => {
                 setShowDeleteConfirmBox(false);
                 setDeleteRecord(null);
                 setAnchorActionEl(null);
+                localStorage.removeItem(localStorageSelectedRecords);
             })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -181,18 +182,17 @@ const Users = ({ warehouse }) => {
     const handleAssignUser = (data) => {
 
         const user = data?.map(_user => _user?._id)
-
         axiosInstance().post(`${routes.warehouse.path}/user/assign`, {
             warehouse: warehouse,
             user
+        }).then((res) => {
+            fetchData();
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+            fetchData();
         })
-            .then((res) => {
-                fetchData();
-            })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-                fetchData();
-            })
+
+        localStorage.removeItem(`${renderedFrom}Warehouse_selected`);
     }
 
     return (
@@ -274,7 +274,10 @@ const Users = ({ warehouse }) => {
             )}
             {openDialog && (
                 <AssignUserDialog
-                    handleClose={() => setOpenDialog(false)}
+                    handleClose={() => {
+                        setOpenDialog(false)
+                        localStorage.removeItem(`${renderedFrom}Warehouse_selected`);
+                    }}
                     onSuccess={(data) => {
                         handleAssignUser(data)
                         setOpenDialog(false);

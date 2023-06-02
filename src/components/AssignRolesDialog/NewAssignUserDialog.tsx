@@ -12,11 +12,12 @@ import SearchBox from '../Helpers/SearchBox';
 import CustomAgGrid, { intialState, reducer } from '../AgGridComponents/CustomAgGrid';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import { camelCase } from 'lodash';
 
 let searchTimeout;
 
 export default function AssignUserDialog({ reference, handleClose, onSuccess, assignedUser = [] }) {
-    const renderedFrom = `${routes.user.title}_${reference}_selected`;
+    const renderedFrom = camelCase(`${routes.user.title}_${reference}`);
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
     const {
@@ -93,12 +94,16 @@ export default function AssignUserDialog({ reference, handleClose, onSuccess, as
                         ...finalObject
                     };
                 });
-                const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+
                 if (renderCount === 0) {
                     const selectedRecords = rows.filter((_row: any) => assignedUser.includes(_row.id))
                     localStorage.setItem(localStorageSelectedRecords, JSON.stringify(selectedRecords))
                     setRenderCount(renderCount + 1)
+                } else {
+                    setRenderCount(renderCount + 1)
                 }
+
+                const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
 
                 dispatch({
                     type: 'selection',
@@ -113,10 +118,6 @@ export default function AssignUserDialog({ reference, handleClose, onSuccess, as
                 toastConfig.setToastConfig(error);
             });
     };
-
-    useEffect(() => {
-
-    }, [])
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
@@ -159,7 +160,6 @@ export default function AssignUserDialog({ reference, handleClose, onSuccess, as
             fetchData();
         }, millisec);
     }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
-
 
     const handleSearch = (e) => {
         dispatch({ type: 'search', search: e.target.value });
