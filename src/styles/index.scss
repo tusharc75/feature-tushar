@@ -45,6 +45,8 @@
   --colorAccount: red;
   --colorProject: yellow;
   --new_theme_color: #0f9fa9;
+  --new_theme_secondary_color: #ffc955;
+  --new_theme_secondary_border_color: #ff9c28;
   --ag-odd-row-background-color: #fff;
   --accordion-details-border: #ececec;
   --accordion-summary-bg: #ffffff;
@@ -3366,13 +3368,17 @@ body {
 
 .table-filter-v1 {
   .filter-chip {
-    font-weight: 400;
+    font-weight: 500;
+    border: 1px solid var(--new_theme_secondary_border_color);
     font-size: 12px !important;
     line-height: 14px !important;
-    color: #162d40 !important;
+    color: #2a3042 !important;
     padding: 8px 3px !important;
-    background-color: #effbf9 !important;
+    background-color: var(--new_theme_secondary_color) !important;
     border-radius: 3.09998px !important;
+    svg {
+      color: #2a3042 !important;
+    }
   }
 
   .chip-group {
