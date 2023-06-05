@@ -69,8 +69,8 @@ const SerializedAsset = () => {
   const [productCategory, setProductCategory] = useState(null);
   const [productFilter, setProductFilter] = useState(null);
 
-  const [plantOptions, setPlantOptions] = useState([]);
-  const [selectedPlant, setSelectedPlant] = useState(null);
+  const [warehouseOptions, setWarehouseOptions] = useState([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
 
   const {
@@ -104,7 +104,7 @@ const SerializedAsset = () => {
     sorting,
     search,
     warehouse,
-    selectedPlant,
+    selectedWarehouse,
     redirectProduct,
     fromPurchaseOrder,
     productCategory,
@@ -123,11 +123,13 @@ const SerializedAsset = () => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`${warehouseHelper.warehouseApi}?noEntityWise=1&sortBy=warehouseName&orderBy=asc`)
+      .get(`/sa-formbuilder/lookup?lookupResource=Warehouse`)
       .then(({ data: { data } }) => {
-        setPlantOptions(data);
+        setWarehouseOptions(data['Warehouse']);
       });
   }, []);
+
+
 
   useEffect(() => {
     if (productCategory && productCategory !== '') {
@@ -263,8 +265,8 @@ const SerializedAsset = () => {
     if (warehouse?.optionValue) {
       filterByIds.push({ field: 'warehouse', term: warehouse?.optionValue });
     }
-    if (selectedPlant && selectedPlant !== '') {
-      filterByIds.push({ field: 'warehouse', term: selectedPlant });
+    if (selectedWarehouse && selectedWarehouse !== '') {
+      filterByIds.push({ field: 'warehouse', term: selectedWarehouse });
     }
     if (redirectProduct?.id) {
       filterByIds.push({ field: 'product', term: redirectProduct?.id });
@@ -588,16 +590,15 @@ const SerializedAsset = () => {
                   )}
                   <Autocomplete
                     style={{ width: '250px' }}
-                    options={plantOptions}
-                    getOptionLabel={(option: any) => (option ? option?.warehouseName : '')}
+                    options={warehouseOptions}
+                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                     getOptionSelected={(option: any, val) => option.optionValue === val}
-                    value={
-                      plantOptions.filter((data) => data._id === selectedPlant).length
-                        ? plantOptions.filter((data) => data._id === selectedPlant)[0]
-                        : ''
+                    value={warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                      ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                      : ''
                     }
                     onChange={(e, val) => {
-                      setSelectedPlant(val && val._id ? val._id : '');
+                      setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
                     }}
                     renderInput={(params) =>
                       isMobile && !isTablet ? (
