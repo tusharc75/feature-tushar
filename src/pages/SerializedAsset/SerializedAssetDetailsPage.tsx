@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Grid, Box, Button, Paper, Typography, Tab, Tabs, useMediaQuery } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Typography, Tab, Tabs, useMediaQuery, IconButton } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -36,6 +36,8 @@ import { MdEdit } from 'react-icons/md';
 import { camelCase, startCase } from 'lodash';
 import moment from 'moment';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { FcApproval } from 'react-icons/fc';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -75,9 +77,9 @@ const SerializedAssetDetailsPage = () => {
     <>
       {params.value ? (
         params.data.type === 'Loading Ticket' ||
-        params.data.type === 'Receiving Ticket' ||
-        params.data.type === 'Return Ticket' ||
-        params.data.type === 'Delivery Ticket' ? (
+          params.data.type === 'Receiving Ticket' ||
+          params.data.type === 'Return Ticket' ||
+          params.data.type === 'Delivery Ticket' ? (
           <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link>
@@ -302,7 +304,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: productInventoryData.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -357,6 +359,21 @@ const SerializedAssetDetailsPage = () => {
     }
   }, [productInventoryData]);
 
+  const handleMTRAttached = (status: boolean) => {
+    axiosInstance().post(`${serializedAsset.api}/update-bulk-data`, { _ids: [id], mtrAttached: status })
+      .then(({ data }) => {
+        fetchProductInventoryData()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -369,6 +386,32 @@ const SerializedAssetDetailsPage = () => {
               <>
                 {permissions?.serializedAsset?.isUpdate && productInventoryData.active && (
                   <>
+                    {productInventoryFields?.some(field => field?.fieldData?.fieldName === "mtrAttached") && (
+                      <>
+                        {productInventoryData?.mtrAttached ?
+                          <HtmlTooltip title={'MTR Attached'}>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                handleMTRAttached(false)
+                              }}
+                            >
+                              <FcApproval size={25} />
+                            </IconButton>
+                          </HtmlTooltip>
+                          :
+                          <Button
+                            variant="outlined"
+                            color="default"
+                            size="small"
+                            onClick={() => {
+                              handleMTRAttached(true)
+                            }}>
+                            MTR Attach
+                          </Button>
+                        }
+                      </>
+                    )}
                     {permissions?.repairJob?.isCreate &&
                       productInventoryData?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
                       [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(

@@ -127,7 +127,7 @@ const AddSerializedAsset = ({
         setFrameWorkComponent({ ...tempFrameworkComponent, rentalJobRenderer: RentalJobRenderer });
 
         const inUseColoumns: any = [{
-          field: 'Rental Job',
+          field: 'rentalJob',
           headerName: 'Rental Job',
           show: true,
           filter: true,
@@ -270,9 +270,7 @@ const AddSerializedAsset = ({
     } else {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
     }
-
-    deepFilter = `${deepFilter}&isNonSerializedAsset=0`;
-
+    
     return deepFilter;
   };
 

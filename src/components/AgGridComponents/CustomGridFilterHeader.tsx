@@ -30,7 +30,7 @@ const CustomGridFilterHeader = (props) => {
     dispatch,
     showOnlyShowFilteredRecordSwitch = false,
     selectedRecords = null,
-    defaultColumns,
+    defaultColumns
   } = props;
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
@@ -65,7 +65,7 @@ const CustomGridFilterHeader = (props) => {
 
   return (
     <>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', margin: '8px', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '15px', margin: '8px 0', justifyContent: 'space-between' }}>
         <div
           className="table-filter-v1"
           style={{ flexBasis: isFilterPresent ? '766px' : 'unset', maxWidth: isFilterPresent ? '766px' : 'unset', paddingRight: '52px' }}
@@ -111,7 +111,7 @@ const CustomGridFilterHeader = (props) => {
             isClientSideGrid={isClientSideGrid}
             dispatch={dispatch}
             style={{ marginRight: buttonGap }}
-            refreshGrid={refreshGrid} 
+            refreshGrid={refreshGrid}
             defaultColumns={defaultColumns}
           />
           <RefreshButton isOffline={isOffline} refreshGrid={refreshGrid} />
@@ -164,16 +164,18 @@ const DisplyaFilters = (props) => {
             element.filter.from && element.filter.to
               ? `${element.filter.from ? element.filter.from : null} - ${element.filter.to ? element.filter.to : null}`
               : element.filter.from || element.filter.to
-                ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
-                : null;
+              ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
+              : null;
           const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: dateValue, name: keys[i] };
           filterData.push(data);
-        }
-        else if (element.operator && element.condition1) {
-          const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: element?.condition1?.filter?.map((e) => e?.optionLabel)?.toString(), name: keys[i] };
+        } else if (element.operator && element.condition1) {
+          const data = {
+            title: currentColumn?.headerName || _.startCase(keys[i]),
+            value: element?.condition1?.filter?.map((e) => e?.optionLabel)?.toString(),
+            name: keys[i]
+          };
           filterData.push(data);
-        }
-        else {
+        } else {
           const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: element.filter, name: keys[i] };
           filterData.push(data);
         }
