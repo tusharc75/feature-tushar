@@ -208,7 +208,14 @@ const CurrencyConverter = () => {
         </div>
         <div className="listing-grid">
           <Box p={1}>
-            <Grid container style={{ background: '#f0f0f0', border: '1px solid #ddd', padding: '10px 10px' }}>
+            <Grid
+              container
+              style={{
+                background: 'var(--dark-secondary, rgb(241, 245, 255))',
+                border: '1px solid var(--common-border-color)',
+                padding: '10px 10px'
+              }}
+            >
               <Grid item xs={12} md={8} sm={8}>
                 <Autocomplete
                   fullWidth
