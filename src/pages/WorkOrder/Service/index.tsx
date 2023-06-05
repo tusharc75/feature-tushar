@@ -357,7 +357,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const stylesForEveryTab = (selectedService, data, index, mobScreen): React.CSSProperties => {
     if (data?.type === 'quotation' && selectedService?.type !== 'quotation') {
       return {
-        borderColor: 'rgb(224, 224, 224)',
+        borderColor: 'var(--dark-mode-border-color, rgb(224, 224, 224))',
         borderBottomWidth: '1px',
         borderLeftWidth: '1px',
         borderRightWidth: '1px',
@@ -391,7 +391,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     }
     if (selectedService?.uniqueId == data?.uniqueId) {
       return {
-        borderColor: '#298B88',
+        borderColor: 'var(--dark-active-border-color,#298B88)',
         borderTopWidth: '1px',
         borderBottomWidth: '1px',
         borderLeftWidth: '1px',
@@ -405,7 +405,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderLeftWidth: '1px',
         borderRightWidth: '1px',
         borderStyle: 'solid',
-        borderColor: 'rgb(224, 224, 224)',
+        borderColor: 'var(--dark-mode-border-color, rgb(224, 224, 224))',
         cursor: 'pointer',
         borderTopWidth: index !== 0 && !mobScreen ? 0 : 1
       };
@@ -769,6 +769,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                         allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                         setDisableCompleteFail={setDisableCompleteFail}
                         fetchService={fetchServiceData}
+                        referencType="workOrder"
                       />
                     ) : (
                       <Box textAlign="center">
@@ -792,196 +793,196 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   {serviceSteps?.map((data, index) => {
                     let isTechnician = data?.assignedUsers?.some((u: any) => u?.optionValue === user?._id);
                     const style = stylesForEveryTab(selectedService, data, index, mobScreen);
-                    return (
-                      Boolean(allowedToEdit || isTechnician) && (
-                        <Tab
-                          key={index}
-                          content={
-                            <Box
-                              style={{
-                                transition: '.3s',
-                                height: '100%',
-                                display: 'flex',
-                                alignItems: 'center'
-                              }}
-                              onClick={() => {
-                                if (data?.type === 'service') {
-                                  setSelectedService(data);
-                                }
-                              }}
-                            >
-                              <Grid item xs={12} key={index}>
-                                <Box
-                                  style={{
-                                    ...style,
-                                    padding: '8px 10px',
-                                    transition: '.3s'
-                                  }}
-                                  onClick={() => {
-                                    if (data?.type === 'service') {
-                                      setSelectedService(data);
-                                    }
-                                  }}
-                                >
-                                  <Grid container>
-                                    <Grid item xs={10}>
-                                      <Box
-                                        display="flex"
-                                        style={{
-                                          flexWrap: 'wrap',
-                                          alignItems: 'center',
-                                          position: 'relative',
-                                          paddingLeft: !isColapsed && data?.type !== 'quotation' ? '20px' : '',
-                                          gap: '10px'
-                                        }}
-                                      >
-                                        {data?.type === 'service' ? (
+                    return Boolean(allowedToEdit || isTechnician) ? (
+                      <Tab
+                        key={index}
+                        content={
+                          <Box
+                            style={{
+                              transition: '.3s',
+                              height: '100%',
+                              display: 'flex',
+                              alignItems: 'center'
+                            }}
+                            onClick={() => {
+                              if (data?.type === 'service') {
+                                setSelectedService(data);
+                              }
+                            }}
+                          >
+                            <Grid item xs={12} key={index}>
+                              <Box
+                                style={{
+                                  ...style,
+                                  padding: '8px 10px',
+                                  transition: '.3s'
+                                }}
+                                onClick={() => {
+                                  if (data?.type === 'service') {
+                                    setSelectedService(data);
+                                  }
+                                }}
+                              >
+                                <Grid container>
+                                  <Grid item xs={10}>
+                                    <Box
+                                      display="flex"
+                                      style={{
+                                        flexWrap: 'wrap',
+                                        alignItems: 'center',
+                                        position: 'relative',
+                                        paddingLeft: !isColapsed && data?.type !== 'quotation' ? '20px' : '',
+                                        gap: '10px'
+                                      }}
+                                    >
+                                      {data?.type === 'service' ? (
+                                        <Box
+                                          style={{
+                                            backgroundColor: 'var(--primary)',
+                                            color: 'white',
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '50%',
+                                            lineHeight: '20px',
+                                            textAlign: 'center',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '10px',
+                                            flexShrink: 0,
+                                            top: '4px',
+                                            left: 0
+                                          }}
+                                          sx={{ position: !isColapsed ? 'absolute' : '' }}
+                                        >
+                                          <span>{data?.order}</span>
+                                        </Box>
+                                      ) : (
+                                        data?.type === 'quotation' && <FormatQuoteIcon />
+                                      )}
+
+                                      {!isColapsed && (
+                                        <>
                                           <Box
                                             style={{
-                                              backgroundColor: 'var(--primary)',
-                                              color: 'white',
-                                              width: '20px',
-                                              height: '20px',
-                                              borderRadius: '50%',
-                                              lineHeight: '20px',
-                                              textAlign: 'center',
                                               display: 'flex',
                                               alignItems: 'center',
-                                              justifyContent: 'center',
-                                              fontSize: '10px',
-                                              flexShrink: 0,
-                                              top: '4px',
-                                              left: 0
+                                              flexWrap: 'wrap',
+                                              flexBasis: data?.type === 'quotation' ? 'calc(100% - 30px)' : '100%'
                                             }}
-                                            sx={{ position: !isColapsed ? 'absolute' : '' }}
                                           >
-                                            <span>{data?.order}</span>
-                                          </Box>
-                                        ) : (
-                                          data?.type === 'quotation' && <FormatQuoteIcon />
-                                        )}
-
-                                        {!isColapsed && (
-                                          <>
-                                            <Box
-                                              style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                flexWrap: 'wrap',
-                                                flexBasis: data?.type === 'quotation' ? 'calc(100% - 30px)' : '100%'
-                                              }}
-                                            >
-                                              <Box ml={'10px'}>
-                                                <Typography>{data?.serviceName}</Typography>
-                                              </Box>
-                                              {user?.brandPolicy?.repairOrderQuotation && data?.type === 'service' && (
-                                                <Box ml={1}>
-                                                  {data?.preWork ? (
-                                                    <HtmlTooltip title="Pre Work Service">
-                                                      <span>
-                                                        <PreWorkIcon style={{ verticalAlign: 'middle' }} />
-                                                      </span>
-                                                    </HtmlTooltip>
-                                                  ) : (
-                                                    <HtmlTooltip title="Post Work Service">
-                                                      <span>
-                                                        <PostWorkIcon style={{ verticalAlign: 'middle' }} />
-                                                      </span>
-                                                    </HtmlTooltip>
-                                                  )}
-                                                </Box>
-                                              )}
-                                              <>
-                                                {data?.type === 'service' && data?.serviceStatus && (
-                                                  <Box ml={1}>
-                                                    <RenderStatusIcon stepStatus={data?.serviceStatus} />
-                                                  </Box>
-                                                )}
-                                                {data?.type === 'quotation' && quotationData && (
-                                                  <Box ml={1}>
-                                                    <RenderStatusIcon stepStatus={quotationData?.status} />
-                                                  </Box>
-                                                )}
-                                              </>
-                                              {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
-                                                <Box ml={1}>
-                                                  <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                                    <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
-                                                  </HtmlTooltip>
-                                                </Box>
-                                              )}
+                                            <Box ml={'10px'}>
+                                              <Typography>{data?.serviceName}</Typography>
                                             </Box>
-
-                                            {/* Chips */}
-                                            <Box style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', flexBasis: '100%', gap: '8px' }}>
-                                              {data?.type === 'service' && (
+                                            {user?.brandPolicy?.repairOrderQuotation && data?.type === 'service' && (
+                                              <Box ml={1}>
+                                                {data?.preWork ? (
+                                                  <HtmlTooltip title="Pre Work Service">
+                                                    <span>
+                                                      <PreWorkIcon style={{ verticalAlign: 'middle' }} />
+                                                    </span>
+                                                  </HtmlTooltip>
+                                                ) : (
+                                                  <HtmlTooltip title="Post Work Service">
+                                                    <span>
+                                                      <PostWorkIcon style={{ verticalAlign: 'middle' }} />
+                                                    </span>
+                                                  </HtmlTooltip>
+                                                )}
+                                              </Box>
+                                            )}
+                                            <>
+                                              {data?.type === 'service' && data?.serviceStatus && (
                                                 <Box ml={1}>
-                                                  <Chip
-                                                    label={data?.status}
-                                                    variant="outlined"
-                                                    style={{
-                                                      borderColor:
-                                                        data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                          ? '#E1FCE3'
-                                                          : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fabebe'
-                                                          : '#FFF5DD',
-                                                      color:
-                                                        data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                          ? '#048E0A'
-                                                          : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fa0202'
-                                                          : '#FF8C21',
-                                                      background:
-                                                        data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                          ? '#E1FCE3'
-                                                          : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fabebe'
-                                                          : '#FFF5DD',
-                                                      fontWeight: 700
-                                                    }}
-                                                  />
+                                                  <RenderStatusIcon stepStatus={data?.serviceStatus} />
                                                 </Box>
                                               )}
                                               {data?.type === 'quotation' && quotationData && (
                                                 <Box ml={1}>
-                                                  <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
+                                                  <RenderStatusIcon stepStatus={quotationData?.status} />
                                                 </Box>
                                               )}
-                                            </Box>
-                                          </>
-                                        )}
-                                      </Box>
-                                    </Grid>
-                                    {!isColapsed && (
-                                      <>
-                                        {data?.type === 'service' && (
-                                          <Grid item xs={2} container justify="flex-end">
-                                            <div style={{ display: 'flex' }}>
-                                              <IconButton
-                                                size="small"
-                                                color="primary"
-                                                aria-label="delete"
-                                                disabled={!isAllowedToServiceEdit}
-                                                onClick={(event) => {
-                                                  handleOpenMenu(event);
-                                                  setSelectedService(data);
-                                                }}
-                                              >
-                                                <MoreHorizIcon />
-                                              </IconButton>
-                                            </div>
-                                          </Grid>
-                                        )}
-                                      </>
-                                    )}
+                                            </>
+                                            {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
+                                              <Box ml={1}>
+                                                <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                                                  <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
+                                                </HtmlTooltip>
+                                              </Box>
+                                            )}
+                                          </Box>
+
+                                          {/* Chips */}
+                                          <Box style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', flexBasis: '100%', gap: '8px' }}>
+                                            {data?.type === 'service' && (
+                                              <Box ml={1}>
+                                                <Chip
+                                                  label={data?.status}
+                                                  variant="outlined"
+                                                  style={{
+                                                    borderColor:
+                                                      data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
+                                                        ? '#E1FCE3'
+                                                        : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
+                                                        ? '#fabebe'
+                                                        : '#FFF5DD',
+                                                    color:
+                                                      data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
+                                                        ? '#048E0A'
+                                                        : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
+                                                        ? '#fa0202'
+                                                        : '#FF8C21',
+                                                    background:
+                                                      data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
+                                                        ? '#E1FCE3'
+                                                        : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
+                                                        ? '#fabebe'
+                                                        : '#FFF5DD',
+                                                    fontWeight: 700
+                                                  }}
+                                                />
+                                              </Box>
+                                            )}
+                                            {data?.type === 'quotation' && quotationData && (
+                                              <Box ml={1}>
+                                                <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
+                                              </Box>
+                                            )}
+                                          </Box>
+                                        </>
+                                      )}
+                                    </Box>
                                   </Grid>
-                                </Box>
-                              </Grid>
-                            </Box>
-                          }
-                        ></Tab>
-                      )
+                                  {!isColapsed && (
+                                    <>
+                                      {data?.type === 'service' && (
+                                        <Grid item xs={2} container justify="flex-end">
+                                          <div style={{ display: 'flex' }}>
+                                            <IconButton
+                                              size="small"
+                                              color="primary"
+                                              aria-label="delete"
+                                              disabled={!isAllowedToServiceEdit}
+                                              onClick={(event) => {
+                                                handleOpenMenu(event);
+                                                setSelectedService(data);
+                                              }}
+                                            >
+                                              <MoreHorizIcon />
+                                            </IconButton>
+                                          </div>
+                                        </Grid>
+                                      )}
+                                    </>
+                                  )}
+                                </Grid>
+                              </Box>
+                            </Grid>
+                          </Box>
+                        }
+                      ></Tab>
+                    ) : (
+                      <Tab key={index}></Tab>
                     );
                   })}
                 </Tabs>

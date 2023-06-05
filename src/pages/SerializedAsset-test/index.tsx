@@ -21,7 +21,7 @@ import {
   gridLoadingTimeout,
   product,
   warehouse as warehouseHelper,
-  INVENTORY_STATUS,
+  ASSET_STATUS,
   COLOUR_MASTER,
   getLocalStorageArrayData
 } from '../../constants/helpers';
@@ -208,7 +208,7 @@ const SerializedAssetTest = () => {
             e.cellRenderer = 'assetNumberRenderer';
             e.cellStyle = (params) => {
               if (
-                [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(
+                [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
                   params?.data?.status
                 )
               ) {
@@ -683,7 +683,7 @@ const SerializedAssetTest = () => {
                     </MenuItem>
                     {permissions?.serializedAsset?.isUpdate &&
                       allowUpdateStatus &&
-                      [INVENTORY_STATUS.available, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].map((status) => (
+                      [ASSET_STATUS.available, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].map((status) => (
                         <MenuItem
                           onClick={() => {
                             closeActions();
@@ -691,7 +691,7 @@ const SerializedAssetTest = () => {
                           }}
                           disabled={
                             selectedRecords?.filter((o) =>
-                              [INVENTORY_STATUS.new, INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(
+                              [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(
                                 o.status
                               )
                             ).length === selectedRecords.length
@@ -707,28 +707,28 @@ const SerializedAssetTest = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(INVENTORY_STATUS.scrap);
+                            handleStatusUpdate(ASSET_STATUS.scrap);
                           }}
                           disabled={
-                            selectedRecords?.filter((o) => ![INVENTORY_STATUS.scrap].includes(o.status)).length === selectedRecords.length
+                            selectedRecords?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status)).length === selectedRecords.length
                               ? false
                               : true
                           }
                         >
-                          {`Status Change - ${INVENTORY_STATUS.scrap}`}
+                          {`Status Change - ${ASSET_STATUS.scrap}`}
                         </MenuItem>
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(INVENTORY_STATUS.lost);
+                            handleStatusUpdate(ASSET_STATUS.lost);
                           }}
                           disabled={
-                            selectedRecords?.filter((o) => ![INVENTORY_STATUS.lost].includes(o.status)).length === selectedRecords.length
+                            selectedRecords?.filter((o) => ![ASSET_STATUS.lost].includes(o.status)).length === selectedRecords.length
                               ? false
                               : true
                           }
                         >
-                          {`Status Change - ${INVENTORY_STATUS.lost}`}
+                          {`Status Change - ${ASSET_STATUS.lost}`}
                         </MenuItem>
                       </>
                     )}

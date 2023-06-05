@@ -12,7 +12,8 @@ import {
   ListItemText,
   Tooltip,
   MenuItem,
-  Menu
+  Menu,
+  Button
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -38,61 +39,8 @@ import { formatAmountWithCurrency } from '../../constants/helpers';
 import routes from '../../components/Helpers/Routes';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import styles from './ProjectSales.module.scss';
-
-const Accordion = withStyles({
-  root: {
-    border: '1px solid rgba(0, 0, 0, .125)',
-    '&:not(:last-child)': {
-      borderBottom: 0
-    },
-    '&:before': {
-      display: 'none'
-    },
-    '&$expanded': {
-      margin: 'auto'
-    }
-  },
-  expanded: {}
-})(MuiAccordion);
-
-const AccordionSummary = withStyles({
-  root: {
-    backgroundColor: 'white',
-    borderBottom: '1px solid #f1ece8',
-    background: '#ffffff',
-    fontWeight: 'bold',
-    padding: '0px',
-    '&$expanded': {
-      minHeight: 46
-    }
-  },
-  content: {
-    '&$expanded': {
-      margin: '12px 0'
-    }
-  },
-  expanded: {}
-})(MuiAccordionSummary);
-
-const AccordionDetails = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(1),
-    display: 'block'
-  }
-}))(MuiAccordionDetails);
-
-function DisplayData({ key, label, value, icon }) {
-  return (
-    <div style={{ flexGrow: 1 }}>
-      <List>
-        <ListItem key={key}>
-          <ListItemAvatar>{icon}</ListItemAvatar>
-          <ListItemText primary={value ? value : '-'} secondary={label} />
-        </ListItem>
-      </List>
-    </div>
-  );
-}
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import DisplayData from 'src/components/CardDisplayData';
 
 export default function QuotesAccordionInProjectSale({
   expanded = true,
@@ -244,9 +192,8 @@ export default function QuotesAccordionInProjectSale({
           Add Exisiting
         </MenuItem>
       </Menu>
-      <Accordion expanded={expandQuote} className="omsAccordian accordQuotes ">
+      <Accordion expanded={expandQuote} onChange={() => setExpandQuote(!expandQuote)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header pos_rel">
-          <div className="clicker_div" onClick={() => setExpandQuote(!expandQuote)}></div>
           <Grid container>
             <Grid item xs={8} alignItems="center">
               <Box component="div" display="flex" alignItems="center" flexGrow={1}>
@@ -267,7 +214,6 @@ export default function QuotesAccordionInProjectSale({
             </Grid>
           </Grid>
         </AccordionSummary>
-        <Box margin={0.5} />
         <AccordionDetails>
           <>
             {expandQuote && (
@@ -282,9 +228,8 @@ export default function QuotesAccordionInProjectSale({
                         // md={recordsPerLineInLargeScreen}
                         className={styles.opportunity_layout_container}
                       >
-                        <Card className="detailCard">
-                          <CardContent className="detailListing">
-                            <div className="cardStyle"> </div>
+                        <Card className="detailCard  card-v1" variant="outlined">
+                          <CardContent className="card-link">
                             <Grid item xs={12}>
                               <Grid container className="detailCardHeader">
                                 <Grid item xs={6}>
@@ -368,25 +313,20 @@ export default function QuotesAccordionInProjectSale({
                 )}
               </>
             )}
+            {quotes?.length > 0 && quotes.length > maxRecordsToShow && (
+              <Button
+                onClick={() => {
+                  setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
+                }}
+                className="accordion-outlined-button"
+                endIcon={<FaArrowAltCircleDown size={25} />}
+                style={{ margin: '10px auto 0', display: 'flex' }}
+              >
+                <span className="show_more_text">Show More</span>
+              </Button>
+            )}
           </>
         </AccordionDetails>
-
-        {quotes?.length > 0 && quotes.length > maxRecordsToShow && (
-          <Box
-            margin={1}
-            className="btn-view gap-1 expander"
-            onClick={() => {
-              setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
-            }}
-            p={1}
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <span className="show_more_text">Show More</span>
-            <FaArrowAltCircleDown size={25} />
-          </Box>
-        )}
       </Accordion>
       {showConfirmBox ? (
         <ConfirmationDialog

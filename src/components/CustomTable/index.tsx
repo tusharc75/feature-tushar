@@ -4,13 +4,14 @@ import { Checkbox, Typography } from '@material-ui/core';
 
 interface TableInterface extends React.HTMLAttributes<HTMLTableElement> {
   data: any[];
-  columns: columnsInterface[];
+  columns: ColumnsInterface[];
   uniqueKey: (data: any) => string;
   checkBox?: boolean;
   onSelect?: any;
   height?: string;
+  dense?: boolean;
 }
-interface columnsInterface extends React.HTMLAttributes<HTMLTableCellElement> {
+export interface ColumnsInterface extends React.HTMLAttributes<HTMLTableCellElement> {
   header: string;
   minWidth?: number;
   width?: number;
@@ -18,7 +19,17 @@ interface columnsInterface extends React.HTMLAttributes<HTMLTableCellElement> {
   sticky?: 'right' | 'left';
 }
 
-const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, className, checkBox, onSelect = null, height, ...others }) => {
+const CustomTable: React.FC<TableInterface> = ({
+  data,
+  columns,
+  uniqueKey,
+  className,
+  checkBox,
+  onSelect = null,
+  height,
+  dense = false,
+  ...others
+}) => {
   const [selected, setSelected] = useState<any>([]);
 
   const selectAll = useCallback(() => {
@@ -56,11 +67,11 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
 
   return (
     <div className={styles.tableWrapper}>
-      <div className={styles.tableContainer} style={{ maxHeight: height }}>
+      <div className={styles.tableContainer} style={{ maxHeight: height ?? 'calc(100vh - 290px)' }}>
         <table {...others} className={`${styles.table} ${className}`}>
           <thead>
             {checkBox && (
-              <th style={{ minWidth: '48px' }} className={`${styles.checkBox}`}>
+              <th style={{ minWidth: dense ? '48px' : '60px', textAlign: 'center' }} className={`${styles.checkBox}`}>
                 <Checkbox
                   style={{ padding: '0' }}
                   inputProps={{ 'aria-label': 'Select all' }}
@@ -75,10 +86,11 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
                   key={column.header}
                   {...column}
                   style={{
+                    ...column.style,
                     width: `${column.width}px}`,
                     maxWidth: `${column.width}px}`,
                     minWidth: `${column.minWidth}px`,
-                    position: column.sticky ? 'sticky' : 'unset',
+                    position: column.sticky ? 'sticky' : 'static',
                     [column.sticky]: 0
                   }}
                 >
@@ -96,7 +108,7 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
             {data?.map((row, index) => (
               <tr key={uniqueKey(row)}>
                 {checkBox && (
-                  <td style={{ minWidth: '48px' }} className={`${styles.checkBox}`}>
+                  <td style={{ minWidth: dense ? '48px' : '60px', textAlign: 'center' }} className={`${styles.checkBox}`}>
                     {row?.hideSelection ? null : (
                       <Checkbox
                         style={{ padding: '0' }}
@@ -111,11 +123,14 @@ const CustomTable: React.FC<TableInterface> = ({ data, columns, uniqueKey, class
                   <td
                     className={column.sticky ? (column.sticky === 'right' ? styles.stickyRight : styles.stickyLeft) : ''}
                     key={index}
+                    {...column}
                     style={{
+                      ...column.style,
                       width: `${column.width}px}`,
                       maxWidth: `${column.width}px}`,
                       minWidth: `${column.minWidth}px`,
-                      position: column.sticky ? 'sticky' : 'unset',
+                      position: column.sticky ? 'sticky' : 'static',
+                      padding: dense ? '6px 16px' : '18px 16px',
                       [column.sticky]: 0
                     }}
                   >

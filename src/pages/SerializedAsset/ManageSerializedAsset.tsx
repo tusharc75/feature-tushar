@@ -11,7 +11,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, INVENTORY_STATUS, serializedAsset, setFieldsInAscendingOrder, supplierAccount } from '../../constants/helpers';
+import { CustomDialogTransition, ASSET_STATUS, serializedAsset, setFieldsInAscendingOrder, supplierAccount } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -51,6 +51,8 @@ const ManageSerializedAsset = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showAddSupplierAccountDialog, setShowAddSupplierAccountDialog] = useState({ open: false, fieldName: '' });
   const [accountData, setAccountData] = useState([]);
+  const [productCategoryID, setProductCategoryID] = useState(null);
+  const [productCategoryName, setProductCategoryName] = useState(null);
 
   const {
     state: { permissions }
@@ -91,7 +93,7 @@ const ManageSerializedAsset = ({
                 const { _id, createdBy, updatedBy, assetNumber, ...rest } = data;
                 setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
-                oldValues.status = INVENTORY_STATUS.new;
+                oldValues.status = ASSET_STATUS.new;
                 oldValues.assetNumber = fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || '';
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -154,8 +156,8 @@ const ManageSerializedAsset = ({
   }, [productInventoryId]);
 
   const handleSubmit = (values) => {
-    sessionStorage.removeItem('productCategoryId');
-    sessionStorage.removeItem('productCategoryName');
+    setProductCategoryID(null)
+    setProductCategoryName(null)
     setSubmitting(true);
     if (productInventoryId && isClone === false) {
       values._id = productInventoryId;
@@ -265,8 +267,9 @@ const ManageSerializedAsset = ({
                                               const productValue = productCategory
                                                 ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionValue
                                                 : '';
-                                              sessionStorage.setItem('productCategoryId', JSON.stringify(productValue));
-                                              sessionStorage.setItem('productCategoryName', JSON.stringify(productLabel));
+
+                                              setProductCategoryID(productValue)
+                                              setProductCategoryName(productLabel)
                                             }}
                                           />
                                         </Box>
@@ -314,8 +317,8 @@ const ManageSerializedAsset = ({
                                               const label = val && val.optionLabel ? val.optionLabel : '';
                                               setFieldValue(field.fieldName, value);
                                               setFieldValue('product', '');
-                                              sessionStorage.setItem('productCategoryId', JSON.stringify(value));
-                                              sessionStorage.setItem('productCategoryName', JSON.stringify(label));
+                                              setProductCategoryID(value)
+                                              setProductCategoryName(label)
                                             }}
                                           />
                                         </Box>
@@ -449,8 +452,8 @@ const ManageSerializedAsset = ({
                         setOpen({ open: false, isClone: false });
                         if (data._id) {
                           setFieldValue('productCategory', data._id);
-                          sessionStorage.setItem('productCategoryId', JSON.stringify(data._id));
-                          sessionStorage.setItem('productCategoryName', JSON.stringify(data.name));
+                          setProductCategoryID(data?._id)
+                          setProductCategoryName(data?.productRendererNames)
                           setProductCategoryOptions((prevState) => {
                             return [
                               ...prevState,
@@ -468,10 +471,17 @@ const ManageSerializedAsset = ({
                   )}
                   {productOpen?.open && (
                     <CreateProduct
-                      open={productOpen?.open}
-                      handleClose={() => setProductOpen({ open: false, isClone: false })}
                       isClone={productOpen?.isClone}
-                      openFrom={'serializedAsset'}
+                      productCategoryID={productCategoryID}
+                      productCategoryName={productCategoryName}
+                      handleClose={() => setProductOpen({ open: false, isClone: false })}
+                      isRedirectToDetailPage={false}
+                      openFrom="serializedAsset"
+
+                      // open={productOpen?.open}
+                      // handleClose={() => setProductOpen({ open: false, isClone: false })}
+                      // isClone={productOpen?.isClone}
+                      // openFrom={'serializedAsset'}
                       onSuccess={(data) => {
                         setProductOpen({ open: false, isClone: false });
                         if (data._id) {
@@ -498,7 +508,7 @@ const ManageSerializedAsset = ({
                               }
                             ];
                           });
-                          sessionStorage.setItem('productCategoryId', JSON.stringify(data.productCategory));
+                          setProductCategoryID(data.productCategory)
                         }
                       }}
                     />
@@ -541,8 +551,9 @@ const ManageSerializedAsset = ({
                     onClick={() => {
                       if (isEqual(initialData.values, values)) onClose();
                       else setShowConfirmDialog(true);
-                      sessionStorage.removeItem('productCategoryId');
-                      sessionStorage.removeItem('productCategoryName');
+                      setProductCategoryID(null)
+                      setProductCategoryName(null)
+
                     }}
                   >
                     Cancel
@@ -559,14 +570,16 @@ const ManageSerializedAsset = ({
                     onSave={() => {
                       setShowConfirmDialog(false);
                       submitForm();
-                      sessionStorage.removeItem('productCategoryId');
-                      sessionStorage.removeItem('productCategoryName');
+                      setProductCategoryID(null)
+                      setProductCategoryName(null)
+
                     }}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();
-                      sessionStorage.removeItem('productCategoryId');
-                      sessionStorage.removeItem('productCategoryName');
+                      setProductCategoryID(null)
+                      setProductCategoryName(null)
+
                     }}
                   />
                 ) : null}

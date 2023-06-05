@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Box, Button, Card, CardContent, Grid, Paper, Tab, Tabs, Typography, List, useMediaQuery, Dialog } from '@material-ui/core';
+import { Box, Button, Grid, Paper, Tab, Tabs, Typography, List, Dialog } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { Skeleton } from '@material-ui/lab';
 import { Link } from 'react-router-dom';
-import contactClass from './contact.module.scss';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from '../../StateProvider/Provider';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import axiosInstance from './../../axios/axiosInstance';
 import {
   getObjKeysWithValues,
-  isObjectEmpty,
   sidebarResource,
   customerAccount,
   processFieldName,
@@ -24,9 +22,7 @@ import ManageContact from './ManageContact/index';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import OrgChartContainer from '../../components/OrgChart/OrgChartContainer';
 import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
-import { FcFlowChart } from 'react-icons/fc';
 import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
-import BoxWithBorder from '../../components/BoxWithBorder';
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { ListItemText } from '@material-ui/core';
@@ -39,23 +35,19 @@ import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccord
 import ProcessFlow from '../../components/ProcessFlow';
 import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import routes from '../../components/Helpers/Routes';
 import queryString from 'query-string';
 import AddReportsToContact from './AddReportsToContact';
-import { MdDelete, MdEdit } from 'react-icons/md';
+import { MdDelete } from 'react-icons/md';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import Warehouse from '../Account/Warehouse';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { AccountHierarchyIcon } from 'src/assets/svg/svgIcons';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline } = useContext(CustomOfflineContext);
-
   const {
     contact: { contactApi, contactResource, contactRoute },
-    account: { accountResource, accountApi },
+    account: { accountResource },
     contactBreadcrumb
   } = props;
   const history = useHistory();
@@ -345,66 +337,9 @@ const ContactDetailsPage = (props) => {
         setOrgChartInFullScreenDialog(true);
       },
       icon: <AccountHierarchyIcon width={23} height={23} />,
-      // icon: <TiFlowChildren />,
       show: true,
       class: 'account'
     }
-    // {
-    //   label: "Projects",
-    //   count: 0,
-    //   show: true,
-    //   icon: <FcMultipleSmartphones />,
-    //   class: "project"
-    // },
-    // {
-    //   label: "Opportunity",
-    //   count: opportunities ? opportunities.length : 0,
-    //   show: permissions?.opportunity?.isRead ?? false,
-    //   icon: <FcBinoculars />,
-    //   class: "opportunity",
-    //   onClick: () => {
-    //     history.push({
-    //       pathname: `/opportunity`,
-    //       state: {
-    //         accountId: accountData._id,
-    //         accountName: accountData.accountName,
-    //       },
-    //     });
-    //   },
-    // },
-    // {
-    //   label: "Quotes",
-    //   count: 0,
-    //   show: true,
-    //   icon: <BsChatSquareQuoteFill />,
-    //   class: "quotes"
-    // },
-    // {
-    //   label: "Accounts Teams",
-    //   count: 0,
-    //   show: true,
-    //   icon: <FcConferenceCall />,
-    //   class: "teams"
-    // },
-    // {
-    //   label: "Contacts",
-    //   count: relatedContacts ? relatedContacts.length : 0,
-    //   icon: <FcContacts />,
-    //   class: "contact",
-    //   onClick: () => {
-    //     history.push({
-    //       pathname: `/${contactRoute}`,
-    //       state: {
-    //         accountId: accountData._id,
-    //         accountName: accountData.accountName,
-    //       },
-    //     });
-    //   },
-    //   show:
-    //     permissions && permissions[contactResource]
-    //       ? permissions[contactResource].isRead
-    //       : false,
-    // },
   ].filter((d) => d.show);
 
   const handleMainPoints = (data) => {
@@ -706,7 +641,7 @@ const ContactDetailsPage = (props) => {
               >
                 <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
                 <Tab label={<div className="tab-font">Org Charts</div>} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className="tabLayout" />
-                {!isOffline && contactResource === 'customerContact' && permissions?.productInventory && (
+                { contactResource === 'customerContact' && permissions?.productInventory && (
                   <Tab label={<div className="tab-font">Plants</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
                 )}
               </Tabs>
@@ -716,7 +651,6 @@ const ContactDetailsPage = (props) => {
                 ) : (
                   <DetailsPage data={contactData} fields={filteredContactFields} />
                 )}
-                {/* <DetailsPage data={contactData} fields={contactFields} /> */}
               </Box>
               <Box hidden={currentTabIndex !== 1}>
                 <OrgChartContainer
@@ -729,7 +663,7 @@ const ContactDetailsPage = (props) => {
                   isInContact={true}
                 />
               </Box>
-              {!isOffline && contactResource === 'customerContact' && permissions?.productInventory && (
+              {contactResource === 'customerContact' && permissions?.productInventory && (
                 <Box hidden={currentTabIndex !== 2}>
                   <Warehouse reference={contactResource} api={contactApi} id={id} accountId={contactData?.accountName?.optionValue} />
                 </Box>
@@ -931,36 +865,6 @@ const ContactDetailsPage = (props) => {
         </Dialog>
       )}
       {openAdditionalDialog && (
-        // <Dialog
-        //   disableBackdropClick={true}
-        //   fullWidth
-        //   maxWidth="sm"
-        //   open={openAdditionalDialog}
-        //   onClose={() => setOpenAdditionalDialog(false)}
-        //   aria-labelledby="form-dialog-title"
-        //   fullScreen={isMobile || isTablet}
-        // >
-        //   <CustomDialogHeader
-        //     title="Additonal Information"
-        //     onClose={() => setOpenAdditionalDialog(false)}
-        //   ></CustomDialogHeader>
-        //   {sectionFields.map((item) => (
-        //     <CustomDialogContent>{item}</CustomDialogContent>
-        //   ))}
-
-        //   <CustomDialogFooter>
-        //     <Button
-        //       color="primary"
-        //       size="small"
-        //       onClick={() => setOpenAdditionalDialog(false)}
-        //     >
-        //       Close
-        //     </Button>
-        //     <Button color="primary" size="small" onClick={handleSave}>
-        //       Save
-        //     </Button>
-        //   </CustomDialogFooter>
-        // </Dialog>
         <AdditionalDialogPopUp
           open={openAdditionalDialog}
           close={() => setOpenAdditionalDialog(false)}
@@ -981,15 +885,6 @@ const ContactDetailsPage = (props) => {
         />
       ) : null}
       {openUpdateDialog && showAtLast ? (
-        // <UpdateDetailsDialog
-        //     title={`Editing  ${contactData.firstName}`}
-        //     openDialog={openUpdateDialog}
-        //     onClose={closeUpdateDialog}
-        //     data={contactData}
-        //     fields={contactFields}
-        //     isUpdating={isUpdating}
-        //     handleUpdate={handleUpdateContact}
-        // />
         <ManageContact
           isNew={false}
           open={openUpdateDialog}
@@ -1009,10 +904,8 @@ const ContactDetailsPage = (props) => {
           handleSubmit={handleUpdateContact}
           contactId={contactData._id}
           account={props?.account}
-          // contactResource={contactResource}
           accountResource={accountResource}
           contactResource={contactResource}
-          // contactApi={contactApi}
         />
       ) : openUpdateDialog ? (
         <ManageContact
@@ -1034,10 +927,8 @@ const ContactDetailsPage = (props) => {
           handleSubmit={handleUpdateContact}
           contactId={contactData._id}
           account={props?.account}
-          // contactResource={contactResource}
           accountResource={accountResource}
           contactResource={contactResource}
-          // contactApi={contactApi}
         />
       ) : null}
     </Box>

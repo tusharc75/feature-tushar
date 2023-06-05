@@ -3,7 +3,7 @@ import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flo
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { deliveryTicket, DELIVERY_TICKET_REFERENCE_TYPE, INVENTORY_STATUS, REPAIR_JOB_STATUS, COLOUR_MASTER } from 'src/constants/helpers';
+import { deliveryTicket, DELIVERY_TICKET_REFERENCE_TYPE, ASSET_STATUS, REPAIR_JOB_STATUS, COLOUR_MASTER } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -106,8 +106,8 @@ const RepairJobViews = (props) => {
           },
           position: { x: xPosition, y: index * 80 },
           style:
-            item?.status === INVENTORY_STATUS.scrap || item?.status === INVENTORY_STATUS.lost
-              ? item?.status === INVENTORY_STATUS.scrap
+            item?.status === ASSET_STATUS.scrap || item?.status === ASSET_STATUS.lost
+              ? item?.status === ASSET_STATUS.scrap
                 ? customNodeStyles.scrapAssets
                 : customNodeStyles.lostAssets
               : customNodeStyles.asset

@@ -18,7 +18,7 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_FROM_TO_TYPE,
   repairOrder,
-  INVENTORY_STATUS,
+  ASSET_STATUS,
   WORK_ORDER_STATUS
 } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';

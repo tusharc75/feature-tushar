@@ -55,8 +55,9 @@ import { IoMdDownload } from 'react-icons/io';
 import Steps, { getIndex } from 'src/components/Steps';
 
 const RentalManagementDetailsPage = () => {
+  
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline, updateOfflineGridData } = useContext(CustomOfflineContext);
+  const { isOffline } = useContext(CustomOfflineContext);
   const renderedFrom = camelCase(routes?.rentalManagement.title);
 
   const { id } = useParams();

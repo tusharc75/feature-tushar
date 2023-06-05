@@ -27,6 +27,7 @@ import { stepIconInterface } from 'src/components/Steps/icons';
 interface stepInterface extends stepIconInterface {
   name: string;
   title: string;
+  date?: Date;
 }
 
 export const staticHiddenResource = ['Dashboard', 'Report'];
@@ -1790,12 +1791,13 @@ export const arrayToDropwdownOption = (array) => {
   return option;
 };
 
-export const INVENTORY_STATUS = {
+export const ASSET_STATUS = {
   new: 'New',
   available: 'Available',
   reserved: 'Reserved',
   inSale: 'In Sale',
   inUse: 'In-Use',
+  delivered: 'Delivered',
   indTransit: 'In-Transit',
   underReview: 'Under Review',
   repair: 'Repair',

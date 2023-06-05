@@ -54,16 +54,16 @@ const CycleCountDetermination = () => {
   }, [warehouse]);
 
   const getWarehouse = () => {
-    axiosInstance()
-      .get(`/warehouse`)
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Warehouse`)
       .then(({ data: { data } }) => {
-        setWarehouseOption([...data]);
-        setWarehouse(data[0]._id);
+        setWarehouseOption([...data['Warehouse']]);
+        if (data['Warehouse']?.length) {
+          setWarehouse(data['Warehouse'][0]?.optionValue);
+        }
       });
   };
 
   const fetchGridColumns = () => {
-    let columns = [];
     let rendererNames = [];
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
@@ -189,31 +189,21 @@ const CycleCountDetermination = () => {
               <Autocomplete
                 style={{ width: '250px' }}
                 options={warehouseOption}
-                getOptionLabel={(option: any) => option?.warehouseName}
+                getOptionLabel={(option: any) => option?.optionLabel}
                 disableClearable
-                value={
-                  warehouseOption.filter((data) => data._id === warehouse).length ? warehouseOption.filter((data) => data._id === warehouse)[0] : ''
+                value={warehouseOption.filter((data) => data.optionValue === warehouse).length ?
+                  warehouseOption.filter((data) => data.optionValue === warehouse)[0] : ''
                 }
                 onChange={(e, val) => {
-                  if (val !== null) {
-                    setWarehouse(val && val._id ? val._id : '');
-                  }
-                  fetchCycleCountDetermination();
+                  setWarehouse(val && val.optionValue ? val.optionValue : null);
                 }}
                 renderInput={(params) =>
-                  isMobile && !isTablet ? (
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="plant"
-                      placeholder={routes.warehouse.title}
-                      variant="standard"
-                      fullWidth
-                      className={isMobile ? 'serchBox' : ''}
-                    />
-                  ) : (
-                    <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-                  )
+                  <TextField {...params}
+                    margin="dense"
+                    name="plant"
+                    label={routes.warehouse.title}
+                    variant="outlined"
+                    fullWidth />
                 }
               />
             </Grid>
@@ -244,13 +234,13 @@ const CycleCountDetermination = () => {
                 allowSwipe={true}
                 permissions={permissions.cycleCountDetermination}
                 primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {}}
+                onClick={(data) => { }}
                 dataRows={dataRows}
                 selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                 dispatch={dispatch}
-                onEdit={(data) => {}}
+                onEdit={(data) => { }}
                 extraParamsToCheckDelete={true}
-                onDelete={(data) => {}}
+                onDelete={(data) => { }}
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
@@ -258,7 +248,7 @@ const CycleCountDetermination = () => {
                 chips={[]}
                 onCreate={false}
                 showClone={true}
-                onClone={(data) => {}}
+                onClone={(data) => { }}
                 renderedFrom={renderedFrom}
               />
             ) : (
@@ -300,7 +290,7 @@ const CycleCountDetermination = () => {
             }}
             data={editData}
             warehouse={warehouse}
-            warehouseName={warehouseOption?.find((e) => e._id === warehouse)?.warehouseName}
+            warehouseName={warehouseOption?.find((e) => e._id === warehouse)?.optionLabel}
           />
         )}
       </CustomContainer>

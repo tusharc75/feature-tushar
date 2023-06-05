@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { Formik, Form, FieldArray } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { dateFormatForInputControl, productInventory, purchaseOrder, sidebarResource } from '../../../constants/helpers';
+import { convertDateInDateTime, dateFormatForInputControl, productInventory, purchaseOrder, sidebarResource } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
 import DateUtils from '@date-io/date-fns';
@@ -329,7 +329,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                           }
                           maxDate={new Date()}
                           onChange={(value) => {
-                            setFieldValue('rejectDate', value);
+                            setFieldValue('rejectDate', convertDateInDateTime(value));
                           }}
                         />
                       </Box>

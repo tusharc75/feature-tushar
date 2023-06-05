@@ -14,7 +14,7 @@ import {
   repairJob,
   REPAIR_JOB_STATUS,
   deliveryTicket,
-  INVENTORY_STATUS,
+  ASSET_STATUS,
   serializedAsset,
   DELIVERY_TICKET_TYPE,
   DELIVERY_FROM_TO_TYPE,
@@ -130,7 +130,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
           finalObject['canDelete'] = false;
           finalObject['isChecked'] = false;
           finalObject['allowedToEdit'] = finalObject?.repairTypeId ? true : false;
-          finalObject['hideSelection'] = [INVENTORY_STATUS.lost].includes(u.status);
+          finalObject['hideSelection'] = [ASSET_STATUS.lost].includes(u.status);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: rows.length });
@@ -163,7 +163,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         <HtmlTooltip title="Repaired">
           <CheckCircleIcon color="primary" fontSize="small" />
         </HtmlTooltip>
-      ) : ![INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].includes(params.data?.status) &&
+      ) : ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(params.data?.status) &&
         params.data?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
         !params?.data?.repairTypeId ? (
         <HtmlTooltip title="Repair Asset">
@@ -348,7 +348,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 size="small"
                 disabled={
                   selectedRecords.length === 0 ||
-                  selectedRecords.some((s) => s.repaired === true || s.repairTypeId || [INVENTORY_STATUS.scrap].includes(s.status)) ||
+                  selectedRecords.some((s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
                   checkUniqcurrentOwnerType()
                 }
                 onClick={() => {
@@ -475,7 +475,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
               renderedFrom={renderedFrom}
               rowClassRules={{
                 'red-data-row': function (params) {
-                  return [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].some((s) => s === params.data.status);
+                  return [ASSET_STATUS.lost, ASSET_STATUS.scrap].some((s) => s === params.data.status);
                 }
               }}
               isClientSideGrid={true}

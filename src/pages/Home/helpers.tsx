@@ -60,14 +60,14 @@ export const assignIconAndText = (groupedData) => {
 
 // CHECK SECTION NAME AND RETURN ICON, COLOR, AND DESCRIPTION
 export const setDataBySectionName = (secName, index = 0) => {
-  const colorAccessor = index % colourCodes.length;
-  const iconColour = colourCodes[colorAccessor]?.icon || ['#FFA800', '#E35200'];
+  const colorAccessor = getColors(index);
+  const iconColour = colorAccessor.icon || ['#FFA800', '#E35200'];
 
   let icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   let text = '';
   let sideBarIcon = <FaReact size={20} />;
   const color = '#ffffff';
-  const gradient = colourCodes[colorAccessor]?.gradient || ['#FFA800', '#E35200'];
+  const gradient = colorAccessor.gradient || ['#FFA800', '#E35200'];
 
   if (['CRM +', 'Sales Management'].includes(secName)) {
     text = 'Convert leads and close sales deals faster.';
@@ -152,41 +152,54 @@ const colourCodes = [
   {
     main: '#FFEFEE',
     icon: ['#FC5757', '#C60707'],
+    iconGradient: ['#FC5757', '#C60707', '#FC5757'],
     gradient: ['#FC5757', '#C60707']
   },
   {
     main: '#F3F8FF',
     icon: ['#68C82E', '#03640D'],
+    iconGradient: ['#68C82E', '#03640D', '#68C82E'],
     gradient: ['#68C82E', '#03640D']
   },
   {
     main: '#FFF7F2',
     icon: ['#FFA800', '#E35200'],
+    iconGradient: ['#FFA800', '#E35200', '#FFA800'],
     gradient: ['#FFA800', '#E35200']
   },
   {
     main: '#F9FDEC',
     icon: ['#577BFC', '#1608BD'],
+    iconGradient: ['#577BFC', '#1608BD', '#577BFC'],
     gradient: ['#577BFC', '#1608BD']
   },
   {
     main: '#FFFAEC',
     icon: ['#FAC94B', '#FF9B04'],
+    iconGradient: ['#FAC94B', '#FF9B04', '#FAC94B'],
     gradient: ['#FAC94B', '#FF9B04']
   },
   {
     main: '#F6F1FF',
     icon: ['#AD14F5', '#6203AC'],
+    iconGradient: ['#AD14F5', '#6203AC', '#AD14F5'],
     gradient: ['#AD14F5', '#6203AC']
   },
   {
     main: '#FFFAEC',
     icon: ['#68C82E', '#03640D'],
+    iconGradient: ['#68C82E', '#03640D', '#68C82E'],
     gradient: ['#68C82E', '#03640D']
   },
   {
     main: '#F6F1FF',
     icon: ['#EC3F7D', '#FF0550'],
+    iconGradient: ['#EC3F7D', '#FF0550', '#EC3F7D'],
     gradient: ['#EC3F7D', '#FF0550']
   }
 ];
+
+export const getColors = (index: number) => {
+  const colorAccessor = index % colourCodes.length;
+  return colourCodes[colorAccessor];
+};

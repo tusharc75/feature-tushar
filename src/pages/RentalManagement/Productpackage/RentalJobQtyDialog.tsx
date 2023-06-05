@@ -60,6 +60,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   isInlineEdit = false,
   showSaveAndNext = false
 }) => {
+  const ref = useRef(null);
+
   const toastConfig = useContext(CustomToastContext);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -72,7 +74,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [fetchingData, setFetchingData] = useState(false);
-  const ref = useRef(null);
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
@@ -82,14 +83,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const fetchTaxRate = async (zipcode: any) => {
     try {
       const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode/${zipcode}`);
-      const datas = response?.data?.data?.map((item: any) => {
-        return {
-          optionLabel: item?.taxCode,
-          optionValue: item?._id,
-          taxRate: item?.taxRate
-        };
-      });
-      return datas || [];
+      return response?.data?.data || [];
     } catch (e) {
       toastConfig.setToastConfig(e);
     }
@@ -228,7 +222,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    if (rentalManagementData?.billingAddress?.zipCode) {
+    if (rentalManagementData?.customerAccount?.taxApplicable && rentalManagementData?.billingAddress?.zipCode) {
       const taxCodeOptions = await fetchTaxRate(rentalManagementData?.billingAddress?.zipCode);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
@@ -527,8 +521,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             field.fieldName === 'pricingMethod' && priceConditionList && values['pricingCondition']
                                               ? priceMethodList
                                               : field.fieldName === 'pricingCondition' && values['pricingMethod']
-                                              ? priceConditionList
-                                              : field.option
+                                                ? priceConditionList
+                                                : field.option
                                           }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
