@@ -9,12 +9,14 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import moment from 'moment';
 import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const Approver = ({ irtTicketData }) => {
   const [approver, setAapprover] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const [selected, setSelected] = useState(null);
+  const [theme] = useAppTheme();
 
   useEffect(() => {
     fetchData();
@@ -76,13 +78,19 @@ const Approver = ({ irtTicketData }) => {
                       borderStyle: 'solid',
                       backgroundColor:
                         item.status === IRT_APPROVER_STATUS.send
-                          ? '#E2F8FF'
+                          ? theme === 'light'
+                            ? 'hsl(194, 100%, 94%)'
+                            : 'hsla(194, 100%, 64%, .5)'
                           : item.status === IRT_APPROVER_STATUS.approved
-                          ? '#EDFFE1'
+                          ? theme === 'light'
+                            ? 'hsl(96, 100%, 94%)'
+                            : 'hsla(96, 100%, 64%, .5)'
                           : item.status === IRT_APPROVER_STATUS.declined
-                          ? '#FFEAEA'
+                          ? theme === 'light'
+                            ? 'hsl(0, 100%, 96%)'
+                            : 'hsla(0, 100%, 66%, .5)'
                           : 'white',
-                      borderColor: selected?._id === item?._id ? '#329592' : 'rgb(224, 224, 224)',
+                      borderColor: selected?._id === item?._id ? 'var(--dark-active-border-color, #329592)' : 'var(--common-border-color)',
                       cursor: 'pointer',
                       transition: '.3s'
                     }}
@@ -137,7 +145,7 @@ const Approver = ({ irtTicketData }) => {
               style={{
                 borderWidth: '1px',
                 borderStyle: 'solid',
-                borderColor: 'rgb(224, 224, 224)',
+                borderColor: 'var(--common-border-color)',
                 marginTop: '47px'
               }}
             >
@@ -146,19 +154,19 @@ const Approver = ({ irtTicketData }) => {
                   {index !== 0 && (
                     <>
                       <br />
-                      <div style={{ height: '1px', width: '100%', background: 'rgb(224, 224, 224)' }} />
+                      <div style={{ height: '1px', width: '100%', background: 'var(--common-border-color)' }} />
                       <br />
                     </>
                   )}
 
-                  <Typography variant="body1" style={{ fontWeight: '600' }}>
+                  <Typography variant="body1" style={{ fontWeight: '600', color: 'var(--dark-primary-text, #3e3e3e)' }}>
                     {item?.detail}
                   </Typography>
-                  <Typography variant="body2" style={{ fontSize: '12px', marginBottom: '6px', color: 'gray' }}>
+                  <Typography variant="body2" style={{ fontSize: '12px', marginBottom: '6px', color: 'var(--dark-secondary-text, gray)' }}>
                     {moment(item?.date).format('MMM DD YYYY hh:mm A')}
                   </Typography>
                   {item?.reason && (
-                    <Typography variant="body2" style={{ color: '#3e3e3e' }}>
+                    <Typography variant="body2" style={{ color: 'var(--dark-secondary-text, #3e3e3e)' }}>
                       {item?.reason}
                     </Typography>
                   )}
