@@ -231,11 +231,11 @@ const RoadMap = () => {
           </Box>
         </Box>
       </Box>
-      <Box bgcolor="white" pt={2}>
+      <Box pt={2}>
         <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
           <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
             <Box minWidth={300} border={1} borderColor="var(--common-border-color)" style={{ position: 'relative', overflow: 'hidden' }}>
-              <Box height={60} bgcolor="grey.200" display="flex" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+              <Box height={60} bgcolor="var(--dark-secondary, grey.200)" display="flex" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
                 <Box p={2} display="flex" alignItems="center">
                   <Typography variant="body1" display="block">
                     Products
@@ -297,7 +297,7 @@ const RoadMap = () => {
                           position: 'absolute',
                           left: day * dayPixel,
                           width: dayPixel,
-                          background: day % 2 === 0 ? '#f8fffe' : 'white'
+                          background: day % 2 === 0 ? 'var(--dark-primary-light, #f8fffe)' : 'var(--dark-secondary, white)'
                         }}
                       ></Box>
                     );
@@ -311,7 +311,7 @@ const RoadMap = () => {
                       width: dayPixel
                     }}
                   >
-                    <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="secondary.main" height={'100%'}></Box>
+                    <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="var(--common-border-color)" height={'100%'}></Box>
                   </Box>
                 </div>
               </Box>
