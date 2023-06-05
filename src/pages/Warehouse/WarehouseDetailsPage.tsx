@@ -17,6 +17,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import StorageLocation from './StorageLocation';
+import Users from './Users';
 
 const WarehouseDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -155,6 +156,7 @@ const WarehouseDetailsPage = () => {
               className={'tabLayout'}
             />
           )}
+          <Tab label={<div className="tab-font">Users</div>} value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className={'tabLayout'} />
         </Tabs>
         {tabValue === 0 && (
           <Box>
@@ -168,6 +170,7 @@ const WarehouseDetailsPage = () => {
           </Box>
         )}
         {tabValue === 1 && <StorageLocation warehouse={id} />}
+        {tabValue === 2 && <Users warehouse={id} />}
       </Box>
       {openUpdateDialog && (
         <ManageWarehouse
