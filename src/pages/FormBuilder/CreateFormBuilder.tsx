@@ -327,10 +327,10 @@ const CreateFormBuilder = () => {
             <Fragment>
               <Box p={1} pb={0} ml={1}>
                 <Grid container spacing={1}>
-                  <Grid item xs={2}>
+                  {/* <Grid item xs={2}>
                     <Typography variant="caption">Resource</Typography>
                     <Typography variant="body1">{resource}</Typography>
-                  </Grid>
+                  </Grid> */}
                   <Grid item xs={3}>
                     <TextField
                       variant="outlined"
@@ -360,7 +360,7 @@ const CreateFormBuilder = () => {
                       }}
                     />
                   </Grid>
-                  <Grid item xs={2}>
+                  <Grid item xs={3}>
                     <Autocomplete
                       id="section-name"
                       freeSolo
@@ -374,7 +374,7 @@ const CreateFormBuilder = () => {
                       }}
                     />
                   </Grid>
-                  <Grid item xs={2} container justifyContent="flex-end">
+                  <Grid item xs={3} container justifyContent="flex-end">
                     <Box>
                       {formBuilderPermissions.isUpdate && (
                         <Button

@@ -30,7 +30,7 @@ const FormBuilder = () => {
   const columns = [
     { field: 'resourceLabel', headerName: 'Resource Label', show: true, disabled: true, cellRenderer: 'resourceRenderer' },
     { field: 'homePageLabel', headerName: 'Home Page Label', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'resource', headerName: 'Resource', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    //{ field: 'resource', headerName: 'Resource', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     {
       field: 'section',
       headerName: 'Section',
