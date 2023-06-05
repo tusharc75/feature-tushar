@@ -19,7 +19,6 @@ function FieldDependent({ fields, values, fieldSet }) {
       setResourceFields(res.data.data);
       setResourceFieldsLoading(false);
     } catch (e) {
-      console.log(e);
       setResourceFieldsLoading(false);
     }
   };
