@@ -161,7 +161,7 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
 
   return (
     <Fragment>
-      <InvoiceFacility invoiceData={invoiceData} />
+      <InvoiceFacility invoiceData={invoiceData} columns={columns} />
       <Grid item xs={12} md={12} sm={12}>
         {columns && rowsData ? (
           <>

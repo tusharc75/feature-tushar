@@ -2,7 +2,7 @@ import Box from '@material-ui/core/Box/Box';
 import { useState, useContext } from 'react';
 import { Button, Dialog, Menu, MenuItem } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, invoice } from '../../../constants/helpers';
+import { CustomDialogTransition, RESOURCE_LABEL, invoice } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
@@ -10,8 +10,9 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { MdEmail } from 'react-icons/all';
 import { IoMdDownload } from 'react-icons/io';
+import PreviewDownload from 'src/components/PreviewDownload';
 
-const InvoiceFacility = ({ invoiceData }) => {
+const InvoiceFacility = ({ invoiceData, columns }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -124,22 +125,23 @@ const InvoiceFacility = ({ invoiceData }) => {
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center" flexWrap={'wrap'} gridGap={8}>
           {permissions?.invoice?.isRead && (
-            <Button
-              variant="outlined"
-              color="primary"
-              type="button"
-              size="small"
-              disabled={downlodingFile === 'Preview' ? true : false}
-              startIcon={isMobile ? '' : <AiFillFilePdf />}
-              onClick={(e) => {
-                setDownlodingFile('Preview');
-                handleClick(e);
-              }}
-            >
-              {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === 'Preview' ? 'Please wait...' : 'Preview'}
-            </Button>
+            <PreviewDownload resource={RESOURCE_LABEL.invoice} referenceId={invoiceData?._id} columns={columns} />
+            // <Button
+            //   variant="outlined"
+            //   color="primary"
+            //   type="button"
+            //   size="small"
+            //   disabled={downlodingFile === 'Preview' ? true : false}
+            //   startIcon={isMobile ? '' : <AiFillFilePdf />}
+            //   onClick={(e) => {
+            //     setDownlodingFile('Preview');
+            //     handleClick(e);
+            //   }}
+            // >
+            //   {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === 'Preview' ? 'Please wait...' : 'Preview'}
+            // </Button>
           )}
-          {permissions?.invoice?.isRead && (
+          {/* {permissions?.invoice?.isRead && (
             <Button
               variant="outlined"
               color="primary"
@@ -154,7 +156,7 @@ const InvoiceFacility = ({ invoiceData }) => {
             >
               {isMobile && !isTablet ? <IoMdDownload size={22} /> : downlodingFile === 'Download' ? 'Please wait...' : 'Download'}
             </Button>
-          )}
+          )} */}
           <Menu
             id="simple-menu"
             anchorEl={anchorEl}
