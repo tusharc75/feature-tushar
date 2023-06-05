@@ -451,8 +451,11 @@ const LoadingTicket = ({
     { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
   ];
+  
+  if (findHeader(columnHeader?.assetFields, 'mtrAttached')) {
+    columns.push({ field: 'mtrAttached', headerName: 'MTR Attached', show: true, cellRenderer: 'commonRenderer' })
+  }
 
-  columns.push({ field: 'mtrAttached', headerName: 'MTR Attached', show: true, cellRenderer: 'commonRenderer' })
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
