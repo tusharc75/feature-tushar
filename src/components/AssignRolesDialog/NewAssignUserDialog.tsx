@@ -16,7 +16,8 @@ import { camelCase } from 'lodash';
 
 let searchTimeout;
 
-export default function AssignUserDialog({ reference, handleClose, onSuccess, assignedUser = [] }) {
+export default function AssignUserDialog({ reference, isAssigning, handleClose, onSuccess, ignoreUsers = [] }) {
+
     const renderedFrom = camelCase(`${routes.user.title}_${reference}`);
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -27,13 +28,10 @@ export default function AssignUserDialog({ reference, handleClose, onSuccess, as
     const toastConfig = useContext(CustomToastContext);
 
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
     const [columns, setColumns] = useState([]);
     const [frameWorkComponent, setFrameWorkComponent] = useState(null);
     const [gridApi, setGridApi] = useState(null);
-    const [isAssigning, setIsAssigning] = useState(false);
-    const [renderCount, setRenderCount] = useState(0)
-    const [disableSaveButton, setDisableSaveButton] = useState(true)
 
     const { getColumnData } = useColumns();
 
@@ -67,60 +65,36 @@ export default function AssignUserDialog({ reference, handleClose, onSuccess, as
             });
     };
 
-    useEffect(() => {
-        selectedRecords.forEach(rec => {
-            if (assignedUser.includes(rec._id)) {
-                setDisableSaveButton(true)
-            } else {
-                setDisableSaveButton(false)
-            }
-        })
-    }, [selectedRecords]);
-
     const fetchData = () => {
         dispatch({ type: 'loading', loading: true });
         if (gridApi) {
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance()
-            .get(`/user${queryString}`)
-            .then(({ data }) => {
-                let rows = data.data.map((u) => {
-                    let finalObject = prepareDataForGrid(u);
-                    finalObject['isChecked'] = false;
-                    finalObject['id'] = u._id;
-                    return {
-                        ...finalObject
-                    };
-                });
-
-                if (renderCount === 0) {
-                    const selectedRecords = rows.filter((_row: any) => assignedUser.includes(_row.id))
-                    localStorage.setItem(localStorageSelectedRecords, JSON.stringify(selectedRecords))
-                    setRenderCount(renderCount + 1)
-                } else {
-                    setRenderCount(renderCount + 1)
-                }
-
-                const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-
-                dispatch({
-                    type: 'selection',
-                    selectedRecords: savedRecords
-                });
-                dispatch({ type: 'initialize', data: rows, count: data.count });
-                setTimeout(() => {
-                    dispatch({ type: 'loading', loading: false });
-                }, gridLoadingTimeout);
-            })
+        axiosInstance().get(`/user${queryString}`).then(({ data }) => {
+            let rows = data.data.map((u) => {
+                let finalObject = prepareDataForGrid(u);
+                finalObject['isChecked'] = false;
+                finalObject['id'] = u._id;
+                return {
+                    ...finalObject
+                };
+            });
+            dispatch({ type: 'initialize', data: rows, count: data.count });
+            setTimeout(() => {
+                dispatch({ type: 'loading', loading: false });
+            }, gridLoadingTimeout);
+        })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
             });
     };
 
     const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}`;
+
+        const ignoreIds = ignoreUsers && ignoreUsers?.length > 0 ? ignoreUsers : [];
+        let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
+
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
         }
@@ -183,13 +157,12 @@ export default function AssignUserDialog({ reference, handleClose, onSuccess, as
                         <div className="header-panel">
                             <Grid container className={styles.filter_side_container}>
                                 <Grid item xs={6} className="d-flex align-items-center gap-1">
-
                                 </Grid>
                                 <Grid item xs={6} className={styles.filter_side}>
                                     <Box className={styles.filter_side_header} component="div">
                                         <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
                                         <Button
-                                            disabled={disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
+                                            disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                                             onClick={handleSubmit}
                                             color="primary"
                                             size="small"
