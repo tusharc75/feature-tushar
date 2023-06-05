@@ -145,7 +145,9 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
             if (isClone) {
               fields = fieldsDataForCreate;
               const { planningNumber, ...rest } = data;
-              rest.planningNumber = `PLO_${generateUniqueIdOnly()}`;
+              if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
+                rest.planningNumber = `PLO_${generateUniqueIdOnly()}`;
+              }
               setCloneHeading(planningNumber);
               tempData = rest;
             }
@@ -159,7 +161,9 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
           });
       } else {
         const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
-        tempInitialData['planningNumber'] = `PLO_${generateUniqueIdOnly()}`;
+        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
+          tempInitialData['planningNumber'] = `PLO_${generateUniqueIdOnly()}`;
+        }
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           tempInitialData['currency'] = user.user?.brandCurrency;
         }

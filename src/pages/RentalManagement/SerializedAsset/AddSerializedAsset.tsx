@@ -332,10 +332,10 @@ const AddSerializedAsset = ({
   const checkUniqRentalJob = () => {
     if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0) {
       return true;
-    } else if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), 'loadingTicket.rentalJob.optionLabel')).length === 1) {
-      return false;
+      // } else if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), 'loadingTicket.rentalJob.optionLabel')).length === 1) {
+      //   return false;
     } else {
-      return true;
+      return false;
     }
   };
 
@@ -401,7 +401,7 @@ const AddSerializedAsset = ({
         }
       }
     });
-    
+
     if (assetsAdd?.length === 0) {
       return
     }
@@ -448,6 +448,38 @@ const AddSerializedAsset = ({
         }).catch((error) => {
           toastConfig.setToastConfig(error);
         });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+  const handleAutoTransferAssets = () => {
+
+    const assetsAdd: any = []
+    const assets = [...getLocalStorageArrayData(`${localStorageSelectedRecords}`)];
+
+    selectedProducts?.forEach((e: any) => {
+      if (e.type === 'product') {
+        let qty = e.realAssetQty - e.realAssetAssignedQty;
+        while (qty) {
+          const result = assets.filter((f) => f.productId === e.materialId && !f.isCounted);
+          if (result.length) {
+            let obj: any = {};
+            obj._id = e._id;
+            obj.product = e.materialId;
+            obj.asset = result[0]._id;
+            obj.rentalJob = result[0].loadingTicket?.rentalJob?.optionValue;
+            assetsAdd.push(obj);
+            result[0].isCounted = true;
+          }
+          qty--;
+        }
+      }
+    });
+
+    axiosInstance().post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, { "assets": assetsAdd, rentalJob: referenceData?._id })
+      .then(({ data }) => {
+        handleSuccess()
       }).catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -647,7 +679,7 @@ const AddSerializedAsset = ({
                           color="primary"
                           size="small"
                           onClick={() => {
-                            handleTicketDialog()
+                            handleAutoTransferAssets()
                           }}
                           variant={isMobile && !isTablet ? 'text' : 'contained'}
                           disabled={isAdding || checkUniqRentalJob()}
@@ -696,12 +728,12 @@ const AddSerializedAsset = ({
                         {...a11yProps(1)}
                       />
                     )}
-                    {/* <Tab
+                    <Tab
                       className={'tabLayout'}
                       value={2}
                       label={<div className="d-flex align-items-center tab-font">In Use Assets</div>}
                       {...a11yProps(2)}
-                    /> */}
+                    />
                   </Tabs>
                 </Grid>
               </Grid>
