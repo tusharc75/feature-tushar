@@ -443,6 +443,28 @@ const SerializedAsset = () => {
     setAnchorEl(null);
   };
 
+  const handleStatusMTRAttached = (status: boolean) => {
+    const _ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => d?._id);
+    axiosInstance().post(`${serializedAsset.api}/update-bulk-data`, {
+      _ids, mtrAttached: status
+    })
+      .then(() => {
+        if (gridApi) {
+          gridApi.deselectAll();
+        }
+        localStorage.removeItem(localStorageSelectedRecords);
+        fetchProductInventory();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `MTR Attached`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -761,7 +783,28 @@ const SerializedAsset = () => {
                             {`Status Change - ${ASSET_STATUS.lost}`}
                           </MenuItem>
                         </>
-                      )}
+                      )
+                    }
+                    {columns?.some(_field => _field.field === "mtrAttached") &&
+                      <>
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleStatusMTRAttached(true)
+                          }}
+                        >
+                          MTR Attach - Yes
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleStatusMTRAttached(false)
+                          }}
+                        >
+                          MTR Attach - No
+                        </MenuItem>
+                      </>
+                    }
                   </Menu>
                 </Box>
               </Box>
