@@ -77,9 +77,9 @@ const SerializedAssetDetailsPage = () => {
     <>
       {params.value ? (
         params.data.type === 'Loading Ticket' ||
-        params.data.type === 'Receiving Ticket' ||
-        params.data.type === 'Return Ticket' ||
-        params.data.type === 'Delivery Ticket' ? (
+          params.data.type === 'Receiving Ticket' ||
+          params.data.type === 'Return Ticket' ||
+          params.data.type === 'Delivery Ticket' ? (
           <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link>
@@ -304,7 +304,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: productInventoryData.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -360,16 +360,13 @@ const SerializedAssetDetailsPage = () => {
   }, [productInventoryData]);
 
   const handleMTRAttached = (status: boolean) => {
-    axiosInstance().post(`${serializedAsset.api}/update-bulk-data`, {
-      _ids: [id],
-      mtrAttached: status
-    })
-      .then(() => {
+    axiosInstance().post(`${serializedAsset.api}/update-bulk-data`, { _ids: [id], mtrAttached: status })
+      .then(({ data }) => {
         fetchProductInventoryData()
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `MTR Attached`
+          message: data.message
         });
       })
       .catch((error) => {
@@ -389,32 +386,32 @@ const SerializedAssetDetailsPage = () => {
               <>
                 {permissions?.serializedAsset?.isUpdate && productInventoryData.active && (
                   <>
-                    {
-                      productInventoryFields?.some(field => field?.fieldData?.fieldName === "mtrAttached") && (
-                        <>
-                          {
-                            productInventoryData?.mtrAttached
-                              ?
-                              <HtmlTooltip title={'MTR Attached'}>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => {
-                                    handleMTRAttached(false)
-                                  }}
-                                >
-                                  <FcApproval size={30} />
-                                </IconButton>
-                              </HtmlTooltip>
-                              :
-                              <Button variant="outlined" color="default" size="small" onClick={() => {
-                                handleMTRAttached(true)
-                              }}>
-                                MTR Attach
-                              </Button>
-                          }
-                        </>
-                      )
-                    }
+                    {productInventoryFields?.some(field => field?.fieldData?.fieldName === "mtrAttached") && (
+                      <>
+                        {productInventoryData?.mtrAttached ?
+                          <HtmlTooltip title={'MTR Attached'}>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                handleMTRAttached(false)
+                              }}
+                            >
+                              <FcApproval size={25} />
+                            </IconButton>
+                          </HtmlTooltip>
+                          :
+                          <Button
+                            variant="outlined"
+                            color="default"
+                            size="small"
+                            onClick={() => {
+                              handleMTRAttached(true)
+                            }}>
+                            MTR Attach
+                          </Button>
+                        }
+                      </>
+                    )}
                     {permissions?.repairJob?.isCreate &&
                       productInventoryData?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
                       [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(

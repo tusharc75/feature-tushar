@@ -17,7 +17,6 @@ import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
   serializedAsset,
-  isObjectEmpty,
   gridLoadingTimeout,
   product,
   warehouse as warehouseHelper,
@@ -47,9 +46,13 @@ import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
+import { FcApproval } from 'react-icons/fc';
 
 const SerializedAsset = () => {
+
   const renderedFrom = camelCase(routes?.serializedAsset.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const toastConfig = useContext(CustomToastContext);
   const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -61,8 +64,6 @@ const SerializedAsset = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productFilterList, setProductFilterList] = useState([]);
   const [productCategory, setProductCategory] = useState(null);
@@ -71,8 +72,6 @@ const SerializedAsset = () => {
   const [plantOptions, setPlantOptions] = useState([]);
   const [selectedPlant, setSelectedPlant] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
-  const [isNonSerializedAsset, setNonSerializedAsset] = useState(false);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
     state: { permissions }
@@ -111,7 +110,6 @@ const SerializedAsset = () => {
     productCategory,
     productFilter,
     subleaseAsset,
-    isNonSerializedAsset,
     showFilteredRecordsOnly
   ]);
 
@@ -232,8 +230,6 @@ const SerializedAsset = () => {
             ...finalObject
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data.data);
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -249,7 +245,6 @@ const SerializedAsset = () => {
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-        // dispatch({ type: "initialize", data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -297,7 +292,7 @@ const SerializedAsset = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -308,11 +303,6 @@ const SerializedAsset = () => {
       deepFilter = `${deepFilter}&subleaseAsset=1`;
     } else {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
-    }
-    if (isNonSerializedAsset) {
-      deepFilter = `${deepFilter}&isNonSerializedAsset=1`;
-    } else {
-      deepFilter = `${deepFilter}&isNonSerializedAsset=0`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
@@ -389,6 +379,15 @@ const SerializedAsset = () => {
 
   const ActionsRenderer = (params) => (
     <>
+      {params.data?.mtrAttached &&
+        <Box>
+          <HtmlTooltip title={'MTR Attached'}>
+            <Box pt={1} pr={1}>
+              <FcApproval size={25} />
+            </Box>
+          </HtmlTooltip>
+        </Box>
+      }
       {permissions?.serializedAsset?.isCreate ? (
         <HtmlTooltip title="Clone">
           <IconButton
@@ -443,21 +442,16 @@ const SerializedAsset = () => {
     setAnchorEl(null);
   };
 
-  const handleStatusMTRAttached = (status: boolean) => {
+  const handleMTRAttached = (status: boolean) => {
     const _ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => d?._id);
-    axiosInstance().post(`${serializedAsset.api}/update-bulk-data`, {
-      _ids, mtrAttached: status
-    })
-      .then(() => {
-        if (gridApi) {
-          gridApi.deselectAll();
-        }
+    axiosInstance().post(`${serializedAsset.api}/update-bulk-data`, { _ids, mtrAttached: status })
+      .then(({ data }) => {
         localStorage.removeItem(localStorageSelectedRecords);
         fetchProductInventory();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `MTR Attached`
+          message: data.message
         });
       })
       .catch((error) => {
@@ -785,12 +779,12 @@ const SerializedAsset = () => {
                         </>
                       )
                     }
-                    {columns?.some(_field => _field.field === "mtrAttached") &&
+                    {columns?.some(e => e.field === "mtrAttached") &&
                       <>
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusMTRAttached(true)
+                            handleMTRAttached(true)
                           }}
                         >
                           MTR Attach - Yes
@@ -798,7 +792,7 @@ const SerializedAsset = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusMTRAttached(false)
+                            handleMTRAttached(false)
                           }}
                         >
                           MTR Attach - No
@@ -928,9 +922,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
