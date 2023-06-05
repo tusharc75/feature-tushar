@@ -3,23 +3,25 @@ import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core
 import { ExpandMore } from '@material-ui/icons';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import { camelCase } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import AssignUserDialog from 'src/components/AssignRolesDialog/NewAssignUserDialog';
 
 const Users = ({ warehouse }) => {
-    let renderedFrom = camelCase(routes.user.title);
+
+    let renderedFrom = `${camelCase(routes.user.title)}_warehouse_master`;
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
     const toastConfig = useContext(CustomToastContext);
+
     const [openDialog, setOpenDialog] = useState(false);
     const [anchorActionEl, setAnchorActionEl] = useState(null);
     const [deleteRecord, setDeleteRecord] = useState(null);
@@ -28,12 +30,14 @@ const Users = ({ warehouse }) => {
         state: { user, permissions, selectedEntity }
     }: any = useData();
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
-        state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const [gridApi, setGridApi] = useState(null);
     const [columns, setColumns] = useState([]);
     const [frameWorkComponent, setFrameWorkComponent] = useState({});
     const { getColumnData } = useColumns();
+
+    const [isAssigning, setIsAssigning] = useState(false);
+
 
     useEffect(() => {
         localStorage.removeItem(localStorageSelectedRecords);
@@ -75,23 +79,20 @@ const Users = ({ warehouse }) => {
         if (gridApi) {
             gridApi.setRowData([]);
         }
-        const queryString = getQueryString();
         axiosInstance()
-            .get(`${routes.warehouse.path}/user/${warehouse}${queryString}`)
+            .get(`${routes.warehouse.path}/user/${warehouse}`)
             .then(({ data: { data } }) => {
-                let rows = data?.data?.map((u) => {
+                let rows = data?.map((u) => {
                     let finalObject = prepareDataForGrid(u);
-                    finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
-                    finalObject['allowedToEdit'] = permissions?.storageLocation?.isUpdate;
-                    finalObject['canDelete'] = permissions?.storageLocation?.isDelete;
+                    finalObject['isChecked'] = getLocalStorageArrayData(localStorageSelectedRecords)?.some((s) => s._id === u._id);
+                    finalObject['allowedToEdit'] = permissions?.warehouse?.isUpdate;
+                    finalObject['canDelete'] = permissions?.warehouse?.isUpdate;
                     let res = {
                         ...finalObject
                     };
                     return res;
                 });
-
-                dispatch({ type: 'initialize', data: rows, count: data?.count });
-
+                dispatch({ type: 'initialize', data: rows, count: rows?.length });
                 setTimeout(() => {
                     dispatch({ type: 'loading', loading: false });
                 }, gridLoadingTimeout);
@@ -102,43 +103,15 @@ const Users = ({ warehouse }) => {
             });
     };
 
-    const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}`;
-
-        const updatedFilters = [];
-        if (!isObjectEmpty(filters)) {
-            Object.keys(filters).forEach((field) => {
-                updatedFilters.push({
-                    field: replaceFieldName(field),
-                    term: filters[field].filter
-                });
-            });
-        }
-        if (updatedFilters?.length) {
-            deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
-        }
-        if (sorting.length > 0) {
-            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-        }
-        if (search) {
-            deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
-        }
-        if (showFilteredRecordsOnly) {
-            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
-        }
-        return deepFilter;
-    };
-
     const handleDelete = () => {
         axiosInstance()
             .put(`${routes.warehouse.path}/user/remove`, { warehouse, user: deleteRecord })
             .then(() => {
+                localStorage.removeItem(localStorageSelectedRecords);
                 fetchData();
                 setShowDeleteConfirmBox(false);
                 setDeleteRecord(null);
                 setAnchorActionEl(null);
-                localStorage.removeItem(localStorageSelectedRecords);
             })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -168,31 +141,18 @@ const Users = ({ warehouse }) => {
         setAnchorActionEl(null);
     };
 
-    const replaceFieldName = (field) => {
-        switch (field) {
-            case 'createdBy':
-                return 'createdBy.user.concatedName';
-            case 'updatedBy':
-                return 'updatedBy.user.concatedName';
-            default:
-                return field;
-        }
-    };
-
     const handleAssignUser = (data) => {
-
-        const user = data?.map(_user => _user?._id)
-        axiosInstance().post(`${routes.warehouse.path}/user/assign`, {
-            warehouse: warehouse,
-            user
-        }).then((res) => {
+        setIsAssigning(true)
+        const user = data?.map(e => e?._id)
+        axiosInstance().post(`${routes.warehouse.path}/user/assign`, { warehouse: warehouse, user }).then((res) => {
+            localStorage.removeItem(localStorageSelectedRecords);
             fetchData();
+            setOpenDialog(false);
+            setIsAssigning(false)
         }).catch((error) => {
             toastConfig.setToastConfig(error);
-            fetchData();
+            setIsAssigning(false)
         })
-
-        localStorage.removeItem(`${renderedFrom}Warehouse_selected`);
     }
 
     return (
@@ -208,7 +168,7 @@ const Users = ({ warehouse }) => {
                                 setOpenDialog(true);
                             }}
                         >
-                            Assign User
+                            Assign Users
                         </Button>
                     </Grid>
                     <Grid item xs={9} md={9} sm={9}>
@@ -265,7 +225,9 @@ const Users = ({ warehouse }) => {
                     loading={loading}
                     renderedFrom={renderedFrom}
                     refreshGrid={fetchData}
-                    showOnlyShowFilteredRecordSwitch={true}
+                    allowAction={permissions?.warehouse?.isUpdate}
+                    isClientSideGrid={true}
+                    showOnlyShowFilteredRecordSwitch={false}
                 />
             ) : (
                 <Box p={2} height={500}>
@@ -276,20 +238,19 @@ const Users = ({ warehouse }) => {
                 <AssignUserDialog
                     handleClose={() => {
                         setOpenDialog(false)
-                        localStorage.removeItem(`${renderedFrom}Warehouse_selected`);
                     }}
                     onSuccess={(data) => {
                         handleAssignUser(data)
-                        setOpenDialog(false);
                     }}
                     reference={'warehouse'}
-                    assignedUser={dataRows.map(data => data?._id)}
+                    isAssigning={isAssigning}
+                    ignoreUsers={dataRows?.map(e => e?._id) || []}
                 />
             )}
             {showDeleteConfirmBox && (
                 <ConfirmationDialogRaw
                     open={showDeleteConfirmBox}
-                    message={`Are you sure you want to delete the ${routes.user?.title?.toLowerCase()} ?`}
+                    message={`Are you sure you want to remove the ${routes.user?.title?.toLowerCase()} ?`}
                     onClose={() => {
                         setDeleteRecord(null);
                         setShowDeleteConfirmBox(false);
