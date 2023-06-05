@@ -37,7 +37,7 @@ export default function customTable({ id, classes, entity, table, setTable }) {
           <Typography className={classes.headingLabel} variant="h5" component="h5">
             Tables
           </Typography>
-          <Box border={1} borderColor={'grey.400'} padding={1}>
+          <Box border={1} borderColor={'var(--common-border-color)'} padding={1}>
             <Fragment>
               <Button
                 variant="contained"

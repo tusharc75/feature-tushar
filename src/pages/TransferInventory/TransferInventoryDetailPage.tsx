@@ -219,10 +219,10 @@ const TransferInventoryDetailPage = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
-              <Button 
-                className={'btn-outline-v1'} 
+              <Button
+                className={'btn-outline-v1'}
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
-                size="small" 
+                size="small"
                 onClick={handleOpenUpdateDialog}
               >
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
@@ -246,10 +246,6 @@ const TransferInventoryDetailPage = () => {
         >
           <Tab
             className={'tabLayout'}
-            style={{
-              background: tabValue === 1 ? 'white' : '',
-              color: tabValue === 1 ? '#163340' : '#163340'
-            }}
             label={
               <div className="d-flex align-items-center tab-font">
                 <FaWpforms className="mr-1" fontSize="inherit" /> Header
@@ -259,10 +255,6 @@ const TransferInventoryDetailPage = () => {
           />
           <Tab
             className={'tabLayout'}
-            style={{
-              background: tabValue === 2 ? 'white' : '',
-              color: tabValue === 2 ? 'blue' : '#163340'
-            }}
             label={
               <div className="d-flex align-items-center tab-font">
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
