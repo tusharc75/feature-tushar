@@ -13,8 +13,9 @@ function FieldDependent({ fields, values, fieldSet }) {
 
   const getFields = async () => {
     setResourceFieldsLoading(true);
+    const resource = fields.filter((data) => data.fieldName === values['lookupDependentOn'])[0];
     try {
-      const res = await axiosInstance().get('/field?resource=Quotation');
+      const res = await axiosInstance().get(`/field?resource=${resource.lookupResource}`);
       setResourceFields(res.data.data);
       setResourceFieldsLoading(false);
     } catch (e) {
