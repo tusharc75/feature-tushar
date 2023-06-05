@@ -25,7 +25,7 @@ const WarehouseDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { permissions, user }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -147,7 +147,7 @@ const WarehouseDetailsPage = () => {
           }}
         >
           <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          {permissions?.storageLocation?.isRead && (
+          {(permissions?.storageLocation?.isRead && user?.user?.brandPolicy?.storageLocation) && (
             <Tab
               label={<div className="tab-font">{routes.storageLocation.title}</div>}
               value={1}
@@ -156,7 +156,13 @@ const WarehouseDetailsPage = () => {
               className={'tabLayout'}
             />
           )}
-          <Tab label={<div className="tab-font">Users</div>} value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className={'tabLayout'} />
+          {user?.user?.brandPolicy?.warehouseAccessByUser &&
+            <Tab
+              label={<div className="tab-font">Users</div>}
+              value={2}
+              aria-controls="a11y-tabpanel-2"
+              id="a11y-tab-2" className={'tabLayout'} />
+          }
         </Tabs>
         {tabValue === 0 && (
           <Box>
