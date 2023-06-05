@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin:auto;background:transparent;display:block;" width="200px" height="200px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
-<defs><mask id="ldio-2tudk4do0zx-mask"><circle cx="50" cy="50" r="45" fill="#fff"/></mask></defs>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin:auto;background:transparent;display:block;" width="200px" height="200px" viewBox="0 0 100 100" >
+<defs><mask id="maskCircle"><circle cx="50" cy="50" r="45" fill="#fff"/></mask></defs>
 <circle cx="50" cy="50" r="45" fill="#2e9996"/>
-<path d="M 37.27207793864214 40.72792206135786 L 62.72792206135786 15.272077938642143 L 162.72792206135784 115.27207793864214 L 137.27207793864216 140.72792206135784 Z" fill="#206b69" mask="url(#ldio-2tudk4do0zx-mask)">
+<path d="M 37.27207793864214 40.72792206135786 L 62.72792206135786 15.272077938642143 L 162.72792206135784 115.27207793864214 L 137.27207793864216 140.72792206135784 Z" fill="#206b69" mask="url(#maskCircle)">
   <animate attributeName="d" dur="1s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" values="M 37.27207793864214 40.72792206135786 L 62.72792206135786 15.272077938642143 L 162.72792206135784 115.27207793864214 L 137.27207793864216 140.72792206135784 Z;M 37.27207793864214 84.72792206135786 L 62.72792206135786 59.27207793864214 L 162.72792206135784 159.27207793864216 L 137.27207793864216 184.72792206135784 Z;M 37.27207793864214 40.72792206135786 L 62.72792206135786 15.272077938642143 L 162.72792206135784 115.27207793864214 L 137.27207793864216 140.72792206135784 Z" keySplines="0.45 0 0.9 0.55;0 0.45 0.55 0.9"/>
 </path>
 <circle cx="50" cy="28" r="18" fill="#ffffff">
