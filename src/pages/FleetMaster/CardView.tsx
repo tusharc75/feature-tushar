@@ -16,8 +16,8 @@ import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
 const useStyles = makeStyles((theme) => ({
   cardBox: {
     borderRadius: '4px',
-    border: '1px solid #ebebeb',
-    backgroundColor: '#F8FFFC',
+    border: '1px solid var(--common-border-color,#ebebeb)',
+    backgroundColor: 'var(--dark-secondary, #F8FFFC)',
     position: 'relative',
     padding: '15px',
     paddingBottom: '35px',
@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   text: {
     fontSize: '14px',
     lineHeight: '1.28',
-    color: '#2A3042',
+    color: 'var(--dark-primary-text, #2A3042)',
     marginBottom: '7px'
   },
   icons: {

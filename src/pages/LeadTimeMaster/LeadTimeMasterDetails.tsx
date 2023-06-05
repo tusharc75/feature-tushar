@@ -161,7 +161,7 @@ const LeadTimeMasterDetails = () => {
       <Box className={`detail-container-v1`}>
         <Grid container spacing={1}>
           <Grid item xs={12} sm={12} md={8}>
-            <Box style={{ height: '80vh' }}>
+            <Box style={{ minHeight: '80vh' }}>
               {leadTimeMasterData ? (
                 <DetailsPageHeader heading={leadTimeMasterData?.leadTimeName} mainPoints={null} showHeading={true}>
                   {permissions?.leadTimeMaster?.isUpdate && (

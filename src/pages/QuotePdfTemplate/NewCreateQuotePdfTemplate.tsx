@@ -44,7 +44,6 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: {
     width: '100%',
-    padding: theme.spacing(2),
     textAlign: 'center',
     color: theme.palette.text.secondary
   },
@@ -456,7 +455,7 @@ export default function NewCreateQuotePdfTemplate() {
         </Grid>
       </Grid>
       <div className={`main-container ${classes.mainContainer}`}>
-        <Paper className={classes.paper}>
+        <Box className={classes.paper}>
           {initialValues && pdfResourceOption ? (
             <Formik
               innerRef={(ref) => ref && setFormValues(ref.values)}
@@ -862,7 +861,7 @@ export default function NewCreateQuotePdfTemplate() {
             </Box>
           </Grid>
           <CustomTable id={id} classes={classes} entity={selectedEntity} table={table} setTable={setTable} />
-        </Paper>
+        </Box>
       </div>
     </div>
   );
