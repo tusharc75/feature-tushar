@@ -51,6 +51,7 @@
   // --accordion-expanded-summary-bg: #effbf9;
   --accordion-expanded-summary-bg: #f1f5ff;
   --card-bg: #fff;
+  --active-border-color: #f99336;
 }
 
 // Dark Theme
@@ -74,6 +75,7 @@
   --accordion-details-border: #3d3d5c;
 
   --dark-primary: #0e0e23;
+  --dark-primary-light: hsl(240, 27%, 16%);
   --dark-secondary: #24243e;
   --accordion-summary-bg: hsl(240, 27%, 30%);
   --accordion-expanded-summary-bg: var(--dark-secondary);
@@ -3460,14 +3462,14 @@ body {
     width: 46px;
     height: 44px;
     position: absolute;
-    background: white;
+    background: var(--dark-secondary, white);
     right: 1px;
     top: 1px;
     padding: 11px;
     border-left: 1px solid var(--common-border-color);
     border-radius: 0px;
-    [data-mode='dark'] & {
-      background-color: #282845;
+    &:hover {
+      background-color: var(--dark-primary, white) !important;
     }
   }
   .arrange-view-v2 {
@@ -3487,11 +3489,7 @@ body {
     background-color: white !important;
   }
 }
-.arrange-view-v1 {
-  &:hover {
-    background-color: white !important;
-  }
-}
+
 .table-header-container-v1 {
   position: relative;
   @media all and (min-width: 950px) {

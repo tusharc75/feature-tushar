@@ -59,7 +59,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'resource-calendar',
         'serialized-asset-new',
         'import-export',
-        'custom-report',
+        'custom-report'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
@@ -79,8 +79,6 @@ const ProtectedRoute = ({ children, ...rest }) => {
           checking || userLoading ? (
             <div
               style={{
-                width: '100vw',
-                height: '100vh',
                 padding: '1rem'
               }}
             >
