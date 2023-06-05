@@ -23,16 +23,15 @@ export default function ColorModeProvider({ children }: ColorModeInterface) {
   const [theme, setStore] = useStore((store) => store[THEME]);
 
   useEffect(() => {
-    // const localTheme = getThemeFromLocal();
-    // if (localTheme) {
-    //   const theme = localTheme as ThemeColor;
-    //   setTheme(theme);
-    // } else {
-    //   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    //   setThemeToLocal(prefersDark ? 'dark' : 'light');
-    //   setTheme(prefersDark ? 'dark' : 'light');
-    // }
-    setStore({ [THEME]: 'light' });
+    const localTheme = getThemeFromLocal();
+    if (localTheme) {
+      const theme = localTheme as ThemeColor;
+      setStore({ [THEME]: theme });
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setThemeToLocal(prefersDark ? 'dark' : 'light');
+      setStore({ [THEME]: prefersDark ? 'dark' : 'light' });
+    }
   }, []);
 
   useEffect(() => {

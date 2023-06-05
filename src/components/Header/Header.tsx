@@ -1013,10 +1013,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                     aria-label="Them switcher"
                     color="inherit"
                     className={styles.showIconLayout}
-                    style={{
-                      opacity: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 1 : 0,
-                      pointerEvents: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 'all' : 'none'
-                    }}
                   >
                     {themeColor === 'light' ? <MoonIcon /> : <SunIcon />}
                   </IconButton>
@@ -1117,10 +1113,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                 aria-label="Them switcher"
                 color="inherit"
                 className={styles.showIconLayout}
-                style={{
-                  opacity: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 1 : 0,
-                  pointerEvents: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 'all' : 'none'
-                }}
               >
                 {themeColor === 'light' ? <MoonIcon /> : <SunIcon />}
               </IconButton>
