@@ -157,7 +157,9 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, productionOrderNumber, updatedBy, ...rest } = data;
             rest.status = 'New';
-            rest.productionOrderNumber = `PO_${generateUniqueIdOnly()}`;
+            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
+              rest.productionOrderNumber = `PO_${generateUniqueIdOnly()}`;
+            }
             setCloneHeading(productionOrderNumber);
             setInitialData({
               fields: fieldsDataForCreate,
@@ -176,7 +178,9 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-        initialData['productionOrderNumber'] = `PO_${generateUniqueIdOnly()}`;
+        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
+          initialData['productionOrderNumber'] = `PO_${generateUniqueIdOnly()}`;
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
