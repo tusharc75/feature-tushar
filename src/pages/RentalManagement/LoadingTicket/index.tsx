@@ -402,7 +402,7 @@ const LoadingTicket = ({
         },
         {
           resource: 'Serialized Asset',
-          fieldNames: ['serialNumber']
+          fieldNames: ['serialNumber', 'mtrAttached']
         }
       ]
     });
@@ -449,8 +449,13 @@ const LoadingTicket = ({
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
     { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
   ];
+  
+  if (findHeader(columnHeader?.assetFields, 'mtrAttached')) {
+    columns.push({ field: 'mtrAttached', headerName: 'MTR Attached', show: true, cellRenderer: 'commonRenderer' })
+  }
+
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {

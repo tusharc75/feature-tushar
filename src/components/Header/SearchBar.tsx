@@ -25,15 +25,6 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   const [showCloseButton, setShowCloseButton] = useState(false);
   const [search, setSearch] = useState('');
   const [filterState, filterDispatch] = useReducer(filterReducer, filterReducerInitialState);
-  const isSlashPressed = useKeyPress({ targetKey: '/' });
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    if (isSlashPressed) {
-      filterDispatch({ type: 'resetIndex' });
-      inputRef?.current.focus();
-    }
-  }, [isSlashPressed]);
 
   useEffect(() => {
     filterDispatch({ type: 'resetIndex' });
@@ -79,7 +70,6 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   }, [user, selectedEntity]);
 
   const handleSearch = (value) => {
-    // dispatch({ type: SET_SEARCH, payload: value });
     setStore({ [SEARCH]: value });
     const searchedValueInLowerCase = value?.toLowerCase();
     const filteredItems = [];
@@ -116,7 +106,6 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
     <div className={styles.searchContainer}>
       <div className={`${styles.search_input}`} style={{ borderRadius: showCloseButton ? '4px 4px 0 0' : '4px' }}>
         <input
-          ref={inputRef}
           type="text"
           value={search}
           placeholder="Search"
