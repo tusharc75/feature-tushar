@@ -46,7 +46,6 @@ import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
-import { FcApproval } from 'react-icons/fc';
 
 const SerializedAsset = () => {
 
@@ -381,15 +380,6 @@ const SerializedAsset = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {params.data?.mtrAttached &&
-        <Box>
-          <HtmlTooltip title={'MTR Attached'}>
-            <Box pt={1} pr={1}>
-              <FcApproval size={25} />
-            </Box>
-          </HtmlTooltip>
-        </Box>
-      }
       {permissions?.serializedAsset?.isCreate ? (
         <HtmlTooltip title="Clone">
           <IconButton
