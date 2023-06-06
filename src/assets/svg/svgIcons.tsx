@@ -383,3 +383,59 @@ export const SunIcon: React.FC<svgInterface> = ({ width = 19, height = 20, ...ot
     </svg>
   );
 };
+
+export const TemperatureIcon: React.FC<svgInterface> = ({ width = 39, height = 39, ...rest }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 39 39" {...rest}>
+      <rect width="38" height="38" x="0.289" y="0.133" fill="url(#paint0_linear_4216_50376)" rx="8"></rect>
+      <path fill="#fff" d="M15.575 17.655v-4.88a3.714 3.714 0 117.428 0v4.88a6.5 6.5 0 11-7.428 0zm0 5.335a3.714 3.714 0 107.428 0h-7.428z"></path>
+      <defs>
+        <linearGradient id="paint0_linear_4216_50376" x1="5.93" x2="38.289" y1="0.133" y2="38.133" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FAC94B"></stop>
+          <stop offset="1" stopColor="#FF9B04"></stop>
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
+
+export const PressureIcon: React.FC<svgInterface> = ({ width = 39, height = 39, ...rest }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 39 39" {...rest}>
+      <rect width="38" height="38" x="0.289" y="0.133" fill="url(#paint0_linear_4216_50384)" rx="8"></rect>
+      <g clipPath="url(#clip0_4216_50384)">
+        <path
+          fill="#fff"
+          d="M27.067 11.355a10.928 10.928 0 00-7.778-3.222c-2.938 0-5.7 1.144-7.778 3.222a10.928 10.928 0 00-3.222 7.778c0 2.938 1.144 5.7 3.222 7.778a10.928 10.928 0 007.778 3.222c2.938 0 5.7-1.144 7.778-3.222a10.929 10.929 0 003.222-7.778c0-2.938-1.144-5.7-3.222-7.778zm-8.422.215h1.289v2.578h-1.29V11.57zm-4.34 8.207h-2.578v-1.289h2.578v1.29zm.345-2.578l-2.232-1.29.644-1.116 2.233 1.29-.645 1.116zm1.589-2.06l-1.29-2.233 1.117-.645 1.289 2.233-1.116.645zm3.05 10.01a1.719 1.719 0 01-.645-3.313V16.34h1.29v5.496a1.719 1.719 0 01-.645 3.312zm1.934-10.655l1.29-2.233 1.115.645-1.289 2.232-1.116-.644zm2.06 1.588l2.233-1.289.645 1.117-2.233 1.289-.645-1.117zm3.569 3.695h-2.579v-1.289h2.579v1.29z"
+        ></path>
+      </g>
+      <defs>
+        <linearGradient id="paint0_linear_4216_50384" x1="5.93" x2="38.289" y1="0.133" y2="38.133" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#3BE961"></stop>
+          <stop offset="1" stopColor="#058D12"></stop>
+        </linearGradient>
+        <clipPath id="clip0_4216_50384">
+          <path fill="#fff" d="M0 0H22V22H0z" transform="translate(8.29 8.133)"></path>
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
+
+export const VolumeIcon: React.FC<svgInterface> = ({ width = 39, height = 39, ...rest }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 39 39" {...rest}>
+      <rect width="38" height="38" x="0.289" y="0.133" fill="url(#paint0_linear_4216_50391)" rx="8"></rect>
+      <path
+        fill="#fff"
+        d="M20.08 11.451c-.452-.77-.93-.744-1.383 0-2.074 3.086-5.213 7.713-5.213 10.027 0 1.623.665 3.112 1.73 4.176a5.912 5.912 0 004.175 1.729 5.912 5.912 0 004.175-1.729 5.912 5.912 0 001.73-4.175c0-2.341-3.14-6.942-5.214-10.027zm3.564 12.66a5.049 5.049 0 01-1.782 1.73c-.345.185-.771.08-.957-.267a.7.7 0 01.266-.984 3.52 3.52 0 001.277-1.223c.319-.506.505-1.09.531-1.702a.694.694 0 01.745-.665.694.694 0 01.665.744 5.268 5.268 0 01-.745 2.367z"
+      ></path>
+      <defs>
+        <linearGradient id="paint0_linear_4216_50391" x1="5.93" x2="38.289" y1="0.133" y2="38.133" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#AD14F5"></stop>
+          <stop offset="1" stopColor="#6203AC"></stop>
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
