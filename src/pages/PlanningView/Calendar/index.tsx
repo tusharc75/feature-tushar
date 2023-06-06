@@ -1,17 +1,29 @@
 import React, { useEffect, useCallback, useMemo, useState, useContext } from 'react'
 import { useHistory } from 'react-router-dom';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar'
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import './calendarView.scss'
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import moment from 'moment';
 import { Grid, Checkbox, TextField, Box } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import { sidebarResource } from 'src/constants/helpers';
 
+const DragAndDropCalendar = withDragAndDrop(Calendar as any)
 const localizer = momentLocalizer(moment);
 const formats = {
     weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
+};
+
+const newStyles = {
+    backgroundColor: 'rgba(234, 239, 254, 1)',
+    color: 'rgba(4, 50, 161, 1)',
+    borderRadius: '4px',
+    border: 'none',
+    padding: '8px 16px'
 };
 
 function CalendarView({ resourceList }) {
@@ -36,6 +48,8 @@ function CalendarView({ resourceList }) {
 
     const [renderCount, setRenderCount] = useState(0)
     const defaultDate = useMemo(() => moment().toDate(), [])
+
+    const [staticEvents, setStaticEvents] = useState([])
 
 
     const [dateRange, setDateRange] = useState({
@@ -158,14 +172,15 @@ function CalendarView({ resourceList }) {
                         {
                             id: d._id,
                             title: d[selectedResource.fieldName],
-                            start: d[selectedResource.start],
-                            end: d[selectedResource.end],
+                            start: new Date(d[selectedResource.start]),
+                            end: new Date(d[selectedResource.end]),
                             allDay: true,
                             type: selectedResource.resource
                         }
                     )
                 })
                 setEvents(rows);
+                setStaticEvents(rows)
             })
             .catch((err) => {
 
@@ -243,6 +258,66 @@ function CalendarView({ resourceList }) {
             setRenderCount(renderCount + 1)
         }
     }, [view])
+
+    const updateData = (event, start, end) => {
+        axiosInstance()
+            .put(`/planning-view/change-date`, {
+                _id: event.id,
+                startDate: start.toISOString(),
+                endDate: end.toISOString(),
+                resource: event.type
+            })
+            .then(({ data }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: data.message
+                });
+                fetchData()
+            })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+                fetchData()
+            });
+    }
+
+    const moveEvent = ({ event, start, end }) => {
+        const filterEvents = staticEvents.filter(ev => ev.id !== event.id)
+        const existing = staticEvents.find((ev) => ev.id === event.id) ?? {}
+        setEvents([...filterEvents, { ...existing, start, end }])
+        updateData(event, start, end)
+    }
+
+    const resizeEvent = ({ event, start, end }) => {
+        const filterEvents = staticEvents.filter(ev => ev.id !== event.id)
+        const existing = staticEvents.find((ev) => ev.id === event.id) ?? {}
+        setEvents([...filterEvents, { ...existing, start, end }])
+        updateData(event, start, end)
+    }
+
+    const onNavigate = (date) => {
+        if (view === 'month') {
+            setDateRange({
+                estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
+                estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+            });
+        } else if (view === 'week') {
+            setDateRange({
+                estimateStartDate: moment(date).startOf('week').format('MM/DD/YYYY'),
+                estimateEndDate: moment(date).endOf('week').format('MM/DD/YYYY')
+            });
+        } else if (view === 'day') {
+            setDateRange({
+                estimateStartDate: moment(date).format('MM/DD/YYYY'),
+                estimateEndDate: moment(date).format('MM/DD/YYYY')
+            });
+        } else if (view === 'agenda') {
+            setDateRange({
+                estimateStartDate: moment(date).format('MM/DD/YYYY'),
+                estimateEndDate: moment(date).add(1, 'months').format('MM/DD/YYYY')
+            });
+        }
+    }
 
     return (
         <>
@@ -344,59 +419,66 @@ function CalendarView({ resourceList }) {
                         </Grid>
                     </Box>
                 </Box>
-                <Calendar
-                    // style={{ height: "calc(100vh - 260px)" }}
-                    defaultDate={defaultDate}
-                    defaultView={'day'}
-                    events={events}
-                    formats={formats}
-                    localizer={localizer}
-                    popup={true}
-                    messages={{
-                        agenda: 'List',
-                    }}
-                    views={{ month: true, week: true, day: true, agenda: true }}
-                    onView={onView}
-                    view={view}
-                    eventPropGetter={(obj: any) => {
-                        const newStyles = {
-                            backgroundColor: 'rgba(234, 239, 254, 1)',
-                            color: 'rgba(4, 50, 161, 1)',
-                            borderRadius: '4px',
-                            border: 'none',
-                            padding: '8px 16px'
-                        };
-                        return {
-                            style: newStyles
-                        };
-                    }}
-                    onNavigate={(date) => {
-                        if (view === 'month') {
-                            setDateRange({
-                                estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
-                                estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
-                            });
-                        } else if (view === 'week') {
-                            setDateRange({
-                                estimateStartDate: moment(date).startOf('week').format('MM/DD/YYYY'),
-                                estimateEndDate: moment(date).endOf('week').format('MM/DD/YYYY')
-                            });
-                        } else if (view === 'day') {
-                            setDateRange({
-                                estimateStartDate: moment(date).format('MM/DD/YYYY'),
-                                estimateEndDate: moment(date).format('MM/DD/YYYY')
-                            });
-                        } else if (view === 'agenda') {
-                            setDateRange({
-                                estimateStartDate: moment(date).format('MM/DD/YYYY'),
-                                estimateEndDate: moment(date).add(1, 'months').format('MM/DD/YYYY')
-                            });
-                        }
-                    }}
-                    onSelectEvent={(event: any) => {
-                        history.push(`${selectedResource.path}/${event.id}`);
-                    }}
-                />
+                {
+                    (selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning)
+                        ?
+                        <DragAndDropCalendar
+                            defaultDate={defaultDate}
+                            defaultView={'day'}
+                            events={events}
+                            formats={formats}
+                            localizer={localizer}
+                            onEventDrop={moveEvent}
+                            onEventResize={resizeEvent}
+                            popup={true}
+                            messages={{
+                                agenda: 'List',
+                            }}
+                            resizable
+                            views={{ month: true, week: true, day: true, agenda: true }}
+                            onView={onView}
+                            view={view}
+                            eventPropGetter={(obj: any) => {
+                                return {
+                                    style: newStyles
+                                };
+                            }}
+                            onNavigate={(date) => {
+                                onNavigate(date)
+                            }}
+                            onSelectEvent={(event: any) => {
+                                history.push(`${selectedResource.path}/${event.id}`);
+                            }}
+                        />
+                        :
+                        <Calendar
+                            defaultDate={defaultDate}
+                            defaultView={'day'}
+                            events={events}
+                            formats={formats}
+                            localizer={localizer}
+                            popup={true}
+                            messages={{
+                                agenda: 'List',
+                            }}
+                            views={{ month: true, week: true, day: true, agenda: true }}
+                            onView={onView}
+                            view={view}
+                            eventPropGetter={(obj: any) => {
+                                return {
+                                    style: newStyles
+                                };
+                            }}
+                            onNavigate={(date) => {
+                                onNavigate(date)
+                            }}
+                            onSelectEvent={(event: any) => {
+                                history.push(`${selectedResource.path}/${event.id}`);
+                            }}
+                        />
+                }
+
+
             </div >
         </>
     )
