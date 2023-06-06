@@ -376,7 +376,7 @@ export const RESOURCE_LABEL = {
   eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
   purchaseOrder: 'Purchase Orders',
-  transferAsset: 'Transfer Assets',
+  transferAsset: 'Transfer Asset',
   address: 'Addresses',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',

@@ -12,7 +12,8 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_FROM_TO_TYPE,
   ASSET_STATUS,
-  COLOUR_MASTER
+  COLOUR_MASTER,
+  RESOURCE_LABEL
 } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -30,6 +31,7 @@ import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAsset
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 interface LoadingGridProps {
   permissions: any;
@@ -351,36 +353,37 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       <Box display="flex" flexDirection={'row'} justifyContent={'flex-end'} mx={1} my={1}>
         <Box>
           {permissions?.transferAsset?.isRead && !isMobile && !isMobile && (
-            <Button
-              variant={'outlined'}
-              color="primary"
-              type="button"
-              size="small"
-              startIcon={<AiFillFilePdf />}
-              disabled={fileDownloading}
-              onClick={() => {
-                handleViewPdf(false);
-              }}
-            >
-              {fileDownloading ? 'Please wait...' : 'Preview'}
-            </Button>
-          )}
-          <Box component="span" mx={1} />
-          {permissions?.transferAsset?.isRead && (
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
-              type="button"
-              size="small"
-              style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
-              startIcon={isMobile ? '' : <IoMdDownload />}
-              disabled={fileDownloading}
-              onClick={() => {
-                handleViewPdf(true);
-              }}
-            >
-              {isMobile && !isTablet ? <IoMdDownload size={20} /> : fileDownloading ? 'Please wait...' : 'Download'}
-            </Button>
+            <PreviewDownload resource={RESOURCE_LABEL.transferAsset} referenceId={transferAssetId} columns={columns} />
+          //   <Button
+          //     variant={'outlined'}
+          //     color="primary"
+          //     type="button"
+          //     size="small"
+          //     startIcon={<AiFillFilePdf />}
+          //     disabled={fileDownloading}
+          //     onClick={() => {
+          //       handleViewPdf(false);
+          //     }}
+          //   >
+          //     {fileDownloading ? 'Please wait...' : 'Preview'}
+          //   </Button>
+          // )}
+          // <Box component="span" mx={1} />
+          // {permissions?.transferAsset?.isRead && (
+          //   <Button
+          //     variant={isMobile && !isTablet ? 'text' : 'outlined'}
+          //     color="primary"
+          //     type="button"
+          //     size="small"
+          //     style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
+          //     startIcon={isMobile ? '' : <IoMdDownload />}
+          //     disabled={fileDownloading}
+          //     onClick={() => {
+          //       handleViewPdf(true);
+          //     }}
+          //   >
+          //     {isMobile && !isTablet ? <IoMdDownload size={20} /> : fileDownloading ? 'Please wait...' : 'Download'}
+          //   </Button>
           )}
           <Box component="span" mx={1} />
         </Box>
