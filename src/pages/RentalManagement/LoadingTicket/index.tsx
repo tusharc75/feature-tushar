@@ -2,12 +2,12 @@ import Box from '@material-ui/core/Box/Box';
 import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { CommonRenderer, CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import { Button, Tooltip, Menu, MenuItem, Dialog, TextField, CircularProgress, IconButton } from '@material-ui/core';
-import { AiFillFilePdf, AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { AiFillFilePdf } from 'react-icons/ai';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
@@ -23,7 +23,6 @@ import {
   serializedAsset,
   DELIVERY_FROM_TO_TYPE,
   COLOUR_MASTER,
-  INVENTORY_OWNER_TYPE
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { useHistory } from 'react-router-dom';
@@ -82,7 +81,6 @@ const LoadingTicket = ({
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
-  const [loadingData, setLoadingData] = useState(false);
 
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -111,7 +109,6 @@ const LoadingTicket = ({
   }, []);
 
   const fetchRecords = async () => {
-    setLoadingData(true);
     setNextStep(false);
     try {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
@@ -303,11 +300,9 @@ const LoadingTicket = ({
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
-      setLoadingData(false);
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
-      setLoadingData(false);
     }
   };
 
@@ -387,6 +382,7 @@ const LoadingTicket = ({
     productNameRenderer: ProductNameRenderer,
     inventoryRenderer: InventoryRenderer,
     warehouseRenderer: WarehouseRenderer,
+    checkboxRenderer: CheckboxRenderer,
     commonRenderer: CommonRenderer,
     parentNameRenderer: ParentNameRenderer
   };
@@ -402,7 +398,7 @@ const LoadingTicket = ({
         },
         {
           resource: 'Serialized Asset',
-          fieldNames: ['serialNumber']
+          fieldNames: ['serialNumber', 'mtrAttached']
         }
       ]
     });
@@ -449,8 +445,13 @@ const LoadingTicket = ({
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
     { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
   ];
+
+  if (findHeader(columnHeader?.assetFields, 'mtrAttached')) {
+    columns.push({ field: 'mtrAttached', headerName: 'MTR Attached', show: true, cellRenderer: 'checkboxRenderer' })
+  }
+
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
