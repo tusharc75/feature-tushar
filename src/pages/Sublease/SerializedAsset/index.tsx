@@ -182,7 +182,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
             />
           </Box>
         )}
-        <PreviewDownload resource={RESOURCE_LABEL.serializedAsset} referenceId={subleaseData?._id} columns={columns} />
+        <PreviewDownload resource={RESOURCE_LABEL.sublease} referenceId={subleaseData?._id} columns={columns} />
         {/* <Box>
           {!isMobile && (
             <Button

@@ -20,7 +20,8 @@ import {
   DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   prepareDataForGrid,
-  INVENTORY_OWNER_TYPE
+  INVENTORY_OWNER_TYPE,
+  RESOURCE_LABEL
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
@@ -38,6 +39,7 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { groupBy, uniq, map } from 'lodash';
 import RepairProcess from '../RepairProcess';
 import LayersIcon from '@material-ui/icons/Layers';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -294,6 +296,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
               {downlodingFile ? 'Please wait...' : 'Preview'}
             </Button>
           )}
+          <PreviewDownload resource={RESOURCE_LABEL.repairJob} referenceId={repairJobData?._id} columns={columns} />
           {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
             <Fragment>
               <Button

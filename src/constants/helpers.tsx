@@ -370,7 +370,7 @@ export const RESOURCE_LABEL = {
   rentalManagement: 'Rental Job',
   deliveryTicket: 'Delivery Tickets',
   pricingCondition: 'Pricing Setup',
-  repairJob: 'Repair Jobs',
+  repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
   invoice: 'Invoice',
   eCommercePolicy: 'e-Commerce Policy',
