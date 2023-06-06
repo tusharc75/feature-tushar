@@ -23,6 +23,7 @@ import {
   serializedAsset,
   DELIVERY_FROM_TO_TYPE,
   COLOUR_MASTER,
+  INVENTORY_OWNER_TYPE,
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { useHistory } from 'react-router-dom';
@@ -470,15 +471,20 @@ const LoadingTicket = ({
       data['ticketName'] = rentalManagementData.rentalJobName;
       data['referenceId'] = rentalManagementData._id;
 
-      if (selectedRecords[0].warehouse) {
+      if (selectedRecords[0].currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
         data['pickupFrom'] = selectedRecords[0].warehouseId;
         data['pickupFromAddress'] = selectedRecords[0].currentLocation;
-      } else {
+      } else if (selectedRecords[0].currentOwnerType === INVENTORY_OWNER_TYPE.customerAccount) {
+        data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
+        data['pickupFrom'] = selectedRecords[0].currentOwner;
+        data['pickupFromAddress'] = selectedRecords[0].currentLocation;
+      } else if (selectedRecords[0].currentOwnerType === INVENTORY_OWNER_TYPE.supplierAccount) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.supplier;
         data['pickupFrom'] = selectedRecords[0].currentOwner;
         data['pickupFromAddress'] = selectedRecords[0].currentLocation;
       }
+
       data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.customer;
       data['deliveryTo'] = rentalManagementData?.customerAccount?.optionValue;
       data['deliveryToAddress'] = rentalManagementData.shippingAddress?.optionValue;
@@ -527,6 +533,16 @@ const LoadingTicket = ({
     if (selectedRecords.length === 0) {
       return true;
     } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const checkUniqCurrentOwnerType = () => {
+    if (selectedRecords.length === 0) {
+      return true;
+    } else if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
       return false;
     } else {
       return true;
@@ -777,7 +793,8 @@ const LoadingTicket = ({
                     closeActions();
                     handleDeliveryTicketDialog();
                   }}
-                  disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty('loadingTicketId')) || checkUniqWarehouse()}
+                  disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty('loadingTicketId')) || checkUniqWarehouse()
+                    || checkUniqCurrentOwnerType()}
                 >
                   Create Loading Ticket
                 </MenuItem>
