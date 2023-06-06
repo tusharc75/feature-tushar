@@ -146,8 +146,8 @@ const AddSerializedAsset = ({
   };
 
   const RentalJobRenderer = (params) => (
-    <Link className="link text-truncate" to={`${routes.rentalManagementDetail.path}/${params.data?.loadingTicket?.rentalJob?.optionValue}`}>
-      {params?.data?.loadingTicket?.rentalJob?.optionLabel}
+    <Link className="link text-truncate" to={`${routes.rentalManagementDetail.path}/${params.data?.rentalJob?.optionValue}`}>
+      {params?.data?.rentalJob?.optionLabel}
     </Link>
   );
 
@@ -198,22 +198,21 @@ const AddSerializedAsset = ({
     } else {
       api = `${serializedAsset.api}${queryString}`
     }
-    axiosInstance()
-      .get(api)
-      .then(({ data }) => {
-        data.data = data.data.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = false;
-          if (Number(tabValue) === 2) {
-            finalObject['loadingTicket'] = u.loadingTicket;
-          }
-          return finalObject;
-        });
-        dispatch({ type: 'initialize', data: data.data, count: data.count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
+    axiosInstance().get(api).then(({ data: { data, count } }) => {
+      const rows = data?.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        finalObject['isChecked'] = false;
+        if (Number(tabValue) === 2) {
+          finalObject['rentalJob'] = u.loadingTicket?.rentalJob;
+          finalObject['loadingTicket'] = u.loadingTicket;
+        }
+        return finalObject;
+      });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
@@ -229,7 +228,7 @@ const AddSerializedAsset = ({
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -270,25 +269,12 @@ const AddSerializedAsset = ({
     } else {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
     }
-    
+
     return deepFilter;
   };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
   };
 
   const getRowStyleScheduled = (params) => {
