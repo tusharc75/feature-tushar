@@ -3678,3 +3678,16 @@ body {
   font-size: 12px !important;
   color: var(--dark-secondary-text, #5b5b5b);
 }
+
+.new-dropdown-v1,
+[data-mode='dark'] .new-dropdown-v1 {
+  background-color: var(--new_theme_secondary_color) !important;
+  border-color: var(--new_theme_secondary_border_color) !important;
+  border-width: 1px !important;
+  border-style: solid;
+  color: #2a3042 !important;
+  font-weight: 600 !important;
+  &:disabled {
+    opacity: 0.5;
+  }
+}
