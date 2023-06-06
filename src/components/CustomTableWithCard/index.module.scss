@@ -29,6 +29,9 @@
 
 .checkbox {
   min-width: 24px;
+  svg {
+    color: var(--ag-checkbox-checked-color, var(--ag-material-accent-color, var(--primary-light))) !important;
+  }
   @media all and (max-width: 768px) {
     position: absolute;
     top: 18px;
