@@ -1,0 +1,43 @@
+.metricsWithIcon {
+  text-align: center;
+  min-width: 85px;
+  padding: 8px;
+  border-radius: 8px;
+  .iconContainer {
+    margin-bottom: 8px;
+  }
+  h6 {
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 119%;
+    color: var(--dark-primary-text, #2a3042);
+    margin-bottom: 8px;
+  }
+  p,
+  span {
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 109%;
+    color: var(--dark-primary-text, #2a3042);
+  }
+}
+.temperature {
+  background-color: #fffeef;
+}
+.pressure {
+  background-color: #effff0;
+}
+.volume {
+  background-color: #f3efff;
+}
+[data-mode='dark'] {
+  .temperature {
+    background-color: hsla(56, 100%, 67%, 0.5);
+  }
+  .pressure {
+    background-color: hsla(124, 100%, 67%, 0.5);
+  }
+  .volume {
+    background-color: hsla(255, 100%, 67%, 0.5);
+  }
+}
