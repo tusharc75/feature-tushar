@@ -55,7 +55,7 @@ import { IoMdDownload } from 'react-icons/io';
 import Steps, { getIndex } from 'src/components/Steps';
 
 const RentalManagementDetailsPage = () => {
-  
+
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
   const renderedFrom = camelCase(routes?.rentalManagement.title);
@@ -459,6 +459,13 @@ const RentalManagementDetailsPage = () => {
                     allowedToEdit && (
                       <Fragment>
                         <Button
+                          variant={'contained'}
+                          className={'btn-outline-v1'}
+                          onClick={() => updateJobStatus(RENTAL_STATUS.closed)}
+                        >
+                          Close
+                        </Button>
+                        {/* <Button
                           variant="outlined"
                           color="default"
                           size="small"
@@ -494,7 +501,7 @@ const RentalManagementDetailsPage = () => {
                               </MenuItem>
                             );
                           })}
-                        </Menu>
+                        </Menu> */}
                       </Fragment>
                     )}
                   {user?.role?.selectedEntity?.policy?.isRentalReopen && rentalManagementData?.status === RENTAL_STATUS.closed && (

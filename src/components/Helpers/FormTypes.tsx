@@ -2079,7 +2079,7 @@ const FormTypes = (props) => {
           value={values[name]}
           name={name}
           label={getLabel(label)}
-          onChange={(date) => setFieldValue(name, date)}
+          onChange={(date) => handleChange(name, date)}
           onError={console.error}
           disablePast
           format={dateFormatForInputControl + " HH:mm"}
