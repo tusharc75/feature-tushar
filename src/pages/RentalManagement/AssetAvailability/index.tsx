@@ -10,25 +10,27 @@ import DashboardModal, { ModalContent } from 'src/components/DashboardModal';
 import Skeleton from '@material-ui/lab/Skeleton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const typographyh = {
+const typographyh: React.CSSProperties = {
   fontSize: '13px',
-  fontWeight: 600
+  fontWeight: 600,
+  lineHeight: '1.14',
+  marginBottom: '8px'
 };
-const typographyd = {
+const typographyd: React.CSSProperties = {
   fontSize: '13px'
 };
 
 export default function AssetAvailability({ rentalId, handleAssetAvailabilityClose }) {
   const toastConfig = useContext(CustomToastContext);
   const [modalContent, setModalContent] = useState<ModalContent | null>({
-    title: <Skeleton variant="text" height={30} width={250} />,
+    title: 'Checking Assets Availability',
     icon: <Skeleton variant="circle" width={32} height={32} />
   });
   const [asset, setAsset] = useState(null);
   const [availableAssets, setAvailableAssets] = useState(null);
 
   const handleCloseHelperModal = () => {
-    setModalContent({ title: <Skeleton variant="text" height={30} width={250} />, icon: <Skeleton variant="circle" width={32} height={32} /> });
+    setModalContent({ title: 'Checking Assets Availability', icon: <Skeleton variant="circle" width={32} height={32} /> });
     handleAssetAvailabilityClose();
   };
 
@@ -75,7 +77,6 @@ export default function AssetAvailability({ rentalId, handleAssetAvailabilityClo
     <DashboardModal modalContent={modalContent} handleClose={handleCloseHelperModal} style={{ position: 'relative' }}>
       {asset === null && availableAssets === null && (
         <>
-          <Typography style={{ fontSize: '13px', fontWeight: '500' }}>Checking assets availability</Typography>
           <div className="mt-2" style={{ maxWidth: 'calc(100% - 8px)' }}>
             <CommonSkeleton lenArray={[...Array(2).keys()]} sm={12} md={false} />
           </div>
@@ -88,7 +89,15 @@ export default function AssetAvailability({ rentalId, handleAssetAvailabilityClo
             {asset?.map((_asset) => {
               return (
                 <>
-                  <div className="d-flex pt-2 pb-2 pl-3 pr-3 mt-3" style={{ border: '1px solid var(--common-border-color)', borderRadius: '10px' }}>
+                  <div
+                    className="d-flex pl-3 pr-3 mt-3"
+                    style={{
+                      padding: '14px 20px',
+                      border: '1px solid var(--common-border-color)',
+                      borderRadius: '10px',
+                      boxShadow: '0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06)'
+                    }}
+                  >
                     <div>
                       <Typography style={typographyh}>Product Name</Typography>
                       <Typography style={typographyd}>{_asset?.product?.productName}</Typography>
