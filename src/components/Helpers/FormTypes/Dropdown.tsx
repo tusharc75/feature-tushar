@@ -23,8 +23,19 @@ import ManageContact from 'src/pages/Contact/ManageContact';
 import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
 
 function dropdownOptions(options, values, fields, fieldData) {
-  
-  if (!fieldData?.lookupDependentOn || fieldData?.lookupDependentOn === '') return options || [];
+  if (!fieldData?.lookupDependentOn || fieldData?.lookupDependentOn === '') {
+    let oData = options;
+    if (fieldData?.fieldName === 'owner') {
+      console.log('values', values['collaborator'], options);
+      const optionDatas = options?.filter((option: any) => ![...values['collaborator']]?.includes(option?.optionValue)) || [];
+      oData = optionDatas || [];
+    }
+    if (fieldData?.fieldName === 'collaborator') {
+      const optionDatas = options?.filter((option: any) => option?.optionValue !== values['owner']) || [];
+      oData = optionDatas || [];
+    }
+    return oData || [];
+  }
 
   const optionsToShow = [];
   if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOnField) {
@@ -92,19 +103,23 @@ function Dropdown({
                 disableCloseOnSelect={true}
                 options={dropdownOptions(option, values, fields, fieldData)}
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                value={values[name] ? [...dropdownOptions(option, values, fields, fieldData)].filter((data: any) => values[name].includes(data.optionValue)) : []}
+                value={
+                  values[name]
+                    ? [...dropdownOptions(option, values, fields, fieldData)].filter((data: any) => values[name].includes(data.optionValue))
+                    : []
+                }
                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                 onChange={
                   onChange
                     ? onChange
                     : (e, value: any, reason) => {
-                      if (setFieldValue) {
-                        setFieldValue(
-                          name,
-                          value.map((val) => val.optionValue)
-                        );
+                        if (setFieldValue) {
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
+                        }
                       }
-                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -128,16 +143,18 @@ function Dropdown({
                 getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                 getOptionSelected={(option: any, val) => option.optionValue === val}
                 value={[...dropdownOptions(option, values, fields, fieldData)].find((data: any) => data.optionValue === values[name]) || ''}
-                onChange={onChange ? onChange
-                  : (e, val) => {
-                    if (setFieldValue) {
-                      handleChange(name, val && val.optionValue ? val.optionValue : '');
-                      const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                      fieldChange?.forEach((val: any) => {
-                        setFieldValue(val.fieldName, val.value);
-                      });
-                    }
-                  }
+                onChange={
+                  onChange
+                    ? onChange
+                    : (e, val) => {
+                        if (setFieldValue) {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
+                          });
+                        }
+                      }
                 }
                 selectOnFocus
                 clearOnBlur
