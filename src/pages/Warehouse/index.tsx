@@ -39,7 +39,7 @@ import MobileSortDialog from 'src/components/MobileSortDialog';
 import MobileFilterDialog from 'src/components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-
+import AssignUserDialog from 'src/components/AssignRolesDialog/NewAssignUserDialog';
 const Warehouse = () => {
   const renderedFrom = camelCase(routes?.warehouse.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -70,7 +70,9 @@ const Warehouse = () => {
     state;
   const [sortOpen, setSortOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
-
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [wareHouseList, setWareHouseList] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -223,11 +225,27 @@ const Warehouse = () => {
     </>
   );
 
+  const handleAssignUser = (data) => {
+    setIsAssigning(true);
+    const user = data?.map((e) => e?._id);
+    axiosInstance()
+      .post(`${routes.warehouse.path}/user/assign`, { warehouse: wareHouseList, user })
+      .then((res) => {
+        localStorage.removeItem(localStorageSelectedRecords);
+        fetchWarehouses();
+        setOpenDialog(false);
+        setIsAssigning(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsAssigning(false);
+      });
+  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -466,6 +484,27 @@ const Warehouse = () => {
                         Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
                       </MenuItem>
                     )}
+                    {user?.user?.brandPolicy?.warehouseAccessByUser && (
+                      <MenuItem
+                        disabled={selectedRecords.length === 0}
+                        onClick={() => {
+                          if (selectedRecords.some((d) => d.isUpdate === false)) {
+                            closeActions();
+                            setShowUpdateWarningConfirmBox(true);
+                          } else {
+                            closeActions();
+                            setOpenDialog(true);
+                            let selectedWarehouses = [];
+                            selectedRecords.map((current) => {
+                              selectedWarehouses.push(current._id);
+                            });
+                            setWareHouseList(selectedWarehouses);
+                          }
+                        }}
+                      >
+                        Assign Users &nbsp; <Chip size="small" label={selectedRecords.length} />
+                      </MenuItem>
+                    )}
                   </Menu>
                 </Grid>
               </Box>
@@ -507,7 +546,7 @@ const Warehouse = () => {
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -532,6 +571,19 @@ const Warehouse = () => {
           )
         ) : null}
 
+        {openDialog && (
+          <AssignUserDialog
+            handleClose={() => {
+              setOpenDialog(false);
+            }}
+            onSuccess={(data) => {
+              handleAssignUser(data);
+            }}
+            reference={'warehouse'}
+            isAssigning={isAssigning}
+            ignoreUsers={dataRows?.map((e) => e?._id) || []}
+          />
+        )}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
