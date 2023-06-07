@@ -900,7 +900,6 @@ const SerializedAsset = () => {
       </div>
       {showManageProductInventoryDialog.open && (
         <ManageSerializedAsset
-          isNew={true}
           isClone={showManageProductInventoryDialog.isClone}
           productInventoryId={showManageProductInventoryDialog.idToClone}
           onClose={() => setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null })}

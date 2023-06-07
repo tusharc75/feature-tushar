@@ -18,12 +18,10 @@ import { Box, Grid } from '@material-ui/core';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
 import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
 import CreateProductCategory from '../ProductCategory/CreateProductCategory';
 import CreateProduct from '../../components/Product/CreateProduct';
-import ManageAccountDialog from '../Account/ManageAccount';
 import { isEqual } from 'lodash';
 
 const ManageSerializedAsset = ({
@@ -33,7 +31,6 @@ const ManageSerializedAsset = ({
   onSuccess,
   productId = null,
   productCategory = null,
-  isNew = true,
   referenceType = null,
   referenceData = null
 }) => {
@@ -49,8 +46,6 @@ const ManageSerializedAsset = ({
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [productOpen, setProductOpen] = useState({ open: false, isClone: false });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [showAddSupplierAccountDialog, setShowAddSupplierAccountDialog] = useState({ open: false, fieldName: '' });
-  const [accountData, setAccountData] = useState([]);
   const [productCategoryID, setProductCategoryID] = useState(null);
   const [productCategoryName, setProductCategoryName] = useState(null);
 
@@ -77,11 +72,6 @@ const ManageSerializedAsset = ({
 
         setProductCategoryOptions(categoryOptions);
         setProductDescriptionOptions(productOptions);
-
-        const supplierAccountOptions = fieldsDataForUpdate?.find((obj) => obj?.lookupResource === 'Supplier Account');
-        if (supplierAccountOptions) {
-          setAccountData(supplierAccountOptions.option);
-        }
 
         setAllFields(productInventoryId ? fieldsDataForUpdate : fieldsDataForCreate);
 
@@ -369,48 +359,6 @@ const ManageSerializedAsset = ({
                                         }
                                       }}
                                     />
-                                  ) : field?.lookupResource === 'Supplier Account' ? (
-                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Box display="flex">
-                                        <Box flexGrow={1}>
-                                          <FormTypes
-                                            {...field}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            fieldData={field}
-                                            type={field.type}
-                                            options={accountData}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            doNotShowInfoTooltip={true}
-                                            onChange={(e, value) => {
-                                              setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                            }}
-                                          />
-                                        </Box>
-                                        {permissions?.supplierAccount?.isCreate && (
-                                          <Box>
-                                            <Tooltip title={`Create ${field?.fieldLabel}`}>
-                                              <IconButton
-                                                onClick={() => {
-                                                  setShowAddSupplierAccountDialog({ open: true, fieldName: field?.fieldName });
-                                                }}
-                                                disabled={!isClone ? field.disableOnEdit : false}
-                                                size="small"
-                                              >
-                                                <AddIcon color={isClone ? 'primary' : field.disableOnEdit ? 'disabled' : 'primary'} />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Box>
-                                        )}
-                                      </Box>
-                                    </Grid>
                                   ) : (
                                     <FormTypes
                                       isNew={Boolean(productInventoryId)}
@@ -477,11 +425,6 @@ const ManageSerializedAsset = ({
                       handleClose={() => setProductOpen({ open: false, isClone: false })}
                       isRedirectToDetailPage={false}
                       openFrom="serializedAsset"
-
-                      // open={productOpen?.open}
-                      // handleClose={() => setProductOpen({ open: false, isClone: false })}
-                      // isClone={productOpen?.isClone}
-                      // openFrom={'serializedAsset'}
                       onSuccess={(data) => {
                         setProductOpen({ open: false, isClone: false });
                         if (data._id) {
@@ -511,35 +454,6 @@ const ManageSerializedAsset = ({
                           setProductCategoryID(data.productCategory)
                         }
                       }}
-                    />
-                  )}
-                  {showAddSupplierAccountDialog.open && (
-                    <ManageAccountDialog
-                      open={showAddSupplierAccountDialog.open}
-                      onClose={() => {
-                        setShowAddSupplierAccountDialog({ open: false, fieldName: '' });
-                      }}
-                      id={null}
-                      accountResource={supplierAccount.accountResource}
-                      accountApi={supplierAccount.accountApi}
-                      isGetAccountData={true}
-                      onGetAddedAccount={({ data }) => {
-                        setAccountData((prevState) => {
-                          return [
-                            ...prevState,
-                            {
-                              optionValue: data._id,
-                              optionLabel: data.accountName,
-                              order: accountData.length,
-                              default: false,
-                              billingAddress: data?.billingAddress,
-                              shippingAddress: data?.shippingAddress
-                            }
-                          ];
-                        });
-                        setFieldValue(showAddSupplierAccountDialog.fieldName, data._id);
-                      }}
-                      isRedirectToDetailPage={false}
                     />
                   )}
                 </CustomDialogContent>
