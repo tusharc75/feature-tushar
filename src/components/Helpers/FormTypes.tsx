@@ -279,7 +279,7 @@ const FormTypes = (props) => {
     setFields,
     ...rest
   } = props;
-  console.log('props field', fields, fieldData);
+
   const [image, setImage] = React.useState<any>('');
   const [imageFileName, setImageFileName] = React.useState<any>('');
   const [readingImage, setReadingImage] = React.useState<any>(false);
@@ -954,12 +954,12 @@ const FormTypes = (props) => {
       sidebarResource.supplierAccount,
       sidebarResource.customerContact,
       sidebarResource.supplierContact,
-      sidebarResource.address
+      sidebarResource.address,
+      sidebarResource.user
     ].includes(fieldData?.lookupResource) ? (
     <Dropdown
       InfoLabel={InfoLabel}
       fieldData={fieldData}
-      addAdditionalOption={addAdditionalOption}
       rest={rest}
       option={option}
       values={values}
@@ -970,14 +970,10 @@ const FormTypes = (props) => {
       addFieldOption={addFieldOption}
       setOptionsList={setOptionsList}
       handleChange={handleChange}
-      filter={filter}
       getLabel={getLabel}
       touched={touched}
       errors={errors}
       required={required}
-      optionSaveDialog={optionSaveDialog}
-      setOptionSaveDialog={setOptionSaveDialog}
-      AddOptionDialog={AddOptionDialog}
       setFieldValue={setFieldValue}
       fields={fields}
     />

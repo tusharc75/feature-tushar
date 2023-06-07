@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: 'var(--dark-secondary, #fff)',
     boxShadow: '0px 3px 30px rgba(0, 0, 0, 0.08)',
     position: 'relative',
-    padding: '18px 14px 24px 18px',
+    padding: '18px 16px 18px 20px',
     height: '100%',
     cursor: 'pointer',
     display: 'flex',
@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '14px',
     lineHeight: '1.28',
     color: 'var(--dark-primary-text, #2A3042)',
-    marginBottom: '7px'
+    marginBottom: '6px'
   },
   icons: {
     display: 'flex',
@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     flexWrap: 'wrap',
     maxWidth: '400px',
-    paddingTop: '15px',
+    paddingTop: '13px',
     paddingBottom: '10px',
     gap: '10px'
   },
@@ -124,7 +124,6 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                     <IconButton
                       size="small"
                       aria-label="Attachment"
-                      style={{ marginRight: '8px' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setActivityShow({ open: true, referenceId: fleetMaster?._id });
@@ -139,7 +138,6 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                       size="small"
                       aria-label="Map"
                       className={classes.buttons}
-                      style={{ marginRight: '8px' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setMapView({
