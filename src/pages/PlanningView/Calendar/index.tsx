@@ -26,6 +26,39 @@ const newStyles = {
     padding: '8px 16px'
 };
 
+const FILTERS = [
+    {
+        label: 'Plant',
+        value: 'Warehouse',
+        key: 'warehouse'
+    },
+    {
+        label: 'Product',
+        value: 'Product',
+        key: 'product'
+    },
+    {
+        label: 'Asset',
+        value: 'Serialized Asset',
+        key: 'asset'
+    },
+    {
+        label: 'Service',
+        value: 'Service Master',
+        key: 'service'
+    },
+    {
+        label: 'Customer Account',
+        value: 'Customer Account',
+        key: 'customerAccount'
+    },
+    {
+        label: 'competencies',
+        value: 'Competencies',
+        key: 'competencies'
+    }
+]
+
 function CalendarView({ resourceList }) {
 
     const toastConfig = useContext(CustomToastContext);
@@ -37,12 +70,8 @@ function CalendarView({ resourceList }) {
     const [events, setEvents] = useState([])
     const [view, setView] = useState<View>('month');
     const [filterToKeep, setFilterToKeep] = useState([]);
-    const [warehouse, setWarehouse] = useState([])
-    const [product, setProduct] = useState([])
-    const [asset, setAsset] = useState([])
-    const [selectedWarehouse, setSelectedWarehouse] = useState([])
-    const [selectedProduct, setSelectedProduct] = useState([])
-    const [selectedAsset, setSelectedAsset] = useState([])
+    const [lookupResource, setLookUpResource] = useState(null)
+    const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null)
 
     const [selectedResource, setSelectedResource] = useState(null);
 
@@ -75,13 +104,6 @@ function CalendarView({ resourceList }) {
         endDate: moment().add(1, 'months').format('MM/DD/YYYY')
     })
 
-
-    const FILTERS = {
-        warehouse: 'Plant',
-        product: 'Product',
-        asset: 'Asset'
-    }
-
     useEffect(() => {
         if (view === 'month') {
             setMonth({
@@ -108,11 +130,9 @@ function CalendarView({ resourceList }) {
 
     useEffect(() => {
         axiosInstance()
-            .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Product,Serialized Asset')
+            .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Product,Serialized Asset,Service Master,Customer Account,Competencies')
             .then(({ data: { data } }) => {
-                setProduct(data['Product'])
-                setAsset(data['Serialized Asset'])
-                setWarehouse(data['Warehouse'])
+                setLookUpResource(data)
             })
             .catch((err) => { });
     }, [])
@@ -136,7 +156,7 @@ function CalendarView({ resourceList }) {
         else {
             setEvents([])
         }
-    }, [selectedResource, selectedWarehouse, selectedProduct, selectedAsset, dateRange]);
+    }, [selectedResource, selectedLookUpResourceData, dateRange]);
 
     const getQueryString = () => {
         const api = '/planning-view';
@@ -146,17 +166,11 @@ function CalendarView({ resourceList }) {
         if (selectedResource) {
             query = `${query}&resource=${selectedResource.resource}`
         }
-        if (selectedWarehouse.length > 0) {
-            const warehouse = queryData(selectedWarehouse);
-            query = `${query}&warehouse=${warehouse}`
-        }
-        if (selectedProduct.length > 0) {
-            const product = queryData(selectedProduct)
-            query = `${query}&product=${product}`
-        }
-        if (selectedAsset.length > 0) {
-            const asset = queryData(selectedAsset)
-            query = `${query}&asset=${asset}`
+        if (selectedLookUpResourceData) {
+            Object.keys(selectedLookUpResourceData).forEach((d) => {
+                const data = queryData(selectedLookUpResourceData[d])
+                query = `${query}&${d}=${data}`
+            })
         }
 
         return query;
@@ -188,16 +202,13 @@ function CalendarView({ resourceList }) {
     }
 
     useEffect(() => {
-        if (selectedWarehouse.length > 0 || selectedProduct.length > 0 || selectedAsset.length > 0) {
-            if (!filterToKeep.includes('warehouse')) {
-                setSelectedWarehouse([])
-            }
-            if (!filterToKeep.includes('product')) {
-                setSelectedProduct([])
-            }
-            if (!filterToKeep.includes('asset')) {
-                setSelectedAsset([])
-            }
+        if (selectedLookUpResourceData) {
+            Object.keys(selectedLookUpResourceData).forEach(o => {
+                if (!filterToKeep.some(f => f.key === o)) {
+                    const { [o]: _, ...remainObj } = selectedLookUpResourceData;
+                    setSelectedLookUpResourceData(remainObj)
+                }
+            })
         }
     }, [filterToKeep])
 
@@ -348,73 +359,56 @@ function CalendarView({ resourceList }) {
                             <Autocomplete
                                 style={{ width: "350px" }}
                                 multiple
-                                options={Object.keys(FILTERS)?.map((key) => key) || []}
+                                options={FILTERS}
                                 disableCloseOnSelect
-                                getOptionLabel={(option) => FILTERS[option]}
+                                getOptionLabel={(option) => option?.label}
                                 renderOption={(option: any) => (
                                     <React.Fragment>
-                                        <Checkbox checked={filterToKeep?.includes(option)} />
-                                        {FILTERS[option]}
+                                        <Checkbox checked={filterToKeep?.some(_s => _s.key === option.key)} />
+                                        {option?.label}
                                     </React.Fragment>
                                 )}
                                 size="small"
                                 renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
                                 value={filterToKeep}
                                 onChange={(event: any, newValue: any) => {
-                                    setFilterToKeep(newValue);
+                                    setFilterToKeep(newValue)
                                 }}
                             />
                         </Box>
                     </Box>
                     <Box display="flex" flexDirection="row" ml={1} mt={2}>
                         <Grid container spacing={2}>
-                            {filterToKeep?.includes('warehouse') &&
-                                <Grid item xs={12} sm={6} md={4} lg={4}>
-                                    <Autocomplete
-                                        options={warehouse}
-                                        multiple
-                                        disableCloseOnSelect
-                                        getOptionLabel={(option: any) => option.optionLabel}
-                                        value={selectedWarehouse}
-                                        onChange={(event, newValue) => {
-                                            setSelectedWarehouse(newValue);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => <TextField {...params} label={`Select Plant`} variant="outlined" />}
-                                    />
-                                </Grid>
-                            }
-                            {filterToKeep?.includes('product') &&
-                                <Grid item xs={12} sm={6} md={4} lg={4}>
-                                    <Autocomplete
-                                        options={product}
-                                        multiple
-                                        disableCloseOnSelect
-                                        getOptionLabel={(option: any) => option.optionLabel}
-                                        value={selectedProduct}
-                                        onChange={(event, newValue) => {
-                                            setSelectedProduct(newValue);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => <TextField {...params} label={`Select Product`} variant="outlined" />}
-                                    />
-                                </Grid>
-                            }
-                            {filterToKeep?.includes('asset') &&
-                                <Grid item xs={12} sm={6} md={4} lg={4}>
-                                    <Autocomplete
-                                        options={asset}
-                                        multiple
-                                        disableCloseOnSelect
-                                        getOptionLabel={(option: any) => option.optionLabel}
-                                        value={selectedAsset}
-                                        onChange={(event, newValue) => {
-                                            setSelectedAsset(newValue);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => <TextField {...params} label={`Select Asset`} variant="outlined" />}
-                                    />
-                                </Grid>
+                            {
+                                filterToKeep?.map((filtered) => {
+                                    return (
+                                        <Grid item xs={12} sm={6} md={4} lg={4} key={filtered?.value}>
+                                            <Autocomplete
+                                                options={lookupResource ? lookupResource[filtered?.value] : []}
+                                                multiple
+                                                disableCloseOnSelect
+                                                getOptionLabel={(option: any) => option?.optionLabel}
+                                                value={selectedLookUpResourceData && selectedLookUpResourceData[filtered.key] ? selectedLookUpResourceData[filtered.key] : []}
+                                                onChange={(event, newValue) => {
+                                                    if (newValue?.length > 0) {
+                                                        setSelectedLookUpResourceData(preVal => (
+                                                            {
+                                                                ...preVal,
+                                                                [filtered.key]: newValue
+                                                            }
+                                                        ))
+                                                    } else {
+                                                        const { [filtered.key]: _, ...remainObj } = selectedLookUpResourceData;
+                                                        setSelectedLookUpResourceData(remainObj)
+                                                    }
+                                                }}
+
+                                                size="small"
+                                                renderInput={(params) => <TextField {...params} label={`Select ${filtered?.label}`} variant="outlined" />}
+                                            />
+                                        </Grid>
+                                    )
+                                })
                             }
                         </Grid>
                     </Box>
