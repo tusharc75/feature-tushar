@@ -66,6 +66,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
   const [countryBillToMainData, setCountryBillToMainData] = useState([]);
   const [countrySellToMainData, setCountrySellToMainData] = useState([]);
+  const [fields, setFields] = useState(null);
 
   const updateAccountDropdown = (data) => {
     const entityFields = initialData.fields;
@@ -160,7 +161,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
       let fieldData;
       const response: any = await axiosInstance().get('/field?resource=Sales Order');
       fieldData = response?.data?.data;
-
+      setFields(fieldData);
       fieldData = fieldData?.filter((e) => !['quotation'].includes(e?.fieldData?.fieldName));
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -342,256 +343,24 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field) => (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    {field.fieldName == 'customerAccount' ? (
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions.customerAccount?.isCreate ? 11 : 11}
-                                          sm={permissions.customerAccount?.isCreate ? 11 : 11}
-                                          md={permissions.customerAccount?.isCreate ? 11 : 11}
-                                        >
-                                          <FormTypes
-                                            {...field}
-                                            isNew={!salesOrderId}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={accountData}
-                                            disabled={!isClone ? salesOrderId && field.disableOnEdit : false}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            doNotShowInfoTooltip={true}
-                                            onChange={(e, value) => {
-                                              setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                              setFieldValue('customerContact', '');
-                                              setFieldValue('billingAddress', '');
-                                              setFieldValue('shippingAddress', '');
-                                            }}
-                                          />
-                                        </Grid>
-                                        {permissions.customerAccount?.isCreate && (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title="Create Account" className="mt-1">
-                                              <IconButton
-                                                onClick={() => {
-                                                  setShowAddCustomerAccountDialog(true);
-                                                }}
-                                                disabled={!isClone ? salesOrderId && field.disableOnEdit : false}
-                                                size="small"
-                                              >
-                                                <AddIcon color={isClone ? 'primary' : salesOrderId && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        )}
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    ) : field.fieldName === 'customerContact' ? (
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions.customerContact?.isCreate ? 11 : 11}
-                                          sm={permissions.customerContact?.isCreate ? 11 : 11}
-                                          md={permissions.customerContact?.isCreate ? 11 : 11}
-                                        >
-                                          <FormTypes
-                                            {...field}
-                                            isNew={!salesOrderId}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={customerContactDataSource}
-                                            doNotShowInfoTooltip={true}
-                                            setFieldValue={(name, value) => {
-                                              setFieldValue(name, value);
-                                            }}
-                                            disabled={!isClone ? salesOrderId && field.disableOnEdit : false}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={false}
-                                            size="small"
-                                            onOpen={() => onCustomerContactDropdownOpen(values['customerAccount'])}
-                                          />
-                                        </Grid>
-                                        {permissions?.customerContact?.isCreate && (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title="Create Contact" className="mt-1">
-                                              <IconButton
-                                                onClick={() => {
-                                                  setShowAddCustomerContactDialog(true);
-                                                }}
-                                                disabled={!isClone ? salesOrderId && field.disableOnEdit : false}
-                                                size="small"
-                                              >
-                                                <AddIcon color={isClone ? 'primary' : salesOrderId && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        )}
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip className="mt-2" title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    ) : field.fieldName === 'owner' ? (
-                                      <FormTypes
-                                        salesOrderId={salesOrderId}
-                                        {...field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={ownerData}
-                                        onChange={(e, val) => {
-                                          setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                          if (val && val.optionValue !== user?.user?._id) {
-                                            const checkOwnerAddedInCollaborator = values['collaborator'].find(
-                                              (d) => d?.optionValue === user?.user?._id
-                                            );
-                                            if (!checkOwnerAddedInCollaborator) {
-                                              setFieldValue('collaborator', [
-                                                ...values['collaborator'],
-                                                collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                              ]);
-                                            }
-                                          }
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        disabled={!salesOrderId && field.disableOnEdit}
-                                        onOpen={() => {
-                                          onOwnerDropdownOpen(values['collaborator']);
-                                        }}
-                                      />
-                                    ) : field.fieldName === 'collaborator' ? (
-                                      <FormTypes
-                                        salesOrderId={salesOrderId}
-                                        {...field}
-                                        disabled={!salesOrderId && field.disableOnEdit}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={collaboratorData}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onOpen={() => {
-                                          onCollabOwnerMultiselectOpen(values['owner']);
-                                        }}
-                                      />
-                                    ) : field.fieldName === 'billingAddress' ? (
-                                      <FormTypes
-                                        {...field}
-                                        disabled={Boolean(salesOrderId) && field.disableOnEdit && !isClone}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={countryBillToDropDown}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onOpen={() => onCountryBillToDropDownOpen(values['customerAccount'])}
-                                      />
-                                    ) : field.fieldName === 'shippingAddress' ? (
-                                      <FormTypes
-                                        {...field}
-                                        disabled={Boolean(salesOrderId) && field.disableOnEdit && !isClone}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={countrySellToDropDown}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onOpen={() => onCountrySellToDropDownOpen(values['customerAccount'])}
-                                      />
-                                    ) : (
-                                      <FormTypes
-                                        salesOrderId={salesOrderId}
-                                        {...field}
-                                        fieldData={field}
-                                        disabled={
-                                          field.fieldName === 'currency'
-                                            ? salesDetails && salesDetails?.material?.length
-                                              ? true
-                                              : false
-                                            : field.fieldName === 'warehouse'
-                                            ? salesDetails && salesDetails?.productInventory?.length
-                                              ? true
-                                              : false
-                                            : salesOrderId && field.disableOnEdit && !isClone
-                                        }
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                            : null
-                                        }
-                                      />
-                                    )}
+                                    <FormTypes
+                                      // {...rest}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={setFieldValue}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      fieldData={field}
+                                      fields={initialData?.fields}
+                                    />
                                   </Grid>
                                 ))}
                               </Grid>
