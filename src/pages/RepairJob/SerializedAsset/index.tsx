@@ -21,7 +21,8 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   prepareDataForGrid,
   INVENTORY_OWNER_TYPE,
-  RESOURCE_LABEL
+  RESOURCE_LABEL,
+  CHILD_RESOURCE
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
@@ -62,6 +63,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   const { getColumnData } = useColumns();
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState(null);
+  const [newColumns, setNewColumns] = useState(null);
 
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {} });
@@ -113,6 +115,29 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
+        axiosInstance()
+        .get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`)
+        .then((apiResponse) => {
+          const newColumns = apiResponse.data.data.map((item) => {
+            return {
+              Header: item.fieldLabel,
+              accessor: item.fieldName,
+            };
+          });
+          newColumns.push({
+            Header: 'Asset Number',
+            accessor: 'assetNumber',
+          },
+          {
+            Header: 'Status',
+            accessor: 'status',
+          },
+          {
+            Header : 'Product Description',
+            accessor : 'product'
+          })
+          setNewColumns(newColumns);
+        })
         fetchRecords();
       });
   };
@@ -257,7 +282,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     <>
       <Box display="flex" justifyContent="flex-end" m={1}>
         <Box display="flex" alignItems="center" gridGap={'8px'}>
-          {!isMobile && (
+          {/* {!isMobile && (
             <Button
               onClick={() => {
                 setDownlodingFile(true);
@@ -295,8 +320,8 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             >
               {downlodingFile ? 'Please wait...' : 'Preview'}
             </Button>
-          )}
-          <PreviewDownload resource={RESOURCE_LABEL.repairJob} referenceId={repairJobData?._id} columns={columns} />
+          )} */}
+          <PreviewDownload resource={RESOURCE_LABEL.repairJob} referenceId={repairJobData?._id} columns={newColumns} />
           {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
             <Fragment>
               <Button
