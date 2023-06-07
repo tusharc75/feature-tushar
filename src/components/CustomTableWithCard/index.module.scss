@@ -19,8 +19,12 @@
     transition: box-shadow 0.3s;
     cursor: pointer;
     &:hover {
-      box-shadow: rgba(142, 159, 199, 0.01) 0px 165px 66px, rgba(142, 159, 199, 0.05) 0px 93px 56px, rgba(142, 159, 199, 0.09) 0px 41px 41px,
-        rgba(142, 159, 199, 0.1) 0px 10px 23px, rgba(142, 159, 199, 0.1) 0px 0px 0px;
+      box-shadow: -3px 3px 6px rgba(220, 220, 220, 0.2), 3px -3px 6px rgba(220, 220, 220, 0.2), -3px -3px 6px rgba(255, 255, 255, 0.9),
+        3px 3px 8px rgba(220, 220, 220, 0.9), inset 1px 1px 2px rgba(255, 255, 255, 0.3), inset -1px -1px 2px rgba(220, 220, 220, 0.5);
+    }
+    [data-mode='dark'] &:hover {
+      box-shadow: -3px 3px 6px rgba(64, 64, 94, 0.1), 3px -3px 6px rgba(64, 64, 94, 0.1), -3px -3px 6px rgba(64, 64, 94, 0.5), 3px 3px 8px #40405e,
+        inset 1px 1px 2px rgba(64, 64, 94, 0.2), inset -1px -1px 2px rgba(64, 64, 94, 0.2);
     }
   }
   @media all and (max-width: 768px) {
@@ -119,9 +123,9 @@
   color: hsl(184, 84%, 36%);
   background-color: hsl(166, 100%, 96%);
   [data-mode='dark'] & {
-    border-color: hsl(184, 91%, 79%);
-    color: hsla(184, 84%, 76%, 0.7);
-    background-color: hsla(166, 100%, 66%, 0.5);
+    border-color: #98f4fa;
+    color: #fff;
+    background-color: #0f9fa9;
   }
 }
 .pendingChip {
@@ -129,8 +133,8 @@
   color: hsl(36, 100%, 50%);
   background-color: hsl(55, 100%, 91%);
   [data-mode='dark'] & {
-    border-color: hsl(36, 100%, 83%);
-    color: hsla(36, 100%, 90%, 0.7);
-    background-color: hsla(55, 100%, 61%, 0.5);
+    border-color: #ffdba6;
+    color: #fff;
+    background-color: #ff9900;
   }
 }
