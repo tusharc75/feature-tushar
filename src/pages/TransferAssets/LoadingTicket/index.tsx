@@ -89,6 +89,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [columns, setColumns] = useState(null);
+  const [newCols, setNewCols] = useState(null);
 
   useEffect(() => {
     if (transferAssetId) {
@@ -147,6 +148,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
       { field: 'loadingTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
     ];
+    const newCols = [
+      {
+        field: 'assetNumber',
+        headerName: 'Asset Number',
+      },
+      { field: 'product', headerName: 'Product Type' },
+      { field: 'productDescription', headerName: 'Product Description' },
+      { field: 'status', headerName: 'Status' },
+    ]
+    setNewCols(newCols);
     setColumns(column);
   };
 
@@ -353,7 +364,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       <Box display="flex" flexDirection={'row'} justifyContent={'flex-end'} mx={1} my={1}>
         <Box>
           {permissions?.transferAsset?.isRead && !isMobile && !isMobile && (
-            <PreviewDownload resource={RESOURCE_LABEL.transferAsset} referenceId={transferAssetId} columns={columns} />
+            <PreviewDownload resource={RESOURCE_LABEL.transferAsset} referenceId={transferAssetId} columns={newCols} />
           //   <Button
           //     variant={'outlined'}
           //     color="primary"
