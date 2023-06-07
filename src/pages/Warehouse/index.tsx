@@ -17,7 +17,7 @@ import routes from 'src/components/Helpers/Routes';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, sidebarResource } from 'src/constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, sidebarResource } from 'src/constants/helpers';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -70,9 +70,10 @@ const Warehouse = () => {
     state;
   const [sortOpen, setSortOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
+
   const [isAssigning, setIsAssigning] = useState(false);
-  const [wareHouseList, setWareHouseList] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [userAssignDialog, setUserAssignDialog] = useState(false);
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -117,9 +118,8 @@ const Warehouse = () => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['canDelete'] = permissions?.warehouse?.isDelete;
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['isChecked'] = getLocalStorageArrayData(localStorageSelectedRecords)?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.warehouse?.isUpdate;
-
           return finalObject;
         });
         if (appendRows) {
@@ -228,12 +228,18 @@ const Warehouse = () => {
   const handleAssignUser = (data) => {
     setIsAssigning(true);
     const user = data?.map((e) => e?._id);
+    const warehouse = getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id);
     axiosInstance()
-      .post(`${routes.warehouse.path}/user/assign`, { warehouse: wareHouseList, user })
-      .then((res) => {
+      .post(`${routes.warehouse.path}/user/assign`, { warehouse, user })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         localStorage.removeItem(localStorageSelectedRecords);
         fetchWarehouses();
-        setOpenDialog(false);
+        setUserAssignDialog(false);
         setIsAssigning(false);
       })
       .catch((error) => {
@@ -276,7 +282,7 @@ const Warehouse = () => {
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = selectedRecords.map((m) => m._id);
+      ids = getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id);
     }
     axiosInstance()
       .put(`/warehouse/remove`, { ids: ids })
@@ -284,7 +290,6 @@ const Warehouse = () => {
         fetchWarehouses();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        // setSelectedCategory([])
         setAnchorEl(null);
       })
       .catch((error) => {
@@ -335,8 +340,8 @@ const Warehouse = () => {
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
+            ids={getLocalStorageArrayData(localStorageSelectedRecords)?.length ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchWarehouses();
@@ -432,14 +437,13 @@ const Warehouse = () => {
                     color="default"
                     size="small"
                     onClick={openActions}
-                    disabled={selectedRecords.length ? false : true}
+                    disabled={getLocalStorageArrayData(localStorageSelectedRecords)?.length ? false : true}
                     aria-controls="action-menu"
                     className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                     endIcon={<ExpandMore />}
                   >
                     {isMobile && !isTablet ? '' : 'Actions'}
                   </Button>
-
                   <Menu
                     anchorEl={anchorEl}
                     keepMounted
@@ -455,7 +459,6 @@ const Warehouse = () => {
                     {permissions?.warehouse?.isDelete ? <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem> : null}
                     {permissions?.warehouse?.isUpdate && (
                       <MenuItem
-                        disabled={selectedRecords.length === 0}
                         onClick={() => {
                           if (selectedRecords.some((d) => d.isUpdate === false)) {
                             closeActions();
@@ -484,22 +487,11 @@ const Warehouse = () => {
                         Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
                       </MenuItem>
                     )}
-                    {user?.user?.brandPolicy?.warehouseAccessByUser && (
+                    {permissions?.warehouse?.isUpdate && user?.user?.brandPolicy?.warehouseAccessByUser && (
                       <MenuItem
-                        disabled={selectedRecords.length === 0}
                         onClick={() => {
-                          if (selectedRecords.some((d) => d.isUpdate === false)) {
-                            closeActions();
-                            setShowUpdateWarningConfirmBox(true);
-                          } else {
-                            closeActions();
-                            setOpenDialog(true);
-                            let selectedWarehouses = [];
-                            selectedRecords.map((current) => {
-                              selectedWarehouses.push(current._id);
-                            });
-                            setWareHouseList(selectedWarehouses);
-                          }
+                          closeActions();
+                          setUserAssignDialog(true);
                         }}
                       >
                         Assign Users &nbsp; <Chip size="small" label={selectedRecords.length} />
@@ -546,7 +538,7 @@ const Warehouse = () => {
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -570,18 +562,17 @@ const Warehouse = () => {
             />
           )
         ) : null}
-
-        {openDialog && (
+        {userAssignDialog && (
           <AssignUserDialog
             handleClose={() => {
-              setOpenDialog(false);
+              setUserAssignDialog(false);
             }}
             onSuccess={(data) => {
               handleAssignUser(data);
             }}
             reference={'warehouse'}
             isAssigning={isAssigning}
-            ignoreUsers={dataRows?.map((e) => e?._id) || []}
+            ignoreUsers={[]}
           />
         )}
         {showDeleteConfirmBox && (
