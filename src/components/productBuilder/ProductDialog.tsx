@@ -3,7 +3,6 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
-import ConfirmationDialog from '../Helpers/ConfirmationDialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -29,9 +28,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { useData } from '../../StateProvider/Provider';
 import { FaDiceOne } from 'react-icons/fa';
 import { uniq, map, orderBy, sortBy, isEqual } from 'lodash';
-import ManageAccountDialog from '../../pages/Account/ManageAccount';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
+
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
 const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, handleSaveProduct, stage }) => {
@@ -52,8 +49,6 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
   const [expanded, setExpanded] = useState({});
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
-
-  const [showAccountCreateDialog, setShowAccountCreateDialog] = useState(false);
 
   const {
     state: { permissions }
@@ -376,55 +371,10 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                               ? true
                                               : false
                                             : ['productCategory', 'productTemplate', 'entity', 'priceTemplate'].includes(field.fieldName)
-                                            ? true
-                                            : false
+                                              ? true
+                                              : false
                                         }
                                       />
-                                    ) : field.fieldName === 'supplier' ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                        <Box display="flex">
-                                          <FormTypes
-                                            {...field}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            onChange={(e, value) => {
-                                              setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            doNotShowInfoTooltip={true}
-                                          />
-                                          {permissions?.supplierAccount?.isCreate && (
-                                            <Grid>
-                                              <Tooltip title="Create Account" className="mt-1">
-                                                <IconButton
-                                                  onClick={() => {
-                                                    setShowAccountCreateDialog(true);
-                                                  }}
-                                                  size="small"
-                                                >
-                                                  <AddIcon color={'primary'} />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
-                                          )}
-                                          {field?.tooltipMessage ? (
-                                            <Grid>
-                                              <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                <InfoIcon color="disabled" />
-                                              </Tooltip>
-                                            </Grid>
-                                          ) : null}
-                                        </Box>
-                                      </Grid>
                                     ) : (
                                       <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                         <Box display="flex">
@@ -461,14 +411,14 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                                     ? true
                                                     : false
                                                   : ['productCategory', 'productTemplate', 'entity', 'priceTemplate'].includes(field.fieldName)
-                                                  ? true
-                                                  : false
+                                                    ? true
+                                                    : false
                                               }
                                               imageOrFileUploadCompletePercentage={
                                                 ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                                   ? (completePercentage) => {
-                                                      setUploadingImageOrFileProgress(completePercentage);
-                                                    }
+                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                  }
                                                   : null
                                               }
                                               setValues={setValues}
@@ -492,38 +442,6 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                           </Box>
                         </div>
                       ))}
-                    {showAccountCreateDialog && (
-                      <ManageAccountDialog
-                        open={showAccountCreateDialog}
-                        onClose={() => {
-                          setShowAccountCreateDialog(false);
-                        }}
-                        accountResource={'supplierAccount'}
-                        accountApi={'supplier-account'}
-                        isRedirectToDetailPage={false}
-                        onSuccess={({ data }) => {
-                          setShowAccountCreateDialog(false);
-                          if (data._id) {
-                            setFieldValue('supplier', data._id);
-                            const fields = [...productFields];
-                            fields.forEach((s) => {
-                              s.sectionFields.forEach((f: any) => {
-                                if (f.fieldName === 'supplier') {
-                                  f.option = [
-                                    ...f.option,
-                                    {
-                                      optionLabel: data?.accountName,
-                                      optionValue: data?._id
-                                    }
-                                  ];
-                                }
-                              });
-                            });
-                            setProductFields(fields);
-                          }
-                        }}
-                      />
-                    )}
                   </Form>
                 </Box>
               </CustomDialogContent>

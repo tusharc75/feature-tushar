@@ -12,27 +12,18 @@ import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
-  generateUniqueIdOnly,
-  getCollaboratorDropdownDataSource,
-  getOwnerDropdownDataSource,
   purchaseOrder,
   PURCHASE_ORDER_STATUS,
   setFieldsInAscendingOrder,
-  supplierAccount,
-  supplierContact
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
-import ManageAccountDialog from '../Account/ManageAccount';
-import ManageContactDialog from '../Contact/ManageContact';
 import { isEqual } from 'lodash';
 
 const ManagePurchaseOrder = ({
@@ -62,15 +53,6 @@ const ManagePurchaseOrder = ({
   const [cloneHeading, setCloneHeading] = useState('head');
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [accountData, setAccountData] = useState([]);
-  const [contactData, setContactData] = useState([]);
-
-  const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
-  const [ownerData, setOwnerData] = useState([]);
-  const [collaboratorData, setCollaboratorData] = useState([]);
-
-  const [showAddSupplierAccountDialog, setShowAddSupplierAccountDialog] = useState(false);
-  const [showAddSupplierContactDialog, setShowAddSupplierContactDialog] = useState(false);
 
   useEffect(() => {
     axiosInstance()
@@ -144,20 +126,6 @@ const ManagePurchaseOrder = ({
             values: createValues
           });
         }
-        const supplierAccountOptions = fieldsDataForCreate.find((d) => d.fieldName === 'supplierAccount');
-        if (supplierAccountOptions) {
-          setAccountData(supplierAccountOptions.option);
-        }
-        const supplierContactOptions = fieldsDataForCreate.find((d) => d.fieldName === 'supplierContact');
-        if (supplierAccountOptions) {
-          setContactData(supplierContactOptions.option);
-        }
-        let ownerCollaboratorOptions = fieldsDataForCreate.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
-        if (ownerCollaboratorOptions.length > 0) {
-          setOwnerCollaboratorData(ownerCollaboratorOptions[0].option);
-          setOwnerData(ownerCollaboratorOptions[0].option);
-          setCollaboratorData(ownerCollaboratorOptions[0].option);
-        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -204,14 +172,6 @@ const ManagePurchaseOrder = ({
           toastConfig.setToastConfig(error);
         });
     }
-  };
-
-  const onOwnerDropdownOpen = (selectedCollaborator) => {
-    setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData));
-  };
-
-  const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
-    setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData));
   };
 
   const handleScroll = (errors) => {
@@ -275,135 +235,7 @@ const ManagePurchaseOrder = ({
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field, index2) => (
                               <Grid key={index2} item xs={12} sm={6} md={6}>
-                                {field.fieldName === 'rentalJob' ? (
-                                  <FormTypes
-                                    isNew={Boolean(purchaseOrderId)}
-                                    {...field}
-                                    disabled={(Boolean(purchaseOrderId) && field.disableOnEdit && !isClone) || rentalManagementId}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    fieldData={field}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                  />
-                                ) : field.fieldName == 'supplierAccount' ? (
-                                  <Grid container spacing={1}>
-                                    <Grid
-                                      item
-                                      xs={permissions.supplierAccount?.isCreate ? 11 : 11}
-                                      sm={permissions.supplierAccount?.isCreate ? 11 : 11}
-                                      md={permissions.supplierAccount?.isCreate ? 11 : 11}
-                                    >
-                                      <FormTypes
-                                        {...field}
-                                        disabled={!isClone ? field?.disableOnEdit : false}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        fieldData={field}
-                                        type={field.type}
-                                        options={accountData}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        doNotShowInfoTooltip={true}
-                                        onChange={(e, value) => {
-                                          setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                          setFieldValue('supplierContact', '');
-                                        }}
-                                      />
-                                    </Grid>
-                                    {permissions.supplierAccount?.isCreate && (
-                                      <Grid item xs={1} sm={1} md={1}>
-                                        <Tooltip title="Create Account" className="mt-1">
-                                          <IconButton
-                                            onClick={() => {
-                                              setShowAddSupplierAccountDialog(true);
-                                            }}
-                                            disabled={!isClone ? field.disableOnEdit : false}
-                                            size="small"
-                                          >
-                                            <AddIcon color={isClone ? 'primary' : field.disableOnEdit ? 'disabled' : 'primary'} />
-                                          </IconButton>
-                                        </Tooltip>
-                                      </Grid>
-                                    )}
-                                    {field?.tooltipMessage ? (
-                                      <Grid item xs={1} sm={1} md={1}>
-                                        <Tooltip title={field?.tooltipMessage ?? ''}>
-                                          <InfoIcon color="disabled" />
-                                        </Tooltip>
-                                      </Grid>
-                                    ) : null}
-                                  </Grid>
-                                ) : field.fieldName === 'supplierContact' ? (
-                                  <Grid container spacing={1}>
-                                    <Grid
-                                      item
-                                      xs={permissions.supplierContact?.isCreate ? 11 : 11}
-                                      sm={permissions.supplierContact?.isCreate ? 11 : 11}
-                                      md={permissions.supplierContact?.isCreate ? 11 : 11}
-                                    >
-                                      <FormTypes
-                                        isNew={Boolean(purchaseOrderId)}
-                                        {...field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        fieldData={field}
-                                        type={field.type}
-                                        options={contactData.filter((d) => d.parentAccount === values['supplierAccount'])}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    </Grid>
-                                    {permissions.supplierContact?.isCreate && (
-                                      <Grid item xs={1} sm={1} md={1}>
-                                        <Tooltip title="Create Contact" className="mt-1">
-                                          <IconButton
-                                            onClick={() => {
-                                              setShowAddSupplierContactDialog(true);
-                                            }}
-                                            disabled={!isClone ? field.disableOnEdit : false}
-                                            size="small"
-                                          >
-                                            <AddIcon color={isClone ? 'primary' : field.disableOnEdit ? 'disabled' : 'primary'} />
-                                          </IconButton>
-                                        </Tooltip>
-                                      </Grid>
-                                    )}
-                                    {field?.tooltipMessage ? (
-                                      <Grid item xs={1} sm={1} md={1}>
-                                        <Tooltip title={field?.tooltipMessage ?? ''}>
-                                          <InfoIcon color="disabled" />
-                                        </Tooltip>
-                                      </Grid>
-                                    ) : null}
-                                  </Grid>
-                                ) : field.fieldName === 'deliveryDate' ? (
+                                {field.fieldName === 'deliveryDate' ? (
                                   <FormTypes
                                     {...field}
                                     disabled={Boolean(purchaseOrderId) && field.disableOnEdit && !isClone}
@@ -426,71 +258,11 @@ const ManagePurchaseOrder = ({
                                     tooltipMessage={field?.tooltipMessage}
                                     size="small"
                                   />
-                                ) : field.fieldName === 'owner' ? (
-                                  <FormTypes
-                                    {...field}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    fieldData={field}
-                                    type={field.type}
-                                    options={ownerData}
-                                    onChange={(e, val) => {
-                                      setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                      if (val && val.optionValue !== user?.user?._id) {
-                                        const checkOwnerAddedInCollaborator = values['collaborator'].find((d) => d?.optionValue === user?.user?._id);
-                                        if (!checkOwnerAddedInCollaborator) {
-                                          setFieldValue('collaborator', [
-                                            ...values['collaborator'],
-                                            collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                          ]);
-                                        }
-                                      }
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                    disabled={field.disableOnEdit}
-                                    onOpen={() => {
-                                      onOwnerDropdownOpen(values['collaborator']);
-                                    }}
-                                  />
-                                ) : field.fieldName === 'collaborator' ? (
-                                  <FormTypes
-                                    {...field}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    fieldData={field}
-                                    type={field.type}
-                                    options={collaboratorData}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                    onOpen={() => {
-                                      onCollabOwnerMultiselectOpen(values['owner']);
-                                    }}
-                                  />
                                 ) : (
                                   <FormTypes
                                     isNew={Boolean(purchaseOrderId)}
                                     {...field}
-                                    disabled={
-                                      (Boolean(purchaseOrderId) && field.disableOnEdit && !isClone) ||
-                                      field.fieldName === 'purchaseOrderNumber' ||
-                                      field.fieldName === 'status'
-                                    }
+                                    disabled={(Boolean(purchaseOrderId) && field.disableOnEdit && !isClone)}
                                     values={values}
                                     errors={errors}
                                     touched={touched}
@@ -559,68 +331,6 @@ const ManagePurchaseOrder = ({
                   }}
                 />
               ) : null}
-              {showAddSupplierAccountDialog && (
-                <ManageAccountDialog
-                  open={showAddSupplierAccountDialog}
-                  onClose={() => {
-                    setShowAddSupplierAccountDialog(false);
-                  }}
-                  id={null}
-                  accountResource={supplierAccount.accountResource}
-                  accountApi={supplierAccount.accountApi}
-                  isGetAccountData={true}
-                  onGetAddedAccount={({ data, addressDataSource }) => {
-                    setAccountData((prevState) => {
-                      return [
-                        ...prevState,
-                        {
-                          optionValue: data._id,
-                          optionLabel: data.accountName,
-                          order: accountData.length,
-                          default: false,
-                          billingAddress: data?.billingAddress,
-                          shippingAddress: data?.shippingAddress
-                        }
-                      ];
-                    });
-                    setFieldValue('supplierAccount', data._id);
-                    setFieldValue('supplierContact', '');
-                  }}
-                  isRedirectToDetailPage={false}
-                />
-              )}
-              {showAddSupplierContactDialog && (
-                <ManageContactDialog
-                  open={showAddSupplierContactDialog}
-                  onClose={() => setShowAddSupplierContactDialog(false)}
-                  onSuccess={(obj) => {
-                    if (obj?.data?.data) {
-                      setContactData((prevState) => {
-                        return [
-                          ...prevState,
-                          {
-                            optionValue: obj?.data?.data?._id,
-                            optionLabel: `${obj?.data?.data?.firstName} ${obj?.data?.data?.lastName}`,
-                            order: contactData.length,
-                            default: false,
-                            parentAccount: obj?.data?.data?.accountName
-                          }
-                        ];
-                      });
-                      setShowAddSupplierContactDialog(false);
-                      setFieldValue('supplierContact', obj?.data?.data?._id);
-                    }
-                  }}
-                  accountId={values['supplierAccount']}
-                  contactResource={supplierContact.contactResource}
-                  contactApi={supplierContact.contactApi}
-                  isRedirectToDetailPage={false}
-                  collaborators={collaboratorData}
-                  owner={ownerData}
-                  account={supplierAccount}
-                  isAccountFieldDisable={true}
-                />
-              )}
             </Fragment>
           )}
         </Formik>
