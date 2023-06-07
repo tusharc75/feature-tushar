@@ -42,8 +42,8 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false }
         if (k === 'qtyDisplay') {
           return 'qty';
         } else {
-          return k.split('_')[0];
-        }
+        return k.endsWith('_usd') ? k : k.split('_')[0];
+      }
       });
     if (PDFType === 'Regular') {
       setLoading('Regular');
