@@ -178,7 +178,7 @@ const MaterialHandling = () => {
                                 backgroundColor: 'var(--dark-secondary, white)',
                                 '--card-color-primary': 'var(--dark-primary-text, #2A3042)',
                                 '--card-color-secondary': 'var(--dark-secondary-text, #5B5B5B)',
-                                border: selectedWorkOrder === data ? '2px solid var(--active-border-color)' : '1px solid var(--common-border-color)',
+                                border: selectedWorkOrder === data ? '2.5px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
                                 borderRadius: '8px'
                               } as React.CSSProperties
                             }

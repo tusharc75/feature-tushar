@@ -16,7 +16,7 @@ export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export interface ModalContent {
-  title: string;
+  title: string | ReactElement;
   items?: any[] | null;
   icon: ReactElement;
 }

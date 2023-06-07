@@ -104,7 +104,12 @@ const Users = ({ warehouse }) => {
   const handleDelete = () => {
     axiosInstance()
       .put(`${routes.warehouse.path}/user/remove`, { warehouse, user: deleteRecord })
-      .then(() => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         localStorage.removeItem(localStorageSelectedRecords);
         fetchData();
         setShowDeleteConfirmBox(false);
@@ -144,7 +149,12 @@ const Users = ({ warehouse }) => {
     const user = data?.map((e) => e?._id);
     axiosInstance()
       .post(`${routes.warehouse.path}/user/assign`, { warehouse: [warehouse], user })
-      .then((res) => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         localStorage.removeItem(localStorageSelectedRecords);
         fetchData();
         setOpenDialog(false);

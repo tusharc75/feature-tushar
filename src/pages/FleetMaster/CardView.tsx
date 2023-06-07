@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     cursor: 'pointer',
     display: 'flex',
+    alignItems: 'center',
     gap: 20
   },
   leftContent: {
