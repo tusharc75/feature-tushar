@@ -114,6 +114,8 @@ const Request = ({ workOrder }) => {
                           variant="contained"
                           color="primary"
                           size="small"
+                          style={{ boxShadow: 'unset' }}
+                          className="no-shadow"
                           disabled={loading}
                           onClick={() => {
                             setQtyDialog({ open: true, status: MATERIAL_REQUEST_STATUS.processed, data: row });
