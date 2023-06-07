@@ -12,8 +12,6 @@ import {
   opportunity,
   setFieldsInAscendingOrder,
   formFieldNames,
-  getCollaboratorDropdownDataSource,
-  getOwnerDropdownDataSource,
 } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
@@ -67,13 +65,6 @@ export default function NewOpportunityProjectSales({
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
-
-  const [
-    ownerCollaboratorCommonDataSource,
-    setOwnerCollaboratorCommonDataSource,
-  ] = useState([]);
-  const [ownerDataSource, setOwnerDataSource] = useState([]);
-  const [collaboratorDataSource, setCollaboratorDataSource] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
@@ -86,21 +77,6 @@ export default function NewOpportunityProjectSales({
           setAdditionalFieldName(d.sectionName)
         }
       });
-    }
-
-    if (users && collaborators) {
-      setOwnerCollaboratorCommonDataSource(users);
-      setOwnerDataSource(users);
-      setCollaboratorDataSource(collaborators);
-    } else {
-      let ownerCollaboratorDropdownData = opportunityData.fields.filter(
-        (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
-      );
-      if (ownerCollaboratorDropdownData.length > 0) {
-        setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
-        setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
-        setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
-      }
     }
 
     setFormsData(setFieldsInAscendingOrder(opportunityData.fields));
@@ -222,24 +198,6 @@ export default function NewOpportunityProjectSales({
       });
   };
 
-  const onOwnerDropdownOpen = (selectedCollaborator) => {
-    setOwnerDataSource(
-      getOwnerDropdownDataSource(
-        selectedCollaborator,
-        ownerCollaboratorCommonDataSource
-      )
-    );
-  };
-
-  const onCollaboratorMultiselectOpen = (selectedOwnerId) => {
-    setCollaboratorDataSource(
-      getCollaboratorDropdownDataSource(
-        selectedOwnerId,
-        ownerCollaboratorCommonDataSource
-      )
-    );
-  };
-
   return (
     <>
       <Dialog
@@ -300,81 +258,7 @@ export default function NewOpportunityProjectSales({
                                       sm={6}
                                       md={6}
                                     >
-                                      {field.fieldName === "owner" ? (
-                                        <FormTypes
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={ownerDataSource}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onChange={(e, val) => {
-                                            setFieldValue(
-                                              field.fieldName,
-                                              val && val.optionValue
-                                                ? val.optionValue
-                                                : ""
-                                            );
-
-                                            if (
-                                              val &&
-                                              val.optionValue !== user?.user?._id
-                                            ) {
-                                              const checkOwnerAddedInCollaborator =
-                                                values["collaborator"].find(
-                                                  (d) =>
-                                                    d?.optionValue ===
-                                                    user?.user?._id
-                                                );
-                                              if (
-                                                !checkOwnerAddedInCollaborator
-                                              ) {
-                                                setFieldValue("collaborator", [
-                                                  ...values["collaborator"],
-                                                  collaboratorDataSource.find(
-                                                    (d) =>
-                                                      d?.optionValue ===
-                                                      user?.user?._id
-                                                  ).optionValue,
-                                                ]);
-                                              }
-                                            }
-                                          }}
-                                          onOpen={() => {
-                                            onOwnerDropdownOpen(
-                                              values["collaborator"]
-                                            );
-                                          }}
-                                        />
-                                      ) : field.fieldName === "collaborator" ? (
-                                        <FormTypes
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={collaboratorDataSource}
-                                          setFieldValue={setFieldValue}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onOpen={() =>
-                                            onCollaboratorMultiselectOpen(
-                                              values["owner"]
-                                            )
-                                          }
-                                        />
-                                      ) : field.fieldName === "probability" ? (
+                                      {field.fieldName === "probability" ? (
                                         <FormTypes
                                           // {...rest}
                                           values={values}
@@ -671,6 +555,8 @@ export default function NewOpportunityProjectSales({
                                                   }
                                                   : null
                                               }
+                                              fieldData={field}
+                                              fields={opportunityData?.fields}
                                             />
                                           )}
                                     </Grid>
