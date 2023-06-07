@@ -17,13 +17,13 @@ import ManageWellMaster from 'src/pages/WellMaster/ManageWellMaster';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 import ManageStorageLocation from 'src/pages/StorageLocation/ManageStorageLocation';
 import ManageCompetencyType from 'src/pages/CompetencyType/ManageCompetencyType';
-import { camelCase } from 'lodash';
 import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
 import ManageAccount from 'src/pages/Account/ManageAccount';
 import ManageContact from 'src/pages/Contact/ManageContact';
 import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
 
-function dropdownOptions(options: string[], values, fields, fieldData) {
+function dropdownOptions(options, values, fields, fieldData) {
+  
   if (!fieldData?.lookupDependentOn || fieldData?.lookupDependentOn === '') return options || [];
 
   const optionsToShow = [];
@@ -52,7 +52,6 @@ function dropdownOptions(options: string[], values, fields, fieldData) {
 function Dropdown({
   InfoLabel,
   fieldData,
-  addAdditionalOption,
   rest,
   option,
   values,
@@ -63,14 +62,10 @@ function Dropdown({
   addFieldOption,
   setOptionsList,
   handleChange,
-  filter,
   getLabel,
   touched,
   errors,
   required,
-  optionSaveDialog,
-  setOptionSaveDialog,
-  AddOptionDialog,
   setFieldValue,
   fields = []
 }) {
@@ -94,27 +89,22 @@ function Dropdown({
               <Autocomplete
                 {...rest}
                 multiple
-                freeSolo={!fieldData?.lookup}
                 disableCloseOnSelect={true}
                 options={dropdownOptions(option, values, fields, fieldData)}
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                value={
-                  values[name]
-                    ? [...dropdownOptions(option, values, fields, fieldData)].filter((data: any) => values[name].includes(data.optionValue))
-                    : []
-                }
+                value={values[name] ? [...dropdownOptions(option, values, fields, fieldData)].filter((data: any) => values[name].includes(data.optionValue)) : []}
                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                 onChange={
                   onChange
                     ? onChange
                     : (e, value: any, reason) => {
-                        if (setFieldValue) {
-                          setFieldValue(
-                            name,
-                            value.map((val) => val.optionValue)
-                          );
-                        }
+                      if (setFieldValue) {
+                        setFieldValue(
+                          name,
+                          value.map((val) => val.optionValue)
+                        );
                       }
+                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -135,42 +125,20 @@ function Dropdown({
                 {...rest}
                 disabled={fieldData?.isUneditable || rest?.disabled}
                 options={dropdownOptions(option, values, fields, fieldData) || []}
-                freeSolo={type === 'dropDown' && !fieldData?.lookup}
                 getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                 getOptionSelected={(option: any, val) => option.optionValue === val}
                 value={[...dropdownOptions(option, values, fields, fieldData)].find((data: any) => data.optionValue === values[name]) || ''}
-                onChange={
-                  onChange
-                    ? onChange
-                    : (e, val) => {
-                        if (setFieldValue) {
-                          handleChange(name, val && val.optionValue ? val.optionValue : '');
-                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                          fieldChange?.forEach((val: any) => {
-                            setFieldValue(val.fieldName, val.value);
-                          });
-                        }
-                      }
-                }
-                filterOptions={(options, params) => {
-                  const filtered = filter(options, params);
-
-                  if (
-                    params.inputValue !== '' &&
-                    !option.find((o) => o?.optionValue.includes(params.inputValue)) &&
-                    !fieldData?.lookup &&
-                    (addAdditionalOption || fieldData?.addAdditionalOption)
-                  ) {
-                    filtered.push({
-                      order: option.length,
-                      default: false,
-                      optionLabel: `Add "${params.inputValue}"`,
-                      optionValue: params.inputValue
-                    });
+                onChange={onChange ? onChange
+                  : (e, val) => {
+                    if (setFieldValue) {
+                      handleChange(name, val && val.optionValue ? val.optionValue : '');
+                      const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                      fieldChange?.forEach((val: any) => {
+                        setFieldValue(val.fieldName, val.value);
+                      });
+                    }
                   }
-
-                  return filtered;
-                }}
+                }
                 selectOnFocus
                 clearOnBlur
                 handleHomeEndKeys
@@ -191,29 +159,6 @@ function Dropdown({
             )}
           </InfoLabel>
         </Box>
-        {!fieldData?.lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-          <Box>
-            <HtmlTooltip title={`Add ${fieldData?.lookupResource}`} className="formActionButton">
-              <>
-                <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
-                  <AddCircleIcon />
-                </IconButton>
-                {optionSaveDialog && (
-                  <AddOptionDialog
-                    values={values}
-                    handleChange={handleChange}
-                    name={name}
-                    label={label}
-                    addFieldOption={addFieldOption}
-                    options={option}
-                    setOptions={setOptionsList}
-                    setOpen={setOptionSaveDialog}
-                  />
-                )}
-              </>
-            </HtmlTooltip>
-          </Box>
-        )}
         {rest?.hidelookupAddButton ? null : (
           <Fragment>
             {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.wellMaster && permissions?.wellMaster?.isCreate && (
@@ -633,7 +578,6 @@ function Dropdown({
                               parentAccount: data?.data?.accountName,
                               order: option.length
                             };
-                            console.log('supplierContact', tempNewOption, data);
                             addFieldOption(tempNewOption);
                             setOptionsList([tempNewOption, ...option]);
                             handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');

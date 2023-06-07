@@ -11,12 +11,8 @@ import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
-  customerAccount,
-  customerContact,
-  getCollaboratorDropdownDataSource,
   getObjKeys,
   getObjKeysWithValues,
-  getOwnerDropdownDataSource,
   salesOrder,
   setFieldsInAscendingOrder,
   yupSchema,
@@ -28,14 +24,11 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from 'react-icons/fa';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
-import ManageAccountDialog from '../../Account/ManageAccount';
-import ManageContactDialog from '../../Contact/ManageContact';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, onClose, onSuccess, open }) => {
+  
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -44,112 +37,16 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
-  const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
-  const [ownerData, setOwnerData] = useState([]);
-  const [collaboratorData, setCollaboratorData] = useState([]);
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
-  const [contactData, setContactData] = useState([]);
-  const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
-  const [showAddCustomerContactDialog, setShowAddCustomerContactDialog] = useState(false);
-
-  const [accountData, setAccountData] = useState([]);
-  const [customerContactMainDataSource, setCustomerContactMainDataSource] = useState([]);
-  const [customerContactDataSource, setCustomerContactDataSource] = useState([]);
-
-  const [salesDetails, setSalesDetails] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
-  const [countryBillToDropDown, setCountryBillToDropDown] = useState([]);
-  const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
-  const [countryBillToMainData, setCountryBillToMainData] = useState([]);
-  const [countrySellToMainData, setCountrySellToMainData] = useState([]);
-  const [fields, setFields] = useState(null);
-
-  const updateAccountDropdown = (data) => {
-    const entityFields = initialData.fields;
-    const customerAccountNameFieldIndex = entityFields.findIndex((d) => d.fieldName === 'customerAccount');
-    if (customerAccountNameFieldIndex > -1) {
-      entityFields[customerAccountNameFieldIndex].option = [
-        ...entityFields[customerAccountNameFieldIndex].option,
-        {
-          optionValue: data._id,
-          optionLabel: data.accountName,
-          order: entityFields[customerAccountNameFieldIndex].option.length,
-          default: false
-        }
-      ];
-      setAccountData(entityFields[customerAccountNameFieldIndex].option);
-    }
-  };
-
-  const updateContactDropdown = (data) => {
-    const entityFields = initialData.fields;
-    const customerContactNameFieldIndex = entityFields.findIndex((d) => d.fieldName === 'customerContact');
-    if (customerContactNameFieldIndex > -1) {
-      const newCustomer = {
-        optionValue: data._id,
-        optionLabel: `${data.firstName} ${data.lastName}`,
-        order: entityFields[customerContactNameFieldIndex].option.length,
-        default: false,
-        parentAccount: data.accountName
-      };
-      entityFields[customerContactNameFieldIndex].option = [...entityFields[customerContactNameFieldIndex].option, newCustomer];
-      setCustomerContactMainDataSource(entityFields[customerContactNameFieldIndex].option);
-      setCustomerContactDataSource((prevState) => [...prevState, newCustomer]);
-    }
-  };
 
   useEffect(() => {
-    const ownerCollabOptions = initialData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
-    if (ownerCollabOptions.length > 0) {
-      setOwnerCollaboratorData(ownerCollabOptions[0].option);
-      setOwnerData(ownerCollabOptions[0].option);
-      setCollaboratorData(ownerCollabOptions[0].option);
-    }
-    let customerAccountOptions = initialData.fields.find((d) => d.fieldName === 'customerAccount');
-    if (customerAccountOptions) {
-      setAccountData(customerAccountOptions.option);
-    }
-    let customerContactOptions = initialData.fields.find((d) => d.fieldName === 'customerContact');
-    if (customerContactOptions) {
-      setContactData(customerContactOptions.option);
-    }
-    const customerContactDropdownData = initialData.fields.find((d) => d.fieldName === 'customerContact');
-    const countryBillToDropdownData = initialData.fields.find((d) => d.fieldName === 'billingAddress');
-    if (countryBillToDropdownData) {
-      setCountryBillToMainData(countryBillToDropdownData.option);
-      setCountryBillToDropDown(countryBillToDropdownData.option);
-    }
-    const countrySellToDropdownData = initialData.fields.find((d) => d.fieldName === 'shippingAddress');
-    if (countryBillToDropdownData) {
-      setCountrySellToMainData(countrySellToDropdownData.option);
-      setCountrySellToDropDown(countrySellToDropdownData.option);
-    }
-    if (customerContactDropdownData) {
-      setCustomerContactMainDataSource(customerContactDropdownData.option);
-      if (salesOrderId) {
-        setCustomerContactDataSource(
-          customerContactDropdownData.option.filter((d) => d.parentAccount === salesOrderData?.customerAccount.optionValue)
-        );
-      }
-    }
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
   }, [initialData.fields]);
 
-  const onOwnerDropdownOpen = (selectedCollaborator) => {
-    setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData));
-  };
-
-  const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
-    setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData));
-  };
-
-  const onCustomerContactDropdownOpen = (selectedAccount) => {
-    setCustomerContactDataSource(customerContactMainDataSource.filter((d) => d.parentAccount === selectedAccount));
-  };
 
   useEffect(() => {
     setLoading(true);
@@ -161,7 +58,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
       let fieldData;
       const response: any = await axiosInstance().get('/field?resource=Sales Order');
       fieldData = response?.data?.data;
-      setFields(fieldData);
+
       fieldData = fieldData?.filter((e) => !['quotation'].includes(e?.fieldData?.fieldName));
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -186,7 +83,6 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
             });
             setLoading(false);
           } else {
-            setSalesDetails(data);
             setInitialData({
               fields: fieldsDataForUpdate,
               values: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -262,24 +158,6 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
     }
   };
 
-  const onCountrySellToDropDownOpen = (selectedAccount) => {
-    let filterAddress = accountData.find((d) => d.optionValue === selectedAccount)?.shippingAddress;
-    if (filterAddress) {
-      setCountrySellToDropDown(countrySellToMainData.filter((d) => filterAddress?.some((u) => u === d.optionValue)));
-    } else {
-      setCountrySellToDropDown([]);
-    }
-  };
-
-  const onCountryBillToDropDownOpen = (selectedAccount) => {
-    let filterAddress = accountData.find((d) => d.optionValue === selectedAccount)?.billingAddress;
-    if (filterAddress) {
-      setCountryBillToDropDown(countryBillToMainData.filter((d) => filterAddress?.some((u) => u === d.optionValue)));
-    } else {
-      setCountryBillToDropDown([]);
-    }
-  };
-
   function validate(values) {
     const errors = {};
     return errors;
@@ -344,7 +222,6 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                                 {form.sectionFields.map((field) => (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                     <FormTypes
-                                      // {...rest}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -415,47 +292,6 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                   }}
                 />
               ) : null}
-              {showAddCustomerAccountDialog && (
-                <ManageAccountDialog
-                  open={showAddCustomerAccountDialog}
-                  onClose={() => {
-                    setShowAddCustomerAccountDialog(false);
-                  }}
-                  id={null}
-                  accountResource={customerAccount.accountResource}
-                  accountApi={customerAccount.accountApi}
-                  isGetAccountData={true}
-                  onGetAddedAccount={({ data }) => {
-                    updateAccountDropdown(data);
-
-                    setFieldValue('customerAccount', data._id);
-                    setFieldValue('customerContact', '');
-                  }}
-                  isRedirectToDetailPage={false}
-                />
-              )}
-              {showAddCustomerContactDialog && (
-                <ManageContactDialog
-                  open={showAddCustomerContactDialog}
-                  onClose={() => setShowAddCustomerContactDialog(false)}
-                  onSuccess={(obj) => {
-                    if (obj) {
-                      setShowAddCustomerContactDialog(false);
-                      updateContactDropdown(obj.data.data);
-
-                      setFieldValue('customerContact', obj.id);
-                    }
-                  }}
-                  accountId={values['customerAccount']}
-                  contactResource={customerContact.contactResource}
-                  contactApi={customerContact.contactApi}
-                  isRedirectToDetailPage={false}
-                  collaborators={collaboratorData}
-                  owner={ownerData}
-                  account={customerAccount}
-                  isAccountFieldDisable={true}
-                />
-              )}
             </Fragment>
           )}
         </Formik>
