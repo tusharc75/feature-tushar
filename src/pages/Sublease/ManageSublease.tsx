@@ -13,29 +13,20 @@ import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
   generateUniqueIdOnly,
-  getCollaboratorDropdownDataSource,
-  getOwnerDropdownDataSource,
   sublease,
   setFieldsInAscendingOrder,
-  supplierAccount,
-  supplierContact,
   SUBLEASE_STATUS
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
-import ManageAccountDialog from '../Account/ManageAccount';
-import ManageContactDialog from '../Contact/ManageContact';
 import { isEqual } from 'lodash';
 import moment from 'moment';
-import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
 
 const ManageSublease = ({
   isClone = false,
@@ -58,24 +49,7 @@ const ManageSublease = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
   const [subleaseData, setSubleaseData] = useState(null);
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [supplierData, setSupplierData] = useState([]);
-  const [contactData, setContactData] = useState([]);
-  const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
-  const [ownerData, setOwnerData] = useState([]);
-  const [collaboratorData, setCollaboratorData] = useState([]);
-
-  const [showAddSupplierAccountDialog, setShowAddSupplierAccountDialog] = useState(false);
-  const [showAddSupplierContactDialog, setShowAddSupplierContactDialog] = useState(false);
-
-  const [addressData, setAddressData] = useState([]);
-  const [shippingAddress, setShippingAddress] = useState([]);
-  const [deliveryToAddress, setDeliveryToAddress] = useState([]);
-
-  const [showAddressDialog, setShowAddressDialog] = useState(false);
-  const [addressType, setAddressType] = useState('');
-  const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
 
   useEffect(() => {
     axiosInstance()
@@ -84,11 +58,6 @@ const ManageSublease = ({
         data = data.filter((d) => !['rentalJob'].includes(d.fieldData.fieldName));
         let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        data?.forEach((e: any) => {
-          if (e?.fieldData?.fieldName === 'warehouse' && e?.fieldData?.option) {
-            setOptionsPlantsEntity(e?.fieldData?.option);
-          }
-        });
         if (subleaseId) {
           axiosInstance()
             .get(`${sublease.api}/` + subleaseId)
@@ -116,6 +85,13 @@ const ManageSublease = ({
                 }
                 if (data?.actualEndDate && data?.actualEndDate === '') {
                   fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !['actualEndDate'].includes(obj.fieldName));
+                }
+                if (![SUBLEASE_STATUS.new, SUBLEASE_STATUS.inProgress].includes(data?.status)) {
+                  fieldsDataForUpdate?.forEach((e) => {
+                    if (e.fieldName === 'supplierAccount') {
+                      e.disableOnEdit = true;
+                    }
+                  })
                 }
                 setInitialData({
                   fields: fieldsDataForUpdate,
@@ -165,28 +141,6 @@ const ManageSublease = ({
             fields: fieldsDataForCreate,
             values: createValues
           });
-        }
-        let ownerCollaboratorOptions = fieldsDataForCreate.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
-        const supplierAccountOptions = fieldsDataForCreate.find((d) => d.fieldName === 'supplierAccount');
-        if (supplierAccountOptions) {
-          setSupplierData(supplierAccountOptions.option);
-        }
-
-        const supplierContactOptions = fieldsDataForCreate.find((d) => d.fieldName === 'supplierContact');
-        if (supplierAccountOptions) {
-          setContactData(supplierContactOptions.option);
-        }
-        if (ownerCollaboratorOptions.length > 0) {
-          setOwnerCollaboratorData(ownerCollaboratorOptions[0].option);
-          setOwnerData(ownerCollaboratorOptions[0].option);
-          setCollaboratorData(ownerCollaboratorOptions[0].option);
-        }
-
-        const allAddressData = fieldsDataForCreate.find((d) => d.fieldName === 'shippingAddress');
-        if (allAddressData) {
-          setAddressData(allAddressData.option);
-          setShippingAddress(allAddressData.option);
-          setDeliveryToAddress(allAddressData.option);
         }
       })
       .catch((error) => {
@@ -249,23 +203,6 @@ const ManageSublease = ({
           setLoading(false);
           toastConfig.setToastConfig(error);
         });
-    }
-  };
-
-  const onOwnerDropdownOpen = (selectedCollaborator) => {
-    setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData));
-  };
-
-  const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
-    setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData));
-  };
-
-  const onShippingAddressOpen = (supplierId, shippingAddress) => {
-    let filterAddress = supplierData.find((d) => d.optionValue === supplierId)?.shippingAddress;
-    if (filterAddress || shippingAddress) {
-      setShippingAddress(addressData.filter((d) => filterAddress?.some((u) => u === d.optionValue) || d.optionValue === shippingAddress));
-    } else {
-      setShippingAddress([]);
     }
   };
 
@@ -351,170 +288,7 @@ const ManageSublease = ({
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field, index2) => (
                               <Grid key={index2} item xs={12} sm={6} md={6}>
-                                {field.fieldName == 'supplierAccount' ? (
-                                  <Grid container spacing={1}>
-                                    <Grid
-                                      item
-                                      xs={permissions.supplierAccount?.isCreate ? 11 : 11}
-                                      sm={permissions.supplierAccount?.isCreate ? 11 : 11}
-                                      md={permissions.supplierAccount?.isCreate ? 11 : 11}
-                                    >
-                                      <FormTypes
-                                        {...field}
-                                        fieldData={field}
-                                        disabled={[SUBLEASE_STATUS.new, SUBLEASE_STATUS.inProgress].includes(values?.status) ? false : true}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={supplierData}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        doNotShowInfoTooltip={true}
-                                        onChange={(e, value) => {
-                                          setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                          setFieldValue('supplierContact', '');
-                                          setFieldValue('shippingAddress', '');
-                                        }}
-                                      />
-                                    </Grid>
-                                    {permissions.supplierAccount?.isCreate && (
-                                      <Grid item xs={1} sm={1} md={1}>
-                                        <Tooltip title="Create Account" className="mt-1">
-                                          <IconButton
-                                            onClick={() => {
-                                              setShowAddSupplierAccountDialog(true);
-                                            }}
-                                            disabled={!isClone ? field.disableOnEdit : false}
-                                            size="small"
-                                          >
-                                            <AddIcon color={isClone ? 'primary' : field.disableOnEdit ? 'disabled' : 'primary'} />
-                                          </IconButton>
-                                        </Tooltip>
-                                      </Grid>
-                                    )}
-                                    {field?.tooltipMessage ? (
-                                      <Grid item xs={1} sm={1} md={1}>
-                                        <Tooltip title={field?.tooltipMessage ?? ''}>
-                                          <InfoIcon color="disabled" />
-                                        </Tooltip>
-                                      </Grid>
-                                    ) : null}
-                                  </Grid>
-                                ) : field.fieldName === 'supplierContact' ? (
-                                  <Grid container spacing={1}>
-                                    <Grid
-                                      item
-                                      xs={permissions.supplierContact?.isCreate ? 11 : 11}
-                                      sm={permissions.supplierContact?.isCreate ? 11 : 11}
-                                      md={permissions.supplierContact?.isCreate ? 11 : 11}
-                                    >
-                                      <FormTypes
-                                        isNew={Boolean(subleaseId)}
-                                        {...field}
-                                        fieldData={field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={contactData.filter((d) => d.parentAccount === values['supplierAccount'])}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    </Grid>
-                                    {permissions.supplierContact?.isCreate && (
-                                      <Grid item xs={1} sm={1} md={1}>
-                                        <Tooltip title="Create Contact" className="mt-1">
-                                          <IconButton
-                                            onClick={() => {
-                                              setShowAddSupplierContactDialog(true);
-                                            }}
-                                            disabled={!isClone ? field.disableOnEdit : false}
-                                            size="small"
-                                          >
-                                            <AddIcon color={isClone ? 'primary' : field.disableOnEdit ? 'disabled' : 'primary'} />
-                                          </IconButton>
-                                        </Tooltip>
-                                      </Grid>
-                                    )}
-                                    {field?.tooltipMessage ? (
-                                      <Grid item xs={1} sm={1} md={1}>
-                                        <Tooltip title={field?.tooltipMessage ?? ''}>
-                                          <InfoIcon color="disabled" />
-                                        </Tooltip>
-                                      </Grid>
-                                    ) : null}
-                                  </Grid>
-                                ) : field.fieldName === 'owner' ? (
-                                  <FormTypes
-                                    {...field}
-                                    values={values}
-                                    fieldData={field}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={ownerData}
-                                    onChange={(e, val) => {
-                                      setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                      if (val && val.optionValue !== user?.user?._id) {
-                                        const checkOwnerAddedInCollaborator = values['collaborator'].find((d) => d?.optionValue === user?.user?._id);
-                                        if (!checkOwnerAddedInCollaborator) {
-                                          setFieldValue('collaborator', [
-                                            ...values['collaborator'],
-                                            collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                          ]);
-                                        }
-                                      }
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                    disabled={field.disableOnEdit}
-                                    onOpen={() => {
-                                      onOwnerDropdownOpen(values['collaborator']);
-                                    }}
-                                  />
-                                ) : field.fieldName === 'collaborator' ? (
-                                  <FormTypes
-                                    {...field}
-                                    values={values}
-                                    errors={errors}
-                                    fieldData={field}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={collaboratorData}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                    onOpen={() => {
-                                      onCollabOwnerMultiselectOpen(values['owner']);
-                                    }}
-                                  />
-                                ) : field.fieldName === 'estimateStartDate' ? (
+                                {field.fieldName === 'estimateStartDate' ? (
                                   <FormTypes
                                     {...field}
                                     values={values}
@@ -572,66 +346,6 @@ const ManageSublease = ({
                                     tooltipMessage={field?.tooltipMessage}
                                     size="small"
                                   />
-                                ) : field.fieldName === 'plant' || field.fieldName === 'warehouse' ? (
-                                  <FormTypes
-                                    {...field}
-                                    values={values}
-                                    fieldData={field}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={optionsPlantsEntity}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                  />
-                                ) : field.fieldName === 'shippingAddress' ? (
-                                  <Box display="flex">
-                                    <Box flexGrow={1}>
-                                      <FormTypes
-                                        {...field}
-                                        disabled={Boolean(subleaseId) && field.disableOnEdit && !isClone}
-                                        fieldData={field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={shippingAddress}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onOpen={() => onShippingAddressOpen(values['supplierAccount'], values['shippingAddress'])}
-                                      />
-                                    </Box>
-                                    <Box>
-                                      <Tooltip title={`Add ${field.fieldLabel}`} className="mt-1">
-                                        <IconButton
-                                          onClick={() => {
-                                            setShowAddressDialog(true);
-                                            setAddressType('shippingAddress');
-                                          }}
-                                          disabled={field.disableOnEdit}
-                                          size="small"
-                                        >
-                                          <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
-                                        </IconButton>
-                                      </Tooltip>
-                                    </Box>
-                                  </Box>
                                 ) : (
                                   <FormTypes
                                     isNew={Boolean(subleaseId)}
@@ -709,112 +423,6 @@ const ManageSublease = ({
                   }}
                 />
               ) : null}
-              {showAddSupplierAccountDialog && (
-                <ManageAccountDialog
-                  open={showAddSupplierAccountDialog}
-                  onClose={() => {
-                    setShowAddSupplierAccountDialog(false);
-                  }}
-                  id={null}
-                  accountResource={supplierAccount.accountResource}
-                  accountApi={supplierAccount.accountApi}
-                  isGetAccountData={true}
-                  onGetAddedAccount={({ data, addressDataSource }) => {
-                    setSupplierData((prevState) => {
-                      return [
-                        ...prevState,
-                        {
-                          optionValue: data._id,
-                          optionLabel: data.accountName,
-                          order: supplierData.length,
-                          default: false,
-                          billingAddress: data?.billingAddress,
-                          shippingAddress: data?.shippingAddress
-                        }
-                      ];
-                    });
-                    setFieldValue('supplierAccount', data._id);
-                    setFieldValue('supplierContact', '');
-                    setFieldValue('shippingAddress', '');
-                  }}
-                  isRedirectToDetailPage={false}
-                />
-              )}
-              {showAddSupplierContactDialog && (
-                <ManageContactDialog
-                  open={showAddSupplierContactDialog}
-                  onClose={() => setShowAddSupplierContactDialog(false)}
-                  onSuccess={(obj) => {
-                    if (obj?.data?.data) {
-                      setContactData((prevState) => {
-                        return [
-                          ...prevState,
-                          {
-                            optionValue: obj?.data?.data?._id,
-                            optionLabel: `${obj?.data?.data?.firstName} ${obj?.data?.data?.lastName}`,
-                            order: contactData.length,
-                            default: false,
-                            parentAccount: obj?.data?.data?.accountName
-                          }
-                        ];
-                      });
-                      setShowAddSupplierContactDialog(false);
-                      setFieldValue('supplierContact', obj?.data?.data?._id);
-                    }
-                  }}
-                  accountId={values['supplierAccount']}
-                  contactResource={supplierContact.contactResource}
-                  contactApi={supplierContact.contactApi}
-                  isRedirectToDetailPage={false}
-                  collaborators={collaboratorData}
-                  owner={ownerData}
-                  account={supplierAccount}
-                  isAccountFieldDisable={true}
-                />
-              )}
-
-              {showAddressDialog && (
-                <ManageAddressDialog
-                  onClose={() => {
-                    setShowAddressDialog(false);
-                  }}
-                  onSuccess={(obj) => {
-                    if (obj) {
-                      setShowAddressDialog(false);
-                      if (obj?.isAlreadyExist === true) {
-                        let tempAddress =
-                          addressType === 'shippingAddress'
-                            ? addressData.find((d) => d?.optionLabel === obj?.fullAddress)
-                            : addressData.find((d) => d?.optionLabel === obj?.fullAddress);
-                        onShippingAddressOpen(values.supplierAccount, tempAddress?.optionValue);
-
-                        setFieldValue(addressType, tempAddress?.optionValue);
-                      } else {
-                        setAddressData((prevState) => [
-                          ...prevState,
-                          {
-                            default: false,
-                            optionLabel: obj?.fullAddress,
-                            optionValue: obj._id,
-                            order: addressData.length + 1
-                          }
-                        ]);
-                        setShippingAddress((prevState) => [
-                          ...prevState,
-                          {
-                            default: false,
-                            optionLabel: obj?.fullAddress,
-                            optionValue: obj._id,
-                            order: shippingAddress.length + 1
-                          }
-                        ]);
-
-                        setFieldValue(addressType, obj._id);
-                      }
-                    }
-                  }}
-                />
-              )}
             </Fragment>
           )}
         </Formik>
