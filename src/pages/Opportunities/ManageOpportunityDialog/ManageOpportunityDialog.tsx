@@ -64,14 +64,8 @@ export default function ManageOpportunityDialog({
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
-  const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
-  const [ownerData, setOwnerData] = useState([]);
-  const [collaboratorData, setCollaboratorData] = useState([]);
-  const [supplierData, setSupplierData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
-  const [showAddSupplierAccountDialog, setShowAddSupplierAccountDialog] = useState(false);
   const [accountData, setAccountData] = useState([]);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
@@ -117,12 +111,6 @@ export default function ManageOpportunityDialog({
         }
       }
     }
-    let ownerCollaboratorOptions = initialData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
-    if (ownerCollaboratorOptions.length > 0) {
-      setOwnerCollaboratorData(ownerCollaboratorOptions[0].option);
-      setOwnerData(ownerCollaboratorOptions[0].option);
-      setCollaboratorData(ownerCollaboratorOptions[0].option);
-    }
 
     let customerAccountOptions = initialData.fields.find((d) => d.fieldName === 'customerAccount');
     if (customerAccountOptions) {
@@ -130,28 +118,13 @@ export default function ManageOpportunityDialog({
     }
 
     let supplierAccountOptions = initialData.fields.find((d) => d.fieldName === 'supplierAccount');
-    if (supplierAccountOptions) {
-      setSupplierData(supplierAccountOptions.option);
-    }
 
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
 
     return () => {
-      setOwnerCollaboratorData([]);
-      setOwnerData([]);
-      setCollaboratorData([]);
       setAccountData([]);
-      setSupplierData([]);
     };
   }, [initialData.fields]);
-
-  const onOwnerDropdownOpen = (selectedCollaborator) => {
-    setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData));
-  };
-
-  const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
-    setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData));
-  };
 
   useEffect(() => {
     getOpportunityFields();
@@ -435,129 +408,7 @@ export default function ManageOpportunityDialog({
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field, index2) => (
                                     <Grid key={index2} item xs={12} sm={6} md={6}>
-                                      {field.fieldName == 'customerAccount' ? (
-                                        <Grid container spacing={1}>
-                                          <Grid
-                                            item
-                                            xs={permissions.customerAccount.isCreate ? 11 : 11}
-                                            sm={permissions.customerAccount.isCreate ? 11 : 11}
-                                            md={permissions.customerAccount.isCreate ? 11 : 11}
-                                          >
-                                            <FormTypes
-                                              isNew={isNew}
-                                              {...field}
-                                              disabled={disableOwnerAndAccount || (!isNew && field.disableOnEdit)}
-                                              values={values}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              options={accountData}
-                                              onChange={(e, value) => {
-                                                setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                                if (initialData?.fields?.some((e) => e.fieldName === 'marketSegment')) {
-                                                  setFieldValue('marketSegment', value?.marketSegment ?? '');
-                                                  marketSegmentChange(value?.marketSegment ?? '');
-                                                }
-                                                if (initialData?.fields?.some((e) => e.fieldName === 'subMarketSegment')) {
-                                                  setFieldValue('subMarketSegment', value?.subMarketSegment ?? '');
-                                                }
-                                                if (initialData?.fields?.some((e) => e.fieldName === 'countryBillTo')) {
-                                                  setFieldValue('countryBillTo', value?.billingAddress?.length > 0 ? value?.billingAddress : []);
-                                                }
-                                                if (initialData?.fields?.some((e) => e.fieldName === 'countrySellTo')) {
-                                                  setFieldValue('countrySellTo', value?.shippingAddress?.length > 0 ? value?.shippingAddress : []);
-                                                }
-                                              }}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={field?.isTooltip || false}
-                                              tooltipMessage={field?.tooltipMessage}
-                                              size="small"
-                                              doNotShowInfoTooltip={true}
-                                            />
-                                          </Grid>
-                                          {permissions.customerAccount.isCreate && !accountId && (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Create Account" className="mt-1">
-                                                <IconButton
-                                                  onClick={() => {
-                                                    setShowAddCustomerAccountDialog(true);
-                                                  }}
-                                                  disabled={disableOwnerAndAccount || (!isNew && field.disableOnEdit)}
-                                                  size="small"
-                                                >
-                                                  <AddIcon
-                                                    color={disableOwnerAndAccount || (!isNew && field.disableOnEdit) ? 'disabled' : 'primary'}
-                                                  />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
-                                          )}
-                                          {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                <InfoIcon color="disabled" />
-                                              </Tooltip>
-                                            </Grid>
-                                          ) : null}
-                                        </Grid>
-                                      ) : field.fieldName === 'supplierAccount' ? (
-                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                          <Grid container spacing={1}>
-                                            <Grid
-                                              item
-                                              xs={permissions.supplierAccount?.isCreate ? 11 : 11}
-                                              sm={permissions.supplierAccount?.isCreate ? 11 : 11}
-                                              md={permissions.supplierAccount?.isCreate ? 11 : 11}
-                                            >
-                                              <FormTypes
-                                                isNew={isNew}
-                                                {...field}
-                                                disabled={!isNew && field.disableOnEdit}
-                                                values={values}
-                                                errors={errors}
-                                                touched={touched}
-                                                label={field.fieldLabel}
-                                                name={field.fieldName}
-                                                type={field.type}
-                                                options={supplierData}
-                                                setFieldValue={(name, value) => {
-                                                  setFieldValue(name, value);
-                                                }}
-                                                required={field.required}
-                                                fullWidth
-                                                isTooltip={field?.isTooltip || false}
-                                                tooltipMessage={field?.tooltipMessage}
-                                                size="small"
-                                              />
-                                            </Grid>
-                                            {permissions.supplierAccount?.isCreate && (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title="Add Supplier Account" className="mt-1">
-                                                  <IconButton
-                                                    onClick={() => {
-                                                      setShowAddSupplierAccountDialog(true);
-                                                    }}
-                                                    disabled={!isNew && field.disableOnEdit}
-                                                    size="small"
-                                                  >
-                                                    <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                  </IconButton>
-                                                </Tooltip>
-                                              </Grid>
-                                            )}
-                                            {field?.tooltipMessage ? (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
-                                              </Grid>
-                                            ) : null}
-                                          </Grid>
-                                        </Grid>
-                                      ) : field.fieldName === 'countryBillTo' ? (
+                                      {field.fieldName === 'countryBillTo' ? (
                                         <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                           <Grid container spacing={1}>
                                             <Grid
@@ -669,66 +520,6 @@ export default function ManageOpportunityDialog({
                                             ) : null}
                                           </Grid>
                                         </Grid>
-                                      ) : field.fieldName === 'owner' ? (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={ownerData}
-                                          onChange={(e, val) => {
-                                            setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-
-                                            if (val && val.optionValue !== user?.user?._id) {
-                                              const checkOwnerAddedInCollaborator = values['collaborator'].find(
-                                                (d) => d?.optionValue === user?.user?._id
-                                              );
-                                              if (!checkOwnerAddedInCollaborator) {
-                                                setFieldValue('collaborator', [
-                                                  ...values['collaborator'],
-                                                  collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                                ]);
-                                              }
-                                            }
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
-                                          onOpen={() => {
-                                            onOwnerDropdownOpen(values['collaborator']);
-                                          }}
-                                        />
-                                      ) : field.fieldName === 'collaborator' ? (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={collaboratorData}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onOpen={() => {
-                                            onCollabOwnerMultiselectOpen(values['owner']);
-                                          }}
-                                        />
                                       ) : field.fieldName === 'probability' ? (
                                         <FormTypes
                                           isNew={isNew}
@@ -998,10 +789,12 @@ export default function ManageOpportunityDialog({
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                               : null
                                           }
+                                          fieldData={field}
+                                          fields={initialData?.fields}
                                         />
                                       )}
                                     </Grid>
@@ -1204,107 +997,46 @@ export default function ManageOpportunityDialog({
                         } else {
                           addressType === 'countryBillTo'
                             ? setCountryBillToMainData((prevState) => [
-                                ...prevState,
-                                {
-                                  default: false,
-                                  optionLabel: obj?.fullAddress,
-                                  optionValue: obj._id,
-                                  order: countryBillToMainData.length + 1
-                                }
-                              ])
+                              ...prevState,
+                              {
+                                default: false,
+                                optionLabel: obj?.fullAddress,
+                                optionValue: obj._id,
+                                order: countryBillToMainData.length + 1
+                              }
+                            ])
                             : setCountrySellToMainData((prevState) => [
-                                ...prevState,
-                                {
-                                  default: false,
-                                  optionLabel: obj?.fullAddress,
-                                  optionValue: obj._id,
-                                  order: countrySellToMainData.length + 1
-                                }
-                              ]);
+                              ...prevState,
+                              {
+                                default: false,
+                                optionLabel: obj?.fullAddress,
+                                optionValue: obj._id,
+                                order: countrySellToMainData.length + 1
+                              }
+                            ]);
                           addressType === 'countryBillTo'
                             ? setCountryBillToDropDown((prevState) => [
-                                ...prevState,
-                                {
-                                  default: false,
-                                  optionLabel: obj?.fullAddress,
-                                  optionValue: obj._id,
-                                  order: countryBillToDropDown.length + 1
-                                }
-                              ])
+                              ...prevState,
+                              {
+                                default: false,
+                                optionLabel: obj?.fullAddress,
+                                optionValue: obj._id,
+                                order: countryBillToDropDown.length + 1
+                              }
+                            ])
                             : setCountrySellToDropDown((prevState) => [
-                                ...prevState,
-                                {
-                                  default: false,
-                                  optionLabel: obj?.fullAddress,
-                                  optionValue: obj._id,
-                                  order: countrySellToDropDown.length + 1
-                                }
-                              ]);
+                              ...prevState,
+                              {
+                                default: false,
+                                optionLabel: obj?.fullAddress,
+                                optionValue: obj._id,
+                                order: countrySellToDropDown.length + 1
+                              }
+                            ]);
                           setFieldValue(addressType, [...values[`${addressType}`], obj._id]);
                         }
                       }
                     }}
-                  />
-                )}
-
-                {showAddSupplierAccountDialog && (
-                  <ManageAccountDialog
-                    open={showAddSupplierAccountDialog}
-                    onClose={() => {
-                      setShowAddSupplierAccountDialog(false);
-                    }}
-                    id={null}
-                    accountResource="supplierAccount"
-                    accountApi="supplier-account"
-                    isGetAccountData={true}
-                    onGetAddedAccount={({ data }) => {
-                      setSupplierData((prevState) => {
-                        return [
-                          ...prevState,
-                          {
-                            optionValue: data._id,
-                            optionLabel: data.accountName,
-                            order: supplierData.length,
-                            default: false
-                          }
-                        ];
-                      });
-
-                      setFieldValue('supplierAccount', [...values['supplierAccount'], data._id]);
-                    }}
-                    isRedirectToDetailPage={false}
-                  />
-                )}
-
-                {showAddCustomerAccountDialog && (
-                  <ManageAccountDialog
-                    open={showAddCustomerAccountDialog}
-                    onClose={() => {
-                      setShowAddCustomerAccountDialog(false);
-                    }}
-                    id={null}
-                    accountResource={customerAccount.accountResource}
-                    accountApi={customerAccount.accountApi}
-                    isGetAccountData={true}
-                    onGetAddedAccount={({ data }) => {
-                      setAccountData((prevState) => {
-                        return [
-                          ...prevState,
-                          {
-                            optionValue: data._id,
-                            optionLabel: data.accountName,
-                            order: accountData.length,
-                            default: false
-                          }
-                        ];
-                      });
-                      setFieldValue('customerAccount', data._id);
-                      setFieldValue('marketSegment', data?.marketSegment ?? '');
-                      setFieldValue('subMarketSegment', data?.subMarketSegment ?? '');
-                      setFieldValue('countryBillTo', data?.billingAddress ?? '');
-                      setFieldValue('countrySellTo', data?.shippingAddress ?? '');
-                    }}
-                    isRedirectToDetailPage={false}
                   />
                 )}
               </Fragment>
