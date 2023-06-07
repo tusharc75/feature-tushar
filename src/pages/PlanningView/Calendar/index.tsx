@@ -53,7 +53,7 @@ const FILTERS = [
         key: 'customerAccount'
     },
     {
-        label: 'competencies',
+        label: 'Competencies',
         value: 'Competencies',
         key: 'competencies'
     }
@@ -129,12 +129,22 @@ function CalendarView({ resourceList }) {
     }, [dateRange])
 
     useEffect(() => {
-        axiosInstance()
-            .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Product,Serialized Asset,Service Master,Customer Account,Competencies')
-            .then(({ data: { data } }) => {
-                setLookUpResource(data)
-            })
-            .catch((err) => { });
+        let lookupResource = null
+        FILTERS.forEach((f, i) => {
+            if (i === 0) {
+                lookupResource = f.value;
+            } else {
+                lookupResource = lookupResource + ',' + f.value;
+            }
+        });
+        if (lookupResource) {
+            axiosInstance()
+                .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
+                .then(({ data: { data } }) => {
+                    setLookUpResource(data)
+                })
+                .catch((err) => { });
+        }
     }, [])
 
     const queryData = (data) => {
