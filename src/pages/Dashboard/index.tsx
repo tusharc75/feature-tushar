@@ -56,18 +56,14 @@ const DashbaordNew = () => {
       try {
         const {
           data: { data }
-        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product Category,Market Segment,Customer Account,Product,User,Warehouse`);
+        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product Category,Market Segment,Customer Account,Product,User,Warehouse,Service Master,Competencies`);
         if (!data) return;
 
        const res = await axiosInstance().get('/field?resource=Project Sales') ; 
        let businessUnitOptions = [];
-       let serviceFamilyOptions = [];
        res?.data?.data.forEach((e: any) => {
          if (e?.fieldData?.fieldName === 'businessUnit') {
           businessUnitOptions = e.fieldData.option;
-         }
-         else if (e?.fieldData?.fieldName === 'serviceFamily') {
-          serviceFamilyOptions = e.fieldData.option;
          }
        });
        
@@ -87,7 +83,9 @@ const DashbaordNew = () => {
             country: countriesData,
             period: periodOption,
             businessUnit: businessUnitOptions, 
-            serviceFamily: serviceFamilyOptions
+            service: data['Service Master'],
+            competencies: data['Competencies']
+            
           });
         });
       } catch (error) {
