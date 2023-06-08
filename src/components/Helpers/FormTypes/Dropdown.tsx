@@ -22,6 +22,7 @@ import ManageAccount from 'src/pages/Account/ManageAccount';
 import ManageContact from 'src/pages/Contact/ManageContact';
 import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
 import { has, isEmpty } from 'lodash';
+import ManageMarketSegmentDialog from 'src/pages/MarketSegment/ManageMarketSegmentDialog';
 
 function dropdownOptions(options, values, fields, fieldData) {
   if (!fieldData?.lookupDependentOn || fieldData?.lookupDependentOn === '') {
@@ -638,6 +639,45 @@ function Dropdown({
                               optionValue: data?._id,
                               order: option.length,
                               [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
+                            };
+                            addFieldOption(tempNewOption);
+                            setOptionsList([tempNewOption, ...option]);
+                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          }
+                        }}
+                      />
+                    )}
+                  </>
+                </HtmlTooltip>
+              </Box>
+            )}
+            {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.marketSegment && permissions?.marketSegment?.isCreate && (
+              <Box>
+                <HtmlTooltip title={`Add ${name}`} className="formActionButton">
+                  <>
+                    <IconButton
+                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      onClick={() => setLookupDialog(true)}
+                      size="small"
+                      color="primary"
+                    >
+                      <AddCircleIcon />
+                    </IconButton>
+                    {lookupDialog && (
+                      <ManageMarketSegmentDialog
+                        marketSegmentId={null}
+                        onClose={() => setLookupDialog(false)}
+                        onSuccess={(data) => {
+                          setLookupDialog(false);
+                          if (data?._id) {
+                            let tempNewOption = {
+                              default: true,
+                              optionLabel: data?.name,
+                              optionValue: data?._id,
+                              order: option.length,
+                              ...(fieldData.lookupDependentOn && {
+                                [fieldData.lookupDependentOn]: data?.parentMarketSegment || values[fieldData?.lookupDependentOn] || ''
+                              })
                             };
                             addFieldOption(tempNewOption);
                             setOptionsList([tempNewOption, ...option]);
