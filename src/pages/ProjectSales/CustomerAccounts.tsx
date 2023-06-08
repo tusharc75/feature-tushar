@@ -716,12 +716,6 @@ const CustomerAccounts = (props) => {
                           />
                         </Box>
                       )}
-                      {/* <QuotesInAccordion /> */}
-                      {/* <ProjectInAccordion
-                            recordsPerLine={3}
-                            projectSales={null} /> */}
-
-                      {/* <ProductBuilderInAccordion /> */}
                     </Box>
                   ))}
                 </>

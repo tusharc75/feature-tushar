@@ -25,7 +25,7 @@ import { Link } from 'react-router-dom';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
-import ManageOpportunityDialog from './../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
+import ManageOpportunityDialog from './../Opportunities/ManageOpportunityDialog';
 import { useData } from '../../StateProvider/Provider';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { MoreVert } from '@material-ui/icons';
@@ -239,6 +239,7 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
       {showCreateOpportunityDialog && (
         <ManageOpportunityDialog
           isNew={true}
+          opportunityId={null}
           open={showCreateOpportunityDialog}
           onClose={() => setShowCreateOpportunityDialog(false)}
           onSuccess={() => {
