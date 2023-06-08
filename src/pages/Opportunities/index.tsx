@@ -11,7 +11,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { GiHiveMind } from 'react-icons/gi';
-import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
+import ManageOpportunityDialog from './ManageOpportunityDialog';
 import { opportunity, isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';

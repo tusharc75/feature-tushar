@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Dialog, IconButton, Typography } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CloseIcon from '@material-ui/icons/Close';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
@@ -66,7 +66,7 @@ export default function AssetAvailability({ rentalId, handleAssetAvailabilityClo
 
   useEffect(() => {
     axiosInstance()
-      .get(`/rental-management/automation/check-asset-availability/${rentalId}`)
+      .get(`${rentalManagement.api}/automation/check-asset-availability/${rentalId}`)
       .then((data: { data }) => {
         const assets = data?.data?.data;
         const samePlantAsset = assets.samePlant;
@@ -127,7 +127,7 @@ export default function AssetAvailability({ rentalId, handleAssetAvailabilityClo
         <>
           {asset?.samePlant?.length > 0 &&
             <>
-              <Typography style={{ fontSize: '13px', fontWeight: '500' }}>Serialized Assets are not available for following products</Typography>
+              <Typography style={{ fontSize: '16px', fontWeight: '500' }}>Serialized Assets are not available for following products</Typography>
               <div className="mt-2">
                 {asset?.otherPlant?.map((_asset) =>
                   <ShowProduct _asset={_asset} />
@@ -137,7 +137,7 @@ export default function AssetAvailability({ rentalId, handleAssetAvailabilityClo
           }
           {asset?.otherPlant?.length > 0 &&
             <>
-              <Typography style={{ fontSize: '13px', fontWeight: '500' }}>Serialized Assets are available for following products</Typography>
+              <Typography style={{ fontSize: '16px', fontWeight: '500' }}>Serialized Assets are available for following products</Typography>
               <div className="mt-2">
                 {asset?.otherPlant?.map((_asset) => <ShowProduct _asset={_asset} />)}
               </div>

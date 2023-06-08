@@ -572,11 +572,16 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           </Box>
           <Box display="flex" ml={1}>
             <Box mr={1}>
-              <IconButton size="small" aria-label="Details" onClick={() => {
-                setOpenAssetAvailibility(true)
-              }}>
-                <InfoIcon color={'primary'} />
-              </IconButton>
+              <HtmlTooltip title="Check Assets Availibility">
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setOpenAssetAvailibility(true)
+                  }}>
+                  <InfoIcon color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
             </Box>
             <Button
               variant="outlined"
@@ -778,8 +783,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           }}
         />
       )}
-      {
-        openAssetAvailibility &&
+      {openAssetAvailibility &&
         <AssetAvailability
           rentalId={rentalManagementData?._id}
           handleAssetAvailabilityClose={() => {

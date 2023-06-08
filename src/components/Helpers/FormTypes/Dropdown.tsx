@@ -21,24 +21,32 @@ import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
 import ManageAccount from 'src/pages/Account/ManageAccount';
 import ManageContact from 'src/pages/Contact/ManageContact';
 import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
+import { has, isEmpty } from 'lodash';
+import ManageMarketSegmentDialog from 'src/pages/MarketSegment/ManageMarketSegmentDialog';
 
 function dropdownOptions(options, values, fields, fieldData) {
   if (!fieldData?.lookupDependentOn || fieldData?.lookupDependentOn === '') {
     let oData = options;
     if (fieldData?.fieldName === 'owner') {
-      console.log('values', values['collaborator'], options);
       const optionDatas = options?.filter((option: any) => ![...values['collaborator']]?.includes(option?.optionValue)) || [];
       oData = optionDatas || [];
-    }
-    if (fieldData?.fieldName === 'collaborator') {
+    } else if (fieldData?.fieldName === 'collaborator') {
       const optionDatas = options?.filter((option: any) => option?.optionValue !== values['owner']) || [];
       oData = optionDatas || [];
+    } else {
+      // for market segment kind of situation
+      const optionDatas = options?.filter((o) => {
+        if (has(o, fieldData?.fieldName)) {
+          return isEmpty(o[fieldData?.fieldName]);
+        } else return true;
+      });
+      oData = optionDatas;
     }
     return oData || [];
   }
 
   const optionsToShow = [];
-  if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOnField) {
+  if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOnField && !isEmpty(fieldData?.lookupDependentOnField)) {
     const dependentField = fields.find((field) => field?.fieldName === fieldData.lookupDependentOn);
     if (dependentField) {
       const dependentValue = values[dependentField?.fieldName];
@@ -51,7 +59,8 @@ function dropdownOptions(options, values, fields, fieldData) {
       }
     }
   }
-  if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOn !== '' && values[fieldData?.lookupDependentOn]) {
+
+  if (fieldData?.lookupDependentOn && !isEmpty(fieldData?.lookupDependentOn) && values[fieldData?.lookupDependentOn]) {
     const value = values[fieldData?.lookupDependentOn];
     const optionDatas = options?.filter((option: any) => option[fieldData?.lookupDependentOn] === value) || [];
     optionsToShow.push(...optionDatas);
@@ -630,6 +639,45 @@ function Dropdown({
                               optionValue: data?._id,
                               order: option.length,
                               [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
+                            };
+                            addFieldOption(tempNewOption);
+                            setOptionsList([tempNewOption, ...option]);
+                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          }
+                        }}
+                      />
+                    )}
+                  </>
+                </HtmlTooltip>
+              </Box>
+            )}
+            {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.marketSegment && permissions?.marketSegment?.isCreate && (
+              <Box>
+                <HtmlTooltip title={`Add ${name}`} className="formActionButton">
+                  <>
+                    <IconButton
+                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      onClick={() => setLookupDialog(true)}
+                      size="small"
+                      color="primary"
+                    >
+                      <AddCircleIcon />
+                    </IconButton>
+                    {lookupDialog && (
+                      <ManageMarketSegmentDialog
+                        marketSegmentId={null}
+                        onClose={() => setLookupDialog(false)}
+                        onSuccess={(data) => {
+                          setLookupDialog(false);
+                          if (data?._id) {
+                            let tempNewOption = {
+                              default: true,
+                              optionLabel: data?.name,
+                              optionValue: data?._id,
+                              order: option.length,
+                              ...(fieldData.lookupDependentOn && {
+                                [fieldData.lookupDependentOn]: data?.parentMarketSegment || values[fieldData?.lookupDependentOn] || ''
+                              })
                             };
                             addFieldOption(tempNewOption);
                             setOptionsList([tempNewOption, ...option]);

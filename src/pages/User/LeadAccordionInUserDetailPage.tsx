@@ -221,9 +221,7 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
           onClose={() => setShowCreateLeadDialog(false)}
           isNew={true}
           dataToUpdate={null}
-          leadApi={routes.lead.path}
           isRedirectToDetailPage={false}
-          userId={userId}
         />
       )}
     </>
