@@ -20,13 +20,43 @@ const typographyd: React.CSSProperties = {
   fontSize: '13px'
 };
 
+const ShowProduct = ({ _asset }) => {
+  return (
+    <div
+      className="d-flex pl-3 pr-3 mt-3"
+      style={{
+        padding: '14px 20px',
+        border: '1px solid var(--common-border-color)',
+        borderRadius: '10px',
+        boxShadow: '0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06)'
+      }}
+    >
+      <div>
+        <Typography style={typographyh}>Product Name</Typography>
+        <Typography style={typographyd}>{_asset?.product?.productName}</Typography>
+      </div>
+      <div className="ml-4">
+        <Typography style={typographyh}>Qty</Typography>
+        <Typography style={typographyd}>{_asset?.qty}</Typography>
+      </div>
+      <div className="ml-4">
+        <Typography style={typographyh}>Asset Status</Typography>
+        <Typography style={typographyd}>{_asset?.availableAssets}</Typography>
+      </div>
+    </div>
+  )
+}
+
 export default function AssetAvailability({ rentalId, handleAssetAvailabilityClose }) {
   const toastConfig = useContext(CustomToastContext);
   const [modalContent, setModalContent] = useState<ModalContent | null>({
     title: 'Checking Assets Availability',
     icon: <Skeleton variant="circle" width={32} height={32} />
   });
-  const [asset, setAsset] = useState(null);
+  const [asset, setAsset] = useState({
+    samePlant: null,
+    otherPlant: null
+  });
   const [availableAssets, setAvailableAssets] = useState(null);
 
   const handleCloseHelperModal = () => {
@@ -39,19 +69,30 @@ export default function AssetAvailability({ rentalId, handleAssetAvailabilityClo
       .get(`/rental-management/automation/check-asset-availability/${rentalId}`)
       .then((data: { data }) => {
         const assets = data?.data?.data;
+        const samePlantAsset = assets.samePlant;
+        const otherPlantAsset = assets.otherPlant;
         const fetchedAvailableAssets = [];
-        const fetchedAssets = [];
-        assets.map((_asset) => {
+        const fetchedOtherPlantAvailableAssets = [];
+        const fetchedSamePlantAvailableAssets = [];
+        otherPlantAsset.map((_asset) => {
           if (_asset?.availableAssets >= _asset?.qty) {
             fetchedAvailableAssets.push(_asset);
-            // setAvailableAssets([...availableAssets, _asset]);
           } else {
-            fetchedAssets.push(_asset);
-            // setAsset([...asset, _asset]);
+            fetchedOtherPlantAvailableAssets.push(_asset)
+          }
+        });
+        samePlantAsset.map((_asset) => {
+          if (_asset?.availableAssets >= _asset?.qty) {
+            fetchedAvailableAssets.push(_asset);
+          } else {
+            fetchedSamePlantAvailableAssets.push(_asset)
           }
         });
         setAvailableAssets(fetchedAvailableAssets);
-        setAsset(fetchedAssets);
+        setAsset({
+          samePlant: fetchedSamePlantAvailableAssets,
+          otherPlant: fetchedOtherPlantAvailableAssets
+        });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -59,13 +100,13 @@ export default function AssetAvailability({ rentalId, handleAssetAvailabilityClo
   }, [rentalId]);
 
   useEffect(() => {
-    if (availableAssets?.length > 0 && asset?.length === 0) {
+    if (availableAssets?.length > 0 && asset?.samePlant?.length === 0 && asset?.otherPlant?.length === 0) {
       setModalContent({
         title: 'Serialized Assets Available',
         icon: <CheckCircleIcon color="secondary" />
       });
     }
-    if (asset?.length > 0) {
+    if (asset?.samePlant?.length > 0 || asset?.otherPlant?.length > 0) {
       setModalContent({
         title: 'Serialized Assets not Available',
         icon: <ErrorIcon color="error" />
@@ -75,50 +116,37 @@ export default function AssetAvailability({ rentalId, handleAssetAvailabilityClo
 
   return (
     <DashboardModal modalContent={modalContent} handleClose={handleCloseHelperModal} style={{ position: 'relative' }}>
-      {asset === null && availableAssets === null && (
+      {asset?.samePlant === null && asset?.otherPlant === null && availableAssets === null && (
         <>
           <div className="mt-2" style={{ maxWidth: 'calc(100% - 8px)' }}>
             <CommonSkeleton lenArray={[...Array(2).keys()]} sm={12} md={false} />
           </div>
         </>
       )}
-      {asset?.length > 0 ? (
+      {(asset?.samePlant?.length > 0 || asset?.otherPlant?.length > 0) ? (
         <>
-          <Typography style={{ fontSize: '13px', fontWeight: '500' }}>Serialized Assets are not available for following products</Typography>
-          <div className="mt-2">
-            {asset?.map((_asset) => {
-              return (
-                <>
-                  <div
-                    className="d-flex pl-3 pr-3 mt-3"
-                    style={{
-                      padding: '14px 20px',
-                      border: '1px solid var(--common-border-color)',
-                      borderRadius: '10px',
-                      boxShadow: '0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06)'
-                    }}
-                  >
-                    <div>
-                      <Typography style={typographyh}>Product Name</Typography>
-                      <Typography style={typographyd}>{_asset?.product?.productName}</Typography>
-                    </div>
-                    <div className="ml-4">
-                      <Typography style={typographyh}>Qty</Typography>
-                      <Typography style={typographyd}>{_asset?.qty}</Typography>
-                    </div>
-                    <div className="ml-4">
-                      <Typography style={typographyh}>Asset Status</Typography>
-                      <Typography style={typographyd}>{_asset?.availableAssets}</Typography>
-                    </div>
-                  </div>
-                </>
-              );
-            })}
-          </div>
+          {asset?.samePlant?.length > 0 &&
+            <>
+              <Typography style={{ fontSize: '13px', fontWeight: '500' }}>Serialized Assets are not available for following products</Typography>
+              <div className="mt-2">
+                {asset?.otherPlant?.map((_asset) =>
+                  <ShowProduct _asset={_asset} />
+                )}
+              </div>
+            </>
+          }
+          {asset?.otherPlant?.length > 0 &&
+            <>
+              <Typography style={{ fontSize: '13px', fontWeight: '500' }}>Serialized Assets are available for following products</Typography>
+              <div className="mt-2">
+                {asset?.otherPlant?.map((_asset) => <ShowProduct _asset={_asset} />)}
+              </div>
+            </>
+          }
         </>
       ) : (
         <>
-          {availableAssets?.length > 0 && asset?.length === 0 && (
+          {availableAssets?.length > 0 && asset?.samePlant?.length === 0 && asset?.otherPlant?.length === 0 && (
             <Typography style={{ fontSize: '13px', fontWeight: '500' }}>
               Serialized Assets are available for all the products. Rental job can be fulfilled
             </Typography>
