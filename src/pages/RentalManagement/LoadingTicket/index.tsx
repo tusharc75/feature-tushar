@@ -477,7 +477,7 @@ const LoadingTicket = ({
       data['ticketName'] = rentalManagementData.rentalJobName;
       data['referenceId'] = rentalManagementData._id;
 
-      if (selectedRecords[0].currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
+      if (selectedRecords[0].warehouseId) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
         data['pickupFrom'] = selectedRecords[0].warehouseId;
         data['pickupFromAddress'] = selectedRecords[0].currentLocation;
