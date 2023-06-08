@@ -5,14 +5,10 @@ import { useHistory } from 'react-router-dom';
 import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import {
-  getOwnerDropdownDataSource,
-  getCollaboratorDropdownDataSource,
   getObjKeys,
   yupSchema,
   getObjKeysWithValues,
-  initializeDropdownById,
   setFieldsInAscendingOrder,
-  formFieldNames
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -24,13 +20,10 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
-import ManageMarketSegmentDialog from '../../MarketSegment/ManageMarketSegmentDialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { isEqual } from 'lodash';
+import routes from 'src/components/Helpers/Routes';
 
 export default function ManageLeadDialog({
   open,
@@ -38,8 +31,6 @@ export default function ManageLeadDialog({
   onClose,
   isNew,
   dataToUpdate,
-  leadApi,
-  userId = null,
   isRedirectToDetailPage = true,
   isClone = false,
   leadId = null
@@ -47,252 +38,99 @@ export default function ManageLeadDialog({
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
-  const {
-    state: { user, selectedEntity, permissions }
-  }: any = useData();
-  const [disableOwnerSelection] = useState(!isNew && user.user._id !== dataToUpdate.owner.optionValue);
-  const { isOffline } = useContext(CustomOfflineContext);
+  const { state: { user, selectedEntity, permissions } }: any = useData();
 
-  const [initialData, setInitialData] = useState({
-    fields: [],
-    values: {}
-  });
+  const [initialData, setInitialData] = useState({ fields: [], values: {} });
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
-  const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
-  const [ownerData, setOwnerData] = useState([]);
-  const [collaboratorData, setCollaboratorData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [loadingData, setLoadingData] = useState(false);
-  const [additionalFieldName, setAdditionalFieldName] = useState('');
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
-
-  const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
-  const [mainMarketSegmentDataSource, setMainMarketSegmentDataSource] = useState([]);
-  const [marketSegmentDataSource, setMarketSegmentDataSource] = useState([]);
-  const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
-  const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
-  const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
-    if (isNew) {
-      const processSteps = initialData.fields.find((d) => d.type.toLowerCase() === 'process');
+    getLeadFields();
+  }, []);
 
-      if (processSteps) {
-        initialData.fields.map((d) => {
-          if (d.sectionName == processSteps?.additionalInfoSection) {
-            setAdditionalFieldName(d.sectionName);
-          }
-        });
-      }
-    }
-    if (!isNew) {
-      const processSteps = initialData.fields.find((d) => d.type.toLowerCase() === 'process');
-      if (processSteps) {
-        let len = processSteps.option.length;
-        if (dataToUpdate.process !== processSteps.option[len - 1]['optionValue']) {
-          initialData.fields.map((d) => {
-            if (d.sectionName == processSteps.additionalInfoSection) {
-              setAdditionalFieldName(d.sectionName);
-            }
-          });
-        }
-      }
-    }
-
-    const ownerCollabOptions = initialData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
-    if (ownerCollabOptions.length > 0) {
-      setOwnerCollaboratorData(ownerCollabOptions[0].option);
-      setOwnerData(ownerCollabOptions[0].option);
-      setCollaboratorData(ownerCollabOptions[0].option);
-    }
-
+  useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
   }, [initialData.fields]);
 
-  const onOwnerDropdownOpen = (selectedCollaborator) => {
-    setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData));
-  };
-
-  const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
-    setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData));
-  };
-
-  const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
-    if (values && values.hasOwnProperty(formFieldNames.marketSegment)) {
-      const getNewAddedMarketSegment = marketSegmentSource.find((d) => d?.optionValue === newMarketSegmentId);
-      if (getNewAddedMarketSegment) {
-        values[formFieldNames.marketSegment] = getNewAddedMarketSegment.optionValue;
-      }
-      return values;
-    }
-    return values;
-  };
-
-  const initializeSubMarketSegmentDropdown = (values, subMarketSegmentSource) => {
-    if (values && values.hasOwnProperty(formFieldNames.subMarketSegment)) {
-      const getNewAddedSubMarketSegment = subMarketSegmentSource.find((d) => d?.optionValue === newSubMarketSegmentId);
-      if (getNewAddedSubMarketSegment) {
-        values[formFieldNames.subMarketSegment] = getNewAddedSubMarketSegment.optionValue;
-      }
-      return values;
-    }
-    return values;
-  };
-
-  const marketSegmentChange = (marketSegmentId: string) => {
-    setSubMarketSegmentDataSource(marketSegmentId ? mainMarketSegmentDataSource.filter((d) => d.parentMarketSegment === marketSegmentId) : []);
-  };
-
-  useEffect(() => {
-    if (initialData.fields.length === 0) {
-      getLeadFields();
-    }
-  }, []);
-
   const getLeadFields = async () => {
-    if (selectedEntity) {
-      setLoadingData(true);
+    const response = await axiosInstance().get(`/field?resource=Lead`);
+    let data = response?.data?.data;
 
-      let data;
-      if (!isOffline) {
-        if (selectedEntity) {
-          const response = await axiosInstance().get(`/field?resource=Lead&entity=${selectedEntity}`);
+    const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+    const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-          data = response?.data?.data;
-        } else {
-          data = [];
-        }
-      }
-
-      const newFields = [];
-
-      const filterData = isNew ? data?.filter((d) => d.isCreate) : data.filter((d) => d.isUpdate);
-
-      //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
-      const marketSegmentDropdownData = filterData.map((m) => m.fieldData).find((d) => d.fieldName === formFieldNames.marketSegment);
-      if (marketSegmentDropdownData) {
-        setMainMarketSegmentDataSource(marketSegmentDropdownData.option);
-
-        let initializeMarketSegmentDataSource = [];
-        marketSegmentDropdownData.option.forEach((option) => {
-          if (option.parentMarketSegment === '' || marketSegmentDropdownData.option.some((s) => s.parentMarketSegment === option.optionValue)) {
-            initializeMarketSegmentDataSource.push(option);
-          }
-        });
-        setMarketSegmentDataSource(initializeMarketSegmentDataSource);
-      }
-
-      if (isNew) {
-        filterData.map((_f) => {
-          if (isNew && userId && _f.fieldData.fieldName === 'owner') {
-            _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
-          }
-          newFields.push(_f.fieldData);
-        });
-
-        if (isClone) {
-          axiosInstance()
-            .get(`${leadApi}/${leadId}?entity=${selectedEntity}`)
-            .then(({ data: { data } }) => {
-              const { _id, firstName, lastName, middleName, ...rest } = data;
-
-              setCloneHeading(`${firstName || ''} ${middleName || ''} ${lastName || ''}`);
-              let tempData = { ...rest };
-              if (marketSegmentDropdownData) {
-                setSubMarketSegmentDataSource(
-                  marketSegmentDropdownData.option.filter((d) => d.parentMarketSegment === data?.marketSegment?.optionValue)
-                );
-              }
-              setInitialData({
-                fields: newFields,
-                values: getObjKeysWithValues(tempData, newFields)
-              });
+    if (isNew) {
+      if (isClone) {
+        axiosInstance()
+          .get(`${routes.lead.path}/${leadId}?entity=${selectedEntity}`)
+          .then(({ data: { data } }) => {
+            const { _id, firstName, lastName, middleName, ...rest } = data;
+            setCloneHeading(`${firstName || ''} ${middleName || ''} ${lastName || ''}`);
+            let tempData = { ...rest };
+            setInitialData({
+              fields: fieldsDataForCreate,
+              values: getObjKeysWithValues(tempData, fieldsDataForCreate)
             });
-        } else {
-          setInitialData({
-            fields: newFields,
-            values: getObjKeys('', newFields)
           });
-        }
-
-        setTimeout(() => setLoadingData(false), 500);
       } else {
-        if (marketSegmentDropdownData) {
-          setSubMarketSegmentDataSource(
-            marketSegmentDropdownData.option.filter((d) => d.parentMarketSegment === dataToUpdate.marketSegment?.optionValue)
-          );
-        }
-
-        filterData.map((_f) => newFields.push(_f.fieldData));
         setInitialData({
-          fields: newFields,
-          values: getObjKeysWithValues(dataToUpdate, newFields)
+          fields: fieldsDataForCreate,
+          values: getObjKeys('', fieldsDataForCreate)
         });
-        setTimeout(() => setLoadingData(false), 500);
       }
-    }
-  };
-
-  const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
-    if (Object.keys(errors).length) {
-      initialData.fields.forEach((input) => {
-        if (input.required || values[input.fieldName]) {
-          setTouched(input.fieldName, true);
-        }
-      });
-      setErrors({ ...errors });
     } else {
-      isNew ? handleCreateLead(values) : handleUpdateLead(values);
+      setInitialData({
+        fields: fieldsDataForUpdate,
+        values: getObjKeysWithValues(dataToUpdate, fieldsDataForUpdate)
+      });
     }
   };
 
-  const handleCreateLead = (values) => {
-    setLoading(true);
-
-    axiosInstance()
-      .post(`${leadApi}?entity=${selectedEntity}`, values)
-      .then(({ data }) => {
-        const newId = data.data._id;
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+  const handleSubmit = async (values) => {
+    if (isNew) {
+      axiosInstance()
+        .post(`${routes.lead.path}?entity=${selectedEntity}`, values)
+        .then(({ data }) => {
+          const newId = data.data._id;
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          if (isRedirectToDetailPage) {
+            history.push(`${routes.leadDetail.path}/${newId}`);
+          }
+          setLoading(false);
+          onSuccess();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setLoading(false);
         });
-        if (isRedirectToDetailPage) {
-          history.push(`${leadApi}/detail/${newId}`);
-        }
-        setLoading(false);
-        onSuccess();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setLoading(false);
-      });
-  };
-
-  const handleUpdateLead = (values) => {
-    values = { ...values, _id: dataToUpdate._id };
-    setLoading(true);
-
-    axiosInstance()
-      .put(`${leadApi}?entity=${selectedEntity}`, values)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+    } else {
+      values = { ...values, _id: dataToUpdate._id };
+      axiosInstance()
+        .put(`${routes.lead.path}?entity=${selectedEntity}`, values)
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setLoading(false);
+          onSuccess();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setLoading(false);
         });
-        setLoading(false);
-        onSuccess();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setLoading(false);
-      });
+
+    }
   };
 
   const handleScroll = (errors) => {
@@ -324,7 +162,7 @@ export default function ManageLeadDialog({
         open={open}
       >
         {initialData?.fields?.length ? (
-          <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={() => {}}>
+          <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
             {({ values, errors, setFieldValue, setFieldTouched, setErrors, setValues, touched, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
@@ -332,8 +170,8 @@ export default function ManageLeadDialog({
                     isClone
                       ? `Clone - ${cloneHeading}`
                       : isNew
-                      ? 'Create Lead'
-                      : `Editing ${[dataToUpdate.firstName, dataToUpdate.lastName].filter((f) => f).join(' ')}`
+                        ? 'Create Lead'
+                        : `Editing ${[dataToUpdate.firstName, dataToUpdate.lastName].filter((f) => f).join(' ')}`
                   }
                   onClose={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -347,58 +185,55 @@ export default function ManageLeadDialog({
                 />
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                    {formsData &&
-                      formsData
-                        .filter((item) => item.name !== additionalFieldName)
-                        .map((form, i) => {
-                          return (
-                            form.name && (
-                              <div key={i}>
-                                <div className={'detail-box-content'}>
-                                  <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                                  <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                                </div>
-                                <Box marginY={2}>
-                                  <Grid spacing={3} container>
-                                    {form.sectionFields.map((field) => (
-                                      <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          fieldData={field}
-                                          fields={initialData.fields}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                              ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
-                                              : null
+                    {formsData && formsData.map((form, i) => {
+                      return (
+                        form.name && (
+                          <div key={i}>
+                            <div className={'detail-box-content'}>
+                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                            </div>
+                            <Box marginY={2}>
+                              <Grid spacing={3} container>
+                                {form.sectionFields.map((field) => (
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <FormTypes
+                                      isNew={isNew}
+                                      {...field}
+                                      disabled={!isNew && field.disableOnEdit}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      fieldData={field}
+                                      fields={initialData.fields}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      imageOrFileUploadCompletePercentage={
+                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                          ? (completePercentage) => {
+                                            setUploadingImageOrFileProgress(completePercentage);
                                           }
-                                        />
-                                      </Grid>
-                                    ))}
+                                          : null
+                                      }
+                                    />
                                   </Grid>
-                                </Box>
-                              </div>
-                            )
-                          );
-                        })}
+                                ))}
+                              </Grid>
+                            </Box>
+                          </div>
+                        )
+                      );
+                    })}
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
@@ -422,119 +257,24 @@ export default function ManageLeadDialog({
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll(errors);
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                      submitForm();
                     }}
                   >
                     Save
                   </CustomButton>
                 </CustomDialogFooter>
-                {showConfirmDialog ? (
+                {showConfirmDialog && (
                   <ConfirmCancelDialog
                     close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false);
                       handleScroll(errors);
-
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                      submitForm();
                     }}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();
-                    }}
-                  />
-                ) : null}
-                {showAddMarketSegmentDialog && (
-                  <ManageMarketSegmentDialog
-                    marketSegmentId={null}
-                    onClose={() => {
-                      setShowAddMarketSegmentDialog(false);
-                    }}
-                    onSuccess={(data) => {
-                      if (data?._id) {
-                        setMainMarketSegmentDataSource((prevState) => {
-                          return [
-                            ...prevState,
-                            {
-                              optionValue: data._id,
-                              optionLabel: data.name,
-                              order: mainMarketSegmentDataSource.length,
-                              default: false,
-                              parentMarketSegment: data.parentMarketSegment
-                            }
-                          ];
-                        });
-
-                        //  If no parent selected, consider that as parent and add it in Market Segment
-                        if (data.parentMarketSegment === '') {
-                          setMarketSegmentDataSource((prevState) => {
-                            return [
-                              ...prevState,
-                              {
-                                optionValue: data._id,
-                                optionLabel: data.name,
-                                order: marketSegmentDataSource.length,
-                                default: false,
-                                parentMarketSegment: data.parentMarketSegment
-                              }
-                            ];
-                          });
-                          setSubMarketSegmentDataSource([]);
-                          setNewMarketSegmentId(data._id);
-                          setNewSubMarketSegmentId(null);
-                        } else {
-                          //  If parent selected, consider that as a child
-                          if (marketSegmentDataSource.some((d) => d?.optionValue === data.parentMarketSegment)) {
-                            setSubMarketSegmentDataSource([
-                              ...mainMarketSegmentDataSource.filter((s) => s.parentMarketSegment === data.parentMarketSegment),
-                              {
-                                optionValue: data._id,
-                                optionLabel: data.name,
-                                order: subMarketSegmentDataSource.length,
-                                default: false,
-                                parentMarketSegment: data.parentMarketSegment
-                              }
-                            ]);
-                          } else {
-                            let initializeMarketSegmentDataSource = [];
-                            mainMarketSegmentDataSource.forEach((option) => {
-                              if (
-                                option.parentMarketSegment === '' ||
-                                mainMarketSegmentDataSource.some((s) => s.parentMarketSegment === option.optionValue)
-                              ) {
-                                initializeMarketSegmentDataSource.push(option);
-                              }
-                            });
-
-                            if (!initializeMarketSegmentDataSource.some((s) => s.optionValue === data.parentMarketSegment)) {
-                              const getMarketSegment = mainMarketSegmentDataSource.find((d) => d?.optionValue === data.parentMarketSegment);
-
-                              initializeMarketSegmentDataSource.push({
-                                optionValue: getMarketSegment.optionValue,
-                                optionLabel: getMarketSegment.optionLabel,
-                                order: initializeMarketSegmentDataSource.length,
-                                default: false,
-                                parentMarketSegment: getMarketSegment.parentMarketSegment
-                              });
-                            }
-                            setMarketSegmentDataSource(initializeMarketSegmentDataSource);
-
-                            setSubMarketSegmentDataSource([
-                              ...mainMarketSegmentDataSource.filter((s) => s.parentMarketSegment === data.parentMarketSegment),
-                              {
-                                optionValue: data._id,
-                                optionLabel: data.name,
-                                order: subMarketSegmentDataSource.length,
-                                default: false,
-                                parentMarketSegment: data.parentMarketSegment
-                              }
-                            ]);
-                          }
-                          setNewMarketSegmentId(data.parentMarketSegment);
-                          setNewSubMarketSegmentId(data._id);
-                        }
-                      }
-                      setShowAddMarketSegmentDialog(false);
                     }}
                   />
                 )}

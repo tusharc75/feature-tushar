@@ -22,7 +22,7 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { displayDate } from '../../services/util';
 import routes from './../../components/Helpers/Routes';
 import { Link } from 'react-router-dom';
-import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
+import ManageOpportunityDialog from '../../pages/Opportunities/ManageOpportunityDialog';
 import { useHistory } from 'react-router-dom';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { BiCustomize } from 'react-icons/bi';
@@ -295,6 +295,7 @@ export default function OpportunityInAccordian({
       {showCreateOpportunityDialog && (
         <ManageOpportunityDialog
           isNew={true}
+          opportunityId={null}
           open={showCreateOpportunityDialog}
           onClose={() => setShowCreateOpportunityDialog(false)}
           onSuccess={(id) => {
