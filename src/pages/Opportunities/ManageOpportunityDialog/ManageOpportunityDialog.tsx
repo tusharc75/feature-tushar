@@ -4,8 +4,6 @@ import { Formik, Form } from 'formik';
 import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import {
-  getOwnerDropdownDataSource,
-  getCollaboratorDropdownDataSource,
   getObjKeys,
   yupSchema,
   getObjKeysWithValues,
@@ -29,7 +27,6 @@ import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import AddIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
-import ManageAccountDialog from '../../Account/ManageAccount';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import ManageMarketSegmentDialog from '../../MarketSegment/ManageMarketSegmentDialog';
@@ -116,8 +113,6 @@ export default function ManageOpportunityDialog({
     if (customerAccountOptions) {
       setAccountData(customerAccountOptions.option);
     }
-
-    let supplierAccountOptions = initialData.fields.find((d) => d.fieldName === 'supplierAccount');
 
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
 
