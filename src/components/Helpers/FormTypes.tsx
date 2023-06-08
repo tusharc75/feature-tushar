@@ -955,7 +955,8 @@ const FormTypes = (props) => {
       sidebarResource.customerContact,
       sidebarResource.supplierContact,
       sidebarResource.address,
-      sidebarResource.user
+      sidebarResource.user,
+      sidebarResource.marketSegment
     ].includes(fieldData?.lookupResource) ? (
     <Dropdown
       InfoLabel={InfoLabel}

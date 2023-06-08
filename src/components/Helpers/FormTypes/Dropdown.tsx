@@ -21,24 +21,31 @@ import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
 import ManageAccount from 'src/pages/Account/ManageAccount';
 import ManageContact from 'src/pages/Contact/ManageContact';
 import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
+import { has, isEmpty } from 'lodash';
 
 function dropdownOptions(options, values, fields, fieldData) {
-
   if (!fieldData?.lookupDependentOn || fieldData?.lookupDependentOn === '') {
     let oData = options;
     if (fieldData?.fieldName === 'owner') {
       const optionDatas = options?.filter((option: any) => ![...values['collaborator']]?.includes(option?.optionValue)) || [];
       oData = optionDatas || [];
-    }
-    if (fieldData?.fieldName === 'collaborator') {
+    } else if (fieldData?.fieldName === 'collaborator') {
       const optionDatas = options?.filter((option: any) => option?.optionValue !== values['owner']) || [];
       oData = optionDatas || [];
+    } else {
+      // for market segment kind of situation
+      const optionDatas = options?.filter((o) => {
+        if (has(o, fieldData?.fieldName)) {
+          return isEmpty(o[fieldData?.fieldName]);
+        } else return true;
+      });
+      oData = optionDatas;
     }
     return oData || [];
   }
 
   const optionsToShow = [];
-  if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOnField) {
+  if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOnField && !isEmpty(fieldData?.lookupDependentOnField)) {
     const dependentField = fields.find((field) => field?.fieldName === fieldData.lookupDependentOn);
     if (dependentField) {
       const dependentValue = values[dependentField?.fieldName];
@@ -51,8 +58,8 @@ function dropdownOptions(options, values, fields, fieldData) {
       }
     }
   }
-  
-  if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOn !== '' && values[fieldData?.lookupDependentOn]) {
+
+  if (fieldData?.lookupDependentOn && !isEmpty(fieldData?.lookupDependentOn) && values[fieldData?.lookupDependentOn]) {
     const value = values[fieldData?.lookupDependentOn];
     const optionDatas = options?.filter((option: any) => option[fieldData?.lookupDependentOn] === value) || [];
     optionsToShow.push(...optionDatas);
@@ -114,13 +121,13 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, value: any, reason) => {
-                      if (setFieldValue) {
-                        setFieldValue(
-                          name,
-                          value.map((val) => val.optionValue)
-                        );
+                        if (setFieldValue) {
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
+                        }
                       }
-                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -148,14 +155,14 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, val) => {
-                      if (setFieldValue) {
-                        handleChange(name, val && val.optionValue ? val.optionValue : '');
-                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                        fieldChange?.forEach((val: any) => {
-                          setFieldValue(val.fieldName, val.value);
-                        });
+                        if (setFieldValue) {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
+                          });
+                        }
                       }
-                    }
                 }
                 selectOnFocus
                 clearOnBlur
