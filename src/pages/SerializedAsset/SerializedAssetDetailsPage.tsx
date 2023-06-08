@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Grid, Box, Button, Paper, Typography, Tab, Tabs, useMediaQuery, IconButton } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Typography, Tab, Tabs, useMediaQuery, IconButton, FormControlLabel, Checkbox } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -13,7 +13,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import {
   serializedAsset,
-  getObjKeysWithValues,
   ASSET_STATUS,
   repairJob,
   INVENTORY_OWNER_TYPE,
@@ -36,8 +35,6 @@ import { MdEdit } from 'react-icons/md';
 import { camelCase, startCase } from 'lodash';
 import moment from 'moment';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { FcApproval } from 'react-icons/fc';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -45,8 +42,8 @@ interface TabPanelProps {
 }
 
 const SerializedAssetDetailsPage = () => {
+
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.serializedAsset.title);
   const { id } = useParams();
   const history = useHistory();
   const {
@@ -386,32 +383,6 @@ const SerializedAssetDetailsPage = () => {
               <>
                 {permissions?.serializedAsset?.isUpdate && productInventoryData.active && (
                   <>
-                    {productInventoryFields?.some(field => field?.fieldData?.fieldName === "mtrAttached") && (
-                      <>
-                        {productInventoryData?.mtrAttached ?
-                          <HtmlTooltip title={'MTR Attached'}>
-                            <IconButton
-                              size="small"
-                              onClick={() => {
-                                handleMTRAttached(false)
-                              }}
-                            >
-                              <FcApproval size={25} />
-                            </IconButton>
-                          </HtmlTooltip>
-                          :
-                          <Button
-                            variant="outlined"
-                            color="default"
-                            size="small"
-                            onClick={() => {
-                              handleMTRAttached(true)
-                            }}>
-                            MTR Attach
-                          </Button>
-                        }
-                      </>
-                    )}
                     {permissions?.repairJob?.isCreate &&
                       productInventoryData?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
                       [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
@@ -507,6 +478,25 @@ const SerializedAssetDetailsPage = () => {
                   </Grid>
                 ) : (
                   <>
+                    {permissions?.serializedAsset?.isUpdate && productInventoryFields?.some(field => field?.fieldData?.fieldName === "mtrAttached") && (
+                      <Box style={{ marginTop: isMobile && !isTablet ? '5px' : '-30px' }}>
+                        <Grid container direction="row" justifyContent="flex-end" alignItems="center">
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={productInventoryData?.mtrAttached}
+                                onChange={(event) => {
+                                  handleMTRAttached(event.target.checked)
+                                }}
+                                name="mtrAttached"
+                                color="primary"
+                              />
+                            }
+                            label={productInventoryFields?.find(field => field?.fieldData?.fieldName === "mtrAttached")?.fieldLabel || "MTR Attached"}
+                          />
+                        </Grid>
+                      </Box>
+                    )}
                     <DetailsPage
                       data={productInventoryData}
                       fields={

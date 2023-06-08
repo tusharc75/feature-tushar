@@ -766,6 +766,7 @@ const ManageDeliveryTicket = ({
                                         name={field.fieldName}
                                         type={field.type}
                                         options={field.option}
+                                        hidelookupAddButton={true}
                                         onChange={(e, val) => {
                                           setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
                                           if (values['deliveryToType'] === DELIVERY_FROM_TO_TYPE.plant && val?.address) {
@@ -774,7 +775,6 @@ const ManageDeliveryTicket = ({
                                             setFieldValue('deliveryToAddress', '');
                                           }
                                         }}
-                                        hidelookupAddButton={true}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
@@ -790,6 +790,7 @@ const ManageDeliveryTicket = ({
                                             disabled={Boolean(deliveryTicketId) && field.disableOnEdit}
                                             fieldData={field}
                                             values={values}
+                                            hidelookupAddButton={true}
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
@@ -835,6 +836,7 @@ const ManageDeliveryTicket = ({
                                             fieldData={field}
                                             values={values}
                                             errors={errors}
+                                            hidelookupAddButton={true}
                                             touched={touched}
                                             label={field.fieldLabel}
                                             name={field.fieldName}
