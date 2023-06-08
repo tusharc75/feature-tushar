@@ -11,12 +11,8 @@ import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
-  customerAccount,
-  customerContact,
-  getCollaboratorDropdownDataSource,
   getObjKeys,
   getObjKeysWithValues,
-  getOwnerDropdownDataSource,
   invoice,
   setFieldsInAscendingOrder,
   yupSchema,
@@ -28,10 +24,6 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from 'react-icons/fa';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
-import ManageAccountDialog from '../../Account/ManageAccount';
-import ManageContactDialog from '../../Contact/ManageContact';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 

@@ -24,7 +24,6 @@ import ManageMarketSegmentDialog from '../MarketSegment/ManageMarketSegmentDialo
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
-import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
 import routes from 'src/components/Helpers/Routes';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -75,8 +74,6 @@ const CreateProjectSales = ({
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [showAddAddresstDialog, setShowAddAddresstDialog] = useState(false);
-  const [addressDataSource, setAddressDataSource] = useState([]);
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
@@ -98,16 +95,11 @@ const CreateProjectSales = ({
         const filterData = projectSalesId
           ? data.filter((d) => d.isUpdate)
           : data.filter((d) => {
-              if (accountId && ['customerAccountName', 'supplierAccountName'].some((_f) => _f === d.fieldData.fieldName)) {
-                d = initializeDropdownById(d, d.fieldData.fieldName, accountId);
-              }
-              return d.isCreate;
-            });
-
-        const addressDropdownData = filterData.map((m) => m.fieldData).find((d) => d.fieldName === 'finalDestination');
-        if (addressDropdownData) {
-          setAddressDataSource(addressDropdownData.option);
-        }
+            if (accountId && ['customerAccountName', 'supplierAccountName'].some((_f) => _f === d.fieldData.fieldName)) {
+              d = initializeDropdownById(d, d.fieldData.fieldName, accountId);
+            }
+            return d.isCreate;
+          });
 
         const marketSegmentDropdownData = filterData.map((m) => m.fieldData).find((d) => d.fieldName === formFieldNames.marketSegment);
         if (marketSegmentDropdownData) {
@@ -321,9 +313,8 @@ const CreateProjectSales = ({
                     setShowConfirmDialog(true);
                   }
                 }}
-                title={`${
-                  isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `New ${routes.projectSales.title}`
-                }`}
+                title={`${isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `New ${routes.projectSales.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -641,58 +632,6 @@ const CreateProjectSales = ({
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                     />
-                                  ) : field.fieldName === 'finalDestination' ? (
-                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                      <Grid container spacing={1}>
-                                        <Grid
-                                          item
-                                          xs={permissions?.projectSales?.isCreate ? 11 : 12}
-                                          sm={permissions?.projectSales?.isCreate ? 11 : 12}
-                                          md={permissions?.projectSales?.isCreate ? 11 : 12}
-                                        >
-                                          <FormTypes
-                                            {...field}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={addressDataSource}
-                                            setFieldValue={(name, value) => {
-                                              setFieldValue(name, value);
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                          />
-                                        </Grid>
-                                        {permissions?.projectSales?.isCreate && (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title="Add Address" className="mt-1">
-                                              <IconButton
-                                                onClick={() => {
-                                                  setShowAddAddresstDialog(true);
-                                                }}
-                                                disabled={field.disableOnEdit}
-                                                size="small"
-                                              >
-                                                <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        )}
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    </Grid>
                                   ) : (
                                     <FormTypes
                                       {...field}
@@ -779,33 +718,6 @@ const CreateProjectSales = ({
                   Save
                 </CustomButton>
               </CustomDialogFooter>
-              {showAddAddresstDialog && (
-                <ManageAddressDialog
-                  onClose={() => {
-                    setShowAddAddresstDialog(false);
-                  }}
-                  onSuccess={(obj) => {
-                    if (obj) {
-                      setShowAddAddresstDialog(false);
-                      if (obj?.isAlreadyExist === true) {
-                        let tempAddress = addressDataSource.find((d) => d?.optionLabel === obj?.fullAddress);
-                        setFieldValue('finalDestination', [...values[`finalDestination`], tempAddress.optionValue]);
-                      } else {
-                        setAddressDataSource((prevState) => [
-                          ...prevState,
-                          {
-                            default: false,
-                            optionLabel: obj?.fullAddress,
-                            optionValue: obj._id,
-                            order: addressDataSource.length + 1
-                          }
-                        ]);
-                        setFieldValue('finalDestination', [...values[`finalDestination`], obj._id]);
-                      }
-                    }
-                  }}
-                />
-              )}
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
                   close={() => setShowConfirmDialog(false)}
