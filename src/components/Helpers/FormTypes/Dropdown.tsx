@@ -21,11 +21,15 @@ import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
 import ManageAccount from 'src/pages/Account/ManageAccount';
 import ManageContact from 'src/pages/Contact/ManageContact';
 import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
-import { has, isEmpty } from 'lodash';
 import ManageMarketSegmentDialog from 'src/pages/MarketSegment/ManageMarketSegmentDialog';
+import { camelCase, has, isEmpty } from 'lodash';
 
 function dropdownOptions(options, values, fields, fieldData) {
-  if (!fieldData?.lookupDependentOn || fieldData?.lookupDependentOn === '') {
+
+  const lookupDependentOn = fieldData?.lookupDependentOn;
+  const lookupDependentOnField = fieldData?.lookupDependentOnField;
+
+  if (!lookupDependentOn || isEmpty(lookupDependentOn)) {
     let oData = options;
     if (fieldData?.fieldName === 'owner') {
       const optionDatas = options?.filter((option: any) => ![...values['collaborator']]?.includes(option?.optionValue)) || [];
@@ -33,7 +37,8 @@ function dropdownOptions(options, values, fields, fieldData) {
     } else if (fieldData?.fieldName === 'collaborator') {
       const optionDatas = options?.filter((option: any) => option?.optionValue !== values['owner']) || [];
       oData = optionDatas || [];
-    } else {
+    }
+    else {
       // for market segment kind of situation
       const optionDatas = options?.filter((o) => {
         if (has(o, fieldData?.fieldName)) {
@@ -46,24 +51,28 @@ function dropdownOptions(options, values, fields, fieldData) {
   }
 
   const optionsToShow = [];
-  if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOnField && !isEmpty(fieldData?.lookupDependentOnField)) {
-    const dependentField = fields.find((field) => field?.fieldName === fieldData.lookupDependentOn);
-    if (dependentField) {
-      const dependentValue = values[dependentField?.fieldName];
-      if (dependentValue) {
-        const dependentFieldOptions = dependentField?.option || [];
-        const dependentFieldOption = dependentFieldOptions.find((option) => option.optionValue === dependentValue);
-        const dependentIds = dependentFieldOption[fieldData?.lookupDependentOnField] || [];
-        const optionDatas = options?.filter((option: any) => dependentIds.includes(option.optionValue)) || [];
-        optionsToShow.push(...optionDatas);
+
+  if (lookupDependentOn && lookupDependentOnField && !isEmpty(lookupDependentOn) && !isEmpty(lookupDependentOnField)) {
+    const dependentOnField = fields.find((e) => e?.fieldName === lookupDependentOn);
+    if (dependentOnField) {
+      const dependentOnFieldValue = values[dependentOnField?.fieldName];
+      if (dependentOnFieldValue) {
+        const dependentFieldOption = dependentOnField?.option?.find((e) => e.optionValue === dependentOnFieldValue);
+        const dependentIds = dependentFieldOption[lookupDependentOnField] || [];
+        const newOptions = options?.filter((option: any) => dependentIds.includes(option.optionValue)) || [];
+        optionsToShow.push(...newOptions);
       }
     }
   }
 
-  if (fieldData?.lookupDependentOn && !isEmpty(fieldData?.lookupDependentOn) && values[fieldData?.lookupDependentOn]) {
-    const value = values[fieldData?.lookupDependentOn];
-    const optionDatas = options?.filter((option: any) => option[fieldData?.lookupDependentOn] === value) || [];
-    optionsToShow.push(...optionDatas);
+  if (lookupDependentOn && !isEmpty(lookupDependentOn)) {
+    const fieldName = fields?.find((e) => e.fieldName === lookupDependentOn)?.fieldName
+    const lookupResource = fields?.find((e) => e.fieldName === lookupDependentOn)?.lookupResource
+    const value = values[lookupDependentOn] || values[fieldName];
+    if (value) {
+      const newOptions = options?.filter((option: any) => option[lookupDependentOn] === value || option[camelCase(lookupResource)] === value) || [];
+      optionsToShow.push(...newOptions);
+    }
   }
 
   return optionsToShow;
@@ -122,13 +131,13 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, value: any, reason) => {
-                        if (setFieldValue) {
-                          setFieldValue(
-                            name,
-                            value.map((val) => val.optionValue)
-                          );
-                        }
+                      if (setFieldValue) {
+                        setFieldValue(
+                          name,
+                          value.map((val) => val.optionValue)
+                        );
                       }
+                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -156,14 +165,14 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, val) => {
-                        if (setFieldValue) {
-                          handleChange(name, val && val.optionValue ? val.optionValue : '');
-                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                          fieldChange?.forEach((val: any) => {
-                            setFieldValue(val.fieldName, val.value);
-                          });
-                        }
+                      if (setFieldValue) {
+                        handleChange(name, val && val.optionValue ? val.optionValue : '');
+                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                        fieldChange?.forEach((val: any) => {
+                          setFieldValue(val.fieldName, val.value);
+                        });
                       }
+                    }
                 }
                 selectOnFocus
                 clearOnBlur
