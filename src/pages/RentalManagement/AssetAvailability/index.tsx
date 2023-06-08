@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Dialog, IconButton, Typography } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CloseIcon from '@material-ui/icons/Close';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
@@ -36,7 +36,7 @@ export default function AssetAvailability({ rentalId, handleAssetAvailabilityClo
 
   useEffect(() => {
     axiosInstance()
-      .get(`/rental-management/automation/check-asset-availability/${rentalId}`)
+      .get(`${rentalManagement.api}/automation/check-asset-availability/${rentalId}`)
       .then((data: { data }) => {
         const assets = data?.data?.data;
         const fetchedAvailableAssets = [];
@@ -84,7 +84,7 @@ export default function AssetAvailability({ rentalId, handleAssetAvailabilityClo
       )}
       {asset?.length > 0 ? (
         <>
-          <Typography style={{ fontSize: '13px', fontWeight: '500' }}>Serialized Assets are not available for following products</Typography>
+          <Typography style={{ fontSize: '16px', fontWeight: '500' }}>Serialized Assets are not available for following products</Typography>
           <div className="mt-2">
             {asset?.map((_asset) => {
               return (
@@ -103,11 +103,11 @@ export default function AssetAvailability({ rentalId, handleAssetAvailabilityClo
                       <Typography style={typographyd}>{_asset?.product?.productName}</Typography>
                     </div>
                     <div className="ml-4">
-                      <Typography style={typographyh}>Qty</Typography>
+                      <Typography style={typographyh}>Requested Qty</Typography>
                       <Typography style={typographyd}>{_asset?.qty}</Typography>
                     </div>
                     <div className="ml-4">
-                      <Typography style={typographyh}>Asset Status</Typography>
+                      <Typography style={typographyh}>Available Asset</Typography>
                       <Typography style={typographyd}>{_asset?.availableAssets}</Typography>
                     </div>
                   </div>
@@ -119,7 +119,7 @@ export default function AssetAvailability({ rentalId, handleAssetAvailabilityClo
       ) : (
         <>
           {availableAssets?.length > 0 && asset?.length === 0 && (
-            <Typography style={{ fontSize: '13px', fontWeight: '500' }}>
+            <Typography style={{ fontSize: '18px', fontWeight: '500' }}>
               Serialized Assets are available for all the products. Rental job can be fulfilled
             </Typography>
           )}

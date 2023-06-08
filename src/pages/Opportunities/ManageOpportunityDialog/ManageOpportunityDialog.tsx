@@ -32,7 +32,6 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import ManageMarketSegmentDialog from '../../MarketSegment/ManageMarketSegmentDialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
-import ManageAddressDialog from '../../../components/Address/ManageAddressDialog';
 import { isArray, isEqual } from 'lodash';
 export default function ManageOpportunityDialog({
   open,
@@ -50,6 +49,7 @@ export default function ManageOpportunityDialog({
   opportunityId = null,
   isClone = false
 }) {
+  
   const { opportunityApi } = opportunity;
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -57,13 +57,12 @@ export default function ManageOpportunityDialog({
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const [disableOwnerSelection] = useState((!isNew && user.user._id !== dataToUpdate.owner.optionValue) || disableOwnerAndAccount);
+
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [accountData, setAccountData] = useState([]);
   const [additionalFieldName, setAdditionalFieldName] = useState('');
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [cloneHeading, setCloneHeading] = useState('');
@@ -72,13 +71,8 @@ export default function ManageOpportunityDialog({
   const [marketSegmentDataSource, setMarketSegmentDataSource] = useState([]);
   const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
   const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
-  const [countryBillToDropDown, setCountryBillToDropDown] = useState([]);
-  const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
-  const [countryBillToMainData, setCountryBillToMainData] = useState([]);
-  const [countrySellToMainData, setCountrySellToMainData] = useState([]);
-  const [showAddressDialog, setShowAddressDialog] = useState(false);
+ 
 
-  const [addressType, setAddressType] = useState('');
   const ref = useRef(null);
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -86,7 +80,6 @@ export default function ManageOpportunityDialog({
   useEffect(() => {
     if (isNew) {
       const processSteps = initialData.fields.find((d) => d.type.toLowerCase() === 'process');
-
       if (processSteps) {
         initialData.fields.map((d) => {
           if (d.sectionName === processSteps.additionalInfoSection) {
@@ -108,22 +101,11 @@ export default function ManageOpportunityDialog({
         }
       }
     }
-
-    let customerAccountOptions = initialData.fields.find((d) => d.fieldName === 'customerAccount');
-    if (customerAccountOptions) {
-      setAccountData(customerAccountOptions.option);
-    }
-
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
-
-    return () => {
-      setAccountData([]);
-    };
   }, [initialData.fields]);
 
   useEffect(() => {
     getOpportunityFields();
-
     return () => {
       setCurrencySymbol(null);
       setInitialData({
@@ -153,17 +135,6 @@ export default function ManageOpportunityDialog({
             }
           });
           setMarketSegmentDataSource(initializeMarketSegmentDataSource);
-        }
-
-        const countryBillToDropdownData = filterData.map((m) => m.fieldData).find((d) => d.fieldName === 'countryBillTo');
-        if (countryBillToDropdownData) {
-          setCountryBillToMainData(countryBillToDropdownData.option);
-          setCountryBillToDropDown(countryBillToDropdownData.option);
-        }
-        const countrySellToDropdownData = filterData.map((m) => m.fieldData).find((d) => d.fieldName === 'countrySellTo');
-        if (countrySellToDropdownData) {
-          setCountrySellToMainData(countrySellToDropdownData.option);
-          setCountrySellToDropDown(countrySellToDropdownData.option);
         }
 
         filterData.map((_f) => {
@@ -299,52 +270,10 @@ export default function ManageOpportunityDialog({
       });
   };
 
-  const updateAccountDropdown = (data) => {
-    const entityFields = initialData.fields;
-    const customerAccountNameFieldIndex = entityFields.findIndex((d) => d.fieldName === 'customerAccountName');
-
-    if (customerAccountNameFieldIndex > -1) {
-      entityFields[customerAccountNameFieldIndex].option = [
-        ...entityFields[customerAccountNameFieldIndex].option,
-        {
-          optionValue: data._id,
-          optionLabel: data.accountName,
-          order: entityFields[customerAccountNameFieldIndex].option.length,
-          default: false
-        }
-      ];
-
-      setAccountData(entityFields[customerAccountNameFieldIndex].option);
-    }
-  };
-
-  const onCountrySellToDropDownOpen = (selectedAccount, alreadySelected) => {
-    let filterAddress = accountData.find((d) => d.optionValue === selectedAccount)?.shippingAddress;
-    if (isArray(filterAddress) || alreadySelected) {
-      setCountrySellToDropDown(
-        countrySellToMainData.filter((d) => filterAddress?.some((u) => u === d.optionValue) || alreadySelected?.some((u) => u === d.optionValue))
-      );
-    } else {
-      setCountrySellToDropDown([]);
-    }
-  };
-
-  const onCountryBillToDropDownOpen = (selectedAccount, alreadySelected) => {
-    let filterAddress = accountData.find((d) => d.optionValue === selectedAccount)?.billingAddress;
-    if (isArray(filterAddress) || alreadySelected) {
-      setCountryBillToDropDown(
-        countryBillToMainData.filter((d) => filterAddress?.some((u) => u === d.optionValue) || alreadySelected?.some((u) => u === d.optionValue))
-      );
-    } else {
-      setCountryBillToDropDown([]);
-    }
-  };
-
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
     if (err.length) {
       const input = document.querySelector(`input[name=${err[0]}]`);
-
       input.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
@@ -403,176 +332,10 @@ export default function ManageOpportunityDialog({
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field, index2) => (
                                     <Grid key={index2} item xs={12} sm={6} md={6}>
-                                      {field.fieldName === 'countryBillTo' ? (
-                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                          <Grid container spacing={1}>
-                                            <Grid
-                                              item
-                                              xs={permissions.address?.isCreate ? 11 : 11}
-                                              sm={permissions.address?.isCreate ? 11 : 11}
-                                              md={permissions.address?.isCreate ? 11 : 11}
-                                            >
-                                              <FormTypes
-                                                isNew={isNew}
-                                                {...field}
-                                                disabled={!isNew && field.disableOnEdit}
-                                                values={values}
-                                                errors={errors}
-                                                touched={touched}
-                                                label={field.fieldLabel}
-                                                name={field.fieldName}
-                                                type={field.type}
-                                                options={countryBillToDropDown}
-                                                setFieldValue={(name, value) => {
-                                                  setFieldValue(name, value);
-                                                }}
-                                                required={field.required}
-                                                fullWidth
-                                                isTooltip={field?.isTooltip || false}
-                                                tooltipMessage={field?.tooltipMessage}
-                                                size="small"
-                                                onOpen={() => onCountryBillToDropDownOpen(values.customerAccountName, values.countryBillTo)}
-                                              />
-                                            </Grid>
-                                            {permissions.address?.isCreate && (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title="Add Country Bill to Address" className="mt-1">
-                                                  <IconButton
-                                                    onClick={() => {
-                                                      setShowAddressDialog(true);
-                                                      setAddressType('countryBillTo');
-                                                    }}
-                                                    disabled={!isNew && field.disableOnEdit}
-                                                    size="small"
-                                                  >
-                                                    <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                  </IconButton>
-                                                </Tooltip>
-                                              </Grid>
-                                            )}
-                                            {field?.tooltipMessage ? (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
-                                              </Grid>
-                                            ) : null}
-                                          </Grid>
-                                        </Grid>
-                                      ) : field.fieldName === 'countrySellTo' ? (
-                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                          <Grid container spacing={1}>
-                                            <Grid
-                                              item
-                                              xs={permissions.address?.isCreate ? 11 : 11}
-                                              sm={permissions.address?.isCreate ? 11 : 11}
-                                              md={permissions.address?.isCreate ? 11 : 11}
-                                            >
-                                              <FormTypes
-                                                isNew={isNew}
-                                                {...field}
-                                                disabled={!isNew && field.disableOnEdit}
-                                                values={values}
-                                                errors={errors}
-                                                touched={touched}
-                                                label={field.fieldLabel}
-                                                name={field.fieldName}
-                                                type={field.type}
-                                                options={countrySellToDropDown}
-                                                setFieldValue={(name, value) => {
-                                                  setFieldValue(name, value);
-                                                }}
-                                                required={field.required}
-                                                fullWidth
-                                                isTooltip={field?.isTooltip || false}
-                                                tooltipMessage={field?.tooltipMessage}
-                                                size="small"
-                                                onOpen={() => onCountrySellToDropDownOpen(values.customerAccountName, values.countrySellTo)}
-                                              />
-                                            </Grid>
-                                            {permissions.address?.isCreate && (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title="Add Country Sell to Address" className="mt-1">
-                                                  <IconButton
-                                                    onClick={() => {
-                                                      setShowAddressDialog(true);
-                                                      setAddressType('countrySellTo');
-                                                    }}
-                                                    disabled={!isNew && field.disableOnEdit}
-                                                    size="small"
-                                                  >
-                                                    <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                  </IconButton>
-                                                </Tooltip>
-                                              </Grid>
-                                            )}
-                                            {field?.tooltipMessage ? (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
-                                              </Grid>
-                                            ) : null}
-                                          </Grid>
-                                        </Grid>
-                                      ) : field.fieldName === 'probability' ? (
+                                      {field.fieldName === 'currency' ? (
                                         <FormTypes
                                           isNew={isNew}
                                           {...field}
-                                          // {...rest}
-                                          disabled={!isNew && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onChange={(e) => {
-                                            if (e.target.value && parseFloat(e.target.value) > 100) {
-                                              setFieldValue('probability', '100');
-                                            } else {
-                                              setFieldValue('probability', e.target.value);
-                                            }
-                                          }}
-                                        />
-                                      ) : field.fieldName === 'lostReason' ? (
-                                        values['stage'] === 'Closed Lost' ? (
-                                          <FormTypes
-                                            isNew={isNew}
-                                            {...field}
-                                            // {...rest}
-                                            disabled={!isNew && field.disableOnEdit}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            setFieldValue={(name, value) => {
-                                              setFieldValue(name, value);
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                          />
-                                        ) : null
-                                      ) : field.fieldName === 'currency' ? (
-                                        <FormTypes
-                                          isNew={isNew}
-                                          {...field}
-                                          // {...rest}
                                           disabled={!isNew && field.disableOnEdit}
                                           values={values}
                                           errors={errors}
@@ -667,24 +430,21 @@ export default function ManageOpportunityDialog({
                                                 doNotShowInfoTooltip={true}
                                               />
                                             </Grid>
-                                            {
-                                              // permissions.productCategory
-                                              //     .isCreate
-                                              permissions.marketSegment?.isCreate && (
-                                                <Grid item xs={1} sm={1} md={1}>
-                                                  <Tooltip title="Add Market Segment" className="mt-1">
-                                                    <IconButton
-                                                      onClick={() => {
-                                                        setShowAddMarketSegmentDialog(true);
-                                                      }}
-                                                      disabled={!isNew && field.disableOnEdit}
-                                                      size="small"
-                                                    >
-                                                      <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                    </IconButton>
-                                                  </Tooltip>
-                                                </Grid>
-                                              )
+                                            {permissions.marketSegment?.isCreate && (
+                                              <Grid item xs={1} sm={1} md={1}>
+                                                <Tooltip title="Add Market Segment" className="mt-1">
+                                                  <IconButton
+                                                    onClick={() => {
+                                                      setShowAddMarketSegmentDialog(true);
+                                                    }}
+                                                    disabled={!isNew && field.disableOnEdit}
+                                                    size="small"
+                                                  >
+                                                    <AddIcon color={!isNew && field.disableOnEdit ? 'disabled' : 'primary'} />
+                                                  </IconButton>
+                                                </Tooltip>
+                                              </Grid>
+                                            )
                                             }
                                             {field?.tooltipMessage ? (
                                               <Grid item xs={1} sm={1} md={1}>
@@ -764,7 +524,6 @@ export default function ManageOpportunityDialog({
                                         <FormTypes
                                           isNew={isNew}
                                           {...field}
-                                          // {...rest}
                                           disabled={!isNew && field.disableOnEdit}
                                           values={values}
                                           errors={errors}
@@ -802,7 +561,6 @@ export default function ManageOpportunityDialog({
                               <FormTypes
                                 isNew={isNew}
                                 {...field}
-                                // {...rest}
                                 disabled={!isNew && field.disableOnEdit}
                                 values={values}
                                 errors={errors}
@@ -961,76 +719,6 @@ export default function ManageOpportunityDialog({
                         }
                       }
                       setShowAddMarketSegmentDialog(false);
-                    }}
-                  />
-                )}
-                {showAddressDialog && (
-                  <ManageAddressDialog
-                    onClose={() => {
-                      setShowAddressDialog(false);
-                    }}
-                    onSuccess={(obj) => {
-                      if (obj) {
-                        setShowAddressDialog(false);
-                        if (obj?.isAlreadyExist === true) {
-                          let tempAddress =
-                            addressType === 'countryBillTo'
-                              ? countryBillToMainData.find((d) => d?.optionLabel === obj?.fullAddress)
-                              : countrySellToMainData.find((d) => d?.optionLabel === obj?.fullAddress);
-                          if (addressType === 'countryBillTo') {
-                            onCountryBillToDropDownOpen(
-                              values.customerAccountName,
-                              values.countryBillTo ? [...values.countryBillTo, tempAddress?.optionValue] : [tempAddress?.optionValue]
-                            );
-                          } else {
-                            onCountrySellToDropDownOpen(
-                              values.customerAccountName,
-                              values.countrySellTo ? [...values.countrySellTo, tempAddress?.optionValue] : [tempAddress?.optionValue]
-                            );
-                          }
-                          setFieldValue(addressType, [...values[`${addressType}`], tempAddress?.optionValue]);
-                        } else {
-                          addressType === 'countryBillTo'
-                            ? setCountryBillToMainData((prevState) => [
-                              ...prevState,
-                              {
-                                default: false,
-                                optionLabel: obj?.fullAddress,
-                                optionValue: obj._id,
-                                order: countryBillToMainData.length + 1
-                              }
-                            ])
-                            : setCountrySellToMainData((prevState) => [
-                              ...prevState,
-                              {
-                                default: false,
-                                optionLabel: obj?.fullAddress,
-                                optionValue: obj._id,
-                                order: countrySellToMainData.length + 1
-                              }
-                            ]);
-                          addressType === 'countryBillTo'
-                            ? setCountryBillToDropDown((prevState) => [
-                              ...prevState,
-                              {
-                                default: false,
-                                optionLabel: obj?.fullAddress,
-                                optionValue: obj._id,
-                                order: countryBillToDropDown.length + 1
-                              }
-                            ])
-                            : setCountrySellToDropDown((prevState) => [
-                              ...prevState,
-                              {
-                                default: false,
-                                optionLabel: obj?.fullAddress,
-                                optionValue: obj._id,
-                                order: countrySellToDropDown.length + 1
-                              }
-                            ]);
-                          setFieldValue(addressType, [...values[`${addressType}`], obj._id]);
-                        }
-                      }
                     }}
                   />
                 )}
