@@ -1,16 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
-import ManageContact from "./ManageContact";
-import {
-  getObjKeys,
-  initializeDropdownById,
-  sidebarResource,
-  getObjKeysWithValues
-} from "../../../constants/helpers";
-import { useData } from "../../../StateProvider/Provider";
-import { useHistory } from "react-router-dom";
-import axiosInstance from "../../../axios/axiosInstance";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import ManageAccountDialog from "../../Account/ManageAccount/index";
+import React, { useContext, useEffect, useState } from 'react';
+import ManageContact from './ManageContact';
+import { getObjKeys, initializeDropdownById, sidebarResource, getObjKeysWithValues } from '../../../constants/helpers';
+import { useData } from '../../../StateProvider/Provider';
+import { useHistory } from 'react-router-dom';
+import axiosInstance from '../../../axios/axiosInstance';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import ManageAccountDialog from '../../Account/ManageAccount/index';
 
 export default function ManageContactDialog(props) {
   const toastConfig = useContext(CustomToastContext);
@@ -37,13 +32,13 @@ export default function ManageContactDialog(props) {
   } = props;
   const { accountApi, accountResource } = account;
   const {
-    state: { user },
+    state: { user }
   }: any = useData();
   const [contactData, setContactData] = useState({
     fields: [],
-    initialValues: {},
+    initialValues: {}
   });
-  const [formValues, setFormValues] = useState({})
+  const [formValues, setFormValues] = useState({});
   const [loading, setLoading] = useState(false);
   const [showAccountDialog, setShowAccountDialog] = useState(false);
   const [accountSource, setAccountSource] = useState([]);
@@ -56,19 +51,17 @@ export default function ManageContactDialog(props) {
     if (contactData && contactData?.fields.length !== 0 && contactData?.initialValues.length !== 0) {
       setContactData({
         fields: contactData.fields,
-        initialValues: contactData.initialValues,
+        initialValues: contactData.initialValues
       });
-      setFormValues(contactData.initialValues)
+      setFormValues(contactData.initialValues);
       contactData.fields.some((currentField) => {
-        if (currentField.fieldName === "accountName") {
+        if (currentField.fieldName === 'accountName') {
           setAccountSource(currentField.option);
           return true;
         }
       });
     } else getContactFields();
   }, [user]);
-
-
 
   const getContactFields = () => {
     setLoading(true);
@@ -80,63 +73,52 @@ export default function ManageContactDialog(props) {
           .filter((d) => d.isCreate)
           .map((_f) => {
             //  If this dialog opens from account details screen, make that account preselected
-            if (accountId && _f.fieldData.fieldName === "accountName") {
-              _f = initializeDropdownById(
-                _f,
-                _f.fieldData.fieldName,
-                accountId
-              );
+            if (accountId && _f.fieldData.fieldName === 'accountName') {
+              _f = initializeDropdownById(_f, _f.fieldData.fieldName, accountId);
             }
 
-            if (userId && _f.fieldData.fieldName == "owner") {
+            if (userId && _f.fieldData.fieldName == 'owner') {
               _f = initializeDropdownById(_f, _f.fieldData.fieldName, userId);
             }
 
-            if (
-              _f?.fieldData?.fieldName &&
-              _f.fieldData.fieldName === "accountName"
-            ) {
+            if (_f?.fieldData?.fieldName && _f.fieldData.fieldName === 'accountName') {
               setAccountSource(_f.fieldData.option);
             }
             newFields.push(_f.fieldData);
           });
         if (isClone && contactId) {
-          getContactCloneData(newFields)
-        }
-        else {
+          getContactCloneData(newFields);
+        } else {
           setContactData({
             fields: newFields,
-            initialValues: getObjKeys("", newFields),
+            initialValues: getObjKeys('', newFields)
           });
-          setFormValues(getObjKeys("", newFields))
+          setFormValues(getObjKeys('', newFields));
           setTimeout(() => setLoading(false), 500);
         }
-
       })
       .catch((err) => setLoading(false));
   };
 
   const getContactCloneData = (newFields) => {
     if (contactId) {
-
-      setLoading(false)
+      setLoading(false);
       axiosInstance()
         .get(`/${contactApi}/${contactId}`)
         .then(({ data: { data } }) => {
-          const { _id, firstName, lastName, middleName, email, reportsTo, ...rest } = data
+          const { _id, firstName, lastName, middleName, email, reportsTo, ...rest } = data;
 
-          let tempData = { ...rest }
+          let tempData = { ...rest };
 
           setContactData({
             fields: newFields,
-            initialValues: getObjKeysWithValues(tempData, newFields),
+            initialValues: getObjKeysWithValues(tempData, newFields)
           });
-          setFormValues(getObjKeysWithValues(tempData, newFields))
+          setFormValues(getObjKeysWithValues(tempData, newFields));
           setTimeout(() => setLoading(false), 500);
-        })
+        });
     }
-  }
-
+  };
 
   const handleCreateContact = (values, saveAndNew, setValues) => {
     setLoading(true);
@@ -144,15 +126,15 @@ export default function ManageContactDialog(props) {
       .post(`/${contactApi}`, values)
       .then(({ data }) => {
         if (isGetContactData) {
-          onGetAddedContact(data.data)
+          onGetAddedContact(data.data);
         }
         const newId = data.data._id;
         onClose({ fetch: true });
         onSuccess({ fetch: true, id: newId, data: data });
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data.message,
+          type: 'success',
+          message: data.message
         });
 
         if (isRedirectToDetailPage) {
@@ -196,8 +178,8 @@ export default function ManageContactDialog(props) {
             optionValue: data._id,
             optionLabel: data.accountName,
             order: accountSource.length,
-            default: false,
-          },
+            default: false
+          }
         ];
       });
       setNewAddedAccountId(data._id);
