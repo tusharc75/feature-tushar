@@ -5,7 +5,7 @@ import { ACTIVITY_RESOURCE, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import ErrorIcon from '@material-ui/icons/Error';
-import DashboardModal, { ModalContent } from 'src/components/DashboardModal';
+import DashboardModal, { ModalHead } from 'src/components/DashboardModal';
 import Skeleton from '@material-ui/lab/Skeleton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
@@ -46,21 +46,20 @@ const ShowProduct = ({ product }) => {
         <Typography style={typographyh}>Asset Available</Typography>
         <Typography style={typographyd}>{product?.assetAvailable}</Typography>
       </div>
-      {!product?.baseWarehouse &&
+      {!product?.baseWarehouse && (
         <div className="ml-4">
           <Typography style={typographyh}>{routes.warehouse.title}</Typography>
           <Typography style={typographyd}>{product?.warehouse?.optionLabel}</Typography>
         </div>
-      }
+      )}
     </div>
-  )
-}
+  );
+};
 
 export default function AssetAvailability({ rentalId, handleClose }) {
-
   const toastConfig = useContext(CustomToastContext);
 
-  const [modalContent, setModalContent] = useState<ModalContent | null>({
+  const [modalContent, setModalContent] = useState<ModalHead | null>({
     title: 'Checking Assets Availability',
     icon: <Skeleton variant="circle" width={32} height={32} />
   });
@@ -71,15 +70,21 @@ export default function AssetAvailability({ rentalId, handleClose }) {
 
   const [taskDialog, setTaskDialog] = useState(false);
 
-
   useEffect(() => {
+    setModalContent({
+      title: 'Checking Assets Availability',
+      icon: <Skeleton variant="circle" width={32} height={32} />
+    });
     axiosInstance()
       .get(`${rentalManagement.api}/automation/check-asset-availability/${rentalId}`)
       .then(({ data: { data } }) => {
         const rows: any = data;
-        setProducts(rows)
-        if (rows?.length > 0 && rows?.filter((e) => e.baseWarehouse)?.length === rows?.filter((e) => e.baseWarehouse && e.qty <= e.assetAvailable)?.length) {
-          setCanFulfil(true)
+        setProducts(rows);
+        if (
+          rows?.length > 0 &&
+          rows?.filter((e) => e.baseWarehouse)?.length === rows?.filter((e) => e.baseWarehouse && e.qty <= e.assetAvailable)?.length
+        ) {
+          setCanFulfil(true);
         }
       })
       .catch((error) => {
@@ -93,8 +98,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
         title: 'Serialized Assets Available',
         icon: <CheckCircleIcon color="secondary" />
       });
-    }
-    else {
+    } else {
       setModalContent({
         title: 'Serialized Assets not Available',
         icon: <ErrorIcon color="error" />
@@ -104,28 +108,45 @@ export default function AssetAvailability({ rentalId, handleClose }) {
 
   return (
     <DashboardModal
-      modalContent={modalContent}
+      dialogProps={{
+        maxWidth: 'md',
+        fullScreen: isMobile
+        // onClose: (e, reason) => {
+        // if (reason !== 'backdropClick') {
+        //   return;
+        // }
+        // }
+      }}
+      open={true}
+      modalHead={modalContent}
       handleClose={handleClose}
-      style={{ position: 'relative' }}>
-      {products ?
-        canFulfil ?
+    >
+      {products ? (
+        canFulfil ? (
           <Typography style={{ fontSize: '16px', fontWeight: '500' }}>
             Serialized Assets are available for all the products. Rental job can be fulfilled
           </Typography>
-          : <Box>
+        ) : (
+          <Box>
             <Typography style={{ fontSize: '16px', fontWeight: '500' }}>Serialized Assets are not available for following products</Typography>
             <div className="mt-2">
-              {products?.filter((e) => e.baseWarehouse)?.map((product) =>
-                <ShowProduct product={product} />
-              )}
+              {products
+                ?.filter((e) => e.baseWarehouse)
+                ?.map((product) => (
+                  <ShowProduct product={product} />
+                ))}
             </div>
             <Box pt={3}>
-              <Typography style={{ fontSize: '16px', fontWeight: '500' }}>{`Serialized Assets are available in other ${routes.warehouse.title}`}</Typography>
+              <Typography
+                style={{ fontSize: '16px', fontWeight: '500' }}
+              >{`Serialized Assets are available in other ${routes.warehouse.title}`}</Typography>
               <div className="mt-2">
-                {products?.filter((e) => !e.baseWarehouse)?.map((product) =>
-                  <ShowProduct product={product} />
-                )}
-                <div className="mt-2">
+                {products
+                  ?.filter((e) => !e.baseWarehouse)
+                  ?.map((product) => (
+                    <ShowProduct product={product} />
+                  ))}
+                <div className="mt-3" style={{ textAlign: 'right' }}>
                   <Button
                     size="small"
                     variant={'contained'}
@@ -140,10 +161,13 @@ export default function AssetAvailability({ rentalId, handleClose }) {
               </div>
             </Box>
           </Box>
-        : <div className="mt-2" style={{ maxWidth: 'calc(100% - 8px)' }}>
+        )
+      ) : (
+        <div className="mt-2" style={{ maxWidth: 'calc(100% - 8px)' }}>
           <CommonSkeleton lenArray={[...Array(2).keys()]} sm={12} md={false} />
-        </div>}
-      {taskDialog &&
+        </div>
+      )}
+      {taskDialog && (
         <Dialog
           open={taskDialog}
           fullScreen={fullScreen || isMobile || isTablet}
@@ -162,7 +186,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
               setTaskDialog(false);
               setFullScreen(false);
             }}
-            defaultName='Assets Transfer Request'
+            defaultName="Assets Transfer Request"
             relatedTo={[
               {
                 type: ACTIVITY_RESOURCE.rentalManagement,
@@ -177,7 +201,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
             showManimizeMaximize={true}
           />
         </Dialog>
-      }
+      )}
     </DashboardModal>
   );
 }
