@@ -473,6 +473,10 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                         label="Location"
                         name="location"
                         variant="outlined"
+                        value={values["location"]}
+                        onChange={(e) =>
+                          setFieldValue("location", e.target.value.trimStart())
+                        }
                       />
 
                       <TextField
@@ -484,6 +488,10 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                         label="Description"
                         name="description"
                         variant="outlined"
+                        value={values["description"]}
+                        onChange={(e) =>
+                          setFieldValue("description", e.target.value.trimStart())
+                        }
                       />
                       {eventId && (
                         <Fragment>
