@@ -210,8 +210,6 @@ const CreateRole = ({
       ) : (
         <>
           <CustomDialogContent>
-            {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
-
             <Box paddingX={1} paddingY={2}>
               <Box display="flex" marginBottom={2} gridGap={10}>
                 <TextField
