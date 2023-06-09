@@ -126,9 +126,10 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       {products ? (
         canFulfil ? (
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <BsHandThumbsUp size={60} style={{ color: 'var(--dark-primary-text, #047d1c)' }} />
+            <BsHandThumbsUp size={100} style={{ color: 'var(--dark-primary-text, #047d1c)' }} />
             <Typography style={{ fontSize: '16px', fontWeight: '500', marginTop: '20px' }}>
-              Serialized Assets are available for all the products. Rental job can be fulfilled
+              Serialized Assets are available for all the products.
+              <br /> Rental job can be fulfilled.
             </Typography>
           </div>
         ) : (
