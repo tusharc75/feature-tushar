@@ -141,7 +141,12 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
           );
         })}
       </div>
-      <DashboardModal modalContent={modalContent} handleClose={handleClose} handleRoutes={handleRoutes} />
+      <DashboardModal
+        modalContent={modalContent}
+        style={{ width: 'min(468px, calc(100vw - 64px))' }}
+        handleClose={handleClose}
+        handleRoutes={handleRoutes}
+      />
     </div>
   );
 };
@@ -225,7 +230,14 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
           )}
         </div>
       ) : null}
-      {mode !== 'User Manual' && <DashboardModal modalContent={modalContent} handleClose={handleClose} handleRoutes={handleRoutes} />}
+      {mode !== 'User Manual' && (
+        <DashboardModal
+          style={{ width: 'min(468px, calc(100vw - 64px))' }}
+          modalContent={modalContent}
+          handleClose={handleClose}
+          handleRoutes={handleRoutes}
+        />
+      )}
     </>
   );
 };

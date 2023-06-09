@@ -1138,7 +1138,11 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
           {is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
         </Toolbar>
       </AppBar>
-      <DashboardModal modalContent={modalContent} handleClose={handleCloseHelperModal} style={{ position: 'relative' }}>
+      <DashboardModal
+        modalContent={modalContent}
+        handleClose={handleCloseHelperModal}
+        style={{ position: 'relative', width: 'min(468px, calc(100vw - 64px))' }}
+      >
         <a title="open equipt documentation" href={userManual.link} target="_blank" className={styles.viewAll} onClick={handleCloseHelperModal}>
           <Typography component="span">Equipt - User Manual</Typography>
           <FiExternalLink size={20} style={{ marginBottom: 4 }} />
