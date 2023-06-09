@@ -199,7 +199,7 @@ const MaterialHandling = () => {
                                     aria-label="delete"
                                     size="small"
                                   >
-                                    <OpenInNewIcon fontSize="inherit" style={{ width: '24', height: '24' }} />
+                                    <OpenInNewIcon fontSize="inherit" style={{ width: '24', height: '24', color: 'var(--new_theme_color)' }} />
                                   </IconButton>
                                 </Box>
                               </Box>

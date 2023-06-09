@@ -18,14 +18,6 @@ const formats = {
     weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-const newStyles = {
-    backgroundColor: 'rgba(234, 239, 254, 1)',
-    color: 'rgba(4, 50, 161, 1)',
-    borderRadius: '4px',
-    border: 'none',
-    padding: '8px 16px'
-};
-
 const FILTERS = [
     {
         label: 'Plant',
@@ -340,6 +332,27 @@ function CalendarView({ resourceList }) {
         }
     }
 
+    const setEventStyle = (type) => {
+        let backgroundColor = 'rgba(234, 239, 254, 1)';
+        let color = 'rgba(4, 50, 161, 1)';
+        if (type === 'Planning') {
+            const num = Math.floor(Math.random() * 100);
+            if (num % 2 == 0) {
+                backgroundColor = "#048e0a"
+            } else {
+                backgroundColor = "#d13925"
+            }
+            color = "white"
+        }
+        return {
+            backgroundColor,
+            color,
+            borderRadius: '4px',
+            border: 'none',
+            padding: '8px 16px'
+        };
+    }
+
     return (
         <>
             <div>
@@ -443,8 +456,9 @@ function CalendarView({ resourceList }) {
                             onView={onView}
                             view={view}
                             eventPropGetter={(obj: any) => {
+                                const style = setEventStyle(obj.type)
                                 return {
-                                    style: newStyles
+                                    style
                                 };
                             }}
                             onNavigate={(date) => {
@@ -469,8 +483,9 @@ function CalendarView({ resourceList }) {
                             onView={onView}
                             view={view}
                             eventPropGetter={(obj: any) => {
+                                const style = setEventStyle(obj.type)
                                 return {
-                                    style: newStyles
+                                    style
                                 };
                             }}
                             onNavigate={(date) => {

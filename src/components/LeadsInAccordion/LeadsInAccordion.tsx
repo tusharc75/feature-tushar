@@ -176,27 +176,6 @@ export default function LeadInAccordion({
                     }
                 </>
             </AccordionDetails>
-            {/* <Box margin={1} className="btn-view gap-1" onClick={() => { }} p={1} display="flex" justifyContent="center" alignItems="center">
-                <FaEye /> View All &#8599;
-            </Box>
-            <Box margin={1} /> */}
         </Accordion>
-
-        {/* {
-            showCreateLeadDialog && <ManageLeadDialog
-                isNew={true}
-                open={showCreateLeadDialog}
-                onClose={() => setShowCreateLeadDialog(false)}
-                onSuccess={() => {
-                    setShowCreateLeadDialog(false);
-                    onNewLeadAdd();
-                }}
-                dataToUpdate={null}
-                leadApi={leadApi}
-                // accountId={accountId}
-                // resource={resource}
-                // isRedirectTodetailPage={false}
-            />
-        } */}
     </>
 }

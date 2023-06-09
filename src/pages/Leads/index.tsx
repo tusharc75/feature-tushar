@@ -643,7 +643,6 @@ const Leads = () => {
             }}
             isNew={true}
             dataToUpdate={null}
-            leadApi={leadApi}
             isClone={isOpen?.isClone}
             leadId={isOpen?.idToClone}
           />

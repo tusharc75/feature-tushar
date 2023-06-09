@@ -13,7 +13,6 @@ import FormTypes from '../../components/Helpers/FormTypes';
 import { useData } from '../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
-import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 interface InitialData {
@@ -31,11 +30,9 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
   });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
-  //  Owner, Collaborator Code - Start
+
   const [formsData, setFormsData] = useState([]);
   const [parentEntityDataSource, setParentEntityDataSource] = useState([]);
-  const [addressOptions, setAddressOptions] = useState([]);
-  const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const history = useHistory();
@@ -90,7 +87,6 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
 
   const handleSubmit = (enteredValues) => {
     setSubmitting(true);
-
     if (isNew) {
       axiosInstance()
         .post('/entity', enteredValues)
@@ -216,8 +212,8 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                                     imageOrFileUploadCompletePercentage={
                                       ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                         ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          }
+                                          setUploadingImageOrFileProgress(completePercentage);
+                                        }
                                         : null
                                     }
                                   />
@@ -267,26 +263,6 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                   }}
                 />
               ) : null}
-              {addressOpen?.open && (
-                <ManageAddressDialog
-                  onClose={() => setAddressOpen({ open: false, isClone: false })}
-                  onSuccess={(data) => {
-                    setAddressOpen({ open: false, isClone: false });
-                    setFieldValue('address', data.fullAddress);
-                    setAddressOptions((prevState) => {
-                      return [
-                        ...prevState,
-                        {
-                          optionValue: data?.brand,
-                          optionLabel: data?.fullAddress,
-                          order: addressOptions.length,
-                          default: false
-                        }
-                      ];
-                    });
-                  }}
-                />
-              )}
             </Fragment>
           )}
         </Formik>

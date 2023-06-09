@@ -471,9 +471,6 @@ function App() {
             <PrivateRoute exact path={`${routes.opportunityDetail.path}/:id`}>
               <OpportunityDetailsPage />
             </PrivateRoute>
-            {/* <PrivateRoute exact path="/new-opp">
-              <AddNewOpportunity />
-            </PrivateRoute> */}
             <PrivateRoute exact path="/doa">
               <Doa />
             </PrivateRoute>

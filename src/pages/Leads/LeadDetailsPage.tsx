@@ -448,7 +448,6 @@ const LeadDetailsPage = () => {
           }}
           isNew={false}
           dataToUpdate={leadData}
-          leadApi={leadApi}
         />
       )}
       {showConfirmBox && (
