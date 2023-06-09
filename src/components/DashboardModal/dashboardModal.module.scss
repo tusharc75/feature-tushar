@@ -70,36 +70,6 @@
 
     min-height: 250px;
     padding-left: 7px;
-
-    .linkList {
-      list-style-type: none;
-      li {
-        margin-bottom: 14px;
-        font-size: 14px;
-        line-height: 192%;
-        &:last-of-type {
-          margin-bottom: 0;
-        }
-      }
-    }
-    .dialogLinks {
-      font-weight: 500;
-      font-size: 15px;
-      line-height: 183%;
-      text-align: center;
-      color: #161924;
-      [data-mode='dark'] & {
-        color: #fff;
-      }
-      transition: color 0.3s;
-      svg {
-        margin-right: 16px;
-        vertical-align: middle;
-      }
-      &:hover {
-        color: var(--new_theme_color, lightblue);
-      }
-    }
   }
   @media all and (max-width: 550px) {
     .modalIcon {

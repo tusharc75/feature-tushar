@@ -5,7 +5,7 @@ import { ACTIVITY_RESOURCE, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import ErrorIcon from '@material-ui/icons/Error';
-import DashboardModal, { ModalContent } from 'src/components/DashboardModal';
+import DashboardModal, { ModalHead } from 'src/components/DashboardModal';
 import Skeleton from '@material-ui/lab/Skeleton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
@@ -59,7 +59,7 @@ const ShowProduct = ({ product }) => {
 export default function AssetAvailability({ rentalId, handleClose }) {
   const toastConfig = useContext(CustomToastContext);
 
-  const [modalContent, setModalContent] = useState<ModalContent | null>({
+  const [modalContent, setModalContent] = useState<ModalHead | null>({
     title: 'Checking Assets Availability',
     icon: <Skeleton variant="circle" width={32} height={32} />
   });
@@ -107,7 +107,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       dialogProps={{
         maxWidth: 'md'
       }}
-      modalContent={modalContent}
+      modalHead={modalContent}
       handleClose={handleClose}
     >
       {products ? (

@@ -142,11 +142,32 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
         })}
       </div>
       <DashboardModal
-        modalContent={modalContent}
+        modalHead={modalContent}
         style={{ width: 'min(468px, calc(100vw - 64px))' }}
         handleClose={handleClose}
         handleRoutes={handleRoutes}
-      />
+      >
+        <ul className={styles.linkList}>
+          {modalContent?.items
+            ?.filter((item) => !item?.isHidden)
+            .map((item) => (
+              <li key={item.name}>
+                <Typography component="span">
+                  <Link to={handleRoutes(item)} className={styles.dialogLinks}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 13 13" fill="none">
+                      <path
+                        d="M6.50049 0H13.0005V6.5H12.188V1.39014L0.59082 12.981L0.0195312 12.4097L11.6104 0.8125H6.50049V0Z"
+                        fill="currentcolor"
+                        stroke="currentcolor"
+                      ></path>
+                    </svg>
+                    {item.resourceLabel || item.name}
+                  </Link>
+                </Typography>
+              </li>
+            ))}
+        </ul>
+      </DashboardModal>
     </div>
   );
 };
@@ -233,10 +254,31 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
       {mode !== 'User Manual' && (
         <DashboardModal
           style={{ width: 'min(468px, calc(100vw - 64px))' }}
-          modalContent={modalContent}
+          modalHead={modalContent}
           handleClose={handleClose}
           handleRoutes={handleRoutes}
-        />
+        >
+          <ul className={styles.linkList}>
+            {modalContent?.items
+              ?.filter((item) => !item?.isHidden)
+              .map((item) => (
+                <li key={item.name}>
+                  <Typography component="span">
+                    <Link to={handleRoutes(item)} className={styles.dialogLinks}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 13 13" fill="none">
+                        <path
+                          d="M6.50049 0H13.0005V6.5H12.188V1.39014L0.59082 12.981L0.0195312 12.4097L11.6104 0.8125H6.50049V0Z"
+                          fill="currentcolor"
+                          stroke="currentcolor"
+                        ></path>
+                      </svg>
+                      {item.resourceLabel || item.name}
+                    </Link>
+                  </Typography>
+                </li>
+              ))}
+          </ul>
+        </DashboardModal>
       )}
     </>
   );

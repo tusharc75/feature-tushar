@@ -46,7 +46,7 @@ import styles from './Header.module.scss';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
 
 import { SearchBar } from './SearchBar';
-import DashboardModal, { ModalContent } from '../DashboardModal';
+import DashboardModal, { ModalHead } from '../DashboardModal';
 import { userManual } from 'src/pages/Home';
 import { FiExternalLink } from 'react-icons/fi';
 import { SVG } from 'src/assets';
@@ -140,7 +140,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
   const scrollPos = useScrollDirection(40);
 
-  const [modalContent, setModalContent] = useState<ModalContent | null>(null);
+  const [modalContent, setModalContent] = useState<ModalHead | null>(null);
 
   const openHelperModal = () => {
     setModalContent({ title: 'Equipt - User Manual', icon: <img src={SVG('LogoNewShort')} alt="equipt logo" /> });
@@ -1139,7 +1139,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
         </Toolbar>
       </AppBar>
       <DashboardModal
-        modalContent={modalContent}
+        modalHead={modalContent}
         handleClose={handleCloseHelperModal}
         style={{ position: 'relative', width: 'min(468px, calc(100vw - 64px))' }}
       >
