@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useContext } from 'react';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import { CreateEvent } from './CreateEvent';
@@ -14,6 +14,7 @@ import { ViewAll } from '../Helpers/ViewAll';
 import ActivityLoader from '../../Helpers/ActivityLoader';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -22,6 +23,7 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     fetchEvent();
@@ -61,12 +63,19 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const handleDelete = (event) => {
     event.stopPropagation();
     DeleteEvent(eventId)
-      .then(({ data }) => {
+      .then((data) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         setAnchorEl(null);
         fetchEvent();
         handleActivityRefresh();
       })
-      .catch((err) => {});
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleClose = () => {

@@ -137,7 +137,12 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
     }
     if (eventId) {
       UpdateEvent(eventId, values)
-        .then(({ data }) => {
+        .then((data) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
           setSubmitting(false);
           handleClose();
         })
@@ -148,7 +153,12 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
     } else {
       if (relatedTo) {
         CreateNewEvent(values)
-          .then(({ data }) => {
+          .then((data) => {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
             setSubmitting(false);
             handleClose();
           })
@@ -174,9 +184,13 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
             },
           ];
         }
-
         CreateNewEvent(values)
-          .then(({ data }) => {
+          .then((data) => {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: data.message
+            });
             handleClose();
             setSubmitting(false);
           })
@@ -232,7 +246,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
             <>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                   <MuiPickersUtilsProvider utils={MomentUtils}>
                     <Box padding={1}>
                       <TextField
@@ -465,20 +478,18 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                           </Grid>
                         </Grid>
                       </Box>
-
                       <TextField
                         fullWidth
                         margin="dense"
                         type="text"
                         label="Location"
+                        value={values['location']}
                         name="location"
                         variant="outlined"
-                        value={values["location"]}
                         onChange={(e) =>
                           setFieldValue("location", e.target.value.trimStart())
                         }
                       />
-
                       <TextField
                         fullWidth
                         margin="dense"
@@ -486,9 +497,9 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                         multiline
                         rows={3}
                         label="Description"
+                        value={values['description']}
                         name="description"
                         variant="outlined"
-                        value={values["description"]}
                         onChange={(e) =>
                           setFieldValue("description", e.target.value.trimStart())
                         }
@@ -561,11 +572,15 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                     size="small"
                     style={{ color: "red", borderColor: "red" }}
                     onClick={() =>
-                      DeleteEvent(eventId)
-                        .then(({ data }) => {
-                          handleClose();
-                        })
-                        .catch((err) => { })
+                      DeleteEvent(eventId).then((data) => {
+                        toastConfig.setToastConfig({
+                          open: true,
+                          type: 'success',
+                          message: data.message
+                        });
+                        handleClose();
+                      })
+                        .catch((error) => { toastConfig.setToastConfig(error); })
                     }
                   >
                     Delete
