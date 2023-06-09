@@ -341,12 +341,41 @@ const Warehouse = () => {
             isExportAllOrSomeFeature={true}
             total={rowCount}
             recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
-            ids={getLocalStorageArrayData(localStorageSelectedRecords)?.length ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id) : []}
+            ids={
+              getLocalStorageArrayData(localStorageSelectedRecords)?.length
+                ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
+                : []
+            }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchWarehouses();
             }}
             additionalParams={getQueryString(true)}
+            extraImportExportLinks={
+              user?.user?.brandPolicy?.warehouseAccessByUser
+                ? [
+                    {
+                      title: 'Assign Users Download',
+                      api: `warehouse/user/template`,
+                      type: 'download'
+                    },
+                    {
+                      title: 'Assign Users Export',
+                      api: `warehouse/user/template?export=true${
+                        getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                          ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                          : ''
+                      }`,
+                      type: 'export'
+                    },
+                    {
+                      title: 'Assign Users Import',
+                      api: `warehouse/user/import`,
+                      type: 'import'
+                    }
+                  ]
+                : []
+            }
           />
         </Grid>
       </Grid>
@@ -538,7 +567,7 @@ const Warehouse = () => {
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
