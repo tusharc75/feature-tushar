@@ -16,6 +16,7 @@ export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
   handleClose: () => void;
   handleRoutes?: (any) => string;
   dialogProps?: Omit<DialogProps, 'open'>;
+  open?: boolean;
 }
 
 export interface ModalHead {
@@ -23,7 +24,16 @@ export interface ModalHead {
   icon: ReactElement;
 }
 
-const DashboardModal: FC<ModalProps> = ({ modalHead, dialogProps, handleClose, handleRoutes, children = null, className = '', ...props }) => {
+const DashboardModal: FC<ModalProps> = ({
+  modalHead,
+  dialogProps,
+  handleClose,
+  handleRoutes,
+  children = null,
+  className = '',
+  open = undefined,
+  ...props
+}) => {
   const [themeColor] = useAppTheme();
   const DialogContent = withStyles((theme) => ({
     root: {
@@ -34,7 +44,7 @@ const DashboardModal: FC<ModalProps> = ({ modalHead, dialogProps, handleClose, h
   return (
     <Dialog
       {...dialogProps}
-      onClose={handleClose}
+      onClose={dialogProps?.onClose || handleClose}
       aria-labelledby="customized-dialog-title"
       BackdropProps={{
         style: {
@@ -45,21 +55,24 @@ const DashboardModal: FC<ModalProps> = ({ modalHead, dialogProps, handleClose, h
       PaperProps={{
         style: {
           borderRadius: 16,
-          margin: 15,
-          marginBottom: dialogProps?.maxWidth || dialogProps?.fullScreen ? 15 : 94,
+          margin: dialogProps?.fullScreen ? 0 : 15,
+          marginBottom: dialogProps?.fullScreen ? 0 : dialogProps?.maxWidth ? 15 : 94,
           width: dialogProps?.maxWidth || dialogProps?.fullScreen ? '100%' : 'unset',
           background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff',
           boxShadow:
             '0px 165px 66px rgba(142, 159, 199, 0.01), 0px 93px 56px rgba(142, 159, 199, 0.05), 0px 41px 41px rgba(142, 159, 199, 0.09), 0px 10px 23px rgba(142, 159, 199, 0.1), 0px 0px 0px rgba(142, 159, 199, 0.1)'
         }
       }}
-      open={Boolean(modalHead)}
+      open={open !== undefined ? open : Boolean(modalHead)}
       className={styles.dialogContainer}
     >
       <Box
         className={styles.dialogContentContainer}
         {...props}
-        style={{ ...props.style, maxWidth: dialogProps?.maxWidth || dialogProps?.fullScreen ? '100%' : '468px' }}
+        style={{
+          ...props.style,
+          maxWidth: dialogProps?.maxWidth || dialogProps?.fullScreen ? '100%' : '468px'
+        }}
       >
         <MuiDialogTitle disableTypography className={styles.modalHead}>
           <Box className={styles.modalIconAndName}>

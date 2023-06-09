@@ -71,6 +71,10 @@ export default function AssetAvailability({ rentalId, handleClose }) {
   const [taskDialog, setTaskDialog] = useState(false);
 
   useEffect(() => {
+    setModalContent({
+      title: 'Checking Assets Availability',
+      icon: <Skeleton variant="circle" width={32} height={32} />
+    });
     axiosInstance()
       .get(`${rentalManagement.api}/automation/check-asset-availability/${rentalId}`)
       .then(({ data: { data } }) => {
@@ -105,8 +109,15 @@ export default function AssetAvailability({ rentalId, handleClose }) {
   return (
     <DashboardModal
       dialogProps={{
-        maxWidth: 'md'
+        maxWidth: 'md',
+        fullScreen: isMobile
+        // onClose: (e, reason) => {
+        // if (reason !== 'backdropClick') {
+        //   return;
+        // }
+        // }
       }}
+      open={true}
       modalHead={modalContent}
       handleClose={handleClose}
     >
