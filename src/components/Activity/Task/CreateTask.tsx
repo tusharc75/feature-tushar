@@ -43,7 +43,7 @@ const TaskSchema = object().shape({
   dueDate: string().required('Please enter due date')
 });
 
-export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized, onMinimizeMaximize, showManimizeMaximize }) => {
+export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized, onMinimizeMaximize, showManimizeMaximize, defaultName = '' }) => {
   const {
     state: {
       user: { user }
@@ -80,7 +80,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
         .catch((err) => { });
     } else {
       let initialData = {
-        name: '',
+        name: defaultName,
         description: '',
         status: status || 'To Do',
         assignee: [],

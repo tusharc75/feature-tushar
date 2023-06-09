@@ -941,22 +941,7 @@ const FormTypes = (props) => {
         }}
       />
     </InfoLabel>
-  ) : (type === 'dropDown' || type === 'multiSelect') &&
-    (lookup || fieldData?.lookup) &&
-    [
-      sidebarResource.wellMaster,
-      sidebarResource.wellNumber,
-      sidebarResource.warehouse,
-      sidebarResource.storageLocation,
-      sidebarResource.competencyType,
-      sidebarResource.competencies,
-      sidebarResource.customerAccount,
-      sidebarResource.supplierAccount,
-      sidebarResource.customerContact,
-      sidebarResource.supplierContact,
-      sidebarResource.address,
-      sidebarResource.user
-    ].includes(fieldData?.lookupResource) ? (
+  ) : (type === 'dropDown' || type === 'multiSelect') && (lookup || fieldData?.lookup) ? (
     <Dropdown
       InfoLabel={InfoLabel}
       fieldData={fieldData}

@@ -29,7 +29,7 @@ import {
   FcApproval,
   FcDisapprove
 } from 'react-icons/fc';
-import ManageOpportunityDialog from '../Opportunities/ManageOpportunityDialog/ManageOpportunityDialog';
+import ManageOpportunityDialog from '../Opportunities/ManageOpportunityDialog';
 import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
 import { Link } from 'react-router-dom';
@@ -1103,6 +1103,7 @@ export default function AccountDetailPage(props) {
           accountId={accountData._id}
           resource={accountResource}
           isRedirectTodetailPage={false}
+          opportunityId={null}
         />
       )}
       {showCreateContactDialog && (

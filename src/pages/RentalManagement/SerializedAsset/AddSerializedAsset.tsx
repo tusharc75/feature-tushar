@@ -39,6 +39,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { Link } from 'react-router-dom';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
 
 let searchTimeout;
@@ -81,6 +82,10 @@ const AddSerializedAsset = ({
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {}, assets: [] });
 
+  const [checkMTRValidation, setCheckMTRValidation] = useState(false);
+  const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
+
+  const [inuseAssetConfirmBox, setInuseAssetConfirmBox] = useState(false);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 600;
@@ -109,6 +114,7 @@ const AddSerializedAsset = ({
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
+        setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
@@ -355,11 +361,11 @@ const AddSerializedAsset = ({
     setTabValue(newValue);
     dispatch({ type: 'selection', selectedRecords: [] });
     localStorage.removeItem(localStorageSelectedRecords);
-    if (newValue === 0) {
-      setSelectedWarehouse(filterByPlant);
-    } else {
-      setSelectedWarehouse(null);
-    }
+    // if (newValue === 0) {
+    //   setSelectedWarehouse(filterByPlant);
+    // } else {
+    //   setSelectedWarehouse(null);
+    // }
   };
 
   const handleTicketDialog = () => {
@@ -637,7 +643,19 @@ const AddSerializedAsset = ({
                           <Button
                             color="primary"
                             size="small"
-                            onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
+                            onClick={() => {
+                              if (referenceType === 'Rental Job' && checkMTRValidation) {
+                                if ([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.mtrAttached !== true)) {
+                                  setMtrConfirmBox(true)
+                                }
+                                else {
+                                  addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])
+                                }
+                              }
+                              else {
+                                addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])
+                              }
+                            }}
                             variant={isMobile && !isTablet ? 'text' : 'contained'}
                             disabled={
                               getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 ||
@@ -663,7 +681,7 @@ const AddSerializedAsset = ({
                           color="primary"
                           size="small"
                           onClick={() => {
-                            handleAutoTransferAssets()
+                            setInuseAssetConfirmBox(true)
                           }}
                           variant={isMobile && !isTablet ? 'text' : 'contained'}
                           disabled={isAdding || checkUniqRentalJob()}
@@ -779,6 +797,34 @@ const AddSerializedAsset = ({
           onClose={() => setShowTicketDialog({ open: false, data: {}, assets: [] })}
           onSuccess={(data) => {
             handleCreateLoadingTicketAddAsstes(data)
+          }}
+        />
+      )}
+      {mtrConfirmBox && (
+        <ConfirmationDialog
+          open={mtrConfirmBox}
+          okBtnLoading={isAdding}
+          message={`MTR(s) missing for some or all line items.`}
+          onClose={() => {
+            setMtrConfirmBox(false);
+          }}
+          onOk={() => {
+            addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])
+            setMtrConfirmBox(false);
+          }}
+        />
+      )}
+      {inuseAssetConfirmBox && (
+        <ConfirmationDialog
+          open={inuseAssetConfirmBox}
+          okBtnLoading={isAdding}
+          message={`Do you want to move the assets to the new rental job?`}
+          onClose={() => {
+            setInuseAssetConfirmBox(false);
+          }}
+          onOk={() => {
+            handleAutoTransferAssets()
+            setInuseAssetConfirmBox(false);
           }}
         />
       )}

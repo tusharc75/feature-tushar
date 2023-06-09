@@ -1,164 +1,146 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Formik, Form } from 'formik';
+import React, { useEffect, useState, useContext, Fragment, useRef } from 'react';
 import { Box, Button, Grid } from '@material-ui/core';
+import { Formik, Form } from 'formik';
+import Dialog from '@material-ui/core/Dialog';
+import axiosInstance from '../../../axios/axiosInstance';
+import {
+  getObjKeys,
+  yupSchema,
+  getObjKeysWithValues,
+  opportunity,
+  setFieldsInAscendingOrder,
+} from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { useData } from '../../../StateProvider/Provider';
-import { isMobile, isTablet } from 'react-device-detect';
-import {
-  CustomDialogTransition,
-  getObjKeys,
-  getObjKeysWithValues,
-  fieldServiceOrder,
-  setFieldsInAscendingOrder,
-  yupSchema,
-  generateUniqueIdOnly,
-  sidebarResource
-} from '../../../constants/helpers';
-import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@material-ui/core/Dialog';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
-import routes from '../../../components/Helpers/Routes';
+import PropTypes from 'prop-types';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomDialogTransition } from '../../../constants/helpers';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
-
-const ManageServiceOrderDialog = ({
-  isClone,
-  serviceOrderId,
-  serviceOrderData = null,
-  onClose,
-  onSuccess,
+export default function ManageOpportunityDialog({
   open,
-  referenceData = null,
-  isDisableCustomerAccount = false
-}) => {
-  const history = useHistory();
+  onSuccess,
+  onClose,
+  isNew,
+  dataToUpdate,
+  accountId,
+  resource, // either called from customer account or supplier account
+  isRedirectTodetailPage,
+  userId = null,
+  contactId = null,
+  contactResource = null,
+  disableOwnerAndAccount = false,
+  opportunityId,
+  isClone = false
+}) {
+
+  const { opportunityApi } = opportunity;
   const toastConfig = useContext(CustomToastContext);
-  const [loading, setLoading] = useState(false);
-  const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
+  const history = useHistory();
+
+  const {
+    state: { user, selectedEntity, permissions }
+  }: any = useData();
+
+  const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
-  const [serviceDetails, setServiceDetails] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const [cloneHeading, setCloneHeading] = useState('');
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
+  useEffect(() => {
+    axiosInstance().get(`/field?resource=Opportunity&entity=${selectedEntity}`).then(async ({ data: { data } }) => {
+
+      const process = data.find((obj) => obj?.fieldData?.type === 'process')?.fieldData;
+      if (process) {
+        data = data?.filter((e) => e.fieldData.sectionName !== process?.additionalInfoSection)
+      }
+
+      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
+      if (opportunityId) {
+        var opportunityData: any = await axiosInstance().get(`${opportunityApi}/${opportunityId}?entity=${selectedEntity}`);
+        opportunityData = opportunityData?.data?.data;
+        if (isClone) {
+          const { opportunityName, ...rest } = opportunityData;
+          setCloneHeading(opportunityName);
+          setInitialData({
+            fields: fieldsDataForUpdate,
+            values: { ...getObjKeysWithValues(rest, fieldsDataForUpdate) }
+          });
+        }
+        else {
+          setInitialData({
+            fields: fieldsDataForUpdate,
+            values: { ...getObjKeysWithValues(opportunityData, fieldsDataForUpdate) }
+          });
+        }
+      } else {
+        let initialData = { ...getObjKeys('', fieldsDataForCreate) };
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: initialData
+        });
+      }
+    });
+  }, []);
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
   }, [initialData.fields]);
 
-  useEffect(() => {
-    fetchFields();
-  }, [serviceOrderId]);
-
-  const fetchFields = async () => {
-    setLoading(true);
-    try {
-      let fieldData;
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
-      fieldData = response?.data?.data;
-
-      var statusOptions = [];
-      fieldData?.forEach((e: any) => {
-        if (e?.fieldData?.fieldName === 'status') {
-          statusOptions = e.fieldData.option;
-        }
-      });
-      var fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      var fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-      if (serviceOrderId) {
-        try {
-          let data;
-          const response: any = await axiosInstance().get(`${fieldServiceOrder.api}/` + serviceOrderId);
-          data = response?.data?.data;
-          if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, fieldServiceOrderNumber, updatedBy, ...rest } = data;
-            rest['status'] = 'New';
-            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-              rest['fieldServiceOrderNumber'] = `FSO_${generateUniqueIdOnly()}`;
-            }
-            setCloneHeading(fieldServiceOrderNumber);
-            setInitialData({
-              fields: fieldsDataForCreate,
-              values: getObjKeysWithValues(rest, fieldsDataForCreate)
-            });
-            setLoading(false);
-          } else {
-            setServiceDetails(data);
-            setInitialData({
-              fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
-            });
-            setLoading(false);
-          }
-        } catch (error) {
-          toastConfig.setToastConfig(error);
-        }
-      } else {
-        let initialData = getObjKeys('', fieldsDataForCreate);
-        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
-          initialData['currency'] = user.user?.brandCurrency;
-        }
-        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-          initialData['fieldServiceOrderNumber'] = `FSO_${generateUniqueIdOnly()}`;
-        }
-        setInitialData({
-          fields: fieldsDataForCreate,
-          values: initialData
-        });
-        setLoading(false);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
-
   const handleSubmit = (values) => {
-    setLoading(true);
-    if (serviceOrderId && isClone === false) {
-      values._id = serviceOrderId;
+    if (isNew) {
+      if (contactId && contactResource) {
+        values.staticData = { [contactResource]: [contactId] };
+      }
+      setLoading(true);
       axiosInstance()
-        .put(`${fieldServiceOrder.api}`, values)
+        .post(`${opportunityApi}?entity=${selectedEntity}`, values)
+        .then(({ data }) => {
+          const newId = data.data._id;
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          if (isRedirectTodetailPage) history.push(`${opportunityApi}/detail/${newId}`);
+          onSuccess(data);
+          setTimeout(() => setLoading(false), 500);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setLoading(false);
+        });
+    }
+    else {
+      values = { ...values, _id: dataToUpdate._id };
+      setLoading(true);
+      axiosInstance()
+        .put(`${opportunityApi}?entity=${selectedEntity}`, values)
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: data.message
           });
+          setLoading(false);
           onSuccess();
-          setLoading(false);
         })
         .catch((error) => {
-          setLoading(false);
           toastConfig.setToastConfig(error);
-        });
-    } else {
-      axiosInstance()
-        .post(`${fieldServiceOrder.api}`, values)
-        .then(({ data: { data, message } }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
-          history.push(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
           setLoading(false);
-        })
-        .catch((error) => {
-          setLoading(false);
-          toastConfig.setToastConfig(error);
         });
     }
   };
@@ -174,11 +156,6 @@ const ManageServiceOrderDialog = ({
       });
     }
   };
-
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
 
   return (
     <>
@@ -196,26 +173,16 @@ const ManageServiceOrderDialog = ({
         open={open}
       >
         {initialData?.fields?.length ? (
-          <Formik
-            initialValues={initialData.values}
-            validationSchema={yupSchema(initialData.fields)}
-            validateOnMount
-            validate={validate}
-            onSubmit={handleSubmit}
-          >
-            {({ values, errors, touched, setFieldValue, submitForm }) => (
+          <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} >
+            {({ submitForm, values, errors, touched, setFieldValue }) => (
               <Fragment>
                 <CustomDialogHeader
-                  title={
-                    !serviceOrderId
-                      ? `Create ${routes.fieldServiceOrder.title}`
-                      : `${isClone ? `Clone - ${cloneHeading}` : `Update ${serviceOrderData?.fieldServiceOrderNumber}`}`
-                  }
+                  title={isClone ? `Clone - ${cloneHeading}` : isNew ? 'Create Opportunity' : `Editing ${dataToUpdate.opportunityName}`}
                   onClose={(e, reason) => {
-                    if (isEqual(initialData.values, values)) {
-                      onClose();
-                    } else {
+                    if (!isEqual(values, initialData.values)) {
                       setShowConfirmDialog(true);
+                    } else {
+                      onClose();
                     }
                   }}
                   isMinimized={!fullScreen}
@@ -240,18 +207,12 @@ const ManageServiceOrderDialog = ({
                                   {form.sectionFields.map((field) => (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                       <FormTypes
-                                        serviceOrderId={serviceOrderId}
                                         {...field}
-                                        fieldData={field}
-                                        disabled={
-                                          field.fieldName === 'currency'
-                                            ? serviceDetails && serviceDetails?.material?.length
-                                              ? true
-                                              : false
-                                            : serviceOrderId && field.disableOnEdit && !isClone
-                                        }
+                                        disabled={field.disableOnEdit}
                                         values={values}
                                         errors={errors}
+                                        fieldData={field}
+                                        fields={initialData.fields}
                                         touched={touched}
                                         label={field.fieldLabel}
                                         name={field.fieldName}
@@ -265,14 +226,6 @@ const ManageServiceOrderDialog = ({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
-                                            : null
-                                        }
-                                        fields={initialData?.fields}
                                       />
                                     </Grid>
                                   ))}
@@ -291,10 +244,10 @@ const ManageServiceOrderDialog = ({
                     color="primary"
                     size="small"
                     onClick={() => {
-                      if (isEqual(initialData.values, values)) {
-                        onClose();
-                      } else {
+                      if (!isEqual(values, initialData.values)) {
                         setShowConfirmDialog(true);
+                      } else {
+                        onClose();
                       }
                     }}
                   >
@@ -304,7 +257,7 @@ const ManageServiceOrderDialog = ({
                     loading={loading}
                     variant="contained"
                     color="primary"
-                    disabled={uploadingImageOrFileProgress > 0 || loading}
+                    disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll(errors);
@@ -322,14 +275,12 @@ const ManageServiceOrderDialog = ({
                       handleScroll(errors);
                       submitForm();
                     }}
-                    close={() => setShowConfirmDialog(false)}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();
                     }}
                   />
                 ) : null}
-
               </Fragment>
             )}
           </Formik>
@@ -341,6 +292,14 @@ const ManageServiceOrderDialog = ({
       </Dialog>
     </>
   );
-};
+}
 
-export default ManageServiceOrderDialog;
+ManageOpportunityDialog.propTypes = {
+  open: PropTypes.bool,
+  onSuccess: PropTypes.func,
+  onClose: PropTypes.any,
+  isNew: PropTypes.bool,
+  dataToUpdate: PropTypes.any,
+  accountId: PropTypes.string,
+  isRedirectToDetailPage: PropTypes.bool
+};
