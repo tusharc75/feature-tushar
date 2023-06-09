@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
   Breadcrumbs,
@@ -35,6 +35,7 @@ import { dateFormatForInputControl } from '../../../constants/helpers';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const CaseSchema = object().shape({
   name: string().required('Please enter case name'),
@@ -55,6 +56,8 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
   const [openAddSub, setOpenAddSub] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     fetchCaseDetail();
@@ -98,21 +101,33 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
     values.relatedTo = relatedTo;
     if (id) {
       UpdateCase(id, values)
-        .then(({ data }) => {
+        .then((data) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
           setSubmitting(false);
           handleClose();
         })
-        .catch((err) => {
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
           setSubmitting(false);
         });
     } else {
       values.parentId = null;
       CreateNewCase(values)
-        .then(({ data }) => {
+        .then((data) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
           setSubmitting(false);
           handleClose();
         })
-        .catch((err) => {
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
           setSubmitting(false);
         });
     }
@@ -183,6 +198,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               multiline
                               rows={3}
                               label="Description"
+                              value={values['description']}
                               name="description"
                               variant="outlined"
                               onChange={(e) => {
@@ -287,7 +303,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                               margin="dense"
                               value={values.startDate}
                               format={dateFormatForInputControl}
-                              minDate={new Date()}
+                              //minDate={new Date()}
                               onChange={(value) => {
                                 setFieldValue('startDate', value);
                                 setFieldValue('dueDate', value);

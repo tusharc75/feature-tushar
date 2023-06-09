@@ -1,27 +1,31 @@
 import { Box, CircularProgress, Grid, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import React from 'react';
-import axiosInstance from 'src/axios/axiosInstance';
+import { getResourceField } from '../helper';
 
 function FieldDependent({ fields, values, fieldSet }) {
+
   const [resourceFields, setResourceFields] = React.useState([]);
   const [resourceFieldsLoading, setResourceFieldsLoading] = React.useState(false);
 
   React.useEffect(() => {
-    values['lookupDependentOn'] && getFields();
+    if (values['lookupDependentOn']) {
+      getFields()
+    }
   }, [values['lookupDependentOn']]);
 
   const getFields = async () => {
     setResourceFieldsLoading(true);
     const resource = fields.filter((data) => data.fieldName === values['lookupDependentOn'])[0];
     try {
-      const res = await axiosInstance().get(`/field?resource=${resource.lookupResource}`);
-      setResourceFields(res.data.data);
+      const data: any = await getResourceField(resource.lookupResource);
+      setResourceFields(data);
       setResourceFieldsLoading(false);
     } catch (e) {
       setResourceFieldsLoading(false);
     }
   };
+
   return (
     <Box pt={1} pb={1}>
       <Grid container spacing={1}>
@@ -38,7 +42,6 @@ function FieldDependent({ fields, values, fieldSet }) {
             }
             onChange={(e, val) => {
               fieldSet('lookupDependentOn', val && val.fieldName ? val.fieldName : '');
-              //   setFieldValue('lookupDependentOn', val && val.fieldName ? val.fieldName : '');
             }}
             renderInput={(params) => (
               <TextField {...params} margin="dense" variant="outlined" label="Lookup Dependent On" placeholder="Lookup Dependent On" />
@@ -51,15 +54,15 @@ function FieldDependent({ fields, values, fieldSet }) {
               id="lookup-dependent-on-field"
               options={resourceFields}
               disabled={resourceFieldsLoading}
-              getOptionLabel={(option: any) => (option ? option?.fieldData?.fieldLabel : '')}
-              getOptionSelected={(option: any, val) => option?.fieldData?.fieldName === val}
+              getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+              getOptionSelected={(option: any, val) => option?.fieldName === val}
               value={
-                resourceFields && resourceFields.filter((data) => data?.fieldData?.fieldName === values['lookupDependentOnField']).length
-                  ? resourceFields && resourceFields.filter((data) => data?.fieldData?.fieldName === values['lookupDependentOnField'])[0]
+                resourceFields && resourceFields.filter((data) => data?.fieldName === values['lookupDependentOnField']).length
+                  ? resourceFields && resourceFields.filter((data) => data?.fieldName === values['lookupDependentOnField'])[0]
                   : ''
               }
               onChange={(e, val) => {
-                fieldSet('lookupDependentOnField', val && val?.fieldData?.fieldName ? val?.fieldData?.fieldName : '');
+                fieldSet('lookupDependentOnField', val && val?.fieldName ? val?.fieldName : '');
               }}
               renderInput={(params) => (
                 <TextField

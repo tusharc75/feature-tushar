@@ -437,7 +437,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: 'Deleted Successfully'
+            message: data.message
           });
           fetchAttachment();
           handleActivityRefresh();
@@ -456,7 +456,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: 'Deleted Successfully'
+          message: data.message
         });
         fetchAttachment();
         handleActivityRefresh();

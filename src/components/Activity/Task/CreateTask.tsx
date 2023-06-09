@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -34,6 +34,7 @@ import Loader from '../../Loader';
 import { dateFormat, dateFormatForInputControl } from '../../../constants/helpers';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const TaskSchema = object().shape({
   name: string().required('Please enter task name'),
@@ -43,7 +44,8 @@ const TaskSchema = object().shape({
   dueDate: string().required('Please enter due date')
 });
 
-export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized, onMinimizeMaximize, showManimizeMaximize, defaultName = '' }) => {
+export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized, onMinimizeMaximize, showManimizeMaximize,
+  defaultName = '', defaultDescription = '' }) => {
   const {
     state: {
       user: { user }
@@ -54,6 +56,8 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
   const [openAddSub, setOpenAddSub] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     fetchTaskDetail();
@@ -81,7 +85,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
     } else {
       let initialData = {
         name: defaultName,
-        description: '',
+        description: defaultDescription,
         status: status || 'To Do',
         assignee: [],
         reporter: user._id,
@@ -97,21 +101,33 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
     values.relatedTo = relatedTo;
     if (id) {
       UpdateTask(id, values)
-        .then(({ data }) => {
+        .then((data) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
           setSubmitting(false);
           handleClose();
         })
-        .catch((err) => {
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
           setSubmitting(false);
         });
     } else {
       values.parentId = null;
       CreateNewTask(values)
-        .then(({ data }) => {
+        .then((data) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
           setSubmitting(false);
           handleClose();
         })
-        .catch((err) => {
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
           setSubmitting(false);
         });
     }
@@ -188,6 +204,7 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                             rows={3}
                             label="Description"
                             name="description"
+                            value={values['description']}
                             variant="outlined"
                             onChange={(e) => {
                               setFieldValue('description', e.target.value);

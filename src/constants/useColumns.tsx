@@ -125,8 +125,11 @@ export const getStaticFields = () => {
 
 export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
   let data = localStorage.getItem('gridMetaData');
-  let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
-  if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+  let gridMetaData = {};
+  if (data && data !== 'undefined') {
+    gridMetaData = JSON.parse(data);
+  }
+  if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
     return gridMetaData[renderedFrom]?.hide?.indexOf(fieldName) >= 0 ? false : true;
   }
   return true;
@@ -134,8 +137,11 @@ export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
 
 export const checkStaticField = (renderedFrom, fieldData) => {
   let data = localStorage.getItem('gridMetaData');
-  let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
-  if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+  let gridMetaData = {};
+  if (data && data !== 'undefined') {
+    gridMetaData = JSON.parse(data);
+  }
+  if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
     return {
       ...fieldData,
       show: gridMetaData[renderedFrom]?.hide?.indexOf(fieldData?.field) >= 0 ? false : true

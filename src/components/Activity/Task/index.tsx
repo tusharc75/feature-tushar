@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useContext } from 'react';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import { CreateTask } from './CreateTask';
@@ -15,6 +15,7 @@ import ActivityLoader from '../../Helpers/ActivityLoader';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -27,6 +28,8 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
+  const toastConfig = useContext(CustomToastContext);
+
   useEffect(() => {
     fetchTask();
   }, []);
@@ -37,7 +40,6 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
       .then(({ data }) => {
         setTask(data);
         onSetCount('Task', data.length);
-
         setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
       })
       .catch((err) => {
@@ -66,12 +68,19 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const handleDelete = (event) => {
     event.stopPropagation();
     DeleteTask(taskId)
-      .then(({ data }) => {
+      .then((data) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         setAnchorEl(null);
         fetchTask();
         handleActivityRefresh();
       })
-      .catch((err) => {});
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleClose = () => {
