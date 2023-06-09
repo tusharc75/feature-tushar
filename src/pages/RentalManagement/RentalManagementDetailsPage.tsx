@@ -55,7 +55,6 @@ import { IoMdDownload } from 'react-icons/io';
 import Steps, { getIndex } from 'src/components/Steps';
 
 const RentalManagementDetailsPage = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
   const renderedFrom = camelCase(routes?.rentalManagement.title);
@@ -174,11 +173,12 @@ const RentalManagementDetailsPage = () => {
 
   const fetchQuotationData = (versionNumber = null, createIfNotExits = false) => {
     if (user?.user?.brandPolicy?.rentalQuotation) {
-      axiosInstance().get(
-        createIfNotExits
-          ? `${rentalManagement.api}/${rentalManagementData._id}/quotation?createIfNotExits=1`
-          : `${rentalManagement.api}/${id}/quotation`
-      )
+      axiosInstance()
+        .get(
+          createIfNotExits
+            ? `${rentalManagement.api}/${rentalManagementData._id}/quotation?createIfNotExits=1`
+            : `${rentalManagement.api}/${id}/quotation`
+        )
         .then(({ data: { data } }) => {
           if (data?.versions) {
             setQuotationData(data);
@@ -219,7 +219,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -336,8 +336,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -458,11 +458,7 @@ const RentalManagementDetailsPage = () => {
                     [RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) &&
                     allowedToEdit && (
                       <Fragment>
-                        <Button
-                          variant={'contained'}
-                          className={'btn-outline-v1'}
-                          onClick={() => updateJobStatus(RENTAL_STATUS.closed)}
-                        >
+                        <Button variant={'contained'} className={'btn-outline-v1'} onClick={() => updateJobStatus(RENTAL_STATUS.closed)}>
                           Close
                         </Button>
                         {/* <Button

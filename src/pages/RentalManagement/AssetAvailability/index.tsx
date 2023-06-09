@@ -11,6 +11,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { CreateTask } from 'src/components/Activity/Task/CreateTask';
 import { isMobile, isTablet } from 'react-device-detect';
+import { GoThumbsup } from 'react-icons/go';
+import { BsHandThumbsUp } from 'react-icons/bs';
 
 const typographyh: React.CSSProperties = {
   fontSize: '13px',
@@ -123,9 +125,12 @@ export default function AssetAvailability({ rentalId, handleClose }) {
     >
       {products ? (
         canFulfil ? (
-          <Typography style={{ fontSize: '16px', fontWeight: '500' }}>
-            Serialized Assets are available for all the products. Rental job can be fulfilled
-          </Typography>
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <BsHandThumbsUp size={60} style={{ color: 'var(--dark-primary-text, #047d1c)' }} />
+            <Typography style={{ fontSize: '16px', fontWeight: '500', marginTop: '20px' }}>
+              Serialized Assets are available for all the products. Rental job can be fulfilled
+            </Typography>
+          </div>
         ) : (
           <Box>
             <Typography style={{ fontSize: '16px', fontWeight: '500' }}>Serialized Assets are not available for following products</Typography>
