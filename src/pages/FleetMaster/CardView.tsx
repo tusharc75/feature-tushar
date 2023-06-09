@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1
   },
   text: {
-    fontSize: '14px',
+    fontSize: '13px',
     lineHeight: '1.28',
     color: 'var(--dark-primary-text, #2A3042)',
     marginBottom: '6px'
@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     flexWrap: 'wrap',
     maxWidth: '400px',
-    paddingTop: '13px',
+    paddingTop: '10px',
     paddingBottom: '10px',
     gap: '10px'
   },
