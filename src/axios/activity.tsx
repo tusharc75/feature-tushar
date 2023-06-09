@@ -114,8 +114,6 @@ export const DeleteNote = async (noteId) => {
 };
 
 
-
-
 export const GetEmail = async (relatedTo) => {
     const { data } = await api().get(`/email?relatedTo=${relatedTo}`);
     return data;

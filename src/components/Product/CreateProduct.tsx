@@ -541,7 +541,6 @@ const CreateProduct = (props) => {
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
-                                    {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                                     {productFields && productFields.map((section, i) => (
                                         <div key={i}>
                                             <div className={"detail-box-content detail-product-box"}>

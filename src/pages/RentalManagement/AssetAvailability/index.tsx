@@ -130,36 +130,32 @@ export default function AssetAvailability({ rentalId, handleClose }) {
           <Box>
             <Typography style={{ fontSize: '16px', fontWeight: '500' }}>Serialized Assets are not available for following products</Typography>
             <div className="mt-2">
-              {products
-                ?.filter((e) => e.baseWarehouse)
-                ?.map((product) => (
-                  <ShowProduct product={product} />
-                ))}
+              {products?.filter((e) => e.baseWarehouse)?.map((product) => (
+                <ShowProduct product={product} />
+              ))}
             </div>
-            <Box pt={3}>
-              <Typography
-                style={{ fontSize: '16px', fontWeight: '500' }}
-              >{`Serialized Assets are available in other ${routes.warehouse.title}`}</Typography>
-              <div className="mt-2">
-                {products
-                  ?.filter((e) => !e.baseWarehouse)
-                  ?.map((product) => (
+            {products?.filter((e) => !e.baseWarehouse)?.length > 0 &&
+              <Box pt={3}>
+                <Typography style={{ fontSize: '16px', fontWeight: '500' }}  >{`Serialized Assets are available in other ${routes.warehouse.title}`}</Typography>
+                <div className="mt-2">
+                  {products?.filter((e) => !e.baseWarehouse)?.map((product) => (
                     <ShowProduct product={product} />
                   ))}
-                <div className="mt-3" style={{ textAlign: 'right' }}>
-                  <Button
-                    size="small"
-                    variant={'contained'}
-                    color="primary"
-                    onClick={() => {
-                      setTaskDialog(true);
-                    }}
-                  >
-                    Create Task
-                  </Button>
+                  <div className="mt-3" style={{ textAlign: 'right' }}>
+                    <Button
+                      size="small"
+                      variant={'contained'}
+                      color="primary"
+                      onClick={() => {
+                        setTaskDialog(true);
+                      }}
+                    >
+                      Create Task
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </Box>
+              </Box>
+            }
           </Box>
         )
       ) : (
@@ -187,6 +183,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
               setFullScreen(false);
             }}
             defaultName="Assets Transfer Request"
+            defaultDescription={`Transfer Request for following products - ${products?.filter((e) => !e.baseWarehouse)?.map((e) => `${e.productName}-${e.qty}`)?.toString()}`}
             relatedTo={[
               {
                 type: ACTIVITY_RESOURCE.rentalManagement,
