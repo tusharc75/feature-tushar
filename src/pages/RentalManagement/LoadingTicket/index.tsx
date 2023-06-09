@@ -104,6 +104,10 @@ const LoadingTicket = ({
   const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
   const [showConformationCancleTicket, setShowConformationCancleTicket] = useState(false);
 
+  const [checkMTRValidation, setCheckMTRValidation] = useState(false);
+  const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
+
+
   useEffect(() => {
     fetchRecords();
     getColumn();
@@ -405,6 +409,8 @@ const LoadingTicket = ({
     });
     const productFields = data?.find((d) => d.resource === 'Product');
     const assetFields = data?.find((d) => d.resource === 'Serialized Asset');
+
+    setCheckMTRValidation(assetFields?.fieldNames?.some((e) => e?.fieldName === 'mtrAttached'));
     setColumnHeader({ productFields, assetFields });
   };
 
@@ -471,7 +477,7 @@ const LoadingTicket = ({
       data['ticketName'] = rentalManagementData.rentalJobName;
       data['referenceId'] = rentalManagementData._id;
 
-      if (selectedRecords[0].currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
+      if (selectedRecords[0].warehouseId) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
         data['pickupFrom'] = selectedRecords[0].warehouseId;
         data['pickupFromAddress'] = selectedRecords[0].currentLocation;
@@ -533,16 +539,6 @@ const LoadingTicket = ({
     if (selectedRecords.length === 0) {
       return true;
     } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
-      return false;
-    } else {
-      return true;
-    }
-  };
-
-  const checkUniqCurrentOwnerType = () => {
-    if (selectedRecords.length === 0) {
-      return true;
-    } else if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
       return false;
     } else {
       return true;
@@ -672,7 +668,6 @@ const LoadingTicket = ({
       });
   };
 
-
   return (
     <>
       <Box display="flex" justifyContent="flex-end" m={1}>
@@ -791,10 +786,14 @@ const LoadingTicket = ({
                 <MenuItem
                   onClick={() => {
                     closeActions();
-                    handleDeliveryTicketDialog();
+                    if (checkMTRValidation && selectedRecords?.some((e) => e.type === "Asset" && e.mtrAttached !== true)) {
+                      setMtrConfirmBox(true)
+                    }
+                    else {
+                      handleDeliveryTicketDialog();
+                    }
                   }}
-                  disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty('loadingTicketId')) || checkUniqWarehouse()
-                    || checkUniqCurrentOwnerType()}
+                  disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty('loadingTicketId')) || checkUniqWarehouse()}
                 >
                   Create Loading Ticket
                 </MenuItem>
@@ -1182,6 +1181,19 @@ const LoadingTicket = ({
             setShowConformationCancleTicket(false);
           }}
           okBtnLoading={okBtnLoading}
+        />
+      )}
+      {mtrConfirmBox && (
+        <ConfirmationDialog
+          open={mtrConfirmBox}
+          message={`MTR(s) missing for some or all line items.`}
+          onClose={() => {
+            setMtrConfirmBox(false);
+          }}
+          onOk={() => {
+            handleDeliveryTicketDialog();
+            setMtrConfirmBox(false);
+          }}
         />
       )}
     </>

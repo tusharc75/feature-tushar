@@ -11,7 +11,7 @@ import routes from '../../components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
+import ManageOpportunityDialog from './ManageOpportunityDialog';
 import { cloneDeep } from 'lodash';
 import CustomMobileStepperOpportunities from '../../components/CustomMobileStepperOpportunities';
 import {
@@ -714,7 +714,7 @@ function OpportunityDetailsPage() {
             dataToUpdate={opportunityData}
             resource={null}
             isRedirectTodetailPage={false}
-            // opportunityApi={opportunityApi}
+            opportunityId={opportunityData?._id}
           />
         )}
 

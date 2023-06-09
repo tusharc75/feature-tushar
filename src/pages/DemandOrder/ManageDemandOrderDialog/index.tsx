@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, Fragment, useRef } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import FormTypes from '../../../components/Helpers/FormTypes';
@@ -11,12 +11,8 @@ import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
-  customerAccount,
-  customerContact,
-  getCollaboratorDropdownDataSource,
   getObjKeys,
   getObjKeysWithValues,
-  getOwnerDropdownDataSource,
   setFieldsInAscendingOrder,
   yupSchema,
   generateUniqueIdOnly,
@@ -25,134 +21,29 @@ import {
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from 'react-icons/fa';
-import moment from 'moment';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
-import ManageAccountDialog from '../../Account/ManageAccount';
-import ManageContactDialog from '../../Contact/ManageContact';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 
 const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = null, onClose, onSuccess, open }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-
   const [loading, setLoading] = useState(false);
   const [salesData, setSalesData] = useState({ fields: [], initialValues: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
-  const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
-  const [ownerData, setOwnerData] = useState([]);
-  const [collaboratorData, setCollaboratorData] = useState([]);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
-  const [contactData, setContactData] = useState([]);
-  const [showAddCustomerAccountDialog, setShowAddCustomerAccountDialog] = useState(false);
-  const [showAddCustomerContactDialog, setShowAddCustomerContactDialog] = useState(false);
-
-  const [accountData, setAccountData] = useState([]);
-  const [customerContactMainDataSource, setCustomerContactMainDataSource] = useState([]);
-  const [customerContactDataSource, setCustomerContactDataSource] = useState([]);
-  const [newAddedAccountId, setNewAddedAccountId] = useState(null);
-
-  const [salesDetails, setSalesDetails] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
-  const [countryBillToDropDown, setCountryBillToDropDown] = useState([]);
-  const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
-  const [countryBillToMainData, setCountryBillToMainData] = useState([]);
-  const [countrySellToMainData, setCountrySellToMainData] = useState([]);
+
   const ref = useRef(null);
-
-  const updateAccountDropdown = (data) => {
-    const entityFields = salesData.fields;
-    const customerAccountNameFieldIndex = entityFields.findIndex((d) => d.fieldName === 'customerAccount');
-    if (customerAccountNameFieldIndex > -1) {
-      entityFields[customerAccountNameFieldIndex].option = [
-        ...entityFields[customerAccountNameFieldIndex].option,
-        {
-          optionValue: data._id,
-          optionLabel: data.accountName,
-          order: entityFields[customerAccountNameFieldIndex].option.length,
-          default: false
-        }
-      ];
-      setAccountData(entityFields[customerAccountNameFieldIndex].option);
-    }
-  };
-
-  const updateContactDropdown = (data) => {
-    const entityFields = salesData.fields;
-    const customerContactNameFieldIndex = entityFields.findIndex((d) => d.fieldName === 'customerContact');
-    if (customerContactNameFieldIndex > -1) {
-      const newCustomer = {
-        optionValue: data._id,
-        optionLabel: `${data.firstName} ${data.lastName}`,
-        order: entityFields[customerContactNameFieldIndex].option.length,
-        default: false,
-        parentAccount: data.accountName
-      };
-      entityFields[customerContactNameFieldIndex].option = [...entityFields[customerContactNameFieldIndex].option, newCustomer];
-      setCustomerContactMainDataSource(entityFields[customerContactNameFieldIndex].option);
-      setCustomerContactDataSource((prevState) => [...prevState, newCustomer]);
-    }
-  };
-
   useEffect(() => {
-    const ownerCollabOptions = salesData.fields.filter((d) => ['owner', 'collaborator'].indexOf(d.fieldName) !== -1);
-    if (ownerCollabOptions.length > 0) {
-      setOwnerCollaboratorData(ownerCollabOptions[0].option);
-      setOwnerData(ownerCollabOptions[0].option);
-      setCollaboratorData(ownerCollabOptions[0].option);
-    }
-    let customerAccountOptions = salesData.fields.find((d) => d.fieldName === 'customerAccount');
-    if (customerAccountOptions) {
-      setAccountData(customerAccountOptions.option);
-    }
-    let customerContactOptions = salesData.fields.find((d) => d.fieldName === 'customerContact');
-    if (customerContactOptions) {
-      setContactData(customerContactOptions.option);
-    }
-    const customerContactDropdownData = salesData.fields.find((d) => d.fieldName === 'customerContact');
-    const countryBillToDropdownData = salesData.fields.find((d) => d.fieldName === 'billingAddress');
-    if (countryBillToDropdownData) {
-      setCountryBillToMainData(countryBillToDropdownData.option);
-      setCountryBillToDropDown(countryBillToDropdownData.option);
-    }
-    const countrySellToDropdownData = salesData.fields.find((d) => d.fieldName === 'shippingAddress');
-    if (countryBillToDropdownData) {
-      setCountrySellToMainData(countrySellToDropdownData.option);
-      setCountrySellToDropDown(countrySellToDropdownData.option);
-    }
-    if (customerContactDropdownData) {
-      setCustomerContactMainDataSource(customerContactDropdownData.option);
-      if (demandOrderId) {
-        setCustomerContactDataSource(
-          customerContactDropdownData.option.filter((d) => d.parentAccount === demandOrderData?.customerAccount.optionValue)
-        );
-      }
-    }
     setFormsData(setFieldsInAscendingOrder(salesData.fields));
   }, [salesData.fields]);
-
-  const onOwnerDropdownOpen = (selectedCollaborator) => {
-    setOwnerData(getOwnerDropdownDataSource(selectedCollaborator, ownerCollaboratorData));
-  };
-
-  const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
-    setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData));
-  };
-
-  const onCustomerContactDropdownOpen = (selectedAccount) => {
-    setCustomerContactDataSource(customerContactMainDataSource.filter((d) => d.parentAccount === selectedAccount));
-  };
 
   useEffect(() => {
     setLoading(true);
@@ -186,7 +77,6 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
             });
             setLoading(false);
           } else {
-            setSalesDetails(data);
             setSalesData({
               fields: fieldsDataForUpdate,
               initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -263,23 +153,6 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
     }
   };
 
-  const onCountrySellToDropDownOpen = (selectedAccount) => {
-    let filterAddress = accountData.find((d) => d.optionValue === selectedAccount)?.shippingAddress;
-    if (filterAddress) {
-      setCountrySellToDropDown(countrySellToMainData.filter((d) => filterAddress?.some((u) => u === d.optionValue)));
-    } else {
-      setCountrySellToDropDown([]);
-    }
-  };
-
-  const onCountryBillToDropDownOpen = (selectedAccount) => {
-    let filterAddress = accountData.find((d) => d.optionValue === selectedAccount)?.billingAddress;
-    if (filterAddress) {
-      setCountryBillToDropDown(countryBillToMainData.filter((d) => filterAddress?.some((u) => u === d.optionValue)));
-    } else {
-      setCountryBillToDropDown([]);
-    }
-  };
 
   return (
     <>
@@ -358,6 +231,7 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
                                     isTooltip={field?.isTooltip || false}
                                     tooltipMessage={field?.tooltipMessage}
                                     size="small"
+                                    fields={salesData?.fields}
                                   />
                                 </Grid>
                               ))}
