@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Box, Button, Grid, IconButton } from '@material-ui/core';
 import { Formik, Form } from 'formik';
-import {
-  CustomDialogTransition,
-  setFieldsInAscendingOrder,
-  yupSchema
-} from '../../../constants/helpers';
+import { CustomDialogTransition, setFieldsInAscendingOrder, yupSchema } from '../../../constants/helpers';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -134,13 +130,7 @@ export default function ManageAccount(props) {
       >
         {accountData.fields.length > 0 ? (
           <>
-            <Formik
-              initialValues={accountData.initialValues}
-              validationSchema={yupSchema(accountData.fields)}
-              validateOnMount
-
-              onSubmit={onSubmit}
-            >
+            <Formik initialValues={accountData.initialValues} validationSchema={yupSchema(accountData.fields)} validateOnMount onSubmit={onSubmit}>
               {({ submitForm, values, errors, touched, setFieldValue }) => (
                 <>
                   <CustomDialogHeader
@@ -160,10 +150,10 @@ export default function ManageAccount(props) {
                       isClone
                         ? `Clone - ${accountNameForClone}`
                         : isNew
-                          ? accountResource === 'customerAccount'
-                            ? `Add ${routes?.customerAccount?.title}`
-                            : `Add ${routes?.supplierAccount?.title}`
-                          : `Editing ${accountData.initialValues.accountName ? accountData.initialValues.accountName : ''}`
+                        ? accountResource === 'customerAccount'
+                          ? `Add ${routes?.customerAccount?.title}`
+                          : `Add ${routes?.supplierAccount?.title}`
+                        : `Editing ${accountData.initialValues.accountName ? accountData.initialValues.accountName : ''}`
                     }
                   />
                   <CustomDialogContent>
@@ -242,12 +232,7 @@ export default function ManageAccount(props) {
                                       ) : field.fieldName === 'billingAddress' ? (
                                         <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                           <Grid container spacing={1}>
-                                            <Grid
-                                              item
-                                              xs={permissions[accountResource]?.isCreate ? 10 : 11}
-                                              sm={permissions[accountResource]?.isCreate ? 10 : 11}
-                                              md={permissions[accountResource]?.isCreate ? 10 : 11}
-                                            >
+                                            <Grid item xs={permissions[accountResource]?.isCreate ? 11 : 12}>
                                               <FormTypes
                                                 isNew={isNew}
                                                 {...field}
@@ -300,12 +285,7 @@ export default function ManageAccount(props) {
                                       ) : field.fieldName === 'shippingAddress' ? (
                                         <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                           <Grid container spacing={1}>
-                                            <Grid
-                                              item
-                                              xs={permissions[accountResource]?.isCreate ? 10 : 11}
-                                              sm={permissions[accountResource]?.isCreate ? 10 : 11}
-                                              md={permissions[accountResource]?.isCreate ? 10 : 11}
-                                            >
+                                            <Grid item xs={permissions[accountResource]?.isCreate ? 10 : 11}>
                                               <FormTypes
                                                 isNew={isNew}
                                                 {...field}
@@ -355,12 +335,7 @@ export default function ManageAccount(props) {
                                       ) : field.fieldName === 'parentAccount' ? (
                                         <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                           <Grid container spacing={1}>
-                                            <Grid
-                                              item
-                                              xs={permissions[accountResource]?.isCreate ? 10 : 11}
-                                              sm={permissions[accountResource]?.isCreate ? 10 : 11}
-                                              md={permissions[accountResource]?.isCreate ? 10 : 11}
-                                            >
+                                            <Grid item xs={permissions[accountResource]?.isCreate ? 10 : 11}>
                                               <FormTypes
                                                 isNew={isNew}
                                                 {...field}
@@ -431,8 +406,8 @@ export default function ManageAccount(props) {
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                                  setUploadingImageOrFileProgress(completePercentage);
+                                                }
                                               : null
                                           }
                                         />

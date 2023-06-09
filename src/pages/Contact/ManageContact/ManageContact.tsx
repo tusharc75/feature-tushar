@@ -22,8 +22,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import ManageContactDialog from './index';
-import ManageAddressDialog from "../../../components/Address/ManageAddressDialog"
-import axiosInstance from "../../../axios/axiosInstance";
+import ManageAddressDialog from '../../../components/Address/ManageAddressDialog';
+import axiosInstance from '../../../axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { isEqual } from 'lodash';
 
@@ -65,7 +65,6 @@ export default function ManageContact(props) {
     state: { user, permissions }
   }: any = useData();
 
-
   const disableOwnerSelection = !isNew && user.user._id !== contactData.initialValues.owner;
 
   //  Owner, Collaborator Code - Start
@@ -80,7 +79,7 @@ export default function ManageContact(props) {
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showContactDialog, setShowContactDialog] = useState(false);
-  const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false })
+  const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false });
   const [addressDataSource, setAddressDataSource] = useState([]);
   const [cloneHeading, setCloneHeading] = useState('');
 
@@ -97,8 +96,8 @@ export default function ManageContact(props) {
         }
       }
 
-      const addressDataDropdown = contactData.fields.find((d) => d.fieldName === "mailingAddress")?.option ?? [];
-      setAddressDataSource(addressDataDropdown)
+      const addressDataDropdown = contactData.fields.find((d) => d.fieldName === 'mailingAddress')?.option ?? [];
+      setAddressDataSource(addressDataDropdown);
 
       if (fromProject) {
         setOwnerCollaboratorCommonDataSource(owners);
@@ -127,21 +126,17 @@ export default function ManageContact(props) {
     }
   }, [contactData.fields]);
 
-
   useEffect(() => {
     if (contactId && isClone) {
       axiosInstance()
         .get(`/${contactApi}/${contactId}`)
         .then(({ data: { data } }) => {
-          const { _id, firstName, lastName, middleName, email, reportsTo, ...rest } = data
+          const { _id, firstName, lastName, middleName, email, reportsTo, ...rest } = data;
 
           setCloneHeading(`${firstName ?? ''} ${middleName ?? ''} ${lastName ?? ''}`);
-
-
-
-        })
+        });
     }
-  })
+  });
 
   const onOwnerDropdownOpen = (selectedCollaborator, selectedEntity) => {
     if (selectedEntity?.length > 0) {
@@ -189,8 +184,6 @@ export default function ManageContact(props) {
   const onReportsToDropdownOpen = (selectedAccount) => {
     setReportsToDataSource(reportsToMainDataSource.filter((d) => d.parentAccount === selectedAccount));
   };
-
-
 
   const handleGetAddedContact = (data, selectedAccount) => {
     if (data?._id) {
@@ -255,19 +248,8 @@ export default function ManageContact(props) {
       >
         {contactData.fields.length > 0 ? (
           <>
-            <Formik
-              initialValues={contactData.initialValues}
-              validationSchema={yupSchema(contactData.fields)}
-              validateOnMount
-              onSubmit={onSubmit}
-            >
-              {({
-                submitForm,
-                values,
-                errors,
-                touched,
-                setFieldValue
-              }) => (
+            <Formik initialValues={contactData.initialValues} validationSchema={yupSchema(contactData.fields)} validateOnMount onSubmit={onSubmit}>
+              {({ submitForm, values, errors, touched, setFieldValue }) => (
                 <>
                   <CustomDialogHeader
                     onClose={() => {
@@ -277,9 +259,14 @@ export default function ManageContact(props) {
                         setShowConfirmDialog(true);
                       }
                     }}
-                    title={isClone ? `Clone - ${cloneHeading}` : isNew
-                      ? contactResource === 'customerContact' ? `Add ${routes?.customerContact?.title}` : `Add ${routes?.supplierContact?.title}`
-                      : `Editing ${contactData?.initialValues?.firstName ?? ''} ${contactData?.initialValues?.lastName ?? ''}`
+                    title={
+                      isClone
+                        ? `Clone - ${cloneHeading}`
+                        : isNew
+                        ? contactResource === 'customerContact'
+                          ? `Add ${routes?.customerContact?.title}`
+                          : `Add ${routes?.supplierContact?.title}`
+                        : `Editing ${contactData?.initialValues?.firstName ?? ''} ${contactData?.initialValues?.lastName ?? ''}`
                     }
                     isMinimized={!fullScreen}
                     onMinimizeMaximize={() => {
@@ -344,12 +331,7 @@ export default function ManageContact(props) {
                                       ) : field.fieldName === 'mailingAddress' ? (
                                         <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                           <Grid container spacing={1}>
-                                            <Grid
-                                              item
-                                              xs={permissions.customerContact?.isCreate ? 10 : 11}
-                                              sm={permissions.customerContact?.isCreate ? 10 : 11}
-                                              md={permissions.customerContact?.isCreate ? 10 : 11}
-                                            >
+                                            <Grid item xs={permissions.customerContact?.isCreate ? 11 : 12} style={{ maxWidth: 'unset' }}>
                                               <FormTypes
                                                 isNew={isNew}
                                                 {...field}
@@ -371,7 +353,7 @@ export default function ManageContact(props) {
                                             </Grid>
 
                                             {permissions?.customerContact?.isCreate && (
-                                              <Grid item xs={1} sm={1} md={1}>
+                                              <Grid item xs={1}>
                                                 <Tooltip title="Add Address" className="mt-1">
                                                   <IconButton
                                                     onClick={() => {
@@ -385,7 +367,6 @@ export default function ManageContact(props) {
                                                 </Tooltip>
                                               </Grid>
                                             )}
-
 
                                             {field?.tooltipMessage ? (
                                               <Grid item xs={1} sm={1} md={1}>
@@ -578,8 +559,8 @@ export default function ManageContact(props) {
                                           imageOrFileUploadCompletePercentage={
                                             ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                               ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                                  setUploadingImageOrFileProgress(completePercentage);
+                                                }
                                               : null
                                           }
                                         />
@@ -595,22 +576,21 @@ export default function ManageContact(props) {
                       <ManageAddressDialog
                         onClose={() => setAddressOpen({ open: false, isClone: false })}
                         onSuccess={(data) => {
-
-                          setAddressOpen({ open: false, isClone: false })
+                          setAddressOpen({ open: false, isClone: false });
                           if (data?.isAlreadyExist === true) {
-                            let tempAddress = addressDataSource.find(d => d?.optionLabel === data?.fullAddress)
-                            setFieldValue("mailingAddress", [tempAddress.optionValue, ...values.mailingAddress])
-
-                          }
-                          else {
-                            setFieldValue("mailingAddress", [data._id, ...values.mailingAddress])
-                            setAddressDataSource((prevState) => [...prevState,
-                            {
-                              default: false,
-                              optionLabel: data.fullAddress,
-                              optionValue: data._id,
-                              order: addressDataSource.length + 1,
-                            }]);
+                            let tempAddress = addressDataSource.find((d) => d?.optionLabel === data?.fullAddress);
+                            setFieldValue('mailingAddress', [tempAddress.optionValue, ...values.mailingAddress]);
+                          } else {
+                            setFieldValue('mailingAddress', [data._id, ...values.mailingAddress]);
+                            setAddressDataSource((prevState) => [
+                              ...prevState,
+                              {
+                                default: false,
+                                optionLabel: data.fullAddress,
+                                optionValue: data._id,
+                                order: addressDataSource.length + 1
+                              }
+                            ]);
                           }
                         }}
                       />

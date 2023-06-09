@@ -91,7 +91,7 @@ export const setDataBySectionName = (secName, index = 0) => {
     sideBarIcon = <FaRegRegistered size={20} />;
   } else if (['Field Service Operations'].includes(secName)) {
     text = 'Fulfill Service Orders Faster.';
-    icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
+    icon = <DashboardIcons.SERVICE_MANAGEMENT colors={iconColour} />;
     sideBarIcon = <MdMiscellaneousServices size={20} />;
   } else if (['Repair & Maintenance Management'].includes(secName)) {
     text = 'Repair & Maintain your product and services at ease.';

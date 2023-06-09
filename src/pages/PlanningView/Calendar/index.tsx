@@ -191,7 +191,8 @@ function CalendarView({ resourceList }) {
                             start: new Date(d[selectedResource.start]),
                             end: new Date(d[selectedResource.end]),
                             allDay: true,
-                            type: selectedResource.resource
+                            type: selectedResource.resource,
+                            fulfillStatus: d?.fulfillStatus
                         }
                     )
                 })
@@ -332,17 +333,22 @@ function CalendarView({ resourceList }) {
         }
     }
 
-    const setEventStyle = (type) => {
+    const setEventStyle = (obj) => {
         let backgroundColor = 'rgba(234, 239, 254, 1)';
         let color = 'rgba(4, 50, 161, 1)';
-        if (type === 'Planning') {
-            const num = Math.floor(Math.random() * 100);
-            if (num % 2 == 0) {
+        if (obj?.type === sidebarResource.planning) {
+            if (obj?.fulfillStatus === "Yes") {
                 backgroundColor = "#048e0a"
-            } else {
-                backgroundColor = "#d13925"
+                color = "white"
             }
-            color = "white"
+            else if (obj?.fulfillStatus === "No") {
+                backgroundColor = "#d13925"
+                color = "white"
+            }
+            else if (obj?.fulfillStatus === "Partially") {
+                backgroundColor = "#F6BE00"
+                color = 'black'
+            }
         }
         return {
             backgroundColor,
@@ -436,65 +442,64 @@ function CalendarView({ resourceList }) {
                         </Grid>
                     </Box>
                 </Box>
-                {
-                    (selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning)
-                        ?
-                        <DragAndDropCalendar
-                            defaultDate={defaultDate}
-                            defaultView={'day'}
-                            events={events}
-                            formats={formats}
-                            localizer={localizer}
-                            onEventDrop={moveEvent}
-                            onEventResize={resizeEvent}
-                            popup={true}
-                            messages={{
-                                agenda: 'List',
-                            }}
-                            resizable
-                            views={{ month: true, week: true, day: true, agenda: true }}
-                            onView={onView}
-                            view={view}
-                            eventPropGetter={(obj: any) => {
-                                const style = setEventStyle(obj.type)
-                                return {
-                                    style
-                                };
-                            }}
-                            onNavigate={(date) => {
-                                onNavigate(date)
-                            }}
-                            onSelectEvent={(event: any) => {
-                                history.push(`${selectedResource.path}/${event.id}`);
-                            }}
-                        />
-                        :
-                        <Calendar
-                            defaultDate={defaultDate}
-                            defaultView={'day'}
-                            events={events}
-                            formats={formats}
-                            localizer={localizer}
-                            popup={true}
-                            messages={{
-                                agenda: 'List',
-                            }}
-                            views={{ month: true, week: true, day: true, agenda: true }}
-                            onView={onView}
-                            view={view}
-                            eventPropGetter={(obj: any) => {
-                                const style = setEventStyle(obj.type)
-                                return {
-                                    style
-                                };
-                            }}
-                            onNavigate={(date) => {
-                                onNavigate(date)
-                            }}
-                            onSelectEvent={(event: any) => {
-                                history.push(`${selectedResource.path}/${event.id}`);
-                            }}
-                        />
+                {(selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning)
+                    ?
+                    <DragAndDropCalendar
+                        defaultDate={defaultDate}
+                        defaultView={'day'}
+                        events={events}
+                        formats={formats}
+                        localizer={localizer}
+                        onEventDrop={moveEvent}
+                        onEventResize={resizeEvent}
+                        popup={true}
+                        messages={{
+                            agenda: 'List',
+                        }}
+                        resizable
+                        views={{ month: true, week: true, day: true, agenda: true }}
+                        onView={onView}
+                        view={view}
+                        eventPropGetter={(obj: any) => {
+                            const style = setEventStyle(obj)
+                            return {
+                                style
+                            };
+                        }}
+                        onNavigate={(date) => {
+                            onNavigate(date)
+                        }}
+                        onSelectEvent={(event: any) => {
+                            history.push(`${selectedResource.path}/${event.id}`);
+                        }}
+                    />
+                    :
+                    <Calendar
+                        defaultDate={defaultDate}
+                        defaultView={'day'}
+                        events={events}
+                        formats={formats}
+                        localizer={localizer}
+                        popup={true}
+                        messages={{
+                            agenda: 'List',
+                        }}
+                        views={{ month: true, week: true, day: true, agenda: true }}
+                        onView={onView}
+                        view={view}
+                        eventPropGetter={(obj: any) => {
+                            const style = setEventStyle(obj.type)
+                            return {
+                                style
+                            };
+                        }}
+                        onNavigate={(date) => {
+                            onNavigate(date)
+                        }}
+                        onSelectEvent={(event: any) => {
+                            history.push(`${selectedResource.path}/${event.id}`);
+                        }}
+                    />
                 }
 
 
