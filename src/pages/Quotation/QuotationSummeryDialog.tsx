@@ -1,5 +1,19 @@
 import React, { useState, useContext, useMemo, useEffect } from 'react';
-import { Dialog, List, ListItem, ListItemIcon, ListItemText, Box, Checkbox, Button, TextField, CircularProgress, Grid } from '@material-ui/core';
+import {
+  Dialog,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Box,
+  Checkbox,
+  Button,
+  TextField,
+  CircularProgress,
+  Grid,
+  Chip,
+  Typography
+} from '@material-ui/core';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -125,6 +139,13 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
               </div>
             </div>
           )}
+        </div>
+        <div style={{ marginTop: 25 }}>
+          <hr style={{ border: 0, borderTop: '1px solid var(--common-border-color)' }} />
+          <Typography style={{ fontWeight: 600, marginTop: 5 }}>AI Suggestions:</Typography>
+          <Box mt={1}>
+            <Chip style={{ fontWeight: 500 }} label="As per previous orders, margin can be increased by 2-5%" />
+          </Box>
         </div>
       </DashboardModal>
     </>
