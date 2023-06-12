@@ -18,10 +18,9 @@ import { BiEdit } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 
 const LeadTimeMasterDetails = () => {
-  const renderedFrom = camelCase(routes?.leadTimeMasterDetail.title);
+
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -202,7 +201,7 @@ const LeadTimeMasterDetails = () => {
                   <Box p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                     <Grid container>
                       <Grid item xs={2}>
-                        <Typography variant="body1">#</Typography>
+                        <Typography variant="body1">Index</Typography>
                       </Grid>
                       <Grid item xs={6}>
                         <Typography variant="body1">Status</Typography>
