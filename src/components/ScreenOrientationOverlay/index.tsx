@@ -37,6 +37,15 @@ const ScreenOrientationOverlay: FC<ScreenOrientationOverlayProps> = ({ displayOn
     );
   }, [landscape, portrait, isMobile, isTablet, displayOn, device]);
 
+  useEffect(() => {
+    if (shouldDisplay) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = null;
+    }
+    return () => (document.body.style.overflow = null);
+  }, [shouldDisplay]);
+
   return (
     <>
       {shouldDisplay &&

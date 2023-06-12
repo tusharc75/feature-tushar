@@ -1349,40 +1349,45 @@ body::-webkit-scrollbar-thumb {
 }
 
 .quoteBox {
-  padding: 25px 15px;
-  display: flex;
+  padding: 15px;
   justify-content: space-between;
   border-radius: 4px;
-  flex-direction: column;
-  // box-shadow: 2px 3px 5px #737573;
-
-  flex: 1;
+  min-width: 144px;
+  flex-grow: 1;
+  .quoteAmount {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .quoteDetailHeading {
+    font-size: 14px;
+    font-weight: 500;
+  }
 }
 
 .quoteProfit {
-  background: #d1f2be;
+  background: #5eae2c;
 
   .quoteAmount,
   .quoteDetailHeading {
-    color: #306411;
+    color: #fff;
   }
 }
 
 .quoteSale {
-  background: #84e4e0;
+  background: #6482ea;
 
   .quoteAmount,
   .quoteDetailHeading {
-    color: #0b4e4c;
+    color: #fff;
   }
 }
 
 .quoteCost {
-  background: #ffeac1;
+  background: #ffb005;
 
   .quoteAmount,
   .quoteDetailHeading {
-    color: #66532f;
+    color: #fff;
   }
 }
 
