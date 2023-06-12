@@ -344,14 +344,11 @@ const User: FC = () => {
 
           const [firstRegionalWideRole, ...restRegionalWideRoles] = allRegionalWideRoles;
 
-
           let finalObject = prepareDataForGrid(u);
           finalObject["canDelete"] = permissions?.user?.isDelete;
           finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
           finalObject["allowedToEdit"] = permissions?.user?.isUpdate;
-
-          const email = u.hideEmail ? null : u.email;
-
+          finalObject['email'] = u.hideEmail ? null : u?.email;
           let res = {
             ...finalObject,
             status: u.blocked ? u.blocked : false,
@@ -362,7 +359,6 @@ const User: FC = () => {
             regionalWideRoleId: firstRegionalWideRole?._id ?? "",
             regionalWideRole: firstRegionalWideRole?.name ?? "",
             restRegionalWideRoles: restRegionalWideRoles,
-            email: email,
           };
           return res;
         });
@@ -565,11 +561,11 @@ const User: FC = () => {
     }
   }
 
-  const handleEmailVisibility = (hideEmail) => {
+  const handleEmailVisibility = (data) => {
     let userIds = selectedRecords.map((o) => o?._id)
     if (userIds && userIds.length > 0) {
       axiosInstance()
-        .post(`/user/hide-email`, { "users": [...userIds], "hideEmail" : hideEmail })
+        .post(`/user/hide-email`, { "users": [...userIds], "hideEmail": data })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
