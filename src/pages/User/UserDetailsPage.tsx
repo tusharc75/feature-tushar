@@ -268,17 +268,17 @@ const UserDetailsPage = () => {
     await axiosInstance()
       .get(`/user/${id}`)
       .then(({ data: { data } }) => {
+        if (data?.hideEmail) {
+          data.email = null;
+        }
         handleMainPoints(data);
         const name = [data.firstName, data.lastName].filter((d) => d).join(' ');
-
         setHeadingLbl(name);
         setUserData(data);
         setEntities(data.entities.filter((e) => e.role.length !== 0 || e.entity !== undefined));
         setGloabalRoles(data.role);
         setCustomizedRoutes([routes.user, { title: `${data.firstName} ${data.lastName}` }]);
-
         let orgChartData = [];
-
         if (data.parentHierarchy && data.parentHierarchy.length > 0) {
           data.parentHierarchy.forEach((d) => {
             orgChartData.push({
@@ -411,7 +411,7 @@ const UserDetailsPage = () => {
     let tempMp = {
       name: `${data.firstName} ${data.lastName}`,
       phone: data.mobileNo || '',
-      email: data.hideEmail ? '' : (data.email || '')
+      email: data?.email || ''
     };
     setMainPoints(tempMp);
   };
