@@ -19,11 +19,57 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { GiReceiveMoney } from 'react-icons/gi';
+import { AiIcon, LightIcon } from 'src/assets/svg/svgIcons';
 
 import { currencyCodeToSymbol, CustomDialogTransition, formatAmountWithCurrency, quotation, QUOTATION_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { isMobile, isTablet } from 'react-device-detect';
 import DashboardModal, { ModalHead } from 'src/components/DashboardModal';
+import { Background } from 'react-flow-renderer';
+
+interface CssObj {
+  [index: string]: React.CSSProperties;
+}
+
+const styles: CssObj = {
+  aiCard: {
+    border: '1px solid var(--common-border-color)',
+    boxShadow: '0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06)',
+    borderRadius: '8px',
+    padding: '16px 20px 20px',
+    marginTop: 22,
+    minHeight: 200
+  },
+  cardHead: {
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 18
+  },
+  chip: {
+    boxShadow: `-3px 3px 6px rgba(220, 220, 220, 0.2), 
+    3px -3px 6px rgba(220, 220, 220, 0.2), 
+    -3px -3px 6px rgba(255, 255, 255, 0.9), 
+    3px 3px 8px rgba(220, 220, 220, 0.9), 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.3), 
+    inset -1px -1px 2px rgba(220, 220, 220, 0.5)`,
+    borderRadius: '6px',
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    padding: '6px 10px',
+    fontWeight: 400,
+    fontSize: '12px',
+    lineHeight: '16px',
+    maxWidth: 'max-content'
+  },
+  chipContainer: {
+    display: 'grid',
+    gap: 9,
+    marginTop: 14
+  }
+};
 
 const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
   const [quotationSummary, setQuotationSummary] = useState({
@@ -91,7 +137,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
         open={true}
         dialogProps={{
           fullScreen: fullScreen || isMobile || isTablet,
-          maxWidth: 'md'
+          maxWidth: 'sm'
         }}
         modalHead={{
           title: 'Quotation Summary',
@@ -140,15 +186,30 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
             </div>
           )}
         </div>
-        <div style={{ marginTop: 25 }}>
-          <hr style={{ border: 0, borderTop: '1px solid var(--common-border-color)' }} />
-          <Typography style={{ fontWeight: 600, marginTop: 5 }}>AI Suggestions:</Typography>
-          <Box mt={1}>
-            <Chip style={{ fontWeight: 500 }} label="As per previous orders, margin can be increased by 2-5%" />
+        <div style={styles.aiCard}>
+          <div style={styles.cardHead}>
+            <AiIcon />
+            <Typography style={{ fontWeight: 600, marginTop: 5 }}>AI Suggestions:</Typography>
+          </div>
+          <Box mt={1} style={styles.chipContainer}>
+            <RenderChip lebel="As per previous orders, margin can be increased by 2-5%" />
           </Box>
         </div>
       </DashboardModal>
     </>
+  );
+};
+
+interface ChipInterface extends React.HTMLAttributes<HTMLDivElement> {
+  lebel: string | React.ReactNode;
+}
+
+const RenderChip: React.FC<ChipInterface> = ({ lebel, style, ...rest }) => {
+  return (
+    <div style={{ ...style, ...styles.chip }} {...rest}>
+      <LightIcon />
+      <span>{lebel}</span>
+    </div>
   );
 };
 

@@ -731,14 +731,14 @@ const routes = {
     title:
       storedRoutes && storedRoutes.frequentlyAskedQuestion && storedRoutes.frequentlyAskedQuestion.title
         ? storedRoutes.frequentlyAskedQuestion?.title
-        : RESOURCE_LABEL.freqentlyAskedQuestion,
+        : RESOURCE_LABEL.frequentlyAskedQuestion,
     path: '/frequently-asked-question'
   },
   frequentlyAskedQuestionDetail: {
     title:
       storedRoutes && storedRoutes.frequentlyAskedQuestion && storedRoutes.frequentlyAskedQuestion.title
         ? storedRoutes.frequentlyAskedQuestion?.title
-        : RESOURCE_LABEL.freqentlyAskedQuestion,
+        : RESOURCE_LABEL.frequentlyAskedQuestion,
     path: '/frequently-asked-question/detail'
   },
   blog: {

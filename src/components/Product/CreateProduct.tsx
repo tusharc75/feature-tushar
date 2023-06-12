@@ -87,7 +87,7 @@ const CreateProduct = (props) => {
                 const newField = _fields;
                 axiosInstance().get(`/product/` + productId).then(({ data: { data } }) => {
                     data.fields?.map((_f) => newField.push(_f));
-                    data.productData.fields?.map((_f) => newField.push(_f));
+                    data.productData.fields?.map((_f) => newField.push({ ..._f, leval: _f?.leval ? _f?.leval : 'product-custom' }));
                     if (data.productData.fieldChanges) {
                         setFieldChanges(data.productData.fieldChanges);
                     }

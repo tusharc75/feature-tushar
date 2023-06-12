@@ -13,6 +13,7 @@ import { CreateTask } from 'src/components/Activity/Task/CreateTask';
 import { isMobile, isTablet } from 'react-device-detect';
 import { GoThumbsup } from 'react-icons/go';
 import { BsHandThumbsUp } from 'react-icons/bs';
+import { SerializedAssetAvailableIllustration } from 'src/assets/svg/svgIcons';
 
 const typographyh: React.CSSProperties = {
   fontSize: '13px',
@@ -126,8 +127,8 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       {products ? (
         canFulfil ? (
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <BsHandThumbsUp size={100} style={{ color: 'var(--dark-primary-text, #047d1c)' }} />
-            <Typography style={{ fontSize: '16px', fontWeight: '500', marginTop: '20px' }}>
+            <SerializedAssetAvailableIllustration />
+            <Typography style={{ fontSize: '16px', fontWeight: '500', marginTop: '20px', lineHeight: '1.8' }}>
               Serialized Assets are available for all the products.
               <br /> Rental job can be fulfilled.
             </Typography>
@@ -136,17 +137,23 @@ export default function AssetAvailability({ rentalId, handleClose }) {
           <Box>
             <Typography style={{ fontSize: '16px', fontWeight: '500' }}>Unable to fulfill the asset requirement from the plant.</Typography>
             <div className="mt-2">
-              {products?.filter((e) => e.baseWarehouse && e.qty > e.assetAvailable)?.map((product) => (
-                <ShowProduct product={product} />
-              ))}
+              {products
+                ?.filter((e) => e.baseWarehouse && e.qty > e.assetAvailable)
+                ?.map((product) => (
+                  <ShowProduct product={product} />
+                ))}
             </div>
-            {products?.filter((e) => !e.baseWarehouse)?.length > 0 &&
+            {products?.filter((e) => !e.baseWarehouse)?.length > 0 && (
               <Box pt={3}>
-                <Typography style={{ fontSize: '16px', fontWeight: '500' }}  >{`Serialized Assets are available in other ${routes.warehouse.title}`}</Typography>
+                <Typography
+                  style={{ fontSize: '16px', fontWeight: '500' }}
+                >{`Serialized Assets are available in other ${routes.warehouse.title}`}</Typography>
                 <div className="mt-2">
-                  {products?.filter((e) => !e.baseWarehouse)?.map((product) => (
-                    <ShowProduct product={product} />
-                  ))}
+                  {products
+                    ?.filter((e) => !e.baseWarehouse)
+                    ?.map((product) => (
+                      <ShowProduct product={product} />
+                    ))}
                   <div className="mt-3" style={{ textAlign: 'right' }}>
                     <Button
                       size="small"
@@ -161,7 +168,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
                   </div>
                 </div>
               </Box>
-            }
+            )}
           </Box>
         )
       ) : (
@@ -189,7 +196,10 @@ export default function AssetAvailability({ rentalId, handleClose }) {
               setFullScreen(false);
             }}
             defaultName="Assets Transfer Request"
-            defaultDescription={`Transfer Request for following products - ${products?.filter((e) => !e.baseWarehouse)?.map((e) => `${e.productName}-${e.qty}`)?.toString()}`}
+            defaultDescription={`Transfer Request for following products - ${products
+              ?.filter((e) => !e.baseWarehouse)
+              ?.map((e) => `${e.productName}-${e.qty}`)
+              ?.toString()}`}
             relatedTo={[
               {
                 type: ACTIVITY_RESOURCE.rentalManagement,
