@@ -35,6 +35,7 @@ import PreviewIcon from '@material-ui/icons/Visibility';
 import _ from 'lodash';
 import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined';
 import FolderIcon from '@material-ui/icons/Folder';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -239,20 +240,31 @@ export default function Attachment() {
     {
       id: 'createdAt',
       accessor: 'createdAt',
-      Header: 'Created At',
-      width: 100,
+      Header: 'Created By',
+      width: 120,
       canDrag: false,
       sticky: isMobile ? 'none' : 'left',
-      Cell: ({ row }) => <>{row.original?.createdBy}</>
+      Cell: ({ row }) => (
+        <p>
+          {row.original?.createdBy?.user?.concatedName}
+          <br /> {row.original?.createdAt}
+        </p>
+      )
     },
     {
       id: 'updatedAt',
       accessor: 'updatedAt',
-      Header: 'Updated At',
-      width: 100,
+      Header: 'Updated By',
+      width: 120,
       canDrag: false,
       sticky: isMobile ? 'none' : 'left',
-      Cell: ({ row }) => <>{row.original?.updatedAt}</>
+      Cell: ({ row }) => (
+        <p>
+          {row.original?.updatedBy?.user?.concatedName}
+          <br />
+          {row.original?.updatedAt}
+        </p>
+      )
     },
     {
       id: 'action',
@@ -471,8 +483,8 @@ export default function Attachment() {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `&page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `&page=${page}&limit=${limit}` : '';
 
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
@@ -519,8 +531,8 @@ export default function Attachment() {
               id: parent._id,
               fileUrl: parent.fileUrl,
               canEdit: parent.type === 'folder' ? true : parent?.canEdit,
-              createdBy: displayDate(parent.createdBy?.date),
-              updatedBy: displayDate(parent.updatedBy?.date),
+              createdAt: displayDate(parent.createdBy?.date),
+              updatedAt: displayDate(parent.updatedBy?.date),
               isChecked: false
             };
           });
@@ -610,7 +622,26 @@ export default function Attachment() {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[{ title: routes.attachment.title }]} />
+        <Grid item md={4} sm={11} xs={10}>
+          <CustomBreadCrumbs routes={[{ title: routes.attachment.title }]} />
+        </Grid>
+        <Grid item md={8} sm={1} xs={2}>
+          <Grid container direction="row">
+            <Grid item xs={12} sm={12}>
+              <Grid container justify="flex-end">
+                <ImportExportLinks
+                  permissions={permissions?.attachment}
+                  module="Attachment"
+                  api={`/attachment`}
+                  afterImportCompleted={() => {}}
+                  total={rowCount}
+                  onlyExport={true}
+                  additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
       </Grid>
       <CustomContainer>
         {filter && (

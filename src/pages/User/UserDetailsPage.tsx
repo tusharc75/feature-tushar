@@ -411,7 +411,7 @@ const UserDetailsPage = () => {
     let tempMp = {
       name: `${data.firstName} ${data.lastName}`,
       phone: data.mobileNo || '',
-      email: data.email || ''
+      email: data.hideEmail ? '' : (data.email || '')
     };
     setMainPoints(tempMp);
   };
