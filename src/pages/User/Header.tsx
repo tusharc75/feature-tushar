@@ -16,6 +16,7 @@ const Header = (props) => {
     searchVal,
     onCreate,
     userPermissions,
+    superAdminAccess,
     showConfirmBox,
     openRolesDialog,
     openApprovalProcessDialog,
@@ -28,6 +29,7 @@ const Header = (props) => {
     unAssignUsersFromEntity,
     openUserSetupDialog,
     handleResetPassword,
+    handleEmailVisibility,
     userSetupDisabled,
     selectedRecordsLength = 0,
     manageDeleteUser,
@@ -271,6 +273,26 @@ const Header = (props) => {
                       }}
                     >
                       Reset Password
+                    </MenuItem>
+                  )}
+                  {superAdminAccess && (
+                    <MenuItem
+                      onClick={() => {
+                        handleEmailVisibility(true);
+                        closeActions();
+                      }}
+                    >
+                      Hide Email
+                    </MenuItem>
+                  )}
+                  {superAdminAccess && (
+                    <MenuItem
+                      onClick={() => {
+                        handleEmailVisibility(false);
+                        closeActions();
+                      }}
+                    >
+                      Unhide Email
                     </MenuItem>
                   )}
                 </Menu>
