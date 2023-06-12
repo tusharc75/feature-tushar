@@ -78,7 +78,7 @@ const CardWithCheckbox: FC<CardWithCheckboxProps> = ({
                 key={index}
                 {...rest}
                 className={`${styles.bodyColumn} ${rest.className || ''}`}
-                style={{ ...style, minWidth: minWidth, width: width }}
+                style={{ ...style, minWidth: minWidth !== undefined ? minWidth : 'auto', width: width !== undefined ? width : 'auto' }}
               >
                 {render(row)}
               </Grid>
