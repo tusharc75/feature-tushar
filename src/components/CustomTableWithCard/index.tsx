@@ -1,6 +1,7 @@
 import React, { ReactNode, useState, useCallback, FC, ChangeEvent } from 'react';
 import styles from './index.module.scss';
 import CardWithCheckBox from './CardWithCheckbox';
+import type { GridProps } from '@material-ui/core/Grid';
 
 interface TableInterface extends React.HTMLAttributes<HTMLDivElement> {
   data: any[];
@@ -16,9 +17,11 @@ export interface CardInterface extends React.HTMLAttributes<HTMLDivElement> {
   checked?: boolean;
   onInputChange?: (e: React.ChangeEvent<HTMLInputElement>, data: any) => void;
   onCardClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, data: any) => void;
-  bodyColumns: ColumnsInterface[];
+  bodyColumns: BodyColumns[];
   headerColumns: ColumnsInterface[];
 }
+
+interface BodyColumns extends ColumnsInterface, GridProps {}
 export interface ColumnsInterface extends React.HTMLAttributes<HTMLDivElement> {
   minWidth?: number;
   width?: number;

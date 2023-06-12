@@ -90,12 +90,6 @@
   border-style: solid;
 }
 
-.cardBody {
-  --body-column-gap: 22px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--body-column-gap, 15px);
-}
 .bodyColumn {
   & > p {
     font-weight: 500;

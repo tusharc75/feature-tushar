@@ -184,7 +184,11 @@ const Request = ({ workOrder }) => {
                 <Typography>{row['requestDate'] ? <span>{moment(row['requestDate']).format(dateTimeFormat)}</span> : <NoDataCell />}</Typography>
               </>
             );
-          }
+          },
+          xs: 6,
+          sm: 4,
+          md: 4,
+          lg: 2
         },
         {
           render: (row) => {
@@ -203,7 +207,11 @@ const Request = ({ workOrder }) => {
                 <Typography>{row['processDate'] ? <span>{moment(row['processDate']).format(dateTimeFormat)}</span> : <NoDataCell />}</Typography>
               </>
             );
-          }
+          },
+          xs: 6,
+          sm: 4,
+          md: 4,
+          lg: 2
         },
         {
           render: (row) => {
@@ -213,7 +221,11 @@ const Request = ({ workOrder }) => {
                 <Typography>{row['qty'] ? row['qty'] : '---'}</Typography>
               </>
             );
-          }
+          },
+          xs: 6,
+          sm: 4,
+          md: 4,
+          lg: 2
         },
         {
           render: (row) => {
@@ -223,7 +235,11 @@ const Request = ({ workOrder }) => {
                 <Typography>{row['processedQty'] ? row['processedQty'] : '---'}</Typography>
               </>
             );
-          }
+          },
+          xs: 6,
+          sm: 4,
+          md: 4,
+          lg: 2
         },
         {
           render: (row) => {
@@ -233,7 +249,11 @@ const Request = ({ workOrder }) => {
                 <Typography>{row['comment'] ? row['comment'] : '---'}</Typography>
               </>
             );
-          }
+          },
+          xs: 6,
+          sm: 4,
+          md: 4,
+          lg: 2
         }
       ]
     };
@@ -252,7 +272,11 @@ const Request = ({ workOrder }) => {
               )}
             </Typography>
           </>
-        )
+        ),
+        xs: 6,
+        sm: 4,
+        md: 4,
+        lg: 2
       });
     }
     setAccessor(accessor);
