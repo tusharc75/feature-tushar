@@ -134,9 +134,9 @@ export default function AssetAvailability({ rentalId, handleClose }) {
           </div>
         ) : (
           <Box>
-            <Typography style={{ fontSize: '16px', fontWeight: '500' }}>Serialized Assets are not available for following products</Typography>
+            <Typography style={{ fontSize: '16px', fontWeight: '500' }}>Unable to fulfill the asset requirement from the plant.</Typography>
             <div className="mt-2">
-              {products?.filter((e) => e.baseWarehouse)?.map((product) => (
+              {products?.filter((e) => e.baseWarehouse && e.qty > e.assetAvailable)?.map((product) => (
                 <ShowProduct product={product} />
               ))}
             </div>

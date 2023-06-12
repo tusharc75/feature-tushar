@@ -630,13 +630,13 @@ export default function Attachment() {
             <Grid item xs={12} sm={12}>
               <Grid container justify="flex-end">
                 <ImportExportLinks
-                  permissions={permissions?.workOrder}
+                  permissions={permissions?.attachment}
                   module="Attachment"
-                  api={'/attachment'}
+                  api={`/attachment`}
                   afterImportCompleted={() => {}}
                   total={rowCount}
                   onlyExport={true}
-                  additionalParams={getQueryString(true)}
+                  additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
                 />
               </Grid>
             </Grid>

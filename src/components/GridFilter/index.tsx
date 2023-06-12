@@ -195,6 +195,9 @@ function GridFilter({
         };
       }
       else if (['multiSelect', 'dropDown'].includes(col.type) && formValues[fieldName]) {
+        if (col.type === 'multiSelect' && formValues[fieldName]?.length === 0) {
+          return
+        }
         filterModel[fieldName] = {
           filterType: 'text',
           type: 'contains',
