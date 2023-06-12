@@ -1,6 +1,6 @@
 import { ReactComponent } from 'ag-grid-react/lib/reactComponent';
 import { useAppTheme } from 'src/constants/AppConfig';
-import React, { FC, ReactElement } from 'react';
+import React, { FC, ReactElement, useState } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import { Dialog, Box, Typography, IconButton, DialogContent } from '@material-ui/core';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import styles from './dashboardModal.module.scss';
 import CloseIcon from '@material-ui/icons/Close';
 import type { DialogProps } from '@material-ui/core/Dialog';
+import { FiMinimize2, FiMaximize2 } from 'react-icons/fi';
 // node_modules/@material-ui/core/Dialog/Dialog.d.ts
 
 export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -22,6 +23,7 @@ export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
 export interface ModalHead {
   title: string | ReactElement;
   icon: ReactElement;
+  fullScreenOption?: boolean;
 }
 
 const DashboardModal: FC<ModalProps> = ({
@@ -40,10 +42,16 @@ const DashboardModal: FC<ModalProps> = ({
       padding: theme.spacing(2)
     }
   }))(MuiDialogContent);
+  const [maximized, setMaximized] = useState<boolean>(dialogProps?.fullScreen || false);
+
+  const toggleMaximized = () => {
+    setMaximized((prev) => !prev);
+  };
 
   return (
     <Dialog
       {...dialogProps}
+      fullScreen={maximized}
       onClose={dialogProps?.onClose || handleClose}
       aria-labelledby="customized-dialog-title"
       BackdropProps={{
@@ -55,7 +63,7 @@ const DashboardModal: FC<ModalProps> = ({
       PaperProps={{
         style: {
           borderRadius: 16,
-          margin: dialogProps?.fullScreen ? 0 : 15,
+          margin: dialogProps?.fullScreen || maximized ? 0 : 15,
           marginBottom: dialogProps?.fullScreen ? 0 : dialogProps?.maxWidth ? 15 : 94,
           width: dialogProps?.maxWidth || dialogProps?.fullScreen ? '100%' : 'unset',
           background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff',
@@ -81,9 +89,16 @@ const DashboardModal: FC<ModalProps> = ({
               {modalHead?.title}
             </Typography>
           </Box>
-          <IconButton aria-label="close" onClick={() => handleClose()}>
-            <CloseIcon />
-          </IconButton>
+          <Box className={styles.modalHeadActions}>
+            {modalHead?.fullScreenOption ? (
+              <IconButton aria-label="close" onClick={() => toggleMaximized()}>
+                {maximized ? <FiMinimize2 /> : <FiMaximize2 />}
+              </IconButton>
+            ) : null}
+            <IconButton aria-label="close" onClick={() => handleClose()}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </MuiDialogTitle>
         <DialogContent
           className={`${styles.dialogContent} ${className}`}

@@ -92,7 +92,7 @@ const CreateProductBuilder = () => {
                 <Box p={1}>
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={3}>
-                      <TextField fullWidth margin="dense" type="text" label="Name" name="name" variant="outlined" disabled={true} />
+                      <TextField fullWidth margin="dense" type="text" label="Name" name="name" variant="outlined" disabled={true} value={values['name']} />
                     </Grid>
                     <Grid item xs={12} sm={3}>
                       <Box mt={1}>

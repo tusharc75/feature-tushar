@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import styles from './index.module.scss';
 
 import type { CardInterface } from './';
-import { Checkbox, Typography } from '@material-ui/core';
+import { Checkbox, Typography, Grid } from '@material-ui/core';
 
 interface CardWithCheckboxProps extends CardInterface {
   row: any;
@@ -69,21 +69,22 @@ const CardWithCheckbox: FC<CardWithCheckboxProps> = ({
             })}
           </div>
         </div>
-        <div className={styles.cardBody}>
+        <Grid container spacing={3} className={styles.cardBody}>
           {bodyColumns.map((bodyCol, index) => {
             const { style, minWidth, width, render, ...rest } = bodyCol;
             return (
-              <div
+              <Grid
+                item
                 key={index}
                 {...rest}
                 className={`${styles.bodyColumn} ${rest.className || ''}`}
-                style={{ ...style, minWidth: minWidth, width: width }}
+                style={{ ...style, minWidth: minWidth !== undefined ? minWidth : 'auto', width: width !== undefined ? width : 'auto' }}
               >
                 {render(row)}
-              </div>
+              </Grid>
             );
           })}
-        </div>
+        </Grid>
       </div>
     </div>
   );
