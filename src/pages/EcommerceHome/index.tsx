@@ -32,57 +32,54 @@ const useClasses = makeStyles(() => ({
 }));
 
 const EcommerceHome = () => {
+
   const classes = useClasses();
   const [formData, setFormData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [oldData, setOldData] = useState([]);
   const toastConfig = useContext(CustomToastContext);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      let res = await axiosInstance().get('/e-commerce-home');
-      let data = res.data?.data;
-      // data items sort by order number
-      let items = data?.items?.sort((a, b) => a.order - b.order);
-      setFormData(items || []);
-      setOldData(items || []);
-      setLoading(false);
-    } catch (err) {
-      toastConfig.setToastConfig(err);
-    }
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = () => {
+    setLoading(true);
+    axiosInstance().get('/e-commerce-home')
+      .then(({ data: { data } }) => {
+        let items = data?.items?.sort((a, b) => a.order - b.order);
+        setFormData(items || []);
+        setLoading(false);
+      }).catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
-  const handleClickSave = async (data = null) => {
-    try {
-      setIsSubmitting(true);
-      let body = {
-        items: data
-          ? data?.map((i, idx) => {
-              return {
-                ...i,
-                order: idx + 1
-              };
-            }) || []
-          : formData?.map((i, idx) => {
-              return {
-                ...i,
-                order: idx + 1
-              };
-            }) || []
-      };
-      await axiosInstance().put('/e-commerce-home', body);
+  const handleClickSave = () => {
+    setIsSubmitting(true);
+    let body = {
+      items: formData?.map((i, idx) => {
+        return {
+          ...i,
+          order: idx + 1
+        };
+      }) || []
+    };
+    axiosInstance().put('/e-commerce-home', body).then(({ data }) => {
       setIsSubmitting(false);
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
-        message: 'Record updated successfully'
+        message: data.message
       });
       fetchData();
-    } catch (err) {
+
+    }).catch((err) => {
       toastConfig.setToastConfig(err);
-    }
+    });
+
+
+
   };
 
   const handleRemove = (id: string) => {
@@ -129,13 +126,13 @@ const EcommerceHome = () => {
         const content: any = e.target.result;
         const data = JSON.parse(content);
         setFormData(data);
-        handleClickSave(data);
       };
       fileread.readAsText(file_to_read);
       event.target.files = null;
       event.target.value = '';
     }
   };
+
   const handleExportField = () => {
     toastConfig.setToastConfig({
       hideDuration: null,
@@ -150,9 +147,6 @@ const EcommerceHome = () => {
     document.body.appendChild(link);
     link.click();
   };
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   return (
     <Box className="main-container-v1">
@@ -186,7 +180,7 @@ const EcommerceHome = () => {
               color="primary"
               variant="contained"
               size="small"
-              disabled={isSubmitting || loading || oldData === formData}
+              disabled={isSubmitting || loading}
               onClick={handleClickSave}
               startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
             >
