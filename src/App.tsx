@@ -213,6 +213,7 @@ import DynamicFormDetail from './pages/DynamicForm/DynamicFormDetail';
 import Competencies from './pages/Competencies';
 import CompetenciesDetail from './pages/Competencies/CompetenciesDetail';
 import MaterialHandling from './pages/MaterialHandling';
+import ScreenOrientationOverlay from './components/ScreenOrientationOverlay';
 
 var notificationInterval: any = null;
 
@@ -1034,6 +1035,7 @@ function App() {
             </PrivateRoute>
             <Route path="*" component={NotFound} />
           </Switch>
+          <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
         </ErrorBoundaryComponent>
       </AnimatePresence>
       {toast?.toastConfig?.open &&

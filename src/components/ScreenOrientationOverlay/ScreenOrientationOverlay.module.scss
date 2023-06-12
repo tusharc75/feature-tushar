@@ -1,0 +1,144 @@
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(5, 9, 19, 0.74);
+  backdrop-filter: blur(2px);
+  transition: opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+
+.iconContainer {
+  width: 200px;
+  height: 200px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -100px;
+  margin-top: -100px;
+  & p {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    font-size: 20px;
+    opacity: 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+}
+
+.phone {
+  position: relative;
+  left: 50%;
+  margin-left: -50px;
+  width: 0;
+  height: 0;
+  border: 0 solid #fff;
+  background: var(--new_theme_color);
+  border-radius: 10px;
+  box-sizing: border-box;
+  & svg {
+    width: 100%;
+    line-height: 120px;
+    font-size: 50px;
+
+    opacity: 0;
+    margin: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+.landscape {
+  .phone {
+    left: 36%;
+  }
+}
+
+.overlay.show {
+  display: block;
+  z-index: 1800;
+  .phone {
+    animation: sizeIncrease 0.5s forwards ease, borderIncrease 0.5s 0.5s forwards ease, rotateRight 0.7s 1s forwards ease;
+  }
+  .phone svg {
+    animation: fadeIn 0.5s 0.8s forwards ease;
+  }
+  .iconContainer p {
+    animation: fadeIn 0.5s 1.3s forwards ease;
+  }
+  &.landscape {
+    .phone {
+      animation: sizeIncreasePotrait 0.5s forwards ease, borderIncreasePotrait 0.5s 0.5s forwards ease, rotateLeft 0.7s 1s forwards ease;
+    }
+  }
+}
+
+/* KEYFRAMES
+------------------------------------------- */
+/* Animate width + height */
+@keyframes sizeIncrease {
+  0% {
+    width: 0;
+    height: 10px;
+  }
+  50% {
+    width: 100px;
+    height: 10px;
+  }
+  100% {
+    width: 100px;
+    height: 160px;
+  }
+}
+@keyframes sizeIncreasePotrait {
+  0% {
+    width: 10px;
+    height: 0px;
+  }
+  50% {
+    width: 10px;
+    height: 100px;
+  }
+  100% {
+    width: 160px;
+    height: 100px;
+  }
+}
+
+/* Add borders */
+@keyframes borderIncrease {
+  100% {
+    border-width: 20px 10px;
+  }
+}
+@keyframes borderIncreasePotrait {
+  100% {
+    border-width: 10px 20px;
+  }
+}
+
+/* fade-in  */
+@keyframes fadeIn {
+  100% {
+    color: #fff;
+    opacity: 1;
+  }
+}
+
+/* Rotate device */
+@keyframes rotateRight {
+  100% {
+    transform: rotate(90deg);
+  }
+}
+@keyframes rotateLeft {
+  100% {
+    transform: rotate(-90deg);
+  }
+}
