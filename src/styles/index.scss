@@ -1324,9 +1324,10 @@ body::-webkit-scrollbar-thumb {
 
 .quoteHeader {
   display: flex;
+  flex-wrap: wrap;
   font-size: 12px;
-  -webkit-gap: 0.25rem;
-  gap: 0.25rem;
+  -webkit-gap: 10px;
+  gap: 10px;
   font-weight: bold;
   justify-content: center;
 }
@@ -1353,7 +1354,8 @@ body::-webkit-scrollbar-thumb {
   justify-content: space-between;
   border-radius: 4px;
   flex-direction: column;
-  box-shadow: 2px 3px 5px #737573;
+  // box-shadow: 2px 3px 5px #737573;
+
   flex: 1;
 }
 

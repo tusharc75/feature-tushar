@@ -63,10 +63,14 @@
         }
       }
     }
+    .modalHeadActions {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
   }
   .dialogContent {
-    margin: var(--top-space, 20px) 0 0;
-    padding: 0;
+    margin: 10px 0 0;
 
     min-height: 250px;
     padding-left: 7px;
