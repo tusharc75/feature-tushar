@@ -105,7 +105,7 @@ const AddExistingProduct = (props) => {
                 }
               ];
             } else {
-              let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.product.path, true);
+              let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.product.path);
               if (currentColumn !== null) {
                 columns = [...columns, currentColumn?.columnData];
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -283,7 +283,7 @@ const AddExistingProduct = (props) => {
         }
       } else {
         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-          let currentColumn: any = getColumnData(routes.product.title, ele, routes.product.path, true);
+          let currentColumn: any = getColumnData(routes.product.title, ele, routes.productDetail.path);
           column.push({ ...currentColumn.columnData, leval: 'product-template' });
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
             rendererNames.push(currentColumn?.rendererName);
