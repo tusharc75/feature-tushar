@@ -17,6 +17,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import StorageLocation from './StorageLocation';
+import Users from './Users';
 
 const WarehouseDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -24,7 +25,7 @@ const WarehouseDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { permissions, user }
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -146,7 +147,7 @@ const WarehouseDetailsPage = () => {
           }}
         >
           <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          {permissions?.storageLocation?.isRead && (
+          {(permissions?.storageLocation?.isRead && user?.user?.brandPolicy?.storageLocation) && (
             <Tab
               label={<div className="tab-font">{routes.storageLocation.title}</div>}
               value={1}
@@ -155,6 +156,13 @@ const WarehouseDetailsPage = () => {
               className={'tabLayout'}
             />
           )}
+          {user?.user?.brandPolicy?.warehouseAccessByUser &&
+            <Tab
+              label={<div className="tab-font">Users</div>}
+              value={2}
+              aria-controls="a11y-tabpanel-2"
+              id="a11y-tab-2" className={'tabLayout'} />
+          }
         </Tabs>
         {tabValue === 0 && (
           <Box>
@@ -168,6 +176,7 @@ const WarehouseDetailsPage = () => {
           </Box>
         )}
         {tabValue === 1 && <StorageLocation warehouse={id} />}
+        {tabValue === 2 && <Users warehouse={id} />}
       </Box>
       {openUpdateDialog && (
         <ManageWarehouse

@@ -353,7 +353,7 @@ const ProductBuilder = (props) => {
             });
             rendererNames.push('productTypeRenderer');
           } else {
-            let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true);
+            let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path);
             if (ele.type === 'decimal' || ele.type === 'percent' || ele.type === 'singleLine' || ele.type === 'multiLine') {
               if (!ele.isFormula && !ele.isUneditable && Editable) {
                 if (ele.type === 'decimal' || ele.type === 'percent') {
@@ -690,8 +690,8 @@ const ProductBuilder = (props) => {
                 isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
                   ? false
                   : selectedRecords.length
-                  ? false
-                  : true
+                    ? false
+                    : true
               }
               onClick={openActions}
               startIcon={<ExpandMore />}
@@ -767,26 +767,26 @@ const ProductBuilder = (props) => {
               dataToShowForMobile
                 ? dataToShowForMobile.some((f) => f.editable === true)
                   ? [
-                      ...dataToShowForMobile
-                        .filter((f) => f.editable === true)
-                        .map((m) => {
-                          return {
-                            label: `${m.headerName}: `,
-                            field: m.field,
-                            forceShow: true
-                            // onClick: (data, index) => {
-                            //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
-                            // }
-                          };
-                        })
-                    ]
+                    ...dataToShowForMobile
+                      .filter((f) => f.editable === true)
+                      .map((m) => {
+                        return {
+                          label: `${m.headerName}: `,
+                          field: m.field,
+                          forceShow: true
+                          // onClick: (data, index) => {
+                          //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
+                          // }
+                        };
+                      })
+                  ]
                   : [
-                      {
-                        label: `Product description: `,
-                        field: 'productName',
-                        forceShow: true
-                      }
-                    ]
+                    {
+                      label: `Product description: `,
+                      field: 'productName',
+                      forceShow: true
+                    }
+                  ]
                 : []
             }
             onCreate={null}

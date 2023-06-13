@@ -1,138 +1,216 @@
 import React, { useState, useContext, useMemo, useEffect } from 'react';
-import { Dialog, List, ListItem, ListItemIcon, ListItemText, Box, Checkbox, Button, TextField, CircularProgress, Grid } from '@material-ui/core';
+import {
+  Dialog,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Box,
+  Checkbox,
+  Button,
+  TextField,
+  CircularProgress,
+  Grid,
+  Chip,
+  Typography
+} from '@material-ui/core';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
+import { GiReceiveMoney } from 'react-icons/gi';
+import { AiIcon, LightIcon } from 'src/assets/svg/svgIcons';
 
 import { currencyCodeToSymbol, CustomDialogTransition, formatAmountWithCurrency, quotation, QUOTATION_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { isMobile, isTablet } from 'react-device-detect';
+import DashboardModal, { ModalHead } from 'src/components/DashboardModal';
+import { Background } from 'react-flow-renderer';
+
+interface CssObj {
+  [index: string]: React.CSSProperties;
+}
+
+const styles: CssObj = {
+  aiCard: {
+    border: '1px solid var(--common-border-color)',
+    boxShadow: '0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06)',
+    borderRadius: '8px',
+    padding: '16px 20px 20px',
+    marginTop: 22,
+    minHeight: 200
+  },
+  cardHead: {
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 18
+  },
+  chip: {
+    boxShadow: `-3px 3px 6px rgba(220, 220, 220, 0.2), 
+    3px -3px 6px rgba(220, 220, 220, 0.2), 
+    -3px -3px 6px rgba(255, 255, 255, 0.9), 
+    3px 3px 8px rgba(220, 220, 220, 0.9), 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.3), 
+    inset -1px -1px 2px rgba(220, 220, 220, 0.5)`,
+    borderRadius: '6px',
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    padding: '6px 10px',
+    fontWeight: 400,
+    fontSize: '12px',
+    lineHeight: '16px',
+    maxWidth: 'max-content'
+  },
+  chipContainer: {
+    display: 'grid',
+    gap: 9,
+    marginTop: 14
+  }
+};
 
 const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
-    const [quotationSummary, setQuotationSummary] = useState({
-        totalProfit: null,
-        totalcost: null,
-        totalsale: null
+  const [quotationSummary, setQuotationSummary] = useState({
+    totalProfit: null,
+    totalcost: null,
+    totalsale: null
+  });
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [redCard, setRedCard] = useState(false);
+
+  useEffect(() => {
+    if (quotationData) {
+      fetchProductInventory();
+    }
+  }, [quotationData]);
+
+  const fetchProductInventory = async () => {
+    var data: any = [];
+    var inventory: any = [];
+    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
+    data = response?.data?.data;
+    inventory = data?.inventory ? data?.inventory : [];
+    const rows = data.material.filter((e) => e.parentId === null);
+    const totalFinalPrice = rows
+      .filter(
+        (f) =>
+          f?.parentId === null &&
+          f?.hasOwnProperty('finalPrice_' + quotationData?.currency?.toLowerCase()) &&
+          !isNaN(f['finalPrice_' + quotationData?.currency?.toLowerCase()])
+      )
+      .reduce((sum, row) => row['finalPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
+    const totalSupplierPrice = rows
+      .filter(
+        (f) =>
+          f?.parentId === null &&
+          f?.hasOwnProperty('supplierPrice_' + quotationData?.currency?.toLowerCase()) &&
+          !isNaN(f['supplierPrice_' + quotationData?.currency?.toLowerCase()])
+      )
+      .reduce((sum, row) => row['supplierPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
+    setQuotationSummary({
+      totalProfit: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice - totalSupplierPrice),
+      totalcost: formatAmountWithCurrency(quotationData?.currency, totalSupplierPrice),
+      totalsale: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice)
     });
-    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    const [redCard, setRedCard] = useState(false);
+  };
 
-    useEffect(() => {
-        if (quotationData) {
-            fetchProductInventory();
-        }
-    }, [quotationData]);
+  const findProfitPercentage = (CP, Profit) => {
+    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
+    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
+    return ((profit * 100) / parsedCP).toFixed(2);
+  };
 
-    const fetchProductInventory = async () => {
-        var data: any = [];
-        var inventory: any = [];
-        const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
-        data = response?.data?.data;
-        inventory = data?.inventory ? data?.inventory : [];
-        const rows = data.material.filter((e) => e.parentId === null);
-        const totalFinalPrice = rows
-            .filter(
-                (f) =>
-                    f?.parentId === null &&
-                    f?.hasOwnProperty('finalPrice_' + quotationData?.currency?.toLowerCase()) &&
-                    !isNaN(f['finalPrice_' + quotationData?.currency?.toLowerCase()])
-            )
-            .reduce((sum, row) => row['finalPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
-        const totalSupplierPrice = rows
-            .filter(
-                (f) =>
-                    f?.parentId === null &&
-                    f?.hasOwnProperty('supplierPrice_' + quotationData?.currency?.toLowerCase()) &&
-                    !isNaN(f['supplierPrice_' + quotationData?.currency?.toLowerCase()])
-            )
-            .reduce((sum, row) => row['supplierPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
-        setQuotationSummary({
-            totalProfit: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice - totalSupplierPrice),
-            totalcost: formatAmountWithCurrency(quotationData?.currency, totalSupplierPrice),
-            totalsale: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice)
-        });
-    };
+  const defaultTotalValue = useMemo(() => {
+    let result = '0';
+    if (quotationData && quotationData?.currency) {
+      result = `${currencyCodeToSymbol(quotationData.currency)} 0`;
+    }
+    return result;
+  }, [quotationData]);
 
-    const findProfitPercentage = (CP, Profit) => {
-        let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
-        let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
-        return ((profit * 100) / parsedCP).toFixed(2);
-    };
+  return (
+    <>
+      <DashboardModal
+        handleClose={onClose}
+        open={true}
+        dialogProps={{
+          fullScreen: fullScreen || isMobile || isTablet,
+          maxWidth: 'sm'
+        }}
+        modalHead={{
+          title: 'Quotation Summary',
+          icon: <GiReceiveMoney />,
+          fullScreenOption: true
+        }}
+      >
+        <div className="quoteHeader">
+          <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
+            <span className="quoteAmount" title={quotationSummary?.totalProfit?.fullFormatAmount}>
+              {quotationSummary?.totalProfit?.fullFormatAmount ? quotationSummary?.totalProfit?.fullFormatAmount : defaultTotalValue}{' '}
+              {quotationSummary?.totalcost?.fullFormatAmount
+                ? `(${findProfitPercentage(quotationSummary?.totalcost, quotationSummary?.totalProfit)} %)`
+                : ''}
+            </span>
+            <div className={'quoteBoxContent'}>
+              <span className={'quoteDetailHeading'}>Total Profit </span>
+            </div>
+          </div>
+          <div className="quoteBox quoteCost">
+            <span className="quoteAmount" title={quotationSummary?.totalcost?.fullFormatAmount}>
+              {quotationSummary?.totalcost?.fullFormatAmount ? quotationSummary?.totalcost?.fullFormatAmount : defaultTotalValue}
+            </span>
+            <div className={'quoteBoxContent'}>
+              <span className={'quoteDetailHeading'}>Total Cost Price </span>
+            </div>
+          </div>
+          {redCard ? (
+            <div className="quoteBox quoteRed">
+              <div className={'quoteBoxContent'}>
+                {' '}
+                <span>Total Selling Price </span>
+              </div>
+              <span className="quoteAmount" title={quotationSummary?.totalsale?.fullFormatAmount}>
+                {quotationSummary?.totalsale?.fullFormatAmount ? quotationSummary?.totalsale?.fullFormatAmount : defaultTotalValue}
+              </span>
+            </div>
+          ) : (
+            <div className="quoteBox quoteSale">
+              <span className="quoteAmount" title={quotationSummary?.totalsale?.fullFormatAmount}>
+                {quotationSummary?.totalsale?.fullFormatAmount ? quotationSummary?.totalsale?.fullFormatAmount : defaultTotalValue}
+              </span>
+              <div className={'quoteBoxContent'}>
+                <span className={'quoteDetailHeading'}>Total Selling Price </span>
+              </div>
+            </div>
+          )}
+        </div>
+        <div style={styles.aiCard}>
+          <div style={styles.cardHead}>
+            <AiIcon />
+            <Typography style={{ fontWeight: 600, marginTop: 5 }}>AI Suggestions:</Typography>
+          </div>
+          <Box mt={1} style={styles.chipContainer}>
+            <RenderChip lebel="As per previous orders, margin can be increased by 2-5%" />
+          </Box>
+        </div>
+      </DashboardModal>
+    </>
+  );
+};
 
-    const defaultTotalValue = useMemo(() => {
-        let result = '0';
-        if (quotationData && quotationData?.currency) {
-            result = `${currencyCodeToSymbol(quotationData.currency)} 0`;
-        }
-        return result;
-    }, [quotationData]);
+interface ChipInterface extends React.HTMLAttributes<HTMLDivElement> {
+  lebel: string | React.ReactNode;
+}
 
-    return (
-        <Dialog
-            open={true}
-            aria-labelledby="customized-dialog-title"
-            maxWidth="md"
-            onClose={onClose}
-            fullWidth
-            fullScreen={fullScreen || isMobile || isTablet}
-            TransitionComponent={CustomDialogTransition}
-        >
-            <CustomDialogHeader
-                title="Quotation Summary"
-                onClose={onClose}
-                isMinimized={!fullScreen}
-                onMinimizeMaximize={() => {
-                    setFullScreen((prevState) => !prevState);
-                }}
-                showManimizeMaximize={true}
-                showRequiredLabel={false}
-            />
-            <CustomDialogContent>
-                <Grid item className="quoteHeader">
-                    <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
-                        <span className="quoteAmount" title={quotationSummary?.totalProfit?.fullFormatAmount}>
-                            {quotationSummary?.totalProfit?.fullFormatAmount ? quotationSummary?.totalProfit?.fullFormatAmount : defaultTotalValue}{' '}
-                            {quotationSummary?.totalcost?.fullFormatAmount
-                                ? `(${findProfitPercentage(quotationSummary?.totalcost, quotationSummary?.totalProfit)} %)`
-                                : ''}
-                        </span>
-                        <div className={'quoteBoxContent'}>
-                            <span className={'quoteDetailHeading'}>Total Profit </span>
-                        </div>
-                    </div>
-                    <div className="quoteBox quoteCost">
-                        <span className="quoteAmount" title={quotationSummary?.totalcost?.fullFormatAmount}>
-                            {quotationSummary?.totalcost?.fullFormatAmount ? quotationSummary?.totalcost?.fullFormatAmount : defaultTotalValue}
-                        </span>
-                        <div className={'quoteBoxContent'}>
-                            <span className={'quoteDetailHeading'}>Total Cost Price </span>
-                        </div>
-                    </div>
-                    {redCard ? (
-                        <div className="quoteBox quoteRed">
-                            <div className={'quoteBoxContent'}>
-                                {' '}
-                                <span>Total Selling Price </span>
-                            </div>
-                            <span className="quoteAmount" title={quotationSummary?.totalsale?.fullFormatAmount}>
-                                {quotationSummary?.totalsale?.fullFormatAmount ? quotationSummary?.totalsale?.fullFormatAmount : defaultTotalValue}
-                            </span>
-                        </div>
-                    ) : (
-                        <div className="quoteBox quoteSale">
-                            <span className="quoteAmount" title={quotationSummary?.totalsale?.fullFormatAmount}>
-                                {quotationSummary?.totalsale?.fullFormatAmount ? quotationSummary?.totalsale?.fullFormatAmount : defaultTotalValue}
-                            </span>
-                            <div className={'quoteBoxContent'}>
-                                <span className={'quoteDetailHeading'}>Total Selling Price </span>
-                            </div>
-                        </div>
-                    )}
-                </Grid>
-            </CustomDialogContent>
-        </Dialog>
-    );
+const RenderChip: React.FC<ChipInterface> = ({ lebel, style, ...rest }) => {
+  return (
+    <div style={{ ...style, ...styles.chip }} {...rest}>
+      <LightIcon />
+      <span>{lebel}</span>
+    </div>
+  );
 };
 
 export default QuotationSummeryDialog;

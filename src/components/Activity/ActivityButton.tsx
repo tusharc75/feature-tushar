@@ -12,7 +12,7 @@ import HideWhenOffline from '../HideWhenOffline';
 import Activity from '.';
 import { useData } from 'src/StateProvider/Provider';
 
-const ActivityButton = ({ referenceId, resource }) => {
+const ActivityButton = ({ referenceId, resource, handleClose = null }) => {
   const [showActivity, setActivityShow] = useState(false);
 
   useEffect(() => {
@@ -20,6 +20,9 @@ const ActivityButton = ({ referenceId, resource }) => {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.removeProperty('overflow');
+      if (handleClose) {
+        handleClose()
+      }
     }
   }, [showActivity]);
 
@@ -58,7 +61,7 @@ const ActivityButton = ({ referenceId, resource }) => {
                     }
                   ]}
                   close={() => setActivityShow(false)}
-                  handleActivityRefresh={() => {}}
+                  handleActivityRefresh={() => { }}
                   emails={[]}
                 />
               )}

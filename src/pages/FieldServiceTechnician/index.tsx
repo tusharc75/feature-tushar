@@ -288,8 +288,7 @@ const FieldServiceTechnician = () => {
                       className={'tabLayout'}
                       label={
                         <div className="d-flex align-items-center tab-font">
-                          {/* <FaWpforms className="mr-1" fontSize="inherit" /> */}
-                          Field Ticket
+                          {routes.fieldTicket.title}
                         </div>
                       }
                       {...a11yProps(0)}
@@ -298,7 +297,6 @@ const FieldServiceTechnician = () => {
                       className={'tabLayout'}
                       label={
                         <div className="d-flex align-items-center tab-font">
-                          {/* <BiFoodMenu className="mr-1" fontSize="inherit" /> */}
                           Consumables
                         </div>
                       }

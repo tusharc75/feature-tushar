@@ -7,42 +7,61 @@ import { useData } from 'src/StateProvider/Provider';
 import { Map } from '@material-ui/icons';
 import MapView from './MapView';
 import routes from 'src/components/Helpers/Routes';
-import Gauges from 'src/components/Gauges';
-import AttachFileIcon from '@material-ui/icons/AttachFile';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Activity from '../../components/Activity';
 import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import MetricsWithIcon from 'src/components/MetricsWithIcon';
+import { ImAttachment } from 'react-icons/im';
 
 const useStyles = makeStyles((theme) => ({
   cardBox: {
-    borderRadius: '4px',
-    border: '1px solid #ebebeb',
-    backgroundColor: '#F8FFFC',
+    borderRadius: '12px',
+    border: '1px solid var(--common-border-color,#ebebeb)',
+    backgroundColor: 'var(--dark-secondary, #fff)',
+    boxShadow: '0px 3px 30px rgba(0, 0, 0, 0.08)',
     position: 'relative',
-    padding: '15px',
-    paddingBottom: '35px',
+    padding: '18px 16px 18px 20px',
     height: '100%',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 20
+  },
+  leftContent: {
+    flexGrow: 1
   },
   text: {
-    fontSize: '14px',
+    fontSize: '13px',
     lineHeight: '1.28',
-    color: '#2A3042',
-    marginBottom: '7px'
+    color: 'var(--dark-primary-text, #2A3042)',
+    marginBottom: '6px'
   },
   icons: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6
+  },
+  buttons: {
+    background: 'var(--dark-primary, #FFFFFF)',
+    boxShadow: '0px 3.42857px 34.2857px rgba(0, 0, 0, 0.12)',
+    borderRadius: '5.14286px',
+    maxWidth: 35,
+    minWidth: 35,
+    height: 35,
+    '& svg': {
+      maxWidth: 18,
+      maxHeight: 18,
+      color: 'var(--dark-primary-text, #545454)'
+    }
   },
   gaugeContainer: {
     display: 'flex',
     alignItems: 'center',
     flexWrap: 'wrap',
-    justifyContent: 'center',
     maxWidth: '400px',
-    paddingTop: '15px',
-    paddingBottom: '10px'
+    paddingTop: '10px',
+    paddingBottom: '10px',
+    gap: '10px'
   },
   singleGauge: {
     maxWidth: '150px',
@@ -87,36 +106,38 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                   history.push(`${routes.fleetMasterDetail.path}/${fleetMaster?._id}`);
                 }}
               >
-                <Typography className={classes.text}>
-                  <strong>Fleet Number :</strong> {fleetMaster?.fleetNumber}
-                </Typography>
-                <Typography className={classes.text}>
-                  <strong>Current Location :</strong> {fleetMaster?.currentLocation?.optionLabel}
-                </Typography>
-                <Box className={classes.gaugeContainer}>
-                  <Gauges className={classes.singleGauge} max={200} value={fleetMaster?.temperature} lebel="TEMP" suffix={<> °F</>} />
-                  <Gauges className={classes.singleGauge} max={1000} value={fleetMaster?.pressure} lebel="PRESSURE" suffix={<> PSI</>} />
-                  <Gauges className={classes.singleGauge} max={1000} value={fleetMaster?.volume} lebel="VOLUME" suffix={<> MMcf</>} />
+                <Box className={classes.leftContent}>
+                  <Typography className={classes.text}>
+                    <strong>Fleet Number :</strong> {fleetMaster?.fleetNumber}
+                  </Typography>
+                  <Typography className={classes.text}>
+                    <strong>Current Location :</strong> {fleetMaster?.currentLocation?.optionLabel}
+                  </Typography>
+                  <Box className={classes.gaugeContainer}>
+                    <MetricsWithIcon value={fleetMaster?.temperature} type="temperature" suffixText={'°F'} />
+                    <MetricsWithIcon value={fleetMaster?.pressure} type="pressure" suffixText={'PSI'} />
+                    <MetricsWithIcon value={fleetMaster?.volume} type="volume" suffixText={'MMcf'} />
+                  </Box>
                 </Box>
                 <Box className={classes.icons}>
                   <HtmlTooltip title="Attachment">
                     <IconButton
                       size="small"
                       aria-label="Attachment"
-                      style={{ marginRight: '8px' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setActivityShow({ open: true, referenceId: fleetMaster?._id });
                       }}
+                      className={classes.buttons}
                     >
-                      <AttachFileIcon color="primary" />
+                      <ImAttachment size={16} />
                     </IconButton>
                   </HtmlTooltip>
                   <HtmlTooltip title="Map">
                     <IconButton
                       size="small"
                       aria-label="Map"
-                      style={{ marginRight: '8px' }}
+                      className={classes.buttons}
                       onClick={(e) => {
                         e.stopPropagation();
                         setMapView({
@@ -126,13 +147,14 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                         });
                       }}
                     >
-                      <Map color="primary" />
+                      <Map />
                     </IconButton>
                   </HtmlTooltip>
                   {permissions?.fleetMaster?.isCreate ? (
                     <HtmlTooltip title="Clone">
                       <IconButton
                         size="small"
+                        className={classes.buttons}
                         aria-label="Clone"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -140,13 +162,13 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                           setOpen({ open: true, isClone: true });
                         }}
                       >
-                        <FileCopyIcon fontSize="small" color="primary" />
+                        <FileCopyIcon />
                       </IconButton>
                     </HtmlTooltip>
                   ) : (
                     <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
-                      <IconButton aria-label="Clone" size="small">
-                        <FileCopyIcon fontSize="small" />
+                      <IconButton aria-label="Clone" size="small" className={classes.buttons}>
+                        <FileCopyIcon />
                       </IconButton>
                     </HtmlTooltip>
                   )}
@@ -154,6 +176,8 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                   {permissions?.fleetMaster?.isDelete ? (
                     <HtmlTooltip title="Delete">
                       <IconButton
+                        size="small"
+                        className={classes.buttons}
                         aria-label="Delete"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -161,13 +185,13 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                           setShowDeleteConfirmBox(true);
                         }}
                       >
-                        <DeleteIcon fontSize="small" color="error" />
+                        <DeleteIcon />
                       </IconButton>
                     </HtmlTooltip>
                   ) : (
                     <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
-                      <IconButton aria-label="Delete" size="small">
-                        <DeleteIcon fontSize="small" />
+                      <IconButton aria-label="Delete" size="small" className={classes.buttons}>
+                        <DeleteIcon />
                       </IconButton>
                     </HtmlTooltip>
                   )}

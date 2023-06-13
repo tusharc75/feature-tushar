@@ -131,6 +131,8 @@ const Competencies = ({ competencyType }) => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters)
 
+    filterByIds.push({ field: 'competencyType', term: competencyType })
+
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }

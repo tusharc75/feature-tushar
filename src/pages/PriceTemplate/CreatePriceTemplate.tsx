@@ -399,7 +399,7 @@ const PriceTemplate = () => {
             <Formik innerRef={ref} initialValues={initialValues} validationSchema={PriceTemplateSchema} onSubmit={handleSave}>
               {({ submitForm, touched, errors, setFieldValue, values }) => (
                 <Form>
-                  <Box p={1} ml={1} bgcolor="white">
+                  <Box p={1} ml={1}>
                     <Grid container spacing={1}>
                       <Grid item xs={12} sm={3}>
                         <TextField

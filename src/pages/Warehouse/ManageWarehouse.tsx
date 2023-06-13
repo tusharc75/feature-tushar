@@ -139,7 +139,6 @@ const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open 
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                   <InputField
                     errors={errors}
                     values={values}

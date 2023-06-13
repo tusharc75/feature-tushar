@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Grid, Box, Button, Paper, Typography, Tab, Tabs, useMediaQuery } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Typography, Tab, Tabs, useMediaQuery, IconButton, FormControlLabel, Checkbox } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -13,7 +13,6 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import {
   serializedAsset,
-  getObjKeysWithValues,
   ASSET_STATUS,
   repairJob,
   INVENTORY_OWNER_TYPE,
@@ -43,8 +42,8 @@ interface TabPanelProps {
 }
 
 const SerializedAssetDetailsPage = () => {
+
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.serializedAsset.title);
   const { id } = useParams();
   const history = useHistory();
   const {
@@ -75,9 +74,9 @@ const SerializedAssetDetailsPage = () => {
     <>
       {params.value ? (
         params.data.type === 'Loading Ticket' ||
-        params.data.type === 'Receiving Ticket' ||
-        params.data.type === 'Return Ticket' ||
-        params.data.type === 'Delivery Ticket' ? (
+          params.data.type === 'Receiving Ticket' ||
+          params.data.type === 'Return Ticket' ||
+          params.data.type === 'Delivery Ticket' ? (
           <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link>
@@ -302,7 +301,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: productInventoryData.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -356,6 +355,7 @@ const SerializedAssetDetailsPage = () => {
       }
     }
   }, [productInventoryData]);
+
 
   return (
     <Box className="main-container-v1">
@@ -448,7 +448,12 @@ const SerializedAssetDetailsPage = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={productInventoryData?._id} resource={ACTIVITY_RESOURCE.serializedAsset} />
+            <ActivityButton
+              referenceId={productInventoryData?._id}
+              resource={ACTIVITY_RESOURCE.serializedAsset}
+              handleClose={() => {
+                fetchProductInventoryData();
+              }} />
           </Box>
         </Box>
       </Box>

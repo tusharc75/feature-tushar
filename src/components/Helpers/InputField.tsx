@@ -1,30 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Grid, Box, InputAdornment } from '@material-ui/core';
-import { IconButton, Tooltip } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
 import FormTypes from './FormTypes';
 import { setFieldsInAscendingOrder } from '../../constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
-import { useData } from '../../StateProvider/Provider';
-import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
 
 const InputField = (props) => {
+
   const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, ...rest } = props;
 
   const [formsData, setFormsData] = useState([]);
-  const [addressOptions, setAddressOptions] = useState([]);
-  const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false });
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const {
-    state: { user, permissions }
-  }: any = useData();
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(fieldsData));
-    const addressOption = fieldsData.find((obj) => obj?.fieldName === 'address');
-    setAddressOptions(addressOption?.option);
-    // eslint-disable-next-line
   }, [fieldsData]);
 
   return (
@@ -101,58 +89,6 @@ const InputField = (props) => {
                         />
                       </Grid>
                     )
-                  ) : field.fieldName === 'address' ? (
-                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                      <Grid container spacing={1}>
-                        <Grid
-                          item
-                          xs={permissions?.address?.isCreate ? 10 : 11}
-                          sm={permissions?.address?.isCreate ? 10 : 11}
-                          md={permissions?.isCreate ? 10 : 11}
-                        >
-                          <FormTypes
-                            {...rest}
-                            {...field}
-                            values={values}
-                            errors={errors}
-                            touched={touched}
-                            label={field.fieldLabel}
-                            name={field.fieldName}
-                            type={field.type}
-                            options={addressOptions}
-                            setFieldValue={setFieldValue}
-                            required={field.required}
-                            isTooltip={field.isTooltip}
-                            tooltipMessage={field.tooltipMessage}
-                            fields={fieldsData}
-                            fieldData={field}
-                          />
-                        </Grid>
-                        {permissions?.address?.isCreate && (
-                          <Grid item xs={1} sm={1} md={1}>
-                            <Tooltip title="Add Address" className="mt-1">
-                              <IconButton
-                                onClick={() => {
-                                  setAddressOpen({ open: true, isClone: false });
-                                }}
-                                disabled={field.disableOnEdit}
-                                size="small"
-                              >
-                                <AddIcon color={'primary'} />
-                              </IconButton>
-                            </Tooltip>
-                          </Grid>
-                        )}
-
-                        {field?.tooltipMessage ? (
-                          <Grid item xs={1} sm={1} md={1}>
-                            <Tooltip title={field?.tooltipMessage ?? ''}>
-                              <InfoIcon color="disabled" />
-                            </Tooltip>
-                          </Grid>
-                        ) : null}
-                      </Grid>
-                    </Grid>
                   ) : (
                     <Grid
                       key={field.fieldName}
@@ -205,26 +141,6 @@ const InputField = (props) => {
                       />
                     </Grid>
                   )
-                )}
-                {addressOpen?.open && (
-                  <ManageAddressDialog
-                    onClose={() => setAddressOpen({ open: false, isClone: false })}
-                    onSuccess={(data) => {
-                      setFieldValue('address', data._id);
-                      setAddressOptions((prevState) => {
-                        return [
-                          ...prevState,
-                          {
-                            optionValue: data._id,
-                            optionLabel: data.fullAddress,
-                            order: addressOptions.length,
-                            default: false
-                          }
-                        ];
-                      });
-                      setAddressOpen({ open: false, isClone: false });
-                    }}
-                  />
                 )}
               </Grid>
             </Box>

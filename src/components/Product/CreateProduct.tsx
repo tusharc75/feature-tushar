@@ -87,7 +87,7 @@ const CreateProduct = (props) => {
                 const newField = _fields;
                 axiosInstance().get(`/product/` + productId).then(({ data: { data } }) => {
                     data.fields?.map((_f) => newField.push(_f));
-                    data.productData.fields?.map((_f) => newField.push(_f));
+                    data.productData.fields?.map((_f) => newField.push({ ..._f, leval: _f?.leval ? _f?.leval : 'product-custom' }));
                     if (data.productData.fieldChanges) {
                         setFieldChanges(data.productData.fieldChanges);
                     }
@@ -541,7 +541,6 @@ const CreateProduct = (props) => {
                         <CustomDialogContent>
                             <Box>
                                 <Form autoComplete="off" autoCorrect="off" noValidate >
-                                    {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                                     {productFields && productFields.map((section, i) => (
                                         <div key={i}>
                                             <div className={"detail-box-content detail-product-box"}>

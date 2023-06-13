@@ -1,20 +1,57 @@
 import React, { useEffect, useCallback, useMemo, useState, useContext } from 'react'
 import { useHistory } from 'react-router-dom';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar'
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 import './calendarView.scss'
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import moment from 'moment';
 import { Grid, Checkbox, TextField, Box } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import { RESOURCE_LABEL, sidebarResource } from 'src/constants/helpers';
 
+const DragAndDropCalendar = withDragAndDrop(Calendar as any)
 const localizer = momentLocalizer(moment);
 const formats = {
     weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-function CalendarView({ resourceList }) {
+const FILTERS = [
+    {
+        label: 'Plant',
+        value: 'Warehouse',
+        key: 'warehouse'
+    },
+    {
+        label: 'Product',
+        value: 'Product',
+        key: 'product'
+    },
+    {
+        label: 'Asset',
+        value: 'Serialized Asset',
+        key: 'asset'
+    },
+    {
+        label: 'Service',
+        value: 'Service Master',
+        key: 'service'
+    },
+    {
+        label: 'Customer Account',
+        value: 'Customer Account',
+        key: 'customerAccount'
+    },
+    {
+        label: 'Competencies',
+        value: 'Competencies',
+        key: 'competencies'
+    }
+]
+
+function CalendarView({ resourceList, commonSelectedResource, setCommonSelectedResource }) {
 
     const toastConfig = useContext(CustomToastContext);
     const {
@@ -25,17 +62,15 @@ function CalendarView({ resourceList }) {
     const [events, setEvents] = useState([])
     const [view, setView] = useState<View>('month');
     const [filterToKeep, setFilterToKeep] = useState([]);
-    const [warehouse, setWarehouse] = useState([])
-    const [product, setProduct] = useState([])
-    const [asset, setAsset] = useState([])
-    const [selectedWarehouse, setSelectedWarehouse] = useState([])
-    const [selectedProduct, setSelectedProduct] = useState([])
-    const [selectedAsset, setSelectedAsset] = useState([])
-
+    const [lookupResource, setLookUpResource] = useState(null)
+    const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null)
+    const [filterOptions, setFilterOptions] = useState([])
     const [selectedResource, setSelectedResource] = useState(null);
 
     const [renderCount, setRenderCount] = useState(0)
     const defaultDate = useMemo(() => moment().toDate(), [])
+
+    const [staticEvents, setStaticEvents] = useState([])
 
 
     const [dateRange, setDateRange] = useState({
@@ -61,12 +96,16 @@ function CalendarView({ resourceList }) {
         endDate: moment().add(1, 'months').format('MM/DD/YYYY')
     })
 
+    useEffect(() => {
+        const resource = history?.location?.state?.resource;
+        setSelectedResource(resourceList?.filter(_r => _r?.title === resource)[0])
+    }, [resourceList, history?.location?.state?.resource])
 
-    const FILTERS = {
-        warehouse: 'Plant',
-        product: 'Product',
-        asset: 'Asset'
-    }
+    useEffect(() => {
+        if (commonSelectedResource) {
+            setSelectedResource(commonSelectedResource)
+        }
+    }, [])
 
     useEffect(() => {
         if (view === 'month') {
@@ -93,14 +132,23 @@ function CalendarView({ resourceList }) {
     }, [dateRange])
 
     useEffect(() => {
-        axiosInstance()
-            .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Product,Serialized Asset')
-            .then(({ data: { data } }) => {
-                setProduct(data['Product'])
-                setAsset(data['Serialized Asset'])
-                setWarehouse(data['Warehouse'])
-            })
-            .catch((err) => { });
+        setFilterOptions(FILTERS)
+        let lookupResource = null
+        FILTERS.forEach((f, i) => {
+            if (i === 0) {
+                lookupResource = f.value;
+            } else {
+                lookupResource = lookupResource + ',' + f.value;
+            }
+        });
+        if (lookupResource) {
+            axiosInstance()
+                .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
+                .then(({ data: { data } }) => {
+                    setLookUpResource(data)
+                })
+                .catch((err) => { });
+        }
     }, [])
 
     const queryData = (data) => {
@@ -122,7 +170,7 @@ function CalendarView({ resourceList }) {
         else {
             setEvents([])
         }
-    }, [selectedResource, selectedWarehouse, selectedProduct, selectedAsset, dateRange]);
+    }, [selectedResource, selectedLookUpResourceData, dateRange]);
 
     const getQueryString = () => {
         const api = '/planning-view';
@@ -132,17 +180,11 @@ function CalendarView({ resourceList }) {
         if (selectedResource) {
             query = `${query}&resource=${selectedResource.resource}`
         }
-        if (selectedWarehouse.length > 0) {
-            const warehouse = queryData(selectedWarehouse);
-            query = `${query}&warehouse=${warehouse}`
-        }
-        if (selectedProduct.length > 0) {
-            const product = queryData(selectedProduct)
-            query = `${query}&product=${product}`
-        }
-        if (selectedAsset.length > 0) {
-            const asset = queryData(selectedAsset)
-            query = `${query}&asset=${asset}`
+        if (selectedLookUpResourceData) {
+            Object.keys(selectedLookUpResourceData).forEach((d) => {
+                const data = queryData(selectedLookUpResourceData[d])
+                query = `${query}&${d}=${data}`
+            })
         }
 
         return query;
@@ -158,14 +200,16 @@ function CalendarView({ resourceList }) {
                         {
                             id: d._id,
                             title: d[selectedResource.fieldName],
-                            start: d[selectedResource.start],
-                            end: d[selectedResource.end],
+                            start: new Date(d[selectedResource.start]),
+                            end: new Date(d[selectedResource.end]),
                             allDay: true,
-                            type: selectedResource.resource
+                            type: selectedResource.resource,
+                            fulfillStatus: d?.fulfillStatus
                         }
                     )
                 })
                 setEvents(rows);
+                setStaticEvents(rows)
             })
             .catch((err) => {
 
@@ -173,16 +217,25 @@ function CalendarView({ resourceList }) {
     }
 
     useEffect(() => {
-        if (selectedWarehouse.length > 0 || selectedProduct.length > 0 || selectedAsset.length > 0) {
-            if (!filterToKeep.includes('warehouse')) {
-                setSelectedWarehouse([])
-            }
-            if (!filterToKeep.includes('product')) {
-                setSelectedProduct([])
-            }
-            if (!filterToKeep.includes('asset')) {
-                setSelectedAsset([])
-            }
+        if (selectedResource?.title === RESOURCE_LABEL?.planning) {
+            const data = FILTERS.filter(_f => _f.key !== 'asset')
+            const filter = filterToKeep.filter(_f => _f.key !== 'asset')
+            setFilterOptions(data)
+            setFilterToKeep(filter)
+        } else {
+            setFilterOptions(FILTERS)
+        }
+        setCommonSelectedResource(selectedResource)
+    }, [selectedResource]);
+
+    useEffect(() => {
+        if (selectedLookUpResourceData) {
+            Object.keys(selectedLookUpResourceData).forEach(o => {
+                if (!filterToKeep.some(f => f.key === o)) {
+                    const { [o]: _, ...remainObj } = selectedLookUpResourceData;
+                    setSelectedLookUpResourceData(remainObj)
+                }
+            })
         }
     }, [filterToKeep])
 
@@ -244,6 +297,92 @@ function CalendarView({ resourceList }) {
         }
     }, [view])
 
+    const updateData = (event, start, end) => {
+        axiosInstance()
+            .put(`/planning-view/change-date`, {
+                _id: event.id,
+                startDate: start.toISOString(),
+                endDate: end.toISOString(),
+                resource: event.type
+            })
+            .then(({ data }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: data.message
+                });
+                fetchData()
+            })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+                fetchData()
+            });
+    }
+
+    const moveEvent = ({ event, start, end }) => {
+        const filterEvents = staticEvents.filter(ev => ev.id !== event.id)
+        const existing = staticEvents.find((ev) => ev.id === event.id) ?? {}
+        setEvents([...filterEvents, { ...existing, start, end }])
+        updateData(event, start, end)
+    }
+
+    const resizeEvent = ({ event, start, end }) => {
+        const filterEvents = staticEvents.filter(ev => ev.id !== event.id)
+        const existing = staticEvents.find((ev) => ev.id === event.id) ?? {}
+        setEvents([...filterEvents, { ...existing, start, end }])
+        updateData(event, start, end)
+    }
+
+    const onNavigate = (date) => {
+        if (view === 'month') {
+            setDateRange({
+                estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
+                estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
+            });
+        } else if (view === 'week') {
+            setDateRange({
+                estimateStartDate: moment(date).startOf('week').format('MM/DD/YYYY'),
+                estimateEndDate: moment(date).endOf('week').format('MM/DD/YYYY')
+            });
+        } else if (view === 'day') {
+            setDateRange({
+                estimateStartDate: moment(date).format('MM/DD/YYYY'),
+                estimateEndDate: moment(date).format('MM/DD/YYYY')
+            });
+        } else if (view === 'agenda') {
+            setDateRange({
+                estimateStartDate: moment(date).format('MM/DD/YYYY'),
+                estimateEndDate: moment(date).add(1, 'months').format('MM/DD/YYYY')
+            });
+        }
+    }
+
+    const setEventStyle = (obj) => {
+        let backgroundColor = 'rgba(234, 239, 254, 1)';
+        let color = 'rgba(4, 50, 161, 1)';
+        if (obj?.type === sidebarResource.planning) {
+            if (obj?.fulfillStatus === "Yes") {
+                backgroundColor = "#048e0a"
+                color = "white"
+            }
+            else if (obj?.fulfillStatus === "No") {
+                backgroundColor = "#d13925"
+                color = "white"
+            }
+            else if (obj?.fulfillStatus === "Partially") {
+                backgroundColor = "#F6BE00"
+                color = 'black'
+            }
+        }
+        return {
+            backgroundColor,
+            color,
+            borderRadius: '4px',
+            border: 'none',
+            padding: '8px 16px'
+        };
+    }
+
     return (
         <>
             <div>
@@ -273,130 +412,121 @@ function CalendarView({ resourceList }) {
                             <Autocomplete
                                 style={{ width: "350px" }}
                                 multiple
-                                options={Object.keys(FILTERS)?.map((key) => key) || []}
+                                options={filterOptions}
                                 disableCloseOnSelect
-                                getOptionLabel={(option) => FILTERS[option]}
+                                getOptionLabel={(option) => option?.label}
                                 renderOption={(option: any) => (
                                     <React.Fragment>
-                                        <Checkbox checked={filterToKeep?.includes(option)} />
-                                        {FILTERS[option]}
+                                        <Checkbox checked={filterToKeep?.some(_s => _s.key === option.key)} />
+                                        {option?.label}
                                     </React.Fragment>
                                 )}
                                 size="small"
                                 renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
                                 value={filterToKeep}
                                 onChange={(event: any, newValue: any) => {
-                                    setFilterToKeep(newValue);
+                                    setFilterToKeep(newValue)
                                 }}
                             />
                         </Box>
                     </Box>
                     <Box display="flex" flexDirection="row" ml={1} mt={2}>
                         <Grid container spacing={2}>
-                            {filterToKeep?.includes('warehouse') &&
-                                <Grid item xs={12} sm={6} md={4} lg={4}>
-                                    <Autocomplete
-                                        options={warehouse}
-                                        multiple
-                                        disableCloseOnSelect
-                                        getOptionLabel={(option: any) => option.optionLabel}
-                                        value={selectedWarehouse}
-                                        onChange={(event, newValue) => {
-                                            setSelectedWarehouse(newValue);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => <TextField {...params} label={`Select Plant`} variant="outlined" />}
-                                    />
-                                </Grid>
-                            }
-                            {filterToKeep?.includes('product') &&
-                                <Grid item xs={12} sm={6} md={4} lg={4}>
-                                    <Autocomplete
-                                        options={product}
-                                        multiple
-                                        disableCloseOnSelect
-                                        getOptionLabel={(option: any) => option.optionLabel}
-                                        value={selectedProduct}
-                                        onChange={(event, newValue) => {
-                                            setSelectedProduct(newValue);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => <TextField {...params} label={`Select Product`} variant="outlined" />}
-                                    />
-                                </Grid>
-                            }
-                            {filterToKeep?.includes('asset') &&
-                                <Grid item xs={12} sm={6} md={4} lg={4}>
-                                    <Autocomplete
-                                        options={asset}
-                                        multiple
-                                        disableCloseOnSelect
-                                        getOptionLabel={(option: any) => option.optionLabel}
-                                        value={selectedAsset}
-                                        onChange={(event, newValue) => {
-                                            setSelectedAsset(newValue);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => <TextField {...params} label={`Select Asset`} variant="outlined" />}
-                                    />
-                                </Grid>
+                            {
+                                filterToKeep?.map((filtered) => {
+                                    return (
+                                        <Grid item xs={12} sm={6} md={4} lg={4} key={filtered?.value}>
+                                            <Autocomplete
+                                                options={lookupResource ? lookupResource[filtered?.value] : []}
+                                                multiple
+                                                disableCloseOnSelect
+                                                getOptionLabel={(option: any) => option?.optionLabel}
+                                                value={selectedLookUpResourceData && selectedLookUpResourceData[filtered.key] ? selectedLookUpResourceData[filtered.key] : []}
+                                                onChange={(event, newValue) => {
+                                                    if (newValue?.length > 0) {
+                                                        setSelectedLookUpResourceData(preVal => (
+                                                            {
+                                                                ...preVal,
+                                                                [filtered.key]: newValue
+                                                            }
+                                                        ))
+                                                    } else {
+                                                        const { [filtered.key]: _, ...remainObj } = selectedLookUpResourceData;
+                                                        setSelectedLookUpResourceData(remainObj)
+                                                    }
+                                                }}
+
+                                                size="small"
+                                                renderInput={(params) => <TextField {...params} label={`Select ${filtered?.label}`} variant="outlined" />}
+                                            />
+                                        </Grid>
+                                    )
+                                })
                             }
                         </Grid>
                     </Box>
                 </Box>
-                <Calendar
-                    // style={{ height: "calc(100vh - 260px)" }}
-                    defaultDate={defaultDate}
-                    defaultView={'day'}
-                    events={events}
-                    formats={formats}
-                    localizer={localizer}
-                    popup={true}
-                    messages={{
-                        agenda: 'List',
-                    }}
-                    views={{ month: true, week: true, day: true, agenda: true }}
-                    onView={onView}
-                    view={view}
-                    eventPropGetter={(obj: any) => {
-                        const newStyles = {
-                            backgroundColor: 'rgba(234, 239, 254, 1)',
-                            color: 'rgba(4, 50, 161, 1)',
-                            borderRadius: '4px',
-                            border: 'none',
-                            padding: '8px 16px'
-                        };
-                        return {
-                            style: newStyles
-                        };
-                    }}
-                    onNavigate={(date) => {
-                        if (view === 'month') {
-                            setDateRange({
-                                estimateStartDate: moment(date).startOf('month').format('MM/DD/YYYY'),
-                                estimateEndDate: moment(date).endOf('month').format('MM/DD/YYYY')
-                            });
-                        } else if (view === 'week') {
-                            setDateRange({
-                                estimateStartDate: moment(date).startOf('week').format('MM/DD/YYYY'),
-                                estimateEndDate: moment(date).endOf('week').format('MM/DD/YYYY')
-                            });
-                        } else if (view === 'day') {
-                            setDateRange({
-                                estimateStartDate: moment(date).format('MM/DD/YYYY'),
-                                estimateEndDate: moment(date).format('MM/DD/YYYY')
-                            });
-                        } else if (view === 'agenda') {
-                            setDateRange({
-                                estimateStartDate: moment(date).format('MM/DD/YYYY'),
-                                estimateEndDate: moment(date).add(1, 'months').format('MM/DD/YYYY')
-                            });
-                        }
-                    }}
-                    onSelectEvent={(event: any) => {
-                        history.push(`${selectedResource.path}/${event.id}`);
-                    }}
-                />
+                {(selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning)
+                    ?
+                    <DragAndDropCalendar
+                        defaultDate={defaultDate}
+                        defaultView={'day'}
+                        events={events}
+                        formats={formats}
+                        localizer={localizer}
+                        onEventDrop={moveEvent}
+                        onEventResize={resizeEvent}
+                        popup={true}
+                        messages={{
+                            agenda: 'List',
+                        }}
+                        resizable
+                        views={{ month: true, week: true, day: true, agenda: true }}
+                        onView={onView}
+                        view={view}
+                        eventPropGetter={(obj: any) => {
+                            const style = setEventStyle(obj)
+                            return {
+                                style
+                            };
+                        }}
+                        onNavigate={(date) => {
+                            onNavigate(date)
+                        }}
+                        onSelectEvent={(event: any) => {
+                            history.push(`${selectedResource.path}/${event.id}`);
+                        }}
+                    />
+                    :
+                    <Calendar
+                        defaultDate={defaultDate}
+                        defaultView={'day'}
+                        events={events}
+                        formats={formats}
+                        localizer={localizer}
+                        popup={true}
+                        messages={{
+                            agenda: 'List',
+                        }}
+                        views={{ month: true, week: true, day: true, agenda: true }}
+                        onView={onView}
+                        view={view}
+                        eventPropGetter={(obj: any) => {
+                            const style = setEventStyle(obj.type)
+                            return {
+                                style
+                            };
+                        }}
+                        onNavigate={(date) => {
+                            onNavigate(date)
+                        }}
+                        onSelectEvent={(event: any) => {
+                            history.push(`${selectedResource.path}/${event.id}`);
+                        }}
+                    />
+                }
+
+
             </div >
         </>
     )

@@ -34,6 +34,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { ResourceDropdown } from './resourceDropdown';
 import { MinMax } from '../AddField/minMax';
 import { getLookupResource } from '../helper';
+import FieldDependent from './FieldDependent';
 
 const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
@@ -55,13 +56,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
   //const [isChangeFieldName, setIsChangeFieldName] = useState(true);
 
   useEffect(() => {
-    getLookupList()
-  }, [])
+    getLookupList();
+  }, []);
 
   const getLookupList = async () => {
-    const lookupResource = await getLookupResource()
-    setLookupResource(lookupResource)
-  }
+    const lookupResource = await getLookupResource();
+    setLookupResource(lookupResource);
+  };
 
   useEffect(() => {
     if (fieldData.type === 'dropDown' && !fieldData.lookup) {
@@ -81,7 +82,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.isDefaultValue = false;
         values.defaultValue = '';
       }
-      if (!values.isColumnEditable && fieldData.resource === "Rental Management Product" && module !== 'price-template' && module !== 'product-template') {
+      if (
+        !values.isColumnEditable &&
+        fieldData.resource === 'Rental Management Product' &&
+        module !== 'price-template' &&
+        module !== 'product-template'
+      ) {
         values.isColumnEditable = false;
       }
       if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template') {
@@ -110,7 +116,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.minValueServiceAdd = '';
         values.maxValueServiceAdd = '';
       }
-      if (!values.unique && (fieldData.type === 'multiLine' || fieldData.type === 'singleLine' || fieldData.type === 'mobileNumber' || fieldData.type === 'number')
+      if (
+        !values.unique &&
+        (fieldData.type === 'multiLine' || fieldData.type === 'singleLine' || fieldData.type === 'mobileNumber' || fieldData.type === 'number')
       ) {
         values.unique = false;
       }
@@ -253,6 +261,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               if (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') {
                 ele.isDependentDropdown = values.isDependentDropdown;
                 ele.dropdowDependentOn = values.dropdowDependentOn;
+                ele.lookupDependentOnField = values.lookupDependentOnField;
               }
               values.option &&
                 values.option.forEach((_option, index) => {
@@ -317,8 +326,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             if (fieldData.type === 'signature') {
               if (values?.signatureUsers && values?.signatureUsers?.length) {
                 ele.signatureUsers = values.signatureUsers;
-              }
-              else {
+              } else {
                 ele.signatureUsers = [];
               }
             }
@@ -326,10 +334,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             if (fieldData?.lookup) {
               if (values.lookupDependentOn) {
                 ele.lookupDependentOn = values.lookupDependentOn;
+              } else {
+                ele.lookupDependentOn = '';
               }
-              else {
-                ele.lookupDependentOn = "";
-              }
+            }
+            if (fieldData?.lookup && values.lookupDependentOn && values.lookupDependentOn !== '') {
+              ele.lookupDependentOnField = values.lookupDependentOnField;
             }
 
             if (fieldData.type === 'lookUpDisplay') {
@@ -337,7 +347,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.lookUpFieldDisplay = values.lookUpFieldDisplay;
             }
 
-            if (module === "form-builder-master") {
+            if (module === 'form-builder-master') {
               ele.editAble = values.editAble || false;
               ele.deletAble = values.deletAble || false;
             }
@@ -412,13 +422,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
     if (values?.isMinMaxValue) {
       if (!values?.minValue) {
-        errors["minValue"] = "Please enter min value";
+        errors['minValue'] = 'Please enter min value';
       }
       if (!values?.maxValue) {
-        errors["maxValue"] = "Please enter max value";
+        errors['maxValue'] = 'Please enter max value';
       }
       if (values?.minValue > values?.maxValue) {
-        errors["minValue"] = "Please enter valid min value";
+        errors['minValue'] = 'Please enter valid min value';
       }
     }
 
@@ -532,43 +542,43 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'formula' ||
                     values['type'] === 'converter' ||
                     values['type'] === 'currencyAmount') && (
-                      <Grid spacing={3} container>
-                        {values['type'] === 'formula' && (
-                          <Grid item xs={12} sm={6} md={6}>
-                            <FormControl fullWidth margin="dense" variant="outlined">
-                              <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                              <Select
-                                labelId="demo-simple-select-outlined-label"
-                                id="demo-simple-select-outlined"
-                                value={values['returnType']}
-                                onChange={(e) => {
-                                  setFieldValue('returnType', e.target.value);
-                                }}
-                                label="Return Type"
-                                name="returnType"
-                              >
-                                <MenuItem value="decimal">Decimal</MenuItem>
-                                <MenuItem value="string">String</MenuItem>
-                                <MenuItem value="boolean">Boolean</MenuItem>
-                              </Select>
-                            </FormControl>
-                          </Grid>
-                        )}
-                        {(values['type'] === 'decimal' ||
-                          values['type'] === 'converter' ||
-                          values['type'] === 'currencyAmount' ||
-                          values['returnType'] === 'decimal') && (
-                            <Grid item xs={12} sm={6} md={6}>
-                              <DecimalPlaces
-                                values={values}
-                                setFieldValue={(name, value) => {
-                                  setFieldValue(name, value);
-                                }}
-                              />
-                            </Grid>
-                          )}
-                      </Grid>
-                    )}
+                    <Grid spacing={3} container>
+                      {values['type'] === 'formula' && (
+                        <Grid item xs={12} sm={6} md={6}>
+                          <FormControl fullWidth margin="dense" variant="outlined">
+                            <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                            <Select
+                              labelId="demo-simple-select-outlined-label"
+                              id="demo-simple-select-outlined"
+                              value={values['returnType']}
+                              onChange={(e) => {
+                                setFieldValue('returnType', e.target.value);
+                              }}
+                              label="Return Type"
+                              name="returnType"
+                            >
+                              <MenuItem value="decimal">Decimal</MenuItem>
+                              <MenuItem value="string">String</MenuItem>
+                              <MenuItem value="boolean">Boolean</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                      )}
+                      {(values['type'] === 'decimal' ||
+                        values['type'] === 'converter' ||
+                        values['type'] === 'currencyAmount' ||
+                        values['returnType'] === 'decimal') && (
+                        <Grid item xs={12} sm={6} md={6}>
+                          <DecimalPlaces
+                            values={values}
+                            setFieldValue={(name, value) => {
+                              setFieldValue(name, value);
+                            }}
+                          />
+                        </Grid>
+                      )}
+                    </Grid>
+                  )}
                   {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && (
                     <Fragment>
                       <FormControlLabel
@@ -618,7 +628,14 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                               />
                             )}
                           />
-                          <Box pt={1} pb={1}>
+                          <FieldDependent
+                            fields={fields}
+                            values={values}
+                            fieldSet={(name, value) => {
+                              setFieldValue(name, value);
+                            }}
+                          />
+                          {/* <Box pt={1} pb={1}>
                             <Grid container>
                               <Grid item xs={6} sm={6} md={6}>
                                 <Autocomplete
@@ -648,7 +665,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                                 />
                               </Grid>
                             </Grid>
-                          </Box>
+                          </Box> */}
                         </Box>
                       )}
                     </Fragment>
@@ -847,7 +864,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       _id={fieldData._id}
                     />
                   )}
-                  {fieldData.type === "lookUpDisplay" && (
+                  {fieldData.type === 'lookUpDisplay' && (
                     <Box pt={1} pb={1}>
                       <Grid container spacing={2}>
                         <Grid item xs={6} sm={6} md={6}>
@@ -1106,38 +1123,38 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           {values['defaultValue']}
                         </Box>
                       </Box>
-                    ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['isDefaultValue'] && values['lookup'] ?
+                    ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['isDefaultValue'] && values['lookup'] ? (
                       <ResourceDropdown
                         type={fieldData.type}
                         lookupResource={values['lookupResource']}
                         value={values['defaultValue']}
                         setFieldValue={setFieldValue}
                       />
-                      : values['isDefaultValue'] ? (
-                        <Box display="block">
-                          <TextField
-                            inputRef={inputRef}
-                            variant="outlined"
-                            type="text"
-                            label="Default Value"
-                            required={true}
-                            multiline={fieldData.type === 'multiLine'}
-                            name="defaultValue"
-                            rows={4}
-                            fullWidth
-                            margin="dense"
-                            value={values['defaultValue']}
-                            error={touched['defaultValue'] && Boolean(errors['defaultValue'])}
-                            helperText={touched['defaultValue'] && errors['defaultValue']}
-                            onChange={(e) => {
-                              setFieldValue('defaultValue', e.target.value.trimStart());
-                            }}
-                            onKeyPress={(event) => {
-                              event.stopPropagation();
-                            }}
-                          />
-                        </Box>
-                      ) : null}
+                    ) : values['isDefaultValue'] ? (
+                      <Box display="block">
+                        <TextField
+                          inputRef={inputRef}
+                          variant="outlined"
+                          type="text"
+                          label="Default Value"
+                          required={true}
+                          multiline={fieldData.type === 'multiLine'}
+                          name="defaultValue"
+                          rows={4}
+                          fullWidth
+                          margin="dense"
+                          value={values['defaultValue']}
+                          error={touched['defaultValue'] && Boolean(errors['defaultValue'])}
+                          helperText={touched['defaultValue'] && errors['defaultValue']}
+                          onChange={(e) => {
+                            setFieldValue('defaultValue', e.target.value.trimStart());
+                          }}
+                          onKeyPress={(event) => {
+                            event.stopPropagation();
+                          }}
+                        />
+                      </Box>
+                    ) : null}
                     {module !== 'price-template' && module !== 'product-template' ? (
                       <FormControlLabel
                         disabled={values['required']}
@@ -1170,18 +1187,19 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Add Additional Option"
                       />
                     )}
-                    {values["lookup"] &&
+                    {values['lookup'] && (
                       <FormControlLabel
                         control={
                           <Checkbox
                             name="entityWiseLookup"
-                            checked={values["entityWiseLookup"]}
-                            onChange={(e) => setFieldValue("entityWiseLookup", e.target.checked)}
+                            checked={values['entityWiseLookup']}
+                            onChange={(e) => setFieldValue('entityWiseLookup', e.target.checked)}
                             color="primary"
                           />
                         }
                         label="Entity Wise Lookup"
-                      />}
+                      />
+                    )}
                     {fieldData.type === 'dropDown' && (
                       <FormControlLabel
                         control={
@@ -1228,21 +1246,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                     )}
                   </Box>
-                  {fieldData.type === 'signature' && (
-                    <SignatureUser
-                      values={values}
-                      setFieldValue={setFieldValue}
-                    />
-                  )}
-                  {fieldData.type === 'decimal' && (
-                    <MinMax
-                      values={values}
-                      setFieldValue={setFieldValue}
-                      errors={errors}
-                      touched={touched}
-                    />
-                  )}
-                  {module === "form-builder-master" &&
+                  {fieldData.type === 'signature' && <SignatureUser values={values} setFieldValue={setFieldValue} />}
+                  {fieldData.type === 'decimal' && <MinMax values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />}
+                  {module === 'form-builder-master' && (
                     <Box>
                       <hr />
                       <FormControlLabel
@@ -1271,7 +1277,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         }
                         label="Deletable"
                       />
-                    </Box>}
+                    </Box>
+                  )}
                 </Form>
               </Box>
             </CustomDialogContent>

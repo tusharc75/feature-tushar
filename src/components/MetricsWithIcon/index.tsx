@@ -1,0 +1,52 @@
+import React, { FC, ReactNode } from 'react';
+import { PressureIcon, TemperatureIcon, VolumeIcon } from 'src/assets/svg/svgIcons';
+import { Typography } from '@material-ui/core';
+import styles from './index.module.scss';
+
+interface MetricsWithIconProps extends React.HTMLAttributes<HTMLDivElement> {
+  type: 'temperature' | 'pressure' | 'volume';
+  value: number | string;
+  prefixText?: ReactNode | string;
+  suffixText?: ReactNode | string;
+}
+
+const iconMap = (type: MetricsWithIconProps['type']) => {
+  let Icon = PressureIcon;
+  let text = 'Pressure';
+  switch (type) {
+    case 'temperature':
+      Icon = TemperatureIcon;
+      text = 'Temp';
+      break;
+    case 'pressure':
+      Icon = PressureIcon;
+      text = 'Pressure';
+      break;
+    case 'volume':
+      Icon = VolumeIcon;
+      text = 'Volume';
+      break;
+    default:
+      break;
+  }
+  return [Icon, text];
+};
+
+const MetricsWithIcon: FC<MetricsWithIconProps> = ({ type, value, prefixText, suffixText, ...rest }) => {
+  const [Icon, text] = iconMap(type);
+  return (
+    <div className={`${styles.metricsWithIcon} ${rest.className} ${styles[type]}`} {...rest}>
+      <div className={styles.iconContainer}>
+        <Icon />
+      </div>
+      <Typography component={'h6'}>{text}</Typography>
+      <Typography>
+        {prefixText && <Typography component={'span'}>{prefixText}&nbsp;</Typography>}
+        {value}
+        {suffixText && <Typography component={'span'}>&nbsp;{suffixText}</Typography>}
+      </Typography>
+    </div>
+  );
+};
+
+export default MetricsWithIcon;

@@ -8,7 +8,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 700,
     fontSize: '12px',
     lineHeight: 1.84,
-    color: '#2A3042'
+    color: 'var(--dark-secondary-text, #2A3042)'
   },
   gauge: {
     borderRadius: '50vmax 50vmax 0 0',
@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 700,
     fontSize: '12px',
     lineHeight: '17px',
-    color: '#000000'
+    color: 'var(--dark-primary-text, #000000)'
   }
 }));
 
@@ -54,9 +54,9 @@ const Gauges = ({
   suffix = <></>,
   prefix = <></>,
   colors = ['#39EA75', '#2AC656', '#FFD92E', '#FCBE00', '#F95353', '#FF3636'],
-  textColor = '#000000',
-  needleColor = '#1D1D1D',
-  needleBaseColor = '#1D1D1D',
+  textColor = 'var(--dark-secondary, #000000)',
+  needleColor = 'var(--dark-primary-text, #1D1D1D)',
+  needleBaseColor = 'var(--dark-primary-text, #1D1D1D)',
   cornerRadius = 1,
   segments = 6,
   segmentGap = 0,
@@ -78,8 +78,7 @@ const Gauges = ({
         </Typography>
         <GaugeChart
           className={classes.gauge}
-          style={{ background: '#E6F8FC' }}
-          id="gauge-chart5"
+          style={{ background: 'var(--dark-secondary, #E6F8FC)' }}
           nrOfLevels={6}
           arcsLength={getSegmentWidth(segments)}
           colors={colors}

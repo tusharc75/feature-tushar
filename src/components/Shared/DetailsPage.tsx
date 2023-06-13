@@ -263,7 +263,7 @@ const Details = (props: DetailProps) => {
               data[fieldData.fieldName].length ? (
                 data[fieldData.fieldName].map((_val: any, i) => (
                   <React.Fragment key={_val.optionValue}>
-                    <Link to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`}>
+                    <Link to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`} target="_blank" rel="noopener noreferrer">
                       <span className={`text-truncate link`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
@@ -283,6 +283,8 @@ const Details = (props: DetailProps) => {
                     ? `/${kebabCase(fieldData.lookupResource)}?id=${val[fieldData.fieldName]}`
                     : `/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]}`
                 }
+                target="_blank"
+                rel="noopener noreferrer"
                 // onMouseEnter={(e) =>
                 //   getPopoverData(
                 //     e,
@@ -355,7 +357,7 @@ const Details = (props: DetailProps) => {
         <Typography title={value === '-' ? '' : value} className={classes.fieldText} variant="body2">
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
             <>
-              <MuiLink href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`} target="_blank">
+              <MuiLink href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`} target="_blank" rel="noopener noreferrer">
                 <span className={`text-truncate `}> {value} </span>
               </MuiLink>
               {fieldData.type === 'email' && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}

@@ -125,8 +125,11 @@ export const getStaticFields = () => {
 
 export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
   let data = localStorage.getItem('gridMetaData');
-  let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
-  if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+  let gridMetaData = {};
+  if (data && data !== 'undefined') {
+    gridMetaData = JSON.parse(data);
+  }
+  if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
     return gridMetaData[renderedFrom]?.hide?.indexOf(fieldName) >= 0 ? false : true;
   }
   return true;
@@ -134,8 +137,11 @@ export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
 
 export const checkStaticField = (renderedFrom, fieldData) => {
   let data = localStorage.getItem('gridMetaData');
-  let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
-  if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+  let gridMetaData = {};
+  if (data && data !== 'undefined') {
+    gridMetaData = JSON.parse(data);
+  }
+  if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
     return {
       ...fieldData,
       show: gridMetaData[renderedFrom]?.hide?.indexOf(fieldData?.field) >= 0 ? false : true
@@ -188,7 +194,7 @@ export default function useColumns() {
     state: { permissions, user, selectedEntity }
   }: any = useData();
 
-  const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
+  const getColumnData = (title, field, detailScreenRoute = null, openInNewTab = false) => {
     let data = localStorage.getItem('gridMetaData');
 
     if (field.type === 'date') {
@@ -223,7 +229,7 @@ export default function useColumns() {
             ...commonFieldData,
             field: 'concatedName',
             cellRenderer: 'nameRenderer',
-            cellRendererParams: { pathName: pathName }
+            cellRendererParams: { pathName: pathName, }
           },
           rendererName: 'nameRenderer'
         };
@@ -236,7 +242,7 @@ export default function useColumns() {
             disabled: true,
             field: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
             cellRenderer: permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? 'linkRenderer' : 'commonRenderer',
-            cellRendererParams: { pathName: detailScreenRoute, property: '_id', isForPopup: hasPopup }
+            cellRendererParams: { pathName: detailScreenRoute, property: '_id', openInNewTab: openInNewTab }
           },
           rendererName: permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? 'linkRenderer' : 'commonRenderer'
         };
@@ -273,6 +279,7 @@ export default function useColumns() {
               pathName: pathName,
               property: joinedFieldName + 'Id',
               isForPopup: isForPopup,
+              openInNewTab: openInNewTab,
               more: `rest${joinedFieldName}`
             }
           },

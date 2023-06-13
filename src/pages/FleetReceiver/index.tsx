@@ -18,9 +18,9 @@ const useStyles = makeStyles((theme) => ({
     position: 'relative',
     margin: '0px 6px 14px',
     borderRadius: '4px',
-    border: '1px solid #ebebeb',
+    border: '1px solid var(--common-border-color)',
     padding: '15px',
-    backgroundColor: '#F8FFFC',
+    backgroundColor: 'var(--dark-secondary, #F8FFFC)',
     transition: 'transform .2s, background .3s',
     '&:hover': {
       transform: 'scale(1.02)',
@@ -41,18 +41,18 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 700,
     fontSize: '14px',
     lineHeight: '1.28',
-    color: '#2A3042',
+    color: 'var(--dark-primary-text, #2A3042)',
     marginBottom: '14px'
   },
   secondaryText: {
     fontWeight: 400,
     fontSize: '13px',
     lineHeight: 1.5,
-    color: '#5B5B5B',
+    color: 'var(--dark-secondary-text, #5B5B5B)',
 
     '& strong': {
       fontWeight: 600,
-      color: '#2A3042'
+      color: 'var(--dark-primary-text, #2A3042)'
     },
     marginBottom: '4px',
     '&:last-of-type': {
