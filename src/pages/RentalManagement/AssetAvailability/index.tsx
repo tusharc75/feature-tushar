@@ -13,21 +13,49 @@ import { CreateTask } from 'src/components/Activity/Task/CreateTask';
 import { isMobile, isTablet } from 'react-device-detect';
 import { SerializedAssetAvailableIllustration } from 'src/assets/svg/svgIcons';
 
-const typographyh: React.CSSProperties = {
-  fontSize: '13px',
-  fontWeight: 600,
-  lineHeight: '1.14',
-  marginBottom: '8px'
-};
-
-const typographyd: React.CSSProperties = {
-  fontSize: '13px'
+interface CssObj {
+  [index: string]: React.CSSProperties;
+}
+const styles: CssObj = {
+  card: {
+    border: '1px solid var(--common-border-color)',
+    boxShadow: '0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06)',
+    borderRadius: '8px',
+    padding: '16px 20px 20px',
+    marginTop: 22,
+    position: 'relative'
+  },
+  cardWithPb: {
+    border: '1px solid var(--common-border-color)',
+    boxShadow: '0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06)',
+    borderRadius: '8px',
+    padding: '16px 20px 64px',
+    marginTop: 22,
+    position: 'relative'
+  },
+  minH: {
+    minHeight: 250
+  },
+  typographyh: {
+    fontSize: '13px',
+    fontWeight: 600,
+    lineHeight: '1.14',
+    marginBottom: '8px'
+  },
+  typographyd: {
+    fontSize: '13px'
+  },
+  buttonContaier: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20
+  }
 };
 
 const ShowProduct = ({ product }) => {
   return (
     <div
-      className="d-flex pl-3 pr-3 mt-3"
+      className="d-flex pl-3 pr-3 mt-3 "
       style={{
         padding: '14px 20px',
         border: '1px solid var(--common-border-color)',
@@ -36,21 +64,21 @@ const ShowProduct = ({ product }) => {
       }}
     >
       <div>
-        <Typography style={typographyh}>Product Name</Typography>
-        <Typography style={typographyd}>{product?.productName}</Typography>
+        <Typography style={styles.typographyh}>Product Name</Typography>
+        <Typography style={styles.typographyd}>{product?.productName}</Typography>
       </div>
       <div className="ml-4">
-        <Typography style={typographyh}>Requested Qty</Typography>
-        <Typography style={typographyd}>{product?.qty}</Typography>
+        <Typography style={styles.typographyh}>Requested Qty</Typography>
+        <Typography style={styles.typographyd}>{product?.qty}</Typography>
       </div>
       <div className="ml-4">
-        <Typography style={typographyh}>Asset Available</Typography>
-        <Typography style={typographyd}>{product?.assetAvailable}</Typography>
+        <Typography style={styles.typographyh}>Asset Available</Typography>
+        <Typography style={styles.typographyd}>{product?.assetAvailable}</Typography>
       </div>
       {!product?.baseWarehouse && (
         <div className="ml-4">
-          <Typography style={typographyh}>{routes.warehouse.title}</Typography>
-          <Typography style={typographyd}>{product?.warehouse?.optionLabel}</Typography>
+          <Typography style={styles.typographyh}>{routes.warehouse.title}</Typography>
+          <Typography style={styles.typographyd}>{product?.warehouse?.optionLabel}</Typography>
         </div>
       )}
     </div>
@@ -83,8 +111,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
         setProducts(rows);
         if (rows?.length === 0) {
           setCanFulfil(true);
-        }
-        else if (rows?.filter((e) => e.baseWarehouse)?.length === rows?.filter((e) => e.baseWarehouse && e.qty <= e.assetAvailable)?.length) {
+        } else if (rows?.filter((e) => e.baseWarehouse)?.length === rows?.filter((e) => e.baseWarehouse && e.qty <= e.assetAvailable)?.length) {
           setCanFulfil(true);
         }
       })
@@ -134,12 +161,14 @@ export default function AssetAvailability({ rentalId, handleClose }) {
         ) : (
           <Box>
             <div className="mt-2">
-              {products?.filter((e) => e.baseWarehouse && e.qty > e.assetAvailable)?.map((product) => (
-                <ShowProduct product={product} />
-              ))}
+              {products
+                ?.filter((e) => e.baseWarehouse && e.qty > e.assetAvailable)
+                ?.map((product) => (
+                  <ShowProduct product={product} />
+                ))}
             </div>
             {products?.filter((e) => !e.baseWarehouse)?.length > 0 && (
-              <Box pt={3}>
+              <Box pt={3} style={{ ...styles.cardWithPb, ...styles.minH }}>
                 <Typography
                   style={{ fontSize: '16px', fontWeight: '500' }}
                 >{`Serialized Assets are available in other ${routes.warehouse.title}`}</Typography>
@@ -149,7 +178,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
                     ?.map((product) => (
                       <ShowProduct product={product} />
                     ))}
-                  <div className="mt-3" style={{ textAlign: 'right' }}>
+                  <div className="mt-3" style={{ ...styles.buttonContaier }}>
                     <Button
                       size="small"
                       variant={'contained'}
