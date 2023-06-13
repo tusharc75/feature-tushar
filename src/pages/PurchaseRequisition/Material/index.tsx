@@ -20,7 +20,7 @@ import MaterialDialog from './materialDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE, RESOURCE_LABEL } from 'src/constants/helpers';
+import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import PreviewDownload from 'src/components/PreviewDownload';
 
@@ -341,7 +341,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload resource={RESOURCE_LABEL.purchaseRequisition} referenceId={purchaseRequisitionData?._id} columns={columns} />
+            <PreviewDownload resource={sidebarResource.purchaseRequisition} referenceId={purchaseRequisitionData?._id} columns={columns} />
             <Box ml={1} />
 
             <Button

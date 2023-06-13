@@ -48,7 +48,6 @@ import {
   documentUploadSupportExtensions,
   formatAmountWithCurrency,
   sidebarResource,
-  RESOURCE_LABEL
 } from '../../constants/helpers';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';

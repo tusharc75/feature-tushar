@@ -9,7 +9,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { fieldServiceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps, SERVICE_ORDER_STATUS, RESOURCE_LABEL, sidebarResource } from '../../constants/helpers';
+import { fieldServiceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps, SERVICE_ORDER_STATUS, sidebarResource } from '../../constants/helpers';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
@@ -140,7 +140,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const getServiceOrderFields = async () => {

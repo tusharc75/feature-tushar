@@ -9,7 +9,6 @@ import {
   prepareDataForGrid,
   getLocalStorageArrayData,
   removeLocalStorage,
-  RESOURCE_LABEL,
   sidebarResource
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
