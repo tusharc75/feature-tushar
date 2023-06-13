@@ -272,6 +272,7 @@ const Report = () => {
     if (search) {
       filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
     }
+
     if (selectedResources.length > 0) {
       if (selectedData) {
         const keys = selectedData ? Object.keys(selectedData) : [];
@@ -279,7 +280,7 @@ const Report = () => {
         const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
 
         let filterById = idFilter.map((key) => {
-          const options = selectedData[key].value;
+          const options = selectedData[key]?.value;
           return {
             field: key,
             term: {
@@ -295,7 +296,13 @@ const Report = () => {
               field: key,
               term: options.map((d: any) => d.optionValue)
             });
-          } else {
+          } if (selectedData[key].type === 'checkBox') {
+            deepFilter.push({
+              field: key,
+              term: selectedData[key].value ? 'Yes' : 'No'
+            });
+          }
+          else {
             options.forEach((o: any) => {
               deepFilter.push({
                 field: key,
@@ -498,7 +505,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => {}}
+                      onEdit={() => { }}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -513,8 +520,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => {}}
-                      onClone={(data) => {}}
+                      onDelete={(data) => { }}
+                      onClone={(data) => { }}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (
