@@ -15,6 +15,7 @@ import { MdAdd } from 'react-icons/md';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
+  RESOURCE_LABEL,
   getLocalStorageArrayData,
   gridLoadingTimeout,
   isObjectEmpty,
@@ -382,7 +383,12 @@ const Planning = () => {
                   <ToggleButtonGroup size="small">
                     <ToggleButton
                       onClick={() => {
-                        history.push(`${routes.planningView.path}`);
+                        history.push({
+                          pathname: routes.planningView.path,
+                          state: {
+                            resource: RESOURCE_LABEL?.planning
+                          }
+                        });
                       }}
                     >
                       <span>{`Calendar`}</span>

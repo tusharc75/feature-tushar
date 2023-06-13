@@ -10,7 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { sidebarResource } from 'src/constants/helpers';
+import { RESOURCE_LABEL, sidebarResource } from 'src/constants/helpers';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any)
 const localizer = momentLocalizer(moment);
@@ -51,7 +51,7 @@ const FILTERS = [
     }
 ]
 
-function CalendarView({ resourceList }) {
+function CalendarView({ resourceList, commonSelectedResource, setCommonSelectedResource }) {
 
     const toastConfig = useContext(CustomToastContext);
     const {
@@ -64,7 +64,7 @@ function CalendarView({ resourceList }) {
     const [filterToKeep, setFilterToKeep] = useState([]);
     const [lookupResource, setLookUpResource] = useState(null)
     const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null)
-
+    const [filterOptions, setFilterOptions] = useState([])
     const [selectedResource, setSelectedResource] = useState(null);
 
     const [renderCount, setRenderCount] = useState(0)
@@ -97,6 +97,17 @@ function CalendarView({ resourceList }) {
     })
 
     useEffect(() => {
+        const resource = history?.location?.state?.resource;
+        setSelectedResource(resourceList?.filter(_r => _r?.title === resource)[0])
+    }, [resourceList, history?.location?.state?.resource])
+
+    useEffect(() => {
+        if (commonSelectedResource) {
+            setSelectedResource(commonSelectedResource)
+        }
+    }, [])
+
+    useEffect(() => {
         if (view === 'month') {
             setMonth({
                 startDate: dateRange.estimateStartDate,
@@ -121,6 +132,7 @@ function CalendarView({ resourceList }) {
     }, [dateRange])
 
     useEffect(() => {
+        setFilterOptions(FILTERS)
         let lookupResource = null
         FILTERS.forEach((f, i) => {
             if (i === 0) {
@@ -203,6 +215,18 @@ function CalendarView({ resourceList }) {
 
             });
     }
+
+    useEffect(() => {
+        if (selectedResource?.title === RESOURCE_LABEL?.planning) {
+            const data = FILTERS.filter(_f => _f.key !== 'asset')
+            const filter = filterToKeep.filter(_f => _f.key !== 'asset')
+            setFilterOptions(data)
+            setFilterToKeep(filter)
+        } else {
+            setFilterOptions(FILTERS)
+        }
+        setCommonSelectedResource(selectedResource)
+    }, [selectedResource]);
 
     useEffect(() => {
         if (selectedLookUpResourceData) {
@@ -388,7 +412,7 @@ function CalendarView({ resourceList }) {
                             <Autocomplete
                                 style={{ width: "350px" }}
                                 multiple
-                                options={FILTERS}
+                                options={filterOptions}
                                 disableCloseOnSelect
                                 getOptionLabel={(option) => option?.label}
                                 renderOption={(option: any) => (
