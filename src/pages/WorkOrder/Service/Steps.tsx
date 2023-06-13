@@ -5,7 +5,6 @@ import {
   convertMsToTime,
   getObjKeys,
   getObjKeysWithValues,
-  RESOURCE_LABEL,
   setFieldsInAscendingOrder,
   workOrder,
   WORKORDER_SERVICE_STATUS,

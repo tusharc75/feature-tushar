@@ -47,7 +47,7 @@ export default function AssignUserDialog({ reference, isAssigning, handleClose, 
                 let columns = [];
                 let rendererNames = [];
                 data.forEach((o) => {
-                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.userDetail.path);
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.userDetail.path, true);
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData];
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

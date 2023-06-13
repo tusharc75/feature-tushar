@@ -9,8 +9,7 @@ import { Grid, Checkbox, TextField, Box } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider';
-import { RESOURCE_LABEL, sidebarResource } from 'src/constants/helpers';
+import { sidebarResource } from 'src/constants/helpers';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any)
 const localizer = momentLocalizer(moment);
@@ -51,27 +50,22 @@ const FILTERS = [
     }
 ]
 
-function CalendarView({ resourceList, commonSelectedResource, setCommonSelectedResource }) {
+function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
 
     const toastConfig = useContext(CustomToastContext);
-    const {
-        state: { user, selectedEntity, permissions }
-    }: any = useData();
 
     const history = useHistory();
     const [events, setEvents] = useState([])
     const [view, setView] = useState<View>('month');
-    const [filterToKeep, setFilterToKeep] = useState([]);
     const [lookupResource, setLookUpResource] = useState(null)
     const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null)
-    const [filterOptions, setFilterOptions] = useState([])
-    const [selectedResource, setSelectedResource] = useState(null);
+
+    const [selectedFilters, setSelectedFilters] = useState([]);
 
     const [renderCount, setRenderCount] = useState(0)
     const defaultDate = useMemo(() => moment().toDate(), [])
 
     const [staticEvents, setStaticEvents] = useState([])
-
 
     const [dateRange, setDateRange] = useState({
         estimateStartDate: moment().startOf('month').format('MM/DD/YYYY'),
@@ -95,17 +89,6 @@ function CalendarView({ resourceList, commonSelectedResource, setCommonSelectedR
         startDate: moment().startOf('day').format('MM/DD/YYYY'),
         endDate: moment().add(1, 'months').format('MM/DD/YYYY')
     })
-
-    useEffect(() => {
-        const resource = history?.location?.state?.resource;
-        setSelectedResource(resourceList?.filter(_r => _r?.title === resource)[0])
-    }, [resourceList, history?.location?.state?.resource])
-
-    useEffect(() => {
-        if (commonSelectedResource) {
-            setSelectedResource(commonSelectedResource)
-        }
-    }, [])
 
     useEffect(() => {
         if (view === 'month') {
@@ -132,7 +115,6 @@ function CalendarView({ resourceList, commonSelectedResource, setCommonSelectedR
     }, [dateRange])
 
     useEffect(() => {
-        setFilterOptions(FILTERS)
         let lookupResource = null
         FILTERS.forEach((f, i) => {
             if (i === 0) {
@@ -164,6 +146,11 @@ function CalendarView({ resourceList, commonSelectedResource, setCommonSelectedR
     }
 
     useEffect(() => {
+        setSelectedFilters([])
+        setSelectedLookUpResourceData(null)
+    }, [selectedResource]);
+
+    useEffect(() => {
         if (selectedResource) {
             fetchData()
         }
@@ -186,7 +173,6 @@ function CalendarView({ resourceList, commonSelectedResource, setCommonSelectedR
                 query = `${query}&${d}=${data}`
             })
         }
-
         return query;
     }
 
@@ -217,27 +203,15 @@ function CalendarView({ resourceList, commonSelectedResource, setCommonSelectedR
     }
 
     useEffect(() => {
-        if (selectedResource?.title === RESOURCE_LABEL?.planning) {
-            const data = FILTERS.filter(_f => _f.key !== 'asset')
-            const filter = filterToKeep.filter(_f => _f.key !== 'asset')
-            setFilterOptions(data)
-            setFilterToKeep(filter)
-        } else {
-            setFilterOptions(FILTERS)
-        }
-        setCommonSelectedResource(selectedResource)
-    }, [selectedResource]);
-
-    useEffect(() => {
         if (selectedLookUpResourceData) {
             Object.keys(selectedLookUpResourceData).forEach(o => {
-                if (!filterToKeep.some(f => f.key === o)) {
+                if (!selectedFilters.some(f => f.key === o)) {
                     const { [o]: _, ...remainObj } = selectedLookUpResourceData;
                     setSelectedLookUpResourceData(remainObj)
                 }
             })
         }
-    }, [filterToKeep])
+    }, [selectedFilters])
 
     const onView = useCallback(
         (view) => {
@@ -412,20 +386,20 @@ function CalendarView({ resourceList, commonSelectedResource, setCommonSelectedR
                             <Autocomplete
                                 style={{ width: "350px" }}
                                 multiple
-                                options={filterOptions}
+                                options={selectedResource && selectedResource?.resource === sidebarResource.planning ? FILTERS?.filter((e) => e.key !== 'asset') : FILTERS}
                                 disableCloseOnSelect
                                 getOptionLabel={(option) => option?.label}
                                 renderOption={(option: any) => (
                                     <React.Fragment>
-                                        <Checkbox checked={filterToKeep?.some(_s => _s.key === option.key)} />
+                                        <Checkbox checked={selectedFilters?.some(_s => _s.key === option.key)} />
                                         {option?.label}
                                     </React.Fragment>
                                 )}
                                 size="small"
                                 renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
-                                value={filterToKeep}
+                                value={selectedFilters}
                                 onChange={(event: any, newValue: any) => {
-                                    setFilterToKeep(newValue)
+                                    setSelectedFilters(newValue)
                                 }}
                             />
                         </Box>
@@ -433,7 +407,7 @@ function CalendarView({ resourceList, commonSelectedResource, setCommonSelectedR
                     <Box display="flex" flexDirection="row" ml={1} mt={2}>
                         <Grid container spacing={2}>
                             {
-                                filterToKeep?.map((filtered) => {
+                                selectedFilters?.map((filtered) => {
                                     return (
                                         <Grid item xs={12} sm={6} md={4} lg={4} key={filtered?.value}>
                                             <Autocomplete

@@ -21,7 +21,7 @@ import {
   primaryFields,
   productInventory,
   isObjectEmpty,
-  RESOURCE_LABEL
+  sidebarResource
 } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
@@ -363,14 +363,14 @@ const Report = () => {
               addManualOptionInExcel: false,
               addAdditionalOption: false,
               lookup: true,
-              lookupResource: RESOURCE_LABEL.storageLocation,
+              lookupResource: sidebarResource.storageLocation,
               isDropdown: false,
               isWarningTooltip: false,
               warningTooltipMessage: '',
               defaultValue: '',
               fieldName: 'storageLocation',
               sectionName: 'PO Information',
-              resource: RESOURCE_LABEL.purchaseOrder,
+              resource: sidebarResource.purchaseOrder,
               brand: user.brand
             },
             isCreate: true,
