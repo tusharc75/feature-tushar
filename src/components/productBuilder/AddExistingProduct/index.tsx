@@ -105,7 +105,7 @@ const AddExistingProduct = (props) => {
                 }
               ];
             } else {
-              let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.product.path);
+              let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.product.path, true);
               if (currentColumn !== null) {
                 columns = [...columns, currentColumn?.columnData];
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
