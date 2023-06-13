@@ -13,7 +13,7 @@ import { MdAdd, MdFilterList, MdSort } from 'react-icons/md';
 import { objectStore, insertUpdate, clearAll } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { sidebarResource, CHILD_RESOURCE, serializedAsset, RESOURCE_LABEL } from '../../constants/helpers';
+import { sidebarResource, CHILD_RESOURCE, serializedAsset } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
@@ -234,7 +234,7 @@ function RentalManagementHeader({
                         history.push({
                           pathname: routes.planningView.path,
                           state: {
-                            resource: RESOURCE_LABEL?.rentalManagement
+                            resource: sidebarResource?.rentalManagement
                           }
                         });
                       }}

@@ -9,7 +9,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { DataGrid } from '@material-ui/data-grid';
 import { AiOutlineImport, AiOutlineUpload, BiExport, BiImport } from 'react-icons/all';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { documentUploadMaxSize, sidebarResource, RESOURCE_LABEL } from '../../constants/helpers';
+import { documentUploadMaxSize, sidebarResource } from '../../constants/helpers';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateTimeRenderer, NumberRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';

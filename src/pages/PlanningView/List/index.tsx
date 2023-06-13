@@ -10,7 +10,7 @@ import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource 
 import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 
-function ListView({ resourceList, commonSelectedResource, setCommonSelectedResource }) {
+function ListView({ resourceList, selectedResource, setSelectedResource }) {
 
     const toastConfig = useContext(CustomToastContext);
     const {
@@ -22,16 +22,9 @@ function ListView({ resourceList, commonSelectedResource, setCommonSelectedResou
     const [frameWorkComponent, setFrameWorkComponent] = useState({});
     const [state, dispatch] = useReducer(reducer, intialState);
     const [renderedFrom, setRenderedFrom] = useState('')
-    const [selectedResource, setSelectedResource] = useState(null);
     const [columns, setColumns] = useState([])
 
     const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, appendRows } = state;
-
-    useEffect(() => {
-        if (commonSelectedResource) {
-            setSelectedResource(commonSelectedResource)
-        }
-    }, [commonSelectedResource])
 
     const fetchGridColumns = async () => {
         axiosInstance()
@@ -60,7 +53,6 @@ function ListView({ resourceList, commonSelectedResource, setCommonSelectedResou
 
     useEffect(() => {
         if (selectedResource) {
-            setCommonSelectedResource(selectedResource)
             setRenderedFrom(`${routes[selectedResource.key].title}`)
             fetchGridColumns();
         }
