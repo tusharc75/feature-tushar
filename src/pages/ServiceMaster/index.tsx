@@ -19,7 +19,6 @@ import {
   getLocalStorageArrayData,
   serviceMaster,
   removeLocalStorage,
-  RESOURCE_LABEL,
   sidebarResource
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';

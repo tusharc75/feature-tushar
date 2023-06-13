@@ -7,7 +7,6 @@ import { Autocomplete } from '@material-ui/lab';
 import { Add, Cancel, Delete } from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import { RESOURCE_LABEL } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 
 export default function customTable({ id, classes, entity, table, setTable }) {
