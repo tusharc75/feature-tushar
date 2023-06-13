@@ -194,7 +194,7 @@ export default function useColumns() {
     state: { permissions, user, selectedEntity }
   }: any = useData();
 
-  const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
+  const getColumnData = (title, field, detailScreenRoute = null, openInNewTab = false) => {
     let data = localStorage.getItem('gridMetaData');
 
     if (field.type === 'date') {
@@ -229,7 +229,7 @@ export default function useColumns() {
             ...commonFieldData,
             field: 'concatedName',
             cellRenderer: 'nameRenderer',
-            cellRendererParams: { pathName: pathName }
+            cellRendererParams: { pathName: pathName, }
           },
           rendererName: 'nameRenderer'
         };
@@ -242,7 +242,7 @@ export default function useColumns() {
             disabled: true,
             field: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
             cellRenderer: permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? 'linkRenderer' : 'commonRenderer',
-            cellRendererParams: { pathName: detailScreenRoute, property: '_id', isForPopup: hasPopup }
+            cellRendererParams: { pathName: detailScreenRoute, property: '_id', openInNewTab: openInNewTab }
           },
           rendererName: permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? 'linkRenderer' : 'commonRenderer'
         };
@@ -279,6 +279,7 @@ export default function useColumns() {
               pathName: pathName,
               property: joinedFieldName + 'Id',
               isForPopup: isForPopup,
+              openInNewTab: openInNewTab,
               more: `rest${joinedFieldName}`
             }
           },

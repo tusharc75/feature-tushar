@@ -57,35 +57,35 @@ const AddExistingProductInventory = ({
   const defaultColumns =
     type === 'product'
       ? [
-          {
-            field: 'qty',
-            headerName: 'Qty',
-            show: true,
-            disabled: true,
-            cellRenderer: 'commonRenderer',
-            cellEditor: 'numericCellEditor',
-            editable: true
-          },
-          {
-            field: 'inventoryInWarehouseCount',
-            headerName: 'Available Asset',
-            show: true,
-            disabled: true,
-            cellRenderer: 'commonRenderer',
-            editable: false
-          }
-        ]
+        {
+          field: 'qty',
+          headerName: 'Qty',
+          show: true,
+          disabled: true,
+          cellRenderer: 'commonRenderer',
+          cellEditor: 'numericCellEditor',
+          editable: true
+        },
+        {
+          field: 'inventoryInWarehouseCount',
+          headerName: 'Available Asset',
+          show: true,
+          disabled: true,
+          cellRenderer: 'commonRenderer',
+          editable: false
+        }
+      ]
       : [
-          {
-            field: 'qty',
-            headerName: 'Qty',
-            show: true,
-            disabled: true,
-            cellRenderer: 'commonRenderer',
-            cellEditor: 'numericCellEditor',
-            editable: true
-          }
-        ];
+        {
+          field: 'qty',
+          headerName: 'Qty',
+          show: true,
+          disabled: true,
+          cellRenderer: 'commonRenderer',
+          cellEditor: 'numericCellEditor',
+          editable: true
+        }
+      ];
 
   useEffect(() => {
     localStorage.removeItem(localStorageSelectedRecords);
@@ -184,7 +184,7 @@ const AddExistingProductInventory = ({
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, type === 'product' ? routes.productDetail.path : routes.packagesDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, type === 'product' ? routes.productDetail.path : routes.packagesDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

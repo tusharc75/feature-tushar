@@ -11,8 +11,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { CreateTask } from 'src/components/Activity/Task/CreateTask';
 import { isMobile, isTablet } from 'react-device-detect';
-import { GoThumbsup } from 'react-icons/go';
-import { BsHandThumbsUp } from 'react-icons/bs';
 import { SerializedAssetAvailableIllustration } from 'src/assets/svg/svgIcons';
 
 const typographyh: React.CSSProperties = {
@@ -103,7 +101,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       });
     } else {
       setModalContent({
-        title: 'Serialized Assets not Available',
+        title: 'Unable to fulfill Asset requirement(s) from this Plant.',
         icon: <ErrorIcon color="error" />
       });
     }
@@ -135,13 +133,10 @@ export default function AssetAvailability({ rentalId, handleClose }) {
           </div>
         ) : (
           <Box>
-            <Typography style={{ fontSize: '16px', fontWeight: '500' }}>Unable to fulfill the asset requirement from the plant.</Typography>
             <div className="mt-2">
-              {products
-                ?.filter((e) => e.baseWarehouse && e.qty > e.assetAvailable)
-                ?.map((product) => (
-                  <ShowProduct product={product} />
-                ))}
+              {products?.filter((e) => e.baseWarehouse && e.qty > e.assetAvailable)?.map((product) => (
+                <ShowProduct product={product} />
+              ))}
             </div>
             {products?.filter((e) => !e.baseWarehouse)?.length > 0 && (
               <Box pt={3}>
