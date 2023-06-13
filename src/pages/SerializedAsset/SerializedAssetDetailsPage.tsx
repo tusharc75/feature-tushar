@@ -356,20 +356,6 @@ const SerializedAssetDetailsPage = () => {
     }
   }, [productInventoryData]);
 
-  const handleMTRAttached = (status: boolean) => {
-    axiosInstance().post(`${serializedAsset.api}/update-bulk-data`, { _ids: [id], mtrAttached: status })
-      .then(({ data }) => {
-        fetchProductInventoryData()
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }
 
   return (
     <Box className="main-container-v1">
@@ -462,7 +448,12 @@ const SerializedAssetDetailsPage = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={productInventoryData?._id} resource={ACTIVITY_RESOURCE.serializedAsset} />
+            <ActivityButton
+              referenceId={productInventoryData?._id}
+              resource={ACTIVITY_RESOURCE.serializedAsset}
+              handleClose={() => {
+                fetchProductInventoryData();
+              }} />
           </Box>
         </Box>
       </Box>
@@ -478,25 +469,6 @@ const SerializedAssetDetailsPage = () => {
                   </Grid>
                 ) : (
                   <>
-                    {permissions?.serializedAsset?.isUpdate && productInventoryFields?.some(field => field?.fieldData?.fieldName === "mtrAttached") && (
-                      <Box style={{ marginTop: isMobile && !isTablet ? '5px' : '-30px' }}>
-                        <Grid container direction="row" justifyContent="flex-end" alignItems="center">
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={productInventoryData?.mtrAttached}
-                                onChange={(event) => {
-                                  handleMTRAttached(event.target.checked)
-                                }}
-                                name="mtrAttached"
-                                color="primary"
-                              />
-                            }
-                            label={productInventoryFields?.find(field => field?.fieldData?.fieldName === "mtrAttached")?.fieldLabel || "MTR Attached"}
-                          />
-                        </Grid>
-                      </Box>
-                    )}
                     <DetailsPage
                       data={productInventoryData}
                       fields={

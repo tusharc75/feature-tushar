@@ -78,6 +78,7 @@ function dropdownOptions(options, values, fields, fieldData) {
   return optionsToShow;
 }
 
+
 function Dropdown({
   InfoLabel,
   fieldData,
@@ -276,7 +277,7 @@ function Dropdown({
                             if (fieldData.lookupDependentOn) {
                               if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
                                 if (type === 'multiSelect') {
-                                  handleChange(name, tempNewOption && tempNewOption.optionValue ? [tempNewOption.optionValue] : []);
+                                  handleChange(name, tempNewOption && tempNewOption.optionValue ? [...[...values[name] || []], tempNewOption.optionValue] : []);
                                 } else {
                                   handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                                 }
@@ -564,8 +565,8 @@ function Dropdown({
                               email: data?.data?.email,
                               optionLabel: ` ${data?.data?.salutation} ${data?.data?.firstName} ${data?.data?.lastName}`,
                               optionValue: data?.data?._id,
-                              [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn],
-                              order: option.length
+                              order: option.length,
+                              [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
                             };
                             addFieldOption(tempNewOption);
                             setOptionsList([tempNewOption, ...option]);
@@ -609,9 +610,9 @@ function Dropdown({
                               email: data?.data?.data?.email,
                               optionLabel: data?.data?.data?.concatedName,
                               optionValue: data?.data?._id,
-                              [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn],
                               parentAccount: data?.data?.accountName,
-                              order: option.length
+                              order: option.length,
+                              [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
                             };
                             addFieldOption(tempNewOption);
                             setOptionsList([tempNewOption, ...option]);

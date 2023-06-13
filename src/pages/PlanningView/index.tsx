@@ -110,6 +110,7 @@ function PlanningView() {
 
     const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
     const [resourceList, setResourceList] = useState([])
+    const [selectedResource, setSelectedResource] = useState(null)
 
     useEffect(() => {
         const options: any = [];
@@ -174,12 +175,12 @@ function PlanningView() {
                     </Tabs>
                     <TabPanel value={tabValue} index={0}>
                         <Box>
-                            <CalendarView resourceList={resourceList} />
+                            <CalendarView resourceList={resourceList} commonSelectedResource={selectedResource} setCommonSelectedResource={setSelectedResource} />
                         </Box>
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
                         <Box>
-                            <ListView resourceList={resourceList} />
+                            <ListView resourceList={resourceList} commonSelectedResource={selectedResource} setCommonSelectedResource={setSelectedResource} />
                         </Box>
                     </TabPanel>
                 </Box>

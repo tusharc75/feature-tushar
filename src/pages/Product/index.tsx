@@ -306,7 +306,7 @@ const Product = () => {
         }
       } else {
         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-          let currentColumn: any = getColumnData(renderedFrom, ele, routes.product.path, true);
+          let currentColumn: any = getColumnData(renderedFrom, ele, routes.productDetail.path);
           column.push({ ...currentColumn.columnData, leval: 'product-template' });
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
             rendererNames.push(currentColumn?.rendererName);

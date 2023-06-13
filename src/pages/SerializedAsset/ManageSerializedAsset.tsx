@@ -116,6 +116,10 @@ const ManageSerializedAsset = ({
           if (fieldsDataForCreate.some((e) => e.fieldName === 'recertDate')) {
             createValues['recertDate'] = '';
           }
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'mtrAttachedDate')) {
+            createValues['mtrAttachedDate'] = '';
+          }
+
 
           if (referenceType && referenceType === 'repairOrder') {
             if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount')) {
@@ -363,10 +367,7 @@ const ManageSerializedAsset = ({
                                     <FormTypes
                                       isNew={Boolean(productInventoryId)}
                                       {...field}
-                                      disabled={
-                                        (Boolean(productInventoryId) && field.disableOnEdit && !isClone) ||
-                                        (field.fieldName === 'assetNumber' && field.isUneditable)
-                                      }
+                                      disabled={Boolean(productInventoryId) && !isClone ? field?.disableOnEdit || field?.isUneditable : field?.isUneditable}
                                       values={values}
                                       errors={errors}
                                       fieldData={field}

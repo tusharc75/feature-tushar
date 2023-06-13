@@ -25,7 +25,7 @@ import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { generateCustomTableColumns, flattenArray } from 'src/constants/columns';
-import InfoIcon from '@material-ui/icons/Info';
+import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AssetAvailability from '../AssetAvailability';
 
 const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
@@ -580,7 +580,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                     onClick={() => {
                       setOpenAssetAvailibility(true)
                     }}>
-                    <InfoIcon color={'primary'} />
+                    <AssignmentTurnedInIcon color={'primary'} />
                   </IconButton>
                 </HtmlTooltip>
               </Box>
