@@ -155,9 +155,6 @@ export default function Attachment() {
   const [resourceOptions, setResourceOptions] = useState([]);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, data: null, top: null, bottom: null });
 
-  //   InsertDriveFileOutlinedIcon
-  // FolderIcon
-
   const column: any = [
     {
       accessor: 'type',
@@ -165,7 +162,6 @@ export default function Attachment() {
       Header: 'Type',
       width: 70,
       canDrag: false,
-      sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => (
         <p style={{ display: 'flex', alignItems: 'center', color: '#3B4F60' }}>
           {row.original?.type === 'folder' ? (
@@ -188,7 +184,6 @@ export default function Attachment() {
       Header: 'Name',
       width: 300,
       canDrag: false,
-      sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <a className={permissions?.attachment?.isUpdate ? 'link cursor-pointer' : ''} onClick={() => handleActivityOpen(row.original)}>
@@ -217,7 +212,6 @@ export default function Attachment() {
       Header: 'Related To',
       width: 300,
       canDrag: false,
-      sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => (
         <>
           {row.original.relatedTo && row.original.relatedTo?.length > 0 ? (
@@ -238,32 +232,32 @@ export default function Attachment() {
       )
     },
     {
-      id: 'createdAt',
-      accessor: 'createdAt',
+      id: 'createdBy',
+      accessor: 'createdBy',
       Header: 'Created By',
-      width: 120,
+      width: 150,
       canDrag: false,
-      sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => (
-        <p>
-          {row.original?.createdBy?.user?.concatedName}
-          <br /> {row.original?.createdAt}
-        </p>
+        row.original?.createdBy ?
+          <p>
+            {row.original?.createdBy?.user?.concatedName}
+            <span className='createdAtTime badge-date'>{displayDate(row.original?.createdBy?.date)}</span>
+          </p> : <NoDataCell />
       )
     },
     {
-      id: 'updatedAt',
-      accessor: 'updatedAt',
+      id: 'updatedBy',
+      accessor: 'updatedBy',
       Header: 'Updated By',
-      width: 120,
+      width: 150,
       canDrag: false,
-      sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => (
-        <p>
-          {row.original?.updatedBy?.user?.concatedName}
-          <br />
-          {row.original?.updatedAt}
-        </p>
+        row.original?.updatedBy ?
+          <p>
+            {row.original?.updatedBy?.user?.concatedName}
+            <span className='createdAtTime badge-date'>
+            {displayDate(row.original?.updatedBy?.date)}</span>
+          </p> : <NoDataCell />
       )
     },
     {
@@ -531,8 +525,6 @@ export default function Attachment() {
               id: parent._id,
               fileUrl: parent.fileUrl,
               canEdit: parent.type === 'folder' ? true : parent?.canEdit,
-              createdAt: displayDate(parent.createdBy?.date),
-              updatedAt: displayDate(parent.updatedBy?.date),
               isChecked: false
             };
           });
@@ -549,20 +541,16 @@ export default function Attachment() {
   };
 
   const generateNestedData = (data, parent) => {
-    const childRow = data
-      ?.filter((e) => e?.parentFolder === parent?._id)
-      ?.map((u) => {
-        u.subRows = generateNestedData(data, u);
-        return {
-          ...u,
-          id: u._id,
-          fileUrl: u.fileUrl,
-          canEdit: u.type === 'folder' ? true : u?.canEdit,
-          createdBy: displayDate(u.createdBy?.date),
-          updatedBy: displayDate(u.updatedBy?.date),
-          isChecked: false
-        };
-      });
+    const childRow = data?.filter((e) => e?.parentFolder === parent?._id)?.map((u) => {
+      u.subRows = generateNestedData(data, u);
+      return {
+        ...u,
+        id: u._id,
+        fileUrl: u.fileUrl,
+        canEdit: u.type === 'folder' ? true : u?.canEdit,
+        isChecked: false
+      };
+    });
     return childRow;
   };
 
@@ -633,7 +621,7 @@ export default function Attachment() {
                   permissions={permissions?.attachment}
                   module="Attachment"
                   api={`/attachment`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   total={rowCount}
                   onlyExport={true}
                   additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -767,8 +755,8 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => {}}
-              renderedFrom={'attachment_render_form'}
+              setWholeRowsCellColor={() => { }}
+              renderedFrom={'attachment_render'}
               isClientSideGrid={false}
               rowCount={rowCount}
               limit={limit}
@@ -856,8 +844,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                    ? selectedResourceData.optionValue
-                    : user?.user?._id,
+                      ? selectedResourceData.optionValue
+                      : user?.user?._id,
                   access: true
                 }
               ]}
