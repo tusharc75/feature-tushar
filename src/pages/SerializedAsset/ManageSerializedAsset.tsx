@@ -11,7 +11,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, ASSET_STATUS, serializedAsset, setFieldsInAscendingOrder, supplierAccount } from '../../constants/helpers';
+import { CustomDialogTransition, ASSET_STATUS, serializedAsset, setFieldsInAscendingOrder, supplierAccount, ASSET_NUMBER_TYPE } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -363,6 +363,30 @@ const ManageSerializedAsset = ({
                                         }
                                       }}
                                     />
+                                  ) : field.fieldName === 'assetNumber' ? (
+                                    <FormTypes
+                                      isNew={Boolean(productInventoryId)}
+                                      {...field}
+                                      disabled={values['assetNumberType'] ? values['assetNumberType'] === ASSET_NUMBER_TYPE.manual ? false : true :
+                                        Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
+                                      fieldData={field}
+                                      values={values}
+                                      hidelookupAddButton={true}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                      }}
+                                    />
                                   ) : (
                                     <FormTypes
                                       isNew={Boolean(productInventoryId)}
@@ -378,6 +402,9 @@ const ManageSerializedAsset = ({
                                       options={field.option}
                                       setFieldValue={(name, value) => {
                                         setFieldValue(name, value);
+                                        if (field.fieldName === 'assetNumberType') {
+                                          setFieldValue('assetNumber', value === ASSET_NUMBER_TYPE.manual ? '' : 'Auto Generate');
+                                        }
                                       }}
                                       required={field.required}
                                       fullWidth
