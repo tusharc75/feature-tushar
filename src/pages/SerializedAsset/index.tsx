@@ -434,22 +434,22 @@ const SerializedAsset = () => {
     setAnchorEl(null);
   };
 
-  const handleMTRAttached = (status: boolean) => {
-    const _ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => d?._id);
-    axiosInstance().post(`${serializedAsset.api}/update-bulk-data`, { _ids, mtrAttached: status })
-      .then(({ data }) => {
-        localStorage.removeItem(localStorageSelectedRecords);
-        fetchProductInventory();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }
+  // const handleMTRAttached = (status: boolean) => {
+  //   const _ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => d?._id);
+  //   axiosInstance().post(`${serializedAsset.api}/update-bulk-data`, { _ids, mtrAttached: status })
+  //     .then(({ data }) => {
+  //       localStorage.removeItem(localStorageSelectedRecords);
+  //       fetchProductInventory();
+  //       toastConfig.setToastConfig({
+  //         open: true,
+  //         type: 'success',
+  //         message: data.message
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       toastConfig.setToastConfig(error);
+  //     });
+  // }
 
   return (
     <Fragment>
@@ -770,7 +770,7 @@ const SerializedAsset = () => {
                         </>
                       )
                     }
-                    {columns?.some(e => e.field === "mtrAttached") &&
+                    {/* {columns?.some(e => e.field === "mtrAttached") &&
                       <>
                         <MenuItem
                           onClick={() => {
@@ -789,7 +789,7 @@ const SerializedAsset = () => {
                           MTR Attach - No
                         </MenuItem>
                       </>
-                    }
+                    } */}
                   </Menu>
                 </Box>
               </Box>
