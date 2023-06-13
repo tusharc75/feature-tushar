@@ -55,8 +55,9 @@ const styles: CssObj = {
 const ShowProduct = ({ product }) => {
   return (
     <div
-      className="d-flex pl-3 pr-3 mt-3 "
+      className="d-flex pl-3 pr-3 mt-3 flex-wrap"
       style={{
+        gap: 24,
         padding: '14px 20px',
         border: '1px solid var(--common-border-color)',
         borderRadius: '10px',
@@ -67,16 +68,16 @@ const ShowProduct = ({ product }) => {
         <Typography style={styles.typographyh}>Product Name</Typography>
         <Typography style={styles.typographyd}>{product?.productName}</Typography>
       </div>
-      <div className="ml-4">
+      <div>
         <Typography style={styles.typographyh}>Requested Qty</Typography>
         <Typography style={styles.typographyd}>{product?.qty}</Typography>
       </div>
-      <div className="ml-4">
+      <div>
         <Typography style={styles.typographyh}>Asset Available</Typography>
         <Typography style={styles.typographyd}>{product?.assetAvailable}</Typography>
       </div>
       {!product?.baseWarehouse && (
-        <div className="ml-4">
+        <div>
           <Typography style={styles.typographyh}>{routes.warehouse.title}</Typography>
           <Typography style={styles.typographyd}>{product?.warehouse?.optionLabel}</Typography>
         </div>
@@ -146,7 +147,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
         // }
       }}
       open={true}
-      modalHead={modalContent}
+      modalHead={{ ...modalContent, fullScreenOption: true }}
       handleClose={handleClose}
     >
       {products ? (
