@@ -1,11 +1,5 @@
 import React, { useState, useEffect, Fragment } from 'react';
-import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import { GetUpcomingActivity } from '../../axios/activity';
-import Chip from '@material-ui/core/Chip';
-import { ListRelatedTo } from './Helpers/ListRelatedTo';
-import { displayDate } from '../../constants/helpers';
 import { Button, IconButton } from '@material-ui/core';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import HideWhenOffline from '../HideWhenOffline';
@@ -21,7 +15,7 @@ const ActivityButton = ({ referenceId, resource, handleClose = null }) => {
     } else {
       document.body.style.removeProperty('overflow');
       if (handleClose) {
-        handleClose()
+        handleClose();
       }
     }
   }, [showActivity]);
@@ -61,7 +55,7 @@ const ActivityButton = ({ referenceId, resource, handleClose = null }) => {
                     }
                   ]}
                   close={() => setActivityShow(false)}
-                  handleActivityRefresh={() => { }}
+                  handleActivityRefresh={() => {}}
                   emails={[]}
                 />
               )}
