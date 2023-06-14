@@ -591,7 +591,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                       setOpenAssetAvailibility(true);
                     }}
                   >
-                    <AssetAvailabilityIcon color={'#163340'} size={24} />
+                    <AssetAvailabilityIcon color={'var(--dark-primary-text, #163340)'} size={24} />
                   </IconButton>
                 </HtmlTooltip>
               </Box>
