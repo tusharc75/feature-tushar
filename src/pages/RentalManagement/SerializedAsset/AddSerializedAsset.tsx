@@ -99,7 +99,7 @@ const AddSerializedAsset = ({
 
   useEffect(() => {
     fetchGridColumns();
-  }, [tabValue]);
+  }, []);
 
   useEffect(() => {
     axiosInstance()
@@ -110,7 +110,6 @@ const AddSerializedAsset = ({
   }, []);
 
   const fetchGridColumns = () => {
-    setColumns(null)
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
@@ -138,21 +137,17 @@ const AddSerializedAsset = ({
           show: true,
           filter: true,
           sortable: true,
+          lockPosition: true,
           cellRenderer: 'rentalJobRenderer'
         }];
 
-        if (Number(tabValue) === 2) {
-          columns = [...inUseColoumns, ...columns, ...getStaticFields(),];
-        }
-        else {
-          columns = [...columns, ...getStaticFields()];
-        }
+        columns = [...inUseColoumns, ...columns, ...getStaticFields()];
         setColumns([...columns]);
       });
   };
 
   const RentalJobRenderer = (params) => (
-    <Link className="link text-truncate" to={`${routes.rentalManagementDetail.path}/${params.data?.rentalJob?.optionValue}`}>
+    <Link className="link text-truncate" target='_blank' to={`${routes.rentalManagementDetail.path}/${params.data?.rentalJob?.optionValue}`}>
       {params?.data?.rentalJob?.optionLabel}
     </Link>
   );
@@ -743,7 +738,7 @@ const AddSerializedAsset = ({
             <div className={'listing-grid'}>
               {Object.keys(frameWorkComponent).length > 0 && columns ? (
                 <CustomAgGrid
-                  columns={columns}
+                  columns={Number(tabValue) === 2 ? columns : columns?.filter((e: any) => e.field !== 'rentalJob')}
                   dataRows={dataRows}
                   frameworkComponents={frameWorkComponent}
                   setGridApi={setGridApi}
