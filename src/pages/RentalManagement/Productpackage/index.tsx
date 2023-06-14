@@ -27,6 +27,7 @@ import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceD
 import { generateCustomTableColumns, flattenArray } from 'src/constants/columns';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AssetAvailability from '../AssetAvailability';
+import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 
 const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -261,12 +262,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail = `${parent.type === 'service'
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.packageDetail?.packageName
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+          : parent.type === 'product'
+            ? parent.productDetail?.productName
+            : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'service'
@@ -300,12 +301,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = `${_subRow.type === 'service'
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : ''
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === 'package'
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === 'product'
+              ? _subRow.productDetail?.productName
+              : ''
         } `;
       _subRow.description =
         _subRow.type === 'service'
@@ -386,7 +387,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
           if (allFields?.some((e) => e.fieldName === 'supplierPrice') && calValues[priceFieldName]) {
             const supplierPriceFieldName = `supplierPrice_${rentalManagementData?.currency?.toLowerCase()}`;
-            calValues[supplierPriceFieldName] = ((rateResult[0].mrp - ((rateResult[0].mrp * 5) / 100)) * element?.qty * (element?.estimateJobDuration || 1));
+            calValues[supplierPriceFieldName] =
+              (rateResult[0].mrp - (rateResult[0].mrp * 5) / 100) * element?.qty * (element?.estimateJobDuration || 1);
           }
 
           Object.assign(element, calValues);
@@ -544,6 +546,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     }
   };
 
+
   return (
     <Fragment>
       {allowedToEdit && (
@@ -577,20 +580,21 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
             )}
           </Box>
           <Box display="flex" ml={1}>
-            {rowsData?.length > 0 &&
+            {rowsData?.filter((e) => e?.serializedProduct)?.length > 0 && (
               <Box mr={1}>
-                <HtmlTooltip title="Check Assets Availibility">
+                <HtmlTooltip title="Check Assets Availability" arrow placement="top">
                   <IconButton
                     size="small"
                     aria-label="Details"
                     onClick={() => {
-                      setOpenAssetAvailibility(true)
-                    }}>
-                    <AssignmentTurnedInIcon color={'primary'} />
+                      setOpenAssetAvailibility(true);
+                    }}
+                  >
+                    <AssetAvailabilityIcon color={'var(--dark-primary-text, #163340)'} size={24} />
                   </IconButton>
                 </HtmlTooltip>
               </Box>
-            }
+            )}
             <Button
               variant="outlined"
               color="primary"
@@ -791,14 +795,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           }}
         />
       )}
-      {openAssetAvailibility &&
+      {openAssetAvailibility && (
         <AssetAvailability
           rentalId={rentalManagementData?._id}
           handleClose={() => {
-            setOpenAssetAvailibility(false)
+            setOpenAssetAvailibility(false);
           }}
         />
-      }
+      )}
     </Fragment>
   );
 };

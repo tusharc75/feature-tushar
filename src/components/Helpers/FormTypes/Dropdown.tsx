@@ -70,7 +70,7 @@ function dropdownOptions(options, values, fields, fieldData) {
     const lookupResource = fields?.find((e) => e.fieldName === lookupDependentOn)?.lookupResource
     const value = values[lookupDependentOn] || values[fieldName];
     if (value) {
-      const newOptions = options?.filter((option: any) => option[lookupDependentOn] === value || option[camelCase(lookupResource)] === value) || [];
+      const newOptions = options?.filter((option: any) => option[lookupDependentOn]?.includes(value) || option[camelCase(lookupResource)]?.includes(value)) || [];
       optionsToShow.push(...newOptions);
     }
   }
@@ -345,6 +345,7 @@ function Dropdown({
                     </IconButton>
                     {lookupDialog && (
                       <ManageStorageLocation
+                        referenceData={{ warehouse: values[fieldData.lookupDependentOn] }}
                         storageLocationId={null}
                         onClose={() => setLookupDialog(false)}
                         isClone={false}

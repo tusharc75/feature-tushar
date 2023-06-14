@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
   notificationContent: {
     maxHeight: '640px',
     overflow: 'auto',
-    border: '1px solid #eadfdf',
+    border: '1px solid var(--common-border-color)',
     margin: '2px'
   },
   markAll: {
@@ -100,6 +100,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Header = ({ toggleDrawer, isDrawerOpen }) => {
   const [themeColor, toggleThemeColor] = useAppTheme();
+
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
 
@@ -540,7 +541,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
             return (
               <div
                 style={{
-                  borderBottom: d.read ? '1px solid lightgrey' : '1px solid white'
+                  borderBottom: '1px solid var(--common-border-color)'
                 }}
                 className={`${d.read === true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
                 key={index}

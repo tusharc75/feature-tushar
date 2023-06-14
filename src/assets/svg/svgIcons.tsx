@@ -1,3 +1,7 @@
+interface svgInterface extends React.SVGAttributes<SVGElement> {}
+interface svgInterfaceWithSize extends svgInterface {
+  size?: number;
+}
 export const PreWorkIcon = ({ className = '', width = '', height = '', size = 15, color = '#298B88', style = {} }) => {
   return (
     <svg
@@ -121,8 +125,6 @@ export const ReportIcon = ({ width = 43, height = 49, colors = ['#577BFC', '#160
     </svg>
   );
 };
-
-interface svgInterface extends React.SVGAttributes<SVGElement> {}
 
 export const AccountHierarchyIcon: React.FC<svgInterface> = ({ ...other }) => {
   return (
@@ -345,9 +347,9 @@ export const PassIcon: React.FC<svgInterface> = ({ width = 24, height = 24, ...o
   );
 };
 
-export const FailIcon: React.FC<svgInterface> = ({ width = 24, height = 24, ...other }) => {
+export const FailIcon: React.FC<svgInterfaceWithSize> = ({ width = 24, height = 24, size = 24, ...other }) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 22 22" {...other}>
+    <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 22 22" {...other}>
       <path
         fill="currentcolor"
         d="M10.776 21.47c5.725 0 10.366-4.642 10.366-10.367 0-5.725-4.641-10.367-10.366-10.367C5.05.736.409 5.378.409 11.103c0 5.725 4.641 10.366 10.367 10.366z"
@@ -360,9 +362,9 @@ export const FailIcon: React.FC<svgInterface> = ({ width = 24, height = 24, ...o
   );
 };
 
-export const MoonIcon: React.FC<svgInterface> = ({ width = 18, height = 19, ...other }) => {
+export const MoonIcon: React.FC<svgInterfaceWithSize> = ({ width = 18, height = 19, size = 19, ...other }) => {
   return (
-    <svg {...other} xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 18 19">
+    <svg {...other} xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 18 19">
       <path
         fill="currentcolor"
         stroke="currentcolor"
@@ -373,9 +375,9 @@ export const MoonIcon: React.FC<svgInterface> = ({ width = 18, height = 19, ...o
   );
 };
 
-export const SunIcon: React.FC<svgInterface> = ({ width = 19, height = 20, ...other }) => {
+export const SunIcon: React.FC<svgInterfaceWithSize> = ({ width = 20, height = 20, size = 20, ...other }) => {
   return (
-    <svg {...other} xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 19 20">
+    <svg {...other} xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 19 20">
       <path
         fill="currentcolor"
         d="M5.127 4.301l-1.111-1.11A.786.786 0 102.905 4.3l1.11 1.111a.782.782 0 001.112 0 .786.786 0 000-1.11zM2.5 9.071H.929a.786.786 0 000 1.572H2.5a.786.786 0 000-1.572zm2.627 5.23a.786.786 0 00-1.111 0l-1.111 1.112a.786.786 0 101.11 1.11l1.112-1.11a.786.786 0 000-1.111zm4.444 1.842a.786.786 0 00-.785.786V18.5a.786.786 0 001.571 0v-1.571a.786.786 0 00-.786-.786zm6.667-.73l-1.11-1.111a.786.786 0 10-1.112 1.11l1.111 1.112a.782.782 0 001.111 0 .786.786 0 000-1.111zm1.976-6.342h-1.571a.786.786 0 000 1.572h1.571a.786.786 0 000-1.572zm-1.976-5.88a.786.786 0 00-1.11 0L14.015 4.3a.786.786 0 101.111 1.111l1.111-1.11a.786.786 0 000-1.112zM9.571.428a.786.786 0 00-.785.785v1.572a.786.786 0 001.571 0V1.214A.786.786 0 009.571.43zm0 4.321a5.113 5.113 0 00-5.107 5.107 5.113 5.113 0 005.107 5.107 5.113 5.113 0 005.107-5.107A5.113 5.113 0 009.572 4.75zm0 8.643a3.54 3.54 0 01-3.535-3.536A3.54 3.54 0 019.57 6.321a3.54 3.54 0 013.536 3.536 3.54 3.54 0 01-3.536 3.536z"
@@ -384,9 +386,9 @@ export const SunIcon: React.FC<svgInterface> = ({ width = 19, height = 20, ...ot
   );
 };
 
-export const TemperatureIcon: React.FC<svgInterface> = ({ width = 39, height = 39, ...rest }) => {
+export const TemperatureIcon: React.FC<svgInterfaceWithSize> = ({ width = 39, height = 39, size = 39, ...rest }) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 39 39" {...rest}>
+    <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 39 39" {...rest}>
       <rect width="38" height="38" x="0.289" y="0.133" fill="url(#paint0_linear_4216_50376)" rx="8"></rect>
       <path fill="#fff" d="M15.575 17.655v-4.88a3.714 3.714 0 117.428 0v4.88a6.5 6.5 0 11-7.428 0zm0 5.335a3.714 3.714 0 107.428 0h-7.428z"></path>
       <defs>
@@ -399,9 +401,9 @@ export const TemperatureIcon: React.FC<svgInterface> = ({ width = 39, height = 3
   );
 };
 
-export const PressureIcon: React.FC<svgInterface> = ({ width = 39, height = 39, ...rest }) => {
+export const PressureIcon: React.FC<svgInterfaceWithSize> = ({ width = 39, height = 39, size = 39, ...rest }) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 39 39" {...rest}>
+    <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 39 39" {...rest}>
       <rect width="38" height="38" x="0.289" y="0.133" fill="url(#paint0_linear_4216_50384)" rx="8"></rect>
       <g clipPath="url(#clip0_4216_50384)">
         <path
@@ -422,9 +424,9 @@ export const PressureIcon: React.FC<svgInterface> = ({ width = 39, height = 39, 
   );
 };
 
-export const VolumeIcon: React.FC<svgInterface> = ({ width = 39, height = 39, ...rest }) => {
+export const VolumeIcon: React.FC<svgInterfaceWithSize> = ({ width = 39, height = 39, size = 39, ...rest }) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 39 39" {...rest}>
+    <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 39 39" {...rest}>
       <rect width="38" height="38" x="0.289" y="0.133" fill="url(#paint0_linear_4216_50391)" rx="8"></rect>
       <path
         fill="#fff"
@@ -440,9 +442,9 @@ export const VolumeIcon: React.FC<svgInterface> = ({ width = 39, height = 39, ..
   );
 };
 
-export const AiIcon: React.FC<svgInterface> = ({ width = 37, height = 37, ...rest }) => {
+export const AiIcon: React.FC<svgInterfaceWithSize> = ({ width = 37, height = 37, size = 37, ...rest }) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 37 37" {...rest}>
+    <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 37 37" {...rest}>
       <g clipPath="url(#clip0_4397_52762)">
         <path
           fill="#263238"
@@ -473,9 +475,9 @@ export const AiIcon: React.FC<svgInterface> = ({ width = 37, height = 37, ...res
   );
 };
 
-export const LightIcon: React.FC<svgInterface> = ({ width = 19, height = 19, ...rest }) => {
+export const LightIcon: React.FC<svgInterfaceWithSize> = ({ width = 19, height = 19, size = 19, ...rest }) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 19 19">
+    <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 19 19">
       <path
         fill="#50758D"
         d="M11.523 15.317v.456a1.073 1.073 0 01-1.073 1.073H8.805a1.073 1.073 0 01-1.073-1.073v-.456c.142.063.3.098.465.098h2.861c.166 0 .323-.035.465-.098z"
@@ -505,6 +507,23 @@ export const LightIcon: React.FC<svgInterface> = ({ width = 19, height = 19, ...
         fill="#FAA515"
         d="M9.7 9.745a.59.59 0 01-.904.033l-1.68-1.86a.59.59 0 01.875-.79l1.208 1.337 1.929-2.484a.59.59 0 11.932.724L9.7 9.745z"
       ></path>
+    </svg>
+  );
+};
+
+export const AssetAvailabilityIcon: React.FC<svgInterfaceWithSize> = ({ width = 0, height = 0, size = 24, ...rest }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} {...rest} fill="none" viewBox="0 0 104 104">
+      <g fill="currentcolor" clipPath="url(#clip0_4465_51908)">
+        <path d="M81.48 43.333h5.2a1.733 1.733 0 001.734-1.733v-5.2a1.734 1.734 0 00-3.466 0v3.467H81.48a1.733 1.733 0 000 3.466zM40.704 36.4a6.934 6.934 0 10-.001-13.868 6.934 6.934 0 000 13.868zm0-10.4a3.467 3.467 0 110 6.934 3.467 3.467 0 010-6.934z"></path>
+        <path d="M2.84 35.825a5.17 5.17 0 007.263-2.912l13.63-.211-2.378 1.965a1.732 1.732 0 00-.4 2.204l3.24 5.596.07 7.8h-8.65c-.102.01-.203.03-.3.06a5.2 5.2 0 100 3.345c.097.03.198.051.3.061h10.4a1.732 1.732 0 001.733-1.748l-.08-8.785 5.547-2.08c.37.24.753.464 1.145.669l1.17 7.027a1.733 1.733 0 001.711 1.447h.907v8.667h-5.2a1.733 1.733 0 00-1.734 1.733V85.95L16.122 101.04A1.734 1.734 0 0017.348 104h55.466a1.736 1.736 0 001.6-1.07 1.734 1.734 0 00-.374-1.889L62.414 89.416v-9.203l3.88-6.463c6.549 3.95 10.507 5.983 11.72 5.983h10.4A1.734 1.734 0 0090.148 78v-9.682l2.957-2.957a1.75 1.75 0 00.51-1.228v-5.2h2.532a3.466 3.466 0 003.169-4.874l-5.39-12.133a13.47 13.47 0 003.155-8.697A30.093 30.093 0 0080.355 6.167l-5.028-2.517a1.732 1.732 0 00-2.183.544L72.417 5.2H60.681V1.733A1.733 1.733 0 0058.948 0H41.614a1.733 1.733 0 00-1.733 1.733v6.934h-2.645a1.733 1.733 0 00-1.71 1.449l-1.17 7.025c-.393.205-.775.428-1.147.669l-6.675-2.501a1.733 1.733 0 00-2.109.756l-1.748 3.028c-.044 0-.08-.026-.126-.026H12.148v-5.52a5.199 5.199 0 00-1.734-10.102 5.2 5.2 0 00-1.733 10.102V20.8a1.734 1.734 0 001.733 1.733h10.374a1.716 1.716 0 00.567 1.734l5.498 4.527c0 .127 0 .256-.01.385l-16.748.258a5.2 5.2 0 10-7.255 6.387zm7.574 17.908a1.733 1.733 0 110-3.466 1.733 1.733 0 010 3.466zm0-46.8a1.734 1.734 0 110 3.467 1.734 1.734 0 010-3.467zm31.2 43.334h2.556a1.733 1.733 0 001.708-1.448l1.172-7.027c.392-.204.774-.427 1.144-.669l6.679 2.502a1.731 1.731 0 002.109-.756l.734-1.269h8.165c.128-.01.254-.036.376-.076l3.091 4.12v2.89h-6.933V52h3.999l-4.642 1.856a1.733 1.733 0 00-1.09 1.61v3.467H41.614v-8.666zm18.834-28.198l-.73-1.269h4.43v6.933h-8.301l4.203-3.466a1.733 1.733 0 00.398-2.198zm3.7 9.131v6.933h-4.43l.73-1.268a1.733 1.733 0 00-.398-2.198L55.847 31.2h8.3zM52.522 74.025l6.426 6.426v1.016h-10.4V62.4h3.466v10.4c0 .46.183.9.508 1.225zM41.535 97.067h.08v-.09l6.505-7.434c.276-.317.428-.723.428-1.143v-3.467h3.466v15.6h-13.52l3.041-3.466zm-20.003 3.466l12.641-12.64c.325-.326.508-.767.508-1.226V62.4h10.4v25.348l-3.467 3.963V83.2h-3.466v12.48l-4.254 4.853H21.532zm47.098 0H55.481v-15.6h3.467v5.2c0 .46.183.9.508 1.226l9.174 9.174zm-8.296-23.594l-4.853-4.853V62.4h5.2v6.933a1.735 1.735 0 00.814 1.47c.647.406 1.231.763 1.841 1.139l-3.002 4.997zM75.097 7.412l3.706 1.855A26.645 26.645 0 0193.615 33.23a10.036 10.036 0 01-2.96 7.145 1.733 1.733 0 00-.358 1.928l5.85 13.164H91.88a1.734 1.734 0 00-1.733 1.733v5.2h-.298a10.033 10.033 0 01-7.143-2.959 1.734 1.734 0 00-2.451 2.451 13.436 13.436 0 007.602 3.814l-.669.668a1.733 1.733 0 00-.508 1.226v8.667l-8.502.01a92.156 92.156 0 01-11.57-6.396l-.009-.009h-.01c-.816-.496-1.635-.998-2.442-1.5V56.64l7.577-3.03a1.734 1.734 0 001.09-1.61v-6.933c0-.375-.122-.74-.347-1.04l-4.854-6.47v-19.67l7.483-10.475zm-31.75-3.945h13.867v3.466a1.733 1.733 0 001.734 1.734h10.994l-5.47 7.66a1.714 1.714 0 00-.324 1.006h-6.432l-.734-1.268a1.732 1.732 0 00-2.11-.756l-6.671 2.501c-.37-.241-.752-.464-1.144-.669l-1.179-7.027a1.733 1.733 0 00-1.708-1.447h-.822v-5.2zM24.693 22.533l1.998-3.466 6.155 2.307a1.732 1.732 0 001.645-.235c.652-.491 1.36-.904 2.11-1.23a1.732 1.732 0 001.026-1.309l1.078-6.467H42.7l1.079 6.469a1.733 1.733 0 001.025 1.309c.75.326 1.457.74 2.11 1.23a1.73 1.73 0 001.643.235l6.157-2.31 1.997 3.467-5.07 4.173a1.733 1.733 0 00-.62 1.544 9.32 9.32 0 010 2.437 1.737 1.737 0 00.62 1.545l5.07 4.168-1.997 3.467-6.157-2.307a1.73 1.73 0 00-1.643.234c-.653.49-1.36.904-2.11 1.23a1.733 1.733 0 00-1.025 1.309L42.7 46.8h-3.999l-1.075-6.469a1.732 1.732 0 00-1.025-1.308 10.37 10.37 0 01-2.11-1.23 1.732 1.732 0 00-1.645-.235l-6.157 2.309-1.998-3.467 5.07-4.173c.03-.03.06-.061.088-.094.034-.033.065-.066.096-.101.13-.14.235-.302.311-.478l.011-.02c.072-.19.11-.393.111-.597a.602.602 0 00.014-.075c0-.02-.01-.038-.012-.059-.002-.021 0-.08 0-.12a9.33 9.33 0 010-2.437 1.736 1.736 0 00-.62-1.544l-5.07-4.169zM3.673 30.408a1.714 1.714 0 011.013-.867 1.733 1.733 0 011.06 3.293 1.734 1.734 0 01-2.18-1.12c-.138-.432-.1-.902.107-1.306z"></path>
+        <path d="M38.148 69.334h3.467V72.8h-3.467v-3.466zm0 6.933h3.467v3.467h-3.467v-3.467zm10.4-27.733h3.467V52h-3.467v-3.467zm6.934 0h3.466V52h-3.466v-3.467zm15.6-31.2h3.466v6.933h-3.466v-6.933zm0 10.4h3.466V31.2h-3.466v-3.466zm0 6.933h3.466v3.466h-3.466v-3.466z"></path>
+      </g>
+      <defs>
+        <clipPath id="clip0_4465_51908">
+          <path fill="transparent" d="M0 0H104V104H0z"></path>
+        </clipPath>
+      </defs>
     </svg>
   );
 };
