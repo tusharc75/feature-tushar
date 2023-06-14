@@ -110,9 +110,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       .then(({ data: { data } }) => {
         const rows: any = data;
         setProducts(rows);
-        if (rows?.length === 0) {
-          setCanFulfil(true);
-        } else if (rows?.filter((e) => e.baseWarehouse)?.length === rows?.filter((e) => e.baseWarehouse && e.qty <= e.assetAvailable)?.length) {
+        if (rows?.length > 0 && rows?.filter((e) => e.baseWarehouse)?.length === rows?.filter((e) => e.baseWarehouse && e.qty <= e.assetAvailable)?.length) {
           setCanFulfil(true);
         }
       })
@@ -165,19 +163,27 @@ export default function AssetAvailability({ rentalId, handleClose }) {
               {products
                 ?.filter((e) => e.baseWarehouse && e.qty > e.assetAvailable)
                 ?.map((product) => (
-                  <ShowProduct product={product} />
+                  <ShowProduct key={product._id} product={product} />
                 ))}
             </div>
             {products?.filter((e) => !e.baseWarehouse)?.length > 0 && (
               <Box pt={3} style={{ ...styles.cardWithPb, ...styles.minH }}>
                 <Typography
-                  style={{ fontSize: '16px', fontWeight: '500' }}
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    background: '#FFAE00',
+                    padding: '2px 15px',
+                    borderRadius: '8px',
+                    maxWidth: 'max-content',
+                    color: '#fff'
+                  }}
                 >{`Serialized Assets are available in other ${routes.warehouse.title}`}</Typography>
                 <div className="mt-2">
                   {products
                     ?.filter((e) => !e.baseWarehouse)
                     ?.map((product) => (
-                      <ShowProduct product={product} />
+                      <ShowProduct key={product._id} product={product} />
                     ))}
                   <div className="mt-3" style={{ ...styles.buttonContaier }}>
                     <Button
