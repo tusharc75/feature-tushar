@@ -583,7 +583,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           <Box display="flex" ml={1}>
             {rowsData?.length > 0 && (
               <Box mr={1}>
-                <HtmlTooltip title="Check Assets Availability">
+                <HtmlTooltip title="Check Assets Availability" arrow placement="top">
                   <IconButton
                     size="small"
                     aria-label="Details"
