@@ -127,7 +127,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       });
     } else {
       setModalContent({
-        title: 'Unable to fulfill Asset requirement(s) from this Plant.',
+        title: `Unable to fulfill Asset requirement(s) from this ${routes.warehouse.title}.`,
         icon: <ErrorIcon color="error" />
       });
     }
