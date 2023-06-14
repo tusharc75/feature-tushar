@@ -704,6 +704,7 @@ const ProductDetailsPage = () => {
             onClose={() => setOpenProductInventoryDialog(false)}
             onSuccess={() => {
               setOpenProductInventoryDialog(false);
+              setSelectedWarehouse(null);
               if (permissions?.serializedAsset) {
                 getWarehouses();
               }
