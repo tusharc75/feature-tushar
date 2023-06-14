@@ -35,6 +35,7 @@ import { ResourceDropdown } from './resourceDropdown';
 import { MinMax } from '../AddField/minMax';
 import { getLookupResource } from '../helper';
 import FieldDependent from './FieldDependent';
+import LookUpDisplay from './LookUpDisplay';
 
 const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
@@ -866,42 +867,15 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   )}
                   {fieldData.type === 'lookUpDisplay' && (
                     <Box pt={1} pb={1}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={6} sm={6} md={6}>
-                          <TextField
-                            variant="outlined"
-                            type="text"
-                            label="Look Up Field"
-                            required={true}
-                            name="lookUpField"
-                            fullWidth
-                            margin="dense"
-                            value={values['lookUpField']}
-                            error={touched['lookUpField'] && Boolean(errors['lookUpField'])}
-                            helperText={touched['lookUpField'] && errors['lookUpField']}
-                            onChange={(e) => {
-                              setFieldValue('lookUpField', e.target.value.trimStart());
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={6} sm={6} md={6}>
-                          <TextField
-                            variant="outlined"
-                            type="text"
-                            label="Look Up Field Display"
-                            required={true}
-                            name="lookUpFieldDisplay"
-                            fullWidth
-                            margin="dense"
-                            value={values['lookUpFieldDisplay']}
-                            error={touched['lookUpFieldDisplay'] && Boolean(errors['lookUpFieldDisplay'])}
-                            helperText={touched['lookUpFieldDisplay'] && errors['lookUpFieldDisplay']}
-                            onChange={(e) => {
-                              setFieldValue('lookUpFieldDisplay', e.target.value.trimStart());
-                            }}
-                          />
-                        </Grid>
-                      </Grid>
+                      <LookUpDisplay
+                        lookupFields={lookupResource}
+                        values={values}
+                        fieldSet={(name, value) => {
+                          setFieldValue(name, value);
+                        }}
+                        touched={touched}
+                        errors={errors}
+                      />
                     </Box>
                   )}
                   <Box pt={1} pb={1}>
