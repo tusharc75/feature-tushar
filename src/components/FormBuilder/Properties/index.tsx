@@ -543,43 +543,43 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     values['type'] === 'formula' ||
                     values['type'] === 'converter' ||
                     values['type'] === 'currencyAmount') && (
-                    <Grid spacing={3} container>
-                      {values['type'] === 'formula' && (
-                        <Grid item xs={12} sm={6} md={6}>
-                          <FormControl fullWidth margin="dense" variant="outlined">
-                            <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                            <Select
-                              labelId="demo-simple-select-outlined-label"
-                              id="demo-simple-select-outlined"
-                              value={values['returnType']}
-                              onChange={(e) => {
-                                setFieldValue('returnType', e.target.value);
-                              }}
-                              label="Return Type"
-                              name="returnType"
-                            >
-                              <MenuItem value="decimal">Decimal</MenuItem>
-                              <MenuItem value="string">String</MenuItem>
-                              <MenuItem value="boolean">Boolean</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                      )}
-                      {(values['type'] === 'decimal' ||
-                        values['type'] === 'converter' ||
-                        values['type'] === 'currencyAmount' ||
-                        values['returnType'] === 'decimal') && (
-                        <Grid item xs={12} sm={6} md={6}>
-                          <DecimalPlaces
-                            values={values}
-                            setFieldValue={(name, value) => {
-                              setFieldValue(name, value);
-                            }}
-                          />
-                        </Grid>
-                      )}
-                    </Grid>
-                  )}
+                      <Grid spacing={3} container>
+                        {values['type'] === 'formula' && (
+                          <Grid item xs={12} sm={6} md={6}>
+                            <FormControl fullWidth margin="dense" variant="outlined">
+                              <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                              <Select
+                                labelId="demo-simple-select-outlined-label"
+                                id="demo-simple-select-outlined"
+                                value={values['returnType']}
+                                onChange={(e) => {
+                                  setFieldValue('returnType', e.target.value);
+                                }}
+                                label="Return Type"
+                                name="returnType"
+                              >
+                                <MenuItem value="decimal">Decimal</MenuItem>
+                                <MenuItem value="string">String</MenuItem>
+                                <MenuItem value="boolean">Boolean</MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Grid>
+                        )}
+                        {(values['type'] === 'decimal' ||
+                          values['type'] === 'converter' ||
+                          values['type'] === 'currencyAmount' ||
+                          values['returnType'] === 'decimal') && (
+                            <Grid item xs={12} sm={6} md={6}>
+                              <DecimalPlaces
+                                values={values}
+                                setFieldValue={(name, value) => {
+                                  setFieldValue(name, value);
+                                }}
+                              />
+                            </Grid>
+                          )}
+                      </Grid>
+                    )}
                   {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && (
                     <Fragment>
                       <FormControlLabel
@@ -636,37 +636,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                               setFieldValue(name, value);
                             }}
                           />
-                          {/* <Box pt={1} pb={1}>
-                            <Grid container>
-                              <Grid item xs={6} sm={6} md={6}>
-                                <Autocomplete
-                                  id="tags-filled"
-                                  options={fields && fields.filter((_f) => _f._id !== values["_id"] && _f.type === "dropDown" && _f?.lookup)}
-                                  getOptionLabel={(option: any) =>
-                                    option ? option.fieldLabel : ""
-                                  }
-                                  getOptionSelected={(option: any, val) =>
-                                    option.fieldName === val
-                                  }
-                                  value={fields && fields.filter((data) => data.fieldName === values["lookupDependentOn"]).length
-                                    ? fields && fields.filter((data) => data.fieldName === values["lookupDependentOn"])[0] : ""
-                                  }
-                                  onChange={(e, val) => {
-                                    setFieldValue("lookupDependentOn", val && val.fieldName ? val.fieldName : "");
-                                  }}
-                                  renderInput={(params) => (
-                                    <TextField
-                                      {...params}
-                                      margin="dense"
-                                      variant="outlined"
-                                      label="Lookup Dependent On"
-                                      placeholder="Lookup Dependent On"
-                                    />
-                                  )}
-                                />
-                              </Grid>
-                            </Grid>
-                          </Box> */}
                         </Box>
                       )}
                     </Fragment>
@@ -868,13 +837,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   {fieldData.type === 'lookUpDisplay' && (
                     <Box pt={1} pb={1}>
                       <LookUpDisplay
-                        lookupFields={lookupResource}
+                        fields={fields}
                         values={values}
                         fieldSet={(name, value) => {
                           setFieldValue(name, value);
                         }}
-                        touched={touched}
-                        errors={errors}
                       />
                     </Box>
                   )}
