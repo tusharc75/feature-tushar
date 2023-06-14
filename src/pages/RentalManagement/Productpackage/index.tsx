@@ -582,7 +582,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           <Box display="flex" ml={1}>
             {rowsData?.filter((e) => e?.serializedProduct)?.length > 0 && (
               <Box mr={1}>
-                <HtmlTooltip title="Check Assets Availability">
+                <HtmlTooltip title="Check Assets Availability" arrow placement="top">
                   <IconButton
                     size="small"
                     aria-label="Details"
@@ -590,7 +590,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                       setOpenAssetAvailibility(true);
                     }}
                   >
-                    <AssetAvailabilityIcon color={'#163340'} size={24} />
+                    <AssetAvailabilityIcon color={'var(--dark-primary-text, #163340)'} size={24} />
                   </IconButton>
                 </HtmlTooltip>
               </Box>
