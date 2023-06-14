@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
   notificationContent: {
     maxHeight: '640px',
     overflow: 'auto',
-    border: '1px solid #eadfdf',
+    border: '1px solid var(--common-border-color)',
     margin: '2px'
   },
   markAll: {
@@ -100,6 +100,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Header = ({ toggleDrawer, isDrawerOpen }) => {
   const [themeColor, toggleThemeColor] = useAppTheme();
+
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
 
@@ -540,7 +541,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
             return (
               <div
                 style={{
-                  borderBottom: d.read ? '1px solid lightgrey' : '1px solid white'
+                  borderBottom: '1px solid var(--common-border-color)'
                 }}
                 className={`${d.read === true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
                 key={index}
@@ -584,27 +585,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
               </div>
             );
           })}
-          <div
-            style={{
-              borderBottom: true ? '1px solid lightgrey' : '1px solid white'
-            }}
-            className={`${true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
-          >
-            {
-              <>
-                <Grid container>
-                  <Grid item xs={2} md={2}>
-                    <Avatar style={{ height: 30, width: 30 }} src={''}></Avatar>
-                  </Grid>
-                  <Grid item xs={10} md={10}>
-                    <h6>11/10/12</h6>
-                    <h4>Sample Title</h4>
-                    <h5>Description</h5>
-                  </Grid>
-                </Grid>
-              </>
-            }
-          </div>
         </div>
         {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
         View All &#8599;
@@ -869,7 +849,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
           ) : (
             <NotificationContent data={notificationList} />
           )}
-          <NotificationContent data={notificationList} />
         </Popover>
       </MenuItem>
 
@@ -1075,8 +1054,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                   ) : (
                     <NotificationContent data={notificationList} />
                   )}
-
-                  <NotificationContent data={notificationList} />
                 </Popover>
               </div>
 
