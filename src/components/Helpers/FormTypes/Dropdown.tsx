@@ -345,6 +345,7 @@ function Dropdown({
                     </IconButton>
                     {lookupDialog && (
                       <ManageStorageLocation
+                        referenceData={{ warehouse: values[fieldData.lookupDependentOn] }}
                         storageLocationId={null}
                         onClose={() => setLookupDialog(false)}
                         isClone={false}
