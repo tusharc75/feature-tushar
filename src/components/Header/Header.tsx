@@ -1075,6 +1075,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                   ) : (
                     <NotificationContent data={notificationList} />
                   )}
+
                   <NotificationContent data={notificationList} />
                 </Popover>
               </div>
