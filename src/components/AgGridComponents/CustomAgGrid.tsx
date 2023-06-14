@@ -181,7 +181,6 @@ export default function CustomAgGrid({
   showFilters = false,
   resource = null
 }) {
-  console.log(cols)
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
 
