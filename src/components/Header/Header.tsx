@@ -584,6 +584,27 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
               </div>
             );
           })}
+          <div
+            style={{
+              borderBottom: true ? '1px solid lightgrey' : '1px solid white'
+            }}
+            className={`${true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
+          >
+            {
+              <>
+                <Grid container>
+                  <Grid item xs={2} md={2}>
+                    <Avatar style={{ height: 30, width: 30 }} src={''}></Avatar>
+                  </Grid>
+                  <Grid item xs={10} md={10}>
+                    <h6>11/10/12</h6>
+                    <h4>Sample Title</h4>
+                    <h5>Description</h5>
+                  </Grid>
+                </Grid>
+              </>
+            }
+          </div>
         </div>
         {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
         View All &#8599;
@@ -848,6 +869,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
           ) : (
             <NotificationContent data={notificationList} />
           )}
+          <NotificationContent data={notificationList} />
         </Popover>
       </MenuItem>
 
@@ -1053,6 +1075,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                   ) : (
                     <NotificationContent data={notificationList} />
                   )}
+                  <NotificationContent data={notificationList} />
                 </Popover>
               </div>
 
