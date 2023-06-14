@@ -27,6 +27,7 @@ import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceD
 import { generateCustomTableColumns, flattenArray } from 'src/constants/columns';
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AssetAvailability from '../AssetAvailability';
+import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 
 const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -590,7 +591,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                       setOpenAssetAvailibility(true);
                     }}
                   >
-                    <AssignmentTurnedInIcon color={'primary'} />
+                    <AssetAvailabilityIcon color={'#163340'} size={24} />
                   </IconButton>
                 </HtmlTooltip>
               </Box>
