@@ -66,9 +66,8 @@ function dropdownOptions(options, values, fields, fieldData) {
   }
 
   if (lookupDependentOn && !isEmpty(lookupDependentOn)) {
-    const fieldName = fields?.find((e) => e.fieldName === lookupDependentOn)?.fieldName
     const lookupResource = fields?.find((e) => e.fieldName === lookupDependentOn)?.lookupResource
-    const value = values[lookupDependentOn] || values[fieldName];
+    const value = values[lookupDependentOn] || values[camelCase(lookupResource)];
     if (value) {
       const newOptions = options?.filter((option: any) => option[lookupDependentOn]?.includes(value) || option[camelCase(lookupResource)]?.includes(value)) || [];
       optionsToShow.push(...newOptions);
@@ -228,8 +227,7 @@ function Dropdown({
                             addFieldOption(tempNewOption);
                             setOptionsList([tempNewOption, ...option]);
                             if (fieldData.lookupDependentOn) {
-                              if (
-                                data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
+                              if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
                                 data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
                               ) {
                                 handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
