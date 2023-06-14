@@ -46,7 +46,7 @@ import styles from './Header.module.scss';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
 
 import { SearchBar } from './SearchBar';
-import DashboardModal, { ModalContent } from '../DashboardModal';
+import DashboardModal, { ModalHead } from '../DashboardModal';
 import { userManual } from 'src/pages/Home';
 import { FiExternalLink } from 'react-icons/fi';
 import { SVG } from 'src/assets';
@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
   notificationContent: {
     maxHeight: '640px',
     overflow: 'auto',
-    border: '1px solid #eadfdf',
+    border: '1px solid var(--common-border-color)',
     margin: '2px'
   },
   markAll: {
@@ -100,6 +100,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Header = ({ toggleDrawer, isDrawerOpen }) => {
   const [themeColor, toggleThemeColor] = useAppTheme();
+
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
 
@@ -140,7 +141,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
   const scrollPos = useScrollDirection(40);
 
-  const [modalContent, setModalContent] = useState<ModalContent | null>(null);
+  const [modalContent, setModalContent] = useState<ModalHead | null>(null);
 
   const openHelperModal = () => {
     setModalContent({ title: 'Equipt - User Manual', icon: <img src={SVG('LogoNewShort')} alt="equipt logo" /> });
@@ -540,7 +541,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
             return (
               <div
                 style={{
-                  borderBottom: d.read ? '1px solid lightgrey' : '1px solid white'
+                  borderBottom: '1px solid var(--common-border-color)'
                 }}
                 className={`${d.read === true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
                 key={index}
@@ -1013,10 +1014,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                     aria-label="Them switcher"
                     color="inherit"
                     className={styles.showIconLayout}
-                    style={{
-                      opacity: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 1 : 0,
-                      pointerEvents: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 'all' : 'none'
-                    }}
                   >
                     {themeColor === 'light' ? <MoonIcon /> : <SunIcon />}
                   </IconButton>
@@ -1117,10 +1114,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                 aria-label="Them switcher"
                 color="inherit"
                 className={styles.showIconLayout}
-                style={{
-                  opacity: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 1 : 0,
-                  pointerEvents: !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? 'all' : 'none'
-                }}
               >
                 {themeColor === 'light' ? <MoonIcon /> : <SunIcon />}
               </IconButton>
@@ -1146,7 +1139,11 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
           {is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
         </Toolbar>
       </AppBar>
-      <DashboardModal modalContent={modalContent} handleClose={handleCloseHelperModal} style={{ position: 'relative' }}>
+      <DashboardModal
+        modalHead={modalContent}
+        handleClose={handleCloseHelperModal}
+        style={{ position: 'relative', width: 'min(468px, calc(100vw - 64px))' }}
+      >
         <a title="open equipt documentation" href={userManual.link} target="_blank" className={styles.viewAll} onClick={handleCloseHelperModal}>
           <Typography component="span">Equipt - User Manual</Typography>
           <FiExternalLink size={20} style={{ marginBottom: 4 }} />

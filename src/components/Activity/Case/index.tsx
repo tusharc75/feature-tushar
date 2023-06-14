@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useContext } from 'react';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import { CreateCase } from './CreateCase';
@@ -16,6 +16,7 @@ import ActivityLoader from '../../Helpers/ActivityLoader';
 import { isMobile, isTablet } from 'react-device-detect';
 import { dateFormat, CustomDialogTransition } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -27,6 +28,7 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     state: { permissions }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     fetchCash();
@@ -66,12 +68,19 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const handleDelete = (event) => {
     event.stopPropagation();
     DeleteCase(caseId)
-      .then(({ data }) => {
+      .then((data) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         setAnchorEl(null);
         fetchCash();
         handleActivityRefresh();
       })
-      .catch((err) => {});
+      .catch((error) => { 
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleClose = () => {

@@ -69,7 +69,6 @@ const SerializedAssetTest = () => {
   const [plantOptions, setPlantOptions] = useState([]);
   const [selectedPlant, setSelectedPlant] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
-  const [isNonSerializedAsset, setNonSerializedAsset] = useState(false);
 
   const {
     state: { permissions }
@@ -108,7 +107,6 @@ const SerializedAssetTest = () => {
     productCategory,
     productFilter,
     subleaseAsset,
-    isNonSerializedAsset,
     showFilteredRecordsOnly
   ]);
 
@@ -338,11 +336,6 @@ const SerializedAssetTest = () => {
       deepFilter = `${deepFilter}&subleaseAsset=1`;
     } else {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
-    }
-    if (isNonSerializedAsset) {
-      deepFilter = `${deepFilter}&isNonSerializedAsset=1`;
-    } else {
-      deepFilter = `${deepFilter}&isNonSerializedAsset=0`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = selectedRecords;
@@ -605,19 +598,6 @@ const SerializedAssetTest = () => {
                       label="Sublease Assets"
                     />
                   )}
-                  {/* <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="isNonSerializedAsset"
-                        checked={isNonSerializedAsset}
-                        onChange={(e) => {
-                          setNonSerializedAsset(e.target.checked);
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Non Serialized Assets"
-                  /> */}
                 </Fragment>
               )}
             </Grid>
@@ -824,7 +804,6 @@ const SerializedAssetTest = () => {
       </div>
       {showManageProductInventoryDialog.open && (
         <ManageSerializedAsset
-          isNew={true}
           isClone={showManageProductInventoryDialog.isClone}
           productInventoryId={showManageProductInventoryDialog.idToClone}
           onClose={() => setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null })}

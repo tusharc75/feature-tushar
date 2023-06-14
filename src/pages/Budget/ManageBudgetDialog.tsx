@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext, Fragment } from 'react';
-import { Box, Button, Grid, IconButton, Tooltip, InputAdornment } from '@material-ui/core';
+import { useEffect, useState, useContext, Fragment } from 'react';
+import { Box, Button, Grid, Tooltip, InputAdornment } from '@material-ui/core';
 import { Formik, Form } from 'formik';
 import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../axios/axiosInstance';
@@ -10,7 +10,6 @@ import {
   budget,
   setFieldsInAscendingOrder,
   getUniqueCurrencies,
-  formFieldNames
 } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -20,12 +19,9 @@ import CustomButton from '../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import PropTypes from 'prop-types';
-import AddIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../constants/helpers';
-import CreateProductCategory from '../ProductCategory/CreateProductCategory';
-import ManageMarketSegmentDialog from '../MarketSegment/ManageMarketSegmentDialog';
 import { useData } from '../../StateProvider/Provider';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
@@ -64,20 +60,9 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [currency, setCurrency] = useState(null);
 
-  const [showAddProductCategoryDialog, setShowAddProductCategoryDialog] = useState(false);
-  const [productCategoryDataSource, setProductCategoryDataSource] = useState([]);
-  const [newProductCategoryId, setNewProductCategoryId] = useState(null);
-
   const [salesRepDataSource, setSalesRepDataSource] = useState([]);
   const [usersDataSource, setUsersDataSource] = useState([]);
 
-  const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
-
-  const [mainMarketSegmentDataSource, setMainMarketSegmentDataSource] = useState([]);
-  const [marketSegmentDataSource, setMarketSegmentDataSource] = useState([]);
-  const [newMarketSegmentId, setNewMarketSegmentId] = useState(null);
-  const [subMarketSegmentDataSource, setSubMarketSegmentDataSource] = useState([]);
-  const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -119,21 +104,6 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
       .then(({ data: { data } }) => {
         const filterData = budgetId ? data.filter((d) => d.isUpdate) : data.filter((d) => d.isCreate);
 
-        //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
-        const marketSegmentDropdownData = filterData.map((m) => m.fieldData).find((d) => d.fieldName === formFieldNames.marketSegment);
-        if (marketSegmentDropdownData) {
-          setMainMarketSegmentDataSource(marketSegmentDropdownData.option);
-
-          let initializeMarketSegmentDataSource = [];
-          marketSegmentDropdownData.option.forEach((option) => {
-            if (option.parentMarketSegment === '' || marketSegmentDropdownData.option.some((s) => s.parentMarketSegment === option.optionValue)) {
-              initializeMarketSegmentDataSource.push(option);
-            }
-          });
-          setMarketSegmentDataSource(initializeMarketSegmentDataSource);
-        }
-
-        //  Check sales rep field
         const salesRepDropdownData = filterData.map((m) => m.fieldData).find((d) => d.fieldName === 'salesRep');
         if (salesRepDropdownData) {
           setUsersDataSource(salesRepDropdownData.option);
@@ -151,15 +121,9 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                 if (_f.fieldData.fieldName === 'currency') {
                   setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
                 }
-
                 newFields.push(_f.fieldData);
               });
 
-              if (marketSegmentDropdownData) {
-                setSubMarketSegmentDataSource(
-                  marketSegmentDropdownData.option.filter((d) => d.parentMarketSegment === data.marketSegment?.optionValue)
-                );
-              }
 
               let clonedData = { ...data };
 
@@ -178,25 +142,10 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
         } else {
           setInitialData({
             fields: filterData.map((m) => m.fieldData),
-            values: getObjKeys(
-              '',
-              filterData.map((m) => m.fieldData)
-            )
+            values: getObjKeys('', filterData.map((m) => m.fieldData))
           });
         }
-
-        if (filterData.length > 0) {
-          const productCategoryDropdownData = filterData.map((m) => m.fieldData).find((d) => d.fieldName === 'productCategory');
-
-          if (productCategoryDropdownData) {
-            setProductCategoryDataSource(productCategoryDropdownData.option);
-          }
-        }
       });
-  };
-
-  const marketSegmentChange = (marketSegmentId: string) => {
-    setSubMarketSegmentDataSource(marketSegmentId ? mainMarketSegmentDataSource.filter((d) => d.parentMarketSegment === marketSegmentId) : []);
   };
 
   const onSubmit = (values) => {
@@ -240,38 +189,6 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
     }
   };
 
-  const initializeProductCategoryDropdown = (values, productCategorySource) => {
-    if (values && values.hasOwnProperty('productCategory')) {
-      const getNewAddedProductCategory = productCategorySource.find((d) => d?.optionValue === newProductCategoryId);
-      if (getNewAddedProductCategory) {
-        values['productCategory'] = getNewAddedProductCategory.optionValue;
-      }
-      return values;
-    }
-    return values;
-  };
-
-  const initializeMarketSegmentDropdown = (values, marketSegmentSource) => {
-    if (values && values.hasOwnProperty(formFieldNames.marketSegment)) {
-      const getNewAddedMarketSegment = marketSegmentSource.find((d) => d?.optionValue === newMarketSegmentId);
-      if (getNewAddedMarketSegment) {
-        values[formFieldNames.marketSegment] = getNewAddedMarketSegment.optionValue;
-      }
-      return values;
-    }
-    return values;
-  };
-
-  const initializeSubMarketSegmentDropdown = (values, subMarketSegmentSource) => {
-    if (values && values.hasOwnProperty(formFieldNames.subMarketSegment)) {
-      const getNewAddedSubMarketSegment = subMarketSegmentSource.find((d) => d?.optionValue === newSubMarketSegmentId);
-      if (getNewAddedSubMarketSegment) {
-        values[formFieldNames.subMarketSegment] = getNewAddedSubMarketSegment.optionValue;
-      }
-      return values;
-    }
-    return values;
-  };
 
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
@@ -303,15 +220,15 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
       >
         {initialData?.fields?.length ? (
           <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={onSubmit}>
-            {({ submitForm, values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
+            {({ submitForm, values, errors, touched, setFieldValue }) => (
               <Fragment>
                 <CustomDialogHeader
                   title={
                     isClone
                       ? 'Clone'
                       : budgetId
-                      ? `Editing ${initialData.values && initialData.values['name'] ? initialData.values['name'] : ''}`
-                      : 'Create Budget'
+                        ? `Editing ${initialData.values && initialData.values['name'] ? initialData.values['name'] : ''}`
+                        : 'Create Budget'
                   }
                   onClose={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -408,195 +325,6 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                       />
-                                    ) : field.fieldName === 'productCategory' ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                        <Grid container spacing={1}>
-                                          <Grid
-                                            item
-                                            xs={
-                                              //  TODO: Product category is not added in role, once implementation is done, please uncomment below lines
-                                              permissions.productCategory.isCreate ? 11 : 11
-                                            }
-                                            sm={permissions.productCategory.isCreate ? 11 : 11}
-                                            md={permissions.productCategory.isCreate ? 11 : 11}
-                                          >
-                                            <FormTypes
-                                              fields={initialData.fields}
-                                              fieldData={field}
-                                              disabled={Boolean(budgetId) && field.disableOnEdit}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              setFieldValue={(name, value) => {
-                                                setFieldValue(name, value);
-                                              }}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={field.isTooltip}
-                                              tooltipMessage={field.tooltipMessage}
-                                              onChange={(e, val) => {
-                                                setNewProductCategoryId(null);
-                                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                              }}
-                                              size="small"
-                                              values={
-                                                newProductCategoryId ? initializeProductCategoryDropdown(values, productCategoryDataSource) : values
-                                              }
-                                              options={productCategoryDataSource}
-                                              doNotShowInfoTooltip={true}
-                                            />
-                                          </Grid>
-                                          {permissions.productCategory.isCreate && (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Add Product Category" className="mt-1">
-                                                <IconButton
-                                                  onClick={() => {
-                                                    setShowAddProductCategoryDialog(true);
-                                                  }}
-                                                  disabled={Boolean(budgetId) && field.disableOnEdit}
-                                                  size="small"
-                                                >
-                                                  <AddIcon color={Boolean(budgetId) && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
-                                          )}
-                                          {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                <InfoIcon color="disabled" />
-                                              </Tooltip>
-                                            </Grid>
-                                          ) : null}
-                                        </Grid>
-                                      </Grid>
-                                    ) : field.fieldName === formFieldNames.marketSegment ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                        <Grid container spacing={1}>
-                                          <Grid
-                                            item
-                                            xs={permissions.marketSegment.isCreate ? 11 : 11}
-                                            sm={permissions.marketSegment.isCreate ? 11 : 11}
-                                            md={permissions.marketSegment.isCreate ? 11 : 11}
-                                          >
-                                            <FormTypes
-                                              fields={initialData.fields}
-                                              fieldData={field}
-                                              disabled={Boolean(budgetId) && field.disableOnEdit}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              setFieldValue={(name, value) => {
-                                                setFieldValue(name, value);
-                                              }}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={field.isTooltip}
-                                              tooltipMessage={field.tooltipMessage}
-                                              onChange={(e, val) => {
-                                                setNewMarketSegmentId(null);
-                                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                                setNewSubMarketSegmentId(null);
-                                                setFieldValue(formFieldNames.subMarketSegment, '');
-                                                marketSegmentChange(val && val.optionValue ? val.optionValue : '');
-                                              }}
-                                              size="small"
-                                              values={newMarketSegmentId ? initializeMarketSegmentDropdown(values, marketSegmentDataSource) : values}
-                                              options={marketSegmentDataSource}
-                                              doNotShowInfoTooltip={true}
-                                            />
-                                          </Grid>
-                                          {permissions.marketSegment.isCreate && (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Add Market Segment" className="mt-1">
-                                                <IconButton
-                                                  onClick={() => {
-                                                    setShowAddMarketSegmentDialog(true);
-                                                  }}
-                                                  disabled={Boolean(budgetId) && field.disableOnEdit}
-                                                  size="small"
-                                                >
-                                                  <AddIcon color={Boolean(budgetId) && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
-                                          )}
-                                          {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                <InfoIcon color="disabled" />
-                                              </Tooltip>
-                                            </Grid>
-                                          ) : null}
-                                        </Grid>
-                                      </Grid>
-                                    ) : field.fieldName === formFieldNames.subMarketSegment ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                        <Grid container spacing={1}>
-                                          <Grid
-                                            item
-                                            xs={permissions.marketSegment.isCreate ? 11 : 11}
-                                            sm={permissions.marketSegment.isCreate ? 11 : 11}
-                                            md={permissions.marketSegment.isCreate ? 11 : 11}
-                                          >
-                                            <FormTypes
-                                              fields={initialData.fields}
-                                              fieldData={field}
-                                              disabled={Boolean(budgetId) && field.disableOnEdit}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              setFieldValue={(name, value) => {
-                                                setFieldValue(name, value);
-                                              }}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={field.isTooltip}
-                                              tooltipMessage={field.tooltipMessage}
-                                              onChange={(e, val) => {
-                                                setNewSubMarketSegmentId(null);
-                                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                              }}
-                                              size="small"
-                                              values={
-                                                newSubMarketSegmentId
-                                                  ? initializeSubMarketSegmentDropdown(values, subMarketSegmentDataSource)
-                                                  : values
-                                              }
-                                              options={subMarketSegmentDataSource}
-                                              doNotShowInfoTooltip={true}
-                                            />
-                                          </Grid>
-                                          {permissions.marketSegment.isCreate && (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Add Sub Market Segment" className="mt-1">
-                                                <IconButton
-                                                  onClick={() => {
-                                                    setShowAddMarketSegmentDialog(true);
-                                                  }}
-                                                  disabled={Boolean(budgetId) && field.disableOnEdit}
-                                                  size="small"
-                                                >
-                                                  <AddIcon color={Boolean(budgetId) && field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
-                                          )}
-                                          {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                <InfoIcon color="disabled" />
-                                              </Tooltip>
-                                            </Grid>
-                                          ) : null}
-                                        </Grid>
-                                      </Grid>
                                     ) : field.fieldName === 'salesRep' ? (
                                       <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                         <Grid container spacing={1}>
@@ -638,6 +366,8 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                                       <FormTypes
                                         // {...rest}
                                         values={values}
+                                        fieldData={field}
+                                        fields={initialData.fields}
                                         errors={errors}
                                         touched={touched}
                                         label={field.fieldLabel}
@@ -729,123 +459,6 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                     }}
                   />
                 ) : null}
-                {showAddProductCategoryDialog && (
-                  <CreateProductCategory
-                    productCategoryId={null}
-                    onClose={() => setShowAddProductCategoryDialog(false)}
-                    onSuccess={(data) => {
-                      if (data?._id) {
-                        setProductCategoryDataSource((prevState) => {
-                          return [
-                            ...prevState,
-                            {
-                              optionValue: data._id,
-                              optionLabel: data.name,
-                              order: productCategoryDataSource.length,
-                              default: false
-                            }
-                          ];
-                        });
-                        setNewProductCategoryId(data._id);
-                      }
-                      setShowAddProductCategoryDialog(false);
-                    }}
-                  />
-                )}
-                {showAddMarketSegmentDialog && (
-                  <ManageMarketSegmentDialog
-                    marketSegmentId={null}
-                    onClose={() => {
-                      setShowAddMarketSegmentDialog(false);
-                    }}
-                    onSuccess={(data) => {
-                      if (data?._id) {
-                        setMainMarketSegmentDataSource((prevState) => {
-                          return [
-                            ...prevState,
-                            {
-                              optionValue: data._id,
-                              optionLabel: data.name,
-                              order: mainMarketSegmentDataSource.length,
-                              default: false,
-                              parentMarketSegment: data.parentMarketSegment
-                            }
-                          ];
-                        });
-
-                        //  If no parent selected, consider that as parent and add it in Market Segment
-                        if (data.parentMarketSegment === '') {
-                          setMarketSegmentDataSource((prevState) => {
-                            return [
-                              ...prevState,
-                              {
-                                optionValue: data._id,
-                                optionLabel: data.name,
-                                order: marketSegmentDataSource.length,
-                                default: false,
-                                parentMarketSegment: data.parentMarketSegment
-                              }
-                            ];
-                          });
-                          setSubMarketSegmentDataSource([]);
-                          setNewMarketSegmentId(data._id);
-                          setNewSubMarketSegmentId(null);
-                        } else {
-                          //  If parent selected, consider that as a child
-                          if (marketSegmentDataSource.some((d) => d?.optionValue === data.parentMarketSegment)) {
-                            setSubMarketSegmentDataSource([
-                              ...mainMarketSegmentDataSource.filter((s) => s.parentMarketSegment === data.parentMarketSegment),
-                              {
-                                optionValue: data._id,
-                                optionLabel: data.name,
-                                order: subMarketSegmentDataSource.length,
-                                default: false,
-                                parentMarketSegment: data.parentMarketSegment
-                              }
-                            ]);
-                          } else {
-                            let initializeMarketSegmentDataSource = [];
-                            mainMarketSegmentDataSource.forEach((option) => {
-                              if (
-                                option.parentMarketSegment === '' ||
-                                mainMarketSegmentDataSource.some((s) => s.parentMarketSegment === option.optionValue)
-                              ) {
-                                initializeMarketSegmentDataSource.push(option);
-                              }
-                            });
-
-                            if (!initializeMarketSegmentDataSource.some((s) => s.optionValue === data.parentMarketSegment)) {
-                              const getMarketSegment = mainMarketSegmentDataSource.find((d) => d?.optionValue === data.parentMarketSegment);
-
-                              initializeMarketSegmentDataSource.push({
-                                optionValue: getMarketSegment.optionValue,
-                                optionLabel: getMarketSegment.optionLabel,
-                                order: initializeMarketSegmentDataSource.length,
-                                default: false,
-                                parentMarketSegment: getMarketSegment.parentMarketSegment
-                              });
-                            }
-                            setMarketSegmentDataSource(initializeMarketSegmentDataSource);
-
-                            setSubMarketSegmentDataSource([
-                              ...mainMarketSegmentDataSource.filter((s) => s.parentMarketSegment === data.parentMarketSegment),
-                              {
-                                optionValue: data._id,
-                                optionLabel: data.name,
-                                order: subMarketSegmentDataSource.length,
-                                default: false,
-                                parentMarketSegment: data.parentMarketSegment
-                              }
-                            ]);
-                          }
-                          setNewMarketSegmentId(data.parentMarketSegment);
-                          setNewSubMarketSegmentId(data._id);
-                        }
-                      }
-                      setShowAddMarketSegmentDialog(false);
-                    }}
-                  />
-                )}
               </Fragment>
             )}
           </Formik>

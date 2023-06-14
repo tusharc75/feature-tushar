@@ -124,7 +124,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                 component={'p'}
                                 style={{ fontSize: '0.8rem', paddingTop: '2px', color: 'var(--dark-secondary-text,#7b898e)' }}
                               >
-                                Created: {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
+                                Created: {_attachment?.createdBy?.user?.concatedName} {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
                               </Typography>
                             </Box>
                           </div>
@@ -183,7 +183,8 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                     component={'span'}
                                     style={{ fontSize: '0.8rem', paddingTop: '2px', color: 'var(--dark-secondary-text,#7b898e)' }}
                                   >
-                                    Created: {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
+                                    Created: {_attachment?.createdBy?.user?.concatedName}{' '}
+                                    {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
                                   </Typography>
                                 </Box>
                               </Box>
@@ -289,7 +290,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                         component={'span'}
                         style={{ fontSize: '0.8rem', paddingTop: '2px', color: 'var(--dark-secondary-text,#7b898e)' }}
                       >
-                        Created: {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
+                        Created:{_attachment?.createdBy?.user?.concatedName} {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
                       </Typography>
                     </Box>
                   </div>
@@ -338,7 +339,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                             component={'span'}
                             style={{ fontSize: '0.8rem', paddingTop: '2px', color: 'var(--dark-secondary-text,#7b898e)' }}
                           >
-                            Created: {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
+                            Created: {_attachment?.createdBy?.user?.concatedName} {moment(_attachment?.createdBy?.date).format(dateTimeFormat)}
                           </Typography>
                         </Box>
                       </Box>
@@ -437,7 +438,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: 'Deleted Successfully'
+            message: data.message
           });
           fetchAttachment();
           handleActivityRefresh();
@@ -456,7 +457,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: 'Deleted Successfully'
+          message: data.message
         });
         fetchAttachment();
         handleActivityRefresh();

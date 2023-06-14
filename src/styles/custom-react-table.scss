@@ -5,6 +5,9 @@ $isAppliedBill: #a8ec9c;
 
 .custom-react-table {
   // padding: 1rem;
+  .MuiTableCell-root {
+    border-bottom: 1px solid var(--common-border-color, #ddd);
+  }
 
   .table {
     // border: 1px solid #ddd;

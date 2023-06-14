@@ -20,6 +20,8 @@ import FormTypes from "../../components/Helpers/FormTypes";
 const ProductBuilderSchema = object().shape({
     name: string()
         .required("please enter name"),
+    currency: string()
+        .required("please enter currency"),
 });
 
 const CreateNewDialog = (props) => {
@@ -27,7 +29,7 @@ const CreateNewDialog = (props) => {
     const toastConfig = useContext(CustomToastContext)
     const { handleClose } = props;
     const [loading, setLoading] = useState(false);
-    const [initialData] = useState({ name: "" });
+    const [initialData] = useState({ name: "", currency: "" });
     const history = useHistory();
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -72,7 +74,6 @@ const CreateNewDialog = (props) => {
                     ></CustomDialogHeader>
                     <CustomDialogContent>
                         <Form autoComplete="off" autoCorrect="off" noValidate >
-                            {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                             <Box p={1}>
                                 <TextField
                                     variant="outlined"

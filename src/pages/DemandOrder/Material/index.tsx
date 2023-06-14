@@ -20,7 +20,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { CHILD_RESOURCE, RESOURCE_LABEL } from 'src/constants/helpers';
+import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
@@ -362,7 +362,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload resource={RESOURCE_LABEL.demandOrder} referenceId={salesOrderData?._id} columns={columns} />
+            <PreviewDownload resource={sidebarResource.demandOrder} referenceId={salesOrderData?._id} columns={columns} />
             <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}

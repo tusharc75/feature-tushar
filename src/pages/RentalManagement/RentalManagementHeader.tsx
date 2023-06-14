@@ -231,7 +231,12 @@ function RentalManagementHeader({
                   <ToggleButtonGroup size="small">
                     <ToggleButton
                       onClick={() => {
-                        history.push(`${routes.planningView.path}`);
+                        history.push({
+                          pathname: routes.planningView.path,
+                          state: {
+                            resource: sidebarResource?.rentalManagement
+                          }
+                        });
                       }}
                     >
                       <span>{`Calendar`}</span>

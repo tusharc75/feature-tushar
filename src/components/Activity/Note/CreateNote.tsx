@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment, useContext } from "react";
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -27,6 +27,7 @@ import TinyMce from "../../../components/TinyMCE"
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
 import CommonSkeleton from "../../Helpers/CommonSkeleton";
 import { isEqual } from "lodash";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 
 const NoteSchema = object().shape({
     name: string()
@@ -72,6 +73,8 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
     const [open, setOpen] = useState(false)
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0)
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+
+    const toastConfig = useContext(CustomToastContext);
 
     useEffect(() => {
         fetchNoteDetail();
@@ -123,22 +126,34 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
         setUploading(true)
         if (noteId) {
             UpdateNote(noteId, values)
-                .then(() => {
+                .then((data) => {
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: data.message
+                    });
                     setUploading(false)
                     setInitialValues(null)
                     handleClose()
                 })
-                .catch(() => {
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
                     setUploading(false)
                 });
         }
         else {
             CreateNewNote(values)
-                .then(() => {
+                .then((data) => {
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: data.message
+                    });
                     setUploading(false)
                     handleClose()
                 })
-                .catch(() => {
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
                     setUploading(false)
                 });
         }
@@ -165,10 +180,9 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
             })
             .catch((err) => {
                 setUploading(false);
-                // toastConfig.setToastConfig(err);
             });
     };
-    
+
     const onUploadFile = file => {
         if (checkImageUrl(file)) {
             setFileImageAttachments((prevState) => ([...prevState, file]));
@@ -284,7 +298,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
                     ></CustomDialogHeader>
                     <CustomDialogContent>
                         <Form autoComplete="off" autoCorrect="off" noValidate >
-                            {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                             <MuiPickersUtilsProvider utils={MomentUtils}>
                                 <Box padding={1}>
                                     <Grid container spacing={3}>

@@ -17,7 +17,6 @@ import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
   serializedAsset,
-  isObjectEmpty,
   gridLoadingTimeout,
   product,
   warehouse as warehouseHelper,
@@ -49,7 +48,10 @@ import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
 
 const SerializedAsset = () => {
+
   const renderedFrom = camelCase(routes?.serializedAsset.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const toastConfig = useContext(CustomToastContext);
   const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -61,18 +63,14 @@ const SerializedAsset = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productFilterList, setProductFilterList] = useState([]);
   const [productCategory, setProductCategory] = useState(null);
   const [productFilter, setProductFilter] = useState(null);
 
-  const [plantOptions, setPlantOptions] = useState([]);
-  const [selectedPlant, setSelectedPlant] = useState(null);
+  const [warehouseOptions, setWarehouseOptions] = useState([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
-  const [isNonSerializedAsset, setNonSerializedAsset] = useState(false);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
     state: { permissions }
@@ -105,13 +103,12 @@ const SerializedAsset = () => {
     sorting,
     search,
     warehouse,
-    selectedPlant,
+    selectedWarehouse,
     redirectProduct,
     fromPurchaseOrder,
     productCategory,
     productFilter,
     subleaseAsset,
-    isNonSerializedAsset,
     showFilteredRecordsOnly
   ]);
 
@@ -125,11 +122,13 @@ const SerializedAsset = () => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`${warehouseHelper.warehouseApi}?noEntityWise=1&sortBy=warehouseName&orderBy=asc`)
+      .get(`/sa-formbuilder/lookup?lookupResource=Warehouse`)
       .then(({ data: { data } }) => {
-        setPlantOptions(data);
+        setWarehouseOptions(data['Warehouse']);
       });
   }, []);
+
+
 
   useEffect(() => {
     if (productCategory && productCategory !== '') {
@@ -232,8 +231,6 @@ const SerializedAsset = () => {
             ...finalObject
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data.data);
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -249,7 +246,6 @@ const SerializedAsset = () => {
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-        // dispatch({ type: "initialize", data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -268,8 +264,8 @@ const SerializedAsset = () => {
     if (warehouse?.optionValue) {
       filterByIds.push({ field: 'warehouse', term: warehouse?.optionValue });
     }
-    if (selectedPlant && selectedPlant !== '') {
-      filterByIds.push({ field: 'warehouse', term: selectedPlant });
+    if (selectedWarehouse && selectedWarehouse !== '') {
+      filterByIds.push({ field: 'warehouse', term: selectedWarehouse });
     }
     if (redirectProduct?.id) {
       filterByIds.push({ field: 'product', term: redirectProduct?.id });
@@ -297,7 +293,7 @@ const SerializedAsset = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -308,11 +304,6 @@ const SerializedAsset = () => {
       deepFilter = `${deepFilter}&subleaseAsset=1`;
     } else {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
-    }
-    if (isNonSerializedAsset) {
-      deepFilter = `${deepFilter}&isNonSerializedAsset=1`;
-    } else {
-      deepFilter = `${deepFilter}&isNonSerializedAsset=0`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
@@ -443,6 +434,23 @@ const SerializedAsset = () => {
     setAnchorEl(null);
   };
 
+  // const handleMTRAttached = (status: boolean) => {
+  //   const _ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => d?._id);
+  //   axiosInstance().post(`${serializedAsset.api}/update-bulk-data`, { _ids, mtrAttached: status })
+  //     .then(({ data }) => {
+  //       localStorage.removeItem(localStorageSelectedRecords);
+  //       fetchProductInventory();
+  //       toastConfig.setToastConfig({
+  //         open: true,
+  //         type: 'success',
+  //         message: data.message
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       toastConfig.setToastConfig(error);
+  //     });
+  // }
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -572,16 +580,15 @@ const SerializedAsset = () => {
                   )}
                   <Autocomplete
                     style={{ width: '250px' }}
-                    options={plantOptions}
-                    getOptionLabel={(option: any) => (option ? option?.warehouseName : '')}
+                    options={warehouseOptions}
+                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                     getOptionSelected={(option: any, val) => option.optionValue === val}
-                    value={
-                      plantOptions.filter((data) => data._id === selectedPlant).length
-                        ? plantOptions.filter((data) => data._id === selectedPlant)[0]
-                        : ''
+                    value={warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                      ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                      : ''
                     }
                     onChange={(e, val) => {
-                      setSelectedPlant(val && val._id ? val._id : '');
+                      setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
                     }}
                     renderInput={(params) =>
                       isMobile && !isTablet ? (
@@ -761,7 +768,28 @@ const SerializedAsset = () => {
                             {`Status Change - ${ASSET_STATUS.lost}`}
                           </MenuItem>
                         </>
-                      )}
+                      )
+                    }
+                    {/* {columns?.some(e => e.field === "mtrAttached") &&
+                      <>
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleMTRAttached(true)
+                          }}
+                        >
+                          MTR Attach - Yes
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleMTRAttached(false)
+                          }}
+                        >
+                          MTR Attach - No
+                        </MenuItem>
+                      </>
+                    } */}
                   </Menu>
                 </Box>
               </Box>
@@ -872,7 +900,6 @@ const SerializedAsset = () => {
       </div>
       {showManageProductInventoryDialog.open && (
         <ManageSerializedAsset
-          isNew={true}
           isClone={showManageProductInventoryDialog.isClone}
           productInventoryId={showManageProductInventoryDialog.idToClone}
           onClose={() => setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null })}
@@ -885,9 +912,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

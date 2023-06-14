@@ -519,7 +519,6 @@ const Quotation = ({
             setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
             currentVersion={currentVersion}
             isSendEmail={true}
-            hideSummary={true}
           />
         </Box>
         {isMobile ? (

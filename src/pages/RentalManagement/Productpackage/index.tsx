@@ -25,6 +25,9 @@ import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { generateCustomTableColumns, flattenArray } from 'src/constants/columns';
+import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
+import AssetAvailability from '../AssetAvailability';
+import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 
 const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,6 +55,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
   const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
+  const [openAssetAvailibility, setOpenAssetAvailibility] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -103,12 +107,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -257,23 +261,22 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
+      parent.detail = `${parent.type === 'service'
           ? parent.serviceDetail
             ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
           : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.productDetail?.productName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -297,23 +300,22 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'service'
+      _subRow.detail = `${_subRow.type === 'service'
           ? _subRow.serviceDetail?.serviceName
           : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : ''
-      } `;
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === 'product'
+              ? _subRow.productDetail?.productName
+              : ''
+        } `;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -382,6 +384,13 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           element['pricingCondition'] = rateResult[0].conditionId;
           element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+
+          if (allFields?.some((e) => e.fieldName === 'supplierPrice') && calValues[priceFieldName]) {
+            const supplierPriceFieldName = `supplierPrice_${rentalManagementData?.currency?.toLowerCase()}`;
+            calValues[supplierPriceFieldName] =
+              (rateResult[0].mrp - (rateResult[0].mrp * 5) / 100) * element?.qty * (element?.estimateJobDuration || 1);
+          }
+
           Object.assign(element, calValues);
         }
       });
@@ -537,6 +546,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     }
   };
 
+
   return (
     <Fragment>
       {allowedToEdit && (
@@ -570,6 +580,21 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
             )}
           </Box>
           <Box display="flex" ml={1}>
+            {rowsData?.filter((e) => e?.serializedProduct)?.length > 0 && (
+              <Box mr={1}>
+                <HtmlTooltip title="Check Assets Availability" arrow placement="top">
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      setOpenAssetAvailibility(true);
+                    }}
+                  >
+                    <AssetAvailabilityIcon color={'var(--dark-primary-text, #163340)'} size={24} />
+                  </IconButton>
+                </HtmlTooltip>
+              </Box>
+            )}
             <Button
               variant="outlined"
               color="primary"
@@ -767,6 +792,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           onClose={() => {
             AddMaterial(priceDataDialog.material, null);
             setPriceDataDialog({ open: false, material: null });
+          }}
+        />
+      )}
+      {openAssetAvailibility && (
+        <AssetAvailability
+          rentalId={rentalManagementData?._id}
+          handleClose={() => {
+            setOpenAssetAvailibility(false);
           }}
         />
       )}

@@ -39,6 +39,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { Link } from 'react-router-dom';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
 
 let searchTimeout;
@@ -81,6 +82,10 @@ const AddSerializedAsset = ({
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {}, assets: [] });
 
+  const [checkMTRValidation, setCheckMTRValidation] = useState(false);
+  const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
+
+  const [inuseAssetConfirmBox, setInuseAssetConfirmBox] = useState(false);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 600;
@@ -94,7 +99,7 @@ const AddSerializedAsset = ({
 
   useEffect(() => {
     fetchGridColumns();
-  }, [tabValue]);
+  }, []);
 
   useEffect(() => {
     axiosInstance()
@@ -105,14 +110,14 @@ const AddSerializedAsset = ({
   }, []);
 
   const fetchGridColumns = () => {
-    setColumns(null)
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
+        setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -127,27 +132,23 @@ const AddSerializedAsset = ({
         setFrameWorkComponent({ ...tempFrameworkComponent, rentalJobRenderer: RentalJobRenderer });
 
         const inUseColoumns: any = [{
-          field: 'Rental Job',
+          field: 'rentalJob',
           headerName: 'Rental Job',
           show: true,
           filter: true,
           sortable: true,
+          lockPosition: true,
           cellRenderer: 'rentalJobRenderer'
         }];
 
-        if (Number(tabValue) === 2) {
-          columns = [...inUseColoumns, ...columns, ...getStaticFields(),];
-        }
-        else {
-          columns = [...columns, ...getStaticFields()];
-        }
+        columns = [...inUseColoumns, ...columns, ...getStaticFields()];
         setColumns([...columns]);
       });
   };
 
   const RentalJobRenderer = (params) => (
-    <Link className="link text-truncate" to={`${routes.rentalManagementDetail.path}/${params.data?.loadingTicket?.rentalJob?.optionValue}`}>
-      {params?.data?.loadingTicket?.rentalJob?.optionLabel}
+    <Link className="link text-truncate" target='_blank' to={`${routes.rentalManagementDetail.path}/${params.data?.rentalJob?.optionValue}`}>
+      {params?.data?.rentalJob?.optionLabel}
     </Link>
   );
 
@@ -198,22 +199,21 @@ const AddSerializedAsset = ({
     } else {
       api = `${serializedAsset.api}${queryString}`
     }
-    axiosInstance()
-      .get(api)
-      .then(({ data }) => {
-        data.data = data.data.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = false;
-          if (Number(tabValue) === 2) {
-            finalObject['loadingTicket'] = u.loadingTicket;
-          }
-          return finalObject;
-        });
-        dispatch({ type: 'initialize', data: data.data, count: data.count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
+    axiosInstance().get(api).then(({ data: { data, count } }) => {
+      const rows = data?.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        finalObject['isChecked'] = false;
+        if (Number(tabValue) === 2) {
+          finalObject['rentalJob'] = u.loadingTicket?.rentalJob;
+          finalObject['loadingTicket'] = u.loadingTicket;
+        }
+        return finalObject;
+      });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
@@ -229,7 +229,7 @@ const AddSerializedAsset = ({
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -271,26 +271,11 @@ const AddSerializedAsset = ({
       deepFilter = `${deepFilter}&subleaseAsset=0`;
     }
 
-    deepFilter = `${deepFilter}&isNonSerializedAsset=0`;
-
     return deepFilter;
   };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
   };
 
   const getRowStyleScheduled = (params) => {
@@ -332,10 +317,10 @@ const AddSerializedAsset = ({
   const checkUniqRentalJob = () => {
     if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0) {
       return true;
-    } else if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), 'loadingTicket.rentalJob.optionLabel')).length === 1) {
-      return false;
+      // } else if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), 'loadingTicket.rentalJob.optionLabel')).length === 1) {
+      //   return false;
     } else {
-      return true;
+      return false;
     }
   };
 
@@ -371,11 +356,11 @@ const AddSerializedAsset = ({
     setTabValue(newValue);
     dispatch({ type: 'selection', selectedRecords: [] });
     localStorage.removeItem(localStorageSelectedRecords);
-    if (newValue === 0) {
-      setSelectedWarehouse(filterByPlant);
-    } else {
-      setSelectedWarehouse(null);
-    }
+    // if (newValue === 0) {
+    //   setSelectedWarehouse(filterByPlant);
+    // } else {
+    //   setSelectedWarehouse(null);
+    // }
   };
 
   const handleTicketDialog = () => {
@@ -401,7 +386,7 @@ const AddSerializedAsset = ({
         }
       }
     });
-    
+
     if (assetsAdd?.length === 0) {
       return
     }
@@ -448,6 +433,38 @@ const AddSerializedAsset = ({
         }).catch((error) => {
           toastConfig.setToastConfig(error);
         });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+  const handleAutoTransferAssets = () => {
+
+    const assetsAdd: any = []
+    const assets = [...getLocalStorageArrayData(`${localStorageSelectedRecords}`)];
+
+    selectedProducts?.forEach((e: any) => {
+      if (e.type === 'product') {
+        let qty = e.realAssetQty - e.realAssetAssignedQty;
+        while (qty) {
+          const result = assets.filter((f) => f.productId === e.materialId && !f.isCounted);
+          if (result.length) {
+            let obj: any = {};
+            obj._id = e._id;
+            obj.product = e.materialId;
+            obj.asset = result[0]._id;
+            obj.rentalJob = result[0].loadingTicket?.rentalJob?.optionValue;
+            assetsAdd.push(obj);
+            result[0].isCounted = true;
+          }
+          qty--;
+        }
+      }
+    });
+
+    axiosInstance().post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, { "assets": assetsAdd, rentalJob: referenceData?._id })
+      .then(({ data }) => {
+        handleSuccess()
       }).catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -621,7 +638,19 @@ const AddSerializedAsset = ({
                           <Button
                             color="primary"
                             size="small"
-                            onClick={() => addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])}
+                            onClick={() => {
+                              if (referenceType === 'Rental Job' && checkMTRValidation) {
+                                if ([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.mtrAttached !== true)) {
+                                  setMtrConfirmBox(true)
+                                }
+                                else {
+                                  addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])
+                                }
+                              }
+                              else {
+                                addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])
+                              }
+                            }}
                             variant={isMobile && !isTablet ? 'text' : 'contained'}
                             disabled={
                               getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 ||
@@ -647,7 +676,7 @@ const AddSerializedAsset = ({
                           color="primary"
                           size="small"
                           onClick={() => {
-                            handleTicketDialog()
+                            setInuseAssetConfirmBox(true)
                           }}
                           variant={isMobile && !isTablet ? 'text' : 'contained'}
                           disabled={isAdding || checkUniqRentalJob()}
@@ -696,12 +725,12 @@ const AddSerializedAsset = ({
                         {...a11yProps(1)}
                       />
                     )}
-                    {/* <Tab
+                    <Tab
                       className={'tabLayout'}
                       value={2}
                       label={<div className="d-flex align-items-center tab-font">In Use Assets</div>}
                       {...a11yProps(2)}
-                    /> */}
+                    />
                   </Tabs>
                 </Grid>
               </Grid>
@@ -709,7 +738,7 @@ const AddSerializedAsset = ({
             <div className={'listing-grid'}>
               {Object.keys(frameWorkComponent).length > 0 && columns ? (
                 <CustomAgGrid
-                  columns={columns}
+                  columns={Number(tabValue) === 2 ? columns : columns?.filter((e: any) => e.field !== 'rentalJob')}
                   dataRows={dataRows}
                   frameworkComponents={frameWorkComponent}
                   setGridApi={setGridApi}
@@ -763,6 +792,34 @@ const AddSerializedAsset = ({
           onClose={() => setShowTicketDialog({ open: false, data: {}, assets: [] })}
           onSuccess={(data) => {
             handleCreateLoadingTicketAddAsstes(data)
+          }}
+        />
+      )}
+      {mtrConfirmBox && (
+        <ConfirmationDialog
+          open={mtrConfirmBox}
+          okBtnLoading={isAdding}
+          message={`MTR(s) missing for some or all line items.`}
+          onClose={() => {
+            setMtrConfirmBox(false);
+          }}
+          onOk={() => {
+            addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])
+            setMtrConfirmBox(false);
+          }}
+        />
+      )}
+      {inuseAssetConfirmBox && (
+        <ConfirmationDialog
+          open={inuseAssetConfirmBox}
+          okBtnLoading={isAdding}
+          message={`Do you want to move the assets to the new rental job?`}
+          onClose={() => {
+            setInuseAssetConfirmBox(false);
+          }}
+          onOk={() => {
+            handleAutoTransferAssets()
+            setInuseAssetConfirmBox(false);
           }}
         />
       )}

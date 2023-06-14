@@ -382,7 +382,12 @@ const Planning = () => {
                   <ToggleButtonGroup size="small">
                     <ToggleButton
                       onClick={() => {
-                        history.push(`${routes.planningView.path}`);
+                        history.push({
+                          pathname: routes.planningView.path,
+                          state: {
+                            resource: sidebarResource?.planning
+                          }
+                        });
                       }}
                     >
                       <span>{`Calendar`}</span>
