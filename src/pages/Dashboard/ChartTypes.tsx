@@ -185,7 +185,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
           display="flex"
           flexDirection="column"
           justifyContent="space-between"
-          sx={{ border: '1px solid #EFFBF9', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
+          sx={{ border: '1px solid var(--common-border-color)', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
         >
           <Box style={{ padding: '15px 10px' }}>
             <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -307,14 +307,16 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   options={{
                     maintainAspectRatio: false,
                     indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
-                    ...(chart.stack && {scales: {
-                      x: {
-                        stacked: true,
-                      },
-                      y: {
-                        stacked: true,
-                      },
-                    }})  
+                    ...(chart.stack && {
+                      scales: {
+                        x: {
+                          stacked: true
+                        },
+                        y: {
+                          stacked: true
+                        }
+                      }
+                    })
                   }}
                 />
               )

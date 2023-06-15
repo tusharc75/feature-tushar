@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: '3px 3px 0 0',
     // borderBottom: '1px solid #e1dde6',
     // boxShadow: '1px 3px 3px #ddd',
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
     [theme.breakpoints.down('sm')]: {
       height: 'auto'
     },
@@ -144,7 +144,13 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
               <Grid item xs={12} sm={4}>
                 <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
                   <InputLabel id="duration">Select Duration</InputLabel>
-                  <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)} label="Select Duration">
+                  <Select
+                    labelId="duration"
+                    id="time-duration"
+                    value={timeFrame}
+                    onChange={(e) => setTimeFrame(e.target.value)}
+                    label="Select Duration"
+                  >
                     <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                     <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
                     <MenuItem value={'3-months'}>Last 3 Months</MenuItem>

@@ -412,7 +412,7 @@ const RentalManagementViews = (props) => {
           if (!loadingProductData.includes(`${item.materialId}`)) {
             loadingProductData.push(`${item.materialId}`);
             flow.push({
-              id: `${item.productDetail?.productName}`,
+              id: `${item.productDetail?.productName || item.serviceDetail?.serviceName}`,
               sourcePosition: 'right',
               targetPosition: 'left',
               type: 'default',
@@ -421,7 +421,7 @@ const RentalManagementViews = (props) => {
                 ref_id: item.materialId,
                 label: (
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {item.productDetail?.productName || item.packageDetail?.packageName}
+                    {item.productDetail?.productName || item.packageDetail?.packageName || item.serviceDetail?.serviceName}
                     <br />
                     {_.startCase(_.camelCase(item.type))}
                   </div>
@@ -433,14 +433,14 @@ const RentalManagementViews = (props) => {
             beforeLoadingAssetIdx += 1;
           }
           flowEdge.push({
-            id: `edge-assets-product-parent-${item.productDetail?.productName}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,
+            id: `edge-assets-product-parent-${item.productDetail?.productName || item.serviceDetail?.serviceName}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,
             source: item?.parentId && allPackagesAndProductIds.includes(item?.parentId) ? `${item?.parentId}` : rentalId,
             arrowHeadType: 'arrow',
-            target: `${item.productDetail?.productName}`
+            target: `${item.productDetail?.productName || item.serviceDetail?.serviceName}`
           });
           flowEdge.push({
-            id: `edge-assets-product-${item.productDetail?.productName}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,
-            source: `${item.productDetail?.productName}`,
+            id: `edge-assets-product-${item.productDetail?.productName || item.serviceDetail?.serviceName}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,
+            source: `${item.productDetail?.productName || item.serviceDetail?.serviceName}`,
             arrowHeadType: 'arrow',
             target: `${assetsInLoading[item?.materialId]}`
           });
@@ -796,6 +796,9 @@ const RentalManagementViews = (props) => {
         break;
       case 'product':
         history.push(`${routes.productDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'service':
+        history.push(`${routes.serviceMasterDetail.path}/${element.data.ref_id}`);
         break;
       case 'package':
         history.push(`${routes.packagesDetail.path}/${element.data.ref_id}`);

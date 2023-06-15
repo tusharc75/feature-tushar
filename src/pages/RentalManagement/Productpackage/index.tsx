@@ -580,7 +580,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
             )}
           </Box>
           <Box display="flex" ml={1}>
-            {rowsData?.filter((e) => e?.serializedProduct)?.length > 0 && (
+            {flattenArray(rowsData)?.filter((e) => e?.serializedProduct)?.length > 0 && (
               <Box mr={1}>
                 <HtmlTooltip title="Check Assets Availability" arrow placement="top">
                   <IconButton

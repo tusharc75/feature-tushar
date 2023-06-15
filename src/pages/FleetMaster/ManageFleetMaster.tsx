@@ -1,6 +1,6 @@
-import { useState, useEffect, useContext, useRef, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Button, CircularProgress, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import Dialog from '@material-ui/core/Dialog';
 import { FaDiceOne } from 'react-icons/fa';
@@ -28,8 +28,6 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
   const [formsData, setFormsData] = useState([]);
-
-  const ref = useRef(null);
 
   useEffect(() => {
     setLoading(true);
@@ -164,10 +162,10 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
               <CustomDialogHeader
                 title={title}
                 onClose={(e, reason) => {
-                  if (isEqual(initialData.values, values)) {
-                    onClose();
-                  } else {
+                  if (!isEqual(values, initialData.values)) {
                     setShowConfirmDialog(true);
+                  } else {
+                    onClose();
                   }
                 }}
                 isMinimized={!fullScreen}
@@ -230,7 +228,7 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
                   color="primary"
                   size="small"
                   onClick={() => {
-                    if (!isEqual(ref.current.values, initialData.values)) {
+                    if (!isEqual(values, initialData.values)) {
                       setShowConfirmDialog(true);
                     } else {
                       onClose();
