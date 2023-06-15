@@ -73,27 +73,15 @@ const ArrangeViewButton = ({
     <>
       <Tooltip title="Arrange View" placement="top">
         <IconButton
-          style={{
-            zIndex: '2',
-            width: '46px',
-            height: '40px',
-            position: 'absolute',
-            background: 'white',
-            right: '1px',
-            top: '1px',
-            padding: '11px',
-            borderLeft: '1px solid #e5e5e5'
-          }}
           aria-describedby="columnSelection"
           size="small"
           className="px-2  arrange-view-v2"
-          color="primary"
           onClick={(event) => {
             setOpenColumnSelection(true);
             setOpenColumnSelectionAnchorEl(event.currentTarget);
           }}
         >
-          <SwapHorizIcon style={{ color: '#1d1d1d' }} />
+          <SwapHorizIcon />
         </IconButton>
       </Tooltip>
 
