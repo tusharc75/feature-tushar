@@ -484,7 +484,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               setOpen({ open: true, type: 'file', parentFolder: attachment._id, purpose: 'add' });
             }}
           >
-            <AddOutlinedIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+            <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
           </IconButton>
         </HtmlTooltip>
         <HtmlTooltip title={'Create folder'}>
@@ -497,7 +497,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               setOpen({ open: true, type: 'folder', parentFolder: attachment._id, purpose: 'add' });
             }}
           >
-            <CreateNewFolderIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+            <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -621,6 +621,9 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
       <Menu
         id="folder-edit-menu"
         anchorEl={folderAnchorEl}
+        getContentAnchorEl={null}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         open={true}
         onClose={handleFolderOptionsClose}
         MenuListProps={{
@@ -688,7 +691,16 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
             )}
             <RenderFolderEditMenu />
 
-            <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              getContentAnchorEl={null}
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleCloseMenu}
+            >
               {permissions['attachment']?.isUpdate ? <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
               <MenuItem onClick={handleDownload}>Download</MenuItem>
               {permissions['attachment']?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
