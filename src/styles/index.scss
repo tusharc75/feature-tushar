@@ -3488,18 +3488,19 @@ body {
   .arrange-view-v2 {
     z-index: 2;
     width: 46px;
-    height: 40px;
+    height: 45px;
     position: absolute;
-    background: white;
+    background: var(--dark-secondary, white);
     right: 1px;
     top: 1px;
     padding: 11px;
-    border-left: 1px solid #e5e5e5;
+    border-left: 1px solid var(--common-border-color, #e5e5e5);
+    color: var(--dark-primary-text, #1d1d1d);
   }
 }
 .arrange-view-v2 {
   &:hover {
-    background-color: white !important;
+    background-color: var(--dark-primary, white) !important;
   }
 }
 
@@ -3565,7 +3566,7 @@ body {
     }
   }
   tr {
-    border-bottom: 1px solid rgba(224, 224, 224, 1);
+    border-bottom: 1px solid var(--common-border-color, rgba(224, 224, 224, 1));
     th,
     td {
       border-bottom: 0 !important;
