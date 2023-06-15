@@ -484,7 +484,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               setOpen({ open: true, type: 'file', parentFolder: attachment._id, purpose: 'add' });
             }}
           >
-            <AddOutlinedIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+            <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
           </IconButton>
         </HtmlTooltip>
         <HtmlTooltip title={'Create folder'}>
@@ -497,7 +497,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               setOpen({ open: true, type: 'folder', parentFolder: attachment._id, purpose: 'add' });
             }}
           >
-            <CreateNewFolderIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+            <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
           </IconButton>
         </HtmlTooltip>
       </>
