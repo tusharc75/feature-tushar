@@ -56,17 +56,19 @@ const DashbaordNew = () => {
       try {
         const {
           data: { data }
-        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product Category,Market Segment,Customer Account,Product,User,Warehouse,Service Master,Competencies`);
+        } = await axiosInstance().get(
+          `sa-formbuilder/lookup?lookupResource=Product Category,Market Segment,Customer Account,Product,User,Warehouse,Service Master,Competencies`
+        );
         if (!data) return;
 
-       const res = await axiosInstance().get('/field?resource=Project Sales') ; 
-       let businessUnitOptions = [];
-       res?.data?.data.forEach((e: any) => {
-         if (e?.fieldData?.fieldName === 'businessUnit') {
-          businessUnitOptions = e.fieldData.option;
-         }
-       });
-       
+        const res = await axiosInstance().get('/field?resource=Project Sales');
+        let businessUnitOptions = [];
+        res?.data?.data.forEach((e: any) => {
+          if (e?.fieldData?.fieldName === 'businessUnit') {
+            businessUnitOptions = e.fieldData.option;
+          }
+        });
+
         Object.keys(data).forEach((_d) => {
           setFilterOptions({
             productDescription: data['Product'],
@@ -82,10 +84,9 @@ const DashbaordNew = () => {
             countrySellTo: countriesData,
             country: countriesData,
             period: periodOption,
-            businessUnit: businessUnitOptions, 
+            businessUnit: businessUnitOptions,
             service: data['Service Master'],
             competencies: data['Competencies']
-            
           });
         });
       } catch (error) {
@@ -150,7 +151,6 @@ const DashbaordNew = () => {
                     flexDirection="column"
                     justifyContent={'center'}
                     alignItems={'center'}
-                    bgcolor={'rgba(255, 255, 255, 0.7)'}
                     className="asdfkasjhdfkjsdh"
                   >
                     <img width={400} height={340} src={placeholder_img} alt="dashboard" />

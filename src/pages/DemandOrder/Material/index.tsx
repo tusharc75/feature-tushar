@@ -198,8 +198,8 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
+       _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.type === 'package' ? _subRow.packageDetail?.packageName : _subRow.serviceDetail?.serviceName;
+      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
