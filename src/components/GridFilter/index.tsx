@@ -9,7 +9,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import FormTypes from '../Helpers/FormTypes';
-import { dateFormat } from 'src/constants/helpers';
+import { dateFormat, sidebarResource } from 'src/constants/helpers';
 import moment from 'moment';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -59,7 +59,8 @@ function GridFilter({
     'signature',
     'colorPicker',
     'number',
-    'decimal'
+    'decimal',
+    'switch'
   ];
 
   const fetchColumns = () => {
@@ -67,13 +68,23 @@ function GridFilter({
       .get(`/field?resource=${resource}`)
       .then(({ data: { data } }) => {
         const coloum = data?.filter((e) => !FILTER_NOT_APPLIED.includes(e?.fieldData?.type));
-        const modifiedColumn = coloum?.map((col: any) => {
+        var modifiedColumn: any = coloum?.map((col: any) => {
           const d = col.fieldData;
           if (d?.type === 'dropDown') {
             d.type = 'multiSelect';
           }
           return d;
         });
+        if (resource === sidebarResource.user) {
+          modifiedColumn?.forEach((e) => {
+            if (e.fieldName === 'firstName') {
+              e.fieldName = 'concatedName';
+              e.fieldLabel = 'Name';
+              e.type = 'singleLine';
+            }
+          })
+          modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName')
+        }
         setColoums(modifiedColumn);
       })
       .catch((err) => {
