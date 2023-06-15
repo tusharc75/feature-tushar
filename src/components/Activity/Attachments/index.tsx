@@ -621,6 +621,9 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
       <Menu
         id="folder-edit-menu"
         anchorEl={folderAnchorEl}
+        getContentAnchorEl={null}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         open={true}
         onClose={handleFolderOptionsClose}
         MenuListProps={{
@@ -688,7 +691,16 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
             )}
             <RenderFolderEditMenu />
 
-            <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              getContentAnchorEl={null}
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleCloseMenu}
+            >
               {permissions['attachment']?.isUpdate ? <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
               <MenuItem onClick={handleDownload}>Download</MenuItem>
               {permissions['attachment']?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
