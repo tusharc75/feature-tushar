@@ -23,9 +23,10 @@ import ManageContact from 'src/pages/Contact/ManageContact';
 import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
 import ManageMarketSegmentDialog from 'src/pages/MarketSegment/ManageMarketSegmentDialog';
 import { camelCase, has, isEmpty } from 'lodash';
+import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
+import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 
 function dropdownOptions(options, values, fields, fieldData) {
-
   const lookupDependentOn = fieldData?.lookupDependentOn;
   const lookupDependentOnField = fieldData?.lookupDependentOnField;
 
@@ -37,8 +38,7 @@ function dropdownOptions(options, values, fields, fieldData) {
     } else if (fieldData?.fieldName === 'collaborator') {
       const optionDatas = options?.filter((option: any) => option?.optionValue !== values['owner']) || [];
       oData = optionDatas || [];
-    }
-    else {
+    } else {
       // for market segment kind of situation
       const optionDatas = options?.filter((o) => {
         if (has(o, fieldData?.fieldName)) {
@@ -66,17 +66,17 @@ function dropdownOptions(options, values, fields, fieldData) {
   }
 
   if (lookupDependentOn && !isEmpty(lookupDependentOn)) {
-    const lookupResource = fields?.find((e) => e.fieldName === lookupDependentOn)?.lookupResource
+    const lookupResource = fields?.find((e) => e.fieldName === lookupDependentOn)?.lookupResource;
     const value = values[lookupDependentOn] || values[camelCase(lookupResource)];
     if (value) {
-      const newOptions = options?.filter((option: any) => option[lookupDependentOn]?.includes(value) || option[camelCase(lookupResource)]?.includes(value)) || [];
+      const newOptions =
+        options?.filter((option: any) => option[lookupDependentOn]?.includes(value) || option[camelCase(lookupResource)]?.includes(value)) || [];
       optionsToShow.push(...newOptions);
     }
   }
 
   return optionsToShow;
 }
-
 
 function Dropdown({
   InfoLabel,
@@ -131,13 +131,13 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, value: any, reason) => {
-                      if (setFieldValue) {
-                        setFieldValue(
-                          name,
-                          value.map((val) => val.optionValue)
-                        );
+                        if (setFieldValue) {
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
+                        }
                       }
-                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -165,14 +165,14 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, val) => {
-                      if (setFieldValue) {
-                        handleChange(name, val && val.optionValue ? val.optionValue : '');
-                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                        fieldChange?.forEach((val: any) => {
-                          setFieldValue(val.fieldName, val.value);
-                        });
+                        if (setFieldValue) {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
+                          });
+                        }
                       }
-                    }
                 }
                 selectOnFocus
                 clearOnBlur
@@ -194,7 +194,50 @@ function Dropdown({
             )}
           </InfoLabel>
         </Box>
-        {rest?.hidelookupAddButton ? null : (
+        {rest?.hidelookupAddButton ? null : fieldData?.addBulkOptions ? (
+          <Box>
+            <HtmlTooltip title={`Add ${name}`} className="formActionButton">
+              <>
+                <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                  <AddCircleIcon />
+                </IconButton>
+                {lookupDialog && (
+                  <AddMultiple
+                    resource={fieldData?.lookupResource}
+                    referenceData={
+                      fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
+                        ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
+                        : null
+                    }
+                    onClose={() => setLookupDialog(false)}
+                    onSuccess={(data) => {
+                      setLookupDialog(false);
+                      if (data?.length) {
+                        const tempOptions = data?.map((item: any) => {
+                          let tempNewOption = {
+                            ...item,
+                            order: option.length
+                          };
+                          return tempNewOption;
+                        });
+                        addFieldOption([...tempOptions]);
+                        setOptionsList([...tempOptions, ...option]);
+                        if (type === 'multiSelect') {
+                          handleChange(
+                            name,
+                            tempOptions?.length ? [...tempOptions?.map((item: any) => item?.optionValue || ''), ...values[name]] : []
+                          );
+                        } else {
+                          handleChange(name, tempOptions?.length && tempOptions[0].optionValue ? tempOptions[0].optionValue : '');
+                        }
+                      }
+                    }}
+                  />
+                )}
+              </>
+            </HtmlTooltip>
+          </Box>
+        ) : (
           <Fragment>
             {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.wellMaster && permissions?.wellMaster?.isCreate && (
               <Box>
@@ -227,7 +270,8 @@ function Dropdown({
                             addFieldOption(tempNewOption);
                             setOptionsList([tempNewOption, ...option]);
                             if (fieldData.lookupDependentOn) {
-                              if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
+                              if (
+                                data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
                                 data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
                               ) {
                                 handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
@@ -275,7 +319,10 @@ function Dropdown({
                             if (fieldData.lookupDependentOn) {
                               if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
                                 if (type === 'multiSelect') {
-                                  handleChange(name, tempNewOption && tempNewOption.optionValue ? [...[...values[name] || []], tempNewOption.optionValue] : []);
+                                  handleChange(
+                                    name,
+                                    tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                                  );
                                 } else {
                                   handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                                 }
