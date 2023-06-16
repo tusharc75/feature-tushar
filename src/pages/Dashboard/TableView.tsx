@@ -47,7 +47,7 @@ const TableView = ({ id, chartData, isScreenSmall, isCurrency, currency }: Props
   }
 
   return (
-    <TableContainer id={id} style={{ height: isScreenSmall ? '350px' : '400px', width: 'auto' }}>
+    <TableContainer id={id} style={{ height: '100%', width: 'auto' }}>
       <Table stickyHeader id={'table_' + id} aria-label="simple table">
         <TableHead>
           <TableRow>
