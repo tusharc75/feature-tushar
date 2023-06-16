@@ -21,6 +21,7 @@ import {
   ImageList,
   ImageListItem,
   ImageListItemBar,
+  Tooltip,
   makeStyles
 } from '@material-ui/core';
 import { result, find, throttle } from 'lodash';
@@ -1089,11 +1090,14 @@ const FormTypes = (props) => {
               )}
             />
           </Grid>
+
           {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
             <>
-              <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
-                <AddCircleIcon />
-              </IconButton>
+              <Tooltip title={`Add ${fieldData.fieldLabel}`}>
+                <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
+                  <AddCircleIcon />
+                </IconButton>
+              </Tooltip>
 
               {optionSaveDialog && (
                 <AddOptionDialog
