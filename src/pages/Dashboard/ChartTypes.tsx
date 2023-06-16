@@ -282,7 +282,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
             )}
           </Box>
 
-          <Box minHeight={fullScreen ? window.innerHeight - 150 : isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500}>
+          <Box height={fullScreen ? window.innerHeight - 200 : isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500}>
             {loading ? (
               <Loader noLoader={false} text="" style={{ minHeight: '100%' }} />
             ) : !chartData || chartData.length === 0 ? (
