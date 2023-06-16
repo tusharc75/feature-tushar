@@ -71,7 +71,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
     let values = [];
     keys.forEach((key: string) => {
       if (!filterValues[key]) return;
-      const isEmpty = Object.keys(filterValues[key]).length === 0;
+      const isEmpty = Array.isArray(filterValues[key]) ? Object.keys(filterValues[key]).length === 0 : filterValues[key] === 0;
       if (!isEmpty) {
         values.push(key);
       }
@@ -98,6 +98,10 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
     keys.forEach((key) => {
       if (Array.isArray(params[key]) && params[key].length > 0) {
         url = `${url}${key}=${JSON.stringify(params[key].map((p: any) => p.optionValue))}&`;
+      }
+
+      if (typeof params[key] === "number" && params[key] > 0) {
+        url = `${url}${key}=${params[key]}&`;
       }
 
       if (params[key]) {
