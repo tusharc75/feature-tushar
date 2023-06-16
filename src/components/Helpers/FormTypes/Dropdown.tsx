@@ -203,8 +203,12 @@ function Dropdown({
                 </IconButton>
                 {lookupDialog && (
                   <AddMultiple
-                    fieldData={fieldData}
-                    dependentFieldValue={values[fieldData?.lookupDependentOn]}
+                    resource={fieldData?.lookupResource}
+                    referenceData={
+                      fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
+                        ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
+                        : null
+                    }
                     onClose={() => setLookupDialog(false)}
                     onSuccess={(data) => {
                       setLookupDialog(false);
@@ -229,36 +233,6 @@ function Dropdown({
                       }
                     }}
                   />
-                  // <ManageWellMaster
-                  //   refrenceData={{ customerAccount: values[fieldData.lookupDependentOn] }}
-                  //   isClone={false}
-                  //   wellMasterId={null}
-                  //   onClose={() => setLookupDialog(false)}
-                  //   onSuccess={(data) => {
-                  //     setLookupDialog(false);
-                  //     if (data.wellName && data._id) {
-                  //       let tempNewOption = {
-                  //         default: false,
-                  //         optionLabel: data.wellName,
-                  //         optionValue: data._id,
-                  //         order: option.length,
-                  //         customerAccount: data?.customerAccount
-                  //       };
-                  //       addFieldOption(tempNewOption);
-                  //       setOptionsList([tempNewOption, ...option]);
-                  //       if (fieldData.lookupDependentOn) {
-                  //         if (
-                  //           data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn] ||
-                  //           data[fieldData.lookupDependentOn]?.includes(values[fieldData.lookupDependentOn])
-                  //         ) {
-                  //           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                  //         }
-                  //       } else {
-                  //         handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                  //       }
-                  //     }
-                  //   }}
-                  // />
                 )}
               </>
             </HtmlTooltip>

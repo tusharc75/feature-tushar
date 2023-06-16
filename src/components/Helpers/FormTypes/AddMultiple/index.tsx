@@ -1,39 +1,20 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import routes from '../../Routes';
-import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, wellMaster, yupSchema } from 'src/constants/helpers';
-import { Box, Button, CircularProgress, Dialog, Grid, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
-import { Form, Formik } from 'formik';
+import { CustomDialogTransition, getObjKeys } from 'src/constants/helpers';
+import { Box, Button, CircularProgress, Dialog, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { isEmpty, isEqual, orderBy, set } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../FormTypes';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from '../../CustomButton';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from '../../CommonSkeleton';
-import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider';
-import { BiAddToQueue } from 'react-icons/bi';
 import MaUTable from '@material-ui/core/Table';
-import {
-  useTable,
-  useExpanded,
-  useRowSelect,
-  useFlexLayout,
-  useSortBy,
-  useResizeColumns,
-  useFilters,
-  useColumnOrder,
-  usePagination,
-  useRowState
-} from 'react-table';
-import { useSticky } from 'react-table-sticky';
 import { Add, Delete } from '@material-ui/icons';
 
-function AddMultiple({ fieldData, dependentFieldValue = '', onClose, onSuccess }) {
+function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);
   const [entries, setEntries] = useState([]);
   const [entryValues, setEntryValues] = useState([]);
@@ -49,24 +30,23 @@ function AddMultiple({ fieldData, dependentFieldValue = '', onClose, onSuccess }
 
   useEffect(() => {
     fetchFields();
-  }, [fieldData]);
+  }, [resource]);
 
   const fetchFields = () => {
     setLoading(true);
     axiosInstance()
-      .get(`/field?resource=${fieldData?.lookupResource || ''}`)
+      .get(`/field?resource=${resource}`)
       .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data
-          .filter((obj) => obj.isCreate)
-          ?.map((d: any) => d.fieldData)
-          ?.map((d) => {
-            delete d.lookup;
-            return d;
-          });
-        setTitle(`Create Multiple ${fieldData?.lookupResource || ''}`);
+        const fieldsDataForCreate = data.filter((obj) => obj.isCreate)?.map((d: any) => ({ ...d.fieldData, hidelookupAddButton: true }));
+
+        setTitle(`Create Multiple ${resource}`);
         let initialData: any = { ...getObjKeys('', fieldsDataForCreate) };
-        if (fieldData?.lookupDependentOn) {
-          initialData[fieldData?.lookupDependentOn] = dependentFieldValue || '';
+        if (referenceData) {
+          Object.keys(referenceData)?.forEach((key) => {
+            if (fieldsDataForCreate?.find((i) => i.fieldName === key)) {
+              initialData[key] = referenceData[key];
+            }
+          });
         }
 
         setAllFields(fieldsDataForCreate);
@@ -82,21 +62,25 @@ function AddMultiple({ fieldData, dependentFieldValue = '', onClose, onSuccess }
 
   const addEntry = () => {
     const fields = allFields?.map((field) => {
-      delete field.lookup;
       return {
         ...field,
+        hidelookupAddButton: true,
         fieldName: `${field.fieldName}_${entries.length}`
       };
     });
     let initialData: any = { ...getObjKeys('', fields) };
-    if (fieldData?.lookupDependentOn) {
-      initialData[`${fieldData?.lookupDependentOn}_${entries.length}`] = dependentFieldValue || '';
+
+    if (referenceData) {
+      Object.keys(referenceData)?.forEach((key) => {
+        if (allFields?.find((i) => i?.fieldName === key)) {
+          initialData[`${key}_${entries.length}`] = referenceData[key];
+        }
+      });
     }
     setEntries([...entries, fields]);
     setEntryValues([...entryValues, { ...initialData }]);
   };
 
-  // For removing an entry
   const removeEntry = (index) => {
     const deletedEntry = entries[index];
     const errors = { ...error };
@@ -106,7 +90,6 @@ function AddMultiple({ fieldData, dependentFieldValue = '', onClose, onSuccess }
     setError(errors);
     setEntries(entries?.filter((_, i) => i !== index));
     setEntryValues(entryValues?.filter((_, i) => i !== index));
-    // remove error string too
   };
 
   const handleSubmit = (values) => {
@@ -125,7 +108,7 @@ function AddMultiple({ fieldData, dependentFieldValue = '', onClose, onSuccess }
     axiosInstance()
       .post(`/dynamic-form/multi`, datas, {
         headers: {
-          Resource: fieldData?.lookupResource
+          Resource: resource
         }
       })
       .then(({ data: { data, message } }) => {
@@ -142,8 +125,10 @@ function AddMultiple({ fieldData, dependentFieldValue = '', onClose, onSuccess }
             optionLabel: d[primaryField?.fieldName],
             optionValue: d._id
           };
-          if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOn !== '') {
-            data[fieldData?.lookupDependentOn] = d[fieldData?.lookupDependentOn];
+          if (referenceData) {
+            Object.keys(referenceData)?.forEach((key) => {
+              data[key] = referenceData[key];
+            });
           }
           return data;
         });
@@ -359,7 +344,6 @@ function AddMultiple({ fieldData, dependentFieldValue = '', onClose, onSuccess }
               open={showConfirmDialog}
               onSave={() => {
                 setShowConfirmDialog(false);
-                // handleScroll(errors);
                 handleSubmit(entryValues);
               }}
               onClose={() => {
