@@ -33,15 +33,10 @@ import {
 import { useSticky } from 'react-table-sticky';
 import { Add, Delete } from '@material-ui/icons';
 
-function AddMultiple({ fieldData, onClose, onSuccess }) {
-  const history = useHistory();
+function AddMultiple({ fieldData, dependentFieldValue = '', onClose, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions, user, selectedEntity }
-  }: any = useData();
   const [entries, setEntries] = useState([]);
   const [entryValues, setEntryValues] = useState([]);
-  const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -70,6 +65,9 @@ function AddMultiple({ fieldData, onClose, onSuccess }) {
           });
         setTitle(`Create Multiple ${fieldData?.lookupResource || ''}`);
         let initialData: any = { ...getObjKeys('', fieldsDataForCreate) };
+        if (fieldData?.lookupDependentOn) {
+          initialData[fieldData?.lookupDependentOn] = dependentFieldValue || '';
+        }
 
         setAllFields(fieldsDataForCreate);
         setEntries([[...fieldsDataForCreate]]);
@@ -91,6 +89,9 @@ function AddMultiple({ fieldData, onClose, onSuccess }) {
       };
     });
     let initialData: any = { ...getObjKeys('', fields) };
+    if (fieldData?.lookupDependentOn) {
+      initialData[`${fieldData?.lookupDependentOn}_${entries.length}`] = dependentFieldValue || '';
+    }
     setEntries([...entries, fields]);
     setEntryValues([...entryValues, { ...initialData }]);
   };
@@ -112,6 +113,7 @@ function AddMultiple({ fieldData, onClose, onSuccess }) {
     const error = validate(entryValues);
     if (Object.keys(error).length > 0) return;
 
+    setSubmitting(true);
     const datas = values?.map((item) => {
       const newItem = {};
       Object.keys(item)?.forEach((key) => {
@@ -153,9 +155,6 @@ function AddMultiple({ fieldData, onClose, onSuccess }) {
         toastConfig.setToastConfig(error);
       });
   };
-  //   useEffect(() => {
-  //     !isEmpty(entryValues) && validate(entryValues);
-  //   }, [entryValues]);
 
   function validate(values) {
     const errors = {};
@@ -228,7 +227,7 @@ function AddMultiple({ fieldData, onClose, onSuccess }) {
                 <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
                   <TableRow key={'thead'} className="tr">
                     {entries[0]?.map((field, index) => (
-                      <TableCell key={`${index}-${field?.fieldName}`} className="th text-truncate table-header overflow-initial">
+                      <TableCell key={`${index}-${field?.fieldName}-head`} className="th text-truncate table-header overflow-initial">
                         <div className="d-flex align-items-center justify-content-space-between pos-rel">
                           <div className="d-flex gap-2 align-items-center">
                             <span>{field?.fieldLabel}</span>
@@ -262,10 +261,10 @@ function AddMultiple({ fieldData, onClose, onSuccess }) {
                 >
                   {entries?.map((iData, idx) => {
                     return (
-                      <TableRow className="tr" style={{ overflow: 'auto' }}>
+                      <TableRow key={'tbody'} className="tr" style={{ overflow: 'auto' }}>
                         {iData?.map((field, i) => {
                           return (
-                            <TableCell className={`td`} style={{ minWidth: '300px', maxWidth: '300px' }}>
+                            <TableCell key={`${idx}-${i}-${field?.fieldName}-body`} className={`td`} style={{ minWidth: '300px', maxWidth: '300px' }}>
                               <FormTypes
                                 {...field}
                                 disabled={field.disableOnEdit}
@@ -295,7 +294,7 @@ function AddMultiple({ fieldData, onClose, onSuccess }) {
                           );
                         })}
                         <TableCell
-                          key={`Index ${idx}`}
+                          key={`Index ${idx}-action`}
                           className="td table-header action-column"
                           style={{
                             width: '10px',

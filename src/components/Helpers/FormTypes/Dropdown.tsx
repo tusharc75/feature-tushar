@@ -204,6 +204,7 @@ function Dropdown({
                 {lookupDialog && (
                   <AddMultiple
                     fieldData={fieldData}
+                    dependentFieldValue={values[fieldData?.lookupDependentOn]}
                     onClose={() => setLookupDialog(false)}
                     onSuccess={(data) => {
                       setLookupDialog(false);
@@ -213,13 +214,18 @@ function Dropdown({
                             ...item,
                             order: option.length
                           };
-                          // setOptionsList([tempNewOption, ...option]);
                           return tempNewOption;
                         });
-                        console.log('tempOptions', tempOptions);
                         addFieldOption([...tempOptions]);
                         setOptionsList([...tempOptions, ...option]);
-                        handleChange(name, tempOptions?.length && tempOptions[0].optionValue ? tempOptions[0].optionValue : '');
+                        if (type === 'multiSelect') {
+                          handleChange(
+                            name,
+                            tempOptions?.length ? [...tempOptions?.map((item: any) => item?.optionValue || ''), ...values[name]] : []
+                          );
+                        } else {
+                          handleChange(name, tempOptions?.length && tempOptions[0].optionValue ? tempOptions[0].optionValue : '');
+                        }
                       }
                     }}
                   />
