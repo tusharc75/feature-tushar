@@ -76,7 +76,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
               fullWidth
               margin="dense"
               value={values[filter.key]}
-              onChange={(e) => handleChange(filter.key, e.target.value)}
+              onChange={(e) => handleChange(filter.key, Number(e.target.value))}
             />
             )}
           </Box>
