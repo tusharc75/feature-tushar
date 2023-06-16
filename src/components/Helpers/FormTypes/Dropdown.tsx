@@ -24,7 +24,7 @@ import ManageAddressDialog from 'src/components/Address/ManageAddressDialog';
 import ManageMarketSegmentDialog from 'src/pages/MarketSegment/ManageMarketSegmentDialog';
 import { camelCase, has, isEmpty } from 'lodash';
 import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
-import AddMultiple from './AddMultiple';
+import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 
 function dropdownOptions(options, values, fields, fieldData) {
   const lookupDependentOn = fieldData?.lookupDependentOn;

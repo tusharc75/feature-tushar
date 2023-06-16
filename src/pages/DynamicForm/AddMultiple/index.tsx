@@ -5,11 +5,11 @@ import { Box, Button, CircularProgress, Dialog, TableBody, TableCell, TableHead,
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { isEmpty, isEqual } from 'lodash';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import FormTypes from '../../FormTypes';
+import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from '../../CustomButton';
+import CustomButton from '../../../components/Helpers/CustomButton';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
-import CommonSkeleton from '../../CommonSkeleton';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import MaUTable from '@material-ui/core/Table';
 import { Add, Delete } from '@material-ui/icons';
