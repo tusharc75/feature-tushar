@@ -47,7 +47,7 @@ import {
   getUniqueCurrencies,
   documentUploadSupportExtensions,
   formatAmountWithCurrency,
-  sidebarResource,
+  sidebarResource
 } from '../../constants/helpers';
 import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
@@ -91,7 +91,7 @@ const CustomFormat = (props: NumberFormatCustomProps | any) => {
 const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, warningMessage, warningTooltip }) =>
   isTooltip && info ? (
     <Grid container spacing={1} alignItems="center">
-      <Grid item xs={11} sm={11} md={11}>
+      <Grid item style={{ flexGrow: 1 }}>
         {children}
         {warningTooltip && (
           <Box ml={1}>
@@ -101,7 +101,7 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
           </Box>
         )}
       </Grid>
-      <Grid item xs={1} sm={1} md={1}>
+      <Grid item>
         <HtmlTooltip title={<Typography>{info}</Typography>}>
           <InfoIcon color="disabled" />
         </HtmlTooltip>
@@ -130,9 +130,6 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
           </Box>
         )}
       </Grid>
-      {/* <Grid item xs={1} sm={1} md={1}>
-        <InfoIcon style={{ opacity: 0 }} color="disabled" />
-      </Grid> */}
     </Grid>
   );
 
@@ -941,176 +938,180 @@ const FormTypes = (props) => {
       />
     </InfoLabel>
   ) : (type === 'dropDown' || type === 'multiSelect') && (lookup || fieldData?.lookup) ? (
-    <Dropdown
-      InfoLabel={InfoLabel}
-      fieldData={fieldData}
-      rest={rest}
-      option={option}
-      values={values}
-      type={type}
-      onChange={onChange}
-      label={label}
-      name={name}
-      addFieldOption={addFieldOption}
-      setOptionsList={setOptionsList}
-      handleChange={handleChange}
-      getLabel={getLabel}
-      touched={touched}
-      errors={errors}
-      required={required}
-      setFieldValue={setFieldValue}
-      fields={fields}
-    />
+    <>
+      <Dropdown
+        InfoLabel={InfoLabel}
+        fieldData={fieldData}
+        rest={rest}
+        option={option}
+        values={values}
+        type={type}
+        onChange={onChange}
+        label={label}
+        name={name}
+        addFieldOption={addFieldOption}
+        setOptionsList={setOptionsList}
+        handleChange={handleChange}
+        getLabel={getLabel}
+        touched={touched}
+        errors={errors}
+        required={required}
+        setFieldValue={setFieldValue}
+        fields={fields}
+      />
+    </>
   ) : type === 'dropDown' ||
     type === 'lookup' ||
     (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse) ||
     (type === 'formula' && fieldData && fieldData.isDropdown) ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-      doNotShowInfoTooltip={doNotShowInfoTooltip}
-    >
-      <Grid container spacing={1} alignItems="center">
-        <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
-          <Autocomplete
-            {...rest}
-            disabled={fieldData?.isUneditable || rest?.disabled}
-            options={
-              fieldData && fieldData?.isDependentDropdown
-                ? option.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn])
-                : option.filter((f) => f.optionLabel)
-            }
-            freeSolo={type === 'dropDown' && !lookup}
-            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-            getOptionSelected={(option: any, val) => option.optionValue === val}
-            value={
-              option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
-            }
-            onChange={
-              onChange
-                ? onChange
-                : (e, val) => {
-                    if (setFieldValue) {
-                      if (!lookup) {
-                        if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
-                          const newOption = {
-                            order: option.length,
-                            default: false,
-                            optionLabel: val,
-                            optionValue: val
-                          };
-
-                          if (!option?.find((o) => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
-                            addFieldOption(newOption);
-                            setOptionsList([...option, newOption]);
-                          }
-                          if (addAdditionalOption || fieldData?.addAdditionalOption) {
-                            handleChange(name, val);
-                          }
-                        } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
-                          const newOption = {
-                            order: option.length,
-                            default: false,
-                            optionLabel: val.inputValue,
-                            optionValue: val.inputValue
-                          };
-                          if (
-                            !option?.find((o) => o?.optionValue.includes(val.inputValue)) &&
-                            (addAdditionalOption || fieldData?.addAdditionalOption)
-                          ) {
-                            setOptionsList([...option, newOption]);
-                            addFieldOption(newOption);
-                          }
-                          if (addAdditionalOption || fieldData?.addAdditionalOption) {
-                            handleChange(name, val.inputValue);
-                          }
-                        } else {
-                          if (val) {
+    <>
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+        doNotShowInfoTooltip={doNotShowInfoTooltip}
+      >
+        <Grid container spacing={1} alignItems="center">
+          <Grid item style={{ flexGrow: 1 }}>
+            <Autocomplete
+              {...rest}
+              disabled={fieldData?.isUneditable || rest?.disabled}
+              options={
+                fieldData && fieldData?.isDependentDropdown
+                  ? option.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn])
+                  : option.filter((f) => f.optionLabel)
+              }
+              freeSolo={type === 'dropDown' && !lookup}
+              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+              getOptionSelected={(option: any, val) => option.optionValue === val}
+              value={
+                option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
+              }
+              onChange={
+                onChange
+                  ? onChange
+                  : (e, val) => {
+                      if (setFieldValue) {
+                        if (!lookup) {
+                          if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
                             const newOption = {
-                              ...val,
-                              optionLabel: val.optionValue
+                              order: option.length,
+                              default: false,
+                              optionLabel: val,
+                              optionValue: val
+                            };
+
+                            if (!option?.find((o) => o?.optionValue.includes(val)) && (addAdditionalOption || fieldData?.addAdditionalOption)) {
+                              addFieldOption(newOption);
+                              setOptionsList([...option, newOption]);
+                            }
+                            if (addAdditionalOption || fieldData?.addAdditionalOption) {
+                              handleChange(name, val);
+                            }
+                          } else if (val && val.inputValue && /^[a-zA-Z ]*$/.test(val.inputValue)) {
+                            const newOption = {
+                              order: option.length,
+                              default: false,
+                              optionLabel: val.inputValue,
+                              optionValue: val.inputValue
                             };
                             if (
-                              !option?.find((o) => o?.optionValue.includes(val.optionValue)) &&
+                              !option?.find((o) => o?.optionValue.includes(val.inputValue)) &&
                               (addAdditionalOption || fieldData?.addAdditionalOption)
                             ) {
+                              setOptionsList([...option, newOption]);
                               addFieldOption(newOption);
-                              setOptionsList([newOption, ...option]);
                             }
-                            handleChange(name, val && val.optionValue ? val.optionValue : '');
+                            if (addAdditionalOption || fieldData?.addAdditionalOption) {
+                              handleChange(name, val.inputValue);
+                            }
+                          } else {
+                            if (val) {
+                              const newOption = {
+                                ...val,
+                                optionLabel: val.optionValue
+                              };
+                              if (
+                                !option?.find((o) => o?.optionValue.includes(val.optionValue)) &&
+                                (addAdditionalOption || fieldData?.addAdditionalOption)
+                              ) {
+                                addFieldOption(newOption);
+                                setOptionsList([newOption, ...option]);
+                              }
+                              handleChange(name, val && val.optionValue ? val.optionValue : '');
+                            }
+                            //  This else was not there, so In budget create dialog if I was removing the selected dropdown value, the value did not get clear
+                            else {
+                              handleChange(name, val && val.optionValue ? val.optionValue : '');
+                            }
                           }
-                          //  This else was not there, so In budget create dialog if I was removing the selected dropdown value, the value did not get clear
-                          else {
-                            handleChange(name, val && val.optionValue ? val.optionValue : '');
-                          }
+                        } else {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
                         }
-                      } else {
-                        handleChange(name, val && val.optionValue ? val.optionValue : '');
                       }
                     }
-                  }
-            }
-            filterOptions={(options, params) => {
-              const filtered = filter(options, params);
-
-              if (
-                params.inputValue !== '' &&
-                !option.find((o) => o?.optionValue.includes(params.inputValue)) &&
-                !lookup &&
-                (addAdditionalOption || fieldData?.addAdditionalOption)
-              ) {
-                filtered.push({
-                  order: option.length,
-                  default: false,
-                  optionLabel: `Add "${params.inputValue}"`,
-                  optionValue: params.inputValue
-                });
               }
+              filterOptions={(options, params) => {
+                const filtered = filter(options, params);
 
-              return filtered;
-            }}
-            selectOnFocus
-            clearOnBlur
-            handleHomeEndKeys
-            forcePopupIcon={true}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                name={name}
-                label={getLabel(label)}
-                variant="outlined"
-                style={{ outline: '1px solid white' }}
-                error={touched[name] && Boolean(errors[name])}
-                helperText={touched[name] && errors[name]}
-                required={required}
-              />
-            )}
-          />
-        </Grid>
-        {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-          <Grid item xs={2}>
-            <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
-              <AddCircleIcon />
-            </IconButton>
+                if (
+                  params.inputValue !== '' &&
+                  !option.find((o) => o?.optionValue.includes(params.inputValue)) &&
+                  !lookup &&
+                  (addAdditionalOption || fieldData?.addAdditionalOption)
+                ) {
+                  filtered.push({
+                    order: option.length,
+                    default: false,
+                    optionLabel: `Add "${params.inputValue}"`,
+                    optionValue: params.inputValue
+                  });
+                }
 
-            {optionSaveDialog && (
-              <AddOptionDialog
-                values={values}
-                handleChange={handleChange}
-                name={name}
-                label={label}
-                addFieldOption={addFieldOption}
-                options={option}
-                setOptions={setOptionsList}
-                setOpen={setOptionSaveDialog}
-              />
-            )}
+                return filtered;
+              }}
+              selectOnFocus
+              clearOnBlur
+              handleHomeEndKeys
+              forcePopupIcon={true}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  name={name}
+                  label={getLabel(label)}
+                  variant="outlined"
+                  style={{ outline: '1px solid white' }}
+                  error={touched[name] && Boolean(errors[name])}
+                  helperText={touched[name] && errors[name]}
+                  required={required}
+                />
+              )}
+            />
           </Grid>
-        )}
-      </Grid>
-    </InfoLabel>
+          {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
+            <>
+              <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
+                <AddCircleIcon />
+              </IconButton>
+
+              {optionSaveDialog && (
+                <AddOptionDialog
+                  values={values}
+                  handleChange={handleChange}
+                  name={name}
+                  label={label}
+                  addFieldOption={addFieldOption}
+                  options={option}
+                  setOptions={setOptionsList}
+                  setOpen={setOptionSaveDialog}
+                />
+              )}
+            </>
+          )}
+        </Grid>
+      </InfoLabel>
+    </>
   ) : type === 'vlookupDropdown' && fieldData && !fieldData.isvlookupReverse ? (
     <InfoLabel
       info={tooltipMessage}
