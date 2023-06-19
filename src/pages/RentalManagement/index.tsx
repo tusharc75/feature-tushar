@@ -390,6 +390,7 @@ const RentalManagement = () => {
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
             <CustomBreadCrumbs routes={[routes.rentalManagement]} />
+            <h5>TEST RENTAL</h5>
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
             <Grid container direction="row">
