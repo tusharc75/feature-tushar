@@ -2,6 +2,7 @@ import React, { ReactNode, useState, useCallback, FC, ChangeEvent } from 'react'
 import styles from './index.module.scss';
 import CardWithCheckBox from './CardWithCheckbox';
 import type { GridProps } from '@material-ui/core/Grid';
+import { createBodyColumns, ColumnInterface } from './helper';
 
 interface TableInterface extends React.HTMLAttributes<HTMLDivElement> {
   data: any[];
@@ -102,4 +103,6 @@ const CustomTableWithCard: FC<TableInterface> = ({
   );
 };
 
+export { createBodyColumns };
+export type { ColumnInterface };
 export default CustomTableWithCard;

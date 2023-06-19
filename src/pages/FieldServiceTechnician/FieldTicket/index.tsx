@@ -19,6 +19,7 @@ import useColumns from 'src/constants/useColumns';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import CustomTableWithCard, { CardInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
 
 const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
   const renderedFrom = camelCase(`${routes.fieldTicket?.title}`);
@@ -43,6 +44,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const { isOffline } = useContext(CustomOfflineContext);
+  const [accessor, setAccessor] = useState<CardInterface | null>(null);
 
   useImperativeHandle(fieldRef, () => ({
     triggerChildFunction() {
@@ -77,6 +79,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedFieldService, isOffline]);
 
   const fetchGridColumns = async () => {
+    setAccessor(null);
     try {
       let data;
       if (isOffline) {
@@ -86,8 +89,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
         data = response?.data?.data;
         try {
           insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
-        } catch (ex) {
-        }
+        } catch (ex) {}
       }
 
       let columns = [];
@@ -109,8 +111,54 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
       setFrameWorkComponent({ ...tempFrameworkComponent });
       columns = [...columns, ...getStaticFields()];
       setColumns([...columns]);
-    } catch (err) {
-    }
+      const bodyColumns: CardInterface['bodyColumns'] = createBodyColumns({
+        columns,
+        exclude: ['status', 'fieldServiceOrder', 'fieldTicketNumber'],
+        xs: 6,
+        sm: 4,
+        md: 3,
+        lg: 2
+        // className: 'grid-xl-9-col'
+      });
+      setAccessor({
+        name: (row) => (
+          <Box>
+            <Typography component={'h6'}>
+              Field Ticket Number :{' '}
+              <a className="link" href={`${routes.fieldTicketDetail.path}/${row?._id}`} target="_blank">
+                {row['fieldTicketNumber']}
+              </a>
+            </Typography>
+            <Typography style={{ fontSize: '13px', color: 'var(--dark-secondary-text, #6B6B6B)', marginTop: '5px' }}>
+              Field Service Order :{' '}
+              <a className="link" href={`${routes.fieldServiceOrderDetail.path}/${row?.[`fieldServiceOrderId`]}`} target="_blank">
+                {row['fieldServiceOrder']}
+              </a>
+            </Typography>
+          </Box>
+        ),
+        bodyColumns,
+        headerColumns: [
+          {
+            style: { marginRight: 'auto' },
+            render: (row) => row['status'],
+            component: (row) => (row['status'] === 'New' ? 'completedChip' : 'pendingChip')
+          },
+          {
+            render: (row) => {
+              const actionParams = {
+                data: row
+              };
+              return (
+                <>
+                  <Box display="flex">{ActionsRenderer(actionParams)}</Box>
+                </>
+              );
+            }
+          }
+        ]
+      });
+    } catch (err) {}
   };
 
   const fetchData = async (offlineStore = false) => {
@@ -333,72 +381,78 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
 
   return (
     <>
-      <Box p={2} pt={0}>
-        <Box display="flex" justifyContent="flex-end" mb={2}>
-          <Box display="flex" flexWrap={'wrap'}>
-            <Button
-              onClick={() => {
-                setFieldTicketId(null);
-                setOpen({ open: true, isClone: false });
-              }}
-              variant={'contained'}
-              size="small"
-              color="primary"
-              startIcon={<AddOutlined />}
-            >
-              {`Create ${routes.fieldTicket.title}`}
-            </Button>
-          </Box>
-          <Box display="flex" ml={1}>
-            {permissions?.fieldServiceTechnician?.isDelete && (
-              <>
-                <Button
-                  variant={'contained'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  disabled={selectedRecords.length ? false : true}
-                  aria-controls="action-menu"
-                  style={{ marginLeft: '0.4rem' }}
-                  endIcon={<ExpandMore />}
-                >
-                  {'Actions'}
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={
-                      !((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)
+      <Box>
+        <Box display="flex" flexWrap={'wrap'} style={{ gap: '8px' }} justifyContent="flex-end" mb={2}>
+          <Button
+            onClick={() => {
+              setFieldTicketId(null);
+              setOpen({ open: true, isClone: false });
+            }}
+            variant={'contained'}
+            size="small"
+            color="primary"
+            startIcon={<AddOutlined />}
+          >
+            {`Create ${routes.fieldTicket.title}`}
+          </Button>
+          {permissions?.fieldServiceTechnician?.isDelete && (
+            <>
+              <Button
+                variant={'outlined'}
+                className="new-dropdown-v1"
+                color="default"
+                size="small"
+                aria-controls="action-menu"
+                onClick={openActions}
+                style={{ marginLeft: '0.4rem' }}
+                endIcon={<ExpandMore />}
+              >
+                {'Actions'}
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  disabled={
+                    !((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)
+                  }
+                  onClick={() => {
+                    closeActions();
+                    // eslint-disable-next-line no-lone-blocks
+                    {
+                      selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
                     }
-                    onClick={() => {
-                      closeActions();
-                      // eslint-disable-next-line no-lone-blocks
-                      {
-                        selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                      }
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </>
-            )}
-          </Box>
+                    setShowDeleteConfirmBox(true);
+                  }}
+                >
+                  Delete
+                </MenuItem>
+              </Menu>
+            </>
+          )}
         </Box>
-        {Object.keys(frameWorkComponent).length > 0 && (
-          <Box pt={2}>
-            <CustomAgGrid
+        <Box minHeight={'calc(100vh - 290px)'}>
+          {Object.keys(frameWorkComponent).length > 0 && dataRows && dataRows.length > 0 && accessor ? (
+            <>
+              <CustomTableWithCard
+                data={dataRows}
+                accessor={accessor}
+                uniqueKey={(data) => data._id}
+                onSelect={(data) => dispatch({ type: 'selection', selectedRecords: data })}
+                checkBox={true}
+                height={'calc(100vh - 290px)'}
+              />
+
+              {/* <CustomAgGrid
               columns={columns}
               dataRows={dataRows}
               frameworkComponents={frameWorkComponent}
@@ -413,9 +467,12 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
-            />
-          </Box>
-        )}
+            /> */}
+            </>
+          ) : (
+            <CommonSkeleton />
+          )}
+        </Box>
       </Box>
       {showDeleteConfirmBox && (
         <ConfirmationDialog
