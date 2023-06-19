@@ -60,7 +60,7 @@ const Products = ({ handleClose, handleSucess, _id, products, warehouse }) => {
     setTableData((prevState) =>
       prevState.map((data: any) => {
         if (d?.product?.optionValue === data?.product?.optionValue) {
-          data['qty'] = parseInt(value) == NaN ? 0 : parseInt(value);
+          data['qty'] = Number.isNaN(parseInt(value)) ? 0 : parseInt(value);
         }
         return data;
       })

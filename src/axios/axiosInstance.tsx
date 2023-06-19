@@ -104,7 +104,7 @@ export default (history = null, passedHeaders = null) => {
 
             if (!error.response) {
                 return new Promise((resolve, reject) => {
-                    reject({ open: true, type: "error", message: error.response.data.error });
+                    reject({ open: true, type: "error", message: error?.response?.data?.error });
                 })
             }
 

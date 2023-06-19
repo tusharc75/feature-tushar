@@ -101,7 +101,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           enitityList = entityData.resource.filter((list) => list.sectionName === section);
         }
         const items = [...lists, ...enitityList].filter((item) => {
-          if (item?.name === 'Product Builder' && process.env.REACT_APP_ENV === 'staging') {
+          if (item?.name === 'Product Builder' && import.meta.env.VITE_APP_ENV === 'staging') {
             return false;
           }
           if (item?.isHidden || staticHiddenResource?.includes(item?.name)) {

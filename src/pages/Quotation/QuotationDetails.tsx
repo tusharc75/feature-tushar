@@ -24,7 +24,6 @@ import {
   FcOk,
   FcCancel,
   GiReceiveMoney,
-  HiPencil,
   IoArrowDownCircleSharp,
   MdDelete,
   MdDeleteSweep,
@@ -32,6 +31,7 @@ import {
   VscVersions,
   FcApproval
 } from 'react-icons/all';
+import { HiPencil } from 'react-icons/hi';
 import { camelCase } from 'lodash';
 import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';

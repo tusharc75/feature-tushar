@@ -19,9 +19,9 @@ function getFiles() {
 
 upload({
   version: version,
-  organization: process.env.ERROR_REPORTING_ORGANIZATION,
-  project: process.env.ERROR_REPORTING_PROJECT,
-  token: process.env.ERROR_REPORTING_API_TOKEN,
+  organization: import.meta.env.ERROR_REPORTING_ORGANIZATION,
+  project: import.meta.env.ERROR_REPORTING_PROJECT,
+  token: import.meta.env.ERROR_REPORTING_API_TOKEN,
   files: getFiles()
 })
   .then((data) => console.log('----- SUCCESS ----\n', data))

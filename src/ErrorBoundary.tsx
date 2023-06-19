@@ -10,7 +10,7 @@ class ErrorBoundary extends React.Component<any, any> {
   }
 
   componentDidCatch(error, errorInfo) {
-    if (process.env.REACT_APP_ENV !== 'local') {
+    if (import.meta.env.VITE_APP_ENV !== 'local') {
       if (error instanceof TypeError || error instanceof ReferenceError) {
         this.setState({
           error: error,
@@ -42,7 +42,7 @@ class ErrorBoundary extends React.Component<any, any> {
             <Button variant="contained" color="primary" className={styles.reload} onClick={() => (window.location.href = '/')}>
               Try again
             </Button>
-            {['local', 'development'].includes(process.env.REACT_APP_ENV) ? (
+            {['local', 'development'].includes(import.meta.env.VITE_APP_ENV) ? (
               <Typography variant="body1">
                 <details style={{ whiteSpace: 'pre-wrap' }} className={styles.detailScreen}>
                   {this.state.error && this.state.error.toString()}
