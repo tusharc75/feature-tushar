@@ -436,25 +436,27 @@ const SerializedAsset = () => {
     setAnchorEl(null);
   };
 
-  const handleCertificationSupplier = async(data) => {
+  const handleCertificationSupplier = async (data) => {
     const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((item) => item?._id)
     const certificationSupplier = data?.map((item) => item?._id);
     const body = {
       _ids: ids,
       certificationSupplier: certificationSupplier
     }
-    try{
-      let response = await axiosInstance().put(`${routes?.serializedAsset?.path}/update-bulk-data`, body) ;
+    try {
+      let response = await axiosInstance().put(`${routes?.serializedAsset?.path}/update-bulk-data`, body);
       removeLocalStorage(localStorageSelectedRecords);
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
         message: response?.data?.message
       });
+      setOpenSupplierAccountDialog(false)
       fetchProductInventory()
-    }catch(error) {
+    } catch (error) {
       toastConfig.setToastConfig(error);
-    }}
+    }
+  }
 
   return (
     <Fragment>
@@ -772,15 +774,17 @@ const SerializedAsset = () => {
                           >
                             {`Status Change - ${ASSET_STATUS.lost}`}
                           </MenuItem>
-                          <MenuItem
-                            disabled={!permissions?.serializedAsset?.isUpdate}
-                            onClick={() => {
-                              closeActions();
-                              setOpenSupplierAccountDialog(true)
-                            }}
-                          >
-                            {`Assign Certification Supplier`}
-                          </MenuItem>
+                          {columns?.some(e => e.field === "certificationSupplier") &&
+                            <MenuItem
+                              disabled={!permissions?.serializedAsset?.isUpdate}
+                              onClick={() => {
+                                closeActions();
+                                setOpenSupplierAccountDialog(true)
+                              }}
+                            >
+                              {`Assign Certification Supplier`}
+                            </MenuItem>
+                          }
                         </>
                       )
                     }
@@ -936,17 +940,16 @@ const SerializedAsset = () => {
         />
       )}
       {openSupplierAccountDialog && (
-         <AssignSupplierAccountDialog
-         reference={routes.serializedAsset.title}
-         onSuccess={(data) => {
-           handleCertificationSupplier(data);
-          setOpenSupplierAccountDialog(false)
-         }}
-         handleClose={() => {
-          setOpenSupplierAccountDialog(false)
-         }}
-         ids={[]}
-       />
+        <AssignSupplierAccountDialog
+          reference={routes.serializedAsset.title}
+          onSuccess={(data) => {
+            handleCertificationSupplier(data);
+          }}
+          handleClose={() => {
+            setOpenSupplierAccountDialog(false)
+          }}
+          ids={[]}
+        />
       )}
     </Fragment>
   );
