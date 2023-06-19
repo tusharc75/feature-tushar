@@ -9,7 +9,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { purchaseOrder, purchaseOrderSteps, PURCHASE_ORDER_STATUS, ACTIVITY_RESOURCE } from '../../constants/helpers';
+import { purchaseOrder, purchaseOrderSteps, PURCHASE_ORDER_STATUS, ACTIVITY_RESOURCE, displayDateTime } from '../../constants/helpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from '@material-ui/core/MenuItem';

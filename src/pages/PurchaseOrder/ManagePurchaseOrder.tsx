@@ -70,6 +70,10 @@ const ManagePurchaseOrder = ({
               if (isClone) {
                 const { _id, createdBy, updatedBy, serialNumber, purchaseOrderNumber, ...rest } = data;
                 rest['status'] = PURCHASE_ORDER_STATUS.open;
+                const purchaseOrderNumberField = fieldsDataForCreate?.find((e) => e.fieldName === 'purchaseOrderNumber')
+                if (purchaseOrderNumberField) {
+                  rest['purchaseOrderNumber'] = purchaseOrderNumberField?.defaultValue;
+                }
                 if (fieldsDataForCreate?.filter((e) => e.fieldName === 'purchaseOrderDate').length) {
                   rest['purchaseOrderDate'] = new Date();
                 }
