@@ -1101,6 +1101,15 @@ export const convertDateInDateTime = (date) => {
   return newDate;
 };
 
+export const convertDateTimToDate = (date) => {
+  if (!date) {
+    return date;
+  }
+  var newDate = moment(date);
+  newDate.set({ hour: 0, minute: 0, second: 0 });
+  return newDate;
+};
+
 export const materialTableIcons: any = {
   Add: forwardRef((props: any, ref: any) => <AddBox {...props} ref={ref} />),
   Check: forwardRef((props: any, ref: any) => <Check {...props} ref={ref} />),

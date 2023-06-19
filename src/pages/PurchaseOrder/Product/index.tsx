@@ -107,8 +107,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     columns.push({
       accessor: 'detail',
       Header: 'Detail',
-      minWidth: 200,
-      width: 200,
+      minWidth: 300,
+      width: 300,
       primaryField: true,
       Cell: ({ row, rows }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
