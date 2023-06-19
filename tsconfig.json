@@ -2,6 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "types": [
+      "vite/client",
       "google.maps",
       "google.visualization"
     ],
