@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, TextField, Tooltip } from '@material-ui/core';
+import { Box, Chip, Grid, IconButton, TextField, Tooltip } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import React, { Fragment } from 'react';
@@ -106,7 +106,7 @@ function Dropdown({
   return (
     <Box key={fieldData?.lookupResource}>
       <Grid container spacing={1} style={{ alignItems: 'center' }}>
-        <Grid item style={{ flexGrow: 1 }}>
+        <Grid item style={{ flexGrow: 1, maxWidth: 419 }}>
           <InfoLabel
             info={fieldData?.tooltipMessage}
             isTooltip={fieldData?.isTooltip}
