@@ -3,7 +3,7 @@ import { Popover, TextField, Box } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 
 interface Props {
-  filters: { key: string; title: string; multiple?: boolean }[];
+  filters: { key: string; title: string; multiple?: boolean ; defaultValue?: number;}[];
   anchorEl: any;
   closeAnchor: () => any;
   values: any;
@@ -18,7 +18,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
     filters.forEach((filter) => {
       setValues((prevState: any) => ({
         ...prevState,
-        [filter.key]: filter?.multiple ? [] : filter.key === 'status' && isCRM ? { optionValue: 'open', optionLabel: 'Open' } : {}
+        [filter.key]: filter?.multiple ? [] : filter.key === 'status' && isCRM ? { optionValue: 'open', optionLabel: 'Open' } : filter?.defaultValue
       }));
     });
   }, [filters]);
@@ -49,7 +49,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
       <Box width={300} padding={'0px 16px 16px 16px'}>
         {filters.map((filter, index) => (
           <Box mt={'16px'} key={index}>
-            {filterOptions[filter.key] ? (
+            {filterOptions[filter.key] && filter?.multiple ? (
               <Autocomplete
                 size="small"
                 multiple={filter?.multiple}
@@ -66,7 +66,19 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                 onChange={(_, val) => handleChange(filter.key, val)}
                 renderInput={(params) => <TextField {...params} label={filter.title} variant="outlined" />}
               />
-            ) : null}
+            ) : (
+              <TextField
+              variant="outlined"
+              type="number"
+              onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+              label={filter?.title}
+              name={filter.key}
+              fullWidth
+              margin="dense"
+              value={values[filter.key]}
+              onChange={(e) => handleChange(filter.key, Number(e.target.value))}
+            />
+            )}
           </Box>
         ))}
       </Box>

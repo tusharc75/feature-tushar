@@ -6,7 +6,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { convertDateInDateTime, dateFormatForInputControl, productInventory, purchaseOrder, sidebarResource } from '../../../constants/helpers';
+import { convertDateInDateTime, convertDateTimToDate, dateFormatForInputControl, productInventory, purchaseOrder, sidebarResource } from '../../../constants/helpers';
 import { Formik, Form, FieldArray } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -144,8 +144,8 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
   const validateDate = (values) => {
     let errors: any = {};
 
-    if (moment(values["receiveDate"]).isBefore(moment(purchaseOrderData?.purchaseOrderDate))) {
-      errors['receiveDate'] = `Please select valid date`;
+    if (moment(values["receiveDate"]).isBefore(convertDateTimToDate(purchaseOrderData?.purchaseOrderDate))) {
+      errors['receiveDate'] = `Date entered prior to the purchase order date`;
     }
 
     if (lockDate) {
@@ -522,6 +522,10 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                           onChange={(value) => {
                             setFieldValue('receiveDate', convertDateInDateTime(value));
                           }}
+                          error={validateDate(values)?.receiveDate}
+                          helperText={
+                            validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''
+                          }
                         />
                       </Box>
                     </Form>

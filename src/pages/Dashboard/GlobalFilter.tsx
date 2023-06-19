@@ -85,6 +85,15 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
           }
         });
         break;
+      case 'current-year':
+        setGlobalFilters({
+          ...globalFilters,
+          between: {
+            from: new Date(moment().startOf('year').calendar()),
+            to: new Date(moment().endOf('year').calendar()),
+          }
+        });
+        break;
 
       default:
         break;
@@ -155,6 +164,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                     <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
                     <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
                     <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                    <MenuItem value={'current-year'}>Current Year</MenuItem>
                     <MenuItem value={'custom'}>Custom</MenuItem>
                   </Select>
                 </FormControl>
