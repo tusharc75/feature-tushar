@@ -4,10 +4,10 @@ import SidebarCogIcon from './sidebarCogIcon.svg';
 import ColabIcon from './colab.svg';
 import SetupsIcon from './setups.svg';
 import { IMAGE_HEIGHT, IMAGE_WIDTH } from 'src/assets/dashboard_images';
-import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 
 const getHash = () => {
-  return crypto.randomBytes(10).toString('hex');
+  return uuidv4();
 };
 
 const HERO = () => {
