@@ -78,7 +78,7 @@ const Consumables = ({ selectedFieldService, recall }) => {
 
   return (
     <>
-      <Box display="flex" justifyContent="flex-end" p={2}>
+      <Box display="flex" justifyContent="flex-end">
         <Box display="flex" ml={1}>
           <Button
             disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}

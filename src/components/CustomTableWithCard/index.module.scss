@@ -134,11 +134,13 @@
 }
 .selectall {
   margin-left: 21px;
+
   svg {
     color: var(--new_theme_color) !important;
   }
   label > span + span {
     margin-left: 10px;
     user-select: none;
+    font-weight: 500;
   }
 }
