@@ -440,21 +440,19 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
             </>
           )}
         </Box>
-        {Object.keys(frameWorkComponent).length > 0 && (
-          <Box pt={2}>
-            {dataRows && dataRows.length > 0 && accessor && (
-              <Box height={'calc(100vh - 290px)'}>
-                <CustomTableWithCard
-                  data={dataRows}
-                  accessor={accessor}
-                  uniqueKey={(data) => data._id}
-                  onSelect={(data) => dispatch({ type: 'selection', selectedRecords: data })}
-                  checkBox={true}
-                  height={'calc(100vh - 290px)'}
-                />
-              </Box>
-            )}
-            {/* <CustomAgGrid
+        <Box minHeight={'calc(100vh - 290px)'}>
+          {Object.keys(frameWorkComponent).length > 0 && dataRows && dataRows.length > 0 && accessor ? (
+            <>
+              <CustomTableWithCard
+                data={dataRows}
+                accessor={accessor}
+                uniqueKey={(data) => data._id}
+                onSelect={(data) => dispatch({ type: 'selection', selectedRecords: data })}
+                checkBox={true}
+                height={'calc(100vh - 290px)'}
+              />
+
+              {/* <CustomAgGrid
               columns={columns}
               dataRows={dataRows}
               frameworkComponents={frameWorkComponent}
@@ -470,8 +468,11 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
               refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
             /> */}
-          </Box>
-        )}
+            </>
+          ) : (
+            <CommonSkeleton />
+          )}
+        </Box>
       </Box>
       {showDeleteConfirmBox && (
         <ConfirmationDialog
