@@ -40,7 +40,7 @@ const CardWithCheckbox: FC<CardWithCheckboxProps> = ({
       )}
       <div className={styles.cardContent}>
         <div className={styles.cardHeader}>
-          <Typography component={'h6'}>{name(row)}</Typography>
+          {name(row)}
           <div className={styles.headerColumns}>
             {headerColumns.map((headerCol, index) => {
               const { style, minWidth, width, render, component, ...rest } = headerCol;
