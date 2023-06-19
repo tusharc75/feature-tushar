@@ -89,12 +89,12 @@ const Request = ({ workOrder }) => {
     setAccessor(null);
     const accessor: CardInterface = {
       name: (row) => (
-        <>
+        <Typography component={'h6'}>
           Product Type :{' '}
           <a className="link" href={`${routes.productDetail.path}/${row?.product?.optionValue}`} target="_blank">
             {row['productName']}
           </a>
-        </>
+        </Typography>
       ),
       headerColumns: [
         {
@@ -310,8 +310,8 @@ const Request = ({ workOrder }) => {
             className="new-dropdown-v1"
             color="default"
             size="small"
-            onClick={openActions}
             aria-controls="action-menu"
+            onClick={openActions}
             endIcon={<ExpandMore />}
           >
             {'Actions'}
