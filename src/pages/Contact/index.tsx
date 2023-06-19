@@ -914,7 +914,6 @@ export default function Contact(props) {
 
           {showCreateContactDialog?.open && (
             <ManageContactDialog
-              open={showCreateContactDialog?.open}
               onClose={() => setShowCreateContactDialog({ open: false, isClone: false, idToClone: null })}
               onSuccess={() => {
                 setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
