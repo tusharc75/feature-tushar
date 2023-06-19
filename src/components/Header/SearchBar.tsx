@@ -51,7 +51,7 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
 
     var data = arr.map((sec) => {
       const list = allData?.filter((u) => {
-        if (u?.name === 'Product Builder' && process.env.REACT_APP_ENV === 'staging') {
+        if (u?.name === 'Product Builder' && import.meta.env.VITE_APP_ENV === 'staging') {
           return false;
         }
         if (u?.isHidden || staticHiddenResource?.includes(u?.name)) {

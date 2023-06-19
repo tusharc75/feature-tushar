@@ -1,10 +1,12 @@
+@use "sass:math";
+
 $pgb: #e2e2e2;
 $pgt: #fff;
 $bgb: #fff;
 $bgt: #e2e2e2;
 
 @mixin bp($bp, $min-max: min-width) {
-    $em: $bp/16;
+    $em: math.div($bp, 16);
     @media (#{$min-max}: #{$em}em) {
         @content;
     }
