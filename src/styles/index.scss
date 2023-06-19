@@ -3702,6 +3702,26 @@ body {
 .no-shadow {
   box-shadow: unset !important;
 }
+.chip {
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  line-height: 14px !important;
+  border-radius: 14px !important;
+  padding: 5px 10px !important;
+  &-Completed {
+    color: white !important;
+    background-color: var(--new_theme_color) !important;
+  }
+  &-Dispatched {
+    color: white !important;
+    background-color: #ff7714 !important;
+  }
+  &-Assigned {
+    color: white !important;
+    background-color: #fdad00 !important;
+  }
+}
+
 @media all and (min-width: 1280px) {
   .grid-lg-8-col {
     flex-grow: 0 !important;
