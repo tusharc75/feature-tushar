@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { Formik, Form, FieldArray } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { convertDateInDateTime, dateFormatForInputControl, productInventory, purchaseOrder, sidebarResource } from '../../../constants/helpers';
+import { convertDateInDateTime, convertDateTimToDate, dateFormatForInputControl, productInventory, purchaseOrder, sidebarResource } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
 import DateUtils from '@date-io/date-fns';
@@ -119,8 +119,8 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
   const validateDate = (values) => {
     let errors: any = {};
 
-    if (moment(values["rejectDate"]).isBefore(moment(purchaseOrderData?.purchaseOrderDate))) {
-      errors['rejectDate'] = `Please select valid date`;
+    if (moment(values["rejectDate"]).isBefore(convertDateTimToDate(purchaseOrderData?.purchaseOrderDate))) {
+      errors['rejectDate'] = `Date entered prior to the purchase order date`;
     }
 
     if (lockDate) {
@@ -330,6 +330,10 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                           onChange={(value) => {
                             setFieldValue('rejectDate', convertDateInDateTime(value));
                           }}
+                          error={validateDate(values)?.rejectDate}
+                          helperText={
+                            validateDate(values)?.rejectDate ? validateDate(values)?.rejectDate : ''
+                          }
                         />
                       </Box>
                     </Form>
