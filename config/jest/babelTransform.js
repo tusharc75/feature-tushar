@@ -3,7 +3,7 @@
 const babelJest = require('babel-jest');
 
 const hasJsxRuntime = (() => {
-  if (process.env.DISABLE_NEW_JSX_TRANSFORM === 'true') {
+  if (import.meta.env.DISABLE_NEW_JSX_TRANSFORM === 'true') {
     return false;
   }
 

@@ -1,11 +1,11 @@
 import React, { SVGProps } from 'react';
-import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 
 interface svgInterface extends SVGProps<SVGSVGElement> {
   colors?: [string, string];
 }
 const getHash = () => {
-  return crypto.randomBytes(10).toString('hex');
+  return uuidv4();
 };
 
 export const Add: React.FC<svgInterface> = ({ colors, ...others }) => {
