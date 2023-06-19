@@ -103,6 +103,7 @@ const Consumables = ({ selectedFieldService, recall }) => {
                 onSelect={setSelectedRecords}
                 checkBox={true}
                 height={'calc(100vh - 290px)'}
+                showSelectAll={true}
               />
               {/* <CustomReactTable
                 height={'calc(100vh - 345px)'}
