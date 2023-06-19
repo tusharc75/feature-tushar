@@ -46,6 +46,7 @@ import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
+import AssignSupplierAccountDialog from 'src/components/AssignRolesDialog/AssignSupplierAccountDialog';
 
 const SerializedAsset = () => {
 
@@ -71,6 +72,7 @@ const SerializedAsset = () => {
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
+  const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false)
 
   const {
     state: { permissions }
@@ -434,22 +436,25 @@ const SerializedAsset = () => {
     setAnchorEl(null);
   };
 
-  // const handleMTRAttached = (status: boolean) => {
-  //   const _ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => d?._id);
-  //   axiosInstance().post(`${serializedAsset.api}/update-bulk-data`, { _ids, mtrAttached: status })
-  //     .then(({ data }) => {
-  //       localStorage.removeItem(localStorageSelectedRecords);
-  //       fetchProductInventory();
-  //       toastConfig.setToastConfig({
-  //         open: true,
-  //         type: 'success',
-  //         message: data.message
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       toastConfig.setToastConfig(error);
-  //     });
-  // }
+  const handleCertificationSupplier = async(data) => {
+    const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((item) => item?._id)
+    const certificationSupplier = data?.map((item) => item?._id);
+    const body = {
+      _ids: ids,
+      certificationSupplier: certificationSupplier
+    }
+    try{
+      let response = await axiosInstance().put(`${routes?.serializedAsset?.path}/update-bulk-data`, body) ;
+      removeLocalStorage(localStorageSelectedRecords);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: response?.data?.message
+      });
+      fetchProductInventory()
+    }catch(error) {
+      toastConfig.setToastConfig(error);
+    }}
 
   return (
     <Fragment>
@@ -767,6 +772,15 @@ const SerializedAsset = () => {
                           >
                             {`Status Change - ${ASSET_STATUS.lost}`}
                           </MenuItem>
+                          <MenuItem
+                            disabled={!permissions?.serializedAsset?.isUpdate}
+                            onClick={() => {
+                              closeActions();
+                              setOpenSupplierAccountDialog(true)
+                            }}
+                          >
+                            {`Assign Certification Supplier`}
+                          </MenuItem>
                         </>
                       )
                     }
@@ -920,6 +934,19 @@ const SerializedAsset = () => {
           }}
           onOk={handleDelete}
         />
+      )}
+      {openSupplierAccountDialog && (
+         <AssignSupplierAccountDialog
+         reference={routes.serializedAsset.title}
+         onSuccess={(data) => {
+           handleCertificationSupplier(data);
+          setOpenSupplierAccountDialog(false)
+         }}
+         handleClose={() => {
+          setOpenSupplierAccountDialog(false)
+         }}
+         ids={[]}
+       />
       )}
     </Fragment>
   );
