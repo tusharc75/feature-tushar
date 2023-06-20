@@ -1,96 +1,48 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { GiStockpiles } from 'react-icons/gi';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
-import SearchBox from '../../components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
   serializedAssetCertification,
   serializedAsset,
   gridLoadingTimeout,
-  product,
-  warehouse as warehouseHelper,
   ASSET_STATUS,
   COLOUR_MASTER,
   getLocalStorageArrayData,
-  removeLocalStorage,
   sidebarResource,
-  INVENTORY_HISTORY_TYPE,
-  supplierAccount
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useHistory } from 'react-router-dom';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
-import { AiFillCrown, MdAdd } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { Autocomplete } from '@material-ui/lab';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
-import AssignSupplierAccountDialog from 'src/components/AssignRolesDialog/AssignSupplierAccountDialog';
 
 const SerializedAssetsCertification = () => {
 
-  const renderedFrom = camelCase(routes?.serializedAsset.title);
+  const renderedFrom = camelCase(routes?.serializedAssetCertification.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
-  const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
+
   const [gridApi, setGridApi] = useState(null);
   const [columns, setColumns] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [productCategoryList, setProductCategoryList] = useState([]);
-  const [productFilterList, setProductFilterList] = useState([]);
-  const [productCategory, setProductCategory] = useState(null);
-  const [productFilter, setProductFilter] = useState(null);
-
-  const [warehouseOptions, setWarehouseOptions] = useState([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
-  const [subleaseAsset, setSubleaseAsset] = useState(false);
-  const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false)
 
   const {
     state: { permissions, user }
   }: any = useData();
-  console.log(user);
   const { getColumnData } = useColumns();
-  const history = useHistory();
-
-  const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
-
-  const [fromPurchaseOrder, setFromPurchaseOrder] = useState({
-    productId: history.location?.state?.productId,
-    productName: history.location?.state?.productName,
-    pOId: history.location?.state?.pOId,
-    pOName: history.location?.state?.pOName
-  });
-
-  const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
-  const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -98,32 +50,12 @@ const SerializedAssetsCertification = () => {
 
   useEffect(() => {
     fetchProductInventory();
-  }, [
-    page,
-    limit,
-    filters,
-    sorting,
-    search,
-    warehouse,
-    selectedWarehouse,
-    redirectProduct,
-    fromPurchaseOrder,
-    productCategory,
-    productFilter,
-    subleaseAsset,
-    showFilteredRecordsOnly
-  ]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        data?.some((o) => {
-          if (o?.fieldData?.fieldName === 'status') {
-            setAllowUpdateStatus(o?.isUpdate);
-            return true;
-          }
-        });
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
@@ -171,7 +103,7 @@ const SerializedAssetsCertification = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-  
+
     axiosInstance()
       .get(`${serializedAssetCertification.api}`)
       .then(({ data }) => {
@@ -209,9 +141,6 @@ const SerializedAssetsCertification = () => {
       });
   };
 
-  const getQueryString = (supplierAccount) => {
-    return `?supplierAccount=${supplierAccount}`;
-  };
 
 
   const AssetNumberRenderer = (params) => (
@@ -231,437 +160,86 @@ const SerializedAssetsCertification = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions?.serializedAsset?.isCreate ? (
-        <HtmlTooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      ) : (
-        <HtmlTooltip title="You do not have permission to clone">
-          <IconButton size="small" aria-label="Clone">
-            <FileCopyIcon />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-      {permissions?.serializedAsset?.isDelete ? (
-        <HtmlTooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon color="error" />
-          </IconButton>
-        </HtmlTooltip>
-      ) : (
-        <HtmlTooltip title="You do not have permission to delete">
-          <IconButton size="small" aria-label="Clone">
-            <DeleteIcon />
-          </IconButton>
-        </HtmlTooltip>
-      )}
     </>
   );
 
-  const handleSearch = (e) => {
-    dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const handleCertificationSupplier = async (data) => {
-    const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((item) => item?._id)
-    const certificationSupplier = data?.map((item) => item?._id);
-    const body = {
-      _ids: ids,
-      certificationSupplier: certificationSupplier
-    }
-    try {
-      let response = await axiosInstance().put(`${routes?.serializedAsset?.path}/update-bulk-data`, body);
-      removeLocalStorage(localStorageSelectedRecords);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: response?.data?.message
-      });
-      setOpenSupplierAccountDialog(false)
-      fetchProductInventory()
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  }
 
   return (
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.serializedAsset]} />
+          <CustomBreadCrumbs routes={[routes.serializedAssetCertification]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions?.serializedAsset}
-            module="product inventory"
-            api={serializedAsset.api}
-            afterImportCompleted={() => {
-              fetchProductInventory();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)].length}
-            ids={
-              [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                ? [...getLocalStorageArrayData(localStorageSelectedRecords)].map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchProductInventory();
-            }}
-            additionalParams={getQueryString(true)}
-          />
+
         </Grid>
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} sm={12} md={7} className="d-flex align-items-center gap-1 flex-wrap">
-              <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-              <span className="listingHeader">{routes.serializedAsset?.title} </span>
-              {warehouse || warehouse || fromPurchaseOrder?.pOId ? (
-                <Fragment>
-                  {warehouse && (
-                    <Chip
-                      className="ml-3"
-                      color="primary"
-                      label={`Plants : ${warehouse.optionLabel}`}
-                      onDelete={() => {
-                        setWarehouse(null);
-                      }}
-                    />
-                  )}
-                  {redirectProduct && (
-                    <Chip
-                      className="ml-3"
-                      color="primary"
-                      label={`Product : ${redirectProduct.name}`}
-                      onDelete={() => {
-                        setRedirectProduct(null);
-                      }}
-                    />
-                  )}
-                  {fromPurchaseOrder?.productId && (
-                    <Fragment>
-                      <Chip
-                        className="ml-3"
-                        color="primary"
-                        label={`Product : ${fromPurchaseOrder.productName}`}
-                        onDelete={() => {
-                          setFromPurchaseOrder(null);
-                        }}
-                      />
-                      <Chip
-                        className="ml-3"
-                        color="primary"
-                        label={`Purchase Order : ${fromPurchaseOrder.pOName}`}
-                        onDelete={() => {
-                          setFromPurchaseOrder(null);
-                        }}
-                      />
-                    </Fragment>
-                  )}
-                </Fragment>
-              ) : (
-                <Fragment>
-                  <Autocomplete
-                    style={{ width: '250px' }}
-                    options={productCategoryList}
-                    getOptionLabel={(option: any) => (option ? option.name : '')}
-                    getOptionSelected={(option: any, val) => option._id === val}
-                    value={
-                      productCategoryList.filter((data) => data._id === productCategory).length
-                        ? productCategoryList.filter((data) => data._id === productCategory)[0]
-                        : ''
-                    }
-                    onChange={(e, val) => {
-                      setProductCategory(val && val._id ? val._id : '');
-                    }}
-                    renderInput={(params) =>
-                      isMobile && !isTablet ? (
-                        <TextField
-                          {...params}
-                          margin="dense"
-                          name="productCategory"
-                          placeholder="Product Category"
-                          variant="standard"
-                          fullWidth
-                          className={isMobile ? 'serchBox' : ''}
-                        />
-                      ) : (
-                        <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
-                      )
-                    }
-                  />
-                  {productCategory && (
-                    <Autocomplete
-                      style={{ width: '250px' }}
-                      options={productFilterList}
-                      getOptionLabel={(option: any) => (option ? option.productName : '')}
-                      getOptionSelected={(option: any, val) => option._id === val}
-                      value={
-                        productFilterList.filter((data) => data._id === productFilter).length
-                          ? productFilterList.filter((data) => data._id === productFilter)[0]
-                          : ''
-                      }
-                      onChange={(e, val) => {
-                        setProductFilter(val && val._id ? val._id : '');
-                      }}
-                      renderInput={(params) => <TextField {...params} margin="dense" name="product" label="Product" variant="outlined" fullWidth />}
-                    />
-                  )}
-                  <Autocomplete
-                    style={{ width: '250px' }}
-                    options={warehouseOptions}
-                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
-                    value={warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-                      ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
-                      : ''
-                    }
-                    onChange={(e, val) => {
-                      setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
-                    }}
-                    renderInput={(params) =>
-                      isMobile && !isTablet ? (
-                        <TextField
-                          {...params}
-                          margin="dense"
-                          name="plant"
-                          placeholder={routes.warehouse.title}
-                          variant="standard"
-                          fullWidth
-                          className={isMobile ? 'serchBox' : ''}
-                        />
-                      ) : (
-                        <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-                      )
-                    }
-                  />
-                  {permissions?.sublease && (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name="subleaseAsset"
-                          checked={subleaseAsset}
-                          onChange={(e) => {
-                            setSubleaseAsset(e.target.checked);
-                          }}
-                          color="primary"
-                        />
-                      }
-                      label="Sublease Assets"
-                    />
-                  )}
-                </Fragment>
-              )}
-            </Grid>
-            <Grid md={5} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Box style={{ flexGrow: '1' }}>
-                  <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
-                    width={isMobile ? '200px' : '210px'}
-                    style={{ width: ['100%'] }}
-                    size="small"
-                    value={search}
-                  />
-                </Box>
-                <Box style={{ display: 'flex', gap: '5px', marginLeft: 'auto' }}>
-                  {permissions?.serializedAsset?.isCreate && (
-                    <Button
-                      onClick={() => {
-                        setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null });
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      color="primary"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                  )}
-                  {(permissions?.serializedAsset?.isDelete || permissions?.serializedAsset?.isUpdate) && (
-                    <Button
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                    >
-                      {isMobile && !isTablet ? '' : 'Actions'}
-                    </Button>
-                  )}
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      disabled={!permissions?.serializedAsset?.isDelete}
-                      onClick={() => {
-                        closeActions();
-                        setShowDeleteConfirmBox(true);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </Menu>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
         </div>
-        {columns ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions?.serializedAsset}
-              primaryField={columns?.find((d) => d.field === 'assetNumber')}
-              onClick={(d) => {
-                history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(d) => {
-                history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
-              }}
-              extraParamsToCheckDelete={false}
-              onDelete={(d) => {
-                setDeleteRecord(d);
-                setShowDeleteConfirmBox(true);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              chips={[
-                {
-                  label: 'Serial Number : ',
-                  field: 'serialNumber'
+        {columns ? (Object.keys(frameWorkComponent).length > 0 && columns ? (
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameWorkComponent}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={150}
+            loading={loading}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchProductInventory}
+            showOnlyShowFilteredRecordSwitch={true}
+            rowClassRules={{
+              'light-red-data-row': function (params) {
+                if (params.data?.recertDate) {
+                  var a = moment(params.data?.recertDate);
+                  var b = moment();
+                  const days = a.diff(b, 'days');
+                  if (days < 15 && days >= 0) {
+                    return true;
+                  } else if (days < 0) {
+                    return true;
+                  }
                 }
-              ]}
-              owerCollaboratorInitialsOrImages=""
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id });
-              }}
-              renderedFrom={renderedFrom}
-            />
-          ) : Object.keys(frameWorkComponent).length > 0 && columns ? (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={150}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchProductInventory}
-              showOnlyShowFilteredRecordSwitch={true}
-              rowClassRules={{
-                'light-red-data-row': function (params) {
-                  if (params.data?.recertDate) {
-                    var a = moment(params.data?.recertDate);
-                    var b = moment();
-                    const days = a.diff(b, 'days');
-                    if (days < 15 && days >= 0) {
-                      return true;
-                    } else if (days < 0) {
-                      return true;
-                    }
+                return false;
+              },
+              'light-yellow-data-row': function (params) {
+                if (params.data?.recertDate) {
+                  var a = moment(params.data?.recertDate);
+                  var b = moment();
+                  const days = a.diff(b, 'days');
+                  if (days < 30 && days >= 15) {
+                    return true;
                   }
-                  return false;
-                },
-                'light-yellow-data-row': function (params) {
-                  if (params.data?.recertDate) {
-                    var a = moment(params.data?.recertDate);
-                    var b = moment();
-                    const days = a.diff(b, 'days');
-                    if (days < 30 && days >= 15) {
-                      return true;
-                    }
-                  }
-                  return false;
-                },
-                'light-green-data-row': function (params) {
-                  if (params.data?.recertDate) {
-                    var a = moment(params.data?.recertDate);
-                    var b = moment();
-                    const days = a.diff(b, 'days');
-                    if (days <= 60 && days >= 30) {
-                      return true;
-                    }
-                  }
-                  return false;
                 }
-              }}
-              showFilters={true}
-              resource={sidebarResource.serializedAsset}
-            />
-          ) : null
+                return false;
+              },
+              'light-green-data-row': function (params) {
+                if (params.data?.recertDate) {
+                  var a = moment(params.data?.recertDate);
+                  var b = moment();
+                  const days = a.diff(b, 'days');
+                  if (days <= 60 && days >= 30) {
+                    return true;
+                  }
+                }
+                return false;
+              }
+            }}
+            showFilters={true}
+            resource={sidebarResource.serializedAsset}
+          />
+        ) : null
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
       </div>
-      {openSupplierAccountDialog && (
-        <AssignSupplierAccountDialog
-          reference={routes.serializedAsset.title}
-          onSuccess={(data) => {
-            handleCertificationSupplier(data);
-          }}
-          handleClose={() => {
-            setOpenSupplierAccountDialog(false)
-          }}
-          ids={[]}
-        />
-      )}
     </Fragment>
   );
 };
