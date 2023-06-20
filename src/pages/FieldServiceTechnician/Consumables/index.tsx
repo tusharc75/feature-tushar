@@ -78,7 +78,7 @@ const Consumables = ({ selectedFieldService, recall }) => {
 
   return (
     <>
-      <Box display="flex" justifyContent="flex-end" p={2}>
+      <Box display="flex" justifyContent="flex-end">
         <Box display="flex" ml={1}>
           <Button
             disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
@@ -103,6 +103,7 @@ const Consumables = ({ selectedFieldService, recall }) => {
                 onSelect={setSelectedRecords}
                 checkBox={true}
                 height={'calc(100vh - 290px)'}
+                showSelectAll={true}
               />
               {/* <CustomReactTable
                 height={'calc(100vh - 345px)'}

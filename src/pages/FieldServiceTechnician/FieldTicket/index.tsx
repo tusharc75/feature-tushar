@@ -450,6 +450,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
                 onSelect={(data) => dispatch({ type: 'selection', selectedRecords: data })}
                 checkBox={true}
                 height={'calc(100vh - 290px)'}
+                showSelectAll={true}
               />
 
               {/* <CustomAgGrid

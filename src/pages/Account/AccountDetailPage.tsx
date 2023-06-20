@@ -16,7 +16,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AccountHierarchy from './AccountHierarchy';
 import accountClass from './account.module.scss';
-import ManageContactDialog from '../Contact/ManageContact/index';
+import ManageContactDialog from '../Contact/ManageContact';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { getObjKeysWithValues, isObjectEmpty, sidebarResource, customerAccount, processFieldName } from '../../constants/helpers';
 import ManageAccount from './ManageAccount/ManageAccount';
@@ -286,8 +286,8 @@ export default function AccountDetailPage(props) {
 
     let data;
 
-      const response: any = await axiosInstance().get(`/${accountApi}/${id}`);
-      data = response?.data?.data;
+    const response: any = await axiosInstance().get(`/${accountApi}/${id}`);
+    data = response?.data?.data;
 
     setCustomizedRoutes([accountBreadcrumb, { title: data.accountName }]);
     handleMainPonts(data);
@@ -324,9 +324,9 @@ export default function AccountDetailPage(props) {
           current: true,
           parentAccount: data.parentAccount
             ? {
-                _id: data.parentAccount.optionValue,
-                accountName: data.parentAccount.optionLabel
-              }
+              _id: data.parentAccount.optionValue,
+              accountName: data.parentAccount.optionLabel
+            }
             : null,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         }
@@ -584,23 +584,23 @@ export default function AccountDetailPage(props) {
     } else {
       updatedData._id = accountData._id;
     }
-      axiosInstance()
-        .put(`/${accountApi}`, updatedData)
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          setEditAccountData({});
-          setLoading(false);
-          setOpenUpdateDialog(false);
-          fetchAccountData();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setLoading(false);
+    axiosInstance()
+      .put(`/${accountApi}`, updatedData)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+        setEditAccountData({});
+        setLoading(false);
+        setOpenUpdateDialog(false);
+        fetchAccountData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setLoading(false);
+      });
   };
 
   const goBackToListing = () => {
@@ -619,10 +619,6 @@ export default function AccountDetailPage(props) {
   const closeUpdateDIalog = () => {
     setOpenUpdateDialog(false);
     setEditAccountData({});
-  };
-
-  const handleCreateContact = () => {
-    setShowCreateContactDialog(true);
   };
 
   const handleSave = (data) => {
@@ -716,6 +712,7 @@ export default function AccountDetailPage(props) {
         });
     }
   };
+  
   const handleCreateNewAccount = (id) => {
     setParentId(id);
     setShowCreateAccountDialog(true);
@@ -742,8 +739,8 @@ export default function AccountDetailPage(props) {
                         ? accountClass.mobile_button_layout_secondary
                         : ''
                       : isMobile
-                      ? accountClass.mobile_button_layout
-                      : ''
+                        ? accountClass.mobile_button_layout
+                        : ''
                   }
                   onClick={() => {
                     setShowApproveDisapproveConfirmBox(true);
@@ -771,11 +768,11 @@ export default function AccountDetailPage(props) {
               </>
             )}
             {permissions &&
-            permissions[accountResource] &&
-            permissions[accountResource].isDelete &&
-            accountData?.owner?.optionValue &&
-            user?.user?._id &&
-            accountData.owner.optionValue === user.user._id ? (
+              permissions[accountResource] &&
+              permissions[accountResource].isDelete &&
+              accountData?.owner?.optionValue &&
+              user?.user?._id &&
+              accountData.owner.optionValue === user.user._id ? (
               <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
             ) : null}
             <ActivityButton referenceId={accountData?._id} resource={accountResource} />
@@ -933,7 +930,9 @@ export default function AccountDetailPage(props) {
                 {permissions[contactResource].isCreate && (
                   <span style={{ position: 'absolute', right: 15 }}>
                     <Tooltip title="Add Customer Contact" placement="top">
-                      <IconButton onClick={handleCreateContact} color="primary" size="small">
+                      <IconButton onClick={() => {
+                        setShowCreateContactDialog(true);
+                      }} color="primary" size="small">
                         <AddIcon />
                       </IconButton>
                     </Tooltip>
@@ -1029,9 +1028,8 @@ export default function AccountDetailPage(props) {
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this Account ${
-            deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
-          }`}
+          message={`Are you sure you want to delete this Account ${deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
+            }`}
           onClose={() => {
             setShowConfirmBox(false);
             setDeleteAccountId({});
@@ -1088,7 +1086,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => {}}
+          handleAddressDataSource={() => { }}
         />
       ) : null}
 
@@ -1108,15 +1106,18 @@ export default function AccountDetailPage(props) {
       )}
       {showCreateContactDialog && (
         <ManageContactDialog
-          open={showCreateContactDialog}
           onClose={() => {
             setShowCreateContactDialog(false);
             fetchRelatedData();
           }}
           contactResource={contactResource}
-          accountId={accountData._id}
+          contactId={null}
+          isClone={false}
           contactApi={contactApi}
-          account={props?.account}
+          onSuccess={() => {
+            fetchRelatedData()
+          }}
+          referenceData={{ 'accountName': accountData._id }}
         />
       )}
       {showAccountHierarchyInFullScreenDialog && (

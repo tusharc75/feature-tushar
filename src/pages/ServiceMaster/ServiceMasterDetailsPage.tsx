@@ -126,7 +126,7 @@ const ServiceMasterDetailsPage = () => {
           <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
           <Tab label={<div className="tab-font">Steps</div>} value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className={'tabLayout'} />
           <Tab
-            label={<div className="tab-font">Consumables</div>}
+            label={<div className="tab-font">Consumables/Tools</div>}
             value={2}
             aria-controls="a11y-tabpanel-2"
             id="a11y-tab-2"
