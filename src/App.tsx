@@ -214,6 +214,8 @@ import Competencies from './pages/Competencies';
 import CompetenciesDetail from './pages/Competencies/CompetenciesDetail';
 import MaterialHandling from './pages/MaterialHandling';
 import ScreenOrientationOverlay from './components/ScreenOrientationOverlay';
+import PadMaster from './pages/PadMaster';
+import PadMasterDetail from './pages/PadMaster/PadMasterDetail';
 
 var notificationInterval: any = null;
 
@@ -1023,6 +1025,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.materialHandling.path}`}>
               <MaterialHandling />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.padMaster.path}`}>
+              <PadMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.padMasterDetail.path}/:id`}>
+              <PadMasterDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

@@ -954,7 +954,17 @@ const routes = {
         ? storedRoutes.materialHandling?.title
         : RESOURCE_LABEL.materialHandling,
     path: '/material-handling'
-  }
+  },
+  padMaster: {
+    title:
+      storedRoutes && storedRoutes.padMaster && storedRoutes.padMaster.title ? storedRoutes.padMaster?.title : RESOURCE_LABEL.padMaster,
+    path: '/pad-master'
+  },
+  padMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.padMaster && storedRoutes.padMaster.title ? storedRoutes.padMaster?.title : RESOURCE_LABEL.padMaster,
+    path: '/pad-master/detail'
+  },
 };
 
 export default routes;
