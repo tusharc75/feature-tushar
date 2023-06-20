@@ -227,7 +227,6 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
       </Accordion>
       {showCreateContactDialog && (
         <ManageContactDialog
-          open={showCreateContactDialog}
           onClose={() => setShowCreateContactDialog(false)}
           onSuccess={() => {
             setShowCreateContactDialog(false);

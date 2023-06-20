@@ -1108,7 +1108,6 @@ export default function AccountDetailPage(props) {
       )}
       {showCreateContactDialog && (
         <ManageContactDialog
-          open={showCreateContactDialog}
           onClose={() => {
             setShowCreateContactDialog(false);
             fetchRelatedData();
