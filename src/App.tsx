@@ -217,6 +217,8 @@ import MaterialHandling from './pages/MaterialHandling';
 import ScreenOrientationOverlay from './components/ScreenOrientationOverlay';
 import PadMaster from './pages/PadMaster';
 import PadMasterDetail from './pages/PadMaster/PadMasterDetail';
+import FieldJob from './pages/FieldJob';
+import FieldJobDetail from './pages/FieldJob/FieldJobDetail';
 
 var notificationInterval: any = null;
 
@@ -1035,6 +1037,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.padMasterDetail.path}/:id`}>
               <PadMasterDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldJob.path}`}>
+              <FieldJob />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldJobDetail.path}/:id`}>
+              <FieldJobDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
