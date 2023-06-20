@@ -7,11 +7,21 @@
       "google.visualization"
     ],
     "paths": {
-      "src/*": ["src/*"],
-      "pages/*": ["src/pages/*"],
-      "components/*": ["src/components/*"],
-      "constants/*":["src/constants/*"],
-      "provider/*":["src/StateProvider/*"],
+      "src/*": [
+        "src/*"
+      ],
+      "pages/*": [
+        "src/pages/*"
+      ],
+      "components/*": [
+        "src/components/*"
+      ],
+      "constants/*": [
+        "src/constants/*"
+      ],
+      "provider/*": [
+        "src/StateProvider/*"
+      ],
     },
     "target": "es5",
     "module": "esnext",
@@ -22,7 +32,8 @@
     "lib": [
       "dom",
       "dom.iterable",
-      "esnext"
+      "esnext",
+      "WebWorker"
     ],
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
