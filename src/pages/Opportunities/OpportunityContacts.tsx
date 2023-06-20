@@ -261,7 +261,6 @@ export default function OpportunityContacts({
 
       {showCreateDialog && (
         <ManageContactDialog
-          open={showCreateDialog}
           onClose={() => setShowCreateDialog(false)}
           accountId={accountId}
           contactResource={customerContact.contactResource}

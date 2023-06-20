@@ -198,7 +198,13 @@ function Dropdown({
           <>
             <>
               <Tooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                <IconButton
+                  disabled={fieldData?.isUneditable || rest?.disabled}
+                  onClick={() => setLookupDialog(true)}
+                  size="small"
+                  color="primary"
+                  style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                >
                   <AddCircleIcon />
                 </IconButton>
               </Tooltip>
@@ -245,6 +251,7 @@ function Dropdown({
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
                     >
                       <AddCircleIcon />
                     </IconButton>
@@ -293,6 +300,7 @@ function Dropdown({
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
                     >
                       <AddCircleIcon />
                     </IconButton>
@@ -344,6 +352,7 @@ function Dropdown({
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
                     >
                       <AddCircleIcon />
                     </IconButton>
@@ -382,6 +391,7 @@ function Dropdown({
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
                     >
                       <AddCircleIcon />
                     </IconButton>
@@ -421,6 +431,7 @@ function Dropdown({
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
                     >
                       <AddCircleIcon />
                     </IconButton>
@@ -458,6 +469,7 @@ function Dropdown({
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
                     >
                       <AddCircleIcon />
                     </IconButton>
@@ -506,6 +518,7 @@ function Dropdown({
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
                     >
                       <AddCircleIcon />
                     </IconButton>
@@ -540,7 +553,13 @@ function Dropdown({
             {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.supplierAccount && permissions?.supplierAccount?.isCreate && (
               <>
                 <Tooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                  <IconButton disabled={fieldData?.isUneditable || rest?.disabled} onClick={() => setLookupDialog(true)} size="small" color="primary">
+                  <IconButton
+                    disabled={fieldData?.isUneditable || rest?.disabled}
+                    onClick={() => setLookupDialog(true)}
+                    size="small"
+                    color="primary"
+                    style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                  >
                     <AddCircleIcon />
                   </IconButton>
                 </Tooltip>
@@ -579,6 +598,7 @@ function Dropdown({
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
                     >
                       <AddCircleIcon />
                     </IconButton>
@@ -624,6 +644,7 @@ function Dropdown({
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
                     >
                       <AddCircleIcon />
                     </IconButton>
@@ -670,6 +691,7 @@ function Dropdown({
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
                     >
                       <AddCircleIcon />
                     </IconButton>
@@ -706,6 +728,7 @@ function Dropdown({
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
                     >
                       <AddCircleIcon />
                     </IconButton>

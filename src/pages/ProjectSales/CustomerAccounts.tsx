@@ -423,7 +423,6 @@ const CustomerAccounts = (props) => {
       )}
       {showContactCreateDialog && accId && (
         <ManageContactDialog
-          open={showContactCreateDialog}
           onClose={() => {
             setShowContactCreateDialog(false);
             setDialogType(null);
@@ -439,12 +438,6 @@ const CustomerAccounts = (props) => {
           contactApi={customerContact.contactApi}
           account={customerAccount}
           isRedirectToDetailPage={false}
-          collaborators={collaborators}
-          owners={collaborators.map((u) => ({
-            ...u,
-            default: u.optionValue === ownerId
-          }))}
-          fromProject={true}
         />
       )}
       <Box className={`${classes.root} ${'pannel_layout'}`}>
