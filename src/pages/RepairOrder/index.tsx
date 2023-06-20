@@ -39,7 +39,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 let repairOrderTimeout;
 
 const RepairOrder = () => {
-
   const RepairOrderType = [
     {
       key: `All ${routes?.repairOrder.title}`,
@@ -60,7 +59,7 @@ const RepairOrder = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const { type }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
@@ -227,10 +226,10 @@ const RepairOrder = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (fromRental) {
-      filterByIds.push({ field: "rentalJob", term: fromRental?._id });
+      filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
     }
 
     if (filterByIds?.length) {
@@ -243,7 +242,7 @@ const RepairOrder = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -492,8 +491,9 @@ const RepairOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${deleteRecord.repairOrderNumber || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${
+              deleteRecord.repairOrderNumber || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

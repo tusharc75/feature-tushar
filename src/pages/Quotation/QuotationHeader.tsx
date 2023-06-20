@@ -14,6 +14,7 @@ import routes from 'src/components/Helpers/Routes';
 
 function QuotationHeader(props) {
   const {
+    selectedType,
     selectedRecords,
     onTypeChange,
     options,
@@ -134,7 +135,7 @@ function QuotationHeader(props) {
           </div>
         ) : (
           options && (
-            <ToggleButtonGroup size="small" className="ml-2" value={filter} exclusive onChange={handleFilter}>
+            <ToggleButtonGroup size="small" className="ml-2" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
               {options.map((k, index) => {
                 return (
                   <ToggleButton value={k.key} key={index}>

@@ -65,7 +65,7 @@ const TransferInventory = () => {
 
   const [fromRental, setFromRental] = useState(history.location?.state?.rental);
   const { type }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
   const [filter, setFilter] = useState(`All ${routes.transferInventory.title}`);
 
   const {
@@ -153,7 +153,7 @@ const TransferInventory = () => {
       deepFilter = `?`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;

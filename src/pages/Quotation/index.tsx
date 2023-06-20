@@ -5,6 +5,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaSuitcase } from 'react-icons/fa';
 import { GiHiveMind } from 'react-icons/gi';
 import { MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, FaWarehouse, SiStatuspage } from 'react-icons/all';
+import queryString from 'query-string';
 import {
   isObjectEmpty,
   customerAccount,
@@ -56,7 +57,8 @@ const Quotation = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [selectedType, setSelectedType] = useState(1);
+  const { type }: any = queryString.parse(history.location.search);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
@@ -210,19 +212,19 @@ const Quotation = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         filterByIds.push({
           field: 'customerAccount',
           term: accountDetails.accountId
-        })
+        });
       } else if (accountDetails.resource === supplierAccount.accountResource) {
         filterByIds.push({
           field: 'supplierAccountName',
           term: { $in: [accountDetails.accountId] }
-        })
+        });
       }
     }
 
@@ -287,6 +289,7 @@ const Quotation = () => {
 
   const handleQuotationTypeSel = (filterValues) => {
     setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`);
   };
 
   const handleTransferEntityDialog = () => {
@@ -359,7 +362,7 @@ const Quotation = () => {
                   permissions={permissions?.quotation}
                   module="quotation"
                   api={quotation.api}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
                   recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -383,6 +386,7 @@ const Quotation = () => {
         <div className="header-panel">
           {columns && (
             <QuotationHeader
+              selectedType={selectedType}
               selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
               onTypeChange={handleQuotationTypeSel}
               options={QuotationType}

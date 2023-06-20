@@ -57,7 +57,7 @@ const RentalManagement = () => {
   }: any = useData();
   const { getColumnData } = useColumns();
   const [locationKeys, setLocationKeys] = useState([]);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -72,7 +72,6 @@ const RentalManagement = () => {
     show: false,
     rentalJobName: ''
   });
-
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -250,7 +249,7 @@ const RentalManagement = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -445,8 +444,7 @@ const RentalManagement = () => {
               gridApi={gridApi}
               fetchRentalManagement={fetchRentalManagement}
               filters={filters}
-            >
-            </RentalManagementHeader>
+            ></RentalManagementHeader>
           </div>
           {Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
@@ -547,8 +545,9 @@ const RentalManagement = () => {
           {singleRentalManagementDelete.show ? (
             <ConfirmationDialog
               open={singleRentalManagementDelete.show}
-              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-                }?`}
+              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
+                singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+              }?`}
               onClose={() =>
                 setSingleRentalManagementDelete({
                   id: null,
