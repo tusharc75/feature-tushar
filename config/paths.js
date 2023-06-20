@@ -18,7 +18,7 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 const publicUrlOrPath = getPublicUrlOrPath(
   import.meta.env.MODE === 'development',
   require(resolveApp('package.json')).homepage,
-  import.meta.env.VITE_SITE_URL
+  import.meta.env.BASE_URL
 );
 
 const buildPath = import.meta.env.BUILD_PATH || 'build';
