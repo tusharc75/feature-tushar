@@ -24,8 +24,7 @@ type Config = {
 };
 
 export function register(config?: Config) {
-    console.log('env-mode', import.meta.env)
-    if (import.meta.env.MODE === 'production' && 'serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator) {
         // The URL constructor is available in all browsers that support SW.
         const publicUrl = new URL(import.meta.env.BASE_URL, window.location.href);
         if (publicUrl.origin !== window.location.origin) {
