@@ -116,7 +116,7 @@ import TransferInventoryDetailPage from './pages/TransferInventory/TransferInven
 import Zone from './pages/zone';
 import ZoneDetailPage from './pages/zone/ZoneDetailPage';
 import { Button, Snackbar } from '@material-ui/core';
-import * as serviceWorkerRegistration from 'serviceWorkerRegistration';
+import * as serviceWorkerRegistration from 'src/serviceWorkerRegistration';
 import MuiAlert from '@material-ui/lab/Alert';
 import WellMaster from './pages/WellMaster';
 import DashboardBuilder from './pages/DashboardBuilder/DashboardManager';
