@@ -315,7 +315,8 @@ export const sidebarResource = {
   planningView: 'Planning View',
   taxMaster: 'Tax Master',
   competencies: 'Competencies',
-  padMaster: 'Pad Master'
+  padMaster: 'Pad Master',
+  fieldJob: 'Field Job',
 };
 
 export const primaryFields = {
@@ -433,7 +434,8 @@ export const RESOURCE_LABEL = {
   taxMaster: 'Tax Master',
   competencies: 'Competencies',
   materialHandling: 'Material Handling',
-  padMaster: 'Pad Master'
+  padMaster: 'Pad Master',
+  fieldJob: 'Field Job',
 };
 
 export const CHILD_RESOURCE = {

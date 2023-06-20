@@ -972,6 +972,16 @@ const routes = {
       storedRoutes && storedRoutes.padMaster && storedRoutes.padMaster.title ? storedRoutes.padMaster?.title : RESOURCE_LABEL.padMaster,
     path: '/pad-master/detail'
   },
+  fieldJob: {
+    title:
+      storedRoutes && storedRoutes.fieldJob && storedRoutes.fieldJob.title ? storedRoutes.fieldJob?.title : RESOURCE_LABEL.fieldJob,
+    path: '/field-job'
+  },
+  fieldJobDetail: {
+    title:
+      storedRoutes && storedRoutes.fieldJob && storedRoutes.fieldJob.title ? storedRoutes.fieldJob?.title : RESOURCE_LABEL.fieldJob,
+    path: '/field-job/detail'
+  },
 };
 
 export default routes;
