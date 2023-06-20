@@ -24,7 +24,7 @@ type Config = {
 };
 
 export function register(config?: Config) {
-    if (import.meta.env?.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+    if (import.meta.env?.MODE === 'production' && 'serviceWorker' in navigator) {
         const PUBLIC_URL='https://master.portal.equip-t.com/'
         // The URL constructor is available in all browsers that support SW.
         const publicUrl = new URL(PUBLIC_URL, window.location.href);
