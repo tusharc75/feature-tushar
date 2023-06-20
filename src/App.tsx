@@ -75,6 +75,7 @@ import QuotePdfTemplate from './pages/QuotePdfTemplate';
 import Warehouse from './pages/Warehouse';
 import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
 import SerializedAsset from './pages/SerializedAsset';
+import SerializedAssetsCertification from './pages/SerializedAssetsCertification';
 import SerializedAssetDetailsPage from './pages/SerializedAsset/SerializedAssetDetailsPage';
 import EquipmentRentalMaster from './pages/EquipmentRentalMaster';
 import ProductDetailsPage from './pages/Product/ProductDetailsPage';
@@ -325,6 +326,7 @@ function App() {
   }, [isOffline]);
 
   const getNotification = async () => {
+    console.log("from app.tsx");
     if (localStorage.getItem('token') && !isOffline) {
       await axiosInstance()
         .get(`/user/notification/unseen`)
@@ -578,6 +580,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAsset.path}>
               <SerializedAsset />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.serializedAssetCertification.path}>
+              <SerializedAssetsCertification />
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAsset.path + '-new'}>
               <SerializedAssetTest />
