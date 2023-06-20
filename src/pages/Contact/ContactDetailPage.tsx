@@ -18,7 +18,7 @@ import {
 } from './../../constants/helpers';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ManageContact from './ManageContact/index';
+import ManageContactDialog from './ManageContact';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import OrgChartContainer from '../../components/OrgChart/OrgChartContainer';
 import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
@@ -432,9 +432,6 @@ const ContactDetailsPage = (props) => {
     setOpenUpdateDialog(true);
   };
 
-  const closeUpdateDialog = () => {
-    setOpenUpdateDialog(false);
-  };
 
   const handleSave = (data) => {
     setShowAtLast(true);
@@ -566,7 +563,6 @@ const ContactDetailsPage = (props) => {
 
   let filteredContactFields = contactFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
 
-  const tourPaths = ['/customer-contact/detail', '/supplier-contact/detail'];
 
   return (
     <Box className="main-container-v1">
@@ -641,7 +637,7 @@ const ContactDetailsPage = (props) => {
               >
                 <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
                 <Tab label={<div className="tab-font">Org Charts</div>} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className="tabLayout" />
-                { contactResource === 'customerContact' && permissions?.productInventory && (
+                {contactResource === 'customerContact' && permissions?.productInventory && (
                   <Tab label={<div className="tab-font">Plants</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
                 )}
               </Tabs>
@@ -884,53 +880,21 @@ const ContactDetailsPage = (props) => {
           onSubmit={handleUpdateOrgData}
         />
       ) : null}
-      {openUpdateDialog && showAtLast ? (
-        <ManageContact
-          isNew={false}
-          open={openUpdateDialog}
-          onClose={closeUpdateDialog}
-          contactData={{
-            fields: contactFields.map((f) => {
-              return f.fieldData;
-            }),
-            initialValues: getObjKeysWithValues(
-              contactData,
-              contactFields.map((f) => {
-                return f.fieldData;
-              })
-            )
-          }}
-          loading={loading}
-          handleSubmit={handleUpdateContact}
-          contactId={contactData._id}
-          account={props?.account}
-          accountResource={accountResource}
+      {openUpdateDialog && (
+        <ManageContactDialog
           contactResource={contactResource}
-        />
-      ) : openUpdateDialog ? (
-        <ManageContact
-          isNew={false}
-          open={openUpdateDialog}
-          onClose={closeUpdateDialog}
-          contactData={{
-            fields: filteredContactFields.map((f) => {
-              return f.fieldData;
-            }),
-            initialValues: getObjKeysWithValues(
-              contactData,
-              filteredContactFields.map((f) => {
-                return f.fieldData;
-              })
-            )
-          }}
-          loading={loading}
-          handleSubmit={handleUpdateContact}
           contactId={contactData._id}
-          account={props?.account}
-          accountResource={accountResource}
-          contactResource={contactResource}
+          contactApi={contactApi}
+          isClone={false}
+          onClose={() => {
+            setOpenUpdateDialog(false);
+          }}
+          onSuccess={() => {
+            fetchContactData()
+            setOpenUpdateDialog(false);
+          }}
         />
-      ) : null}
+      )}
     </Box>
   );
 };

@@ -258,21 +258,21 @@ export default function OpportunityContacts({
           </>
         ) : null}
       </AccordionDetails>
-
       {showCreateDialog && (
         <ManageContactDialog
           onClose={() => setShowCreateDialog(false)}
-          accountId={accountId}
           contactResource={customerContact.contactResource}
           contactApi={customerContact.contactApi}
-          account={customerAccount}
           isRedirectToDetailPage={false}
-          onSuccess={(obj) => {
-            if (obj) {
+          onSuccess={(data) => {
+            if (data) {
               setShowCreateDialog(false);
-              saveContactToOpportunity(obj.id, 'customer', contacts);
+              saveContactToOpportunity(data._id, 'customer', contacts);
             }
           }}
+          isClone={false}
+          contactId={null}
+          referenceData={{ 'accountName': accountId }}
         />
       )}
     </Accordion>

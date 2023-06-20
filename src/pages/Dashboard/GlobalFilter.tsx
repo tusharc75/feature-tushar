@@ -42,7 +42,7 @@ interface Props {
 const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled }: Props) => {
   const classes = useStyles();
 
-  const [timeFrame, setTimeFrame] = React.useState<any>('1-year');
+  const [timeFrame, setTimeFrame] = React.useState<any>('current-year');
 
   React.useEffect(() => {
     switch (timeFrame) {
