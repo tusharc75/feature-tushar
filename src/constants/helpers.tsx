@@ -314,7 +314,8 @@ export const sidebarResource = {
   wellNumber: 'Well Number',
   planningView: 'Planning View',
   taxMaster: 'Tax Master',
-  competencies: 'Competencies'
+  competencies: 'Competencies',
+  padMaster: 'Pad Master'
 };
 
 export const primaryFields = {
@@ -430,7 +431,8 @@ export const RESOURCE_LABEL = {
   wellNumber: 'Well Number',
   taxMaster: 'Tax Master',
   competencies: 'Competencies',
-  materialHandling: 'Material Handling'
+  materialHandling: 'Material Handling',
+  padMaster: 'Pad Master'
 };
 
 export const CHILD_RESOURCE = {
