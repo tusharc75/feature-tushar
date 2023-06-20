@@ -231,6 +231,13 @@ const routes = {
         : RESOURCE_LABEL.serializedAsset,
     path: '/serialized-asset'
   },
+  serializedAssetCertification: {
+    title:
+      storedRoutes && storedRoutes.serializedAssetCertification && storedRoutes.serializedAssetCertification.title
+        ? storedRoutes.serializedAssetCertification.title
+        : RESOURCE_LABEL.serializedAssetCertification,
+    path: '/serialized-assets-certification'
+  },
   serializedAssetDetail: {
     title:
       storedRoutes && storedRoutes.serializedAsset && storedRoutes.serializedAsset.title
@@ -954,7 +961,17 @@ const routes = {
         ? storedRoutes.materialHandling?.title
         : RESOURCE_LABEL.materialHandling,
     path: '/material-handling'
-  }
+  },
+  padMaster: {
+    title:
+      storedRoutes && storedRoutes.padMaster && storedRoutes.padMaster.title ? storedRoutes.padMaster?.title : RESOURCE_LABEL.padMaster,
+    path: '/pad-master'
+  },
+  padMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.padMaster && storedRoutes.padMaster.title ? storedRoutes.padMaster?.title : RESOURCE_LABEL.padMaster,
+    path: '/pad-master/detail'
+  },
 };
 
 export default routes;

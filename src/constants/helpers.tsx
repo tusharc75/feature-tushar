@@ -314,7 +314,8 @@ export const sidebarResource = {
   wellNumber: 'Well Number',
   planningView: 'Planning View',
   taxMaster: 'Tax Master',
-  competencies: 'Competencies'
+  competencies: 'Competencies',
+  padMaster: 'Pad Master'
 };
 
 export const primaryFields = {
@@ -342,6 +343,7 @@ export const RESOURCE_LABEL = {
   productCategory: 'Product Categories',
   productInventory: 'Product Inventory',
   serializedAsset: 'Serialized Assets',
+  serializedAssetCertification: 'Serialized Assets Certification',
   priceTemplate: 'Price Templates',
   product: 'Product Master',
   productTemplate: 'Product Templates',
@@ -430,7 +432,8 @@ export const RESOURCE_LABEL = {
   wellNumber: 'Well Number',
   taxMaster: 'Tax Master',
   competencies: 'Competencies',
-  materialHandling: 'Material Handling'
+  materialHandling: 'Material Handling',
+  padMaster: 'Pad Master'
 };
 
 export const CHILD_RESOURCE = {
@@ -647,6 +650,13 @@ export const serializedAsset = {
   route: '/serialized-asset',
   permission: 'serializedAsset',
   resource: 'Serialized Asset'
+};
+
+export const serializedAssetCertification = {
+  api: '/serialized-assets-certification',
+  route: '/serialized-assets-certification',
+  permission: 'serializedAssetsCertification',
+  resource: 'Serialized Assets Certification'
 };
 
 export const workOrderSupervisor = {

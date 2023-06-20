@@ -75,6 +75,7 @@ import QuotePdfTemplate from './pages/QuotePdfTemplate';
 import Warehouse from './pages/Warehouse';
 import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
 import SerializedAsset from './pages/SerializedAsset';
+import SerializedAssetsCertification from './pages/SerializedAssetsCertification';
 import SerializedAssetDetailsPage from './pages/SerializedAsset/SerializedAssetDetailsPage';
 import EquipmentRentalMaster from './pages/EquipmentRentalMaster';
 import ProductDetailsPage from './pages/Product/ProductDetailsPage';
@@ -214,6 +215,8 @@ import Competencies from './pages/Competencies';
 import CompetenciesDetail from './pages/Competencies/CompetenciesDetail';
 import MaterialHandling from './pages/MaterialHandling';
 import ScreenOrientationOverlay from './components/ScreenOrientationOverlay';
+import PadMaster from './pages/PadMaster';
+import PadMasterDetail from './pages/PadMaster/PadMasterDetail';
 
 var notificationInterval: any = null;
 
@@ -323,6 +326,7 @@ function App() {
   }, [isOffline]);
 
   const getNotification = async () => {
+    console.log("from app.tsx");
     if (localStorage.getItem('token') && !isOffline) {
       await axiosInstance()
         .get(`/user/notification/unseen`)
@@ -576,6 +580,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAsset.path}>
               <SerializedAsset />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.serializedAssetCertification.path}>
+              <SerializedAssetsCertification />
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAsset.path + '-new'}>
               <SerializedAssetTest />
@@ -1023,6 +1030,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.materialHandling.path}`}>
               <MaterialHandling />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.padMaster.path}`}>
+              <PadMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.padMasterDetail.path}/:id`}>
+              <PadMasterDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

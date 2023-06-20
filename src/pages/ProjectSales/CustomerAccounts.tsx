@@ -428,16 +428,16 @@ const CustomerAccounts = (props) => {
             setDialogType(null);
             setAccId(null);
           }}
-          onSuccess={(obj) => {
-            if (obj && obj.id) {
-              saveCustomerContactToProject(obj.id);
+          onSuccess={(data) => {
+            if (data) {
+              saveCustomerContactToProject(data._id);
             }
           }}
           contactResource={customerContact.contactResource}
-          accountId={accId}
+          referenceData={{ 'accountName': accId }}
           contactApi={customerContact.contactApi}
-          account={customerAccount}
-          isRedirectToDetailPage={false}
+          isClone={false}
+          contactId={null}
         />
       )}
       <Box className={`${classes.root} ${'pannel_layout'}`}>
@@ -582,7 +582,7 @@ const CustomerAccounts = (props) => {
                         id={`vertical-tab-${i}`}
                         className={classes.tabProject}
 
-                        // icon={<AiFillCaretRight size={18}/>}
+                      // icon={<AiFillCaretRight size={18}/>}
                       />
                     ))}
                   </Tabs>
@@ -727,8 +727,8 @@ const CustomerAccounts = (props) => {
             accountDeleteRec
               ? 'Are you sure about removing this account from project?'
               : contactDeleteRec
-              ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
-              : null
+                ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
+                : null
           }
           onClose={() => {
             setShowConfirmBox(false);
