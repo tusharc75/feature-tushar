@@ -17,16 +17,12 @@ import {
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import MuiAccordion from '@material-ui/core/Accordion';
-import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
-import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
-import { withStyles } from '@material-ui/core/styles';
 import routes from './../../components/Helpers/Routes';
 import { Link } from 'react-router-dom';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
 import { customerContact, supplierContact, customerAccount, supplierAccount } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
-import ManageContactDialog from './../Contact/ManageContact/index';
+import ManageContactDialog from './../Contact/ManageContact';
 import { AiOutlineMail } from 'react-icons/ai';
 import { FiStar } from 'react-icons/fi';
 import { BiPhone } from 'react-icons/bi';
@@ -234,9 +230,9 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
           }}
           contactResource={type === 'customer' ? customerContact.contactResource : supplierContact.contactResource}
           contactApi={type === 'customer' ? customerContact.contactApi : supplierContact.contactApi}
-          account={type === 'customer' ? customerAccount : supplierAccount}
-          userId={userId}
-          isRedirectToDetailPage={false}
+          referenceData={{ 'accountName': type === 'customer' ? customerAccount : supplierAccount }}
+          isClone={false}
+          contactId={null}
         />
       )}
     </>

@@ -144,7 +144,7 @@
     "start": "sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
     "dev": "yarn install && sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
     "dev-https": "set \"HTTPS=true\" && yarn install && vite",
-    "build": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite build",
+    "build": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite build --mode production",
     "winBuild": "set \"GENERATE_SOURCEMAP=true\" && node --max_old_space_size=10240 ./node_modules/vite/bin/vite build",
     "sourceMapBuild": "node --max_old_space_size=4096 ./node_modules/vite/bin/vite build",
     "test": "vite test",
