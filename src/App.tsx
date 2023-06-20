@@ -326,7 +326,6 @@ function App() {
   }, [isOffline]);
 
   const getNotification = async () => {
-    console.log("from app.tsx");
     if (localStorage.getItem('token') && !isOffline) {
       await axiosInstance()
         .get(`/user/notification/unseen`)
