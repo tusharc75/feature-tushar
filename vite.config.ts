@@ -6,7 +6,7 @@ import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa'
 
 const manifestForPlugin: Partial<VitePWAOptions> = {
     registerType: "prompt",
-    includeAssets: ["favicon.ico"],
+    includeAssets: [ "**/*"],
     manifest: {
         name: "Equipt OMS",
         short_name: "Equipt OMS",
