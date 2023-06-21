@@ -2,7 +2,80 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react'
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgrPlugin from 'vite-plugin-svgr';
-import { VitePWA } from 'vite-plugin-pwa'
+import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa'
+
+const manifestForPlugin: Partial<VitePWAOptions> = {
+    registerType: "prompt",
+    includeAssets: [ "**/*"],
+    manifest: {
+        name: "Equipt OMS",
+        short_name: "Equipt OMS",
+        "icons": [
+            {
+                src: "/favicon.ico",
+                sizes: "64x64 32x32 24x24 16x16",
+                type: "image/x-icon"
+            },
+            {
+                src: "/favicon-16x16.png",
+                sizes: "16x16",
+                type: "image/png"
+            },
+            {
+                src: "/favicon-32x32.png",
+                sizes: "32x32",
+                type: "image/png"
+            },
+            {
+                src: "/favicon-96x96.png",
+                sizes: "96x96",
+                type: "image/png"
+            },
+            {
+                src: "/android-icon-36x36.png",
+                sizes: "36x36",
+                type: "image\/png",
+                density: "0.75"
+            },
+            {
+                src: "/android-icon-48x48.png",
+                sizes: "48x48",
+                type: "image\/png",
+                density: "1.0"
+            },
+            {
+                src: "/android-icon-72x72.png",
+                sizes: "72x72",
+                type: "image\/png",
+                density: "1.5"
+            },
+            {
+                src: "/android-icon-96x96.png",
+                sizes: "96x96",
+                type: "image\/png",
+                density: "2.0"
+            },
+            {
+                src: "/android-icon-144x144.png",
+                sizes: "144x144",
+                type: "image\/png",
+                density: "3.0"
+            },
+            {
+                src: "/android-icon-192x192.png",
+                sizes: "192x192",
+                type: "image\/png",
+                density: "4.0"
+            }
+        ],
+        theme_color: "#000000",
+        background_color: "#ffffff",
+        display: "standalone",
+        scope: "/",
+        start_url: "/",
+        orientation: "portrait",
+    },
+};
 
 export default defineConfig({
     plugins: [
@@ -11,17 +84,7 @@ export default defineConfig({
             svgrOptions: {
             },
         }),
-        VitePWA({
-            registerType: 'autoUpdate',
-            workbox: {
-                globPatterns: ["**/*"],
-            },
-            // add this to cache all the
-            // static assets in the public folder
-            includeAssets: [
-                "**/*",
-            ],
-        }),
+        VitePWA(manifestForPlugin),
         viteTsconfigPaths()],
     build: {
         outDir: 'build',

@@ -116,8 +116,7 @@ import TransferInventoryDetailPage from './pages/TransferInventory/TransferInven
 import Zone from './pages/zone';
 import ZoneDetailPage from './pages/zone/ZoneDetailPage';
 import { Button, Snackbar } from '@material-ui/core';
-//import * as serviceWorkerRegistration from 'src/serviceWorkerRegistration';
-import { registerSW } from "virtual:pwa-register";
+// import * as serviceWorkerRegistration from 'src/serviceWorkerRegistration';
 import MuiAlert from '@material-ui/lab/Alert';
 import WellMaster from './pages/WellMaster';
 import DashboardBuilder from './pages/DashboardBuilder/DashboardManager';
@@ -239,11 +238,11 @@ function App() {
   const [refreshSnackBar, setRefreshSnackBar] = useState(false);
 
   const updateServiceWorker = () => {
-    const { waitingWorker } = serviceWorkerData;
-    localStorage.removeItem('newVersionAvailable');
-    waitingWorker && waitingWorker.postMessage && waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-    setServiceWorkerData({ ...serviceWorkerData, newVersionAvailable: false });
-    window.location.reload();
+    // const { waitingWorker } = serviceWorkerData;
+    // localStorage.removeItem('newVersionAvailable');
+    // waitingWorker && waitingWorker.postMessage && waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    // setServiceWorkerData({ ...serviceWorkerData, newVersionAvailable: false });
+    // window.location.reload();
   };
 
   const onServiceWorkerUpdate = (registration) => {
@@ -255,16 +254,9 @@ function App() {
     });
   };
 
-  useEffect(() => {
-    //serviceWorkerRegistration.register({ onUpdate: onServiceWorkerUpdate });
-    const updateSW = registerSW({
-      onNeedRefresh() {
-        if (window.confirm("New content available. Reload?")) {
-          updateSW(true);
-        }
-      },
-    });
-  }, []);
+  // useEffect(() => {
+  //   serviceWorkerRegistration.register({ onUpdate: onServiceWorkerUpdate });
+  // }, []);
 
   useEffect(() => {
     const newVersionAvailable = localStorage.getItem('newVersionAvailable');
