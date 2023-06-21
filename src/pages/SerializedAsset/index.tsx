@@ -46,7 +46,7 @@ import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
-import AssignSupplierAccountDialog from 'src/components/AssignRolesDialog/AssignSupplierAccountDialog';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
 const SerializedAsset = () => {
 
@@ -940,7 +940,7 @@ const SerializedAsset = () => {
         />
       )}
       {openSupplierAccountDialog && (
-        <AssignSupplierAccountDialog
+        <AssignDynamicDialog
           reference={routes.serializedAsset.title}
           onSuccess={(data) => {
             handleCertificationSupplier(data);
@@ -949,6 +949,8 @@ const SerializedAsset = () => {
             setOpenSupplierAccountDialog(false)
           }}
           ids={[]}
+          resource={sidebarResource?.supplierAccount}
+          path={routes?.supplierAccount?.path}
         />
       )}
     </Fragment>
