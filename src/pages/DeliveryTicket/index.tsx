@@ -49,7 +49,7 @@ const DeliveryTicket = () => {
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
   const [fromRental, setFromRental] = useState(history?.location?.state?.rental);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
   const [filter, setFilter] = useState(`All ${routes.deliveryTicket.title}`);
   const {
     state: { user, selectedEntity, permissions }
@@ -219,7 +219,7 @@ const DeliveryTicket = () => {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (fromRental) {
       filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
@@ -235,7 +235,7 @@ const DeliveryTicket = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }

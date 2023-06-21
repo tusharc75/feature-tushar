@@ -62,7 +62,7 @@ const TransferAsset = () => {
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
   const [filter, setFilter] = useState(`All ${routes.transferAsset.title}`);
   const [fromRental, setFromRental] = useState(history.location?.state?.rental);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -149,7 +149,7 @@ const TransferAsset = () => {
       deepFilter = `?`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (fromRental) {
       filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
