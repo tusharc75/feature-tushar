@@ -12,7 +12,7 @@ export default defineConfig({
             },
         }),
         VitePWA({
-            //registerType: 'autoUpdate',
+            registerType: 'autoUpdate',
             workbox: {
                 globPatterns: ["**/*"],
             },
