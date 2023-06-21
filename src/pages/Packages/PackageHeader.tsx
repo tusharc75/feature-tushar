@@ -163,8 +163,8 @@ function PackageHeader(props) {
           <Grid style={{ display: 'flex', flex: 1 }}>
             <HideWhenOffline>
               <SearchBox
-                onSearch={onSearch}
-                searchbox={styles.search_box_input}
+                onChange={onSearch}
+                className={styles.search_box_input}
                 value={searchVal}
                 size="small"
                 placeholder="Search Packages"

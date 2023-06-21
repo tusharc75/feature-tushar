@@ -1,11 +1,16 @@
 import React, { memo } from 'react';
-import { TextField, InputAdornment } from '@material-ui/core';
+import { TextField, InputAdornment, TextFieldProps } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import PropTypes from 'prop-types';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiSearch } from 'react-icons/fi';
 
-function SearchBox({ onSearch, value, size, width, placeholder, style, searchbox }) {
+type SerachBoxProps = Partial<TextFieldProps> & {
+  width?: string;
+  placeholder?: string;
+};
+
+function SearchBox({ onChange, value, size, width, placeholder, style, className }: SerachBoxProps) {
   return isMobile && !isTablet ? (
     <TextField
       style={{ minWidth: width || '200px', ...style }}
@@ -14,8 +19,8 @@ function SearchBox({ onSearch, value, size, width, placeholder, style, searchbox
       type="search"
       size={size || 'small'}
       value={value}
-      className={isMobile ? 'serchBox' : searchbox}
-      onChange={onSearch}
+      className={isMobile ? 'serchBox' : className}
+      onChange={onChange}
       InputProps={{
         disableUnderline: true,
         endAdornment: (
@@ -33,8 +38,8 @@ function SearchBox({ onSearch, value, size, width, placeholder, style, searchbox
       type="search"
       size={size || 'small'}
       value={value}
-      className={searchbox}
-      onChange={onSearch}
+      className={className}
+      onChange={onChange}
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
@@ -59,15 +64,5 @@ function SearchBox({ onSearch, value, size, width, placeholder, style, searchbox
 //     }}
 //
 // />
-
-SearchBox.propTypes = {
-  onSearch: PropTypes.any,
-  value: PropTypes.any,
-  size: PropTypes.any,
-  width: PropTypes.any,
-  placeholder: PropTypes.any,
-  style: PropTypes.any,
-  searchbox: PropTypes.any
-};
 
 export default memo(SearchBox);

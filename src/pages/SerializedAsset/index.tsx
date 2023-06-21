@@ -49,7 +49,6 @@ import moment from 'moment';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
 const SerializedAsset = () => {
-
   const renderedFrom = camelCase(routes?.serializedAsset.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -72,7 +71,7 @@ const SerializedAsset = () => {
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
-  const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false)
+  const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false);
 
   const {
     state: { permissions }
@@ -130,8 +129,6 @@ const SerializedAsset = () => {
       });
   }, []);
 
-
-
   useEffect(() => {
     if (productCategory && productCategory !== '') {
       axiosInstance()
@@ -171,11 +168,7 @@ const SerializedAsset = () => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
             e.cellStyle = (params) => {
-              if (
-                [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                  params?.data?.status
-                )
-              ) {
+              if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
                 return { backgroundColor: COLOUR_MASTER.lostAssets.background };
               }
               // if (params.data?.recertDate) {
@@ -261,7 +254,7 @@ const SerializedAsset = () => {
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (warehouse?.optionValue) {
       filterByIds.push({ field: 'warehouse', term: warehouse?.optionValue });
@@ -437,12 +430,12 @@ const SerializedAsset = () => {
   };
 
   const handleCertificationSupplier = async (data) => {
-    const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((item) => item?._id)
+    const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((item) => item?._id);
     const certificationSupplier = data?.map((item) => item?._id);
     const body = {
       _ids: ids,
       certificationSupplier: certificationSupplier
-    }
+    };
     try {
       let response = await axiosInstance().put(`${routes?.serializedAsset?.path}/update-bulk-data`, body);
       removeLocalStorage(localStorageSelectedRecords);
@@ -451,12 +444,12 @@ const SerializedAsset = () => {
         type: 'success',
         message: response?.data?.message
       });
-      setOpenSupplierAccountDialog(false)
-      fetchProductInventory()
+      setOpenSupplierAccountDialog(false);
+      fetchProductInventory();
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  }
+  };
 
   return (
     <Fragment>
@@ -590,9 +583,10 @@ const SerializedAsset = () => {
                     options={warehouseOptions}
                     getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                     getOptionSelected={(option: any, val) => option.optionValue === val}
-                    value={warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-                      ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
-                      : ''
+                    value={
+                      warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                        ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                        : ''
                     }
                     onChange={(e, val) => {
                       setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
@@ -635,10 +629,10 @@ const SerializedAsset = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Box style={{ flexGrow: '1' }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile ? '200px' : '210px'}
-                    style={{ width: ['100%'] }}
+                    style={{ width: '100%', maxWidth: 250, display: 'flex' }}
                     size="small"
                     value={search}
                   />
@@ -722,9 +716,8 @@ const SerializedAsset = () => {
                               handleStatusUpdate(ASSET_STATUS.needRepair);
                             }}
                             disabled={
-                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter(
-                                (o) => ![ASSET_STATUS.needRepair].includes(o.status)
-                              ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRepair].includes(o.status))
+                                .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
                                 ? false
                                 : true
                             }
@@ -737,9 +730,8 @@ const SerializedAsset = () => {
                               handleStatusUpdate(ASSET_STATUS.needRecert);
                             }}
                             disabled={
-                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter(
-                                (o) => ![ASSET_STATUS.needRecert].includes(o.status)
-                              ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRecert].includes(o.status))
+                                .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
                                 ? false
                                 : true
                             }
@@ -774,20 +766,19 @@ const SerializedAsset = () => {
                           >
                             {`Status Change - ${ASSET_STATUS.lost}`}
                           </MenuItem>
-                          {columns?.some(e => e.field === "certificationSupplier") &&
+                          {columns?.some((e) => e.field === 'certificationSupplier') && (
                             <MenuItem
                               disabled={!permissions?.serializedAsset?.isUpdate}
                               onClick={() => {
                                 closeActions();
-                                setOpenSupplierAccountDialog(true)
+                                setOpenSupplierAccountDialog(true);
                               }}
                             >
                               {`Assign Certification Supplier`}
                             </MenuItem>
-                          }
+                          )}
                         </>
-                      )
-                    }
+                      )}
                     {/* {columns?.some(e => e.field === "mtrAttached") &&
                       <>
                         <MenuItem
@@ -930,8 +921,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -946,7 +938,7 @@ const SerializedAsset = () => {
             handleCertificationSupplier(data);
           }}
           handleClose={() => {
-            setOpenSupplierAccountDialog(false)
+            setOpenSupplierAccountDialog(false);
           }}
           ids={[]}
           resource={sidebarResource?.supplierAccount}
