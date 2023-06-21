@@ -64,7 +64,7 @@ const BulkAssetCreation = () => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const { type }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
 
   const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
@@ -163,7 +163,7 @@ const BulkAssetCreation = () => {
       deepFilter = `?`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
 
     if (fromRental) {
       filterByIds.push({ field: 'rentalJob', term: fromRental?._id });

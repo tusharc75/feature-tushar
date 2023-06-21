@@ -21,27 +21,27 @@ import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import { useHistory } from 'react-router-dom';
 
-function RentalManagementHeader(props) {
-  const {
-    selectedRecords,
-    onTypeChange,
-    options,
-    onSearch,
-    searchVal,
-    onCreate,
-    RentalManagementPermissions,
-    showConfirmBox,
-    icon,
-    heading,
-    children,
-    columns,
-    dispatch,
-    showTransferEntityDialog,
-    selectedType,
-    fetchRentalManagement,
-    gridApi,
-    filters
-  } = props;
+function RentalManagementHeader({
+  selectedRecords,
+  onTypeChange,
+  options,
+  onSearch,
+  searchVal,
+  onCreate,
+  RentalManagementPermissions,
+  showConfirmBox,
+  icon,
+  heading,
+  children,
+  columns,
+  dispatch,
+  showTransferEntityDialog,
+  selectedType,
+  fetchRentalManagement,
+  gridApi,
+  filters
+  // showCloneRentalManagementDialog
+}) {
   const {
     state: { permissions }
   }: any = useData();

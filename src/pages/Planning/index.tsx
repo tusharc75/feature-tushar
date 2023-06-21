@@ -72,7 +72,7 @@ const Planning = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const { getColumnData } = useColumns();
 
   const fetchGridColumns = () => {
@@ -142,6 +142,7 @@ const Planning = () => {
         }, gridLoadingTimeout);
       });
   };
+
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -392,8 +393,7 @@ const Planning = () => {
                       <span>{`Calendar`}</span>
                     </ToggleButton>
                   </ToggleButtonGroup>
-                </Box>
-              )}
+                </Box>)}
               {selectedPlanningType && (
                 <Chip
                   className="ml-3"
