@@ -344,7 +344,7 @@ export const RESOURCE_LABEL = {
   productCategory: 'Product Categories',
   productInventory: 'Product Inventory',
   serializedAsset: 'Serialized Assets',
-  serializedAssetCertification: 'Serialized Assets Certification',
+  serializedAssetsCertification: 'Serialized Assets Certification',
   priceTemplate: 'Price Templates',
   product: 'Product Master',
   productTemplate: 'Product Templates',
@@ -654,7 +654,7 @@ export const serializedAsset = {
   resource: 'Serialized Asset'
 };
 
-export const serializedAssetCertification = {
+export const serializedAssetsCertification = {
   api: '/serialized-assets-certification',
   route: '/serialized-assets-certification',
   permission: 'serializedAssetsCertification',

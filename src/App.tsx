@@ -523,7 +523,7 @@ function App() {
             <PrivateRoute exact path={routes.serializedAsset.path}>
               <SerializedAsset />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.serializedAssetCertification.path}>
+            <PrivateRoute exact path={routes.serializedAssetsCertification.path}>
               <SerializedAssetsCertification />
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAsset.path + '-new'}>
