@@ -23,7 +23,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { useLocation } from 'react-router-dom';
-import {  MdAdd } from 'react-icons/all';
+import { MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
@@ -86,52 +86,43 @@ const Address = () => {
       });
   };
 
-  const fetchAddresses = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
-    axiosInstance()
-      .get(`/address${queryString}`)
-      .then(
-        ({
-          data: {
-            data: { data, count }
-          }
-        }) => {
-          let rows = data.map((u) => {
-            let finalObject = prepareDataForGrid(u, user);
-            finalObject['canDelete'] = permissions?.address?.isDelete;
-            finalObject['allowedToEdit'] = permissions?.address?.isUpdate;
-            finalObject['isChecked'] = false;
-
-            return finalObject;
+    axiosInstance().get(`/address${queryString}`).then(
+      ({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['canDelete'] = permissions?.address?.isDelete;
+          finalObject['allowedToEdit'] = permissions?.address?.isUpdate;
+          finalObject['isChecked'] = false;
+          return finalObject;
+        });
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
-          if (appendRows) {
-            dispatch({
-              type: 'initialize',
-              data: [...dataRows, ...rows],
-              count: count,
-              selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-            });
-          } else {
-            dispatch({
-              type: 'initialize',
-              data: rows,
-              count: count,
-              selectedRecords: rows.filter((f) => f.isChecked === true)
-            });
-          }
-
-          dispatch({ type: 'initialize', data: rows, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
+          });
         }
-      )
+
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      }
+    )
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
@@ -139,8 +130,8 @@ const Address = () => {
   };
 
   useEffect(() => {
-    fetchAddresses();
-  }, [page, limit, filters, sorting, search, selectedEntity]);
+    fetchData();
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -189,11 +180,6 @@ const Address = () => {
       deepFilter = `?`;
     }
 
-    if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
-    }
-
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
@@ -214,6 +200,11 @@ const Address = () => {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
 
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+    }
+
     return deepFilter;
   };
 
@@ -227,7 +218,7 @@ const Address = () => {
     axiosInstance()
       .put(`/address/remove`, { ids: ids })
       .then(() => {
-        fetchAddresses();
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         // setSelectedCategory([])
@@ -262,7 +253,7 @@ const Address = () => {
             module="address"
             api={'address'}
             afterImportCompleted={() => {
-              fetchAddresses();
+              fetchData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -270,7 +261,7 @@ const Address = () => {
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
-              else fetchAddresses();
+              else fetchData();
             }}
           />
         </Grid>
@@ -382,7 +373,7 @@ const Address = () => {
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -399,7 +390,7 @@ const Address = () => {
               actionWidth={110}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchAddresses}
+              refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
               resource={sidebarResource.address}
@@ -424,7 +415,7 @@ const Address = () => {
             onClose={() => setOpen({ title: '', open: false, edit: false, isClone: false })}
             onSuccess={() => {
               setOpen({ title: '', open: false, edit: false, isClone: false });
-              fetchAddresses();
+              fetchData();
             }}
           />
         )}

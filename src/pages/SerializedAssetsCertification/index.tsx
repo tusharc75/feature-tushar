@@ -7,7 +7,7 @@ import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
-  serializedAssetCertification,
+  serializedAssetsCertification,
   serializedAsset,
   gridLoadingTimeout,
   ASSET_STATUS,
@@ -27,7 +27,7 @@ import moment from 'moment';
 
 const SerializedAssetsCertification = () => {
 
-  const renderedFrom = camelCase(routes?.serializedAssetCertification.title);
+  const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -105,7 +105,7 @@ const SerializedAssetsCertification = () => {
     }
 
     axiosInstance()
-      .get(`${serializedAssetCertification.api}`)
+      .get(`${serializedAssetsCertification.api}`)
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
@@ -168,7 +168,7 @@ const SerializedAssetsCertification = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.serializedAssetCertification]} />
+          <CustomBreadCrumbs routes={[routes.serializedAssetsCertification]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
 
