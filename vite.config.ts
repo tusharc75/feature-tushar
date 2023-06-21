@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, splitVendorChunkPlugin } from 'vite';
 import react from '@vitejs/plugin-react'
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgrPlugin from 'vite-plugin-svgr';
@@ -15,14 +15,16 @@ export default defineConfig({
             registerType: 'autoUpdate',
             workbox: {
                 globPatterns: ["**/*"],
+                maximumFileSizeToCacheInBytes: 10000000
             },
-            // add this to cache all the
-            // static assets in the public folder
             includeAssets: [
                 "**/*",
             ],
         }),
-        viteTsconfigPaths()],
+        viteTsconfigPaths(),
+        splitVendorChunkPlugin()
+    ],
+
     build: {
         outDir: 'build',
     },
