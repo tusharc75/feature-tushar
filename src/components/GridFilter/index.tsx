@@ -85,6 +85,16 @@ function GridFilter({
           })
           modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName')
         }
+        else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact) {
+          modifiedColumn?.forEach((e) => {
+            if (e.fieldName === 'firstName') {
+              e.fieldName = 'concatedName';
+              e.fieldLabel = 'Name';
+              e.type = 'singleLine';
+            }
+          })
+          modifiedColumn = modifiedColumn?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e.fieldName))
+        }
         setColoums(modifiedColumn);
       })
       .catch((err) => {
@@ -399,7 +409,8 @@ function GridFilter({
                               InputLabelProps={{
                                 shrink: true
                               }}
-                              minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
+                              minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] :
+                                formValues[`to_${field.fieldName}`] ? formValues[`to_${field.fieldName}`] : new Date()}
                             />
                           </Grid>
                         </Fragment>
