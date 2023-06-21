@@ -116,7 +116,8 @@ import TransferInventoryDetailPage from './pages/TransferInventory/TransferInven
 import Zone from './pages/zone';
 import ZoneDetailPage from './pages/zone/ZoneDetailPage';
 import { Button, Snackbar } from '@material-ui/core';
-import * as serviceWorkerRegistration from 'src/serviceWorkerRegistration';
+//import * as serviceWorkerRegistration from 'src/serviceWorkerRegistration';
+import { registerSW } from "virtual:pwa-register";
 import MuiAlert from '@material-ui/lab/Alert';
 import WellMaster from './pages/WellMaster';
 import DashboardBuilder from './pages/DashboardBuilder/DashboardManager';
@@ -255,7 +256,14 @@ function App() {
   };
 
   useEffect(() => {
-    serviceWorkerRegistration.register({ onUpdate: onServiceWorkerUpdate });
+    //serviceWorkerRegistration.register({ onUpdate: onServiceWorkerUpdate });
+    const updateSW = registerSW({
+      onNeedRefresh() {
+        if (window.confirm("New content available. Reload?")) {
+          updateSW(true);
+        }
+      },
+    });
   }, []);
 
   useEffect(() => {
@@ -324,7 +332,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
