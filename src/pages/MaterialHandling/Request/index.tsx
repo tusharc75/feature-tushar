@@ -17,7 +17,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
-import CustomTable, { ColumnsInterface } from 'src/components/CustomTable';
 import CustomTableWithCard, { CardInterface } from 'src/components/CustomTableWithCard';
 
 const Request = ({ workOrder }) => {
