@@ -3,6 +3,15 @@ import moment from 'moment';
 import { CardInterface } from 'src/components/CustomTableWithCard';
 import { dateTimeFormat, dateFormat } from 'src/constants/helpers';
 
+const getUpdatedObject = (oldData, newData) => {
+  const data = new Set([...Object.keys(oldData), ...Object.keys(newData)]);
+  const newObj = {};
+  for (const key of data) {
+    newObj[key] = newData[key] || oldData[key];
+  }
+  return newObj;
+};
+
 export interface ColumnInterface extends GridProps {
   field: string;
   headerName: string;
@@ -38,6 +47,8 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
         continue;
       }
       const { field, headerName, cellRenderer, cellRendererParams, dateAccessor, ...colProps } = item;
+      const mergedProps = getUpdatedObject(others, colProps);
+
       if (cellRenderer === 'linkRenderer') {
         createdBodyColumns.push({
           render: (row) => {
@@ -60,8 +71,7 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
               </>
             );
           },
-          ...others,
-          ...colProps
+          ...mergedProps
         });
       }
       if (cellRenderer === 'commonRenderer') {
@@ -74,8 +84,7 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
               </>
             );
           },
-          ...others,
-          ...colProps
+          ...mergedProps
         });
       }
       if (cellRenderer === 'dateTimeRenderer') {
@@ -88,8 +97,7 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
               </>
             );
           },
-          ...others,
-          ...colProps
+          ...mergedProps
         });
       }
       if (cellRenderer === 'dateRenderer') {
@@ -102,8 +110,7 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
               </>
             );
           },
-          ...others,
-          ...colProps
+          ...mergedProps
         });
       }
       if (cellRenderer === 'createdByRenderer') {
@@ -119,8 +126,7 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
               </>
             );
           },
-          ...others,
-          ...colProps
+          ...mergedProps
         });
       }
       if (cellRenderer === 'updatedByRenderer') {
@@ -136,8 +142,7 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
               </>
             );
           },
-          ...others,
-          ...colProps
+          ...mergedProps
         });
       }
       if (cellRenderer === 'linkColWithDate') {
@@ -165,8 +170,7 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
               </>
             );
           },
-          ...others,
-          ...colProps
+          ...mergedProps
         });
       }
     }
