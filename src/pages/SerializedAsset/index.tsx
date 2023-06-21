@@ -632,7 +632,7 @@ const SerializedAsset = () => {
                     onChange={handleSearch}
                     className={styles.search_box_input}
                     width={isMobile ? '200px' : '210px'}
-                    style={{ width: '100%', maxWidth: 250 }}
+                    style={{ width: '100%', maxWidth: 250, display: 'flex' }}
                     size="small"
                     value={search}
                   />
