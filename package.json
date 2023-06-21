@@ -97,7 +97,7 @@
     "react-gauge-chart": "^0.4.1",
     "react-google-login": "^5.2.2",
     "react-html-parser": "^2.0.2",
-    "react-icons": "^4.6.0",
+    "react-icons": "4.6.0",
     "react-infinite-scroll-component": "^6.1.0",
     "react-joyride": "^2.3.1",
     "react-masonry-css": "^1.0.16",
@@ -112,6 +112,7 @@
     "react-window": "^1.8.6",
     "resolve": "1.18.1",
     "resolve-url-loader": "^3.1.2",
+    "sass-migrator": "^1.7.3",
     "semver": "7.3.2",
     "socket.io-client": "4.1.3",
     "style-loader": "1.3.0",
@@ -143,7 +144,7 @@
     "start": "sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
     "dev": "yarn install && sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
     "dev-https": "set \"HTTPS=true\" && yarn install && vite",
-    "build": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite build",
+    "build": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite build --mode production",
     "winBuild": "set \"GENERATE_SOURCEMAP=true\" && node --max_old_space_size=10240 ./node_modules/vite/bin/vite build",
     "sourceMapBuild": "node --max_old_space_size=4096 ./node_modules/vite/bin/vite build",
     "test": "vite test",
@@ -196,6 +197,7 @@
     "source-map-explorer": "^2.5.2",
     "standard-version": "^9.3.1",
     "vite": "^4.3.9",
+    "vite-plugin-pwa": "^0.16.4",
     "vite-tsconfig-paths": "^4.2.0"
   },
   "prettier": {

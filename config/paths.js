@@ -16,7 +16,7 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 // We can't use a relative path in HTML because we don't want to load something
 // like /todos/42/static/js/bundle.7289d.js. We have to know the root.
 const publicUrlOrPath = getPublicUrlOrPath(
-  import.meta.env.NODE_ENV === 'development',
+  import.meta.env.MODE === 'development',
   require(resolveApp('package.json')).homepage,
   import.meta.env.PUBLIC_URL
 );

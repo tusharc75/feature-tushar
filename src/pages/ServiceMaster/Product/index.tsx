@@ -216,7 +216,7 @@ function Product({ id }) {
                   setOpenAssignProductDialog(true);
                 }}
               >
-                Add Product
+                Add
               </Button>
             </Grid>
             <Grid item xs={6} md={6} sm={6}>

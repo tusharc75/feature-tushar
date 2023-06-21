@@ -10,10 +10,8 @@ import {
     isObjectEmpty,
     prepareDataForGrid,
     getLocalStorageArrayData,
-    sidebarResource
 } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
 import CustomAgGridEditable, { reducer, intialState } from '../AgGridComponents/CustomAgGridEditable';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
@@ -21,10 +19,9 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 let searchTimeout;
 
-const AssignSupplierAccountDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, extraStaticFilter = [] }) => {
-    const renderedFrom = `${routes.supplierAccount.title}_${reference}_selected`;
+const AssignDynamicDialog = ({ reference, onSuccess, handleClose, ids, extraStaticFilter = [], resource, path }) => {
+    const renderedFrom = `${resource}_${reference}_selected`;
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
     const {
         state: { permissions, selectedEntity }
     }: any = useData();
@@ -62,12 +59,12 @@ const AssignSupplierAccountDialog = ({ reference, referenceId = null, onSuccess,
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get(`/field?resource=${sidebarResource?.supplierAccount}&view=true`)
+            .get(`/field?resource=${resource}&view=true`)
             .then(({ data: { data } }) => {
                 let columns = [];
                 let rendererNames = [];
                 data.forEach((o) => {
-                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.supplierAccountDetail.path, true);
+                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${path}/detail`, true);
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData];
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -92,7 +89,7 @@ const AssignSupplierAccountDialog = ({ reference, referenceId = null, onSuccess,
         }
         const queryString = getQueryString();
         axiosInstance()
-            .get(`${routes.supplierAccount.path}${queryString}`)
+            .get(`${path}${queryString}`)
             .then(({ data }) => {
                 let rows = data.data.map((u) => {
                     let finalObject = prepareDataForGrid(u);
@@ -181,7 +178,7 @@ const AssignSupplierAccountDialog = ({ reference, referenceId = null, onSuccess,
     return (
         <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
             <CustomDialogHeader
-                title={`Assign ${routes.supplierAccount.title}`}
+                title={`Assign ${resource}`}
                 showManimizeMaximize={false}
                 showRequiredLabel={false}
                 onClose={handleClose}
@@ -241,4 +238,4 @@ const AssignSupplierAccountDialog = ({ reference, referenceId = null, onSuccess,
     );
 };
 
-export default AssignSupplierAccountDialog;
+export default AssignDynamicDialog;

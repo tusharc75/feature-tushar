@@ -7,21 +7,21 @@ const paths = require('./paths');
 // Make sure that including paths.js after env.js will read .env variables.
 delete require.cache[require.resolve('./paths')];
 
-const NODE_ENV = import.meta.env.NODE_ENV;
-if (!NODE_ENV) {
+const MODE = import.meta.env.MODE;
+if (!MODE) {
   throw new Error(
-    'The NODE_ENV environment variable is required but was not specified.'
+    'The MODE environment variable is required but was not specified.'
   );
 }
 
 // https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
 const dotenvFiles = [
-  `${paths.dotenv}.${NODE_ENV}.local`,
+  `${paths.dotenv}.${MODE}.local`,
   // Don't include `.env.local` for `test` environment
   // since normally you expect tests to produce the same
   // results for everyone
-  NODE_ENV !== 'test' && `${paths.dotenv}.local`,
-  `${paths.dotenv}.${NODE_ENV}`,
+  MODE !== 'test' && `${paths.dotenv}.local`,
+  `${paths.dotenv}.${MODE}`,
   paths.dotenv,
 ].filter(Boolean);
 
@@ -56,7 +56,7 @@ import.meta.env.NODE_PATH = (import.meta.env.NODE_PATH || '')
   .map(folder => path.resolve(appDirectory, folder))
   .join(path.delimiter);
 
-// Grab NODE_ENV and REACT_APP_* environment variables and prepare them to be
+// Grab MODE and REACT_APP_* environment variables and prepare them to be
 // injected into the application via DefinePlugin in webpack configuration.
 const REACT_APP = /^REACT_APP_/i;
 
@@ -71,7 +71,7 @@ function getClientEnvironment(publicUrl) {
       {
         // Useful for determining whether we’re running in production mode.
         // Most importantly, it switches React into the correct mode.
-        NODE_ENV: import.meta.env.NODE_ENV || 'development',
+        MODE: import.meta.env.MODE || 'development',
         // Useful for resolving the correct path to static assets in `public`.
         // For example, <img src={import.meta.env.PUBLIC_URL + '/img/logo.png'} />.
         // This should only be used as an escape hatch. Normally you would put

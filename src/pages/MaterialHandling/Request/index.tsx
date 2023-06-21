@@ -17,8 +17,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
-import CustomTable, { ColumnsInterface } from 'src/components/CustomTable';
-import CustomTableWithCard, { CardInterface } from 'src/components/CustomTableWithCard';
+import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
 
 const Request = ({ workOrder }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -87,6 +86,51 @@ const Request = ({ workOrder }) => {
 
   const fetchColumn = async () => {
     setAccessor(null);
+
+    const columns: ColumnInterface[] = [
+      {
+        headerName: 'Requested By:',
+        field: 'requestBy',
+        cellRenderer: 'linkColWithDate',
+        dateAccessor: 'requestDate',
+        cellRendererParams: {
+          openInNewTab: true,
+          pathName: routes.userDetail.path,
+          property: 'requestById'
+        }
+        /*
+        xs: 3 
+        style: { transform: 'translateX(50px)' }
+        */ // Here is an example of how to pass other props to the columns
+      },
+      {
+        headerName: 'Processed By:',
+        field: 'processBy',
+        cellRenderer: 'linkColWithDate',
+        dateAccessor: 'processDate',
+        cellRendererParams: {
+          openInNewTab: true,
+          pathName: routes.userDetail.path,
+          property: 'processById'
+        }
+      },
+      {
+        headerName: 'Requested Qty:',
+        field: 'qty',
+        cellRenderer: 'commonRenderer'
+      },
+      {
+        headerName: 'Processed Qty:',
+        field: 'processedQty',
+        cellRenderer: 'commonRenderer'
+      },
+      {
+        headerName: 'Comment:',
+        field: 'comment',
+        cellRenderer: 'commonRenderer'
+      }
+    ];
+
     const accessor: CardInterface = {
       name: (row) => (
         <Typography component={'h6'}>
@@ -96,6 +140,7 @@ const Request = ({ workOrder }) => {
           </a>
         </Typography>
       ),
+
       headerColumns: [
         {
           style: { marginRight: 'auto' },
@@ -166,96 +211,7 @@ const Request = ({ workOrder }) => {
           }
         }
       ],
-      bodyColumns: [
-        {
-          render: (row) => {
-            return (
-              <>
-                <Typography>Requested By:</Typography>
-                <Typography>
-                  {row['requestBy'] ? (
-                    <a className="link" href={`${routes.userDetail.path}/${row?.['requestById']}`} target="_blank">
-                      {row?.['requestBy']}
-                    </a>
-                  ) : (
-                    '---'
-                  )}
-                </Typography>
-                <Typography>{row['requestDate'] ? <span>{moment(row['requestDate']).format(dateTimeFormat)}</span> : <NoDataCell />}</Typography>
-              </>
-            );
-          },
-          xs: 6,
-          sm: 4,
-          md: 4,
-          lg: 2
-        },
-        {
-          render: (row) => {
-            return (
-              <>
-                <Typography>Processed By:</Typography>
-                <Typography>
-                  {row['processBy'] ? (
-                    <a className="link" href={`${routes.userDetail.path}/${row?.['processById']}`} target="_blank">
-                      {row?.['processBy']}
-                    </a>
-                  ) : (
-                    '---'
-                  )}
-                </Typography>
-                <Typography>{row['processDate'] ? <span>{moment(row['processDate']).format(dateTimeFormat)}</span> : <NoDataCell />}</Typography>
-              </>
-            );
-          },
-          xs: 6,
-          sm: 4,
-          md: 4,
-          lg: 2
-        },
-        {
-          render: (row) => {
-            return (
-              <>
-                <Typography>Requested Qty:</Typography>
-                <Typography>{row['qty'] ? row['qty'] : '---'}</Typography>
-              </>
-            );
-          },
-          xs: 6,
-          sm: 4,
-          md: 4,
-          lg: 2
-        },
-        {
-          render: (row) => {
-            return (
-              <>
-                <Typography>Processed Qty:</Typography>
-                <Typography>{row['processedQty'] ? row['processedQty'] : '---'}</Typography>
-              </>
-            );
-          },
-          xs: 6,
-          sm: 4,
-          md: 4,
-          lg: 2
-        },
-        {
-          render: (row) => {
-            return (
-              <>
-                <Typography>Comment:</Typography>
-                <Typography>{row['comment'] ? row['comment'] : '---'}</Typography>
-              </>
-            );
-          },
-          xs: 6,
-          sm: 4,
-          md: 4,
-          lg: 2
-        }
-      ]
+      bodyColumns: [...createBodyColumns({ columns: columns, exclude: [], xs: 6, sm: 4, md: 4, lg: 2 })]
     };
     if (user?.user?.brandPolicy?.storageLocation) {
       accessor.bodyColumns.push({
