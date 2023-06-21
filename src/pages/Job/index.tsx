@@ -25,7 +25,9 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
-import { SiStatuspage } from 'react-icons/all';
+import {
+  SiStatuspage,
+} from 'react-icons/all';
 import JobHeader from './JobHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -34,7 +36,9 @@ import CardView from './CardView';
 
 let jobTimeout;
 
+
 const Job = () => {
+
   const JobType = [
     {
       key: `All ${routes?.job.title}`,
@@ -55,7 +59,7 @@ const Job = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const { type }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -74,7 +78,7 @@ const Job = () => {
   const [frameworkComponents, setFrameworkComponents] = useState({});
   const [columns, setColumns] = useState([]);
   const [locationKeys, setLocationKeys] = useState([]);
-  const [viewType, setViewType] = useState(1);
+  const [viewType, setViewType] = useState(1)
 
   const { getColumnData } = useColumns();
 
@@ -212,6 +216,7 @@ const Job = () => {
     </>
   );
 
+
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterJob=${selectedType}`;
     if (isExport) {
@@ -229,7 +234,7 @@ const Job = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-
+    
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -392,7 +397,8 @@ const Job = () => {
           />
         </div>
 
-        {viewType === 1 && (
+        {
+          viewType === 1 &&
           <CardView
             jobs={dataRows}
             setShowManageJobDialog={setShowManageJobDialog}
@@ -400,8 +406,9 @@ const Job = () => {
             dispatch={dispatch}
             loading={loading}
           />
-        )}
-        {viewType === 2 && (
+        }
+        {
+          viewType === 2 &&
           <>
             {Object.keys(frameworkComponents).length > 0 ? (
               isMobile && !isTablet ? (
@@ -463,7 +470,7 @@ const Job = () => {
               )
             ) : null}
           </>
-        )}
+        }
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -474,7 +481,8 @@ const Job = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.jobNumber ? 'Job' : 'Jobs'}   ${deleteRecord.jobNumber || ''}?`}
+            message={`Are you sure you want to delete ${deleteRecord?.jobNumber ? 'Job' : 'Jobs'}   ${deleteRecord.jobNumber || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

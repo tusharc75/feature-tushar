@@ -3,7 +3,6 @@ import { Link, useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered, FaSuitcase } from 'react-icons/fa';
-import queryString from 'query-string';
 import { MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, FaWarehouse, SiStatuspage } from 'react-icons/all';
 import {
   isObjectEmpty,
@@ -38,6 +37,7 @@ import { camelCase } from 'lodash';
 let invoiceTimeout;
 
 const Invoice = () => {
+
   const InvoiceType = [
     {
       key: `All ${routes.invoice.title}`,
@@ -55,8 +55,7 @@ const Invoice = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { type }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
+  const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
@@ -179,21 +178,19 @@ const Invoice = () => {
         </Tooltip>
       )}
 
-      {params?.data?.canDelete && (
-        <GridDeleteIcon
-          hasDeletePermission={params?.data?.canDelete}
-          ownerId={user?.user?._id}
-          userId={user?.user?._id}
-          onDelete={() =>
-            setSingleInvoiceDelete({
-              show: true,
-              id: params.data._id,
-              invoiceNumber: `${params.data.invoiceNumber}`
-            })
-          }
-          entity="invoice"
-        />
-      )}
+      {params?.data?.canDelete && <GridDeleteIcon
+        hasDeletePermission={params?.data?.canDelete}
+        ownerId={user?.user?._id}
+        userId={user?.user?._id}
+        onDelete={() =>
+          setSingleInvoiceDelete({
+            show: true,
+            id: params.data._id,
+            invoiceNumber: `${params.data.invoiceNumber}`
+          })
+        }
+        entity="invoice"
+      />}
     </>
   );
 
@@ -210,19 +207,19 @@ const Invoice = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    const { filterByIds, deepFilters } = gridFilterParser(filters)
 
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         filterByIds.push({
           field: 'customerAccount',
           term: accountDetails.accountId
-        });
+        })
       } else if (accountDetails.resource === supplierAccount.accountResource) {
         filterByIds.push({
           field: 'supplierAccountName',
           term: { $in: [accountDetails.accountId] }
-        });
+        })
       }
     }
 
@@ -284,7 +281,6 @@ const Invoice = () => {
 
   const handleInvoiceTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
   };
 
   const handleTransferEntityDialog = () => {
@@ -357,7 +353,7 @@ const Invoice = () => {
                   permissions={permissions?.invoice}
                   module="invoice"
                   api={invoice.api}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
                   recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -381,7 +377,6 @@ const Invoice = () => {
         <div className="header-panel">
           {columns && (
             <InvoiceHeader
-              selectedType={selectedType}
               selectedRecords={selectedRecords}
               onTypeChange={handleInvoiceTypeSel}
               options={InvoiceType}
