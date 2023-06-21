@@ -25,6 +25,7 @@
       ],
     },
     "target": "es5",
+    "module": "esnext",
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -33,12 +34,12 @@
       "dom",
       "dom.iterable",
       "esnext",
+      "WebWorker"
     ],
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "ESNext",
-		"moduleResolution": "Node",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -51,10 +52,5 @@
   },
   "include": [
     "./src/**/*"
-  ],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    }
   ]
 }
