@@ -120,9 +120,9 @@ const EntityHeader = (props) => {
         <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header}>
           <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox
-              onSearch={onSearch}
+              onChange={onSearch}
               value={searchVal}
-              searchbox={styles.search_box_input}
+              className={styles.search_box_input}
               size="small"
               placeholder="Search Entities"
               width={isMobile && !isTablet ? '200px' : '242px'}

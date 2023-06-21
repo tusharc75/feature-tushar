@@ -119,7 +119,7 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
-                    <SearchBox onSearch={handleSearch} searchbox="terms_header_search_bar" width="300px" value={search} />
+                    <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
                   </Grid>
                 </Grid>
               </ListItem>

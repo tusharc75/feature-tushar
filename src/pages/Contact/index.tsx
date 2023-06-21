@@ -15,13 +15,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  userType,
-  getLocalStorageArrayData,
-  removeLocalStorage
-} from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, userType, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Chip } from '@material-ui/core';
@@ -688,8 +682,8 @@ export default function Contact(props) {
               <Box id="resourceOperations" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     value={search}
                     size="small"
                     width={isMobile ? '200px' : '242px'}
@@ -918,9 +912,9 @@ export default function Contact(props) {
               contactId={showCreateContactDialog?.idToClone}
               isClone={showCreateContactDialog?.isClone}
               onClose={() => {
-                setShowCreateContactDialog({ open: false, isClone: false, idToClone: null })
+                setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
               }}
-              onSuccess={() => { }}
+              onSuccess={() => {}}
               isRedirectToDetailPage={true}
             />
           )}

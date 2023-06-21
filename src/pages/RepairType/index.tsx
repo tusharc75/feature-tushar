@@ -138,7 +138,7 @@ const RepairType = () => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-   
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
@@ -150,7 +150,7 @@ const RepairType = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-   
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -336,8 +336,8 @@ const RepairType = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={styles.content_box}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={isMobile ? styles.search_box_input : ''}
+                    onChange={handleSearch}
+                    className={isMobile ? styles.search_box_input : ''}
                     width="242px"
                     size="small"
                     value={search}

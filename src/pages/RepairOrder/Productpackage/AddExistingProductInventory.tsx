@@ -228,7 +228,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
           <Box mb={2}>
             <Grid container>
               <Grid item xs={10} sm={10} md={11} container justify="flex-end">
-                <SearchBox onSearch={handleSearch} searchbox="terms_header_search_bar" width="300px" value={search} />
+                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
               </Grid>
               <Grid item xs={2} sm={2} md={1} container justify="flex-end">
                 <Box ml={1}>

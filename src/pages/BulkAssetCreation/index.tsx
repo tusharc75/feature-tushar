@@ -163,7 +163,7 @@ const BulkAssetCreation = () => {
       deepFilter = `?`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (fromRental) {
       filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
@@ -412,8 +412,8 @@ const BulkAssetCreation = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={styles.content_box}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={isMobile ? styles.search_box_input : ''}
+                    onChange={handleSearch}
+                    className={isMobile ? styles.search_box_input : ''}
                     width="242px"
                     size="small"
                     value={search}
