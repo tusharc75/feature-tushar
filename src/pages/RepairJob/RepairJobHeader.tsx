@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
@@ -50,13 +50,10 @@ function RepairJobHeader(props) {
     if (newFilter != null) {
       setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
-
     }
   };
 
-  const [isOpenDialog, setisOpenDialog] = useState(false)
-
-
+  const [isOpenDialog, setisOpenDialog] = useState(false);
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -74,17 +71,10 @@ function RepairJobHeader(props) {
 
   const handleClickClose = () => {
     setOpen(false);
-
   };
 
   let toggleInner = options && (
-    <ToggleButtonGroup
-      size="small"
-      className=" toggle-button-layout"
-      value={filter}
-      exclusive
-      onChange={handleFilter}
-    >
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
           <ToggleButton value={k.key} key={index}>
@@ -94,8 +84,6 @@ function RepairJobHeader(props) {
       })}
     </ToggleButtonGroup>
   );
-
-
 
   return (
     <Grid className={styles.filter_side_container} container>
@@ -129,7 +117,7 @@ function RepairJobHeader(props) {
               />
 
               <Button
-               onClick={handleOpen}
+                onClick={handleOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
@@ -178,8 +166,8 @@ function RepairJobHeader(props) {
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
           <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox
-              onSearch={onSearch}
-              searchbox={styles.search_box_input}
+              onChange={onSearch}
+              className={styles.search_box_input}
               value={searchVal}
               size="small"
               placeholder="Search Repair Jobs"

@@ -23,13 +23,12 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { useLocation } from 'react-router-dom';
-import {  MdAdd } from 'react-icons/all';
+import { MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { camelCase } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-
 
 const Address = () => {
   const renderedFrom = camelCase(routes?.address.title);
@@ -54,7 +53,8 @@ const Address = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   useEffect(() => {
     fetchGridColumns();
@@ -86,52 +86,43 @@ const Address = () => {
       });
   };
 
-  const fetchAddresses = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
-    axiosInstance()
-      .get(`/address${queryString}`)
-      .then(
-        ({
-          data: {
-            data: { data, count }
-          }
-        }) => {
-          let rows = data.map((u) => {
-            let finalObject = prepareDataForGrid(u, user);
-            finalObject['canDelete'] = permissions?.address?.isDelete;
-            finalObject['allowedToEdit'] = permissions?.address?.isUpdate;
-            finalObject['isChecked'] = false;
-
-            return finalObject;
+    axiosInstance().get(`/address${queryString}`).then(
+      ({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['canDelete'] = permissions?.address?.isDelete;
+          finalObject['allowedToEdit'] = permissions?.address?.isUpdate;
+          finalObject['isChecked'] = false;
+          return finalObject;
+        });
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
-          if (appendRows) {
-            dispatch({
-              type: 'initialize',
-              data: [...dataRows, ...rows],
-              count: count,
-              selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-            });
-          } else {
-            dispatch({
-              type: 'initialize',
-              data: rows,
-              count: count,
-              selectedRecords: rows.filter((f) => f.isChecked === true)
-            });
-          }
-
-          dispatch({ type: 'initialize', data: rows, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
+          });
         }
-      )
+
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      }
+    )
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
@@ -139,8 +130,8 @@ const Address = () => {
   };
 
   useEffect(() => {
-    fetchAddresses();
-  }, [page, limit, filters, sorting, search, selectedEntity]);
+    fetchData();
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -181,17 +172,11 @@ const Address = () => {
     </>
   );
 
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
     if (isExport) {
       deepFilter = `?`;
-    }
-
-    if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -214,6 +199,11 @@ const Address = () => {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
 
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+    }
+
     return deepFilter;
   };
 
@@ -227,7 +217,7 @@ const Address = () => {
     axiosInstance()
       .put(`/address/remove`, { ids: ids })
       .then(() => {
-        fetchAddresses();
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         // setSelectedCategory([])
@@ -262,7 +252,7 @@ const Address = () => {
             module="address"
             api={'address'}
             afterImportCompleted={() => {
-              fetchAddresses();
+              fetchData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -270,7 +260,7 @@ const Address = () => {
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
-              else fetchAddresses();
+              else fetchData();
             }}
           />
         </Grid>
@@ -290,8 +280,8 @@ const Address = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile ? '200px' : '242px'}
                     style={isMobile ? { flex: 1 } : {}}
                     size="small"
@@ -382,7 +372,7 @@ const Address = () => {
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -399,7 +389,7 @@ const Address = () => {
               actionWidth={110}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchAddresses}
+              refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
               resource={sidebarResource.address}
@@ -424,7 +414,7 @@ const Address = () => {
             onClose={() => setOpen({ title: '', open: false, edit: false, isClone: false })}
             onSuccess={() => {
               setOpen({ title: '', open: false, edit: false, isClone: false });
-              fetchAddresses();
+              fetchData();
             }}
           />
         )}

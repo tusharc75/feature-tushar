@@ -179,7 +179,7 @@ const PurchaseOrder = () => {
       deepFilter = `?`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (warehouse && warehouse !== '') {
       filterByIds.push({ field: 'warehouse', term: warehouse });
@@ -424,7 +424,11 @@ const PurchaseOrder = () => {
                 options={warehouseOptions}
                 getOptionLabel={(option: any) => option.optionLabel}
                 getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={warehouseOptions.filter((data) => data.optionValue === warehouse).length ? warehouseOptions.filter((data) => data.optionValue === warehouse)[0] : ''}
+                value={
+                  warehouseOptions.filter((data) => data.optionValue === warehouse).length
+                    ? warehouseOptions.filter((data) => data.optionValue === warehouse)[0]
+                    : ''
+                }
                 onChange={(e, val) => {
                   setWarehouse(val && val.optionValue ? val.optionValue : '');
                 }}
@@ -469,8 +473,8 @@ const PurchaseOrder = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={styles.content_box}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={isMobile ? styles.search_box_input : ''}
+                    onChange={handleSearch}
+                    className={isMobile ? styles.search_box_input : ''}
                     width="242px"
                     size="small"
                     value={search}
@@ -524,7 +528,7 @@ const PurchaseOrder = () => {
                     <MenuItem
                       disabled={
                         permissions?.purchaseOrder?.isDelete &&
-                          selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
+                        selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
                           ? false
                           : true
                       }

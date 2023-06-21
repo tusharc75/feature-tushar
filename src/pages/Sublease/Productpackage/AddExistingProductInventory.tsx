@@ -195,7 +195,7 @@ const AddExistingProductInventory = ({
           <Box mb={2}>
             <Grid container>
               <Grid item xs={12} sm={12} container justify="flex-end">
-                <SearchBox onSearch={handleSearch} searchbox="terms_header_search_bar" width="250px" value={search} />
+                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="250px" value={search} />
                 <Box ml={1}>
                   <Button
                     size="small"

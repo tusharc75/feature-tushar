@@ -194,7 +194,9 @@ export default function useColumns() {
     state: { permissions, user, selectedEntity }
   }: any = useData();
 
+
   const getColumnData = (title, field, detailScreenRoute = null, openInNewTab = false) => {
+
     let data = localStorage.getItem('gridMetaData');
 
     if (field.type === 'date') {
@@ -270,11 +272,8 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            cellRenderer: isForPopup
-              ? permissions[permissionForLinks[field?.lookupResource]]?.isUpdate
-                ? 'linkRenderer'
-                : 'commonRenderer'
-              : 'linkRenderer',
+            cellRenderer: permissions[(permissionForLinks[field?.lookupResource]
+              || camelCase(field?.lookupResource))]?.isRead ? 'linkRenderer' : 'commonRenderer',
             cellRendererParams: {
               pathName: pathName,
               property: joinedFieldName + 'Id',
@@ -283,11 +282,8 @@ export default function useColumns() {
               more: `rest${joinedFieldName}`
             }
           },
-          rendererName: isForPopup
-            ? permissions[permissionForLinks[field?.lookupResource]]?.isUpdate
-              ? 'linkRenderer'
-              : 'commonRenderer'
-            : 'linkRenderer'
+          rendererName: permissions[permissionForLinks[field?.lookupResource]
+            || camelCase(field?.lookupResource)]?.isRead ? 'linkRenderer' : 'commonRenderer'
         };
       } else if (isRenderWithCopy(field?.type)) {
         return {

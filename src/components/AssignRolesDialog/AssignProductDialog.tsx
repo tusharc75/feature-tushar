@@ -44,7 +44,6 @@ const AssignProductDialog = ({
   reference = 'product',
   serialized = null
 }) => {
-  
   const renderedFrom = `${routes.product.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const {
@@ -324,7 +323,7 @@ const AssignProductDialog = ({
               </Grid>
               <Grid item xs={6} className={styles.filter_side}>
                 <Box className={styles.filter_side_header} component="div">
-                  <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
+                  <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                   <Button
                     disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                     onClick={handleAssignProduct}

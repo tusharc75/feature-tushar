@@ -255,8 +255,8 @@ function RentalManagementHeader({
           <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
             <HideWhenOffline>
               <SearchBox
-                onSearch={onSearch}
-                searchbox={isMobile ? styles.search_box_input : ''}
+                onChange={onSearch}
+                className={isMobile ? styles.search_box_input : ''}
                 value={searchVal}
                 size="small"
                 placeholder={`Search ${routes.rentalManagement.title}`}

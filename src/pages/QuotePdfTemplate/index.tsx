@@ -376,8 +376,8 @@ const QuotePdfTemplate: FC = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile && !isTablet ? '200px' : '242px'}
                     style={isMobile && !isTablet ? { flex: 1 } : {}}
                     value={search}

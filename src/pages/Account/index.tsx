@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useReducer } from 'react';
 import { useData } from '../../StateProvider/Provider';
 import { Button, Menu, MenuItem, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
-import { Link, useHistory, } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { ExpandMore, AddOutlined } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
@@ -23,13 +23,7 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from 'react-icons/md';
-import {
-  gridLoadingTimeout,
-  sidebarResource,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  removeLocalStorage
-} from '../../constants/helpers';
+import { gridLoadingTimeout, sidebarResource, prepareDataForGrid, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from './../../components/Helpers/Routes';
@@ -68,10 +62,11 @@ const AccTypes = [
 const options = ['All', 'Approved', 'Disapproved'];
 
 export default function Account(props) {
-
   const toastConfig = useContext(CustomToastContext);
   const { getColumnData } = useColumns();
-  const { account: { accountApi, accountResource, accountRoute } } = props;
+  const {
+    account: { accountApi, accountResource, accountRoute }
+  } = props;
   const {
     state: { user, permissions, selectedEntity },
     dispatch: entityDispatch
@@ -188,7 +183,6 @@ export default function Account(props) {
   useEffect(() => {
     fetchAccounts();
   }, [page, limit, selectedType, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, type]);
-
 
   const AccountNameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
@@ -345,7 +339,6 @@ export default function Account(props) {
       )}
     </>
   );
-
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -832,14 +825,15 @@ export default function Account(props) {
             >
               <div
                 id="resourceOperations"
-                className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${accountClass['account_header-mobile']
-                  }`}
+                className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${
+                  accountClass['account_header-mobile']
+                }`}
                 style={isMobile && !isTablet ? { flex: 1 } : {}}
               >
                 <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={isMobile ? accountClass.search_box_input : ''}
+                    onChange={handleSearch}
+                    className={isMobile ? accountClass.search_box_input : ''}
                     style={isMobile ? { flex: 1 } : {}}
                     value={search}
                     width={isMobile ? '200px' : 'auto'}
@@ -1098,8 +1092,9 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
-              } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
+              singleApproveDisapproveAccount.accountName
+            } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -1114,8 +1109,9 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
-              } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
+              multipleApproveDisapproveAccount.selectedRecords
+            } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,
