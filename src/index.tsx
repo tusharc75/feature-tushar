@@ -27,9 +27,9 @@ import { CustomOfflineProvider } from './StateProvider/OfflineContext/OfflineCon
 import { version } from '../package.json';
 
 // @ts-ignore
-if (process.env.REACT_APP_ENV !== 'local' && navigator.onLine) {
+if (import.meta.env.VITE_APP_ENV !== 'local' && navigator.onLine) {
   init({
-    environment: process.env.REACT_APP_ENV,
+    environment: import.meta.env.VITE_APP_ENV,
     release: version,
     dsn: 'https://42514b3242b14f7d8c5b8dbacd0c4237@o718098.ingest.sentry.io/5850347',
     integrations: [new Integrations.BrowserTracing()],

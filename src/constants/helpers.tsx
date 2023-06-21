@@ -314,7 +314,9 @@ export const sidebarResource = {
   wellNumber: 'Well Number',
   planningView: 'Planning View',
   taxMaster: 'Tax Master',
-  competencies: 'Competencies'
+  competencies: 'Competencies',
+  padMaster: 'Pad Master',
+  fieldJob: 'Field Job',
 };
 
 export const primaryFields = {
@@ -342,6 +344,7 @@ export const RESOURCE_LABEL = {
   productCategory: 'Product Categories',
   productInventory: 'Product Inventory',
   serializedAsset: 'Serialized Assets',
+  serializedAssetCertification: 'Serialized Assets Certification',
   priceTemplate: 'Price Templates',
   product: 'Product Master',
   productTemplate: 'Product Templates',
@@ -430,7 +433,9 @@ export const RESOURCE_LABEL = {
   wellNumber: 'Well Number',
   taxMaster: 'Tax Master',
   competencies: 'Competencies',
-  materialHandling: 'Material Handling'
+  materialHandling: 'Material Handling',
+  padMaster: 'Pad Master',
+  fieldJob: 'Field Job',
 };
 
 export const CHILD_RESOURCE = {
@@ -647,6 +652,13 @@ export const serializedAsset = {
   route: '/serialized-asset',
   permission: 'serializedAsset',
   resource: 'Serialized Asset'
+};
+
+export const serializedAssetCertification = {
+  api: '/serialized-assets-certification',
+  route: '/serialized-assets-certification',
+  permission: 'serializedAssetsCertification',
+  resource: 'Serialized Assets Certification'
 };
 
 export const workOrderSupervisor = {
@@ -1098,6 +1110,15 @@ export const convertDateInDateTime = (date) => {
   var newDate = new Date(date);
   var currentDate = new Date();
   newDate.setHours(currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
+  return newDate;
+};
+
+export const convertDateTimToDate = (date) => {
+  if (!date) {
+    return date;
+  }
+  var newDate = moment(date);
+  newDate.set({ hour: 0, minute: 0, second: 0 });
   return newDate;
 };
 

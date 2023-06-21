@@ -51,7 +51,7 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
 
     var data = arr.map((sec) => {
       const list = allData?.filter((u) => {
-        if (u?.name === 'Product Builder' && process.env.REACT_APP_ENV === 'staging') {
+        if (u?.name === 'Product Builder' && import.meta.env.VITE_APP_ENV === 'staging') {
           return false;
         }
         if (u?.isHidden || staticHiddenResource?.includes(u?.name)) {
@@ -185,13 +185,13 @@ export const SearchResult = ({ filteredData, history, handleRoutes, clearSearch,
         style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll', scrollPadding: '48px 0 0 0', marginBottom: 20 }}
       >
         {filteredData.length !== 0 ? (
-          filteredData.map((section, pkey) => {
+          filteredData.map((section) => {
             return (
-              <List key={pkey} className={styles.resultUL} subheader={<h6 className={`${styles.list_header}`}>{section.head}</h6>}>
-                {section.items.map((item, ckey) => {
+              <List key={section.head} className={styles.resultUL} subheader={<h6 className={`${styles.list_header}`}>{section.head}</h6>}>
+                {section.items.map((item) => {
                   return (
                     <ListItem
-                      key={ckey}
+                      key={item.resourceLabel}
                       button
                       onClick={() => {
                         history.push(handleRoutes(item));

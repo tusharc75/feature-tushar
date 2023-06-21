@@ -230,9 +230,9 @@ export default function ManageAccount(props) {
                                           }}
                                         />
                                       ) : field.fieldName === 'billingAddress' ? (
-                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                          <Grid container spacing={1}>
-                                            <Grid item xs={permissions[accountResource]?.isCreate ? 11 : 12}>
+                                        <Grid key={field.fieldName} item className="hellow">
+                                          <Box display={'flex'} alignItems={'center'}>
+                                            <Box style={{ flexGrow: 1 }}>
                                               <FormTypes
                                                 isNew={isNew}
                                                 {...field}
@@ -256,9 +256,9 @@ export default function ManageAccount(props) {
                                                 tooltipMessage={field?.tooltipMessage}
                                                 size="small"
                                               />
-                                            </Grid>
+                                            </Box>
                                             {
-                                              <Grid item xs={1} sm={1} md={1}>
+                                              <Box ml={1}>
                                                 <Tooltip title="Add Address" className="mt-1">
                                                   <IconButton
                                                     onClick={() => {
@@ -271,7 +271,7 @@ export default function ManageAccount(props) {
                                                     <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
                                                   </IconButton>
                                                 </Tooltip>
-                                              </Grid>
+                                              </Box>
                                             }
                                             {field?.tooltipMessage ? (
                                               <Grid item xs={1} sm={1} md={1}>
@@ -280,7 +280,7 @@ export default function ManageAccount(props) {
                                                 </Tooltip>
                                               </Grid>
                                             ) : null}
-                                          </Grid>
+                                          </Box>
                                         </Grid>
                                       ) : field.fieldName === 'shippingAddress' ? (
                                         <Grid key={field.fieldName} item xs={12} sm={12} md={12}>

@@ -103,7 +103,7 @@
   }
 }
 
-@import '~ag-grid-community/dist/styles/ag-theme-material/sass/_ag-theme-material-mixin.scss';
+@import 'ag-grid-community/dist/styles/ag-theme-material/sass/_ag-theme-material-mixin.scss';
 
 .ag-theme-material {
   border: 1px solid #eeeaea;
@@ -3701,4 +3701,43 @@ body {
 }
 .no-shadow {
   box-shadow: unset !important;
+}
+.chip {
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  line-height: 14px !important;
+  border-radius: 14px !important;
+  padding: 5px 10px !important;
+  &-Completed {
+    color: white !important;
+    background-color: var(--new_theme_color) !important;
+  }
+  &-Dispatched {
+    color: white !important;
+    background-color: #ff7714 !important;
+  }
+  &-Assigned {
+    color: white !important;
+    background-color: #fdad00 !important;
+  }
+}
+
+@media all and (min-width: 1280px) {
+  .grid-lg-8-col {
+    flex-grow: 0 !important;
+    max-width: 12.5% !important;
+    flex-basis: 12.5% !important;
+  }
+}
+@media all and (min-width: 1920px) {
+  .grid-xl-8-col {
+    flex-grow: 0 !important;
+    max-width: 12.5% !important;
+    flex-basis: 12.5% !important;
+  }
+  .grid-xl-9-col {
+    flex-grow: 0 !important;
+    max-width: 11.111111% !important;
+    flex-basis: 11.111111% !important;
+  }
 }

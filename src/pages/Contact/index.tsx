@@ -4,7 +4,7 @@ import { useData } from '../../StateProvider/Provider';
 import { Link } from 'react-router-dom';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageContactDialog from './ManageContact/index';
+import ManageContactDialog from './ManageContact';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import SearchBox from '../../components/Helpers/SearchBox';
 import CustomContainer from '../../components/CustomContainer';
@@ -911,20 +911,17 @@ export default function Contact(props) {
               onOk={handleDeleteContact}
             />
           ) : null}
-
           {showCreateContactDialog?.open && (
             <ManageContactDialog
-              open={showCreateContactDialog?.open}
-              onClose={() => setShowCreateContactDialog({ open: false, isClone: false, idToClone: null })}
-              onSuccess={() => {
-                setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
-                getContacts();
-              }}
               contactResource={contactResource}
               contactApi={contactApi}
-              account={account}
               contactId={showCreateContactDialog?.idToClone}
               isClone={showCreateContactDialog?.isClone}
+              onClose={() => {
+                setShowCreateContactDialog({ open: false, isClone: false, idToClone: null })
+              }}
+              onSuccess={() => { }}
+              isRedirectToDetailPage={true}
             />
           )}
           {showAssignEntityDialog && (

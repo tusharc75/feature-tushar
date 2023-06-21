@@ -42,7 +42,7 @@ interface Props {
 const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled }: Props) => {
   const classes = useStyles();
 
-  const [timeFrame, setTimeFrame] = React.useState<any>('1-year');
+  const [timeFrame, setTimeFrame] = React.useState<any>('current-year');
 
   React.useEffect(() => {
     switch (timeFrame) {
@@ -82,6 +82,15 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
           between: {
             from: new Date(moment().subtract('1', 'year').calendar()),
             to: new Date()
+          }
+        });
+        break;
+      case 'current-year':
+        setGlobalFilters({
+          ...globalFilters,
+          between: {
+            from: new Date(moment().startOf('year').calendar()),
+            to: new Date(moment().endOf('year').calendar()),
           }
         });
         break;
@@ -155,6 +164,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                     <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
                     <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
                     <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                    <MenuItem value={'current-year'}>Current Year</MenuItem>
                     <MenuItem value={'custom'}>Custom</MenuItem>
                   </Select>
                 </FormControl>

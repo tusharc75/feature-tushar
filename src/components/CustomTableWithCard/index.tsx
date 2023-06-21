@@ -2,6 +2,8 @@ import React, { ReactNode, useState, useCallback, FC, ChangeEvent } from 'react'
 import styles from './index.module.scss';
 import CardWithCheckBox from './CardWithCheckbox';
 import type { GridProps } from '@material-ui/core/Grid';
+import { createBodyColumns, ColumnInterface } from './helper';
+import { Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
 
 interface TableInterface extends React.HTMLAttributes<HTMLDivElement> {
   data: any[];
@@ -11,6 +13,7 @@ interface TableInterface extends React.HTMLAttributes<HTMLDivElement> {
   onSelect?: any;
   height?: string;
   dense?: boolean;
+  showSelectAll?: boolean;
 }
 export interface CardInterface extends React.HTMLAttributes<HTMLDivElement> {
   name: (data: any) => string | ReactNode;
@@ -38,6 +41,7 @@ const CustomTableWithCard: FC<TableInterface> = ({
   onSelect = null,
   height,
   dense = false,
+  showSelectAll = false,
   ...others
 }) => {
   const [selected, setSelected] = useState<any>([]);
@@ -77,29 +81,41 @@ const CustomTableWithCard: FC<TableInterface> = ({
   );
 
   return (
-    <div {...others} className={styles.wrapper} style={{ maxHeight: height, ...others.style }}>
-      {data.map((row) => (
-        <CardWithCheckBox
-          key={uniqueKey(row)}
-          checked={checked ?? isChecked(row)}
-          onInputChange={(e, data) => {
-            if (onInputChange) onInputChange(e, data);
-            chekSingle(data);
-          }}
-          checkBox={checkBox}
-          onCardClick={(e, data) => {
-            if (onCardClick) onCardClick(e, data);
-            if (checkBox) chekSingle(data);
-          }}
-          row={row}
-          name={name}
-          bodyColumns={bodyColumns}
-          headerColumns={headerColumns}
-          {...cardProps}
-        />
-      ))}
-    </div>
+    <>
+      {showSelectAll && (
+        <FormGroup row className={styles.selectall}>
+          <FormControlLabel
+            control={<Checkbox checked={selected.length === data?.filter((e) => !e?.hideSelection).length} onChange={selectAll} name="select-all" />}
+            label="Select All"
+          />
+        </FormGroup>
+      )}
+      <div {...others} className={styles.wrapper} style={{ maxHeight: height, ...others.style }}>
+        {data.map((row) => (
+          <CardWithCheckBox
+            key={uniqueKey(row)}
+            checked={checked ?? isChecked(row)}
+            onInputChange={(e, data) => {
+              if (onInputChange) onInputChange(e, data);
+              chekSingle(data);
+            }}
+            checkBox={checkBox}
+            onCardClick={(e, data) => {
+              if (onCardClick) onCardClick(e, data);
+              if (checkBox) chekSingle(data);
+            }}
+            row={row}
+            name={name}
+            bodyColumns={bodyColumns}
+            headerColumns={headerColumns}
+            {...cardProps}
+          />
+        ))}
+      </div>
+    </>
   );
 };
 
+export { createBodyColumns };
+export type { ColumnInterface };
 export default CustomTableWithCard;
