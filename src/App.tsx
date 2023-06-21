@@ -259,7 +259,7 @@ function App() {
     //serviceWorkerRegistration.register({ onUpdate: onServiceWorkerUpdate });
     const updateSW = registerSW({
       onNeedRefresh() {
-        if (confirm("New content available. Reload?")) {
+        if (window.confirm("New content available. Reload?")) {
           updateSW(true);
         }
       },
