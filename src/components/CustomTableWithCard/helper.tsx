@@ -34,7 +34,6 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
 
   if (columns) {
     for (const item of columns) {
-      let col = {};
       if (exclude.includes(item.field)) {
         continue;
       }
