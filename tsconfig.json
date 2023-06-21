@@ -3,6 +3,7 @@
     "baseUrl": "./",
     "types": [
       "vite/client",
+      "vite-plugin-pwa/client",
       "google.maps",
       "google.visualization"
     ],

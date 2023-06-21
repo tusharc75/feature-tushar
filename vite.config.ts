@@ -11,7 +11,17 @@ export default defineConfig({
             svgrOptions: {
             },
         }),
-        VitePWA({ registerType: 'autoUpdate' }),
+        VitePWA({
+            registerType: 'autoUpdate',
+            workbox: {
+                globPatterns: ["**/*"],
+            },
+            // add this to cache all the
+            // static assets in the public folder
+            includeAssets: [
+                "**/*",
+            ],
+        }),
         viteTsconfigPaths()],
     build: {
         outDir: 'build',
