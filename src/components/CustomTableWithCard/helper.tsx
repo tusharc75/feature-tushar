@@ -3,7 +3,7 @@ import moment from 'moment';
 import { CardInterface } from 'src/components/CustomTableWithCard';
 import { dateTimeFormat, dateFormat } from 'src/constants/helpers';
 
-export interface ColumnInterface {
+export interface ColumnInterface extends GridProps {
   field: string;
   headerName: string;
   cellRenderer:
@@ -31,26 +31,28 @@ interface FunctionInterface extends GridProps {
 
 export const createBodyColumns = ({ columns, exclude = [], ...others }: FunctionInterface): CardInterface['bodyColumns'] => {
   const createdBodyColumns: CardInterface['bodyColumns'] = [];
+
   if (columns) {
     for (const item of columns) {
       let col = {};
       if (exclude.includes(item.field)) {
         continue;
       }
-      if (item.cellRenderer === 'linkRenderer') {
+      const { field, headerName, cellRenderer, cellRendererParams, dateAccessor, ...colProps } = item;
+      if (cellRenderer === 'linkRenderer') {
         createdBodyColumns.push({
           render: (row) => {
             return (
               <>
-                <Typography>{item.headerName}</Typography>
+                <Typography>{headerName}</Typography>
                 <Typography>
-                  {row[`${item.field}`] ? (
+                  {row[`${field}`] ? (
                     <a
                       className="link"
-                      href={`${item.cellRendererParams?.pathName}/${row?.[`${item.cellRendererParams?.property}`]}`}
-                      target={`${item.cellRendererParams?.openInNewTab ? '_blank' : '_self'}`}
+                      href={`${cellRendererParams?.pathName}/${row?.[`${cellRendererParams?.property}`]}`}
+                      target={`${cellRendererParams?.openInNewTab ? '_blank' : '_self'}`}
                     >
-                      {row?.[`${item.field}`]}
+                      {row?.[`${field}`]}
                     </a>
                   ) : (
                     '---'
@@ -59,112 +61,113 @@ export const createBodyColumns = ({ columns, exclude = [], ...others }: Function
               </>
             );
           },
-          ...others
+          ...others,
+          ...colProps
         });
       }
-      if (item.cellRenderer === 'commonRenderer') {
+      if (cellRenderer === 'commonRenderer') {
         createdBodyColumns.push({
           render: (row) => {
             return (
               <>
-                <Typography>{item.headerName}</Typography>
-                <Typography>{row[`${item.field}`] ? row?.[`${item.field}`] : '---'}</Typography>
+                <Typography>{headerName}</Typography>
+                <Typography>{row[`${field}`] ? row?.[`${field}`] : '---'}</Typography>
               </>
             );
           },
-          ...others
+          ...others,
+          ...colProps
         });
       }
-      if (item.cellRenderer === 'dateTimeRenderer') {
+      if (cellRenderer === 'dateTimeRenderer') {
         createdBodyColumns.push({
           render: (row) => {
             return (
               <>
-                <Typography>{item.headerName}</Typography>
-                <Typography>{row[`${item.field}`] ? moment(row?.[`${item.field}`]).format(dateTimeFormat) : '---'}</Typography>
+                <Typography>{headerName}</Typography>
+                <Typography>{row[`${field}`] ? moment(row?.[`${field}`]).format(dateTimeFormat) : '---'}</Typography>
               </>
             );
           },
-          ...others
+          ...others,
+          ...colProps
         });
       }
-      if (item.cellRenderer === 'dateRenderer') {
+      if (cellRenderer === 'dateRenderer') {
         createdBodyColumns.push({
           render: (row) => {
             return (
               <>
-                <Typography>{item.headerName}</Typography>
-                <Typography>{row[`${item.field}`] ? moment(row?.[`${item.field}`]).format(dateFormat) : '---'}</Typography>
+                <Typography>{headerName}</Typography>
+                <Typography>{row[`${field}`] ? moment(row?.[`${field}`]).format(dateFormat) : '---'}</Typography>
               </>
             );
           },
-          ...others
+          ...others,
+          ...colProps
         });
       }
-      if (item.cellRenderer === 'createdByRenderer') {
+      if (cellRenderer === 'createdByRenderer') {
         createdBodyColumns.push({
           render: (row) => {
             return (
               <>
-                <Typography>{item.headerName}</Typography>
-                <Typography>{row[`${item.field}`] ? row?.[`${item.field}`] : '---'}</Typography>
+                <Typography>{headerName}</Typography>
+                <Typography>{row[`${field}`] ? row?.[`${field}`] : '---'}</Typography>
                 <Typography>
-                  {row[`${item.dateAccessor ?? 'createdByDate'}`]
-                    ? moment(row?.[`${item.dateAccessor ?? 'createdByDate'}`]).format(dateTimeFormat)
-                    : '---'}
+                  {row[`${dateAccessor ?? 'createdByDate'}`] ? moment(row?.[`${dateAccessor ?? 'createdByDate'}`]).format(dateTimeFormat) : '---'}
                 </Typography>
               </>
             );
           },
-          ...others
+          ...others,
+          ...colProps
         });
       }
-      if (item.cellRenderer === 'updatedByRenderer') {
+      if (cellRenderer === 'updatedByRenderer') {
         createdBodyColumns.push({
           render: (row) => {
             return (
               <>
-                <Typography>{item.headerName}</Typography>
-                <Typography>{row[`${item.field}`] ? row?.[`${item.field}`] : '---'}</Typography>
+                <Typography>{headerName}</Typography>
+                <Typography>{row[`${field}`] ? row?.[`${field}`] : '---'}</Typography>
                 <Typography>
-                  {row[`${item.dateAccessor ?? 'updatedByDate'}`]
-                    ? moment(row?.[`${item.dateAccessor ?? 'updatedByDate'}`]).format(dateTimeFormat)
-                    : '---'}
+                  {row[`${dateAccessor ?? 'updatedByDate'}`] ? moment(row?.[`${dateAccessor ?? 'updatedByDate'}`]).format(dateTimeFormat) : '---'}
                 </Typography>
               </>
             );
           },
-          ...others
+          ...others,
+          ...colProps
         });
       }
-      if (item.cellRenderer === 'linkColWithDate') {
+      if (cellRenderer === 'linkColWithDate') {
         createdBodyColumns.push({
           render: (row) => {
             return (
               <>
-                <Typography>{item.headerName}</Typography>
+                <Typography>{headerName}</Typography>
                 <Typography>
-                  {row[`${item.field}`] ? (
+                  {row[`${field}`] ? (
                     <a
                       className="link"
-                      href={`${item.cellRendererParams?.pathName}/${row?.[`${item.cellRendererParams?.property}`]}`}
-                      target={`${item.cellRendererParams?.openInNewTab ? '_blank' : '_self'}`}
+                      href={`${cellRendererParams?.pathName}/${row?.[`${cellRendererParams?.property}`]}`}
+                      target={`${cellRendererParams?.openInNewTab ? '_blank' : '_self'}`}
                     >
-                      {row?.[`${item.field}`]}
+                      {row?.[`${field}`]}
                     </a>
                   ) : (
                     '---'
                   )}
                 </Typography>
                 <Typography>
-                  {row[`${item.dateAccessor ?? 'updatedByDate'}`]
-                    ? moment(row?.[`${item.dateAccessor ?? 'updatedByDate'}`]).format(dateTimeFormat)
-                    : '---'}
+                  {row[`${dateAccessor ?? 'updatedByDate'}`] ? moment(row?.[`${dateAccessor ?? 'updatedByDate'}`]).format(dateTimeFormat) : '---'}
                 </Typography>
               </>
             );
           },
-          ...others
+          ...others,
+          ...colProps
         });
       }
     }

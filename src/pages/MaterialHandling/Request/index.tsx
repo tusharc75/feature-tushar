@@ -98,6 +98,7 @@ const Request = ({ workOrder }) => {
           pathName: routes.userDetail.path,
           property: 'requestById'
         }
+        // style: { transform: 'translateX(50px)' } // Here is an example of how to pass other props to the columns
       },
       {
         headerName: 'Processed By:',
