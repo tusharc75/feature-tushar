@@ -5,14 +5,15 @@ import PropTypes from 'prop-types';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiSearch } from 'react-icons/fi';
 
-type SerachBoxProps = Partial<TextFieldProps> & {
+type SerachBoxProps = Omit<TextFieldProps, 'variant' | 'placeholder' | 'type' | 'InputProps'> & {
   width?: string;
   placeholder?: string;
 };
 
-function SearchBox({ onChange, value, size, width, placeholder, style, className }: SerachBoxProps) {
+function SearchBox({ onChange, value, size, width, placeholder, style, className, ...otherProps }: SerachBoxProps) {
   return isMobile && !isTablet ? (
     <TextField
+      {...otherProps}
       style={{ minWidth: width || '200px', ...style }}
       variant="standard"
       placeholder={placeholder || 'Search'}
@@ -32,6 +33,7 @@ function SearchBox({ onChange, value, size, width, placeholder, style, className
     />
   ) : (
     <TextField
+      {...otherProps}
       style={{ minWidth: width || '258px', ...style }}
       variant="outlined"
       placeholder={placeholder || 'Search'}
