@@ -174,7 +174,6 @@ function Budget() {
     }
   };
 
-
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
@@ -374,8 +373,8 @@ function Budget() {
               <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
                 <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                   <SearchBox
-                    onSearch={onSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={onSearch}
+                    className={styles.search_box_input}
                     value={search}
                     size="small"
                     placeholder="Search Budget"

@@ -142,8 +142,8 @@ const Header = (props) => {
         <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} id="resourceOperations">
           <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox
-              searchbox={styles.search_box_input}
-              onSearch={onSearch}
+              onChange={onSearch}
+              className={styles.search_box_input}
               value={searchVal}
               size="small"
               placeholder="Search Users"

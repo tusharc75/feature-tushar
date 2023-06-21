@@ -172,8 +172,8 @@ const AddRepairType = (props: Props) => {
         <Box mb={1} display="flex" justifyContent="flex-end" alignItems="center">
           <Box display="flex" alignItems="center">
             <SearchBox
-              onSearch={handleSearch}
-              searchbox={isMobile ? styles.search_box_input : ''}
+              onChange={handleSearch}
+              className={isMobile ? styles.search_box_input : ''}
               width="242px"
               size="small"
               value={search}

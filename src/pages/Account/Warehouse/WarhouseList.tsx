@@ -6,13 +6,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { Box, CircularProgress } from '@material-ui/core';
 import SearchBox from '../../../components/Helpers/SearchBox';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import {
-  gridLoadingTimeout,
-  CustomDialogTransition,
-  isObjectEmpty,
-  prepareDataForGrid,
-  getLocalStorageArrayData
-} from '../../../constants/helpers';
+import { gridLoadingTimeout, CustomDialogTransition, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Dialog from '@material-ui/core/Dialog/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -149,7 +143,7 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
           <Box mb={2}>
             <Grid container>
               <Grid item xs={12} sm={12} container justify="flex-end">
-                <SearchBox onSearch={handleSearch} searchbox="terms_header_search_bar" width="300px" value={search} />
+                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
                 <Box ml={1}>
                   <Button
                     size="small"

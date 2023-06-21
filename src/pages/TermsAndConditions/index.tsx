@@ -315,8 +315,8 @@ export default function TermsAndCondition(props) {
             <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <SearchBox
-                  onSearch={handleSearch}
-                  searchbox={styles.search_box_input}
+                  onChange={handleSearch}
+                  className={styles.search_box_input}
                   width={isMobile && !isTablet ? '200px' : '242px'}
                   style={isMobile && !isTablet ? { flex: 1 } : {}}
                   value={search}

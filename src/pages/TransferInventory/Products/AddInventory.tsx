@@ -253,8 +253,8 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
           </div>
           <Box order={isMobile ? 1 : 2} display="flex" justifyContent={'space-between'} minWidth={isMobile ? '100%' : '300px'}>
             <SearchBox
-              onSearch={handleSearch}
-              searchbox={styles.search_box_input}
+              onChange={handleSearch}
+              className={styles.search_box_input}
               width={'245px'}
               style={isMobile ? { flex: 1 } : {}}
               size="small"

@@ -196,7 +196,7 @@ const EquipmentRentalMaster = () => {
             <Grid xs={6} container className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <div className="d-flex gap-2">
-                  <SearchBox onSearch={handleSearch} width="242px" size="small" value={search} />
+                  <SearchBox onChange={handleSearch} width="242px" size="small" value={search} />
                 </div>
               </Box>
             </Grid>

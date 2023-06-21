@@ -781,10 +781,10 @@ const Product = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
                 <Box style={{ flexGrow: 1, minWidth: 210 }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile ? '200px' : '210px'}
-                    style={{ width: '100%' }}
+                    style={{ width: '100%', maxWidth: '250px', marginLeft: 'auto', display: 'flex' }}
                     size="small"
                     value={search}
                   />
