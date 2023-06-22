@@ -38,11 +38,11 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 const TransferAsset = () => {
   const TransferAssetType = [
     {
-      key: `All ${routes.transferAsset.title}`,
+      key: `My ${routes.transferAsset.title}`,
       value: 1
     },
     {
-      key: `My ${routes.transferAsset.title}`,
+      key: `All ${routes.transferAsset.title}`,
       value: 2
     }
   ];
@@ -142,7 +142,7 @@ const TransferAsset = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {

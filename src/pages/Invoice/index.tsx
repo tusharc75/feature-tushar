@@ -40,11 +40,11 @@ const Invoice = () => {
 
   const InvoiceType = [
     {
-      key: `All ${routes.invoice.title}`,
+      key: `My ${routes.invoice.title}`,
       value: 1
     },
     {
-      key: `My ${routes.invoice.title}`,
+      key: `All ${routes.invoice.title}`,
       value: 2
     }
   ];
@@ -196,7 +196,7 @@ const Invoice = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {

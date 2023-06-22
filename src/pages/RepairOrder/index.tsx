@@ -42,11 +42,11 @@ const RepairOrder = () => {
 
   const RepairOrderType = [
     {
-      key: `All ${routes?.repairOrder.title}`,
+      key: `My ${routes?.repairOrder.title}`,
       value: 1
     },
     {
-      key: `My ${routes?.repairOrder.title}`,
+      key: `All ${routes?.repairOrder.title}`,
       value: 2
     }
   ];
@@ -221,7 +221,7 @@ const RepairOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {

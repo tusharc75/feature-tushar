@@ -39,11 +39,11 @@ import { camelCase } from 'lodash';
 const Sublease = () => {
   const SubleaseType = [
     {
-      key: `All ${routes.sublease.title}`,
+      key: `My ${routes.sublease.title}`,
       value: 1
     },
     {
-      key: `My ${routes.sublease.title}`,
+      key: `All ${routes.sublease.title}`,
       value: 2
     }
   ];
@@ -154,7 +154,7 @@ const Sublease = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
