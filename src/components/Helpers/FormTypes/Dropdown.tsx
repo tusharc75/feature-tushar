@@ -104,7 +104,7 @@ function Dropdown({
 
   return (
     <Box key={fieldData?.lookupResource}>
-      <Grid container spacing={1} style={{ alignItems: 'center' }}>
+      <Grid container spacing={1} style={{ alignItems: 'center', flexWrap: 'nowrap' }}>
         <Grid item style={{ flexGrow: 1 }}>
           <InfoLabel
             info={fieldData?.tooltipMessage}
