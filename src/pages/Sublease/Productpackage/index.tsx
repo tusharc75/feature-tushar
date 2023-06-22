@@ -25,8 +25,9 @@ import { RiEditCircleLine } from 'react-icons/ri';
 import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
 import { ExpandMore } from '@material-ui/icons';
 import styles from '../../Leads/Header.module.scss';
-import { generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 
 const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -384,6 +385,17 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
     setAnchorEl(null);
   };
 
+  
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      inputField['qty'] = inputField['qtyDisplay'];
+    }
+    let rows: any = [{ ...rowData, ...updatedData }];
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    handleSaveData(rows);
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
@@ -510,6 +522,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
             childrenProperty="subRows"
             uniqueKey="_id"
             hideSelection={!allowedToEdit}
+            onSaveEdit={onSaveInlineEdit}
             hideAction={!allowedToEdit}
             renderedFrom="sublease_product_package"
             isClientSideGrid={true}
