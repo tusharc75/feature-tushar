@@ -39,11 +39,11 @@ import queryString from 'query-string';
 const BulkAssetCreation = () => {
   const BulkAssetCreationType = [
     {
-      key: `All ${routes.bulkAssetCreation.title}`,
+      key: `My ${routes.bulkAssetCreation.title}`,
       value: 1
     },
     {
-      key: `My ${routes.bulkAssetCreation.title}`,
+      key: `All ${routes.bulkAssetCreation.title}`,
       value: 2
     }
   ];
@@ -156,7 +156,7 @@ const BulkAssetCreation = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
