@@ -36,11 +36,11 @@ let workOrderTimeout;
 const WorkOrder = () => {
   const WorkOrderType = [
     {
-      key: `All ${routes.workOrder.title}`,
+      key: `My ${routes.workOrder.title}`,
       value: 1
     },
     {
-      key: `My ${routes.workOrder.title}`,
+      key: `All ${routes.workOrder.title}`,
       value: 2
     }
   ];
@@ -195,7 +195,7 @@ const WorkOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (WorkOrderType[selectedType - 1].key === `My ${routes.workOrder.title}`) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {

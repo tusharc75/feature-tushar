@@ -41,11 +41,11 @@ let quotationTimeout;
 const Quotation = () => {
   const QuotationType = [
     {
-      key: `All ${routes.quotation.title}`,
+      key: `My ${routes.quotation.title}`,
       value: 1
     },
     {
-      key: `My ${routes.quotation.title}`,
+      key: `All ${routes.quotation.title}`,
       value: 2
     }
   ];
@@ -204,7 +204,7 @@ const Quotation = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {

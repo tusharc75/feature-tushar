@@ -39,11 +39,11 @@ import queryString from 'query-string';
 const Planning = () => {
   const PlanningType = [
     {
-      key: `All ${routes?.planning.title}`,
+      key: `My ${routes?.planning.title}`,
       value: 1
     },
     {
-      key: `My ${routes?.planning.title}`,
+      key: `All ${routes?.planning.title}`,
       value: 2
     }
   ];
@@ -145,7 +145,7 @@ const Planning = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
