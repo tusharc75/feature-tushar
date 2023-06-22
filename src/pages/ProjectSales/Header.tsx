@@ -68,8 +68,8 @@ const ProjectStrategyHeader = (props) => {
 
   let toggleInner = (
     <ToggleButtonGroup size="small" className=" toggle-button-layout" value={selectedType} exclusive onChange={handleFilter}>
-      <ToggleButton value={1}>All Projects</ToggleButton>
-      <ToggleButton value={2}>My Projects</ToggleButton>
+      <ToggleButton value={1}>My Projects</ToggleButton>
+      <ToggleButton value={2}>All Projects</ToggleButton>
     </ToggleButtonGroup>
   );
 
@@ -131,8 +131,8 @@ const ProjectStrategyHeader = (props) => {
           </div>
         ) : (
           <ToggleButtonGroup size="small" className="ml-8" value={selectedType} exclusive onChange={handleFilter}>
-            <ToggleButton value={1}>All Projects</ToggleButton>
-            <ToggleButton value={2}>My Projects</ToggleButton>
+            <ToggleButton value={1}>My Projects</ToggleButton>
+            <ToggleButton value={2}>All Projects</ToggleButton>
           </ToggleButtonGroup>
         )}
         {children}
