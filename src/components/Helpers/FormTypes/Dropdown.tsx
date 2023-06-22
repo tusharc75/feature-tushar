@@ -102,25 +102,28 @@ function Dropdown({
   }: any = useData();
   const [lookupDialog, setLookupDialog] = React.useState(false);
 
-  const isAddButtonPresent =
-    fieldData?.lookup &&
-    ((fieldData?.lookupResource === sidebarResource.wellMaster && permissions?.wellMaster?.isCreate) ||
-      (fieldData?.lookupResource === sidebarResource.wellNumber && permissions?.wellNumber?.isCreate) ||
-      (fieldData?.lookupResource === sidebarResource.warehouse && permissions?.warehouse?.isCreate) ||
-      (fieldData?.lookupResource === sidebarResource.storageLocation && permissions?.warehouse?.isCreate) ||
-      (fieldData?.lookupResource === sidebarResource.competencyType && permissions?.competencyType?.isCreate) ||
-      (fieldData?.lookupResource === sidebarResource.competencies && permissions?.competencies?.isCreate) ||
-      (fieldData?.lookupResource === sidebarResource.customerAccount && permissions?.customerAccount?.isCreate) ||
-      (fieldData?.lookupResource === sidebarResource.supplierAccount && permissions?.supplierAccount?.isCreate) ||
-      (fieldData?.lookupResource === sidebarResource.customerContact && permissions?.customerContact?.isCreate) ||
-      (fieldData?.lookupResource === sidebarResource.supplierContact && permissions?.supplierContact?.isCreate) ||
-      (fieldData?.lookupResource === sidebarResource.address && permissions?.address?.isCreate) ||
-      (fieldData?.lookupResource === sidebarResource.marketSegment && permissions?.marketSegment?.isCreate));
+  const isAddButtonPresent = React.useMemo(
+    () =>
+      fieldData?.lookup &&
+      ((fieldData?.lookupResource === sidebarResource.wellMaster && permissions?.wellMaster?.isCreate) ||
+        (fieldData?.lookupResource === sidebarResource.wellNumber && permissions?.wellNumber?.isCreate) ||
+        (fieldData?.lookupResource === sidebarResource.warehouse && permissions?.warehouse?.isCreate) ||
+        (fieldData?.lookupResource === sidebarResource.storageLocation && permissions?.warehouse?.isCreate) ||
+        (fieldData?.lookupResource === sidebarResource.competencyType && permissions?.competencyType?.isCreate) ||
+        (fieldData?.lookupResource === sidebarResource.competencies && permissions?.competencies?.isCreate) ||
+        (fieldData?.lookupResource === sidebarResource.customerAccount && permissions?.customerAccount?.isCreate) ||
+        (fieldData?.lookupResource === sidebarResource.supplierAccount && permissions?.supplierAccount?.isCreate) ||
+        (fieldData?.lookupResource === sidebarResource.customerContact && permissions?.customerContact?.isCreate) ||
+        (fieldData?.lookupResource === sidebarResource.supplierContact && permissions?.supplierContact?.isCreate) ||
+        (fieldData?.lookupResource === sidebarResource.address && permissions?.address?.isCreate) ||
+        (fieldData?.lookupResource === sidebarResource.marketSegment && permissions?.marketSegment?.isCreate)),
+    []
+  );
 
   return (
     <Box key={fieldData?.lookupResource}>
       <Grid container spacing={1} style={{ alignItems: 'center' }}>
-        <Grid item style={{ flexGrow: 1, maxWidth: isAddButtonPresent ? 419 : 'auto' }} className="test-className">
+        <Grid item style={{ flexGrow: 1, maxWidth: isAddButtonPresent ? 419 : 'auto' }}>
           <InfoLabel
             info={fieldData?.tooltipMessage}
             isTooltip={fieldData?.isTooltip}
