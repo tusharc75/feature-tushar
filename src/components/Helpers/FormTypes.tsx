@@ -908,6 +908,11 @@ const FormTypes = (props) => {
         disableCloseOnSelect={true}
         freeSolo
         options={[]}
+        ChipProps={{
+          style: {
+            maxWidth: 330
+          }
+        }}
         renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)}
         renderInput={(params) => (
           <TextField
@@ -1680,6 +1685,11 @@ const FormTypes = (props) => {
             multiple
             freeSolo={!lookup}
             disableCloseOnSelect={true}
+            ChipProps={{
+              style: {
+                maxWidth: 330
+              }
+            }}
             options={
               fieldData && fieldData?.isDependentDropdown
                 ? option.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn])
