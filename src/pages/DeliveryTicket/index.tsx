@@ -36,11 +36,11 @@ let deliveryTicketTimeout;
 const DeliveryTicket = () => {
   const DeliveryTicketType = [
     {
-      key: `All ${routes.deliveryTicket.title}`,
+      key: `My ${routes.deliveryTicket.title}`,
       value: 1
     },
     {
-      key: `My ${routes.deliveryTicket.title}`,
+      key: `All ${routes.deliveryTicket.title}`,
       value: 2
     }
   ];
@@ -209,7 +209,7 @@ const DeliveryTicket = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
