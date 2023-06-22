@@ -384,13 +384,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           element['pricingCondition'] = rateResult[0].conditionId;
           element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-
-          if (allFields?.some((e) => e.fieldName === 'supplierPrice') && calValues[priceFieldName]) {
-            const supplierPriceFieldName = `supplierPrice_${rentalManagementData?.currency?.toLowerCase()}`;
-            calValues[supplierPriceFieldName] =
-              (rateResult[0].mrp - (rateResult[0].mrp * 5) / 100) * element?.qty * (element?.estimateJobDuration || 1);
-          }
-
           Object.assign(element, calValues);
         }
       });
