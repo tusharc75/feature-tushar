@@ -27,14 +27,13 @@ let cancelTokenSource = null;
 const Report = () => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
-  const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
     state: { permissions, selectedEntity }
   } = useData();
   let { id } = useParams();
   const [resource, setResource] = React.useState('');
-  const [showGrid, setShowGrid] = React.useState(false);
+  const [showGrid, setShowGrid] = React.useState(true);
   const [selectedData, setSelectedData] = React.useState(null);
   const [betweenDate, setBetweenDate] = React.useState(null);
   const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);

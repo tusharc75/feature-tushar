@@ -186,7 +186,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
             </div>
           )}
         </div>
-        <div style={styles.aiCard}>
+        {/* <div style={styles.aiCard}>
           <div style={styles.cardHead}>
             <AiIcon />
             <Typography style={{ fontWeight: 600, marginTop: 5 }}>AI Suggestions:</Typography>
@@ -194,7 +194,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
           <Box mt={1} style={styles.chipContainer}>
             <RenderChip lebel="As per previous orders, margin can be increased by 2-5%" />
           </Box>
-        </div>
+        </div> */}
       </DashboardModal>
     </>
   );
