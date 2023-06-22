@@ -357,8 +357,11 @@ const AddSerializedAsset = ({
 
   const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
-    dispatch({ type: 'selection', selectedRecords: [] });
-    localStorage.removeItem(localStorageSelectedRecords);
+    if (((tabValue === 0 || tabValue === 1) && newValue === 2) ||
+      (newValue === 0 || newValue === 1) && tabValue === 2) {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      localStorage.removeItem(localStorageSelectedRecords);
+    }
     // if (newValue === 0) {
     //   setSelectedWarehouse(filterByPlant);
     // } else {
@@ -493,32 +496,32 @@ const AddSerializedAsset = ({
                   <Box style={{ display: 'inline' }}>
                     {serializedProducts.length > 0
                       ? serializedProducts.map((d) => (
-                          <Box
-                            m={0.5}
-                            p={1}
-                            border={1}
-                            className="cursor-pointer"
-                            borderColor="grey.300"
-                            onClick={() => {
-                              if (selectedProduct === d.id) {
-                                setSelectedProduct(null);
-                              } else {
-                                setSelectedProduct(d.id);
-                              }
-                            }}
-                            style={{ display: 'inline-block' }}
-                            bgcolor={d.id === selectedProduct && 'primary.main'}
-                            color={d.id === selectedProduct && 'white'}
-                          >
-                            {d?.qty < 0 ? (
-                              <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                            ) : d?.qty === 0 ? (
-                              <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                            ) : (
-                              <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                            )}
-                          </Box>
-                        ))
+                        <Box
+                          m={0.5}
+                          p={1}
+                          border={1}
+                          className="cursor-pointer"
+                          borderColor="grey.300"
+                          onClick={() => {
+                            if (selectedProduct === d.id) {
+                              setSelectedProduct(null);
+                            } else {
+                              setSelectedProduct(d.id);
+                            }
+                          }}
+                          style={{ display: 'inline-block' }}
+                          bgcolor={d.id === selectedProduct && 'primary.main'}
+                          color={d.id === selectedProduct && 'white'}
+                        >
+                          {d?.qty < 0 ? (
+                            <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                          ) : d?.qty === 0 ? (
+                            <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                          ) : (
+                            <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                          )}
+                        </Box>
+                      ))
                       : null}
                   </Box>
                 </Box>
@@ -567,18 +570,18 @@ const AddSerializedAsset = ({
                             : ''
                         }
                         onChange={(e, val) => {
-                          if (selectedRecords.length > 0 && val?.optionValue !== selectedWarehouse) {
-                            toastConfig.setToastConfig({
-                              open: true,
-                              message: 'All pre-selected records will be deselected if you change the plant.',
-                              type: 'warning'
-                            });
-                            dispatch({
-                              type: 'selection',
-                              selectedRecords: []
-                            });
-                            localStorage.removeItem(localStorageSelectedRecords);
-                          }
+                          // if (selectedRecords.length > 0 && val?.optionValue !== selectedWarehouse) {
+                          //   toastConfig.setToastConfig({
+                          //     open: true,
+                          //     message: 'All pre-selected records will be deselected if you change the plant.',
+                          //     type: 'warning'
+                          //   });
+                          //   dispatch({
+                          //     type: 'selection',
+                          //     selectedRecords: []
+                          //   });
+                          //   localStorage.removeItem(localStorageSelectedRecords);
+                          // }
                           setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
                         }}
                         renderInput={(params) => (
@@ -638,10 +641,10 @@ const AddSerializedAsset = ({
                             getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()
                               ? 'Direct transfer to customer location'
                               : referenceType === 'Rental Job'
-                              ? 'Add to Job'
-                              : referenceType === 'ReplaceAsset'
-                              ? 'Replace'
-                              : 'Add'
+                                ? 'Add to Job'
+                                : referenceType === 'ReplaceAsset'
+                                  ? 'Replace'
+                                  : 'Add'
                           }
                         >
                           <Button

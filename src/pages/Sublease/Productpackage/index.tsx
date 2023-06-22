@@ -389,7 +389,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
       {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex">
-            {subleaseData.status === SUBLEASE_STATUS.new && (
+            {(!subleaseData.status || subleaseData.status === SUBLEASE_STATUS.new) && (
               <Fragment>
                 {permissions?.product?.isRead && (
                   <Button

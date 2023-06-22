@@ -138,7 +138,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
     } else {
       setNextStep(false);
     }
-    console.log(rows)
     dispatch({ type: 'initialize', data: rows, count: rows.length });
     setTimeout(() => {
       dispatch({ type: 'loading', loading: false });
