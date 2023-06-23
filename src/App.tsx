@@ -578,8 +578,8 @@ function App() {
             <PrivateRoute exact path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}>
               <CreateFormBuilder />
             </PrivateRoute>
-            <PrivateRoute exact path={termsAndCondition.route}>
-              <TermsAndConditions termsAndConditionBreadcrumb={routes.termsAndConditions} />
+            <PrivateRoute exact path={routes.termsAndConditions.path}>
+              <TermsAndConditions />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.termsAndConditionsDetails.path}/:id`}>
               <TermsAndConditionDetail />
