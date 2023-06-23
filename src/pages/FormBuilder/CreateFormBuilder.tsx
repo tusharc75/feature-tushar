@@ -19,6 +19,7 @@ import TextField from '@material-ui/core/TextField';
 import { camelCase } from 'lodash';
 import { Autocomplete } from '@material-ui/lab';
 import History from './History';
+import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -89,6 +90,11 @@ const CreateFormBuilder = () => {
   const [homePageLabel, setHomePageLabel] = useState('');
   const [sectionName, setsectionName] = useState('');
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
+
+  const [tabValue, setTabValue] = useState(0);
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, value: any) => {
+    setTabValue(value);
+  };
 
   const sectionNameList = [
     'Sales Management',
@@ -325,7 +331,7 @@ const CreateFormBuilder = () => {
         <Box className={`detail-container-v1`}>
           {section ? (
             <Fragment>
-              <Box p={1} pb={0} ml={1}>
+              <Box mb={2}>
                 <Grid container spacing={1}>
                   {/* <Grid item xs={2}>
                     <Typography variant="caption">Resource</Typography>
@@ -412,16 +418,32 @@ const CreateFormBuilder = () => {
                 </Grid>
               </Box>
               <Box>
-                <FormBuilder
-                  section={section}
-                  setSection={setSection}
-                  deleteField={deleteField}
-                  setDeleteField={setDeleteField}
-                  isCustomField={false}
-                  extraFields={[]}
-                  module="form-builder"
-                  resource={resource}
-                />
+                {console.log(tabValue)}
+                <Tabs value={tabValue} onChange={handleMainTabChange}>
+                  <CustomTab index={0} id="fields-tab">
+                    Fields
+                  </CustomTab>
+                  <CustomTab index={1} id="tab-2">
+                    More Features
+                  </CustomTab>
+                </Tabs>
+                <TabPanel value={tabValue} index={0}>
+                  <FormBuilder
+                    section={section}
+                    setSection={setSection}
+                    deleteField={deleteField}
+                    setDeleteField={setDeleteField}
+                    isCustomField={false}
+                    extraFields={[]}
+                    module="form-builder"
+                    resource={resource}
+                  />
+                </TabPanel>
+                <TabPanel value={tabValue} index={1}>
+                  <Box p={5} height={500} textAlign={'center'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                    <Typography variant="h6">Coming soon....</Typography>
+                  </Box>
+                </TabPanel>
               </Box>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
