@@ -4,18 +4,18 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
-import { uniqBy } from 'lodash';
+import { unionBy, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
+import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
+import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import {
@@ -23,7 +23,6 @@ import {
     calculateRowsField,
     resetValueZero,
 } from '../../../components/RentalManagment/helper';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_field_ticket_material_fields } from '../helper';
@@ -37,7 +36,6 @@ interface EditDialogProps {
     selectedServices: any[];
     isBulkedit: any;
     loading: any;
-    from?: any;
     isQtyOnly?: Boolean;
     isInlineEdit?: Boolean;
     showSaveAndNext?: Boolean;
@@ -45,7 +43,7 @@ interface EditDialogProps {
 
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
 
-const ServiceQtyDialog: FC<EditDialogProps> = ({
+const MaterialQtyDialog: FC<EditDialogProps> = ({
     onClose,
     handleSaveData,
     fieldTicketData,
@@ -55,7 +53,6 @@ const ServiceQtyDialog: FC<EditDialogProps> = ({
     isBulkedit,
     loading,
     isQtyOnly = false,
-    from,
     isInlineEdit = false,
     showSaveAndNext = false
 }) => {
@@ -73,7 +70,6 @@ const ServiceQtyDialog: FC<EditDialogProps> = ({
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [saveAndNext, setSaveAndNext] = useState(false);
     const [fetchingData, setFetchingData] = useState(false);
-    const { isOffline } = useContext(CustomOfflineContext);
 
     useEffect(() => {
         fetchData();
@@ -90,7 +86,7 @@ const ServiceQtyDialog: FC<EditDialogProps> = ({
 
     const fetchData = async () => {
         setFetchingData(true);
-        var { fields: data } = await fetch_field_ticket_material_fields(fieldTicketData?.currency, isOffline);
+        var { fields: data } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
         setAllFields(JSON.parse(JSON.stringify(data)));
         if (isBulkedit) {
             let unitArray: any = [];
@@ -208,7 +204,7 @@ const ServiceQtyDialog: FC<EditDialogProps> = ({
         if (isQtyOnly) {
             fields = fields.filter((d) => d.fieldName === 'qty');
         }
-        if (isBulkedit && (from === 'product' || from === 'service')) {
+        if (isBulkedit) {
             fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
         }
 
@@ -269,6 +265,25 @@ const ServiceQtyDialog: FC<EditDialogProps> = ({
                 });
                 priceData = await calculatePrice(fieldTicketData, material);
             }
+
+            selectedServices
+                .forEach((element) => {
+                    const rateResult = priceData?.filter(
+                        (e) =>
+                            e.materialId === element.materialId &&
+                            e.materialType === element.type &&
+                            e.unit === (values['unit'] || element.unit) &&
+                            e.pricingMethod === (values['pricingMethod'] || element.pricingMethod)
+                    );
+
+                    const tempRate = {};
+                    if (rateResult.length && rateResult[0].mrp) {
+                        tempRate[priceFieldName] = rateResult[0].mrp;
+                    }
+
+                    const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, allFields);
+                    rows.push({ ...element, ...calValues });
+                });
             handleSaveData(rows);
         } else {
             const rows = await calculateRowsField(material, values, allFields, rowData);
@@ -688,4 +703,4 @@ const ServiceQtyDialog: FC<EditDialogProps> = ({
     );
 };
 
-export default ServiceQtyDialog;
+export default MaterialQtyDialog;

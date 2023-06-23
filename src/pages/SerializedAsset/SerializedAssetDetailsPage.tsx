@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Grid, Box, Button, Paper, Typography, Tab, Tabs, useMediaQuery, IconButton, FormControlLabel, Checkbox } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
@@ -24,23 +24,19 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import ReasonDialog from './ReasonDialog';
 import { ACTIVITY_RESOURCE } from '../../constants/helpers';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, DateTimeRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
-import { Link } from 'react-router-dom';
-import NoDataCell from '../../components/Helpers/NoDataCell';
 import { isMobile, isTablet } from 'react-device-detect';
 import { GiAutoRepair, GrStatusInfo } from 'react-icons/all';
 import { MdEdit } from 'react-icons/md';
-import { camelCase, startCase } from 'lodash';
+import { startCase } from 'lodash';
 import moment from 'moment';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import SerializedAssetCertificationPage from './SerializedAssetCertificationPage';
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
+import CertificationHistory from "./CertificationHistory";
+import AssetHistory from "./AssetHistory";
+import queryString from 'query-string';
+import { FaWpforms } from 'react-icons/fa';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import TabPanel from "src/components/TabPanel";
 
 const SerializedAssetDetailsPage = () => {
 
@@ -66,82 +62,11 @@ const SerializedAssetDetailsPage = () => {
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [customField, setCustomField] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
+  const parsed = queryString.parse(history.location.search);
+  const { tab }: any = parsed;
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
 
-  const NameRenderer = (params) => (
-    <>
-      {params.value ? (
-        params.data.type === 'Loading Ticket' ||
-          params.data.type === 'Receiving Ticket' ||
-          params.data.type === 'Return Ticket' ||
-          params.data.type === 'Delivery Ticket' ? (
-          <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}>
-            {params.value}
-          </Link>
-        ) : params.data.type?.toLowerCase() === 'repair' ? (
-          <Link className="link" title={params.value} to={`${routes.repairJobDetail.path}/${params.data.referenceId}`}>
-            {params.value}
-          </Link>
-        ) : params.data.type === 'Work Order' ? (
-          <Link className="link" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`}>
-            {params.value}
-          </Link>
-        ) : params.data.type === 'Repair Order' ? (
-          <Link className="link" title={params.value} to={`${routes.repairOrderDetail.path}/${params.data.referenceId}`}>
-            {params.value}
-          </Link>
-        ) : params.data.type?.toLowerCase() === 'rental' ? (
-          <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
-            {params.value}
-          </Link>
-        ) : params.data.type === 'Transfer Assets' ? (
-          <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
-            {params.value}
-          </Link>
-        ) : params.data.type?.toLowerCase().includes('purchase') ? (
-          <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
-            {params.value}
-          </Link>
-        ) : params.data.type?.toLowerCase().includes('sublease') ? (
-          <Link className="link" title={params.value} to={`${routes.subleaseDetail.path}/${params.data.referenceId}`}>
-            {params.value}
-          </Link>
-        ) : params.data?.type === 'Bulk Asset Creation' ? (
-          <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
-            {params.value}
-          </Link>
-        ) : params.data?.type === 'Transfer Inventory' ? (
-          <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`}>
-            {params.value}
-          </Link>
-        ) : (
-          params.value
-        )
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    commonRenderer: CommonRenderer,
-    dateTimeRenderer: DateTimeRenderer
-  };
-
-  const columns = [
-    { field: 'reference', headerName: 'Reference', show: true, cellRenderer: 'nameRenderer' },
-    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'date', headerName: 'Date & Time', show: true, disabled: true, filter: false, cellRenderer: 'dateTimeRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'comments', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'location', headerName: 'Location', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'ownerType', headerName: 'Owner Type', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'owner', headerName: 'Owner', show: true, cellRenderer: 'commonRenderer' }
-  ];
 
   useEffect(() => {
     if (id) {
@@ -152,7 +77,6 @@ const SerializedAssetDetailsPage = () => {
   const fetchAllData = () => {
     fetchFields();
     fetchProductInventoryData();
-    fetchProductInventoryHistory();
     fetchProductInventoryStates();
   };
 
@@ -160,30 +84,6 @@ const SerializedAssetDetailsPage = () => {
     let mainPoint = {};
     Object.keys(data).map((stat: any) => (mainPoint[startCase(stat)] = data[stat] ?? 0));
     setMainPoints(mainPoint);
-  };
-
-  const fetchProductInventoryHistory = () => {
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    axiosInstance()
-      .get(`/history/inventory/${id}`)
-      .then(({ data: { data } }) => {
-        data = data?.map((u, index) => ({
-          ...u,
-          _id: index + 1,
-          id: index + 1,
-          reference: u?.reference?.optionLabel,
-          referenceId: u?.reference?.optionValue
-        }));
-        dispatch({ type: 'initialize', data: data, count: data.length });
-        dispatch({ type: 'loading', loading: false });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
-      });
   };
 
   const fetchProductInventoryStates = async () => {
@@ -202,6 +102,13 @@ const SerializedAssetDetailsPage = () => {
       toastConfig.setToastConfig(error);
     }
   };
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
 
   const fetchProductInventoryData = async () => {
     setLoadingProductInventory(true);
@@ -308,6 +215,14 @@ const SerializedAssetDetailsPage = () => {
       });
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+    history.push(`?tab=${newValue}`);
+    if (newValue === 0) {
+      fetchProductInventoryData();
+    }
+  };
+
   const handleStatusUpdate = (obj) => {
     setUpdateLoading(true);
     axiosInstance()
@@ -325,7 +240,6 @@ const SerializedAssetDetailsPage = () => {
       .then(() => {
         setUpdateLoading(false);
         fetchProductInventoryData();
-        fetchProductInventoryHistory();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -459,10 +373,50 @@ const SerializedAssetDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
+      <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Product Inventory
+              </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Asset History
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Certification History
+              </div>
+            }
+            {...a11yProps(2)}
+          />
+          </Tabs>
         <Grid container spacing={1}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
             <div>
-              {productInventoryData && <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true}></DetailsPageHeader>}
+            <TabPanel value={tabValue} index={0}>
+            {productInventoryData && <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true}></DetailsPageHeader>}
               <Box>
                 {loadingProductInventory || !productInventoryFields.length ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -481,48 +435,16 @@ const SerializedAssetDetailsPage = () => {
                   </>
                 )}
               </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={12} md={12} lg={12}>
-                  <div className="form-v1 mt-4">
-                    <div className="single-form-v1">
-                      <div className="form-head-v1">
-                        <h3 className="form-label-style-v1" title="Asset History">
-                          Asset History
-                        </h3>
-                      </div>
-                      <Grid item xs={12} sm={12} md={12} lg={12} className="formdata-v1">
-                        {columns ? (
-                          <CustomAgGrid
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            allowAction={false}
-                            allowSelection={false}
-                            isClientSideGrid={true}
-                            loading={loading}
-                            renderedFrom="rentalManagementDetailsPageInventory"
-                            refreshGrid={fetchProductInventoryHistory}
-                          />
-                        ) : (
-                          <Box p={2} height={500}>
-                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                          </Box>
-                        )}
-                      </Grid>
-                    </div>
-                  </div>
-                </Grid>
-              </Grid>
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              <AssetHistory id={id} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={2}>
+              <CertificationHistory id={id} />
+            </TabPanel>
             </div>
           </Grid>
         </Grid>
-        <SerializedAssetCertificationPage id={id} />
       </Box>
 
       {showConfirmBox && (
