@@ -29,7 +29,8 @@ function SalesOrderHeader(props) {
     columns,
     dispatch,
     showTransferEntityDialog,
-    filters
+    filters,
+    selectedType,
     // showCloneRentalManagementDialog
   } = props;
 
@@ -61,16 +62,14 @@ function SalesOrderHeader(props) {
     setAnchorEl(null);
   };
 
-  const [filter, setFilter] = useState(options[0].key);
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
-      setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
     }
   };
   let toggleInner = options && (
-    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
           <ToggleButton value={k.key} key={index}>
@@ -137,7 +136,7 @@ function SalesOrderHeader(props) {
           </div>
         ) : (
           options && (
-            <ToggleButtonGroup size="small" className="ml-2" value={filter} exclusive onChange={handleFilter}>
+            <ToggleButtonGroup size="small" className="ml-2" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
               {options.map((k, index) => {
                 return (
                   <ToggleButton value={k.key} key={index}>

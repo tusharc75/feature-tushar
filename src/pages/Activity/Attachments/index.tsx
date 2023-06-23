@@ -162,6 +162,7 @@ export default function Attachment() {
       Header: 'Type',
       width: 70,
       canDrag: false,
+      disableFilters: true,
       Cell: ({ row }) => (
         <p style={{ display: 'flex', alignItems: 'center', color: '#3B4F60' }}>
           {row.original?.type === 'folder' ? (
@@ -184,6 +185,7 @@ export default function Attachment() {
       Header: 'Name',
       width: 300,
       canDrag: false,
+      disableFilters: true,
       Cell: ({ row }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <a className={permissions?.attachment?.isUpdate ? 'link cursor-pointer' : ''} onClick={() => handleActivityOpen(row.original)}>
@@ -212,6 +214,7 @@ export default function Attachment() {
       Header: 'Related To',
       width: 300,
       canDrag: false,
+      disableFilters: true,
       Cell: ({ row }) => (
         <>
           {row.original.relatedTo && row.original.relatedTo?.length > 0 ? (
@@ -237,6 +240,7 @@ export default function Attachment() {
       Header: 'Created By',
       width: 150,
       canDrag: false,
+      disableFilters: true,
       Cell: ({ row }) => (
         row.original?.createdBy ?
           <p>
@@ -251,12 +255,13 @@ export default function Attachment() {
       Header: 'Updated By',
       width: 150,
       canDrag: false,
+      disableFilters: true,
       Cell: ({ row }) => (
         row.original?.updatedBy ?
           <p>
             {row.original?.updatedBy?.user?.concatedName}
             <span className='createdAtTime badge-date'>
-            {displayDate(row.original?.updatedBy?.date)}</span>
+              {displayDate(row.original?.updatedBy?.date)}</span>
           </p> : <NoDataCell />
       )
     },

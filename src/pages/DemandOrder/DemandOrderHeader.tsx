@@ -37,7 +37,6 @@ function DemandOrderHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
-  const [filter, setFilter] = useState(options[0].key);
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -57,7 +56,6 @@ function DemandOrderHeader(props) {
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
-      setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
     }
   };
@@ -71,7 +69,7 @@ function DemandOrderHeader(props) {
   };
 
   let toggleInner = options && (
-    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
           <ToggleButton value={k.key} key={index}>
