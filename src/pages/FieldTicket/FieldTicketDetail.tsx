@@ -14,17 +14,22 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
 import TabPanel from '../../components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
 import AddCost from './AddCost';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
+import Steps from 'src/components/Steps';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import AddService from './AddService';
+import { camelCase } from 'lodash';
 
 const FieldTicketDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const renderedFrom = camelCase(routes?.fieldTicket?.title);
   const {
     state: { permissions, user }
   }: any = useData();
@@ -38,6 +43,9 @@ const FieldTicketDetail = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const { isOffline } = useContext(CustomOfflineContext);
+
+  const [currentStep, setCurrentStep] = useState(0);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -177,7 +185,34 @@ const FieldTicketDetail = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <AddCost fieldTicketData={fieldTicketData} id={id} />
+          <Steps
+            isNextStep={false}
+            nextStep={true}
+            steps={fieldTicketSteps}
+            currentStep={currentStep}
+            setCurrentStep={setCurrentStep}
+            // handlePrev={() => { 
+            //   setCurrentStep((prevStep) => {
+            //     const newStep = prevStep - 1;
+            //     return newStep;
+            //   });
+            // }}
+            isStepEnded={false}
+            setStepFullScreen={() => setStepFullScreen(true)}
+          />
+          <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            {currentStep === 0 && (
+              <AddService
+                stepFullScreen={stepFullScreen}
+                fieldTicketData={fieldTicketData}
+                id={id}
+                renderedFrom={`${renderedFrom}_grid-1`}
+              />
+            )}
+            {currentStep === 1 && (
+              <AddCost fieldTicketData={fieldTicketData} id={id} />
+            )}
+          </ContentFullScreen>
         </TabPanel>
       </Box>
       {showConfirmBox && (
