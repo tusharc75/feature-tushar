@@ -338,14 +338,16 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
       filterKeys.forEach((key) => {
         if (selectedData[key]?.type === 'checkBox') {
           let obj = {
+            type: selectedData[key]?.type,
             term: key,
-            value: selectedData[key]?.value
+            value: selectedData[key].value ? true : false
           };
           filters.push(obj);
         }
         else {
           if (selectedData[key] && selectedData[key]?.value?.length) {
             let obj = {
+              type: selectedData[key]?.type,
               term: key,
               value: selectedData[key]?.value.map((item) => item.optionValue)
             };
@@ -359,22 +361,20 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
       filterKeys.forEach((key) => {
         if (betweenDate[key] && betweenDate[key]) {
           let obj = {
+            type: selectedData[key]?.type,
             term: key,
             value: betweenDate[key]
           };
-
           filters.push(obj);
         }
       });
     }
-
     const newValues = {
       ...values,
       filters,
       resource: values.resource?.value,
       column: values.column.length > 0 ? values.column.map((field) => field.fieldName) : []
     };
-
     setSubmitting(true);
     if (id) {
       let newData = { _id: id, ...newValues };
