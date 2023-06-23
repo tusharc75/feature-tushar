@@ -33,7 +33,7 @@ const Report = () => {
   } = useData();
   let { id } = useParams();
   const [resource, setResource] = React.useState('');
-  const [showGrid, setShowGrid] = React.useState(true);
+  const [showGrid, setShowGrid] = React.useState(false);
   const [selectedData, setSelectedData] = React.useState(null);
   const [betweenDate, setBetweenDate] = React.useState(null);
   const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
@@ -49,7 +49,6 @@ const Report = () => {
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
   const [customReportData, setCustomReportData] = React.useState(null);
 
-  // Grid Configs
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
   const { getColumnData } = useColumns();
   const [columns, setColumns] = React.useState(null);
@@ -116,9 +115,7 @@ const Report = () => {
   React.useEffect(() => {
     if (id) {
       (async () => {
-        let {
-          data: { data }
-        } = await axiosInstance().get(`custom-report/${id}`);
+        let { data: { data } } = await axiosInstance().get(`custom-report/${id}`);
         setCustomReportData(data);
         setResource(data.resource);
         fetchGridColumns(data.resource);
@@ -136,6 +133,7 @@ const Report = () => {
         toastConfig.setToastConfig(error);
       });
   }, [showGrid]);
+
   React.useEffect(() => {
     if (showGrid && resource) {
       fetchResourceData();
@@ -143,8 +141,6 @@ const Report = () => {
   }, [resource, page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
   React.useEffect(() => {
-    // const selectedResourceNames = selectedResources?.map((field) => field.fieldName);
-    // const selectedDataNames = Object.keys(selectedData);
     if (!selectedData) return;
     setSelectedData((prevState: any) => {
       const dataKeys = Object.keys(prevState);
@@ -161,10 +157,7 @@ const Report = () => {
     });
   }, [selectedData, selectedResources]);
 
-  /**
-   * Fetch resource data for selected filters,
-   * @returns none if no data selected
-   */
+
   const fetchResourceData = () => {
     setShowGrid(true);
 
@@ -204,20 +197,6 @@ const Report = () => {
       });
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
-
-  // Create and return query for filters
   const getFilter = (isExport = false) => {
     let filterQuery = `page=${page}&`;
     if (!isExport) {
@@ -248,19 +227,31 @@ const Report = () => {
 
         forDeepFilter.forEach((key) => {
           const options = selectedData[key].value;
-          options.forEach((o: any) => {
+          if (selectedData[key].type === 'dropDown') {
             deepFilter.push({
               field: key,
-              term: o.optionValue
+              term: options.map((d: any) => d.optionValue)
             });
-          });
+          } if (selectedData[key].type === 'checkBox') {
+            deepFilter.push({
+              field: key,
+              term: selectedData[key].value ? 'Yes' : 'No'
+            });
+          }
+          else {
+            options.forEach((o: any) => {
+              deepFilter.push({
+                field: key,
+                term: o.optionValue
+              });
+            });
+          }
         });
 
         if (filterById.length > 0) {
           filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
         }
       }
-
       if (betweenDate) {
         const fields = Object.keys(betweenDate);
         fields.forEach((field) => {
@@ -276,7 +267,7 @@ const Report = () => {
       if (!isObjectEmpty(filters)) {
         Object.keys(filters).forEach((field) => {
           deepFilter.push({
-            field: replaceFieldName(field),
+            field: field,
             term: encodeURI(filters[field].filter)
           });
         });
@@ -286,7 +277,7 @@ const Report = () => {
         filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
       }
     }
-   
+
 
     if (statusPeriod && statusPeriodDate) {
       const fields = Object.keys(statusPeriodDate);
@@ -402,7 +393,6 @@ const Report = () => {
                 </Grid>
               </Grid>
             </div>
-            <hr />
             {!showGrid ? (
               <ReportFilters
                 customReportData={customReportData}
@@ -450,7 +440,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => {}}
+                      onEdit={() => { }}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -465,8 +455,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => {}}
-                      onClone={(data) => {}}
+                      onDelete={(data) => { }}
+                      onClone={(data) => { }}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (

@@ -167,13 +167,6 @@ function Budget() {
     </>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      default:
-        return field;
-    }
-  };
-
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 

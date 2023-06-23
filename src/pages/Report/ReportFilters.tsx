@@ -269,7 +269,6 @@ const ReportFilters = (props: FiltersProps) => {
       const to = new Date(allDateData[`to_${key}`]).getTime();
 
       if (from > to || to < from) {
-        //err[key] = `From ${startCase(key)} should be less then To ${startCase(key)}`;
         err[key] = `Please select valid date range`;
       } else {
         if (errors[key]) {

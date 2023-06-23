@@ -187,9 +187,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-
       parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
-
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
@@ -277,6 +275,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    console.log(rows)
     handleSaveData(rows);
   };
 

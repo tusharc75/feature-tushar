@@ -1,5 +1,5 @@
 
-import { CHILD_RESOURCE, pricingCondition } from '../../constants/helpers';
+import { CHILD_RESOURCE, getObjKeysWithValues, pricingCondition } from '../../constants/helpers';
 import { objectStore, findOne } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from '../../constants/formulaUtility';
@@ -191,6 +191,12 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
         rows = [...rows, ...parent]
     }
     const child = resetValueZero(material, fields, rowData._id)
+
+    // const result: any = [];
+    // [...rows, ...child]?.forEach((e: any) => {
+    //     result.push({ _id: e._id, ...getObjKeysWithValues(e, fields) })
+    // })
+
     return [...rows, ...child];
 };
 
