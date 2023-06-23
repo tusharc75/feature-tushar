@@ -1,5 +1,4 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { startCase } from 'lodash';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
@@ -8,29 +7,26 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { generateCustomTableColumns } from 'src/constants/columns';
-import AddServiceDialog from './AddServiceDialog';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { findOne, objectStore } from 'src/constants/indexdbhelper';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import routes from 'src/components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { calculatePrice } from 'src/components/RentalManagment/helper';
-import ServiceQtyDialog from './ServiceQtyDialog';
+import MaterialQtyDialog from './MaterialQtyDialog';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 
 
-const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
+const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
     const toastConfig = useContext(CustomToastContext);
 
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState([]);
     const [selectedServices, setSelectedServices] = useState([]);
     const [addExistingServiceDialog, setAddExistingServiceDialog] = useState(false);
-    const [isAddingService, setAddingService] = useState(false);
     const [allFields, setAllFields] = useState([]);
     const [isRateRequired, setIsRateRequired] = useState(false);
     const [isServiceEdit, setIsServiceEdit] = useState({ open: false, data: null, showSaveAndNext: false });
@@ -39,11 +35,9 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
     const [isDeleting, setDeleting] = useState(false);
     const [isUpdating, setUpdating] = useState(false);
 
-    const { isOffline } = useContext(CustomOfflineContext);
-
     const fetchFields = async () => {
         setColumns(null);
-        var { fields: data, allFields } = await fetch_field_ticket_material_fields(fieldTicketData?.currency, isOffline);
+        var { fields: data, allFields } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
         setAllFields(JSON.parse(JSON.stringify(allFields)));
         const newColumns = generateCustomTableColumns(data, fieldTicketData?.currency, renderedFrom);
         let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
@@ -64,24 +58,6 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
                 }
             },
             {
-                accessor: 'type',
-                Header: 'Type',
-                disableFilters: true,
-                sticky: isMobile ? 'none' : 'left',
-                width: 200,
-                Cell: ({ row }) =>
-                    row.original['type'] ? (
-                        <p>
-                            {`${startCase(row.original?.type)} `}
-                            {row.original.type === 'service'
-                                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                                : ''}
-                        </p>
-                    ) : (
-                        <NoDataCell />
-                    )
-            },
-            {
                 accessor: 'detail',
                 Header: 'Details',
                 minWidth: 300,
@@ -89,38 +65,32 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
                 sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row, rows }) => (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {isOffline ? (
-                            <p> {row.original.detail}</p>
-                        ) : (
-                            <p
+                        <p
+                            onClick={() => {
+                                setIsServiceEdit({
+                                    open: true,
+                                    data: row.original,
+                                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                                });
+                                setIsBulkEdit(false);
+                            }}
+                            className="link text-truncate"
+                            title={row.original.detail}
+                        >
+                            {row.original.detail}
+                        </p>
+                        <Box ml={1}>
+                            <IconButton
+                                size="small"
                                 onClick={() => {
-                                    setIsServiceEdit({
-                                        open: true,
-                                        data: row.original,
-                                        showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                                    });
-                                    setIsBulkEdit(false);
+                                    if (row.original.type === 'service') {
+                                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                                    }
                                 }}
-                                className="link text-truncate"
-                                title={row.original.detail}
                             >
-                                {row.original.detail}
-                            </p>
-                        )}
-                        {!isOffline && (
-                            <Box ml={1}>
-                                <IconButton
-                                    size="small"
-                                    onClick={() => {
-                                        if (row.original.type === 'service') {
-                                            window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                                        }
-                                    }}
-                                >
-                                    <OpenInNewIcon fontSize="small" color="primary" />
-                                </IconButton>
-                            </Box>
-                        )}
+                                <OpenInNewIcon fontSize="small" color="primary" />
+                            </IconButton>
+                        </Box>
                     </div>
                 )
             },
@@ -166,14 +136,8 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
 
     const fetchMaterial = async () => {
 
-        var data: any = [];
-
-        if (isOffline) {
-            data = await findOne(objectStore.fieldTicket, fieldTicketData?._id);
-        } else {
-            const response = await axiosInstance().get(`/field-ticket/service/${id}`);
-            data = response?.data?.data?.material;
-        }
+        const response = await axiosInstance().get(`/field-ticket/${id}/material`);
+        const data = response?.data?.data?.material;
 
         data.forEach((parent, i) => {
             parent.srno = i + 1;
@@ -190,12 +154,10 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
     }
 
     useEffect(() => {
-        fetchMaterial()
-    }, [columns])
-
-    useEffect(() => {
         fetchFields()
+        fetchMaterial()
     }, [])
+    
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
 
@@ -208,13 +170,12 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
     };
 
     const handleAdd = async (rows) => {
-        setAddingService(true);
         const material: any = [];
         rows.forEach((d) => {
             const element: any = {};
             element.materialId = d._id;
             element.detail = d?.serviceName;
-            element.type = d?.type;
+            element.type = 'service';
             element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
             element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
             element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -267,22 +228,20 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
         }
 
         axiosInstance()
-            .post(`/field-ticket/service/${id}`, { material: tempMaterial })
+            .post(`/field-ticket/${id}/material`, { material: tempMaterial })
             .then(() => {
                 setAddExistingServiceDialog(false);
                 fetchMaterial();
-                setAddingService(false);
             })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
-                setAddingService(false);
             });
     }
 
     const handleDelete = (rows) => {
         setDeleting(true);
         axiosInstance()
-            .put(`/field-ticket/service/${id}/delete`, { ids: rows })
+            .put(`/field-ticket/${id}/material/delete`, { ids: rows })
             .then(() => {
                 setDeleting(false);
                 fetchMaterial();
@@ -306,22 +265,22 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
         });
         setUpdating(true);
         axiosInstance()
-          .put(`/field-ticket/service/${id}`, { material: rows })
-          .then(() => {
-            fetchMaterial();
-            if (saveAndNext) {
-              const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
-              setIsServiceEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
-            } else {
-                setIsServiceEdit({ open: false, data: null, showSaveAndNext: false });
-            }
-            setUpdating(false);
-            setIsBulkEdit(false);
-          })
-          .catch((error) => {
-            setUpdating(false);
-            toastConfig.setToastConfig(error);
-          });
+            .put(`/field-ticket/${id}/material`, { material: rows })
+            .then(() => {
+                fetchMaterial();
+                if (saveAndNext) {
+                    const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
+                    setIsServiceEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+                } else {
+                    setIsServiceEdit({ open: false, data: null, showSaveAndNext: false });
+                }
+                setUpdating(false);
+                setIsBulkEdit(false);
+            })
+            .catch((error) => {
+                setUpdating(false);
+                toastConfig.setToastConfig(error);
+            });
     };
 
     return (
@@ -330,7 +289,6 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
                 <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
                     <Button
                         size="small"
-                        disabled={isOffline}
                         variant={'contained'}
                         color="primary"
                         onClick={() => {
@@ -420,8 +378,6 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
                         onSelect={setSelectedServices}
                         childrenProperty="subRows"
                         uniqueKey="_id"
-                        hideSelection={isOffline}
-                        hideAction={isOffline}
                         renderedFrom="field_ticket_add_service"
                         isClientSideGrid={true}
                         onSaveEdit={() => {
@@ -436,19 +392,19 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
                 </Box>
             )}
             {addExistingServiceDialog && (
-                <AddServiceDialog
-                    renderedFrom={renderedFrom}
-                    handleAddServiceDialog={() => {
+                <AssignServiceDialog
+                    reference={'fieldTicket'}
+                    referenceId={id}
+                    onSuccess={handleAdd}
+                    handleClose={() => {
                         setAddExistingServiceDialog(false);
                     }}
-                    isAddingService={isAddingService}
-                    addService={handleAdd}
                     ids={rowsData?.map(row => row?.materialId)}
                 />
             )}
 
             {isServiceEdit.open && (
-                <ServiceQtyDialog
+                <MaterialQtyDialog
                     onClose={() => {
                         setIsServiceEdit({ open: false, data: null, showSaveAndNext: false });
                         setIsBulkEdit(false);
@@ -460,7 +416,6 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
                     material={rowsData}
                     selectedServices={selectedServices}
                     loading={isUpdating}
-                    from={'service'}
                     showSaveAndNext={isServiceEdit.showSaveAndNext}
                 />
             )}
@@ -478,4 +433,4 @@ const AddService = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
     );
 };
 
-export default AddService;
+export default Material;
