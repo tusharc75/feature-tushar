@@ -275,7 +275,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
-    console.log(rows)
     handleSaveData(rows);
   };
 

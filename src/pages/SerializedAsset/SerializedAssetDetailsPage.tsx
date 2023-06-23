@@ -34,8 +34,6 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import CertificationHistory from "./CertificationHistory";
 import AssetHistory from "./AssetHistory";
 import queryString from 'query-string';
-import { FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import TabPanel from "src/components/TabPanel";
 
 const SerializedAssetDetailsPage = () => {
@@ -373,7 +371,7 @@ const SerializedAssetDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-      <Tabs
+        <Tabs
           className="new-tab-container-v1"
           value={tabValue}
           onChange={handleMainTabChange}
@@ -388,7 +386,7 @@ const SerializedAssetDetailsPage = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Product Inventory
+                Details
               </div>
             }
             {...a11yProps(0)}
@@ -397,7 +395,7 @@ const SerializedAssetDetailsPage = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Asset History
+                Asset History
               </div>
             }
             {...a11yProps(1)}
@@ -406,47 +404,40 @@ const SerializedAssetDetailsPage = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Certification History
+                Certification History
               </div>
             }
             {...a11yProps(2)}
           />
-          </Tabs>
-        <Grid container spacing={1}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            <div>
-            <TabPanel value={tabValue} index={0}>
-            {productInventoryData && <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true}></DetailsPageHeader>}
-              <Box>
-                {loadingProductInventory || !productInventoryFields.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <>
-                    <DetailsPage
-                      data={productInventoryData}
-                      fields={
-                        productInventoryData?.status && (productInventoryData?.status === 'Scrap' || productInventoryData?.status === 'Lost')
-                          ? [...productInventoryFields, customField]
-                          : productInventoryFields
-                      }
-                    />
-                  </>
-                )}
-              </Box>
-            </TabPanel>
-            <TabPanel value={tabValue} index={1}>
-              <AssetHistory id={id} />
-            </TabPanel>
-            <TabPanel value={tabValue} index={2}>
-              <CertificationHistory id={id} />
-            </TabPanel>
-            </div>
-          </Grid>
-        </Grid>
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          {productInventoryData && <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true}></DetailsPageHeader>}
+          <Box>
+            {loadingProductInventory || !productInventoryFields.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <>
+                <DetailsPage
+                  data={productInventoryData}
+                  fields={
+                    productInventoryData?.status && (productInventoryData?.status === 'Scrap' || productInventoryData?.status === 'Lost')
+                      ? [...productInventoryFields, customField]
+                      : productInventoryFields
+                  }
+                />
+              </>
+            )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <AssetHistory id={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <CertificationHistory id={id} />
+        </TabPanel>
       </Box>
-
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
