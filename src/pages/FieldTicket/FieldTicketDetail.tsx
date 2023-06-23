@@ -22,7 +22,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
 import Steps from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import AddService from './AddService';
+import Material from './material';
 import { camelCase } from 'lodash';
 
 const FieldTicketDetail = () => {
@@ -191,18 +191,12 @@ const FieldTicketDetail = () => {
             steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            // handlePrev={() => { 
-            //   setCurrentStep((prevStep) => {
-            //     const newStep = prevStep - 1;
-            //     return newStep;
-            //   });
-            // }}
             isStepEnded={false}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
           <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && (
-              <AddService
+              <Material
                 stepFullScreen={stepFullScreen}
                 fieldTicketData={fieldTicketData}
                 id={id}
