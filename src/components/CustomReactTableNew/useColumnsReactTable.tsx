@@ -30,12 +30,7 @@ export const detailPagePath = {
     customerContact: routes?.customerContactDetail?.path,
     supplierContact: routes?.supplierContactDetail?.path,
 }
-export const hasDetailPageAsPopup = {
-    subMarketSegment: routes?.marketSegment?.path,
-    marketSegment: routes?.marketSegment?.path,
-    productCategory: routes?.productCategory?.path
-}
-export const popupResources = ["Product Category", "Market Segment", "Warehouse"]
+
 
 export const disabledColumns = {
     [routes.rentalManagementDetail.title]: [],
@@ -80,6 +75,7 @@ export const getStaticFields = () => {
             ))
         }]
 }
+
 export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
     let data = localStorage.getItem("gridMetaData")
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
@@ -171,7 +167,7 @@ export default function useColumns() {
                         disabled: true,
                         accessor: field?.fieldName === "firstName" ? "concatedName" : field.fieldName,
                         cellRenderer: permissions[permissionForLinks[field?.resource]]?.isRead ? "linkRenderer" : "commonRenderer",
-                        cellRendererParams: { "pathName": detailScreenRoute, "property": "_id", isForPopup: hasPopup },
+                        cellRendererParams: { "pathName": detailScreenRoute, "property": "_id" },
                         Cell: ({ row }) => (
                             permissions[permissionForLinks[field?.resource]]?.isRead ? <Fragment>
                                 <Link className="link text-truncate" title={row?.original?.[field?.fieldName]} to={`${detailScreenRoute}/${row?.original?._id}`}>
@@ -187,14 +183,9 @@ export default function useColumns() {
 
                 let joinedFieldName = field?.fieldName.indexOf(" ") > 0 ? camelCase(field?.fieldName) : field?.fieldName
                 let pathName = ""
-                let isForPopup = false
-                if (hasDetailPageAsPopup[joinedFieldName]) {
-                    isForPopup = true
-                    pathName = `${hasDetailPageAsPopup[joinedFieldName]}`
-                }
-                else if (field?.lookupResource && popupResources.indexOf(field?.lookupResource) >= 0) {
+
+                if (field?.lookupResource) {
                     pathName = routes[`${camelCase(field?.lookupResource)}`]?.path ?? ""
-                    isForPopup = true
                 }
                 else {
                     pathName = detailPagePath[joinedFieldName] ? detailPagePath[joinedFieldName] :
@@ -207,24 +198,19 @@ export default function useColumns() {
                 return {
                     columnData: {
                         ...commonFieldData,
-                        cellRenderer: isForPopup ? (permissions[permissionForLinks[field?.lookupResource]]?.isUpdate ? "linkRenderer" : "commonRenderer") : "linkRenderer",
+                        cellRenderer: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? "linkRenderer" : "commonRenderer",
                         cellRendererParams: {
-                            "pathName": pathName, "property": joinedFieldName + 'Id',
-                            isForPopup: isForPopup, "more": `rest${joinedFieldName}`
+                            "pathName": pathName,
+                            "property": joinedFieldName + 'Id',
+                            "more": `rest${joinedFieldName}`
                         },
                         Cell: ({ row }) => (
-                            isForPopup ? (permissions[permissionForLinks[field?.lookupResource]]?.isUpdate ? <Fragment>
-                                <Link className="link text-truncate" title={row?.original?.[field?.fieldName]} to={`${pathName}?id=${row?.original?.[`${field?.fieldName}Id`]}`}>
-                                    {row?.original?.[field?.fieldName]}
-                                </Link>
-                            </Fragment> :
-                                <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>) : <Fragment>
+                            (permissions[permissionForLinks[field?.lookupResource]]?.isRead ? <Fragment>
                                 <Link className="link text-truncate" title={row?.original?.[field?.fieldName]} to={`${pathName}/${row?.original?.[`${field?.fieldName}Id`]}`}>
                                     {row?.original?.[field?.fieldName]}
                                 </Link>
-                            </Fragment>
-
-
+                            </Fragment> :
+                                <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>)
                         )
                     },
                 }

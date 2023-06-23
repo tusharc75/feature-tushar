@@ -37,7 +37,7 @@ const ManageTermsAndCondition = ({ onClose, onSuccess, isClone = false, id = nul
   const fetchFields = async () => {
     try {
       let data;
-      const response: any = await axiosInstance().get(`/field?resource=${encodeURIComponent(sidebarResource.termsAndConditions)}`);
+      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.termsAndConditions}`);
       data = response?.data?.data;
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -141,13 +141,12 @@ const ManageTermsAndCondition = ({ onClose, onSuccess, isClone = false, id = nul
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.padName ? `(${initialData.values?.padName})` : ''}`
+                      : `Update ${initialData.values?.name ? `(${initialData.values?.name})` : ''}`
                     : `Create ${routes?.termsAndConditions?.title}`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -192,7 +191,7 @@ const ManageTermsAndCondition = ({ onClose, onSuccess, isClone = false, id = nul
                   Save
                 </Button>
               </CustomDialogFooter>
-              {showConfirmDialog ? (
+              {showConfirmDialog && (
                 <ConfirmationCancelDialog
                   close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
@@ -205,7 +204,7 @@ const ManageTermsAndCondition = ({ onClose, onSuccess, isClone = false, id = nul
                     onClose();
                   }}
                 />
-              ) : null}
+              )}
             </Fragment>
           )}
         </Formik>

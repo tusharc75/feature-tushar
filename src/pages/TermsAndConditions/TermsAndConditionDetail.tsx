@@ -16,6 +16,7 @@ import ManageTermsAndCondition from './ManageTermsAndCondition';
 import { sidebarResource, termsAndCondition } from 'src/constants/helpers';
 
 const TermsAndConditionDetail = () => {
+
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -29,6 +30,10 @@ const TermsAndConditionDetail = () => {
     state: { permissions, user }
   }: any = useData();
 
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
+
+
   useEffect(() => {
     if (id) {
       fetchFields();
@@ -38,7 +43,7 @@ const TermsAndConditionDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get(`/field?resource=${encodeURIComponent(sidebarResource.termsAndConditions)}`)
+      .get(`/field?resource=${sidebarResource.termsAndConditions}`)
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -53,6 +58,14 @@ const TermsAndConditionDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${termsAndCondition.api}/${id}`);
+
+      let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
+      setAllowedToEdit(isAllowedToEdit);
+      setAllowedToDelete(data.owner.optionValue === user?.user?._id);
+
       setTermsAndConditionData(data);
       setCustomizedRoutes([routes.termsAndConditions, { title: data?.name }]);
       setLoading(false);
@@ -62,25 +75,22 @@ const TermsAndConditionDetail = () => {
   };
 
   const handleDelete = () => {
-    if (id) {
-      axiosInstance()
-        .put(`${termsAndCondition.api}/remove`, { ids: [id] })
-        .then(({ data }) => {
-          setShowConfirmBox(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data?.message
-          });
-          history.goBack();
-        })
-        .catch((err) => {
-          setShowConfirmBox(false);
+    axiosInstance()
+      .put(`${termsAndCondition.api}/remove`, { ids: [id] })
+      .then(({ data }) => {
+        setShowConfirmBox(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
         });
-    } else {
-      setShowConfirmBox(false);
-    }
+        history.push(routes.termsAndConditions.path);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -88,6 +98,7 @@ const TermsAndConditionDetail = () => {
   const closeUpdateDialog = () => {
     setOpenUpdateDialog(false);
   };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -97,12 +108,15 @@ const TermsAndConditionDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.termsAndConditions?.isUpdate && (
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+              {permissions?.termsAndConditions?.isUpdate && allowedToEdit && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className="btn-outline-v1"
+                  onClick={handleOpenUpdateDialog}>
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.termsAndConditions?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.termsAndConditions?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
           </Box>
         </Box>
@@ -121,7 +135,7 @@ const TermsAndConditionDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.padMaster?.title?.toLowerCase()} ${termsAndConditionData.name} ?`}
+          message={`Are you sure you want to delete ${routes?.termsAndConditions?.title?.toLowerCase()} ${termsAndConditionData.name} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
