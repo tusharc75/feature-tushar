@@ -41,11 +41,11 @@ import { TextField } from '@material-ui/core';
 const PurchaseOrder = () => {
   const PurchaseOrderType = [
     {
-      key: `All ${routes.purchaseOrder.title}`,
+      key: `My ${routes.purchaseOrder.title}`,
       value: 1
     },
     {
-      key: `My ${routes.purchaseOrder.title}`,
+      key: `All ${routes.purchaseOrder.title}`,
       value: 2
     }
   ];
@@ -172,7 +172,7 @@ const PurchaseOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {

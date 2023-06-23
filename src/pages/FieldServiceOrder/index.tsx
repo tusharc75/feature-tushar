@@ -44,11 +44,11 @@ const ServiceOrder = () => {
 
   const ServiceOrderType = [
     {
-      key: `All ${routes.fieldServiceOrder.title}`,
+      key: `My ${routes.fieldServiceOrder.title}`,
       value: 1
     },
     {
-      key: `My ${routes.fieldServiceOrder.title}`,
+      key: `All ${routes.fieldServiceOrder.title}`,
       value: 2
     }
   ];
@@ -220,9 +220,13 @@ const ServiceOrder = () => {
   );
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterServiceOrders=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterServiceOrders=${selectedType}`;
+      deepFilter = `?`;
     }
     
     const { filterByIds, deepFilters } = gridFilterParser(filters);

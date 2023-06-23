@@ -5,9 +5,8 @@ import PropTypes from 'prop-types';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiSearch } from 'react-icons/fi';
 
-type SerachBoxProps = Omit<TextFieldProps, 'variant' | 'placeholder' | 'type' | 'InputProps'> & {
+type SerachBoxProps = Omit<TextFieldProps, 'variant' | 'type' | 'InputProps'> & {
   width?: string;
-  placeholder?: string;
 };
 
 function SearchBox({ onChange, value, size, width, placeholder, style, className, ...otherProps }: SerachBoxProps) {

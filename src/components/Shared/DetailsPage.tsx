@@ -74,6 +74,12 @@ const useStyles = makeStyles((theme) => ({
     fieldText: {
       fontSize: '0.8rem'
     }
+  },
+  withMultichild: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    borderLeft: '1px solid var(--dark-mode-border-color, #e2e2e2)',
+    marginLeft: '-1px'
   }
 }));
 
@@ -258,7 +264,7 @@ const Details = (props: DetailProps) => {
     ) {
       if (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') {
         return (
-          <Typography className={classes.fieldText} variant="body2">
+          <Typography className={`${classes.fieldText} ${classes.withMultichild}`} variant="body2">
             {Array.isArray(data[fieldData.fieldName]) ? (
               data[fieldData.fieldName].length ? (
                 data[fieldData.fieldName].map((_val: any, i) => (

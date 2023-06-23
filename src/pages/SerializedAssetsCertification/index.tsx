@@ -24,6 +24,7 @@ import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
+import IssueCertificateDialog from './IssueCertificateDialog';
 
 const SerializedAssetsCertification = () => {
 
@@ -31,7 +32,7 @@ const SerializedAssetsCertification = () => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
-
+  const [openDialog, setOpenDialog] = useState({open: false, id: null})
   const [gridApi, setGridApi] = useState(null);
   const [columns, setColumns] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
@@ -144,10 +145,14 @@ const SerializedAssetsCertification = () => {
 
 
   const AssetNumberRenderer = (params) => (
-    <Fragment>
-      <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data?._id}`}>
+     <Fragment>
+      <p 
+      className="link text-truncate" 
+      onClick={() => {
+        setOpenDialog({open: true, id: params?.data?._id})
+      }}>
         {params.value}
-      </Link>
+      </p>
       {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
         <Box ml={1} pt={1}>
           <HtmlTooltip title="Asset needs to be recert">
@@ -240,6 +245,16 @@ const SerializedAssetsCertification = () => {
           </Box>
         )}
       </div>
+      {openDialog?.open && (
+        <IssueCertificateDialog 
+        onClose={()=>  setOpenDialog({open: false, id: null})}
+        onSuccess={()=>{
+          setOpenDialog({open: false, id: null});
+          fetchProductInventory()
+        }}
+        assetId={openDialog?.id}
+        />
+      )}
     </Fragment>
   );
 };
