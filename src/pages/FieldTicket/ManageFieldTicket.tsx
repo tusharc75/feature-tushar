@@ -1,6 +1,6 @@
 import { Box, Button, Chip, CircularProgress, Dialog, TextField } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { isEqual, update } from 'lodash';
+import { camelCase, isEqual, update } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,9 +11,10 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, generateUniqueIdOnly, serviceMaster } from 'src/constants/helpers';
+import { CustomDialogTransition, generateUniqueIdOnly, serviceMaster, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import { useHistory } from 'react-router-dom';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { FaDiceOne } from 'react-icons/fa';
@@ -22,7 +23,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { is } from 'date-fns/locale';
 import moment from 'moment';
 
-const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
+const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false, renderedFrom = ''  }) => {
   const {
     state: { user }
   }: any = useData();
@@ -33,6 +34,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   const [fullScreen, setFullScreen] = useState(fullScreenView || isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
+  const history = useHistory();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [stepOptions, setStepOptions] = useState(referenceData?.steps || []);
   const [completeSteps, setCompleteSteps] = useState([]);
@@ -87,6 +89,15 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           rest.fieldTicketNumber = `FT_${generateUniqueIdOnly()}`;
           setCloneHeading(fieldTicketNumber);
           tempData = rest;
+        } else {
+          if (referenceData && renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0`) {
+            fields?.forEach((e) => {
+              if (e.fieldName === 'fieldServiceOrder') {
+                e.disableOnEdit = true;
+                e.isUneditable = true;
+              }
+            });
+          }
         }
         fetchServiceSteps(tempData?.service?.optionValue);
         setCompleteSteps(tempData?.steps || []);
@@ -99,16 +110,28 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
 
         if (referenceData) {
-          tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
-          tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;
-          tempInitialData['service'] = referenceData?.service;
-          tempInitialData['startDateTime'] = referenceData?.startDateTime;
-          tempInitialData['endDateTime'] = referenceData?.endDateTime;
-          tempInitialData['technician'] = referenceData?.technician;
+          if(renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0` ) {
+            fieldsDataForCreate?.forEach((e) => {
+              if (e.fieldName === 'fieldServiceOrder') {
+                tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;
+                e.disableOnEdit = true;
+                e.isUneditable = true;
+              }
+            });
+          } else {
+            tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
+            tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;
+            tempInitialData['service'] = referenceData?.service;
+            tempInitialData['startDateTime'] = referenceData?.startDateTime;
+            tempInitialData['endDateTime'] = referenceData?.endDateTime;
+            tempInitialData['technician'] = referenceData?.technician;
+          }
         }
+
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           tempInitialData['currency'] = user.user?.brandCurrency;
         }
+
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -189,7 +212,11 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         .post(`${routes.fieldTicket?.path}`, values)
         .then(({ data }) => {
           setLoading(false);
-          onSuccess(data.data);
+          if (referenceData) {
+            onSuccess(data.data);
+          } else {
+            history.push(`${routes.fieldTicket.path}/detail/${data?.data?._id}`);
+          }
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,

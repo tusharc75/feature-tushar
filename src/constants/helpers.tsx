@@ -144,6 +144,7 @@ export const repairOrderSteps: stepInterface[] = [
 ];
 
 export const serviceOrderSteps: stepInterface[] = [
+  { name: 'Field Ticket', title: 'Field Ticket', icon: 'receivingTicket'},
   { name: 'Add Services', title: 'Add', icon: 'add' },
   { name: 'Add Products', title: 'Products', icon: 'assign' },
   { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
