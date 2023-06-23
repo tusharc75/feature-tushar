@@ -108,8 +108,13 @@ const SerializedAssetsCertification = () => {
       gridApi.setRowData([]);
     }
 
+    let apiURL = `${serializedAssetsCertification.api}`;
+    if (certificateStatus) {
+      apiURL += `?certificateStatus=${certificateStatus.name}`;
+    }
+
     axiosInstance()
-      .get(`${serializedAssetsCertification.api}?certificateStatus=${certificateStatus.name}`)
+      .get(apiURL)
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
@@ -189,7 +194,7 @@ const SerializedAssetsCertification = () => {
           getOptionSelected={(option: any, val) => option._id === val._id}
           value={certificateStatus}
           onChange={(e, val) => {
-            setCertificateStatus(val ? val : { _id: "Pending", name: "Pending" });
+            setCertificateStatus(val ? val : null);
           }}
           renderInput={(params) => (
             <TextField {...params} margin="dense" name="certificateStatus" label="Certificate Status" variant="outlined" fullWidth />
