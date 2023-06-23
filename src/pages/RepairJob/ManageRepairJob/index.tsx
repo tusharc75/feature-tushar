@@ -126,8 +126,10 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
               initialData['afeNumber'] = referenceData?.afeNumber;
             }
           }
-          if (referenceType === 'Product Inventory') {
-            initialData['warehouse'] = referenceData?.warehouse;
+          if (referenceData?.warehouse) {
+            if (fieldsDataForCreate.some((e) => e.fieldName === 'warehouse')) {
+              initialData['warehouse'] = referenceData?.warehouse;
+            }
           }
           setInitialData({
             fields: fieldsDataForCreate,
@@ -328,8 +330,8 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                                       imageOrFileUploadCompletePercentage={
                                         ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                           ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
+                                            setUploadingImageOrFileProgress(completePercentage);
+                                          }
                                           : null
                                       }
                                     />
