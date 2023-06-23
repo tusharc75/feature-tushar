@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import { useState, useEffect, useContext, useReducer } from 'react';
 import { Grid, Box} from '@material-ui/core';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { serializedAsset, ASSET_STATUS, repairJob, INVENTORY_OWNER_TYPE, INVENTORY_HISTORY_TYPE } from '../../constants/helpers';
+import { serializedAsset } from '../../constants/helpers';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateTimeRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom';
