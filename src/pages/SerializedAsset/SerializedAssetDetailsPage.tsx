@@ -35,6 +35,7 @@ import { MdEdit } from 'react-icons/md';
 import { camelCase, startCase } from 'lodash';
 import moment from 'moment';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import SerializedAssetCertificationPage from './SerializedAssetCertificationPage';
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -521,6 +522,7 @@ const SerializedAssetDetailsPage = () => {
             </div>
           </Grid>
         </Grid>
+        <SerializedAssetCertificationPage id={id} />
       </Box>
 
       {showConfirmBox && (

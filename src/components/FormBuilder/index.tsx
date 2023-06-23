@@ -102,7 +102,7 @@ export const FormBuilder = ({
 
   const classes = useStyles();
   return (
-    <Box p={2}>
+    <Box>
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
         <Grid container spacing={1}>
           <Grid item xs={12} md={3} sm={4}>
