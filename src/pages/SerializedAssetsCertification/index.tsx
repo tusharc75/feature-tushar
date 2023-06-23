@@ -26,6 +26,7 @@ import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
 import IssueCertificateDialog from './IssueCertificateDialog';
+import { Autocomplete } from '@material-ui/lab';
 
 const SerializedAssetsCertification = () => {
 
@@ -40,8 +41,7 @@ const SerializedAssetsCertification = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [certificateStatus, setCertificateStatus] = useState('Pending');  
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [certificateStatus, setCertificateStatus] = useState<{_id: string, name: string}>({ _id: "Pending", name: "Pending" });
 
   const {
     state: { permissions, user }
@@ -109,7 +109,7 @@ const SerializedAssetsCertification = () => {
     }
 
     axiosInstance()
-      .get(`${serializedAssetsCertification.api}?certificateStatus=${certificateStatus}`)
+      .get(`${serializedAssetsCertification.api}?certificateStatus=${certificateStatus.name}`)
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
@@ -144,16 +144,6 @@ const SerializedAssetsCertification = () => {
         dispatch({ type: 'loading', loading: false });
       });
   };
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = (status) => {
-    setAnchorEl(null);
-    if (typeof status ==="string") setCertificateStatus(status);
-  };
-
 
   const AssetNumberRenderer = (params) => (
      <Fragment>
@@ -192,36 +182,19 @@ const SerializedAssetsCertification = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <Button
-            variant={'outlined'}
-            color="primary"
-            aria-controls="simple-menu"
-            aria-haspopup="true"
-            size="small"
-            onClick={handleClick}
-            endIcon={<ArrowDropDownIcon />}
-          >
-            {'Status'}
-          </Button>
-          <Menu
-            id="simple-menu"
-            anchorEl={anchorEl}
-            keepMounted
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right'
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right'
-            }}
-          >
-            <MenuItem onClick={() => handleClose('Pending')}>Pending</MenuItem>
-            <MenuItem onClick={() => handleClose('Completed')}>Completed</MenuItem>
-          </Menu>
+        <Autocomplete
+          style={{ width: '250px' }}
+          options={[{ _id: "Pending", name: "Pending" },{ _id: "Completed", name: "Completed" }]}
+          getOptionLabel={(option: any) => (option ? option.name : '')}
+          getOptionSelected={(option: any, val) => option._id === val._id}
+          value={certificateStatus}
+          onChange={(e, val) => {
+            setCertificateStatus(val ? val : { _id: "Pending", name: "Pending" });
+          }}
+          renderInput={(params) => (
+            <TextField {...params} margin="dense" name="certificateStatus" label="Certificate Status" variant="outlined" fullWidth />
+          )}
+        />
         </div>
         {columns ? (Object.keys(frameWorkComponent).length > 0 && columns ? (
           <CustomAgGrid
