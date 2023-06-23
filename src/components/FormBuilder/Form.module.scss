@@ -1,26 +1,24 @@
 .set_gridbox_layout {
-    height: calc(85vh - 194px);
-    overflow: auto;
+  height: calc(100vh - 200px);
+  overflow: auto;
 }
 @media screen and (max-width: 960px) {
   .set_gridbox_layout {
-    height: calc(85vh - 194px);
+    height: calc(100vh - 200px);
     overflow-x: hidden;
   }
-  .form_grid_box{
-      display: grid !important;
-      grid-template-columns: 1fr;
-      width: 200% !important;
-      padding-bottom: 15px;
+  .form_grid_box {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    width: 200% !important;
+    padding-bottom: 15px;
   }
-  .custom_field{
-      display: grid !important;
-      width: 200% !important;
-  }
-  .addiction_field{
+  .custom_field {
     display: grid !important;
     width: 200% !important;
-
   }
-
+  .addiction_field {
+    display: grid !important;
+    width: 200% !important;
+  }
 }
