@@ -254,16 +254,6 @@ const DynamicForm = () => {
     setAnchorEl(null);
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-      default:
-        return field;
-    }
-  };
 
   const handleOpen = () => {
     setisOpenDialog(true);

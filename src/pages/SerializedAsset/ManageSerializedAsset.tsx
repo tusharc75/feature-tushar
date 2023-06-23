@@ -87,7 +87,7 @@ const ManageSerializedAsset = ({
             .get(`${serializedAsset.api}/` + productInventoryId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, createdBy, updatedBy, assetNumber, ...rest } = data;
+                const { _id, createdBy, updatedBy, assetNumber, mtrAttached, mtrAttachedBy, mtrAttachedDate, ...rest } = data;
                 setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
                 oldValues.status = ASSET_STATUS.new;
@@ -379,8 +379,8 @@ const ManageSerializedAsset = ({
                                             ? false
                                             : true
                                           : Boolean(productInventoryId) && !isClone
-                                          ? field.disableOnEdit || field.isUneditable
-                                          : field.isUneditable
+                                            ? field.disableOnEdit || field.isUneditable
+                                            : field.isUneditable
                                       }
                                       fieldData={field}
                                       values={values}
