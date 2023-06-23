@@ -228,9 +228,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-            .filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+          .filter((d) => d.optionValue !== 'All')
+          .map((d) => d.optionValue)
+          .toString()
         : plantId;
 
     let deepFilter = '';
@@ -261,7 +261,7 @@ const InventoryProduct = () => {
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -338,10 +338,10 @@ const InventoryProduct = () => {
             !permissions?.productInventory?.isUpdate
               ? TOOLTIP_MESSAGE.remove
               : params?.data?.plantId === 'All'
-              ? 'Select Plant'
-              : !params?.data?.availableInventory
-              ? 'Inventory not available'
-              : 'Remove'
+                ? 'Select Plant'
+                : !params?.data?.availableInventory
+                  ? 'Inventory not available'
+                  : 'Remove'
           }
         >
           <span>
@@ -396,19 +396,6 @@ const InventoryProduct = () => {
     </Fragment>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'productName':
-        return 'productName';
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-      default:
-        return field;
-    }
-  };
-
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState && columns) {
     columns?.forEach((item) => {
@@ -428,7 +415,7 @@ const InventoryProduct = () => {
     }
     axiosInstance()
       .get(api)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -730,9 +717,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d.optionValue !== 'All')
-                    .map((d) => d.optionValue)
-                    .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
                 : plantId
             }
           />
@@ -748,9 +735,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d.optionValue !== 'All')
-                    .map((d) => d.optionValue)
-                    .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
                 : plantId
             }
             storageLocation={storageLocationId}
@@ -766,9 +753,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d.optionValue !== 'All')
-                    .map((d) => d.optionValue)
-                    .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
                 : plantId
             }
           />

@@ -144,7 +144,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -187,21 +187,6 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     checkboxRenderer: CheckboxRenderer,
     nameRenderer: NameRenderer,
     commonRenderer: CommonRenderer
-  };
-
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'productName':
-        return 'productName';
-      case 'plant':
-        return 'plant';
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-      default:
-        return field;
-    }
   };
 
   const onCellValueChanged = ({ data }) => {

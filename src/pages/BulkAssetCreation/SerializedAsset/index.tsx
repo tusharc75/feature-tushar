@@ -101,19 +101,6 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
       });
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
-
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     let filterById = [];
@@ -123,7 +110,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
