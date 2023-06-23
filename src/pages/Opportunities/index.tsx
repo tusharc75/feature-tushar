@@ -40,11 +40,11 @@ const Opportunities = () => {
 
   const OpportunityTypes = [
     {
-      key: `All ${routes.opportunity.title}`,
+      key: `My ${routes.opportunity.title}`,
       value: 1
     },
     {
-      key: `My ${routes.opportunity.title}`,
+      key: `All ${routes.opportunity.title}`,
       value: 2
     }
   ];
@@ -203,34 +203,6 @@ const Opportunities = () => {
       });
   };
 
-  const OpportunityNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.opportunityDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const CustomerAccountNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}>
-      {params.value}
-    </Link>
-  );
-
-  const SupplierAccountNameRenderer = (params) =>
-    params.value ? (
-      <>
-        <h5 className="createBy d-flex">
-          <Link className="link" title={params.value} to={`${routes.supplierAccount.path}/detail/${params.data.supplierAccountId}`}>
-            {params.value}
-          </Link>
-          {params.data.restSupplierAccounts.length > 0 && (
-            <span className="createdAtTime badge-date">{`+${params.data.restSupplierAccounts.length} more..`}</span>
-          )}
-        </h5>
-      </>
-    ) : (
-      <NoDataCell />
-    );
-
   const ActionsRenderer = (params) => (
     <>
       {opportunityPermissions?.isCreate ? (
@@ -278,7 +250,7 @@ const Opportunities = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
@@ -524,6 +496,7 @@ const Opportunities = () => {
             showTransferEntityDialog={handleTransferEntityDialog}
             columns={columns}
             dispatch={dispatch}
+            selectedType={selectedType}
             filters={filters}
           >
             {accountDetails.accountId && (

@@ -42,10 +42,9 @@ function ServiceOrderHeader(props) {
   const closeActions = () => {
     setAnchorEl(null);
   };
-  const [filter, setFilter] = useState(options[0].key);
+
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
-      setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
     }
   };
@@ -70,7 +69,7 @@ function ServiceOrderHeader(props) {
   };
 
   let toggleInner = options && (
-    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
           <ToggleButton value={k.key} key={index}>
