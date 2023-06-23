@@ -11,12 +11,14 @@ import CustomContainer from '../../components/CustomContainer';
 import styles from '../Leads/Header.module.scss';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { termsAndCondition, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
+import { termsAndCondition, isObjectEmpty, gridLoadingTimeout, sidebarResource, prepareDataForGrid } from '../../constants/helpers';
+import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import ManageTermsAndCondition from './ManageTermsAndCondition';
 import { cloneDeep } from 'lodash';
 import { IoDocumentTextOutline } from 'react-icons/io5';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import routes from '../../components/Helpers/Routes';
+import { camelCase } from 'lodash';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
@@ -26,12 +28,13 @@ import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
+import { urlEncode } from '@sentry/utils';
 
 let termsTimeout;
 export default function TermsAndCondition(props) {
-  const history = useHistory();
+  const renderedFrom = camelCase(routes?.termsAndConditions.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const { termsAndConditionBreadcrumb } = props;
-  const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, user, selectedEntity }
@@ -39,53 +42,50 @@ export default function TermsAndCondition(props) {
   const [showCreateDialog, setShowCreateDialog] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [actionsPermissions, setActionsPermissions] = useState({
-    isCreate: false,
-    isRead: false,
-    isUpdate: false,
-    isDelete: false,
-    approveAccount: false
-  });
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  const [columns, setColumns] = useState([]);
   const [deleteRec, setDeleteRec] = useState<any>({});
-  const [termsAndConditionsData, setTermsAndConditionsData] = useState([]);
-  const [editRecord, setEditRecord] = useState<any>({});
   const [sortOpen, setSortOpen] = useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const [gridApi, setGridApi] = useState(null);
+  const [termsAndConditionsId, setTermsAndConditionsId] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, appendRows, filters, sorting, selectedRecords } = state;
+  const { getColumnData } = useColumns();
+
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get(`/field?resource=${encodeURIComponent(sidebarResource?.termsAndConditions)}`)
+      .then(({ data: { data } }) => {
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.termsAndConditionsDetails.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
+            }
+          }
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...columns]);
+      });
+  };
 
   useEffect(() => {
-    if (permissions) {
-      setActionsPermissions(permissions?.[termsAndCondition.permission]);
-    }
-  }, [permissions]);
-
-  useEffect(() => {
-    const parsedParams = queryString.parse(location?.search);
-    const tempData = termsAndConditionsData.find((d) => d.id === parsedParams?.id);
-    if (parsedParams?.id && tempData) {
-      setShowCreateDialog({ open: true, isClone: false });
-
-      setEditRecord({ ...tempData });
-    }
-  }, [location, termsAndConditionsData]);
-
+    fetchGridColumns();
+  }, []);
+ 
   useEffect(() => {
     fetchTermsAndConditions();
   }, [page, limit, filters, sorting, search, selectedEntity]);
-
-  const TermsConditionNameRenderer = (params) => (
-    <span
-      className="link cursor-pointer"
-      onClick={() => {
-        setShowCreateDialog({ open: true, isClone: false });
-        setEditRecord(cloneDeep(params.data));
-      }}
-    >
-      <CustomRenderCell value={params?.value} />
-    </span>
-  );
 
   const ActionsRenderer = (params) => (
     <>
@@ -97,14 +97,14 @@ export default function TermsAndCondition(props) {
           size="small"
           aria-label="Clone"
           onClick={() => {
+            setTermsAndConditionsId(params.data.id);
             setShowCreateDialog({ open: true, isClone: true });
-            setEditRecord({ ...params.data });
           }}
         >
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
-      {permissions?.termsAndConditions?.isDelete && user?.user?._id === params.data?.owner ? (
+      {params?.data?.canDelete ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -126,8 +126,6 @@ export default function TermsAndCondition(props) {
     </>
   );
 
-  const [columns] = useState([{ field: 'TACName', headerName: 'Name', show: true, disabled: true, cellRenderer: 'termsConditionNameRenderer' }]);
-
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -145,13 +143,34 @@ export default function TermsAndCondition(props) {
       dispatch({ type: 'loading', loading: true });
       axiosInstance()
         .get(`${termsAndCondition.api}${queryString}`)
-        .then(({ data }) => {
-          let rows = data?.data?.map((u) => ({
-            ...u,
-            id: u._id
-          }));
-          setTermsAndConditionsData(rows);
-          dispatch({ type: 'initialize', data: rows, count: data.count });
+        .then(({ data: { data } }) => {
+          let count = data?.count;
+          let rows = data?.data.map((u: any) => {
+            let finalObject: any = prepareDataForGrid(u);
+            finalObject['canDelete'] = permissions?.padMaster?.isDelete;
+            finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+            finalObject['allowedToEdit'] = permissions?.padMaster?.isUpdate;
+
+            return {
+              ...finalObject
+            };
+          });
+          if (appendRows) {
+            dispatch({
+              type: 'initialize',
+              data: [...dataRows, ...rows],
+              count: count,
+              selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+            });
+          } else {
+            dispatch({
+              type: 'initialize',
+              data: rows,
+              count: count,
+              selectedRecords: rows.filter((f) => f.isChecked === true)
+            });
+          }
+          dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
           }, gridLoadingTimeout);
@@ -203,17 +222,6 @@ export default function TermsAndCondition(props) {
           setShowDeleteConfirmBox(false);
         });
     }
-  };
-
-  const handleCloseCreateDialog = (params) => {
-    setShowCreateDialog({ open: false, isClone: false });
-    setEditRecord({});
-    if (params?.fetchData) fetchTermsAndConditions();
-  };
-
-  const frameworkComponents = {
-    termsConditionNameRenderer: TermsConditionNameRenderer,
-    actionsRenderer: ActionsRenderer
   };
 
   const getQueryString = () => {
@@ -323,7 +331,7 @@ export default function TermsAndCondition(props) {
                 />
 
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {actionsPermissions.isCreate && (
+                  {permissions?.termsAndConditions?.isCreate && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
@@ -360,13 +368,17 @@ export default function TermsAndCondition(props) {
                     open={Boolean(anchorEl)}
                     onClose={closeActions}
                   >
-                    {actionsPermissions.isDelete && (
+                    {permissions?.termsAndConditions?.isDelete && (
                       <MenuItem
                         onClick={() => {
                           closeActions();
                           setShowDeleteConfirmBox(true);
                         }}
-                        disabled={selectedRecords.some((item) => item?.owner !== user?.user._id)}
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
                       >
                         Delete
                       </MenuItem>
@@ -377,54 +389,59 @@ export default function TermsAndCondition(props) {
             </Grid>
           </Grid>
         </div>
-        {isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permissions?.termsAndConditions}
-            primaryField={columns?.find((d) => d.field === 'TACName')}
-            onClick={(d) => {
-              setShowCreateDialog({ open: true, isClone: false });
-              setEditRecord(cloneDeep(d));
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(d) => {
-              setShowCreateDialog({ open: true, isClone: false });
-              setEditRecord(cloneDeep(d));
-            }}
-            extraParamsToCheckDelete={false}
-            onDelete={(d) => {}}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[]}
-            chips={[]}
-            owerCollaboratorInitialsOrImages=""
-            onCreate={() => {}}
-            showClone={false}
-            onClone={() => {}}
-            renderedFrom={'termsAndConditions'}
-          />
-        ) : (
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={150}
-            loading={loading}
-            refreshGrid={fetchTermsAndConditions}
-            renderedFrom={routes.termsAndConditions.title}
-            isClientSideGrid={true}
-          />
-        )}
+        {Object.keys(frameWorkComponent).length > 0 ? (
+          isMobile && !isTablet ? (
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions?.termsAndConditions}
+              primaryField={columns?.find((d) => d.field === 'TACName')}
+              onClick={(d) => {
+                setTermsAndConditionsId(d.id);
+                setShowCreateDialog({ open: true, isClone: false });
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(d) => {
+                setTermsAndConditionsId(d.id);
+                setShowCreateDialog({ open: true, isClone: false });
+              }}
+              extraParamsToCheckDelete={false}
+              onDelete={(d) => {}}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[]}
+              chips={[]}
+              owerCollaboratorInitialsOrImages=""
+              onCreate={() => {}}
+              showClone={false}
+              onClone={() => {}}
+              renderedFrom={'termsAndConditions'}
+            />
+          ) : (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={150}
+              loading={loading}
+              refreshGrid={fetchTermsAndConditions}
+              renderedFrom={routes.termsAndConditions.title}
+              isClientSideGrid={true}
+              showFilters={true}
+              showOnlyShowFilteredRecordSwitch={true}
+              resource={sidebarResource.termsAndConditions}
+            />
+          )
+        ) : null}
 
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
@@ -436,13 +453,13 @@ export default function TermsAndCondition(props) {
         ) : null}
         {showCreateDialog?.open ? (
           <ManageTermsAndCondition
-            termsAndCondition={termsAndCondition}
-            open={showCreateDialog?.open}
+            id={termsAndConditionsId}
             isClone={showCreateDialog?.isClone}
-            handleClose={handleCloseCreateDialog}
-            fetchData={fetchTermsAndConditions}
-            editRecord={editRecord}
-            displayTitle={'Terms & Conditions'}
+            onClose={() => setShowCreateDialog({ open: false, isClone: false })}
+            onSuccess={() => {
+              setShowCreateDialog({ open: false, isClone: false });
+              fetchTermsAndConditions();
+            }}
           />
         ) : null}
       </CustomContainer>
