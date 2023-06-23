@@ -3,7 +3,8 @@ import Grid from '@material-ui/core/Grid';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
+import { Box, Button, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
@@ -39,6 +40,8 @@ const SerializedAssetsCertification = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
+  const [certificateStatus, setCertificateStatus] = useState('Pending');  
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const {
     state: { permissions, user }
@@ -51,7 +54,7 @@ const SerializedAssetsCertification = () => {
 
   useEffect(() => {
     fetchProductInventory();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, certificateStatus]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -106,7 +109,7 @@ const SerializedAssetsCertification = () => {
     }
 
     axiosInstance()
-      .get(`${serializedAssetsCertification.api}`)
+      .get(`${serializedAssetsCertification.api}?certificateStatus=${certificateStatus}`)
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
@@ -142,6 +145,14 @@ const SerializedAssetsCertification = () => {
       });
   };
 
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = (status) => {
+    setAnchorEl(null);
+    if (typeof status ==="string") setCertificateStatus(status);
+  };
 
 
   const AssetNumberRenderer = (params) => (
@@ -181,6 +192,36 @@ const SerializedAssetsCertification = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
+          <Button
+            variant={'outlined'}
+            color="primary"
+            aria-controls="simple-menu"
+            aria-haspopup="true"
+            size="small"
+            onClick={handleClick}
+            endIcon={<ArrowDropDownIcon />}
+          >
+            {'Status'}
+          </Button>
+          <Menu
+            id="simple-menu"
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
+            }}
+          >
+            <MenuItem onClick={() => handleClose('Pending')}>Pending</MenuItem>
+            <MenuItem onClick={() => handleClose('Completed')}>Completed</MenuItem>
+          </Menu>
         </div>
         {columns ? (Object.keys(frameWorkComponent).length > 0 && columns ? (
           <CustomAgGrid
