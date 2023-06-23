@@ -101,50 +101,46 @@ const ReportFilters = (props: FiltersProps) => {
     if (!customReportData) return;
     setLoading(true);
 
-    const initializeData = () => {
-      let newData: any = { ...customReportData };
+    let newData: any = { ...customReportData };
 
-      if (newData?.filters.length > 0) {
-        const filters = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term === filter.fieldName) > -1);
+    if (newData?.filters.length > 0) {
+      const filters = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term === filter.fieldName) > -1);
 
-        const dateFields = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term.split('_')[1] === filter.fieldName) > -1);
+      const dateFields = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term.split('_')[1] === filter.fieldName) > -1);
 
-        const filterData = newData.filters.reduce(
-          (acc, val) => ({
-            ...acc,
-            [val.term]: val.value
-          }),
-          {}
-        );
+      const filterData = newData.filters.reduce(
+        (acc, val) => ({
+          ...acc,
+          [val.term]: val.value
+        }),
+        {}
+      );
 
-        const selectedFiltersData = filters.reduce(
-          (acc, val) => ({
-            ...acc,
-            [val.fieldName]: {
-              type: val.type,
-              lookup: val.lookup,
-              value: val.option.filter((option) => filterData[val.fieldName].includes(option.optionValue))
-            }
-          }),
-          {}
-        );
+      const selectedFiltersData = filters.reduce(
+        (acc, val) => ({
+          ...acc,
+          [val.fieldName]: {
+            type: val.type,
+            lookup: val.lookup,
+            value: val.option.filter((option) => filterData[val.fieldName].includes(option.optionValue))
+          }
+        }),
+        {}
+      );
 
-        setSelectedData(selectedFiltersData);
-        const dateFilterData = {};
-        newData.filters
-          .filter((item) => item.term.includes('from_') || item.term.includes('to_'))
-          .forEach(({ term, value }) => {
-            dateFilterData[term] = value;
-          });
+      setSelectedData(selectedFiltersData);
+      const dateFilterData = {};
+      newData.filters.filter((item) => item.term.includes('from_') || item.term.includes('to_')).forEach(({ term, value }) => {
+        dateFilterData[term] = value;
+      });
 
-        setBetweenDate(dateFilterData);
-        newData.filters = [...filters, ...dateFields];
-        setFormValues(filterData);
-      }
-      setSelectedResources(newData.filters);
-      setLoading(false);
-    };
-    initializeData();
+      setBetweenDate(dateFilterData);
+      newData.filters = [...filters, ...dateFields];
+      setFormValues(filterData);
+    }
+    setSelectedResources(newData.filters);
+    setLoading(false);
+
   }, [customReportData, filterOptions, resourceColumns]);
 
   React.useEffect(() => {
@@ -389,7 +385,6 @@ const ReportFilters = (props: FiltersProps) => {
             } else {
               setSelectedResources(val);
             }
-
             if (reason === 'remove-option' && selectedData) {
               const selectedKeys = val.map((f) => f?.fieldName);
               setSelectedData((prev) => {
