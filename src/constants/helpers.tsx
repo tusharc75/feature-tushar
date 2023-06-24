@@ -144,6 +144,7 @@ export const repairOrderSteps: stepInterface[] = [
 ];
 
 export const serviceOrderSteps: stepInterface[] = [
+  { name: 'Field Ticket', title: 'Field Ticket', icon: 'receivingTicket'},
   { name: 'Add Services', title: 'Add', icon: 'add' },
   { name: 'Add Products', title: 'Products', icon: 'assign' },
   { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
@@ -228,7 +229,7 @@ export const sidebarResource = {
   product: 'Product',
   productTemplate: 'Product Template',
   doa: 'DOA',
-  termsAndConditions: 'Terms & Conditions',
+  termsAndConditions: 'Terms And Conditions',
   equiptmentRentalMaster: 'Equiptment Rental Master',
   productBuilder: 'Product Builder',
   formBuilder: 'Form Builder',
@@ -354,7 +355,7 @@ export const RESOURCE_LABEL = {
   product: 'Product Master',
   productTemplate: 'Product Templates',
   doa: 'DOA',
-  termsAndConditions: 'T&Cs',
+  termsAndConditions: 'Terms And Conditions',
   equiptmentRentalMaster: 'Equiptment Rental Master',
   projectSales: 'Project Sales',
   productBuilder: 'Price Builder',

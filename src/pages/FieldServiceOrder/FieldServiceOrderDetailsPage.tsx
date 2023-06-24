@@ -29,6 +29,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ServiceOrderViews from './RoadMapViews';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
+import FieldTicket from "./FieldTicket"
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -335,7 +336,14 @@ const ServiceOrderDetailsPage = () => {
             setStepFullScreen={() => setStepFullScreen(true)}
           />
           <ContentFullScreen title={serviceOrderSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {currentStep === 0 && serviceOrderData && (
+          {currentStep === 0 && serviceOrderData && (
+             <FieldTicket 
+              fieldServiceOrder={id} 
+              setNextStep={setNextStep}
+              renderedFrom={`${renderedFrom}_grid-0`}
+             />
+            )}
+            {currentStep === 1 && serviceOrderData && (
               <Services
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -344,7 +352,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {currentStep === 1 && serviceOrderData && (
+            {currentStep === 2 && serviceOrderData && (
               <Products
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -353,7 +361,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {currentStep === 2 && serviceOrderData && (
+            {currentStep === 3 && serviceOrderData && (
               <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -363,7 +371,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {currentStep === 3 && serviceOrderData && (
+            {currentStep === 4 && serviceOrderData && (
               <TechnicianDispatch
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -372,7 +380,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {currentStep === 4 && serviceOrderData && (
+            {currentStep === 5 && serviceOrderData && (
               <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}

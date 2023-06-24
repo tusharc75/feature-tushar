@@ -3,7 +3,8 @@ import Grid from '@material-ui/core/Grid';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
+import { Box, Button, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
@@ -25,6 +26,7 @@ import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
 import IssueCertificateDialog from './IssueCertificateDialog';
+import { Autocomplete } from '@material-ui/lab';
 
 const SerializedAssetsCertification = () => {
 
@@ -39,6 +41,7 @@ const SerializedAssetsCertification = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
+  const [certificateStatus, setCertificateStatus] = useState<{_id: string, name: string}>({ _id: "Pending", name: "Pending" });
 
   const {
     state: { permissions, user }
@@ -51,7 +54,7 @@ const SerializedAssetsCertification = () => {
 
   useEffect(() => {
     fetchProductInventory();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, certificateStatus]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -105,8 +108,13 @@ const SerializedAssetsCertification = () => {
       gridApi.setRowData([]);
     }
 
+    let apiURL = `${serializedAssetsCertification.api}`;
+    if (certificateStatus) {
+      apiURL += `?certificateStatus=${certificateStatus.name}`;
+    }
+
     axiosInstance()
-      .get(`${serializedAssetsCertification.api}`)
+      .get(apiURL)
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
@@ -141,8 +149,6 @@ const SerializedAssetsCertification = () => {
         dispatch({ type: 'loading', loading: false });
       });
   };
-
-
 
   const AssetNumberRenderer = (params) => (
      <Fragment>
@@ -181,6 +187,19 @@ const SerializedAssetsCertification = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
+        <Autocomplete
+          style={{ width: '250px' }}
+          options={[{ _id: "Pending", name: "Pending" },{ _id: "Completed", name: "Completed" }]}
+          getOptionLabel={(option: any) => (option ? option.name : '')}
+          getOptionSelected={(option: any, val) => option._id === val._id}
+          value={certificateStatus}
+          onChange={(e, val) => {
+            setCertificateStatus(val ? val : null);
+          }}
+          renderInput={(params) => (
+            <TextField {...params} margin="dense" name="certificateStatus" label="Certificate Status" variant="outlined" fullWidth />
+          )}
+        />
         </div>
         {columns ? (Object.keys(frameWorkComponent).length > 0 && columns ? (
           <CustomAgGrid

@@ -467,7 +467,7 @@ export default function QuoteDetail() {
           return {
             ...tnc,
             id: tnc._id,
-            name: tnc.TACName
+            name: tnc.name
           };
         });
 

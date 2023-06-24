@@ -418,7 +418,6 @@ const CreateFormBuilder = () => {
                 </Grid>
               </Box>
               <Box>
-                {console.log(tabValue)}
                 <Tabs value={tabValue} onChange={handleMainTabChange}>
                   <CustomTab index={0} id="fields-tab">
                     Fields

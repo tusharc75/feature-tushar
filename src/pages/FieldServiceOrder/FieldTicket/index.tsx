@@ -1,32 +1,22 @@
 import { Fragment, useState, useEffect, useReducer, useContext } from 'react';
 import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import {
-  getLocalStorageArrayData,
-  gridLoadingTimeout,
-  isObjectEmpty,
-  prepareDataForGrid,
-  removeLocalStorage,
-  sidebarResource
-} from 'src/constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
-import { camelCase } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
+import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 
-const Competencies = ({ competencyType }) => {
-  let renderedFrom = camelCase(routes.competencies?.title);
+const FieldTicket = ({ fieldServiceOrder, setNextStep, renderedFrom }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const toastConfig = useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = useState({ open: false, id: null });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
@@ -53,12 +43,12 @@ const Competencies = ({ competencyType }) => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource.competencies}`)
+      .get(`/field?resource=${sidebarResource.fieldTicket}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.competencies?.title, o?.fieldData, routes.competenciesDetail.path);
+          let currentColumn = getColumnData(routes.fieldTicket?.title, o?.fieldData, routes.fieldTicketDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -78,20 +68,20 @@ const Competencies = ({ competencyType }) => {
   };
 
   const fetchData = () => {
+    setNextStep(false)
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes.competencies.path}${queryString}`)
+      .get(`${routes.fieldTicket.path}${queryString}`)
       .then(({ data: { data } }) => {
-        let count = data?.count;
-        let rows = data?.data?.map((u) => {
+        let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.competencies?.isUpdate;
-          finalObject['canDelete'] = permissions?.competencies?.isDelete;
+          finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
+          finalObject['canDelete'] = permissions?.fieldTicket?.isDelete;
           let res = {
             ...finalObject
           };
@@ -101,20 +91,21 @@ const Competencies = ({ competencyType }) => {
           dispatch({
             type: 'initialize',
             data: [...dataRows, ...rows],
-            count: count,
+            count: data?.count,
             selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
-            count: count,
+            count: data?.count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
+        setNextStep(true)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -123,15 +114,13 @@ const Competencies = ({ competencyType }) => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-
-    if (isExport) {
-      deepFilter = `?`;
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
-
-    filterByIds.push({ field: 'competencyType', term: competencyType })
+    filterByIds.push({ field: 'fieldServiceOrder', term: fieldServiceOrder });
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -157,16 +146,9 @@ const Competencies = ({ competencyType }) => {
   };
 
   const handleDelete = () => {
-    let ids = [];
-    if (deleteRecord) {
-      ids.push(deleteRecord._id);
-    } else {
-      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
-    }
     axiosInstance()
-      .put(`${routes.competencies.path}/remove`, { ids: ids })
+      .put(`${routes.fieldTicket.path}/remove`, { ids: deleteRecord })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords);
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -179,7 +161,7 @@ const Competencies = ({ competencyType }) => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions?.competencies?.isCreate && (
+      {permissions?.fieldTicket?.isCreate && (
         <HtmlTooltip title="Edit">
           <IconButton
             size="small"
@@ -192,13 +174,13 @@ const Competencies = ({ competencyType }) => {
           </IconButton>
         </HtmlTooltip>
       )}
-      {permissions?.competencies?.isDelete && (
+      {permissions?.fieldTicket?.isDelete && (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
             aria-label="Delete"
             onClick={() => {
-              setDeleteRecord(params.data);
+              setDeleteRecord([params.data._id]);
               setShowDeleteConfirmBox(true);
             }}
           >
@@ -217,7 +199,6 @@ const Competencies = ({ competencyType }) => {
     setAnchorActionEl(null);
   };
 
-
   return (
     <Fragment>
       <Box p={1} pb={2}>
@@ -230,8 +211,9 @@ const Competencies = ({ competencyType }) => {
               onClick={() => {
                 setOpenDialog({ open: true, id: null });
               }}
+              startIcon={<AddOutlined />}
             >
-              Add
+            {`Create ${routes.fieldTicket.title}`}
             </Button>
           </Grid>
           <Grid item xs={9} md={9} sm={9}>
@@ -262,10 +244,8 @@ const Competencies = ({ competencyType }) => {
                 <MenuItem
                   onClick={() => {
                     closeActions();
-                    if (selectedRecords.length === 1) {
-                      setDeleteRecord(selectedRecords[0]);
-                    }
                     setShowDeleteConfirmBox(true);
+                    setDeleteRecord(selectedRecords.map((d) => d._id));
                   }}
                 >
                   Delete
@@ -290,7 +270,6 @@ const Competencies = ({ competencyType }) => {
           loading={loading}
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
-          showOnlyShowFilteredRecordSwitch={true}
         />
       ) : (
         <Box p={2} height={500}>
@@ -298,21 +277,21 @@ const Competencies = ({ competencyType }) => {
         </Box>
       )}
       {openDialog.open && (
-        <ManageCompetencies
+        <ManageFieldTicket
           id={openDialog.id}
-          isClone={false}
           onClose={() => setOpenDialog({ open: false, id: null })}
+          referenceData={{ fieldServiceOrder: fieldServiceOrder }}
           onSuccess={() => {
             setOpenDialog({ open: false, id: null });
             fetchData();
           }}
-          referenceData={{ competencyType: competencyType }}
+          renderedFrom={renderedFrom}
         />
       )}
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.competencies?.title?.toLowerCase()} ${deleteRecord?.competenceName || ''} ? `}
+          message={`Are you sure you want to delete the ${routes.fieldTicket?.title?.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -324,4 +303,4 @@ const Competencies = ({ competencyType }) => {
   );
 };
 
-export default Competencies;
+export default FieldTicket;

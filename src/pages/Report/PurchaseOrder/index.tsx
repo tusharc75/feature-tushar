@@ -942,7 +942,6 @@ const Report = () => {
                 </Grid>
               </Grid>
             </div>
-            <hr />
             {!showGrid ? (
               <ReportFilters
                 resourceColumns={resourceColumns}
