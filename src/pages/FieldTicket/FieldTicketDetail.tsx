@@ -24,6 +24,7 @@ import Steps from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Material from './material';
 import { camelCase } from 'lodash';
+import Consumables from './Consumables';
 
 const FieldTicketDetail = () => {
   const { id } = useParams();
@@ -40,7 +41,6 @@ const FieldTicketDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -80,8 +80,11 @@ const FieldTicketDetail = () => {
         data = response?.data?.data;
       }
       setFieldTicketData(data);
-      setAllowedToEdit(data?.owner?.optionValue === user?.user?._id);
-      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+      let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
+      setAllowedToEdit(isAllowedToEdit);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -174,6 +177,17 @@ const FieldTicketDetail = () => {
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
           />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
+              </div>
+            }
+            value={2}
+            aria-controls="a11y-tabpanel-1"
+            id="a11y-tab-2"
+          />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -201,12 +215,20 @@ const FieldTicketDetail = () => {
                 fieldTicketData={fieldTicketData}
                 id={id}
                 renderedFrom={`${renderedFrom}_grid-1`}
+                allowedToEdit={allowedToEdit}
               />
             )}
             {currentStep === 1 && (
               <AddCost fieldTicketData={fieldTicketData} id={id} />
             )}
           </ContentFullScreen>
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Consumables
+            allowedToEdit={allowedToEdit}
+            id={id}
+            fieldTicketData={fieldTicketData}
+          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

@@ -20,7 +20,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 
 
-const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
+const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit }) => {
     const toastConfig = useContext(CustomToastContext);
 
     const [columns, setColumns] = useState(null);
@@ -38,6 +38,11 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
     const fetchFields = async () => {
         setColumns(null);
         var { fields: data, allFields } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
+        if (!allowedToEdit) {
+            allFields?.forEach((e) => {
+                e.isColumnEditable = false;
+            });
+        }
         setAllFields(JSON.parse(JSON.stringify(allFields)));
         const newColumns = generateCustomTableColumns(data, fieldTicketData?.currency, renderedFrom);
         let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
@@ -65,20 +70,24 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
                 sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row, rows }) => (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <p
-                            onClick={() => {
-                                setIsServiceEdit({
-                                    open: true,
-                                    data: row.original,
-                                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                                });
-                                setIsBulkEdit(false);
-                            }}
-                            className="link text-truncate"
-                            title={row.original.detail}
-                        >
-                            {row.original.detail}
-                        </p>
+                        {!allowedToEdit ? (
+                            <p> {row.original.detail}</p>
+                        ) : (
+                            <p
+                                onClick={() => {
+                                    setIsServiceEdit({
+                                        open: true,
+                                        data: row.original,
+                                        showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                                    });
+                                    setIsBulkEdit(false);
+                                }}
+                                className="link text-truncate"
+                                title={row.original.detail}
+                            >
+                                {row.original.detail}
+                            </p>
+                        )}
                         <Box ml={1}>
                             <IconButton
                                 size="small"
@@ -118,17 +127,17 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
                         <span>
                             <IconButton
                                 size="small"
-                                aria-label="Details"
+                                aria-label="Delete"
+                                disabled={!allowedToEdit}
                                 onClick={() => {
                                     setDeleteData([{ id: row.original._id }]);
                                 }}
                             >
-                                <DeleteIcon fontSize="small" color={'error'} />
+                                <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
                             </IconButton>
                         </span>
                     </HtmlTooltip >
                 )
-
             }
         });
         setColumns(column);
@@ -136,7 +145,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
 
     const fetchMaterial = async () => {
 
-        const response = await axiosInstance().get(`/field-ticket/${id}/material`);
+        const response = await axiosInstance().get(`/field-ticket/${id}/material?type=service`);
         const data = response?.data?.data?.material;
 
         data.forEach((parent, i) => {
@@ -154,10 +163,15 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
     }
 
     useEffect(() => {
-        fetchFields()
-        fetchMaterial()
-    }, [])
-    
+        fetchFields();
+    }, [id]);
+
+    useEffect(() => {
+        if (columns) {
+            fetchMaterial();
+        }
+    }, [columns]);
+
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
 
@@ -285,89 +299,91 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
 
     return (
         <>
-            <Box display="flex" justifyContent="space-between" m={1}>
-                <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-                    <Button
-                        size="small"
-                        variant={'contained'}
-                        color="primary"
-                        onClick={() => {
-                            setAddExistingServiceDialog(true);
-                        }}
-                    >
-                        {isMobile && !isTablet ? 'Service' : `Add Service`}
-                    </Button>
-                </Box>
-                <Box display="flex" ml={1}>
-                    <Button
-                        variant="outlined"
-                        color="primary"
-                        size="small"
-                        id="demo-positioned-button"
-                        onClick={handleClick}
-                        disabled={!Boolean(selectedServices?.length)}
-                        endIcon={<BiChevronDown />}
-                    >
-                        Actions
-                    </Button>
-                    <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        open={open}
-                        onClose={handleClose}
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'right'
-                        }}
-                        transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right'
-                        }}
-                    >
-                        <HtmlTooltip
-                            title={
-                                Boolean(selectedServices.length)
-                                    ? 'Bulk edit selected records'
-                                    : 'Select records to edit'
-                            }
+            {allowedToEdit &&
+                <Box display="flex" justifyContent="space-between" m={1}>
+                    <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+                        <Button
+                            size="small"
+                            variant={'contained'}
+                            color="primary"
+                            onClick={() => {
+                                setAddExistingServiceDialog(true);
+                            }}
                         >
-                            <MenuItem
-                                onClick={() => {
-                                    setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
-                                    setIsBulkEdit(true);
-                                    handleClose();
-                                }}
-                            >
-                                Bulk Edit
-                            </MenuItem>
-                        </HtmlTooltip>
-                        <HtmlTooltip
-                            title={
-                                Boolean(selectedServices.length)
-                                    ? 'Delete selected records'
-                                    : 'Select records to delete'
-                            }
+                            {isMobile && !isTablet ? 'Service' : `Add Service`}
+                        </Button>
+                    </Box>
+                    <Box display="flex" ml={1}>
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            size="small"
+                            id="demo-positioned-button"
+                            onClick={handleClick}
+                            disabled={!Boolean(selectedServices?.length)}
+                            endIcon={<BiChevronDown />}
                         >
-                            <MenuItem
-                                disabled={isDeleting}
-                                onClick={() => {
-                                    setDeleteData(selectedServices?.map(d => {
-                                        return (
-                                            {
-                                                id: d?._id
-                                            }
-                                        )
-                                    }))
-                                    handleClose();
-                                }}
+                            Actions
+                        </Button>
+                        <Menu
+                            anchorEl={anchorEl}
+                            keepMounted
+                            open={open}
+                            onClose={handleClose}
+                            getContentAnchorEl={null}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right'
+                            }}
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right'
+                            }}
+                        >
+                            <HtmlTooltip
+                                title={
+                                    Boolean(selectedServices.length)
+                                        ? 'Bulk edit selected records'
+                                        : 'Select records to edit'
+                                }
                             >
-                                Delete
-                            </MenuItem>
-                        </HtmlTooltip>
-                    </Menu>
+                                <MenuItem
+                                    onClick={() => {
+                                        setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
+                                        setIsBulkEdit(true);
+                                        handleClose();
+                                    }}
+                                >
+                                    Bulk Edit
+                                </MenuItem>
+                            </HtmlTooltip>
+                            <HtmlTooltip
+                                title={
+                                    Boolean(selectedServices.length)
+                                        ? 'Delete selected records'
+                                        : 'Select records to delete'
+                                }
+                            >
+                                <MenuItem
+                                    disabled={isDeleting}
+                                    onClick={() => {
+                                        setDeleteData(selectedServices?.map(d => {
+                                            return (
+                                                {
+                                                    id: d?._id
+                                                }
+                                            )
+                                        }))
+                                        handleClose();
+                                    }}
+                                >
+                                    Delete
+                                </MenuItem>
+                            </HtmlTooltip>
+                        </Menu>
+                    </Box>
                 </Box>
-            </Box>
+            }
             {columns && rowsData ? (
                 <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
                     <CustomReactTable
@@ -378,11 +394,10 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom }) => {
                         onSelect={setSelectedServices}
                         childrenProperty="subRows"
                         uniqueKey="_id"
+                        hideSelection={!allowedToEdit}
+                        hideAction={!allowedToEdit}
                         renderedFrom="field_ticket_add_service"
                         isClientSideGrid={true}
-                        onSaveEdit={() => {
-
-                        }}
                         hideExpander={true}
                     />
                 </Box>
