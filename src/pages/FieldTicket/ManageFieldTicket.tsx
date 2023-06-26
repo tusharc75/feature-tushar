@@ -108,7 +108,6 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
-        console.log(referenceData, renderedFrom, 'referenceData', fieldsDataForCreate);
         if (referenceData) {
           if (renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0`) {
             fieldsDataForCreate?.forEach((e) => {
@@ -118,28 +117,35 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                 e.isUneditable = true;
               }
             });
-            tempInitialData['warehouse'] = referenceData?.warehouse;
-            tempInitialData['estimateStartDate'] = referenceData?.startDateTime;
-            tempInitialData['estimateEndDate'] = referenceData?.endDateTime;
-            tempInitialData['wellName'] = referenceData?.wellName;
-            tempInitialData['wellNumber'] = referenceData?.wellNumber;
-            tempInitialData['currency'] = referenceData?.currency;
-            tempInitialData['technician'] = referenceData?.technician;
-            tempInitialData['service'] = referenceData?.service;
-          } else {
-            // tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
-            tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;
-            tempInitialData['service'] = referenceData?.service;
-            tempInitialData['startDateTime'] = referenceData?.startDateTime;
-            tempInitialData['endDateTime'] = referenceData?.endDateTime;
-            tempInitialData['technician'] = referenceData?.technician;
+            if (referenceData?.warehouse && fieldsDataForCreate?.some((e) => e.fieldName === 'warehouse')) {
+              tempInitialData['warehouse'] = referenceData?.warehouse;
+            }
+            if (referenceData?.estimateStartDate && fieldsDataForCreate?.some((e) => e.fieldName === 'estimateStartDate')) {
+              tempInitialData['estimateStartDate'] = referenceData?.estimateStartDate;
+            }
+            if (referenceData?.estimateEndDate && fieldsDataForCreate?.some((e) => e.fieldName === 'estimateEndDate')) {
+              tempInitialData['estimateEndDate'] = referenceData?.estimateEndDate;
+            }
+            if (referenceData?.wellName && fieldsDataForCreate?.some((e) => e.fieldName === 'wellName')) {
+              tempInitialData['wellName'] = referenceData?.wellName;
+            }
+            if (referenceData?.wellNumber && fieldsDataForCreate?.some((e) => e.fieldName === 'wellNumber')) {
+              tempInitialData['wellNumber'] = referenceData?.wellNumber;
+            }
+            if (referenceData?.currency && fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+              tempInitialData['currency'] = referenceData?.currency;
+            }
+            if (referenceData?.technician && fieldsDataForCreate?.some((e) => e.fieldName === 'technician')) {
+              tempInitialData['technician'] = referenceData?.technician;
+            }
+            if (referenceData?.service && fieldsDataForCreate?.some((e) => e.fieldName === 'service')) {
+              tempInitialData['service'] = referenceData?.service;
+            }
           }
         }
-
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           tempInitialData['currency'] = user.user?.brandCurrency;
         }
-
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -263,13 +269,12 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
-                    : `Create ${routes?.fieldTicket?.title}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
+                  : `Create ${routes?.fieldTicket?.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
