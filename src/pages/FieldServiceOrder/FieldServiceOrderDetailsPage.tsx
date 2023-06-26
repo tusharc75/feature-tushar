@@ -9,7 +9,14 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { fieldServiceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps, SERVICE_ORDER_STATUS, sidebarResource } from '../../constants/helpers';
+import {
+  fieldServiceOrder,
+  ACTIVITY_RESOURCE,
+  getUniqueCurrencies,
+  serviceOrderSteps,
+  SERVICE_ORDER_STATUS,
+  sidebarResource
+} from '../../constants/helpers';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
@@ -29,7 +36,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ServiceOrderViews from './RoadMapViews';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
-import FieldTicket from "./FieldTicket"
+import FieldTicket from './FieldTicket';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -61,6 +68,7 @@ const ServiceOrderDetailsPage = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [steppers, setSteppers] = useState([]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -141,19 +149,20 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const getServiceOrderFields = async () => {
     try {
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
-      response?.data?.data.some((o) => {
+      const response: any = await axiosInstance().get(`/field/field-policy?resource=${sidebarResource.fieldServiceOrder}`);
+      response?.data?.data?.field.some((o) => {
         if (o?.fieldData?.fieldName === 'status') {
           setStatusOptions([...o.fieldData.option]);
           return true;
         }
       });
-      setServiceOrderFields(response?.data?.data);
+      setServiceOrderFields(response?.data?.data.field);
+      setSteppers(response?.data?.data?.policy.stepper);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -329,19 +338,15 @@ const ServiceOrderDetailsPage = () => {
           <Steps
             isNextStep={false}
             nextStep={nextStep}
-            steps={serviceOrderSteps}
+            steps={serviceOrderSteps?.filter((step) => steppers?.includes(step?.name)) || []}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[SERVICE_ORDER_STATUS.completed].includes(serviceOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
           <ContentFullScreen title={serviceOrderSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-          {currentStep === 0 && serviceOrderData && (
-             <FieldTicket 
-              fieldServiceOrder={id} 
-              setNextStep={setNextStep}
-              renderedFrom={`${renderedFrom}_grid-0`}
-             />
+            {currentStep === 0 && serviceOrderData && (
+              <FieldTicket fieldServiceOrder={id} setNextStep={setNextStep} renderedFrom={`${renderedFrom}_grid-0`} />
             )}
             {currentStep === 1 && serviceOrderData && (
               <Services
