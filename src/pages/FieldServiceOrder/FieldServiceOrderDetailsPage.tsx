@@ -68,7 +68,8 @@ const ServiceOrderDetailsPage = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [steppers, setSteppers] = useState([]);
+
+  const [steps, setSteps] = useState([]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -92,7 +93,7 @@ const ServiceOrderDetailsPage = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
-      updateProcessStatus(serviceOrderSteps[currentStep]?.name);
+      updateProcessStatus(steps[currentStep]?.name);
     }
   }, [currentStep]);
 
@@ -127,8 +128,8 @@ const ServiceOrderDetailsPage = () => {
       setServiceOrderData(data);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       setCurrentStep(
-        serviceOrderSteps.map((s) => s.name).indexOf(data?.processStatus) !== -1
-          ? serviceOrderSteps.map((s) => s.name).indexOf(data?.processStatus)
+        steps.map((s) => s.name).indexOf(data?.processStatus) !== -1
+          ? steps.map((s) => s.name).indexOf(data?.processStatus)
           : 0
       );
       if (isAllowedToEdit && openEdit === 'true') {
@@ -149,7 +150,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const getServiceOrderFields = async () => {
@@ -162,7 +163,14 @@ const ServiceOrderDetailsPage = () => {
         }
       });
       setServiceOrderFields(response?.data?.data.field);
-      setSteppers(response?.data?.data?.policy.stepper);
+
+      const policy = response?.data?.data?.policy;
+      if (policy.stepper?.length) {
+        setSteps(serviceOrderSteps?.filter((step) => policy?.stepper?.includes(step?.name)));
+      }
+      else {
+        setSteps(serviceOrderSteps);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -338,17 +346,20 @@ const ServiceOrderDetailsPage = () => {
           <Steps
             isNextStep={false}
             nextStep={nextStep}
-            steps={serviceOrderSteps?.filter((step) => steppers?.includes(step?.name)) || []}
+            steps={steps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[SERVICE_ORDER_STATUS.completed].includes(serviceOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
-          <ContentFullScreen title={serviceOrderSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {currentStep === 0 && serviceOrderData && (
-              <FieldTicket fieldServiceOrder={id} setNextStep={setNextStep} renderedFrom={`${renderedFrom}_grid-0`} />
+          <ContentFullScreen title={steps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            {steps[currentStep]?.name === serviceOrderSteps[0]?.name && serviceOrderData && (
+              <FieldTicket
+                fieldServiceOrder={id}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-0`} />
             )}
-            {currentStep === 1 && serviceOrderData && (
+            {steps[currentStep]?.name === serviceOrderSteps[1]?.name && serviceOrderData && (
               <Services
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -357,7 +368,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {currentStep === 2 && serviceOrderData && (
+            {steps[currentStep]?.name === serviceOrderSteps[2]?.name && serviceOrderData && (
               <Products
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -366,7 +377,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {currentStep === 3 && serviceOrderData && (
+            {steps[currentStep]?.name === serviceOrderSteps[3]?.name && serviceOrderData && (
               <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -376,7 +387,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {currentStep === 4 && serviceOrderData && (
+            {steps[currentStep]?.name === serviceOrderSteps[4]?.name && serviceOrderData && (
               <TechnicianDispatch
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -385,7 +396,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {currentStep === 5 && serviceOrderData && (
+            {steps[currentStep]?.name === serviceOrderSteps[5]?.name && serviceOrderData && (
               <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
