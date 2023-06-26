@@ -15,7 +15,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 
-const FieldTicket = ({ fieldServiceOrder, setNextStep, renderedFrom }) => {
+const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = useState({ open: false, id: null });
@@ -68,7 +68,7 @@ const FieldTicket = ({ fieldServiceOrder, setNextStep, renderedFrom }) => {
   };
 
   const fetchData = () => {
-    setNextStep(false)
+    setNextStep(false);
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
@@ -105,7 +105,7 @@ const FieldTicket = ({ fieldServiceOrder, setNextStep, renderedFrom }) => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-        setNextStep(true)
+        setNextStep(true);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -120,7 +120,7 @@ const FieldTicket = ({ fieldServiceOrder, setNextStep, renderedFrom }) => {
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    filterByIds.push({ field: 'fieldServiceOrder', term: fieldServiceOrder });
+    filterByIds.push({ field: 'fieldServiceOrder', term: serviceOrderData?._id });
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -213,7 +213,7 @@ const FieldTicket = ({ fieldServiceOrder, setNextStep, renderedFrom }) => {
               }}
               startIcon={<AddOutlined />}
             >
-            {`Create ${routes.fieldTicket.title}`}
+              {`Create ${routes.fieldTicket.title}`}
             </Button>
           </Grid>
           <Grid item xs={9} md={9} sm={9}>
@@ -280,7 +280,16 @@ const FieldTicket = ({ fieldServiceOrder, setNextStep, renderedFrom }) => {
         <ManageFieldTicket
           id={openDialog.id}
           onClose={() => setOpenDialog({ open: false, id: null })}
-          referenceData={{ fieldServiceOrder: fieldServiceOrder }}
+          referenceData={{
+            fieldServiceOrder: serviceOrderData?._id,
+            ...serviceOrderData,
+            warehouse: serviceOrderData?.warehouse?.optionValue || '',
+            wellName: serviceOrderData?.wellName?.optionValue || '',
+            wellNumber: serviceOrderData?.wellNumber?.map((m) => m.optionValue) || [],
+            startDateTime: serviceOrderData?.estimateStartDate || '',
+            endDateTime: serviceOrderData?.estimateEndDate || '',
+            service: serviceOrderData?.service?.optionValue || ''
+          }}
           onSuccess={() => {
             setOpenDialog({ open: false, id: null });
             fetchData();

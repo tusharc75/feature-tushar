@@ -11,7 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, generateUniqueIdOnly, serviceMaster, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, RESOURCE_LABEL, generateUniqueIdOnly, serviceMaster, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
@@ -23,7 +23,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { is } from 'date-fns/locale';
 import moment from 'moment';
 
-const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false, renderedFrom = ''  }) => {
+const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false, renderedFrom = '' }) => {
   const {
     state: { user }
   }: any = useData();
@@ -108,9 +108,9 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
-
+        console.log(referenceData, renderedFrom, 'referenceData', fieldsDataForCreate);
         if (referenceData) {
-          if(renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0` ) {
+          if (renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0`) {
             fieldsDataForCreate?.forEach((e) => {
               if (e.fieldName === 'fieldServiceOrder') {
                 tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;
@@ -118,8 +118,16 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                 e.isUneditable = true;
               }
             });
+            tempInitialData['warehouse'] = referenceData?.warehouse;
+            tempInitialData['estimateStartDate'] = referenceData?.startDateTime;
+            tempInitialData['estimateEndDate'] = referenceData?.endDateTime;
+            tempInitialData['wellName'] = referenceData?.wellName;
+            tempInitialData['wellNumber'] = referenceData?.wellNumber;
+            tempInitialData['currency'] = referenceData?.currency;
+            tempInitialData['technician'] = referenceData?.technician;
+            tempInitialData['service'] = referenceData?.service;
           } else {
-            tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
+            // tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
             tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;
             tempInitialData['service'] = referenceData?.service;
             tempInitialData['startDateTime'] = referenceData?.startDateTime;
@@ -280,42 +288,46 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                     fullWidth
                   />
                 </Form>
-                <div className={'detail-box-content'}>
-                  <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                  <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Step Information</h2>
-                </div>
-                <Box marginY={2} />
-                <Autocomplete
-                  multiple
-                  id="Steps Performed"
-                  options={stepOptions?.map((e) => e?.optionLabel) || []}
-                  defaultValue={completeSteps?.map((e) => e?.optionLabel) || []}
-                  freeSolo
-                  getOptionLabel={(option: any) => option}
-                  renderTags={(value, getTagProps) =>
-                    value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
-                  }
-                  onChange={(event, newValue) => {
-                    const updatedValues = newValue?.map((e) => {
-                      const step = referenceData?.steps?.find((step) => step?.optionLabel === e);
-                      if (step) {
-                        return {
-                          optionLabel: step?.optionLabel,
-                          optionValue: step?.optionValue
-                        };
-                      } else {
-                        return {
-                          optionLabel: e,
-                          optionValue: null
-                        };
+                {initialData?.fields?.find((f) => f?.fieldName === 'service' && f?.lookupResource === RESOURCE_LABEL.serviceMaster) && (
+                  <>
+                    <div className={'detail-box-content'}>
+                      <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                      <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Step Information</h2>
+                    </div>
+                    <Box marginY={2} />
+                    <Autocomplete
+                      multiple
+                      id="Steps Performed"
+                      options={stepOptions?.map((e) => e?.optionLabel) || []}
+                      defaultValue={completeSteps?.map((e) => e?.optionLabel) || []}
+                      freeSolo
+                      getOptionLabel={(option: any) => option}
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
                       }
-                    });
-                    setCompleteSteps(updatedValues);
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} variant="outlined" label="Steps Performed" size="small" placeholder="Steps Performed" />
-                  )}
-                />
+                      onChange={(event, newValue) => {
+                        const updatedValues = newValue?.map((e) => {
+                          const step = referenceData?.steps?.find((step) => step?.optionLabel === e);
+                          if (step) {
+                            return {
+                              optionLabel: step?.optionLabel,
+                              optionValue: step?.optionValue
+                            };
+                          } else {
+                            return {
+                              optionLabel: e,
+                              optionValue: null
+                            };
+                          }
+                        });
+                        setCompleteSteps(updatedValues);
+                      }}
+                      renderInput={(params) => (
+                        <TextField {...params} variant="outlined" label="Steps Performed" size="small" placeholder="Steps Performed" />
+                      )}
+                    />
+                  </>
+                )}
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button
