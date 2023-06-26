@@ -50,6 +50,7 @@ import Roles from './pages/Role';
 import RoleDetailsPage from './pages/Role/RoleDetailsPage';
 import Product from './pages/Product';
 import TermsAndConditions from './pages/TermsAndConditions';
+import TermsAndConditionDetail from './pages/TermsAndConditions/TermsAndConditionDetail';
 import PriceTemplate from './pages/PriceTemplate';
 import CreatePriceTemplate from './pages/PriceTemplate/CreatePriceTemplate';
 import ProductBuilder from './pages/ProductBuilder';
@@ -577,8 +578,11 @@ function App() {
             <PrivateRoute exact path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}>
               <CreateFormBuilder />
             </PrivateRoute>
-            <PrivateRoute exact path={termsAndCondition.route}>
-              <TermsAndConditions termsAndConditionBreadcrumb={routes.termsAndConditions} />
+            <PrivateRoute exact path={routes.termsAndConditions.path}>
+              <TermsAndConditions />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.termsAndConditionsDetails.path}/:id`}>
+              <TermsAndConditionDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.priceTemplate.path}>
               <PriceTemplate />

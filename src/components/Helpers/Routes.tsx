@@ -165,7 +165,14 @@ const routes = {
       storedRoutes && storedRoutes.termsAndConditions && storedRoutes.termsAndConditions.title
         ? storedRoutes.termsAndConditions?.title
         : RESOURCE_LABEL.termsAndConditions,
-    path: '/terms-conditions'
+    path: '/terms-and-conditions'
+  },
+  termsAndConditionsDetails: {
+    title:
+      storedRoutes && storedRoutes.termsAndConditions && storedRoutes.termsAndConditions.title
+        ? storedRoutes.termsAndConditions?.title
+        : RESOURCE_LABEL.termsAndConditions,
+    path: '/terms-and-conditions/detail'
   },
   profilePage: {
     title: 'Profile',

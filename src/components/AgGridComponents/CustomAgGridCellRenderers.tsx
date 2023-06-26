@@ -78,7 +78,7 @@ export const LinkRenderer = (params) =>
     <>
       <Link
         className="link text-truncate"
-        to={params?.isForPopup ? `${params?.pathName}?id=${params?.data[params?.property]}` : `${params?.pathName}/${params?.data[params?.property]}`}
+        to={`${params?.pathName}/${params?.data[params?.property]}`}
         title={params?.value}
         target={params?.openInNewTab ? '_blank' : '_self'}
       >

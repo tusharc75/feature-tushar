@@ -46,11 +46,6 @@ export const detailPagePath = {
   supplierContact: routes?.supplierContactDetail?.path
 };
 
-export const hasDetailPageAsPopup = {
-  termsConditions: routes?.termsAndConditions?.path
-};
-
-export const popupResources = ['Terms & Conditions'];
 
 export const disabledColumns = {
   [routes.rentalManagementDetail.title]: [],
@@ -250,25 +245,11 @@ export default function useColumns() {
         };
       } else if (field?.lookup) {
         let joinedFieldName = field?.fieldName.indexOf(' ') > 0 ? camelCase(field?.fieldName) : field?.fieldName;
-        let pathName = '';
-        let isForPopup = false;
-        if (hasDetailPageAsPopup[joinedFieldName]) {
-          isForPopup = true;
-          pathName = `${hasDetailPageAsPopup[joinedFieldName]}`;
-        } else if (field?.lookupResource && popupResources.indexOf(field?.lookupResource) >= 0) {
-          pathName = routes[`${camelCase(field?.lookupResource)}`]?.path ?? '';
-          isForPopup = true;
-        } else {
-          pathName = detailPagePath[joinedFieldName]
-            ? detailPagePath[joinedFieldName]
-            : field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-              ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-              : routes[joinedFieldName]?.path
-                ? routes[joinedFieldName]?.path
-                : routes[`${joinedFieldName}Detail`]?.path
-                  ? routes[`${joinedFieldName}Detail`]?.path
-                  : `${camelCase(field?.lookupResource)}/detail`;
-        }
+
+        let pathName = routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+          ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+          : `${camelCase(field?.lookupResource)}/detail`;
+
         return {
           columnData: {
             ...commonFieldData,
@@ -277,7 +258,6 @@ export default function useColumns() {
             cellRendererParams: {
               pathName: pathName,
               property: joinedFieldName + 'Id',
-              isForPopup: isForPopup,
               openInNewTab: openInNewTab,
               more: `rest${joinedFieldName}`
             }

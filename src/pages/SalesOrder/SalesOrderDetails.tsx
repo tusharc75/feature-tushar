@@ -20,7 +20,6 @@ import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import Material from './Material';
 import AdditionalCost from './AdditionalCost';
-import LoadingTicket from './LoadingTicket';
 import Invoice from './Invoice';
 import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
