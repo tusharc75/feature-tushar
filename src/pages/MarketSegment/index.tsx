@@ -173,7 +173,7 @@ const MarketSegment = () => {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -350,8 +350,8 @@ const MarketSegment = () => {
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <SearchBox
-                  onSearch={handleSearch}
-                  searchbox={styles.search_box_input}
+                  onChange={handleSearch}
+                  className={styles.search_box_input}
                   width="242px"
                   size="small"
                   value={search}
@@ -450,7 +450,7 @@ const MarketSegment = () => {
             owerCollaboratorInitialsOrImages=""
             onCreate={() => setOpen({ open: true, idToClone: null, isClone: null })}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (

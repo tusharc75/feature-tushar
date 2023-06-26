@@ -104,8 +104,8 @@ function Dropdown({
 
   return (
     <Box key={fieldData?.lookupResource}>
-      <Grid container spacing={1} style={{ alignItems: 'center' }}>
-        <Grid item style={{ flexGrow: 1, maxWidth: 419 }}>
+      <Grid container spacing={1} style={{ alignItems: 'center', flexWrap: 'nowrap' }}>
+        <Grid item style={{ flexGrow: 1 }}>
           <InfoLabel
             info={fieldData?.tooltipMessage}
             isTooltip={fieldData?.isTooltip}
@@ -126,17 +126,22 @@ function Dropdown({
                     : []
                 }
                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                ChipProps={{
+                  style: {
+                    maxWidth: 330
+                  }
+                }}
                 onChange={
                   onChange
                     ? onChange
                     : (e, value: any, reason) => {
-                      if (setFieldValue) {
-                        setFieldValue(
-                          name,
-                          value.map((val) => val.optionValue)
-                        );
+                        if (setFieldValue) {
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
+                        }
                       }
-                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -164,14 +169,14 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, val) => {
-                      if (setFieldValue) {
-                        handleChange(name, val && val.optionValue ? val.optionValue : '');
-                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                        fieldChange?.forEach((val: any) => {
-                          setFieldValue(val.fieldName, val.value);
-                        });
+                        if (setFieldValue) {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
+                          });
+                        }
                       }
-                    }
                 }
                 selectOnFocus
                 clearOnBlur
@@ -608,7 +613,7 @@ function Dropdown({
                       contactId={null}
                       onClose={() => setLookupDialog(false)}
                       isRedirectToDetailPage={false}
-                      referenceData={{ 'accountName': values[fieldData.lookupDependentOn] }}
+                      referenceData={{ accountName: values[fieldData.lookupDependentOn] }}
                       onSuccess={(data) => {
                         setLookupDialog(false);
                         if (data?._id) {
@@ -652,7 +657,7 @@ function Dropdown({
                       isRedirectToDetailPage={false}
                       isClone={false}
                       contactId={null}
-                      referenceData={{ 'accountName': values[fieldData.lookupDependentOn] }}
+                      referenceData={{ accountName: values[fieldData.lookupDependentOn] }}
                       onSuccess={(data) => {
                         setLookupDialog(false);
                         if (data?._id) {

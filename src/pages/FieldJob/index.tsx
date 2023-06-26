@@ -15,13 +15,7 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { MdAdd } from 'react-icons/md';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
-import {
-  getLocalStorageArrayData,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  removeLocalStorage,
-  sidebarResource
-} from 'src/constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -88,7 +82,7 @@ const FieldJob = () => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.fieldJob?.isDelete
+          finalObject['canDelete'] = permissions?.fieldJob?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.fieldJob?.isUpdate;
 
@@ -119,17 +113,17 @@ const FieldJob = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter =  `?page=${page}&limit=${limit}` ;
+    let deepFilter = `?page=${page}&limit=${limit}`;
 
     if (isExport) {
-      deepFilter = `?`
+      deepFilter = `?`;
     }
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -246,7 +240,6 @@ const FieldJob = () => {
     fetchFieldJobData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -285,8 +278,8 @@ const FieldJob = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile ? '200px' : '242px'}
                     style={isMobile ? { flex: 1 } : {}}
                     size="small"

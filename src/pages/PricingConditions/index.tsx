@@ -160,7 +160,7 @@ const PricingConditions = () => {
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -311,8 +311,8 @@ const PricingConditions = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
-                    onSearch={onSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={onSearch}
+                    className={styles.search_box_input}
                     value={search}
                     size="small"
                     placeholder="Search"

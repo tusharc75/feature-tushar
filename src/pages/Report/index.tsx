@@ -245,18 +245,6 @@ const Report = () => {
       });
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
 
   // Create and return query for filters
   const getFilter = (isExport = false) => {
@@ -332,7 +320,7 @@ const Report = () => {
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         deepFilter.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -459,7 +447,6 @@ const Report = () => {
                 </Grid>
               </Grid>
             </div>
-            {/* <hr /> */}
             {!showGrid ? (
               <ReportFilters
                 resourceColumns={resourceColumns}

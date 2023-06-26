@@ -41,7 +41,6 @@ import { Link } from 'react-router-dom';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
-
 let searchTimeout;
 
 const AddSerializedAsset = ({
@@ -131,15 +130,17 @@ const AddSerializedAsset = ({
         };
         setFrameWorkComponent({ ...tempFrameworkComponent, rentalJobRenderer: RentalJobRenderer });
 
-        const inUseColoumns: any = [{
-          field: 'rentalJob',
-          headerName: 'Rental Job',
-          show: true,
-          filter: true,
-          sortable: true,
-          lockPosition: true,
-          cellRenderer: 'rentalJobRenderer'
-        }];
+        const inUseColoumns: any = [
+          {
+            field: 'rentalJob',
+            headerName: 'Rental Job',
+            show: true,
+            filter: true,
+            sortable: true,
+            lockPosition: true,
+            cellRenderer: 'rentalJobRenderer'
+          }
+        ];
 
         columns = [...inUseColoumns, ...columns, ...getStaticFields()];
         setColumns([...columns]);
@@ -147,7 +148,7 @@ const AddSerializedAsset = ({
   };
 
   const RentalJobRenderer = (params) => (
-    <Link className="link text-truncate" target='_blank' to={`${routes.rentalManagementDetail.path}/${params.data?.rentalJob?.optionValue}`}>
+    <Link className="link text-truncate" target="_blank" to={`${routes.rentalManagementDetail.path}/${params.data?.rentalJob?.optionValue}`}>
       {params?.data?.rentalJob?.optionLabel}
     </Link>
   );
@@ -195,25 +196,27 @@ const AddSerializedAsset = ({
     }
     let api = '';
     if (Number(tabValue) === 2) {
-      api = `${serializedAsset.api}/in-use${queryString}&rental=${referenceData?._id}`
+      api = `${serializedAsset.api}/in-use${queryString}&rental=${referenceData?._id}`;
     } else {
-      api = `${serializedAsset.api}${queryString}`
+      api = `${serializedAsset.api}${queryString}`;
     }
-    axiosInstance().get(api).then(({ data: { data, count } }) => {
-      const rows = data?.map((u) => {
-        let finalObject = prepareDataForGrid(u);
-        finalObject['isChecked'] = false;
-        if (Number(tabValue) === 2) {
-          finalObject['rentalJob'] = u.loadingTicket?.rentalJob;
-          finalObject['loadingTicket'] = u.loadingTicket;
-        }
-        return finalObject;
-      });
-      dispatch({ type: 'initialize', data: rows, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    })
+    axiosInstance()
+      .get(api)
+      .then(({ data: { data, count } }) => {
+        const rows = data?.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          finalObject['isChecked'] = false;
+          if (Number(tabValue) === 2) {
+            finalObject['rentalJob'] = u.loadingTicket?.rentalJob;
+            finalObject['loadingTicket'] = u.loadingTicket;
+          }
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
@@ -354,8 +357,11 @@ const AddSerializedAsset = ({
 
   const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
-    dispatch({ type: 'selection', selectedRecords: [] });
-    localStorage.removeItem(localStorageSelectedRecords);
+    if (((tabValue === 0 || tabValue === 1) && newValue === 2) ||
+      (newValue === 0 || newValue === 1) && tabValue === 2) {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      localStorage.removeItem(localStorageSelectedRecords);
+    }
     // if (newValue === 0) {
     //   setSelectedWarehouse(filterByPlant);
     // } else {
@@ -364,10 +370,9 @@ const AddSerializedAsset = ({
   };
 
   const handleTicketDialog = () => {
+    const loadingTicket = getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0].loadingTicket;
 
-    const loadingTicket = getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0].loadingTicket
-
-    const assetsAdd: any = []
+    const assetsAdd: any = [];
     const assets = [...getLocalStorageArrayData(`${localStorageSelectedRecords}`)];
     selectedProducts?.forEach((e: any) => {
       if (e.type === 'product') {
@@ -388,7 +393,7 @@ const AddSerializedAsset = ({
     });
 
     if (assetsAdd?.length === 0) {
-      return
+      return;
     }
 
     const data = {};
@@ -425,22 +430,26 @@ const AddSerializedAsset = ({
     deliveryTicketData._id = data._id;
     deliveryTicketData.rentalJob = referenceData?._id;
     deliveryTicketData.ticketType = DELIVERY_TICKET_TYPE.loading;
-    axiosInstance().post(`${rentalManagement.api}/${referenceData?._id}/inventory`, { "products": showTicketDialog.assets })
+    axiosInstance()
+      .post(`${rentalManagement.api}/${referenceData?._id}/inventory`, { products: showTicketDialog.assets })
       .then(({ data }) => {
-        axiosInstance().post(`${deliveryTicket.api}/auto-create-ticket`, deliveryTicketData).then(({ data }) => {
-          setShowTicketDialog({ open: false, data: {}, assets: [] });
-          handleSuccess()
-        }).catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-      }).catch((error) => {
+        axiosInstance()
+          .post(`${deliveryTicket.api}/auto-create-ticket`, deliveryTicketData)
+          .then(({ data }) => {
+            setShowTicketDialog({ open: false, data: {}, assets: [] });
+            handleSuccess();
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      })
+      .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const handleAutoTransferAssets = () => {
-
-    const assetsAdd: any = []
+    const assetsAdd: any = [];
     const assets = [...getLocalStorageArrayData(`${localStorageSelectedRecords}`)];
 
     selectedProducts?.forEach((e: any) => {
@@ -462,13 +471,15 @@ const AddSerializedAsset = ({
       }
     });
 
-    axiosInstance().post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, { "assets": assetsAdd, rentalJob: referenceData?._id })
+    axiosInstance()
+      .post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, { assets: assetsAdd, rentalJob: referenceData?._id })
       .then(({ data }) => {
-        handleSuccess()
-      }).catch((error) => {
+        handleSuccess();
+      })
+      .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   return (
     <Fragment>
@@ -478,7 +489,7 @@ const AddSerializedAsset = ({
           onClose={handleSerializedAssetClose}
         ></CustomDialogHeader>
         <CustomDialogContent>
-          <Box pt={1} pb={1} className='main-container-v1'>
+          <Box pt={1} pb={1} className="main-container-v1">
             <Grid container spacing={2}>
               <Grid item xs={12} md={5}>
                 <Box display="flex">
@@ -553,23 +564,24 @@ const AddSerializedAsset = ({
                         options={warehouseOption}
                         getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                         getOptionSelected={(option: any, val) => option.optionValue === val}
-                        value={warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
-                          ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
-                          : ''
+                        value={
+                          warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
+                            ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
+                            : ''
                         }
                         onChange={(e, val) => {
-                          if (selectedRecords.length > 0 && val?.optionValue !== selectedWarehouse) {
-                            toastConfig.setToastConfig({
-                              open: true,
-                              message: 'All pre-selected records will be deselected if you change the plant.',
-                              type: 'warning'
-                            });
-                            dispatch({
-                              type: 'selection',
-                              selectedRecords: []
-                            });
-                            localStorage.removeItem(localStorageSelectedRecords);
-                          }
+                          // if (selectedRecords.length > 0 && val?.optionValue !== selectedWarehouse) {
+                          //   toastConfig.setToastConfig({
+                          //     open: true,
+                          //     message: 'All pre-selected records will be deselected if you change the plant.',
+                          //     type: 'warning'
+                          //   });
+                          //   dispatch({
+                          //     type: 'selection',
+                          //     selectedRecords: []
+                          //   });
+                          //   localStorage.removeItem(localStorageSelectedRecords);
+                          // }
                           setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
                         }}
                         renderInput={(params) => (
@@ -593,13 +605,13 @@ const AddSerializedAsset = ({
                 <Box display="flex">
                   <Box flexGrow={1}>
                     <SearchBox
-                      onSearch={handleSearch}
-                      searchbox="terms_header_search_bar"
+                      onChange={handleSearch}
+                      className="terms_header_search_bar"
                       value={search}
                       width={isMobile && !isTablet ? '75%' : '100%'}
                     />
                   </Box>
-                  {(Number(tabValue) === 0 || Number(tabValue) === 1) &&
+                  {(Number(tabValue) === 0 || Number(tabValue) === 1) && (
                     <Fragment>
                       {permissions?.transferAsset?.isCreate &&
                         getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 &&
@@ -641,14 +653,12 @@ const AddSerializedAsset = ({
                             onClick={() => {
                               if (referenceType === 'Rental Job' && checkMTRValidation) {
                                 if ([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.mtrAttached !== true)) {
-                                  setMtrConfirmBox(true)
+                                  setMtrConfirmBox(true);
+                                } else {
+                                  addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                                 }
-                                else {
-                                  addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])
-                                }
-                              }
-                              else {
-                                addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])
+                              } else {
+                                addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                               }
                             }}
                             variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -668,15 +678,15 @@ const AddSerializedAsset = ({
                         </HtmlTooltip>
                       </Box>
                     </Fragment>
-                  }
-                  {(Number(tabValue) === 2) &&
+                  )}
+                  {Number(tabValue) === 2 && (
                     <Box ml={2}>
-                      <HtmlTooltip title={'Add to Job'} >
+                      <HtmlTooltip title={'Add to Job'}>
                         <Button
                           color="primary"
                           size="small"
                           onClick={() => {
-                            setInuseAssetConfirmBox(true)
+                            setInuseAssetConfirmBox(true);
                           }}
                           variant={isMobile && !isTablet ? 'text' : 'contained'}
                           disabled={isAdding || checkUniqRentalJob()}
@@ -690,13 +700,13 @@ const AddSerializedAsset = ({
                         </Button>
                       </HtmlTooltip>
                     </Box>
-                  }
+                  )}
                 </Box>
               </Grid>
             </Grid>
             {referenceType === 'Rental Job' && (
               <Grid container spacing={2}>
-                <Grid item >
+                <Grid item>
                   <Tabs
                     className="new-tab-container-v1"
                     variant="scrollable"
@@ -712,7 +722,8 @@ const AddSerializedAsset = ({
                       }
                     }}
                   >
-                    <Tab className={'tabLayout'}
+                    <Tab
+                      className={'tabLayout'}
                       value={0}
                       label={<div className="d-flex align-items-center tab-font">Assets</div>}
                       {...a11yProps(0)}
@@ -791,7 +802,7 @@ const AddSerializedAsset = ({
           products={[]}
           onClose={() => setShowTicketDialog({ open: false, data: {}, assets: [] })}
           onSuccess={(data) => {
-            handleCreateLoadingTicketAddAsstes(data)
+            handleCreateLoadingTicketAddAsstes(data);
           }}
         />
       )}
@@ -804,7 +815,7 @@ const AddSerializedAsset = ({
             setMtrConfirmBox(false);
           }}
           onOk={() => {
-            addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)])
+            addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
             setMtrConfirmBox(false);
           }}
         />
@@ -818,7 +829,7 @@ const AddSerializedAsset = ({
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            handleAutoTransferAssets()
+            handleAutoTransferAssets();
             setInuseAssetConfirmBox(false);
           }}
         />

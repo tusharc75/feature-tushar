@@ -35,11 +35,11 @@ let rentalManagementTimeout;
 const RentalManagement = () => {
   const RentalManagementType = [
     {
-      key: `All ${routes.rentalManagement.title}`,
+      key: `My ${routes.rentalManagement.title}`,
       value: 1
     },
     {
-      key: `My ${routes.rentalManagement.title}`,
+      key: `All ${routes.rentalManagement.title}`,
       value: 2
     }
   ];
@@ -238,7 +238,7 @@ const RentalManagement = () => {
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {

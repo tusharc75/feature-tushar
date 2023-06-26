@@ -109,7 +109,7 @@ const EquipmentRentalMaster = () => {
 
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -166,19 +166,6 @@ const EquipmentRentalMaster = () => {
     dateRenderer: DateRenderer
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -196,7 +183,7 @@ const EquipmentRentalMaster = () => {
             <Grid xs={6} container className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <div className="d-flex gap-2">
-                  <SearchBox onSearch={handleSearch} width="242px" size="small" value={search} />
+                  <SearchBox onChange={handleSearch} width="242px" size="small" value={search} />
                 </div>
               </Box>
             </Grid>

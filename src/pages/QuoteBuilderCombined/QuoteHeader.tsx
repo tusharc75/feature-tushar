@@ -2,19 +2,9 @@ import { useState, useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
 import {
-  FaUserTie,
-  IoFilterCircle,
-  MdAccountBalanceWallet,
   MdAdd,
   MdFilterList,
   MdSort,
-  FaCalendarDay,
-  RiTicketFill,
-  RiArrowUpDownFill,
-  RiArrowUpDownLine,
-  BsArrowUpShort,
-  BsArrowUp,
-  BsArrowDown
 } from 'react-icons/all';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
@@ -27,8 +17,29 @@ import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import routes from 'src/components/Helpers/Routes';
 
-function QuoteHeader(props) {
+function QuoteHeader({
+  selectedRecords,
+  onTypeChange,
+  options,
+  onSearch,
+  searchVal,
+  onCreate,
+  QuotePermissions,
+  showConfirmBox,
+  canDelete,
+  icon,
+  heading,
+  children,
+  showTransferEntityDialog,
+  showCloneQuoteDialog,
+  columns,
+  dispatch,
+  filters,
+  selectedType
+}) {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [isOpenDialog, setisOpenDialog] = useState(false);
 
   const {
     state: { permissions }
@@ -42,9 +53,6 @@ function QuoteHeader(props) {
     setAnchorEl(null);
   };
 
-  const [filter, setFilter] = useState('All Quotes');
-  const [open, setOpen] = useState(false);
-  const [isOpenDialog, setisOpenDialog] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -64,33 +72,12 @@ function QuoteHeader(props) {
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
-      setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
     }
   };
 
-  const {
-    selectedRecords,
-    onTypeChange,
-    options,
-    onSearch,
-    searchVal,
-    onCreate,
-    QuotePermissions,
-    showConfirmBox,
-    canDelete,
-    icon,
-    heading,
-    children,
-    showTransferEntityDialog,
-    showCloneQuoteDialog,
-    columns,
-    dispatch,
-    filters
-  } = props;
-
   let toggleInner = options && (
-    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
           <ToggleButton value={k.key} key={index}>
@@ -153,7 +140,7 @@ function QuoteHeader(props) {
           </div>
         ) : (
           options && (
-            <ToggleButtonGroup size="small" className="ml-2" value={filter} exclusive onChange={handleFilter}>
+            <ToggleButtonGroup size="small" className="ml-2" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
               {options.map((k, index) => {
                 return (
                   <ToggleButton value={k.key} key={index}>
@@ -170,8 +157,8 @@ function QuoteHeader(props) {
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
           <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox
-              onSearch={onSearch}
-              searchbox={styles.search_box_input}
+              onChange={onSearch}
+              className={styles.search_box_input}
               value={searchVal}
               size="small"
               placeholder="Search Quotes"

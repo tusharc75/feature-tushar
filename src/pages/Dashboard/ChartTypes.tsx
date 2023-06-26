@@ -100,7 +100,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
         url = `${url}${key}=${JSON.stringify(params[key].map((p: any) => p.optionValue))}&`;
       }
 
-      if (typeof params[key] === "number" && params[key] > 0) {
+      if (typeof params[key] === 'number' && params[key] > 0) {
         url = `${url}${key}=${params[key]}&`;
       }
 
@@ -307,20 +307,29 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                 <Chart
                   id={chart.uniqueId}
                   type={chart.chartType?.toLowerCase()}
-                  data={chartData}
+                  data={{
+                    ...chartData,
+                    datasets: chartData.datasets?.map((d: any) => {
+                      if (!chart.stack) {
+                        delete d.stack;
+                      }
+                      return d;
+                    })
+                  }}
                   options={{
                     maintainAspectRatio: false,
                     indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
-                    ...(chart.stack && {
-                      scales: {
-                        x: {
-                          stacked: true
-                        },
-                        y: {
-                          stacked: true
+                    ...(chart.stack &&
+                      !chartData.datasets.some((d) => d.stack === 'stacked') && {
+                        scales: {
+                          x: {
+                            stacked: true
+                          },
+                          y: {
+                            stacked: true
+                          }
                         }
-                      }
-                    })
+                      })
                   }}
                 />
               )

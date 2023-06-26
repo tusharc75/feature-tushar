@@ -205,11 +205,7 @@ const SerializedAssetTest = () => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
             e.cellStyle = (params) => {
-              if (
-                [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                  params?.data?.status
-                )
-              ) {
+              if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
                 return { backgroundColor: COLOUR_MASTER.lostAssets.background };
               }
               if (params.data?.recertDate) {
@@ -320,7 +316,7 @@ const SerializedAssetTest = () => {
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -418,19 +414,6 @@ const SerializedAssetTest = () => {
 
   const closeActions = () => {
     setAnchorEl(null);
-  };
-
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
   };
 
   return (
@@ -605,8 +588,8 @@ const SerializedAssetTest = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile ? '200px' : '242px'}
                     style={isMobile ? { flex: 1 } : {}}
                     size="small"
@@ -671,9 +654,7 @@ const SerializedAssetTest = () => {
                           }}
                           disabled={
                             selectedRecords?.filter((o) =>
-                              [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(
-                                o.status
-                              )
+                              [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(o.status)
                             ).length === selectedRecords.length
                               ? false
                               : true
@@ -690,9 +671,7 @@ const SerializedAssetTest = () => {
                             handleStatusUpdate(ASSET_STATUS.scrap);
                           }}
                           disabled={
-                            selectedRecords?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status)).length === selectedRecords.length
-                              ? false
-                              : true
+                            selectedRecords?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status)).length === selectedRecords.length ? false : true
                           }
                         >
                           {`Status Change - ${ASSET_STATUS.scrap}`}
@@ -703,9 +682,7 @@ const SerializedAssetTest = () => {
                             handleStatusUpdate(ASSET_STATUS.lost);
                           }}
                           disabled={
-                            selectedRecords?.filter((o) => ![ASSET_STATUS.lost].includes(o.status)).length === selectedRecords.length
-                              ? false
-                              : true
+                            selectedRecords?.filter((o) => ![ASSET_STATUS.lost].includes(o.status)).length === selectedRecords.length ? false : true
                           }
                         >
                           {`Status Change - ${ASSET_STATUS.lost}`}

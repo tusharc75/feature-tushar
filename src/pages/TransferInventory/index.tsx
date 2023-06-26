@@ -38,11 +38,11 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 const TransferInventory = () => {
   const TransferInventoryType = [
     {
-      key: `All ${routes.transferInventory.title}`,
+      key: `My ${routes.transferInventory.title}`,
       value: 1
     },
     {
-      key: `My ${routes.transferInventory.title}`,
+      key: `All ${routes.transferInventory.title}`,
       value: 2
     }
   ];
@@ -146,14 +146,14 @@ const TransferInventory = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
       deepFilter = `?`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -394,8 +394,8 @@ const TransferInventory = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width="242px"
                     style={isMobile && !isTablet ? { flex: 1 } : {}}
                     size="small"

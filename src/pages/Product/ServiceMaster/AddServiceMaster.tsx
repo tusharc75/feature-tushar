@@ -131,7 +131,7 @@ const AddServiceMaster = (props: Props) => {
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -154,17 +154,6 @@ const AddServiceMaster = (props: Props) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-      default:
-        return field;
-    }
-  };
-
   return (
     <Dialog open onClose={close} fullScreen>
       <CustomDialogHeader title="Add Service Master" onClose={close} showRequiredLabel={false} showManimizeMaximize={false} />
@@ -172,8 +161,8 @@ const AddServiceMaster = (props: Props) => {
         <Box mb={1} display="flex" justifyContent="flex-end" alignItems="center">
           <Box display="flex" alignItems="center">
             <SearchBox
-              onSearch={handleSearch}
-              searchbox={isMobile ? styles.search_box_input : ''}
+              onChange={handleSearch}
+              className={isMobile ? styles.search_box_input : ''}
               width="242px"
               size="small"
               value={search}

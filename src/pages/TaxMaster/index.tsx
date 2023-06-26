@@ -90,7 +90,7 @@ const TaxMaster = () => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.taxMaster?.isDelete
+          finalObject['canDelete'] = permissions?.taxMaster?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.taxMaster?.isUpdate;
 
@@ -120,11 +120,10 @@ const TaxMaster = () => {
       });
   };
 
-
   const getQueryString = (isExport = false) => {
-    let deepFilter =  `?page=${page}&limit=${limit}` ;
+    let deepFilter = `?page=${page}&limit=${limit}`;
     if (isExport) {
-      deepFilter = `?`
+      deepFilter = `?`;
     }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -135,7 +134,7 @@ const TaxMaster = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -146,7 +145,7 @@ const TaxMaster = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-   
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -250,7 +249,6 @@ const TaxMaster = () => {
     fetchTaxMasterData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -289,8 +287,8 @@ const TaxMaster = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile ? '200px' : '242px'}
                     style={isMobile ? { flex: 1 } : {}}
                     size="small"

@@ -354,25 +354,26 @@ const Warehouse = () => {
             extraImportExportLinks={
               user?.user?.brandPolicy?.warehouseAccessByUser
                 ? [
-                  {
-                    title: 'Assign Users Template',
-                    api: `warehouse/user/template`,
-                    type: 'download'
-                  },
-                  {
-                    title: 'Assign Users Export',
-                    api: `warehouse/user/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                        ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                        : ''
+                    {
+                      title: 'Assign Users Template',
+                      api: `warehouse/user/template`,
+                      type: 'download'
+                    },
+                    {
+                      title: 'Assign Users Export',
+                      api: `warehouse/user/template?export=true${
+                        getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                          ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                          : ''
                       }`,
-                    type: 'export'
-                  },
-                  {
-                    title: 'Assign Users Import',
-                    api: `warehouse/user/import`,
-                    type: 'import'
-                  }
-                ]
+                      type: 'export'
+                    },
+                    {
+                      title: 'Assign Users Import',
+                      api: `warehouse/user/import`,
+                      type: 'import'
+                    }
+                  ]
                 : []
             }
             title={routes.warehouse.title}
@@ -435,8 +436,8 @@ const Warehouse = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile && !isTablet ? '200px' : '242px'}
                     style={isMobile && !isTablet ? { flex: 1 } : {}}
                     size="small"
@@ -567,7 +568,7 @@ const Warehouse = () => {
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (

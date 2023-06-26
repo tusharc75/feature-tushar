@@ -60,6 +60,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
     const [lookupResource, setLookUpResource] = useState(null)
     const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null)
 
+
+    const [filters, setFilters] = useState([]);
     const [selectedFilters, setSelectedFilters] = useState([]);
 
     const [renderCount, setRenderCount] = useState(0)
@@ -90,6 +92,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
         endDate: moment().add(1, 'months').format('MM/DD/YYYY')
     })
 
+
+
     useEffect(() => {
         if (view === 'month') {
             setMonth({
@@ -115,35 +119,42 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
     }, [dateRange])
 
     useEffect(() => {
-        let lookupResource = null
-        FILTERS.forEach((f, i) => {
-            if (i === 0) {
-                lookupResource = f.value;
-            } else {
-                lookupResource = lookupResource + ',' + f.value;
-            }
-        });
+        let lookupResource = FILTERS?.map((e) => e.value)?.toString()
         if (lookupResource) {
-            axiosInstance()
-                .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
+            axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
                 .then(({ data: { data } }) => {
                     setLookUpResource(data)
                 })
-                .catch((err) => { });
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
         }
     }, [])
 
-    const queryData = (data) => {
-        let queryData = null;
-        data.forEach((item, i) => {
-            if (i === 0) {
-                queryData = item.optionValue;
-            } else {
-                queryData = queryData + ',' + item.optionValue
-            }
-        });
-        return queryData;
-    }
+    useEffect(() => {
+        if (selectedResource) {
+            (async () => {
+                if (selectedResource.resource === sidebarResource.planning) {
+                    const fieldData = await axiosInstance().get(`/field?resource=${selectedResource.resource}`)
+                    const categoryField = fieldData?.data?.data?.find((e) => e.fieldData.fieldName === 'category')?.fieldData;
+                    if (categoryField) {
+                        setFilters([...FILTERS?.filter((e) => e.key !== 'asset'), {
+                            label: 'Category',
+                            value: 'Category',
+                            key: 'category'
+                        }])
+                        setLookUpResource((prevState) => ({ ...prevState, Category: categoryField?.option }));
+                    }
+                    else {
+                        setFilters(FILTERS?.filter((e) => e.key !== 'asset'))
+                    }
+                }
+                else {
+                    setFilters(FILTERS)
+                }
+            })();
+        }
+    }, [selectedResource])
 
     useEffect(() => {
         setSelectedFilters([])
@@ -160,16 +171,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
     }, [selectedResource, selectedLookUpResourceData, dateRange]);
 
     const getQueryString = () => {
-        const api = '/planning-view';
         const date = `{"from": "${dateRange.estimateStartDate}", "to": "${dateRange.estimateEndDate}"}`
-        let query = `${api}?date=${date}`
-
+        let query = `?date=${date}`
         if (selectedResource) {
             query = `${query}&resource=${selectedResource.resource}`
         }
         if (selectedLookUpResourceData) {
             Object.keys(selectedLookUpResourceData).forEach((d) => {
-                const data = queryData(selectedLookUpResourceData[d])
+                const data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString()
                 query = `${query}&${d}=${data}`
             })
         }
@@ -179,7 +188,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
     const fetchData = () => {
         const queryString = getQueryString();
         axiosInstance()
-            .get(queryString)
+            .get(`/planning-view${queryString}`)
             .then(({ data: { data } }) => {
                 const rows = data?.map((d: any) => {
                     return (
@@ -289,7 +298,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
             })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
-                fetchData()
             });
     }
 
@@ -386,7 +394,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                             <Autocomplete
                                 style={{ width: "350px" }}
                                 multiple
-                                options={selectedResource && selectedResource?.resource === sidebarResource.planning ? FILTERS?.filter((e) => e.key !== 'asset') : FILTERS}
+                                options={filters}
                                 disableCloseOnSelect
                                 getOptionLabel={(option) => option?.label}
                                 renderOption={(option: any) => (

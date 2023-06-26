@@ -126,7 +126,7 @@ const AddExistingMaterialDialog = ({ type, handleAdd, handleClose, ignoreIds }) 
         <Box mb={2}>
           <Grid container>
             <Grid item xs={12} sm={12} container justify="flex-end">
-              <SearchBox onSearch={handleSearch} searchbox="terms_header_search_bar" width="300px" value={search} />
+              <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
               <Box ml={1}>
                 <Button
                   color="primary"

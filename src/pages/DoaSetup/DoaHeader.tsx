@@ -24,7 +24,7 @@ function DoaHeader(props) {
       </Grid>
       <Grid item xs={6} className={styles.filter_side}>
         <Box className={styles.filter_side_header} component="div">
-          <SearchBox onSearch={onSearch} searchbox={styles.search_box_input} value={searchVal} size="small" placeholder="Search Doa" width="242px" />
+          <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Doa" width="242px" />
 
           {DoaPermissions.isDelete && (
             <>

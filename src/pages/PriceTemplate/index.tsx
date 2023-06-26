@@ -162,19 +162,6 @@ const PriceTemplate: FC = () => {
     actionsRenderer: ActionsRenderer
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
-
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -227,7 +214,7 @@ const PriceTemplate: FC = () => {
 
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -235,7 +222,7 @@ const PriceTemplate: FC = () => {
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {
@@ -349,8 +336,8 @@ const PriceTemplate: FC = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile && !isTablet ? '200px' : '242px'}
                     style={isMobile && !isTablet ? { flex: 1 } : {}}
                     value={search}

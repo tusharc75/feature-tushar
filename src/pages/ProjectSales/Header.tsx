@@ -68,8 +68,8 @@ const ProjectStrategyHeader = (props) => {
 
   let toggleInner = (
     <ToggleButtonGroup size="small" className=" toggle-button-layout" value={selectedType} exclusive onChange={handleFilter}>
-      <ToggleButton value={1}>All Projects</ToggleButton>
-      <ToggleButton value={2}>My Projects</ToggleButton>
+      <ToggleButton value={1}>My Projects</ToggleButton>
+      <ToggleButton value={2}>All Projects</ToggleButton>
     </ToggleButtonGroup>
   );
 
@@ -131,8 +131,8 @@ const ProjectStrategyHeader = (props) => {
           </div>
         ) : (
           <ToggleButtonGroup size="small" className="ml-8" value={selectedType} exclusive onChange={handleFilter}>
-            <ToggleButton value={1}>All Projects</ToggleButton>
-            <ToggleButton value={2}>My Projects</ToggleButton>
+            <ToggleButton value={1}>My Projects</ToggleButton>
+            <ToggleButton value={2}>All Projects</ToggleButton>
           </ToggleButtonGroup>
         )}
         {children}
@@ -141,9 +141,9 @@ const ProjectStrategyHeader = (props) => {
         <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header}>
           <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox
-              onSearch={onSearch}
+              onChange={onSearch}
               value={searchVal}
-              searchbox={styles.search_box_input}
+              className={styles.search_box_input}
               size="small"
               placeholder="Search Project List"
               width={isMobile ? '200px' : '242px'}

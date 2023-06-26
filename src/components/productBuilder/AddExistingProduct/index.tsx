@@ -385,7 +385,7 @@ const AddExistingProduct = (props) => {
               )}
             </Grid>
             <Grid item xs={12} sm={6} container justify="flex-end">
-              <SearchBox onSearch={handleSearch} searchbox="terms_header_search_bar" width="300px" value={search} />
+              <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
               <Box ml={1} mt={1}>
                 <Button
                   size="small"
