@@ -53,6 +53,7 @@ export const FormBuilder = ({
   resource,
   onAddRemoveField = null
 }) => {
+  console.log(section);
   const addSection = (sectionHoverIndex) => {
     let data = [...section];
     if (onAddRemoveField) onAddRemoveField();
