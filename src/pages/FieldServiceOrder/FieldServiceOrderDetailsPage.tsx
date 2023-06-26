@@ -127,11 +127,7 @@ const ServiceOrderDetailsPage = () => {
       setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       setServiceOrderData(data);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
-      setCurrentStep(
-        steps.map((s) => s.name).indexOf(data?.processStatus) !== -1
-          ? steps.map((s) => s.name).indexOf(data?.processStatus)
-          : 0
-      );
+      setCurrentStep(steps.map((s) => s.name).indexOf(data?.processStatus) !== -1 ? steps.map((s) => s.name).indexOf(data?.processStatus) : 0);
       if (isAllowedToEdit && openEdit === 'true') {
         setOpenUpdateDialog(true);
         const params = new URLSearchParams();
@@ -150,7 +146,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const getServiceOrderFields = async () => {
@@ -167,8 +163,7 @@ const ServiceOrderDetailsPage = () => {
       const policy = response?.data?.data?.policy;
       if (policy.stepper?.length) {
         setSteps(serviceOrderSteps?.filter((step) => policy?.stepper?.includes(step?.name)));
-      }
-      else {
+      } else {
         setSteps(serviceOrderSteps);
       }
     } catch (error) {
@@ -354,10 +349,7 @@ const ServiceOrderDetailsPage = () => {
           />
           <ContentFullScreen title={steps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {steps[currentStep]?.name === serviceOrderSteps[0]?.name && serviceOrderData && (
-              <FieldTicket
-                fieldServiceOrder={id}
-                setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-0`} />
+              <FieldTicket serviceOrderData={serviceOrderData} setNextStep={setNextStep} renderedFrom={`${renderedFrom}_grid-0`} />
             )}
             {steps[currentStep]?.name === serviceOrderSteps[1]?.name && serviceOrderData && (
               <Services
