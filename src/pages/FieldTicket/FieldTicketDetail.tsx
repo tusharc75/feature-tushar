@@ -47,6 +47,8 @@ const FieldTicketDetail = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
+  const [nextStep, setNextStep] = useState(false);
+
   useEffect(() => {
     if (id) {
       fetchFields();
@@ -201,7 +203,7 @@ const FieldTicketDetail = () => {
         <TabPanel value={tabValue} index={1}>
           <Steps
             isNextStep={false}
-            nextStep={true}
+            nextStep={nextStep}
             steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
@@ -216,6 +218,7 @@ const FieldTicketDetail = () => {
                 id={id}
                 renderedFrom={`${renderedFrom}_grid-1`}
                 allowedToEdit={allowedToEdit}
+                setNextStep={setNextStep}
               />
             )}
             {currentStep === 1 && (

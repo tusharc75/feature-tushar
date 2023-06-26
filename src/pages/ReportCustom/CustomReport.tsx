@@ -195,6 +195,7 @@ const CustomReport = () => {
     if (search) {
       filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
+    
     if (selectedResources.length > 0) {
       let deepFilter = [];
       if (selectedData) {
@@ -213,24 +214,16 @@ const CustomReport = () => {
         });
 
         forDeepFilter.forEach((key) => {
-          const options = selectedData[key].value;
-          if (selectedData[key].type === 'dropDown') {
-            deepFilter.push({
-              field: key,
-              term: options.map((d: any) => d.optionValue)
-            });
-          } if (selectedData[key].type === 'checkBox') {
+          if (selectedData[key].type === 'checkBox') {
             deepFilter.push({
               field: key,
               term: selectedData[key].value ? 'Yes' : 'No'
             });
           }
           else {
-            options.forEach((o: any) => {
-              deepFilter.push({
-                field: key,
-                term: o.optionValue
-              });
+            deepFilter.push({
+              field: key,
+              term: selectedData[key].value?.map((d: any) => d.optionValue)
             });
           }
         });

@@ -16,16 +16,14 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import moment from 'moment';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
-import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
   serviceOrderData: any;
   rowData?: object | any;
   showSaveAndNext: any;
-  material: any;
   isBulkedit: any;
-  selectedProducts: any;
   loadingEdit: any;
 }
 
@@ -35,9 +33,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
   serviceOrderData,
   rowData,
   showSaveAndNext,
-  material,
   isBulkedit,
-  selectedProducts,
   loadingEdit
 }) => {
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
@@ -46,40 +42,77 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
+  const [allFields, setAllFields] = useState([]);
   const ref = useRef(null);
 
   useEffect(() => {
     fetchData();
   }, [rowData]);
+
   const fetchData = async () => {
     setInitialData({ fields: [], values: {} });
     var data = await fetch_service_order_detail_fields(serviceOrderData?.currency);
-    let unitOptions: any = [];
-    let pricingMethodOptions: any = [];
-    if (rowData?.[`${rowData.type}Detail`]?.unit) {
-      unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
-    }
-    if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
-      pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
-    }
-    data.forEach((element) => {
-      if (element.fieldName === 'unit') {
-        element.option = unitOptions;
-      }
-      if (element.fieldName === 'pricingMethod') {
-        element.option = pricingMethodOptions;
-      }
-    });
-    let initialValues = getObjKeysWithValues(rowData, data);
-    if (isBulkedit) {
+    if(isBulkedit) {
+      let unitArray: any = [];
+      let pricingMethodArray: any = [];
+      rowData?.forEach((element) => {
+        if (element?.[`${element.type}Detail`]?.unit) {
+          unitArray.push([...element?.[`${element.type}Detail`]?.unit]);
+        }
+        if (element?.[`${element.type}Detail`]?.pricingMethod) {
+          pricingMethodArray.push([...element?.[`${element.type}Detail`]?.pricingMethod]);
+        }
+      });
+      let unit: any = unitArray?.shift()?.filter(function (v) {
+        return unitArray.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      let pricingMethod: any = pricingMethodArray?.shift()?.filter(function (v) {
+        return pricingMethodArray.every(function (a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+      const unitOptions: any = arrayToDropwdownOption(unit);
+      const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
+
+      data.forEach((element) => {
+        if (element.fieldName === 'unit') {
+          element.option = unitOptions;
+        }
+        if (element.fieldName === 'pricingMethod') {
+          element.option = pricingMethodOptions;
+        }
+        element.required = false;
+        element.isFormula = false;
+        element.isMulitFormula = false;
+      });
+      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       setInitialData({
         fields: data,
         values: { ...getObjKeys('', data), estimateStartDate: '', estimateEndDate: '', actualStartDate: '', actualEndDate: '', tenure: '' }
       });
     } else {
+      let unitOptions: any = [];
+      let pricingMethodOptions:any = []
+      if (rowData?.[`${rowData.type}Detail`]?.unit) {
+        unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.unit);
+      }
+      if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
+        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
+      }
+      data.forEach((element) => {
+        if (element.fieldName === 'unit') {
+          element.option = unitOptions;
+        }
+        if (element.fieldName === 'pricingMethod') {
+          element.option = pricingMethodOptions;
+        }
+      });
+      setAllFields(JSON.parse(JSON.stringify(data)));
       setInitialData({
         fields: data,
-        values: initialValues
+        values: getObjKeysWithValues(rowData, data)
       });
     }
     EvaluteproductFields(data);
@@ -108,17 +141,21 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
   };
 
   const handleSubmit = async (values) => {
+    let returnData = [];
     if (isBulkedit) {
-      const rows = bulkUpdate(values, selectedProducts, material, fields, serviceOrderData?.currency);
-      handleSaveData(rows);
-    } else {
-      if (rowData.parentId !== null && !showConfirmationDialog) {
-        setShowConfirmationDialog(true);
-      } else {
-        const rows = await calculateRowsField(material, values, fields, rowData);
-        handleSaveData(rows, saveAndNext);
-        setShowConfirmationDialog(false);
+      for (const x in values) {
+        if (values[x] === '' || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
+          delete values[x];
+        }
       }
+      rowData.forEach((element) => {
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        returnData.push({ _id: element._id, ...calValues });
+      });
+      handleSaveData(returnData);
+    }else {
+      returnData = [{ _id: rowData._id, ...values }];
+      handleSaveData(returnData, saveAndNext);
     }
   };
 
