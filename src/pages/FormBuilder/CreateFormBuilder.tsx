@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Fragment, useContext } from 'react';
 import Grid from '@material-ui/core/Grid';
-import { Box, Typography, Button, CircularProgress, Menu, MenuItem, IconButton, makeStyles, useMediaQuery } from '@material-ui/core';
+import { Box, Typography, Button, CircularProgress, Menu, MenuItem, IconButton, makeStyles, useMediaQuery, Chip } from '@material-ui/core';
 import { useHistory, useParams } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -20,6 +20,8 @@ import { camelCase } from 'lodash';
 import { Autocomplete } from '@material-ui/lab';
 import History from './History';
 import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { defaultStepper } from 'src/components/FormBuilder/Stepper/stepHelper';
+import Stepper from 'src/components/FormBuilder/Stepper';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -90,6 +92,7 @@ const CreateFormBuilder = () => {
   const [homePageLabel, setHomePageLabel] = useState('');
   const [sectionName, setsectionName] = useState('');
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
+  const [steppers, setSteppers] = useState([]);
 
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (event: React.ChangeEvent<{}>, value: any) => {
@@ -156,6 +159,7 @@ const CreateFormBuilder = () => {
         setResourceLabel(data.resourceLabel);
         setHomePageLabel(data?.homePageLabel || '');
         setOriSection(JSON.parse(JSON.stringify(data.section)));
+        setSteppers(data?.resourcePolicy?.steppers || []);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -221,6 +225,11 @@ const CreateFormBuilder = () => {
     sendData.deleteField = deleteField;
     sendData.resourceLabel = resourceLabel;
     sendData.homePageLabel = homePageLabel;
+    if (steppers?.length) {
+      sendData.resourcePolicy = {
+        steppers: steppers
+      };
+    }
     setIsUpdating(true);
     axiosInstance()
       .put(`/sa-formbuilder/resourcedata`, sendData)
@@ -439,9 +448,7 @@ const CreateFormBuilder = () => {
                   />
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                  <Box p={5} height={500} textAlign={'center'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                    <Typography variant="h6">Coming soon....</Typography>
-                  </Box>
+                  <Stepper steppers={steppers} setSteppers={setSteppers} resource={resource} />
                 </TabPanel>
               </Box>
               {showConfirmDialog ? (
