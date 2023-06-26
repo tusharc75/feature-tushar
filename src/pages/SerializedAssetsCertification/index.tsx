@@ -27,6 +27,7 @@ import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
 import IssueCertificateDialog from './IssueCertificateDialog';
 import { Autocomplete } from '@material-ui/lab';
+import CertificateHistoryDialog from './CertificateHistoryDialog';
 
 const SerializedAssetsCertification = () => {
 
@@ -108,13 +109,8 @@ const SerializedAssetsCertification = () => {
       gridApi.setRowData([]);
     }
 
-    let apiURL = `${serializedAssetsCertification.api}`;
-    if (certificateStatus) {
-      apiURL += `?certificateStatus=${certificateStatus.name}`;
-    }
-
     axiosInstance()
-      .get(apiURL)
+      .get(`${serializedAssetsCertification.api}?certificateStatus=${certificateStatus.name}`)
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
@@ -194,7 +190,7 @@ const SerializedAssetsCertification = () => {
           getOptionSelected={(option: any, val) => option._id === val._id}
           value={certificateStatus}
           onChange={(e, val) => {
-            setCertificateStatus(val ? val : null);
+            setCertificateStatus(val ? val : { _id: "Pending", name: "Pending" });
           }}
           renderInput={(params) => (
             <TextField {...params} margin="dense" name="certificateStatus" label="Certificate Status" variant="outlined" fullWidth />
@@ -264,7 +260,7 @@ const SerializedAssetsCertification = () => {
           </Box>
         )}
       </div>
-      {openDialog?.open && (
+      {openDialog?.open && certificateStatus._id === "Pending" && (
         <IssueCertificateDialog 
         onClose={()=>  setOpenDialog({open: false, id: null})}
         onSuccess={()=>{
@@ -272,6 +268,12 @@ const SerializedAssetsCertification = () => {
           fetchProductInventory()
         }}
         assetId={openDialog?.id}
+        />
+      )}
+      {openDialog?.open && certificateStatus._id === "Completed" && (
+        <CertificateHistoryDialog 
+        onClose={()=>  setOpenDialog({open: false, id: null})}
+        id={openDialog?.id}
         />
       )}
     </Fragment>
