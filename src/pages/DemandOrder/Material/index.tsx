@@ -13,7 +13,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
 import { startCase } from 'lodash';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import MaterialDialog from './MaterialDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -237,16 +237,6 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.subRows;
-    });
     axiosInstance()
       .put(`${routes.demandOrder.path}/material/${salesOrderData._id}`, { material: rows })
       .then(({ data }) => {
@@ -281,7 +271,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
