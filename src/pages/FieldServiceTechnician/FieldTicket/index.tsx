@@ -485,8 +485,8 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
           referenceData={{
             fieldServiceOrder: selectedFieldService._id,
             service: selectedFieldService?.service._id,
-            startDateTime: selectedFieldService?.estimateStartDate,
-            endDateTime: selectedFieldService?.estimateEndDate,
+            estimateStartDate: selectedFieldService?.estimateStartDate,
+            estimateEndDate: selectedFieldService?.estimateEndDate,
             technician: selectedFieldService?.technicianAssign?.technician,
             steps:
               selectedFieldService?.service?.steps?.map((m) => {

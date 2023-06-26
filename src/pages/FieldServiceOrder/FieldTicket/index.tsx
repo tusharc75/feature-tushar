@@ -282,13 +282,11 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom }) => {
           onClose={() => setOpenDialog({ open: false, id: null })}
           referenceData={{
             fieldServiceOrder: serviceOrderData?._id,
-            ...serviceOrderData,
             warehouse: serviceOrderData?.warehouse?.optionValue || '',
             wellName: serviceOrderData?.wellName?.optionValue || '',
             wellNumber: serviceOrderData?.wellNumber?.map((m) => m.optionValue) || [],
-            startDateTime: serviceOrderData?.estimateStartDate || '',
-            endDateTime: serviceOrderData?.estimateEndDate || '',
-            service: serviceOrderData?.service?.optionValue || ''
+            estimateStartDate: serviceOrderData?.estimateStartDate || '',
+            estimateEndDate: serviceOrderData?.estimateEndDate || '',
           }}
           onSuccess={() => {
             setOpenDialog({ open: false, id: null });
