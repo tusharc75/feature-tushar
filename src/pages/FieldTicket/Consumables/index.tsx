@@ -176,7 +176,6 @@ const Consumables = ({ id, allowedToEdit, fieldTicketData }) => {
         rows.forEach((d) => {
             const element: any = {};
             element.materialId = d._id;
-            element.detail = d?.productName;
             element.type = 'product';
             element.qty = d.qty ? parseFloat(d.qty) : 1;
 
@@ -213,10 +212,12 @@ const Consumables = ({ id, allowedToEdit, fieldTicketData }) => {
     const handleSaveData = async (rows: any, saveAndNext = false) => {
         rows.forEach((element) => {
             element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
+            element.service = element.serviceId;
             delete element.srno;
             delete element.productDescription;
             delete element.productName;
             delete element.productNumber;
+            delete element.serviceId;
         });
         // setUpdating(true);
         axiosInstance()
@@ -249,8 +250,8 @@ const Consumables = ({ id, allowedToEdit, fieldTicketData }) => {
             return;
         }
         let rows: any = [{ ...dataRow, ...updatedData }];
+        inputField.qty = parseInt(inputField.qty);
         handleSaveData(rows)
-        // inputField.qty = parseInt(inputField.qty);
     };
 
     const [anchorEl, setAnchorEl] = useState(null);
