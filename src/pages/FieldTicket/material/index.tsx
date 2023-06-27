@@ -18,6 +18,7 @@ import { fetch_field_ticket_material_fields } from '../helper';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { calculatePrice } from 'src/components/RentalManagment/helper';
+import Consumables from './Consumables';
 
 const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -361,9 +362,9 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
         </Box>
       )}
       {columns && rowsData ? (
-        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 440px)' : 'calc(100vh - 440px)'}>
           <CustomReactTable
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+            height={stepFullScreen ? 'calc(100vh - 440px)' : 'calc(100vh - 440px)'}
             columns={columns}
             data={rowsData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
@@ -382,6 +383,11 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
+
+      <Box mt={3}>
+        <Consumables id={id} allowedToEdit={allowedToEdit} services={rowsData} />
+      </Box>
+
       {addExistingServiceDialog && (
         <AssignServiceDialog
           reference={'fieldTicket'}
