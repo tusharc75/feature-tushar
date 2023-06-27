@@ -824,11 +824,7 @@ export default function AccountDetailPage(props) {
                 ) : (
                   <DetailsPage data={accountData} fields={filteredAccountFields} />
                 )}
-                {accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
-                  <TabPanel value={tabValue} index={3}>
-                    <Warehouse reference={accountResource} api={accountApi} id={id} />
-                  </TabPanel>
-                )}
+
                 <div className="pt-3 ">
                   {permissions?.opportunity?.isRead && (
                     <Box id="opportunityAccordion" mb={2}>
@@ -1022,6 +1018,11 @@ export default function AccountDetailPage(props) {
                 />
               </Box>
             </TabPanel>
+            {accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
+              <TabPanel value={tabValue} index={3}>
+                <Warehouse reference={accountResource} api={accountApi} id={id} />
+              </TabPanel>
+            )}
           </>
         )}
       </Box>

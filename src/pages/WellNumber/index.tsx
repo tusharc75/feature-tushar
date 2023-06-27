@@ -378,7 +378,7 @@ const WellNumber = () => {
                         onClick={openActions}
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                         endIcon={<ExpandMore />}
                       >
                         {isMobile && !isTablet ? '' : 'Actions'}
