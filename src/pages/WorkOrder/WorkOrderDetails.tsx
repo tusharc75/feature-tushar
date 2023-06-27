@@ -369,7 +369,7 @@ const WorkOrderDetails = () => {
           {workOrderData && (
             <Consumables
               allowedToEdit={allowedToEdit && !completed}
-              isCreate={false}
+              isCreate={true}
               workOrderId={id}
               warehouse={workOrderData?.warehouse}
               service={null}
