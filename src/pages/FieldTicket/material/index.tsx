@@ -13,14 +13,14 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import routes from 'src/components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { calculatePrice } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import { calculatePrice } from 'src/components/RentalManagment/helper';
 
 
-const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit }) => {
+const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, setNextStep }) => {
     const toastConfig = useContext(CustomToastContext);
 
     const [columns, setColumns] = useState(null);
@@ -28,7 +28,6 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
     const [selectedServices, setSelectedServices] = useState([]);
     const [addExistingServiceDialog, setAddExistingServiceDialog] = useState(false);
     const [allFields, setAllFields] = useState([]);
-    const [isRateRequired, setIsRateRequired] = useState(false);
     const [isServiceEdit, setIsServiceEdit] = useState({ open: false, data: null, showSaveAndNext: false });
     const [isBulkEdit, setIsBulkEdit] = useState(false);
     const [deleteData, setDeleteData] = useState(null);
@@ -49,8 +48,6 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
         if (qtyIndex > -1) {
             newColumns[qtyIndex].accessor = 'qtyDisplay';
         }
-        const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
-        setIsRateRequired(isPriceRequired);
         let column: any = [
             {
                 accessor: 'srno',
@@ -130,7 +127,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
                                 aria-label="Delete"
                                 disabled={!allowedToEdit}
                                 onClick={() => {
-                                    setDeleteData([{ id: row.original._id }]);
+                                    setDeleteData([{ id: row.original._id, service: row?.original?.materialId }]);
                                 }}
                             >
                                 <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
@@ -154,10 +151,14 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
             parent.description = `${parent?.serviceDetail?.serviceDescription || ''}`;
             parent.qtyDisplay = parent.qty;
             parent.type = parent.type;
-            parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : !isRateRequired;
+            parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
 
         });
-
+        if (data.filter((_rows) => _rows.isValid === false).length > 0) {
+            setNextStep(false);
+        } else {
+            setNextStep(true);
+        }
         setRowsData(data);
         setSelectedServices([]);
     }
@@ -193,22 +194,17 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
             element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
             element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
             element.qty = d.qty ? parseFloat(d.qty) : 1;
-            element.estimateStartDate = fieldTicketData ? fieldTicketData?.startDateTime : new Date();
-            element.estimateEndDate = fieldTicketData ? fieldTicketData?.endDateTime : new Date();
+            element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
+            element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
             const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
             element.estimateJobDuration = 1;
             if (calValues && calValues['estimateJobDuration']) {
                 element.estimateJobDuration = calValues['estimateJobDuration'];
             }
-            element.listPrice = d.listPrice ? d.listPrice : null;
             material.push(element);
         });
-        if (material.filter((d) => d.listPrice === null).length === 0) {
-            AddMaterial(material, []);
-        } else {
-            const priceData: any = await calculatePrice(fieldTicketData, material);
-            AddMaterial(material, priceData);
-        }
+        const priceData: any = await calculatePrice(fieldTicketData, material);
+        AddMaterial(material, priceData);
     };
 
     const AddMaterial = async (material, priceData) => {
@@ -229,13 +225,6 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
                     element['pricingCondition'] = rateResult[0].conditionId;
                     element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
                     const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-
-                    if (allFields?.some((e) => e.fieldName === 'supplierPrice') && calValues[priceFieldName]) {
-                        const supplierPriceFieldName = `supplierPrice_${fieldTicketData?.currency?.toLowerCase()}`;
-                        calValues[supplierPriceFieldName] =
-                            (rateResult[0].mrp - (rateResult[0].mrp * 5) / 100) * element?.qty * (element?.estimateJobDuration || 1);
-                    }
-
                     Object.assign(element, calValues);
                 }
             });
@@ -370,7 +359,8 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
                                         setDeleteData(selectedServices?.map(d => {
                                             return (
                                                 {
-                                                    id: d?._id
+                                                    id: d?._id,
+                                                    service: d?.materialId
                                                 }
                                             )
                                         }))
