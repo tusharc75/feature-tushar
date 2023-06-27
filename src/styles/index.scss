@@ -1583,26 +1583,44 @@ body::-webkit-scrollbar-thumb {
 
 .red-data-row {
   background-color: var(--dark-error, #ffcccb) !important;
+  [data-mode='dark'] & {
+    background-color: hsl(1 100% 65% / 1) !important;
+  }
 }
 
 .scrap-data-row {
   background-color: #ffe4c0 !important;
+  [data-mode='dark'] & {
+    background-color: hsl(34, 100%, 48%) !important;
+  }
 }
 
 .light-red-data-row {
   background-color: #feb1b1 !important;
+  [data-mode='dark'] & {
+    background-color: hsl(0, 97%, 45%) !important;
+  }
 }
 
 .light-yellow-data-row {
   background-color: #fae498 !important;
+  [data-mode='dark'] & {
+    background-color: hsl(47, 91%, 39%) !important;
+  }
 }
 
 .light-grey-data-row {
   background-color: #d3d3d3 !important;
+  [data-mode='dark'] & {
+    background-color: hsl(0, 0%, 53%) !important;
+  }
 }
 
 .light-green-data-row {
   background-color: #acf1c8 !important;
+  [data-mode='dark'] & {
+    background-color: hsl(144, 71%, 31%) !important;
+  }
 }
 
 .a_divider_inner {
