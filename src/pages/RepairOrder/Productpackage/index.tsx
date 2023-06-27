@@ -436,6 +436,7 @@ const Productpackage = ({
               aria-controls="action-menu"
               disabled={selectedProducts.length === 0}
               endIcon={<ExpandMore />}
+              className="new-dropdown-v1"
             >
               Actions
             </Button>

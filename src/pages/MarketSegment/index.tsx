@@ -375,7 +375,7 @@ const MarketSegment = () => {
                   )}
                   {permissions?.marketSegment.isDelete && (
                     <Button
-                      className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_submit_btn}`}
+                      className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_submit_btn} new-dropdown-v1`}
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
                       color="default"
                       size="small"

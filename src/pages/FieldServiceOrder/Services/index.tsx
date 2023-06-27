@@ -422,6 +422,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                   onClick={handleClick}
                   disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => e.canDelete).length)}
                   endIcon={<BiChevronDown />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>
@@ -446,7 +447,12 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                   </MenuItem>
                   <MenuItem
                     onClick={() => {
-                      setIsProductEdit({ open: true, data: selectedProducts?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+                      setIsProductEdit({
+                        open: true,
+                        data: selectedProducts?.filter((e) => !e.hideSelection),
+                        bulkedit: true,
+                        showSaveAndNext: false
+                      });
                       handleClose();
                     }}
                   >

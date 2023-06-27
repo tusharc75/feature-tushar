@@ -253,6 +253,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
                 disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
                 onClick={openActions}
                 endIcon={<KeyboardArrowDown fontSize="small" />}
+                className="new-dropdown-v1"
               >
                 Actions
               </Button>

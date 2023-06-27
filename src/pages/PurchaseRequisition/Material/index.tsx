@@ -340,6 +340,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
               size="small"
               onClick={openActions}
               aria-controls="action-menu"
+              className="new-dropdown-v1"
             >
               {isMobile ? '' : 'Actions'} <ExpandMore />
             </Button>

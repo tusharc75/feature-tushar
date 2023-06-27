@@ -173,6 +173,7 @@ const AddCost = ({ id, fieldTicketData }) => {
             onClick={openActions}
             aria-controls="action-menu"
             endIcon={<ExpandMore />}
+            className="new-dropdown-v1"
           >
             {'Actions'}
           </Button>

@@ -172,7 +172,7 @@ const ProjectStrategyHeader = (props) => {
                   disabled={canDelete}
                   onClick={openActions}
                   aria-controls="action-menu"
-                  className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                  className={`${isMobile ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                   endIcon={<ExpandMore />}
                 >
                   {isMobile ? '' : 'Actions'}

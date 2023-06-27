@@ -229,6 +229,7 @@ function Product({ id }) {
                   aria-controls="action-menu"
                   disabled={selectedRecords.length === 0}
                   endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>
