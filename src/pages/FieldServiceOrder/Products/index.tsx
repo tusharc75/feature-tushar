@@ -19,8 +19,10 @@ import { startCase } from 'lodash';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
-import { generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import AddOnDialog from './AddOnDialog';
+import AddIcon from '@material-ui/icons/Add';
+import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 
 const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -40,6 +42,8 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
+  const [assignAssetDialog, setAssignAssetDialog] = useState({ open: false, products: [] });
+  const [isAssetAdding, setIsAssetAdding] = useState(false);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -141,21 +145,37 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       canDrag: false,
       Cell: ({ row }) => {
         return allowedToEdit && (row.original.type === 'product' || row.original.type === 'Manual Entry') ? (
-          <HtmlTooltip title={'Delete'}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  getNestedSubRows(obj, row.original);
-                  setDeleteData(obj);
-                }}
-              >
-                <DeleteIcon fontSize="small" color={'error'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
+          <>
+            <HtmlTooltip title={'Assign Assets'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setAssignAssetDialog({ open: true, products: [{_id: row.original?._id, product: row.original?.materialId, qty: row.original?.qty, productName: row.original?.detail}] });
+                  }}
+                >
+                  <AddIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+
+            <HtmlTooltip title={'Delete'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                    getNestedSubRows(obj, row.original);
+                    setDeleteData(obj);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color={'error'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </>
         ) : null;
       }
     });
@@ -187,18 +207,18 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageName
-          : parent?.description;
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageName
+              : parent?.description;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent?.description;
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent?.description;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data, parent);
     });
@@ -219,18 +239,18 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageName
-          : _subRow?.description;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageName
+              : _subRow?.description;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : _subRow?.description || '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow?.description || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -301,6 +321,10 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       getNestedSubRows(obj, ele);
     });
     setDeleteData(obj);
+  };
+
+  const handleAssignAssets = (data) => {
+   
   };
 
   return (
@@ -402,6 +426,16 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
           onSuccess={(row) => {
             handleAdd(row);
           }}
+        />
+      )}
+      {assignAssetDialog.open && (
+        <AssignSerializedAssetDialog
+          reference={'fieldServiceOrder'}
+          ids={[]}
+          handleClose={() => setAssignAssetDialog({ open: false, products: [] })}
+          handleSucess={handleAssignAssets}
+          isAssigning={isAssetAdding}
+          selectedProducts={assignAssetDialog.products}
         />
       )}
       {deleteData && (
