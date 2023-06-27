@@ -57,9 +57,11 @@ function dropdownOptions(options, values, fields, fieldData) {
       const dependentOnFieldValue = values[dependentOnField?.fieldName];
       if (dependentOnFieldValue) {
         const dependentFieldOption = dependentOnField?.option?.find((e) => e.optionValue === dependentOnFieldValue);
-        const dependentIds = dependentFieldOption[lookupDependentOnField] || [];
-        const newOptions = options?.filter((option: any) => dependentIds.includes(option.optionValue)) || [];
-        optionsToShow.push(...newOptions);
+        if (dependentFieldOption) {
+          const dependentIds = dependentFieldOption[lookupDependentOnField] || [];
+          const newOptions = options?.filter((option: any) => dependentIds?.includes(option.optionValue)) || [];
+          optionsToShow.push(...newOptions);
+        }
       }
     }
   }
@@ -135,13 +137,13 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, value: any, reason) => {
-                        if (setFieldValue) {
-                          setFieldValue(
-                            name,
-                            value.map((val) => val.optionValue)
-                          );
-                        }
+                      if (setFieldValue) {
+                        setFieldValue(
+                          name,
+                          value.map((val) => val.optionValue)
+                        );
                       }
+                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -169,14 +171,14 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, val) => {
-                        if (setFieldValue) {
-                          handleChange(name, val && val.optionValue ? val.optionValue : '');
-                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                          fieldChange?.forEach((val: any) => {
-                            setFieldValue(val.fieldName, val.value);
-                          });
-                        }
+                      if (setFieldValue) {
+                        handleChange(name, val && val.optionValue ? val.optionValue : '');
+                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                        fieldChange?.forEach((val: any) => {
+                          setFieldValue(val.fieldName, val.value);
+                        });
                       }
+                    }
                 }
                 selectOnFocus
                 clearOnBlur
@@ -309,7 +311,11 @@ function Dropdown({
                   </HtmlTooltip>
                   {lookupDialog && (
                     <ManageWellNumber
-                      refrenceData={{ wellName: values[fieldData.lookupDependentOn] }}
+                      referenceData={
+                        fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
+                          ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
+                          : null
+                      }
                       isClone={false}
                       onClose={() => setLookupDialog(false)}
                       onSuccess={(data) => {
@@ -320,7 +326,9 @@ function Dropdown({
                             optionLabel: data.wellNumber,
                             optionValue: data._id,
                             order: option.length,
-                            wellMaster: data.wellName
+                            wellMaster: data?.wellName,
+                            customerAccount: data?.customerAccount,
+                            address: data?.address
                           };
                           addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
