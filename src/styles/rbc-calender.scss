@@ -26,6 +26,12 @@
   border-top: 1px solid #f0ecec !important;
   min-height: 116px;
   flex-basis: inherit;
+  .rbc-row-content {
+    max-height: 116px;
+  }
+  .rbc-event {
+    margin: 3px 2% 0 1% !important;
+  }
 }
 
 .rbc-day-bg + .rbc-day-bg {
