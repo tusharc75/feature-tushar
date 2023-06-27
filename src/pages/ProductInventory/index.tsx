@@ -228,9 +228,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-          .filter((d) => d.optionValue !== 'All')
-          .map((d) => d.optionValue)
-          .toString()
+            .filter((d) => d.optionValue !== 'All')
+            .map((d) => d.optionValue)
+            .toString()
         : plantId;
 
     let deepFilter = '';
@@ -338,10 +338,10 @@ const InventoryProduct = () => {
             !permissions?.productInventory?.isUpdate
               ? TOOLTIP_MESSAGE.remove
               : params?.data?.plantId === 'All'
-                ? 'Select Plant'
-                : !params?.data?.availableInventory
-                  ? 'Inventory not available'
-                  : 'Remove'
+              ? 'Select Plant'
+              : !params?.data?.availableInventory
+              ? 'Inventory not available'
+              : 'Remove'
           }
         >
           <span>
@@ -415,7 +415,7 @@ const InventoryProduct = () => {
     }
     axiosInstance()
       .get(api)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -593,7 +593,7 @@ const InventoryProduct = () => {
                     color="default"
                     size="small"
                     disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length && plantId !== 'All' ? false : true}
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                     onClick={openActions}
                     aria-controls="action-menu"
                     endIcon={<ExpandMore />}
@@ -717,9 +717,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                    .filter((d) => d.optionValue !== 'All')
+                    .map((d) => d.optionValue)
+                    .toString()
                 : plantId
             }
           />
@@ -735,9 +735,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                    .filter((d) => d.optionValue !== 'All')
+                    .map((d) => d.optionValue)
+                    .toString()
                 : plantId
             }
             storageLocation={storageLocationId}
@@ -753,9 +753,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                    .filter((d) => d.optionValue !== 'All')
+                    .map((d) => d.optionValue)
+                    .toString()
                 : plantId
             }
           />

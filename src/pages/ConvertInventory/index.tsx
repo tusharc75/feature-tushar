@@ -292,7 +292,7 @@ const ConvertInventory = () => {
                     color="default"
                     size="small"
                     disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                     onClick={openActions}
                     aria-controls="action-menu"
                     endIcon={<ExpandMore />}

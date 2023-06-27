@@ -92,8 +92,9 @@ const Address = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    axiosInstance().get(`/address${queryString}`).then(
-      ({ data: { data, count } }) => {
+    axiosInstance()
+      .get(`/address${queryString}`)
+      .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['canDelete'] = permissions?.address?.isDelete;
@@ -121,8 +122,7 @@ const Address = () => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-      }
-    )
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
@@ -316,7 +316,7 @@ const Address = () => {
                         onClick={openActions}
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                         endIcon={<ExpandMore />}
                       >
                         {isMobile && !isTablet ? '' : 'Actions'}
@@ -372,7 +372,7 @@ const Address = () => {
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (

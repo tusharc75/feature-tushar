@@ -26,7 +26,6 @@ function LeadsHeader(props) {
     setAnchorEl(null);
   };
 
-
   const handleFilter = (event, newFilter) => {
     if (newFilter !== null) {
       onTypeChange(options.find((d) => d.key === newFilter).value);
@@ -190,7 +189,7 @@ function LeadsHeader(props) {
                   size="small"
                   onClick={openActions}
                   aria-controls="action-menu"
-                  className={isMobile && !isTablet ? 'mobile_button' : ''}
+                  className={`${isMobile && !isTablet ? 'mobile_button' : ''} new-dropdown-v1 `}
                   disabled={selectedLeads.length === 0}
                 >
                   {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />

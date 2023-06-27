@@ -612,7 +612,7 @@ const SerializedAssetTest = () => {
                     </Button>
                   )}
                   <Button
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="default"
                     size="small"
