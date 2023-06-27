@@ -62,6 +62,11 @@ export const rentalManagementSteps: stepInterface[] = [
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
+export const fieldTicketSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Add-on', title: 'Add-on', icon: 'add' }
+];
+
 export const demandOrderSteps = ['Add Products'];
 
 export const purchaseRequisitionSteps = ['Add Products'];
@@ -139,6 +144,7 @@ export const repairOrderSteps: stepInterface[] = [
 ];
 
 export const serviceOrderSteps: stepInterface[] = [
+  { name: 'Field Ticket', title: 'Field Ticket', icon: 'receivingTicket'},
   { name: 'Add Services', title: 'Add', icon: 'add' },
   { name: 'Add Products', title: 'Products', icon: 'assign' },
   { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
@@ -223,7 +229,7 @@ export const sidebarResource = {
   product: 'Product',
   productTemplate: 'Product Template',
   doa: 'DOA',
-  termsAndConditions: 'Terms & Conditions',
+  termsAndConditions: 'Terms And Conditions',
   equiptmentRentalMaster: 'Equiptment Rental Master',
   productBuilder: 'Product Builder',
   formBuilder: 'Form Builder',
@@ -344,12 +350,12 @@ export const RESOURCE_LABEL = {
   productCategory: 'Product Categories',
   productInventory: 'Product Inventory',
   serializedAsset: 'Serialized Assets',
-  serializedAssetCertification: 'Serialized Assets Certification',
+  serializedAssetsCertification: 'Serialized Assets Certification',
   priceTemplate: 'Price Templates',
   product: 'Product Master',
   productTemplate: 'Product Templates',
   doa: 'DOA',
-  termsAndConditions: 'T&Cs',
+  termsAndConditions: 'Terms And Conditions',
   equiptmentRentalMaster: 'Equiptment Rental Master',
   projectSales: 'Project Sales',
   productBuilder: 'Price Builder',
@@ -460,6 +466,7 @@ export const CHILD_RESOURCE = {
   fieldServiceOrderDetails: 'Field Service Order Detail',
   fieldServiceOrderAddon: 'Field Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',
+  fieldTicketMateial: 'Field Ticket Material',
   jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
@@ -654,7 +661,7 @@ export const serializedAsset = {
   resource: 'Serialized Asset'
 };
 
-export const serializedAssetCertification = {
+export const serializedAssetsCertification = {
   api: '/serialized-assets-certification',
   route: '/serialized-assets-certification',
   permission: 'serializedAssetsCertification',

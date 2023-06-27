@@ -3,11 +3,12 @@ import Grid from '@material-ui/core/Grid';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
+import { Box, Button, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
-  serializedAssetCertification,
+  serializedAssetsCertification,
   serializedAsset,
   gridLoadingTimeout,
   ASSET_STATUS,
@@ -24,20 +25,24 @@ import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
+import IssueCertificateDialog from './IssueCertificateDialog';
+import { Autocomplete } from '@material-ui/lab';
+import CertificateHistoryDialog from './CertificateHistoryDialog';
 
 const SerializedAssetsCertification = () => {
 
-  const renderedFrom = camelCase(routes?.serializedAssetCertification.title);
+  const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
-
+  const [openDialog, setOpenDialog] = useState({open: false, id: null})
   const [gridApi, setGridApi] = useState(null);
   const [columns, setColumns] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
+  const [certificateStatus, setCertificateStatus] = useState<{_id: string, name: string}>({ _id: "Pending", name: "Pending" });
 
   const {
     state: { permissions, user }
@@ -50,7 +55,7 @@ const SerializedAssetsCertification = () => {
 
   useEffect(() => {
     fetchProductInventory();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, certificateStatus]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -105,7 +110,7 @@ const SerializedAssetsCertification = () => {
     }
 
     axiosInstance()
-      .get(`${serializedAssetCertification.api}`)
+      .get(`${serializedAssetsCertification.api}?certificateStatus=${certificateStatus.name}`)
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
@@ -141,13 +146,15 @@ const SerializedAssetsCertification = () => {
       });
   };
 
-
-
   const AssetNumberRenderer = (params) => (
-    <Fragment>
-      <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data?._id}`}>
+     <Fragment>
+      <p 
+      className="link text-truncate" 
+      onClick={() => {
+        setOpenDialog({open: true, id: params?.data?._id})
+      }}>
         {params.value}
-      </Link>
+      </p>
       {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
         <Box ml={1} pt={1}>
           <HtmlTooltip title="Asset needs to be recert">
@@ -168,7 +175,7 @@ const SerializedAssetsCertification = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.serializedAssetCertification]} />
+          <CustomBreadCrumbs routes={[routes.serializedAssetsCertification]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
 
@@ -176,6 +183,19 @@ const SerializedAssetsCertification = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
+        <Autocomplete
+          style={{ width: '250px' }}
+          options={[{ _id: "Pending", name: "Pending" },{ _id: "Completed", name: "Completed" }]}
+          getOptionLabel={(option: any) => (option ? option.name : '')}
+          getOptionSelected={(option: any, val) => option._id === val._id}
+          value={certificateStatus}
+          onChange={(e, val) => {
+            setCertificateStatus(val ? val : { _id: "Pending", name: "Pending" });
+          }}
+          renderInput={(params) => (
+            <TextField {...params} margin="dense" name="certificateStatus" label="Certificate Status" variant="outlined" fullWidth />
+          )}
+        />
         </div>
         {columns ? (Object.keys(frameWorkComponent).length > 0 && columns ? (
           <CustomAgGrid
@@ -240,6 +260,22 @@ const SerializedAssetsCertification = () => {
           </Box>
         )}
       </div>
+      {openDialog?.open && certificateStatus._id === "Pending" && (
+        <IssueCertificateDialog 
+        onClose={()=>  setOpenDialog({open: false, id: null})}
+        onSuccess={()=>{
+          setOpenDialog({open: false, id: null});
+          fetchProductInventory()
+        }}
+        assetId={openDialog?.id}
+        />
+      )}
+      {openDialog?.open && certificateStatus._id === "Completed" && (
+        <CertificateHistoryDialog 
+        onClose={()=>  setOpenDialog({open: false, id: null})}
+        id={openDialog?.id}
+        />
+      )}
     </Fragment>
   );
 };

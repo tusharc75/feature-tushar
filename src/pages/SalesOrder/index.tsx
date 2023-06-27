@@ -41,11 +41,11 @@ const SalesOrder = () => {
 
   const SalesOrderType = [
     {
-      key: `All ${routes?.salesOrder.title}`,
+      key: `My ${routes?.salesOrder.title}`,
       value: 1
     },
     {
-      key: `My ${routes?.salesOrder.title}`,
+      key: `All ${routes?.salesOrder.title}`,
       value: 2
     }
   ];
@@ -199,7 +199,7 @@ const SalesOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
@@ -393,6 +393,7 @@ const SalesOrder = () => {
               columns={columns}
               dispatch={dispatch}
               filters={filters}
+              selectedType={selectedType}
             >
               {accountDetails.accountId && (
                 <Chip

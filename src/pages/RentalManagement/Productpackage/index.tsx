@@ -262,12 +262,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail = `${parent.type === 'service'
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-          : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.packageDetail?.packageName
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'service'
@@ -301,12 +301,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = `${_subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'package'
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === 'product'
-              ? _subRow.productDetail?.productName
-              : ''
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'package'
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'product'
+            ? _subRow.productDetail?.productName
+            : ''
         } `;
       _subRow.description =
         _subRow.type === 'service'
@@ -384,13 +384,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           element['pricingCondition'] = rateResult[0].conditionId;
           element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-
-          if (allFields?.some((e) => e.fieldName === 'supplierPrice') && calValues[priceFieldName]) {
-            const supplierPriceFieldName = `supplierPrice_${rentalManagementData?.currency?.toLowerCase()}`;
-            calValues[supplierPriceFieldName] =
-              (rateResult[0].mrp - (rateResult[0].mrp * 5) / 100) * element?.qty * (element?.estimateJobDuration || 1);
-          }
-
           Object.assign(element, calValues);
         }
       });

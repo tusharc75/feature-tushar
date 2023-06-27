@@ -93,11 +93,11 @@ const MaterialDialog = ({ onClose, materialData, handleUpdate, loadingEdit, bulk
       }
       materialData.forEach((element) => {
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-        returnData.push({ ...element, ...calValues });
+        returnData.push({ _id: element._id, ...calValues });
       });
       handleUpdate(returnData);
     } else {
-      returnData = [{ ...materialData, ...values }];
+      returnData = [{ _id: materialData._id, ...values }];
       handleUpdate(returnData, saveAndNext);
     }
   };

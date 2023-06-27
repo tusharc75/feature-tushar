@@ -28,6 +28,8 @@ import { AiFillFilePdf } from 'react-icons/ai';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import { Link } from 'react-router-dom';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, renderedFrom, allowedToEdit, isProcessor }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -74,14 +76,41 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
+          rentalJobRenderer: RentalJobRenderer,
+          wellNameRenderer: WellNameRenderer,
           ...tempFrameworkComponent
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
+
+        const extraColoums = [
+          { field: 'rentalJob', headerName: 'Rental Job', show: true, cellRenderer: 'rentalJobRenderer' },
+          { field: 'wellName', headerName: 'Well Name', show: true, cellRenderer: 'wellNameRenderer' },
+          { field: 'remainingJobDays', headerName: 'Remaining Job Days', show: true, cellRenderer: 'commonRenderer' }
+        ]
+
+        columns = [...columns.slice(0, 1), ...extraColoums, ...columns.slice(1), ...getStaticFields()];
         setColumns([...columns]);
         fetchRecords();
       });
   };
+
+  const RentalJobRenderer = (params) =>
+    params?.value ? (
+      <Link className="link text-truncate" target='_blank' title={params?.value} to={`${routes.rentalManagementDetail.path}/${params?.data?.rentalJobId}`}>
+        {params?.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    );
+
+  const WellNameRenderer = (params) =>
+    params?.value ? (
+      <Link className="link text-truncate" target='_blank' title={params?.value} to={`${routes.wellMasterDetail.path}/${params?.data?.wellNameId}`}>
+        {params?.value}
+      </Link>
+    ) : (
+      <NoDataCell />
+    );
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -268,9 +297,9 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               </Fragment>
             )} */}
             {selectedRecords.length > 0 &&
-            selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-            checkUniqWarehouse() &&
-            currentStep === 1 ? (
+              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+              checkUniqWarehouse() &&
+              currentStep === 1 ? (
               <Fragment>
                 <Tooltip title="Send to Supplier">
                   <Button
@@ -361,7 +390,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (

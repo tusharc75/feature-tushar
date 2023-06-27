@@ -39,11 +39,11 @@ import queryString from 'query-string';
 const Planning = () => {
   const PlanningType = [
     {
-      key: `All ${routes?.planning.title}`,
+      key: `My ${routes?.planning.title}`,
       value: 1
     },
     {
-      key: `My ${routes?.planning.title}`,
+      key: `All ${routes?.planning.title}`,
       value: 2
     }
   ];
@@ -143,10 +143,9 @@ const Planning = () => {
       });
   };
 
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
@@ -393,7 +392,8 @@ const Planning = () => {
                       <span>{`Calendar`}</span>
                     </ToggleButton>
                   </ToggleButtonGroup>
-                </Box>)}
+                </Box>
+              )}
               {selectedPlanningType && (
                 <Chip
                   className="ml-3"
@@ -409,8 +409,8 @@ const Planning = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile ? '200px' : '242px'}
                     style={isMobile ? { flex: 1 } : {}}
                     size="small"
@@ -442,7 +442,7 @@ const Planning = () => {
                         onClick={openActions}
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                         endIcon={<ExpandMore />}
                       >
                         {isMobile && !isTablet ? '' : 'Actions'}

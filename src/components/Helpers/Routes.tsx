@@ -165,7 +165,14 @@ const routes = {
       storedRoutes && storedRoutes.termsAndConditions && storedRoutes.termsAndConditions.title
         ? storedRoutes.termsAndConditions?.title
         : RESOURCE_LABEL.termsAndConditions,
-    path: '/terms-conditions'
+    path: '/terms-and-conditions'
+  },
+  termsAndConditionsDetails: {
+    title:
+      storedRoutes && storedRoutes.termsAndConditions && storedRoutes.termsAndConditions.title
+        ? storedRoutes.termsAndConditions?.title
+        : RESOURCE_LABEL.termsAndConditions,
+    path: '/terms-and-conditions/detail'
   },
   profilePage: {
     title: 'Profile',
@@ -231,11 +238,11 @@ const routes = {
         : RESOURCE_LABEL.serializedAsset,
     path: '/serialized-asset'
   },
-  serializedAssetCertification: {
+  serializedAssetsCertification: {
     title:
-      storedRoutes && storedRoutes.serializedAssetCertification && storedRoutes.serializedAssetCertification.title
-        ? storedRoutes.serializedAssetCertification.title
-        : RESOURCE_LABEL.serializedAssetCertification,
+      storedRoutes && storedRoutes.serializedAssetsCertification && storedRoutes.serializedAssetsCertification.title
+        ? storedRoutes.serializedAssetsCertification.title
+        : RESOURCE_LABEL.serializedAssetsCertification,
     path: '/serialized-assets-certification'
   },
   serializedAssetDetail: {

@@ -747,7 +747,7 @@ const LoadingTicket = ({
                 setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
               }}
             >
-              Scrap
+              {ASSET_STATUS.scrap}
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -755,7 +755,7 @@ const LoadingTicket = ({
                 setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
               }}
             >
-              Lost
+              {ASSET_STATUS.lost}
             </MenuItem>
           </Menu>
           {(allowedToEdit || isProcessor) && (

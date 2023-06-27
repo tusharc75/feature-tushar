@@ -1,6 +1,6 @@
 import { Box, Button, Chip, CircularProgress, Dialog, TextField } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { isEqual, update } from 'lodash';
+import { camelCase, isEqual, update } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,9 +11,10 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, generateUniqueIdOnly, serviceMaster } from 'src/constants/helpers';
+import { CustomDialogTransition, RESOURCE_LABEL, generateUniqueIdOnly, serviceMaster, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import { useHistory } from 'react-router-dom';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { FaDiceOne } from 'react-icons/fa';
@@ -22,7 +23,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { is } from 'date-fns/locale';
 import moment from 'moment';
 
-const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
+const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false, renderedFrom = '' }) => {
   const {
     state: { user }
   }: any = useData();
@@ -33,6 +34,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   const [fullScreen, setFullScreen] = useState(fullScreenView || isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
+  const history = useHistory();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [stepOptions, setStepOptions] = useState(referenceData?.steps || []);
   const [completeSteps, setCompleteSteps] = useState([]);
@@ -87,6 +89,15 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           rest.fieldTicketNumber = `FT_${generateUniqueIdOnly()}`;
           setCloneHeading(fieldTicketNumber);
           tempData = rest;
+        } else {
+          if (referenceData && renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0`) {
+            fields?.forEach((e) => {
+              if (e.fieldName === 'fieldServiceOrder') {
+                e.disableOnEdit = true;
+                e.isUneditable = true;
+              }
+            });
+          }
         }
         fetchServiceSteps(tempData?.service?.optionValue);
         setCompleteSteps(tempData?.steps || []);
@@ -97,14 +108,40 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
-
         if (referenceData) {
-          tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
-          tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;
-          tempInitialData['service'] = referenceData?.service;
-          tempInitialData['startDateTime'] = referenceData?.startDateTime;
-          tempInitialData['endDateTime'] = referenceData?.endDateTime;
-          tempInitialData['technician'] = referenceData?.technician;
+          if (renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0`) {
+            fieldsDataForCreate?.forEach((e) => {
+              if (e.fieldName === 'fieldServiceOrder') {
+                tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;
+                e.disableOnEdit = true;
+                e.isUneditable = true;
+              }
+            });
+            if (referenceData?.warehouse && fieldsDataForCreate?.some((e) => e.fieldName === 'warehouse')) {
+              tempInitialData['warehouse'] = referenceData?.warehouse;
+            }
+            if (referenceData?.estimateStartDate && fieldsDataForCreate?.some((e) => e.fieldName === 'estimateStartDate')) {
+              tempInitialData['estimateStartDate'] = referenceData?.estimateStartDate;
+            }
+            if (referenceData?.estimateEndDate && fieldsDataForCreate?.some((e) => e.fieldName === 'estimateEndDate')) {
+              tempInitialData['estimateEndDate'] = referenceData?.estimateEndDate;
+            }
+            if (referenceData?.wellName && fieldsDataForCreate?.some((e) => e.fieldName === 'wellName')) {
+              tempInitialData['wellName'] = referenceData?.wellName;
+            }
+            if (referenceData?.wellNumber && fieldsDataForCreate?.some((e) => e.fieldName === 'wellNumber')) {
+              tempInitialData['wellNumber'] = referenceData?.wellNumber;
+            }
+            if (referenceData?.currency && fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+              tempInitialData['currency'] = referenceData?.currency;
+            }
+            if (referenceData?.technician && fieldsDataForCreate?.some((e) => e.fieldName === 'technician')) {
+              tempInitialData['technician'] = referenceData?.technician;
+            }
+            if (referenceData?.service && fieldsDataForCreate?.some((e) => e.fieldName === 'service')) {
+              tempInitialData['service'] = referenceData?.service;
+            }
+          }
         }
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           tempInitialData['currency'] = user.user?.brandCurrency;
@@ -189,7 +226,11 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         .post(`${routes.fieldTicket?.path}`, values)
         .then(({ data }) => {
           setLoading(false);
-          onSuccess(data.data);
+          if (referenceData) {
+            onSuccess(data.data);
+          } else {
+            history.push(`${routes.fieldTicket.path}/detail/${data?.data?._id}`);
+          }
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
@@ -228,13 +269,12 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
-                    : `Create ${routes?.fieldTicket?.title}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
+                  : `Create ${routes?.fieldTicket?.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -253,42 +293,46 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                     fullWidth
                   />
                 </Form>
-                <div className={'detail-box-content'}>
-                  <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                  <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Step Information</h2>
-                </div>
-                <Box marginY={2} />
-                <Autocomplete
-                  multiple
-                  id="Steps Performed"
-                  options={stepOptions?.map((e) => e?.optionLabel) || []}
-                  defaultValue={completeSteps?.map((e) => e?.optionLabel) || []}
-                  freeSolo
-                  getOptionLabel={(option: any) => option}
-                  renderTags={(value, getTagProps) =>
-                    value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
-                  }
-                  onChange={(event, newValue) => {
-                    const updatedValues = newValue?.map((e) => {
-                      const step = referenceData?.steps?.find((step) => step?.optionLabel === e);
-                      if (step) {
-                        return {
-                          optionLabel: step?.optionLabel,
-                          optionValue: step?.optionValue
-                        };
-                      } else {
-                        return {
-                          optionLabel: e,
-                          optionValue: null
-                        };
+                {initialData?.fields?.find((f) => f?.fieldName === 'service' && f?.lookupResource === RESOURCE_LABEL.serviceMaster) && (
+                  <>
+                    <div className={'detail-box-content'}>
+                      <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                      <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Step Information</h2>
+                    </div>
+                    <Box marginY={2} />
+                    <Autocomplete
+                      multiple
+                      id="Steps Performed"
+                      options={stepOptions?.map((e) => e?.optionLabel) || []}
+                      defaultValue={completeSteps?.map((e) => e?.optionLabel) || []}
+                      freeSolo
+                      getOptionLabel={(option: any) => option}
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
                       }
-                    });
-                    setCompleteSteps(updatedValues);
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} variant="outlined" label="Steps Performed" size="small" placeholder="Steps Performed" />
-                  )}
-                />
+                      onChange={(event, newValue) => {
+                        const updatedValues = newValue?.map((e) => {
+                          const step = referenceData?.steps?.find((step) => step?.optionLabel === e);
+                          if (step) {
+                            return {
+                              optionLabel: step?.optionLabel,
+                              optionValue: step?.optionValue
+                            };
+                          } else {
+                            return {
+                              optionLabel: e,
+                              optionValue: null
+                            };
+                          }
+                        });
+                        setCompleteSteps(updatedValues);
+                      }}
+                      renderInput={(params) => (
+                        <TextField {...params} variant="outlined" label="Steps Performed" size="small" placeholder="Steps Performed" />
+                      )}
+                    />
+                  </>
+                )}
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button

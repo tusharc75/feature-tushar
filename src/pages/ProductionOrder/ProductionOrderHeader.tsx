@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
@@ -34,7 +34,9 @@ function ProductionOrderHeader(props) {
     // showCloneRentalManagementDialog
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
-  
+  const [open, setOpen] = useState(false);
+  const [isOpenDialog, setisOpenDialog] = useState(false);
+
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -42,15 +44,13 @@ function ProductionOrderHeader(props) {
   const closeActions = () => {
     setAnchorEl(null);
   };
-  const [filter, setFilter] = useState(options[0].key);
+
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
-      setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
-
     }
   };
-  const [isOpenDialog, setisOpenDialog] = useState(false)
+
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -60,25 +60,16 @@ function ProductionOrderHeader(props) {
     setisOpenDialog(false);
   };
 
-  const [open, setOpen] = useState(false);
-
   const handleClickOpen = () => {
     setOpen(true);
   };
 
   const handleClickClose = () => {
     setOpen(false);
-
   };
 
   let toggleInner = options && (
-    <ToggleButtonGroup
-      size="small"
-      className=" toggle-button-layout"
-      value={filter}
-      exclusive
-      onChange={handleFilter}
-    >
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
           <ToggleButton value={k.key} key={index}>
@@ -121,7 +112,7 @@ function ProductionOrderHeader(props) {
               />
 
               <Button
-               onClick={handleOpen}
+                onClick={handleOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
@@ -170,8 +161,8 @@ function ProductionOrderHeader(props) {
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
           <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox
-              onSearch={onSearch}
-              searchbox={styles.search_box_input}
+              onChange={onSearch}
+              className={styles.search_box_input}
               value={searchVal}
               size="small"
               placeholder="Search Production Orders"
@@ -194,41 +185,41 @@ function ProductionOrderHeader(props) {
               </Button>
             )}
             {ProductionOrderPermissions?.isDelete && (
-                <>
-                  <Button
-                    disabled={canDelete}
-                    variant={isMobile ? "text" : "outlined"}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                  >
-                    {isMobile ? "" :  "Actions" } <ExpandMore/>
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+              <>
+                <Button
+                  disabled={canDelete}
+                  variant={isMobile ? 'text' : 'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                >
+                  {isMobile ? '' : 'Actions'} <ExpandMore />
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      showConfirmBox(null);
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
                   >
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        showConfirmBox(null);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </Menu>
-                </>
-              )}
+                    Delete
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
           </Grid>
         </Box>
       </Grid>

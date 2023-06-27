@@ -57,9 +57,11 @@ function dropdownOptions(options, values, fields, fieldData) {
       const dependentOnFieldValue = values[dependentOnField?.fieldName];
       if (dependentOnFieldValue) {
         const dependentFieldOption = dependentOnField?.option?.find((e) => e.optionValue === dependentOnFieldValue);
-        const dependentIds = dependentFieldOption[lookupDependentOnField] || [];
-        const newOptions = options?.filter((option: any) => dependentIds.includes(option.optionValue)) || [];
-        optionsToShow.push(...newOptions);
+        if (dependentFieldOption) {
+          const dependentIds = dependentFieldOption[lookupDependentOnField] || [];
+          const newOptions = options?.filter((option: any) => dependentIds?.includes(option.optionValue)) || [];
+          optionsToShow.push(...newOptions);
+        }
       }
     }
   }
@@ -104,8 +106,8 @@ function Dropdown({
 
   return (
     <Box key={fieldData?.lookupResource}>
-      <Grid container spacing={1} style={{ alignItems: 'center' }}>
-        <Grid item style={{ flexGrow: 1, maxWidth: 419 }}>
+      <Grid container spacing={1} style={{ alignItems: 'center', flexWrap: 'nowrap' }}>
+        <Grid item style={{ flexGrow: 1 }}>
           <InfoLabel
             info={fieldData?.tooltipMessage}
             isTooltip={fieldData?.isTooltip}
@@ -126,6 +128,11 @@ function Dropdown({
                     : []
                 }
                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                ChipProps={{
+                  style: {
+                    maxWidth: 330
+                  }
+                }}
                 onChange={
                   onChange
                     ? onChange
@@ -304,7 +311,11 @@ function Dropdown({
                   </HtmlTooltip>
                   {lookupDialog && (
                     <ManageWellNumber
-                      refrenceData={{ wellName: values[fieldData.lookupDependentOn] }}
+                      referenceData={
+                        fieldData?.lookupDependentOn && values[fieldData?.lookupDependentOn]
+                          ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
+                          : null
+                      }
                       isClone={false}
                       onClose={() => setLookupDialog(false)}
                       onSuccess={(data) => {
@@ -315,7 +326,9 @@ function Dropdown({
                             optionLabel: data.wellNumber,
                             optionValue: data._id,
                             order: option.length,
-                            wellMaster: data.wellName
+                            wellMaster: data?.wellName,
+                            customerAccount: data?.customerAccount,
+                            address: data?.address
                           };
                           addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
@@ -608,7 +621,7 @@ function Dropdown({
                       contactId={null}
                       onClose={() => setLookupDialog(false)}
                       isRedirectToDetailPage={false}
-                      referenceData={{ 'accountName': values[fieldData.lookupDependentOn] }}
+                      referenceData={{ accountName: values[fieldData.lookupDependentOn] }}
                       onSuccess={(data) => {
                         setLookupDialog(false);
                         if (data?._id) {
@@ -652,7 +665,7 @@ function Dropdown({
                       isRedirectToDetailPage={false}
                       isClone={false}
                       contactId={null}
-                      referenceData={{ 'accountName': values[fieldData.lookupDependentOn] }}
+                      referenceData={{ accountName: values[fieldData.lookupDependentOn] }}
                       onSuccess={(data) => {
                         setLookupDialog(false);
                         if (data?._id) {

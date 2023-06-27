@@ -9,7 +9,14 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { fieldServiceOrder, ACTIVITY_RESOURCE, getUniqueCurrencies, serviceOrderSteps, SERVICE_ORDER_STATUS, sidebarResource } from '../../constants/helpers';
+import {
+  fieldServiceOrder,
+  ACTIVITY_RESOURCE,
+  getUniqueCurrencies,
+  serviceOrderSteps,
+  SERVICE_ORDER_STATUS,
+  sidebarResource
+} from '../../constants/helpers';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
@@ -29,6 +36,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ServiceOrderViews from './RoadMapViews';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
+import FieldTicket from './FieldTicket';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -61,6 +69,8 @@ const ServiceOrderDetailsPage = () => {
   const [statusOptions, setStatusOptions] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
 
+  const [steps, setSteps] = useState([]);
+
   useEffect(() => {
     return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
@@ -83,7 +93,7 @@ const ServiceOrderDetailsPage = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
-      updateProcessStatus(serviceOrderSteps[currentStep]?.name);
+      updateProcessStatus(steps[currentStep]?.name);
     }
   }, [currentStep]);
 
@@ -117,11 +127,7 @@ const ServiceOrderDetailsPage = () => {
       setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       setServiceOrderData(data);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
-      setCurrentStep(
-        serviceOrderSteps.map((s) => s.name).indexOf(data?.processStatus) !== -1
-          ? serviceOrderSteps.map((s) => s.name).indexOf(data?.processStatus)
-          : 0
-      );
+      setCurrentStep(steps.map((s) => s.name).indexOf(data?.processStatus) !== -1 ? steps.map((s) => s.name).indexOf(data?.processStatus) : 0);
       if (isAllowedToEdit && openEdit === 'true') {
         setOpenUpdateDialog(true);
         const params = new URLSearchParams();
@@ -140,19 +146,26 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const getServiceOrderFields = async () => {
     try {
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
-      response?.data?.data.some((o) => {
+      const response: any = await axiosInstance().get(`/field/field-policy?resource=${sidebarResource.fieldServiceOrder}`);
+      response?.data?.data?.field.some((o) => {
         if (o?.fieldData?.fieldName === 'status') {
           setStatusOptions([...o.fieldData.option]);
           return true;
         }
       });
-      setServiceOrderFields(response?.data?.data);
+      setServiceOrderFields(response?.data?.data.field);
+
+      const policy = response?.data?.data?.policy;
+      if (policy.stepper?.length) {
+        setSteps(serviceOrderSteps?.filter((step) => policy?.stepper?.includes(step?.name)));
+      } else {
+        setSteps(serviceOrderSteps);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -328,14 +341,17 @@ const ServiceOrderDetailsPage = () => {
           <Steps
             isNextStep={false}
             nextStep={nextStep}
-            steps={serviceOrderSteps}
+            steps={steps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[SERVICE_ORDER_STATUS.completed].includes(serviceOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
-          <ContentFullScreen title={serviceOrderSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {currentStep === 0 && serviceOrderData && (
+          <ContentFullScreen title={steps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+            {steps[currentStep]?.name === serviceOrderSteps[0]?.name && serviceOrderData && (
+              <FieldTicket serviceOrderData={serviceOrderData} setNextStep={setNextStep} renderedFrom={`${renderedFrom}_grid-0`} />
+            )}
+            {steps[currentStep]?.name === serviceOrderSteps[1]?.name && serviceOrderData && (
               <Services
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -344,7 +360,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {currentStep === 1 && serviceOrderData && (
+            {steps[currentStep]?.name === serviceOrderSteps[2]?.name && serviceOrderData && (
               <Products
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -353,7 +369,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {currentStep === 2 && serviceOrderData && (
+            {steps[currentStep]?.name === serviceOrderSteps[3]?.name && serviceOrderData && (
               <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -363,7 +379,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {currentStep === 3 && serviceOrderData && (
+            {steps[currentStep]?.name === serviceOrderSteps[4]?.name && serviceOrderData && (
               <TechnicianDispatch
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
@@ -372,7 +388,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={true}
               />
             )}
-            {currentStep === 4 && serviceOrderData && (
+            {steps[currentStep]?.name === serviceOrderSteps[5]?.name && serviceOrderData && (
               <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}

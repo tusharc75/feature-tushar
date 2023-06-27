@@ -97,7 +97,7 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
         {((childTasks && childTasks.length > 0) || openAddSub === true) && (
           <Box mb={1}>
             <div className="position-relative">
-              <h4 className="form-label-style" title="Add Terms & Conditions">
+              <h4 className="form-label-style">
                 Child Task
               </h4>
             </div>

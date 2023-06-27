@@ -50,6 +50,7 @@ import Roles from './pages/Role';
 import RoleDetailsPage from './pages/Role/RoleDetailsPage';
 import Product from './pages/Product';
 import TermsAndConditions from './pages/TermsAndConditions';
+import TermsAndConditionDetail from './pages/TermsAndConditions/TermsAndConditionDetail';
 import PriceTemplate from './pages/PriceTemplate';
 import CreatePriceTemplate from './pages/PriceTemplate/CreatePriceTemplate';
 import ProductBuilder from './pages/ProductBuilder';
@@ -116,7 +117,7 @@ import TransferInventoryDetailPage from './pages/TransferInventory/TransferInven
 import Zone from './pages/zone';
 import ZoneDetailPage from './pages/zone/ZoneDetailPage';
 import { Button, Snackbar } from '@material-ui/core';
-import { registerSW } from "virtual:pwa-register";
+import { registerSW } from 'virtual:pwa-register';
 import MuiAlert from '@material-ui/lab/Alert';
 import WellMaster from './pages/WellMaster';
 import DashboardBuilder from './pages/DashboardBuilder/DashboardManager';
@@ -223,9 +224,8 @@ import FieldJobDetail from './pages/FieldJob/FieldJobDetail';
 var notificationInterval: any = null;
 
 function App() {
-
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
+    if ('serviceWorker' in navigator) {
       registerSW();
     }
   }, []);
@@ -291,7 +291,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -523,7 +523,7 @@ function App() {
             <PrivateRoute exact path={routes.serializedAsset.path}>
               <SerializedAsset />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.serializedAssetCertification.path}>
+            <PrivateRoute exact path={routes.serializedAssetsCertification.path}>
               <SerializedAssetsCertification />
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAsset.path + '-new'}>
@@ -577,8 +577,11 @@ function App() {
             <PrivateRoute exact path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}>
               <CreateFormBuilder />
             </PrivateRoute>
-            <PrivateRoute exact path={termsAndCondition.route}>
-              <TermsAndConditions termsAndConditionBreadcrumb={routes.termsAndConditions} />
+            <PrivateRoute exact path={routes.termsAndConditions.path}>
+              <TermsAndConditions />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.termsAndConditionsDetails.path}/:id`}>
+              <TermsAndConditionDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.priceTemplate.path}>
               <PriceTemplate />
