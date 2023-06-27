@@ -337,7 +337,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 color="default"
                 size="small"
                 onClick={openActions}
-                className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                 aria-controls="action-menu"
                 endIcon={<ExpandMore />}
               >

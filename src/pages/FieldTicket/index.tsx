@@ -35,7 +35,6 @@ import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/cons
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 
 const FieldTicket = () => {
-
   const FieldTicketType = [
     {
       key: `My ${routes.fieldTicket.title}`,
@@ -46,7 +45,6 @@ const FieldTicket = () => {
       value: 2
     }
   ];
-
 
   const renderedFrom = camelCase(routes?.fieldTicket.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -351,7 +349,7 @@ const FieldTicket = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-            <ToggleButtonGroup
+              <ToggleButtonGroup
                 size="small"
                 className="align-items-center gap-1 layout-for-mobile "
                 value={FieldTicketType[selectedType - 1].key}
@@ -404,7 +402,7 @@ const FieldTicket = () => {
                         onClick={openActions}
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                         endIcon={<ExpandMore />}
                       >
                         {isMobile && !isTablet ? '' : 'Actions'}

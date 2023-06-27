@@ -415,7 +415,7 @@ const Note = () => {
                         onClick={openActions}
                         aria-controls="action-menu"
                         disabled={selectedRecords.length > 0 ? false : true}
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                         endIcon={<ExpandMore />}
                       >
                         {isMobile && !isTablet ? '' : 'Actions'}
