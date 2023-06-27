@@ -760,7 +760,7 @@ export default function QuoteDetail() {
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
                       color="default"
                       size="small"
-                      className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+                      className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} new-dropdown-v1`}
                       endIcon={isMobile && !isTablet ? null : <ExpandMore />}
                       onClick={openActions}
                       // className={styles.action_submit_btn}

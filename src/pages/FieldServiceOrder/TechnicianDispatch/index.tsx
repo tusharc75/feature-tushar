@@ -262,6 +262,7 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
                   onClick={handleClick}
                   disabled={!Boolean(selectedRecords && selectedRecords.length)}
                   endIcon={<BiChevronDown />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>

@@ -469,6 +469,7 @@ const Consumables = ({ rentalManagementData, setNextStep, currencySymbol, render
                   onClick={handleClick}
                   disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
                   endIcon={<BiChevronDown />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>

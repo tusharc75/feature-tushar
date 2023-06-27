@@ -518,6 +518,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
               onClick={handleClick}
               disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
               endIcon={<BiChevronDown />}
+              className="new-dropdown-v1"
             >
               Actions
             </Button>

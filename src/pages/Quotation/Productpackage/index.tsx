@@ -135,13 +135,14 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === 'product'
+                    `${
+                      row.original.type === 'serializedAsset'
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === 'product'
                         ? routes.productDetail.path
                         : row.original.type === 'package'
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
+                        ? routes.packagesDetail.path
+                        : routes.serviceMasterDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -220,22 +221,23 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -256,22 +258,23 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.srno = parent.srno + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -356,7 +359,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     setUpdating(true);
     axiosInstance()
       .put(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material: rows })
-      .then(({data}) => {
+      .then(({ data }) => {
         setUpdating(false);
         toastConfig.setToastConfig({
           open: true,
@@ -371,7 +374,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
             isBulkedit: false,
             showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
           });
-        }else{
+        } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
         fetchData();
@@ -399,7 +402,11 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
   };
 
   const handleOpen = (row, rows) => {
-    setIsProductEdit({ open: true, isBulkedit: false,  showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false  });
+    setIsProductEdit({
+      open: true,
+      isBulkedit: false,
+      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+    });
     setRecordToUpdate(row.original);
   };
 
@@ -537,6 +544,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 onClick={openActions}
                 aria-controls="action-menu"
                 endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
               >
                 {'Actions'}
               </Button>
@@ -612,15 +620,17 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
               <MenuItem
                 disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
                 onClick={() => {
-                  const dataToDelete = selectedProducts && selectedProducts
-                    .filter((e) => !e.hideSelection)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
+                  const dataToDelete =
+                    selectedProducts &&
+                    selectedProducts
+                      .filter((e) => !e.hideSelection)
+                      .map((rec: any) => {
+                        const obj: any = {};
+                        obj.id = rec._id;
+                        obj.type = rec?.type;
+                        obj.materialId = rec?.materialId;
+                        return obj;
+                      });
                   setDeleteData(dataToDelete);
                   closeActions();
                 }}

@@ -128,9 +128,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         disabled: true,
         cellRenderer: 'assetRenderer',
         cellStyle: (params) => {
-          if (
-            [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)
-          ) {
+          if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
             return { backgroundColor: COLOUR_MASTER.lostAssets.background };
           }
           if (params?.data?.isReplaced) {
@@ -396,6 +394,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   aria-controls="action-menu"
                   disabled={selectedRecords.length === 0}
                   endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>

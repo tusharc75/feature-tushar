@@ -366,7 +366,7 @@ const WorkOrder = () => {
               } */}
                 {permissions?.workOrder?.isDelete && (
                   <Button
-                    className={styles.action_submit_btn}
+                    className={`${styles.action_submit_btn} new-dropdown-v1`}
                     variant="outlined"
                     color="default"
                     size="small"

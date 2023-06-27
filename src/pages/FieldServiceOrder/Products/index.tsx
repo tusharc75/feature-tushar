@@ -342,6 +342,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                   onClick={handleClick}
                   disabled={selectedProducts.length ? false : true}
                   endIcon={<BiChevronDown />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>

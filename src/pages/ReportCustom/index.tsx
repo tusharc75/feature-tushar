@@ -81,11 +81,16 @@ const CustomReport = () => {
       gridApi.setRowData([]);
     }
     try {
-      let { data: { data, count } } = await axiosInstance().get(`custom-report`);
+      let {
+        data: { data, count }
+      } = await axiosInstance().get(`custom-report`);
       data = data.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource
-        finalObject.column = finalObject.column?.split(',')?.map((s: string) => startCase(s))?.join(', ');
+        finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource;
+        finalObject.column = finalObject.column
+          ?.split(',')
+          ?.map((s: string) => startCase(s))
+          ?.join(', ');
         finalObject.filters = finalObject.filters.length > 0 ? finalObject?.filters?.map((item) => startCase(item.term)) : [];
         return finalObject;
       });
@@ -199,12 +204,7 @@ const CustomReport = () => {
               <Grid item xs={8}>
                 <Box display="flex" alignItems="center" justifyContent="flex-end">
                   <Box mr={1}>
-                    <Button
-                      onClick={() => setShowManageDialog((prev) => ({ ...prev, open: true }))}
-                      variant="contained"
-                      size="small"
-                      color="primary"
-                    >
+                    <Button onClick={() => setShowManageDialog((prev) => ({ ...prev, open: true }))} variant="contained" size="small" color="primary">
                       Add
                     </Button>
                   </Box>
@@ -217,6 +217,7 @@ const CustomReport = () => {
                       onClick={openActions}
                       aria-controls="action-menu"
                       disabled={selectedRecords.length === 0}
+                      className="new-dropdown-v1"
                     >
                       Actions
                     </Button>
@@ -248,27 +249,25 @@ const CustomReport = () => {
           </div>
           <div>
             {Object.keys(frameworkComponents).length > 0 && columns ? (
-              (
-                <CustomAgGrid
-                  columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameworkComponents}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  isClientSideGrid={true}
-                  actionWidth={100}
-                  loading={loading}
-                  renderedFrom={renderedFrom}
-                  allowSelection={true}
-                  allowAction={true}
-                  refreshGrid={fetchResourceData}
-                  showOnlyShowFilteredRecordSwitch={false}
-                />
-              )
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameworkComponents}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                isClientSideGrid={true}
+                actionWidth={100}
+                loading={loading}
+                renderedFrom={renderedFrom}
+                allowSelection={true}
+                allowAction={true}
+                refreshGrid={fetchResourceData}
+                showOnlyShowFilteredRecordSwitch={false}
+              />
             ) : (
               <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
             )}

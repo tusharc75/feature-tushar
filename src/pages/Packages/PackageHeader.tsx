@@ -197,7 +197,7 @@ function PackageHeader(props) {
                   size="small"
                   onClick={openActions}
                   aria-controls="action-menu"
-                  className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                  className={`${isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn} new-dropdown-v1`}
                   endIcon={<ExpandMore />}
                 >
                   {isMobile && !isTablet ? '' : 'Actions'}

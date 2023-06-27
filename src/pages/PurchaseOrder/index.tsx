@@ -506,7 +506,7 @@ const PurchaseOrder = () => {
                         onClick={openActions}
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
-                        className={isMobile ? 'mobile_button' : styles.add_submit_btn}
+                        className={`${isMobile ? 'mobile_button' : styles.add_submit_btn} new-dropdown-v1`}
                         endIcon={<ExpandMore />}
                       >
                         {isMobile ? '' : 'Actions'}
