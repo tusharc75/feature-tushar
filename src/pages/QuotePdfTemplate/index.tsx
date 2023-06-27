@@ -183,7 +183,6 @@ const QuotePdfTemplate: FC = () => {
     actionsRenderer: ActionsRenderer
   };
 
-
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -387,7 +386,7 @@ const QuotePdfTemplate: FC = () => {
                   )}
                   {permissions?.quotePdfTemplate?.isDelete && (
                     <Button
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
                       color="default"
                       size="small"

@@ -25,8 +25,6 @@ import { MdAdd } from 'react-icons/md';
 let termsTimeout;
 
 function TermsAndCondition() {
-
-
   const renderedFrom = camelCase(routes?.termsAndConditions.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -43,7 +41,8 @@ function TermsAndCondition() {
   const [gridApi, setGridApi] = useState(null);
   const [termsAndConditionsId, setTermsAndConditionsId] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, appendRows, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, appendRows, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
+    state;
   const { getColumnData } = useColumns();
 
   useEffect(() => {
@@ -133,7 +132,8 @@ function TermsAndCondition() {
       }
       const queryString = getQueryString();
       dispatch({ type: 'loading', loading: true });
-      axiosInstance().get(`${termsAndCondition.api}${queryString}`)
+      axiosInstance()
+        .get(`${termsAndCondition.api}${queryString}`)
         .then(({ data: { data } }) => {
           let count = data?.count;
           let rows = data?.data.map((u: any) => {
@@ -274,7 +274,7 @@ function TermsAndCondition() {
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="default"
                     size="small"
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                     onClick={openActions}
                     aria-controls="action-menu"
                     endIcon={<ExpandMore />}
@@ -299,7 +299,11 @@ function TermsAndCondition() {
                           closeActions();
                           setShowDeleteConfirmBox(true);
                         }}
-                        disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
                       >
                         Delete
                       </MenuItem>
@@ -329,16 +333,16 @@ function TermsAndCondition() {
                 setShowCreateDialog({ open: true, isClone: false });
               }}
               extraParamsToCheckDelete={false}
-              onDelete={(d) => { }}
+              onDelete={(d) => {}}
               rowCount={rowCount}
               page={page}
               loading={loading}
               additionalDetails={[]}
               chips={[]}
               owerCollaboratorInitialsOrImages=""
-              onCreate={() => { }}
+              onCreate={() => {}}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (

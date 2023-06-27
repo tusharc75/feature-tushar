@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
-import {
-  MdAdd,
-  MdFilterList,
-  MdSort,
-} from 'react-icons/all';
+import { MdAdd, MdFilterList, MdSort } from 'react-icons/all';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
@@ -52,7 +48,6 @@ function QuoteHeader({
   const closeActions = () => {
     setAnchorEl(null);
   };
-
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -189,7 +184,7 @@ function QuoteHeader({
                   size="small"
                   onClick={openActions}
                   fullWidth={true}
-                  className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                  className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                   aria-controls="action-menu"
                   endIcon={<ExpandMore />}
                 >

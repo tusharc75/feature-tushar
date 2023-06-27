@@ -385,7 +385,6 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
     setAnchorEl(null);
   };
 
-  
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
@@ -459,7 +458,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
               color="default"
               size="small"
               onClick={openActions}
-              className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+              className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
               aria-controls="action-menu"
               endIcon={<ExpandMore />}
             >

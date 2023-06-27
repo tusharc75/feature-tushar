@@ -3696,7 +3696,8 @@ body {
   color: #2a3042 !important;
   font-weight: 600 !important;
   &:disabled {
-    opacity: 0.5;
+    background-color: var(--new_theme_secondary_color) !important;
+    opacity: 0.7 !important;
   }
 }
 .no-shadow {

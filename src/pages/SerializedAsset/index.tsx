@@ -654,7 +654,7 @@ const SerializedAsset = () => {
                   )}
                   {(permissions?.serializedAsset?.isDelete || permissions?.serializedAsset?.isUpdate) && (
                     <Button
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
                       color="default"
                       size="small"
