@@ -21,7 +21,6 @@ import moment from 'moment';
 import {
     calculatePrice,
     calculateRowsField,
-    resetValueZero,
 } from '../../../components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

@@ -22,17 +22,32 @@ import {
   removeLocalStorage,
   sidebarResource
 } from 'src/constants/helpers';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import styles from '../Leads/Header.module.scss';
+import queryString from 'query-string';
 import ManageFieldTicket from './ManageFieldTicket';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 
 const FieldTicket = () => {
+
+  const FieldTicketType = [
+    {
+      key: `My ${routes.fieldTicket.title}`,
+      value: 1
+    },
+    {
+      key: `All ${routes.fieldTicket.title}`,
+      value: 2
+    }
+  ];
+
+
   const renderedFrom = camelCase(routes?.fieldTicket.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -46,6 +61,9 @@ const FieldTicket = () => {
   const [fieldTicketId, setFieldTicketId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
+  const history = useHistory();
+  const { type }: any = queryString.parse(history.location.search);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
@@ -147,6 +165,11 @@ const FieldTicket = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -280,13 +303,19 @@ const FieldTicket = () => {
     }
   };
 
+  const onTypeChange = (event, type) => {
+    const value = FieldTicketType.find((d) => d.key === type).value;
+    setSelectedType(value);
+    history.push(`?type=${value}`);
+  };
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
     fetchFieldTicketData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, isOffline]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, isOffline, selectedType]);
 
   return (
     <Fragment>
@@ -321,7 +350,23 @@ const FieldTicket = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+            <ToggleButtonGroup
+                size="small"
+                className="align-items-center gap-1 layout-for-mobile "
+                value={FieldTicketType[selectedType - 1].key}
+                exclusive
+                onChange={onTypeChange}
+              >
+                {FieldTicketType.map((k, index) => {
+                  return (
+                    <ToggleButton value={k.key} key={index}>
+                      {k.key}
+                    </ToggleButton>
+                  );
+                })}
+              </ToggleButtonGroup>
+            </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>

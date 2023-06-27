@@ -13,11 +13,11 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import routes from 'src/components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { calculatePrice } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import { calculatePrice } from 'src/components/RentalManagment/helper';
 
 
 const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, setNextStep }) => {
@@ -127,7 +127,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
                                 aria-label="Delete"
                                 disabled={!allowedToEdit}
                                 onClick={() => {
-                                    setDeleteData([{ id: row.original._id }]);
+                                    setDeleteData([{ id: row.original._id, service: row?.original?.materialId }]);
                                 }}
                             >
                                 <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
@@ -359,7 +359,8 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
                                         setDeleteData(selectedServices?.map(d => {
                                             return (
                                                 {
-                                                    id: d?._id
+                                                    id: d?._id,
+                                                    service: d?.materialId
                                                 }
                                             )
                                         }))
