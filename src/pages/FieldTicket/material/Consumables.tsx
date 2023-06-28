@@ -319,7 +319,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
         </Box>
       )}
       <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-        <CustomTab index={0} label={'Products/Consumables'} value={0} />
+        <CustomTab index={0} label={'Products/Consumables'} value={0} primaryColor={true} />
       </CustomTabs>
 
       <TabPanel value={tabValue} index={0}>
