@@ -302,107 +302,109 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
 
   return (
     <>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+      {allowedToEdit && serviceOption?.length > 0 && (
+        <Box style={{ maxWidth: '400px' }} mb={3}>
+          <Autocomplete
+            size="small"
+            style={{ minWidth: '300px' }}
+            fullWidth
+            options={serviceOption ? serviceOption : []}
+            autoHighlight
+            value={selectedServiceOption}
+            getOptionLabel={(option: any) => option?.optionLabel || ''}
+            getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
+            onChange={(_, val) => setSelectedServiceOption(val)}
+            renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
+          />
+        </Box>
+      )}
+      <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
         <CustomTab index={0} label={'Products/Consumables'} value={0} />
       </CustomTabs>
 
       <TabPanel value={tabValue} index={0}>
-        {allowedToEdit && (
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-              <Button variant="outlined" color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
-                Add
-              </Button>
-              {serviceOption?.length > 0 && (
-                <Box>
-                  <Autocomplete
-                    size="small"
-                    style={{ minWidth: '300px' }}
-                    fullWidth
-                    options={serviceOption ? serviceOption : []}
-                    autoHighlight
-                    value={selectedServiceOption}
-                    getOptionLabel={(option: any) => option?.optionLabel || ''}
-                    getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
-                    onChange={(_, val) => setSelectedServiceOption(val)}
-                    renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
-                  />
+        <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+          {allowedToEdit && (
+            <Box display="flex" justifyContent="space-between" mb={2}>
+              <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+                <Button variant="outlined" color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
+                  Add
+                </Button>
+              </Box>
+              <Box display="flex" ml={1}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                  id="demo-positioned-button"
+                  onClick={handleClick}
+                  disabled={!Boolean(selectedRecords?.length)}
+                  endIcon={<BiChevronDown />}
+                  className="new-dropdown-v1"
+                >
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  open={open}
+                  onClose={handleClose}
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right'
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right'
+                  }}
+                >
+                  <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
+                    <MenuItem
+                      disabled={isDeleting}
+                      onClick={() => {
+                        setDeleteData(
+                          selectedRecords?.map((d) => {
+                            return {
+                              id: d?._id
+                            };
+                          })
+                        );
+                        handleClose();
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                  </HtmlTooltip>
+                </Menu>
+              </Box>
+            </Box>
+          )}
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={12} sm={12}>
+              {columns && dataRows ? (
+                <CustomReactTable
+                  height={stepFullScreen ? 'calc(100vh - 440px)' : '278px'}
+                  columns={columns}
+                  data={dataRows}
+                  onSelect={setSelectedRecords}
+                  childrenProperty="subRows"
+                  uniqueKey="_id"
+                  onSaveEdit={onSaveInlineEdit}
+                  renderedFrom={'fieldTicket_consumables'}
+                  isClientSideGrid={true}
+                  hideExpander={true}
+                  hideSelection={!allowedToEdit}
+                  hideAction={!allowedToEdit}
+                />
+              ) : (
+                <Box p={2} height={500}>
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
               )}
-            </Box>
-            <Box display="flex" ml={1}>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                id="demo-positioned-button"
-                onClick={handleClick}
-                disabled={!Boolean(selectedRecords?.length)}
-                endIcon={<BiChevronDown />}
-                className="new-dropdown-v1"
-              >
-                Actions
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                open={open}
-                onClose={handleClose}
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-              >
-                <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
-                  <MenuItem
-                    disabled={isDeleting}
-                    onClick={() => {
-                      setDeleteData(
-                        selectedRecords?.map((d) => {
-                          return {
-                            id: d?._id
-                          };
-                        })
-                      );
-                      handleClose();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </HtmlTooltip>
-              </Menu>
-            </Box>
-          </Box>
-        )}
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={12} sm={12}>
-            {columns && dataRows ? (
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 440px)' : '278px'}
-                columns={columns}
-                data={dataRows}
-                onSelect={setSelectedRecords}
-                childrenProperty="subRows"
-                uniqueKey="_id"
-                onSaveEdit={onSaveInlineEdit}
-                renderedFrom={'fieldTicket_consumables'}
-                isClientSideGrid={true}
-                hideExpander={true}
-                hideSelection={!allowedToEdit}
-                hideAction={!allowedToEdit}
-              />
-            ) : (
-              <Box p={2} height={500}>
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>
-            )}
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
       </TabPanel>
 
       {consumablesDialog && (
