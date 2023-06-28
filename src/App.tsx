@@ -295,7 +295,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -997,6 +997,7 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.driverMasterDetail.path}/:id`}>
               <DriverMasterDetail />
+            </PrivateRoute>
             <PrivateRoute exact path={`${routes.trailerMaster.path}`}>
               <TrailerMaster />
             </PrivateRoute>
