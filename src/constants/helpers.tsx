@@ -322,6 +322,7 @@ export const sidebarResource = {
   taxMaster: 'Tax Master',
   competencies: 'Competencies',
   padMaster: 'Pad Master',
+  driverMaster: 'Driver Master',
   fieldJob: 'Field Job',
 };
 
@@ -441,6 +442,7 @@ export const RESOURCE_LABEL = {
   competencies: 'Competencies',
   materialHandling: 'Material Handling',
   padMaster: 'Pad Master',
+  driverMaster: 'Driver Master',
   fieldJob: 'Field Job',
 };
 

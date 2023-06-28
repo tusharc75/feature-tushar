@@ -220,6 +220,8 @@ import PadMaster from './pages/PadMaster';
 import PadMasterDetail from './pages/PadMaster/PadMasterDetail';
 import FieldJob from './pages/FieldJob';
 import FieldJobDetail from './pages/FieldJob/FieldJobDetail';
+import DriverMaster from './pages/DriverMaster';
+import DriverMasterDetail from './pages/DriverMaster/DriverMasterDetail';
 
 var notificationInterval: any = null;
 
@@ -987,6 +989,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldJobDetail.path}/:id`}>
               <FieldJobDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.driverMaster.path}`}>
+              <DriverMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.driverMasterDetail.path}/:id`}>
+              <DriverMasterDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

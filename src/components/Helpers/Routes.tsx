@@ -989,6 +989,16 @@ const routes = {
       storedRoutes && storedRoutes.fieldJob && storedRoutes.fieldJob.title ? storedRoutes.fieldJob?.title : RESOURCE_LABEL.fieldJob,
     path: '/field-job/detail'
   },
+  driverMaster: {
+    title:
+      storedRoutes && storedRoutes.driverMaster && storedRoutes.driverMaster.title ? storedRoutes.driverMaster?.title : RESOURCE_LABEL.driverMaster,
+    path: '/driver-master'
+  },
+  driverMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.driverMaster && storedRoutes.driverMaster.title ? storedRoutes.driverMaster?.title : RESOURCE_LABEL.driverMaster,
+    path: '/driver-master/detail'
+  },
 };
 
 export default routes;
