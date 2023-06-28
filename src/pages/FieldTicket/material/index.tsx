@@ -379,12 +379,12 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
           />
         </Box>
       ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        <Box p={2} height={stepFullScreen ? 500 : 278}>
+          <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
         </Box>
       )}
 
-      <Box mt={3} className="container-with-border" p={2}>
+      <Box mt={4} className="container-with-border" p={2}>
         <Consumables stepFullScreen={stepFullScreen} id={id} allowedToEdit={allowedToEdit} services={rowsData} />
       </Box>
 
