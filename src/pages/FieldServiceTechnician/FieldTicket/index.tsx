@@ -129,7 +129,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
                 {row['fieldTicketNumber']}
               </a>
             </Typography>
-            <Typography style={{ fontSize: '13px', color: 'var(--dark-secondary-text, #6B6B6B)', marginTop: '5px' }}>
+            <Typography style={{ fontSize: '13px', color: 'var(--dark-secondary-text, #6B6B6B)', marginTop: '8px' }}>
               Field Service Order :{' '}
               <a className="link" href={`${routes.fieldServiceOrderDetail.path}/${row?.[`fieldServiceOrderId`]}`} target="_blank">
                 {row['fieldServiceOrder']}
@@ -438,6 +438,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
                 checkBox={true}
                 height={'calc(100vh - 290px)'}
                 showSelectAll={true}
+                collapsible={true}
               />
 
               {/* <CustomAgGrid
