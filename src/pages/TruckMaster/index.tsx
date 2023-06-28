@@ -28,13 +28,13 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import styles from '../Leads/Header.module.scss';
-import ManageFleetMaster from './ManageFleetMaster';
+import ManageTruckMaster from './ManageTruckMaster';
 import CardView from './CardView';
 import AppsIcon from '@material-ui/icons/Apps';
 import ViewListIcon from '@material-ui/icons/ViewList';
 
-const FleetMaster = () => {
-  const renderedFrom = camelCase(routes?.fleetMaster.title);
+const TruckMaster = () => {
+  const renderedFrom = camelCase(routes?.truckMaster.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -44,7 +44,7 @@ const FleetMaster = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [fleetMasterId, setFleetMasterId] = useState(null);
+  const [truckMasterId, setTruckMasterId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -59,12 +59,12 @@ const FleetMaster = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.fleetMaster}`)
+      .get(`/field?resource=${sidebarResource?.truckMaster}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fleetMasterDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.truckMasterDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -83,21 +83,21 @@ const FleetMaster = () => {
       });
   };
 
-  const fetchFleetMasterData = () => {
+  const fetchTruckMasterData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     if (gridApi) {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes?.fleetMaster.path}${queryString}`)
+      .get(`${routes?.truckMaster.path}${queryString}`)
       .then(({ data: { data } }) => {
         setCardViewData(data?.data);
         let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.fleetMaster?.isDelete;
+          finalObject['canDelete'] = permissions?.truckMaster?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.fleetMaster?.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.truckMaster?.isUpdate;
           return {
             ...finalObject
           };
@@ -170,13 +170,13 @@ const FleetMaster = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      {permissions?.fleetMaster?.isCreate ? (
+      {permissions?.truckMaster?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
             aria-label="Clone"
             onClick={() => {
-              setFleetMasterId(params.data.id);
+              setTruckMasterId(params.data.id);
               setOpen({ open: true, isClone: true });
             }}
           >
@@ -221,10 +221,10 @@ const FleetMaster = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`${routes?.fleetMaster?.path}/remove`, { ids: ids })
+      .put(`${routes?.truckMaster?.path}/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
-        fetchFleetMasterData();
+        fetchTruckMasterData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -243,22 +243,22 @@ const FleetMaster = () => {
   }, []);
 
   useEffect(() => {
-    fetchFleetMasterData();
+    fetchTruckMasterData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   return (
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.fleetMaster.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.truckMaster.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.fleetMaster}
-            module="fleetMaster"
-            api={'field-ticket'}
+            permissions={permissions.truckMaster}
+            module="truckMaster"
+            api={'truck-master'}
             afterImportCompleted={() => {
-              fetchFleetMasterData();
+              fetchTruckMasterData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -270,7 +270,7 @@ const FleetMaster = () => {
             }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
-              else fetchFleetMasterData();
+              else fetchTruckMasterData();
             }}
             additionalParams={getQueryString(true)}
           />
@@ -312,11 +312,11 @@ const FleetMaster = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.fleetMaster?.isCreate && (
+                  {permissions?.truckMaster?.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
-                        setFleetMasterId(null);
+                        setTruckMasterId(null);
                         setOpen({ open: true, isClone: false });
                       }}
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -327,7 +327,7 @@ const FleetMaster = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions?.fleetMaster?.isDelete && (
+                  {permissions?.truckMaster?.isDelete && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -383,7 +383,7 @@ const FleetMaster = () => {
           <CardView
             data={cardViewData}
             fields={columns}
-            setFleetMasterId={setFleetMasterId}
+            setTruckMasterId={setTruckMasterId}
             setOpen={setOpen}
             setDeleteRecord={setDeleteRecord}
             setShowDeleteConfirmBox={setShowDeleteConfirmBox}
@@ -396,17 +396,17 @@ const FleetMaster = () => {
                 <CustomSwipableList
                   allowSelection={true}
                   allowSwipe={true}
-                  permissions={permissions.fleetMaster}
+                  permissions={permissions.truckMaster}
                   primaryField={columns?.find((d) => d.primaryField)}
                   onClick={(data) => {
-                    setFleetMasterId(data.id);
+                    setTruckMasterId(data.id);
                     setOpen({ open: true, isClone: false });
                   }}
                   dataRows={dataRows}
                   selectedRecords={selectedRecords}
                   dispatch={dispatch}
                   onEdit={(data) => {
-                    setFleetMasterId(data.id);
+                    setTruckMasterId(data.id);
                     setOpen({ open: true, isClone: false });
                   }}
                   extraParamsToCheckDelete={true}
@@ -422,7 +422,7 @@ const FleetMaster = () => {
                   onCreate={false}
                   showClone={true}
                   onClone={(data) => {
-                    setFleetMasterId(data.id);
+                    setTruckMasterId(data.id);
                     setOpen({ open: true, isClone: true });
                   }}
                   chips={[]}
@@ -442,7 +442,7 @@ const FleetMaster = () => {
                   allowAction={true}
                   loading={loading}
                   renderedFrom={renderedFrom}
-                  refreshGrid={fetchFleetMasterData}
+                  refreshGrid={fetchTruckMasterData}
                   showOnlyShowFilteredRecordSwitch={true}
                 />
               )
@@ -453,7 +453,7 @@ const FleetMaster = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete Fleet Master  ${deleteRecord?.fleetMasterNumber || ''} ?`}
+            message={`Are you sure you want to delete Truck Master  ${deleteRecord?.truckName || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -462,13 +462,13 @@ const FleetMaster = () => {
           />
         )}
         {open?.open && (
-          <ManageFleetMaster
-            id={fleetMasterId}
+          <ManageTruckMaster
+            id={truckMasterId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-              fetchFleetMasterData();
+              fetchTruckMasterData();
             }}
           />
         )}
@@ -477,4 +477,4 @@ const FleetMaster = () => {
   );
 };
 
-export default FleetMaster;
+export default TruckMaster;
