@@ -51,7 +51,6 @@ function ProductionOrderHeader(props) {
     }
   };
 
-
   const handleOpen = () => {
     setisOpenDialog(true);
   };
@@ -193,7 +192,7 @@ function ProductionOrderHeader(props) {
                   size="small"
                   onClick={openActions}
                   aria-controls="action-menu"
-                  className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                  className={`${isMobile ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                 >
                   {isMobile ? '' : 'Actions'} <ExpandMore />
                 </Button>

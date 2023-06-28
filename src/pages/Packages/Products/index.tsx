@@ -316,6 +316,7 @@ const ProductsTable = ({ packageId, packageData }) => {
             size="small"
             onClick={handleClick}
             endIcon={<ArrowDropDownIcon />}
+            className="new-dropdown-v1"
           >
             {'Actions'}
           </Button>

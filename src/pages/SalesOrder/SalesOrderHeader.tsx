@@ -30,7 +30,7 @@ function SalesOrderHeader(props) {
     dispatch,
     showTransferEntityDialog,
     filters,
-    selectedType,
+    selectedType
     // showCloneRentalManagementDialog
   } = props;
 
@@ -61,7 +61,6 @@ function SalesOrderHeader(props) {
   const closeActions = () => {
     setAnchorEl(null);
   };
-
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
@@ -184,7 +183,7 @@ function SalesOrderHeader(props) {
                   color="default"
                   size="small"
                   onClick={openActions}
-                  className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                  className={`${isMobile ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                   aria-controls="action-menu"
                   endIcon={<ExpandMore />}
                 >

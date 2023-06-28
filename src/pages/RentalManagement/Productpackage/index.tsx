@@ -107,12 +107,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -261,22 +261,23 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
-        }`;
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -300,22 +301,23 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'service'
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === 'package'
+      _subRow.detail = `${
+        _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === 'package'
           ? _subRow.packageDetail?.packageName
           : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : ''
-        } `;
+          ? _subRow.productDetail?.productName
+          : ''
+      } `;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -539,7 +541,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     }
   };
 
-
   return (
     <Fragment>
       {allowedToEdit && (
@@ -596,6 +597,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
               onClick={handleClick}
               disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
               endIcon={<BiChevronDown />}
+              className="new-dropdown-v1"
             >
               Actions
             </Button>

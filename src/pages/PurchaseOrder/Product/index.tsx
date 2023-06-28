@@ -658,6 +658,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 onClick={openActions}
                 disabled={selectedProducts?.filter((e) => !e.hideSelection)?.length ? false : true}
                 aria-controls="action-menu"
+                className="new-dropdown-v1"
               >
                 {'Actions'}
                 <ExpandMore fontSize="small" />

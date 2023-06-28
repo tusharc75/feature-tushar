@@ -294,6 +294,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               size="small"
               onClick={handleClickAction}
               endIcon={<ArrowDropDownIcon />}
+              className="new-dropdown-v1"
             >
               Actions
             </Button>
@@ -367,7 +368,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (

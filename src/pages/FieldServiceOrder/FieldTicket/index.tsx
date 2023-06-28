@@ -226,6 +226,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom }) => {
                 aria-controls="action-menu"
                 disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
               >
                 Actions
               </Button>
@@ -286,7 +287,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom }) => {
             wellName: serviceOrderData?.wellName?.optionValue || '',
             wellNumber: serviceOrderData?.wellNumber?.map((m) => m.optionValue) || [],
             estimateStartDate: serviceOrderData?.estimateStartDate || '',
-            estimateEndDate: serviceOrderData?.estimateEndDate || '',
+            estimateEndDate: serviceOrderData?.estimateEndDate || ''
           }}
           onSuccess={() => {
             setOpenDialog({ open: false, id: null });

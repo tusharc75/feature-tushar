@@ -5,6 +5,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
+import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
@@ -14,37 +15,26 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { MdAdd } from 'react-icons/md';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
-import {
-  getLocalStorageArrayData,
-  gridLoadingTimeout,
-  isObjectEmpty,
-  prepareDataForGrid,
-  removeLocalStorage,
-  sidebarResource
-} from 'src/constants/helpers';
-import { Link } from 'react-router-dom';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import styles from '../Leads/Header.module.scss';
-import ManageFleetMaster from './ManageFleetMaster';
-import CardView from './CardView';
-import AppsIcon from '@material-ui/icons/Apps';
-import ViewListIcon from '@material-ui/icons/ViewList';
+import ManageDriverMaster from './ManageDriverMaster';
 
-const FleetMaster = () => {
-  const renderedFrom = camelCase(routes?.fleetMaster.title);
+const DriverMaster = () => {
+  const renderedFrom = camelCase(routes?.driverMaster.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
+
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [fleetMasterId, setFleetMasterId] = useState(null);
+  const [driverMasterId, setDriverMasterId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -54,17 +44,14 @@ const FleetMaster = () => {
   const [gridApi, setGridApi] = useState(null);
   const { getColumnData } = useColumns();
 
-  const [viewType, setViewType] = useState(1);
-  const [cardViewData, setCardViewData] = useState([]);
-
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.fleetMaster}`)
+      .get(`/field?resource=${sidebarResource?.driverMaster}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fleetMasterDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.driverMasterDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -83,21 +70,23 @@ const FleetMaster = () => {
       });
   };
 
-  const fetchFleetMasterData = () => {
+  const fetchDriverMasterData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
+
     if (gridApi) {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes?.fleetMaster.path}${queryString}`)
+      .get(`${routes?.driverMaster.path}${queryString}`)
       .then(({ data: { data } }) => {
-        setCardViewData(data?.data);
+        let count = data?.count;
         let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.fleetMaster?.isDelete;
+          finalObject['canDelete'] = permissions?.driverMaster?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.fleetMaster?.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.driverMaster?.isUpdate;
+
           return {
             ...finalObject
           };
@@ -106,18 +95,18 @@ const FleetMaster = () => {
           dispatch({
             type: 'initialize',
             data: [...dataRows, ...rows],
-            count: data?.count,
+            count: count,
             selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
-            count: data?.count,
+            count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-        dispatch({ type: 'initialize', data: rows, count: data?.count });
+        dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -125,7 +114,12 @@ const FleetMaster = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (isExport) {
+      deepFilter = `?`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -149,10 +143,12 @@ const FleetMaster = () => {
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
+
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
+
     return deepFilter;
   };
 
@@ -170,13 +166,12 @@ const FleetMaster = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      {permissions?.fleetMaster?.isCreate ? (
+      {permissions?.driverMaster?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
-            size="small"
             aria-label="Clone"
             onClick={() => {
-              setFleetMasterId(params.data.id);
+              setDriverMasterId(params.data.id);
               setOpen({ open: true, isClone: true });
             }}
           >
@@ -221,10 +216,10 @@ const FleetMaster = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`${routes?.fleetMaster?.path}/remove`, { ids: ids })
+      .put(`${routes?.driverMaster?.path}/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
-        fetchFleetMasterData();
+        fetchDriverMasterData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -243,22 +238,22 @@ const FleetMaster = () => {
   }, []);
 
   useEffect(() => {
-    fetchFleetMasterData();
+    fetchDriverMasterData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   return (
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.fleetMaster.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.driverMaster.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.fleetMaster}
-            module="fleetMaster"
-            api={'field-ticket'}
+            permissions={permissions?.driverMaster}
+            module="driverMaster"
+            api={'driver-master'}
             afterImportCompleted={() => {
-              fetchFleetMasterData();
+              fetchDriverMasterData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -270,7 +265,7 @@ const FleetMaster = () => {
             }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
-              else fetchFleetMasterData();
+              else fetchDriverMasterData();
             }}
             additionalParams={getQueryString(true)}
           />
@@ -279,26 +274,7 @@ const FleetMaster = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <IconButton
-                size="small"
-                aria-label="Clone"
-                onClick={() => {
-                  setViewType(1);
-                }}
-              >
-                <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
-              </IconButton>
-              <IconButton
-                size="small"
-                aria-label="Clone"
-                onClick={() => {
-                  setViewType(2);
-                }}
-              >
-                <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
-              </IconButton>
-            </Grid>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
@@ -312,11 +288,11 @@ const FleetMaster = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.fleetMaster?.isCreate && (
+                  {permissions?.driverMaster?.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
-                        setFleetMasterId(null);
+                        setDriverMasterId(null);
                         setOpen({ open: true, isClone: false });
                       }}
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -327,7 +303,7 @@ const FleetMaster = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions?.fleetMaster?.isDelete && (
+                  {permissions?.driverMaster?.isDelete && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -379,81 +355,68 @@ const FleetMaster = () => {
             </Grid>
           </Grid>
         </div>
-        {viewType === 1 && (
-          <CardView
-            data={cardViewData}
-            fields={columns}
-            setFleetMasterId={setFleetMasterId}
-            setOpen={setOpen}
-            setDeleteRecord={setDeleteRecord}
-            setShowDeleteConfirmBox={setShowDeleteConfirmBox}
-          />
-        )}
-        {viewType === 2 && (
-          <>
-            {Object.keys(frameWorkComponent).length > 0 ? (
-              isMobile && !isTablet ? (
-                <CustomSwipableList
-                  allowSelection={true}
-                  allowSwipe={true}
-                  permissions={permissions.fleetMaster}
-                  primaryField={columns?.find((d) => d.primaryField)}
-                  onClick={(data) => {
-                    setFleetMasterId(data.id);
-                    setOpen({ open: true, isClone: false });
-                  }}
-                  dataRows={dataRows}
-                  selectedRecords={selectedRecords}
-                  dispatch={dispatch}
-                  onEdit={(data) => {
-                    setFleetMasterId(data.id);
-                    setOpen({ open: true, isClone: false });
-                  }}
-                  extraParamsToCheckDelete={true}
-                  onDelete={(data) => {
-                    setDeleteRecord(data);
-                    setShowDeleteConfirmBox(true);
-                  }}
-                  rowCount={rowCount}
-                  page={page}
-                  loading={loading}
-                  additionalDetails={[]}
-                  owerCollaboratorInitialsOrImages=""
-                  onCreate={false}
-                  showClone={true}
-                  onClone={(data) => {
-                    setFleetMasterId(data.id);
-                    setOpen({ open: true, isClone: true });
-                  }}
-                  chips={[]}
-                  renderedFrom={renderedFrom}
-                />
-              ) : (
-                <CustomAgGrid
-                  columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameWorkComponent}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  allowAction={true}
-                  loading={loading}
-                  renderedFrom={renderedFrom}
-                  refreshGrid={fetchFleetMasterData}
-                  showOnlyShowFilteredRecordSwitch={true}
-                />
-              )
-            ) : null}
-          </>
-        )}
-
+        {Object.keys(frameWorkComponent).length > 0 ? (
+          isMobile && !isTablet ? (
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.driverMaster}
+              primaryField={columns?.find((d) => d.primaryField)}
+              onClick={(data) => {
+                setDriverMasterId(data.id);
+                setOpen({ open: true, isClone: false });
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(data) => {
+                setDriverMasterId(data.id);
+                setOpen({ open: true, isClone: false });
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => {
+                setDeleteRecord(data);
+                setShowDeleteConfirmBox(true);
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[]}
+              owerCollaboratorInitialsOrImages=""
+              onCreate={false}
+              showClone={true}
+              onClone={(data) => {
+                setDriverMasterId(data.id);
+                setOpen({ open: true, isClone: true });
+              }}
+              chips={[]}
+              renderedFrom={renderedFrom}
+            />
+          ) : (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              allowAction={true}
+              loading={loading}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchDriverMasterData}
+              showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.driverMaster}
+            />
+          )
+        ) : null}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete Fleet Master  ${deleteRecord?.fleetMasterNumber || ''} ?`}
+            message={`Are you sure you want to delete ${routes?.driverMaster?.title?.toLowerCase()}  ${deleteRecord?.driverName || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -462,13 +425,13 @@ const FleetMaster = () => {
           />
         )}
         {open?.open && (
-          <ManageFleetMaster
-            id={fleetMasterId}
+          <ManageDriverMaster
+            id={driverMasterId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-              fetchFleetMasterData();
+              fetchDriverMasterData();
             }}
           />
         )}
@@ -477,4 +440,4 @@ const FleetMaster = () => {
   );
 };
 
-export default FleetMaster;
+export default DriverMaster;

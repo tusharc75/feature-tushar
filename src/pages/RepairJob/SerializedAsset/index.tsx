@@ -366,6 +366,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 aria-controls="action-menu"
                 disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
               >
                 Actions
               </Button>
@@ -441,7 +442,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 setRepairProcessDialog({ open: true, assetId: data._id, assetNumber: data.assetNumber, repaired: data.repaired });
               }}
               extraParamsToCheckDelete={true}
-              onDelete={() => { }}
+              onDelete={() => {}}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -455,7 +456,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -549,8 +550,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       {repairAssetDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to mark repair complete for ${repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
-            } ? `}
+          message={`Are you sure you want to mark repair complete for ${
+            repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
+          } ? `}
           onClose={() => {
             setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
           }}

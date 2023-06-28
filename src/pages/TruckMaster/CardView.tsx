@@ -79,7 +79,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, setShowDeleteConfirmBox }) => {
+const CardView = ({ data, fields, setTruckMasterId, setOpen, setDeleteRecord, setShowDeleteConfirmBox }) => {
   const classes = useStyles();
   const history = useHistory();
   const [showActivity, setActivityShow] = useState({ open: false, referenceId: '' });
@@ -97,26 +97,26 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
   return (
     <Fragment>
       <Grid container spacing={2}>
-        {data.map((fleetMaster, index) => {
+        {data.map((truckMaster, index) => {
           return (
             <Grid item lg={4} md={4} sm={6} xs={12} key={index}>
               <Box
                 className={`${classes.cardBox}`}
                 onClick={(e) => {
-                  history.push(`${routes.fleetMasterDetail.path}/${fleetMaster?._id}`);
+                  history.push(`${routes.truckMasterDetail.path}/${truckMaster?._id}`);
                 }}
               >
                 <Box className={classes.leftContent}>
                   <Typography className={classes.text}>
-                    <strong>Fleet Number :</strong> {fleetMaster?.fleetNumber}
+                    <strong>Truck Name :</strong> {truckMaster?.truckName}
                   </Typography>
                   <Typography className={classes.text}>
-                    <strong>Current Location :</strong> {fleetMaster?.currentLocation?.optionLabel}
+                    <strong>Current Location :</strong> {truckMaster?.currentLocation?.optionLabel}
                   </Typography>
                   <Box className={classes.gaugeContainer}>
-                    <MetricsWithIcon value={fleetMaster?.temperature} type="temperature" suffixText={'°F'} />
-                    <MetricsWithIcon value={fleetMaster?.pressure} type="pressure" suffixText={'PSI'} />
-                    <MetricsWithIcon value={fleetMaster?.volume} type="volume" suffixText={'MMcf'} />
+                    <MetricsWithIcon value={truckMaster?.temperature} type="temperature" suffixText={'°F'} />
+                    <MetricsWithIcon value={truckMaster?.pressure} type="pressure" suffixText={'PSI'} />
+                    <MetricsWithIcon value={truckMaster?.volume} type="volume" suffixText={'MMcf'} />
                   </Box>
                 </Box>
                 <Box className={classes.icons}>
@@ -126,7 +126,7 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                       aria-label="Attachment"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setActivityShow({ open: true, referenceId: fleetMaster?._id });
+                        setActivityShow({ open: true, referenceId: truckMaster?._id });
                       }}
                       className={classes.buttons}
                     >
@@ -142,15 +142,15 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                         e.stopPropagation();
                         setMapView({
                           open: true,
-                          lat: fleetMaster?.currentLocation?.latitude,
-                          lng: fleetMaster?.currentLocation?.longitude
+                          lat: truckMaster?.currentLocation?.latitude,
+                          lng: truckMaster?.currentLocation?.longitude
                         });
                       }}
                     >
                       <Map />
                     </IconButton>
                   </HtmlTooltip>
-                  {permissions?.fleetMaster?.isCreate ? (
+                  {permissions?.truckMaster?.isCreate ? (
                     <HtmlTooltip title="Clone">
                       <IconButton
                         size="small"
@@ -158,7 +158,7 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                         aria-label="Clone"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setFleetMasterId(fleetMaster?._id);
+                          setTruckMasterId(truckMaster?._id);
                           setOpen({ open: true, isClone: true });
                         }}
                       >
@@ -173,7 +173,7 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                     </HtmlTooltip>
                   )}
 
-                  {permissions?.fleetMaster?.isDelete ? (
+                  {permissions?.truckMaster?.isDelete ? (
                     <HtmlTooltip title="Delete">
                       <IconButton
                         size="small"
@@ -181,7 +181,7 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                         aria-label="Delete"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setDeleteRecord(fleetMaster);
+                          setDeleteRecord(truckMaster);
                           setShowDeleteConfirmBox(true);
                         }}
                       >
@@ -210,15 +210,15 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
                 {showActivity.open && (
                   <Activity
                     resourceId={showActivity.referenceId}
-                    resource={ACTIVITY_RESOURCE.fleetMaster}
+                    resource={ACTIVITY_RESOURCE.truckMaster}
                     restrictedAddActivities={
-                      permissions && permissions[`${ACTIVITY_RESOURCE.fleetMaster}`] && permissions[`${ACTIVITY_RESOURCE.fleetMaster}`].isUpdate
+                      permissions && permissions[`${ACTIVITY_RESOURCE.truckMaster}`] && permissions[`${ACTIVITY_RESOURCE.truckMaster}`].isUpdate
                         ? []
                         : ['Attachment', 'Case']
                     }
                     relatedTo={[
                       {
-                        type: ACTIVITY_RESOURCE.fleetMaster,
+                        type: ACTIVITY_RESOURCE.truckMaster,
                         referenceId: showActivity.referenceId,
                         access: true
                       }
@@ -242,8 +242,8 @@ const CardView = ({ data, fields, setFleetMasterId, setOpen, setDeleteRecord, se
               lng: null
             });
           }}
-          lat={mapView.lat}
-          lng={mapView.lng}
+          lat={mapView?.lat}
+          lng={mapView?.lng}
         />
       )}
     </Fragment>
