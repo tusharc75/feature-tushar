@@ -3104,8 +3104,12 @@ svg.MuiSvgIcon-root {
     padding: 10px 34px !important;
     background-color: #fff;
     border: 1px solid #dcdcdc !important;
+
     border-bottom: 0 !important;
     min-width: max-content;
+    &.primaryColoredTab {
+      border: 1px solid var(--sidebar-color) !important;
+    }
     [data-mode='dark'] & {
       background-color: #282845;
       color: #fff;
