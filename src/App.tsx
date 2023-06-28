@@ -220,6 +220,8 @@ import PadMaster from './pages/PadMaster';
 import PadMasterDetail from './pages/PadMaster/PadMasterDetail';
 import FieldJob from './pages/FieldJob';
 import FieldJobDetail from './pages/FieldJob/FieldJobDetail';
+import DriverMaster from './pages/DriverMaster';
+import DriverMasterDetail from './pages/DriverMaster/DriverMasterDetail';
 import TrailerMaster from './pages/TrailerMaster';
 import TrailerMasterDetail from './pages/TrailerMaster/TrailerMasterDetail';
 
@@ -990,6 +992,11 @@ function App() {
             <PrivateRoute exact path={`${routes.fieldJobDetail.path}/:id`}>
               <FieldJobDetail />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.driverMaster.path}`}>
+              <DriverMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.driverMasterDetail.path}/:id`}>
+              <DriverMasterDetail />
             <PrivateRoute exact path={`${routes.trailerMaster.path}`}>
               <TrailerMaster />
             </PrivateRoute>
