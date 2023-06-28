@@ -384,7 +384,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
         </Box>
       )}
 
-      <Box mt={4} className="container-with-border" p={2}>
+      <Box mt={3}>
         <Consumables stepFullScreen={stepFullScreen} id={id} allowedToEdit={allowedToEdit} services={rowsData} />
       </Box>
 
