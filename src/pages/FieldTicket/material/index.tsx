@@ -362,9 +362,9 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
         </Box>
       )}
       {columns && rowsData ? (
-        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 440px)' : 'calc(100vh - 440px)'}>
+        <Box zIndex={5} width={'100%'}>
           <CustomReactTable
-            height={stepFullScreen ? 'calc(100vh - 440px)' : 'calc(100vh - 440px)'}
+            height={stepFullScreen ? 'calc(100vh - 440px)' : '278px'}
             columns={columns}
             data={rowsData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
@@ -379,13 +379,13 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
           />
         </Box>
       ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        <Box p={2} height={stepFullScreen ? 500 : 278}>
+          <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
         </Box>
       )}
 
-      <Box mt={3}>
-        <Consumables id={id} allowedToEdit={allowedToEdit} services={rowsData} />
+      <Box mt={4} className="container-with-border" p={2}>
+        <Consumables stepFullScreen={stepFullScreen} id={id} allowedToEdit={allowedToEdit} services={rowsData} />
       </Box>
 
       {addExistingServiceDialog && (

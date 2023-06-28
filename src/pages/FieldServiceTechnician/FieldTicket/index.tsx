@@ -376,6 +376,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
               setOpen({ open: true, isClone: false });
             }}
             variant={'contained'}
+            className="no-shadow"
             size="small"
             color="primary"
             startIcon={<AddOutlined />}
