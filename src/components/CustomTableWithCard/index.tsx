@@ -14,6 +14,7 @@ interface TableInterface extends React.HTMLAttributes<HTMLDivElement> {
   height?: string;
   dense?: boolean;
   showSelectAll?: boolean;
+  collapsible?: boolean;
 }
 export interface CardInterface extends React.HTMLAttributes<HTMLDivElement> {
   name: (data: any) => string | ReactNode;
@@ -22,6 +23,7 @@ export interface CardInterface extends React.HTMLAttributes<HTMLDivElement> {
   onCardClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, data: any) => void;
   bodyColumns: BodyColumns[];
   headerColumns: ColumnsInterface[];
+  collapsible?: boolean;
 }
 
 interface BodyColumns extends ColumnsInterface, GridProps {}
@@ -42,6 +44,7 @@ const CustomTableWithCard: FC<TableInterface> = ({
   height,
   dense = false,
   showSelectAll = false,
+  collapsible = false,
   ...others
 }) => {
   const [selected, setSelected] = useState<any>([]);
@@ -108,6 +111,7 @@ const CustomTableWithCard: FC<TableInterface> = ({
             name={name}
             bodyColumns={bodyColumns}
             headerColumns={headerColumns}
+            collapsible={collapsible}
             {...cardProps}
           />
         ))}

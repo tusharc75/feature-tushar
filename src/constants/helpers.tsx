@@ -311,7 +311,7 @@ export const sidebarResource = {
   fieldServiceTechnician: `Field Service Technician`,
   rentalPlanningCalendar: `Rental Planning Calendar`,
   resourceLogs: `Resource Logs`,
-  fleetMaster: `Fleet Master`,
+  truckMaster: `Truck Master`,
   job: 'Job',
   fleetDispatch: 'Fleet Dispatch',
   fleetReceiver: 'Fleet Receiver',
@@ -324,6 +324,7 @@ export const sidebarResource = {
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
   fieldJob: 'Field Job',
+  trailerMaster: `Trailer Master`,
 };
 
 export const primaryFields = {
@@ -432,7 +433,7 @@ export const RESOURCE_LABEL = {
   fieldServiceTechnician: `Field Service Technician`,
   fleetDispatch: `Fleet Dispatch`,
   resourceLogs: `Resource Logs`,
-  fleetMaster: `Fleet Master`,
+  truckMaster: `Truck Master`,
   job: 'Job',
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
@@ -444,6 +445,7 @@ export const RESOURCE_LABEL = {
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
   fieldJob: 'Field Job',
+  trailerMaster: `Trailer Master`,
 };
 
 export const CHILD_RESOURCE = {
@@ -2002,7 +2004,7 @@ export const ACTIVITY_RESOURCE = {
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
   fieldTicket: 'fieldTicket',
-  fleetMaster: 'fleetMaster',
+  truckMaster: 'truckMaster',
   job: 'Job',
   purchaseRequisition: 'purchaseRequisition',
   planning: 'planning',
@@ -2019,13 +2021,13 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket'
+  irtTicket: 'irtTicket',
 };
 
 export const LOG_RESOURCE = {
   serializedAsset: sidebarResource.serializedAsset,
   serviceMaster: sidebarResource.serviceMaster,
-  fleetMaster: sidebarResource.fleetMaster,
+  truckMaster: sidebarResource.truckMaster,
   job: sidebarResource.job,
   quotation: sidebarResource.quotation,
   lead: sidebarResource.lead,

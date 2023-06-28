@@ -195,8 +195,8 @@ import FieldTicket from './pages/FieldTicket';
 import FieldTicketDetail from './pages/FieldTicket/FieldTicketDetail';
 import FieldServiceTechnician from './pages/FieldServiceTechnician';
 import FleetDispatch from './pages/FleetDispatch';
-import FleetMaster from './pages/FleetMaster';
-import FleetMasterDetail from './pages/FleetMaster/FleetMasterDetail';
+import TruckMaster from './pages/TruckMaster';
+import TruckMasterDetail from './pages/TruckMaster/TruckMasterDetail';
 import Job from './pages/Job';
 import JobDetail from './pages/Job/JobDetail';
 import FleetReceiver from './pages/FleetReceiver';
@@ -222,6 +222,8 @@ import FieldJob from './pages/FieldJob';
 import FieldJobDetail from './pages/FieldJob/FieldJobDetail';
 import DriverMaster from './pages/DriverMaster';
 import DriverMasterDetail from './pages/DriverMaster/DriverMasterDetail';
+import TrailerMaster from './pages/TrailerMaster';
+import TrailerMasterDetail from './pages/TrailerMaster/TrailerMasterDetail';
 
 var notificationInterval: any = null;
 
@@ -927,11 +929,11 @@ function App() {
             <PrivateRoute exact path={`${routes.fleetDispatch.path}`}>
               <FleetDispatch />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fleetMaster.path}`}>
-              <FleetMaster />
+            <PrivateRoute exact path={`${routes.truckMaster.path}`}>
+              <TruckMaster />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fleetMasterDetail.path}/:id`}>
-              <FleetMasterDetail />
+            <PrivateRoute exact path={`${routes.truckMasterDetail.path}/:id`}>
+              <TruckMasterDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.job.path}`}>
               <Job />
@@ -995,6 +997,11 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.driverMasterDetail.path}/:id`}>
               <DriverMasterDetail />
+            <PrivateRoute exact path={`${routes.trailerMaster.path}`}>
+              <TrailerMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.trailerMasterDetail.path}/:id`}>
+              <TrailerMasterDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

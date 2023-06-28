@@ -12,12 +12,12 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { setFieldsInAscendingOrder, getObjKeysWithValues, getObjKeys, CustomDialogTransition, yupSchema } from 'src/constants/helpers';
+import { setFieldsInAscendingOrder, getObjKeysWithValues, getObjKeys, CustomDialogTransition, yupSchema, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) => {
+const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) => {
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -32,25 +32,25 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
   useEffect(() => {
     setLoading(true);
     axiosInstance()
-      .get('/field?resource=Fleet Master')
+      .get(`/field?resource=${sidebarResource?.truckMaster}`)
       .then(({ data: { data } }) => {
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
         if (id) {
           axiosInstance()
-            .get(`${routes?.fleetMaster.path}/` + id)
+            .get(`${routes?.truckMaster.path}/` + id)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, brand, createdBy, fleetNumber, updatedBy, ...rest } = data;
-                setTitle(`Clone - ${fleetNumber}`);
+                const { _id, brand, createdBy, truckName, updatedBy, ...rest } = data;
+                setTitle(`Clone - ${truckName}`);
                 setInitialData({
                   fields: fieldsDataForCreate,
                   values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
                 });
                 setLoading(false);
               } else {
-                setTitle(`Editing - ${data.fleetNumber}`);
+                setTitle(`Editing - ${data.truckName}`);
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
@@ -62,7 +62,7 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
               toastConfig.setToastConfig(error);
             });
         } else {
-          setTitle(`Create ${routes.fleetMaster.title}`);
+          setTitle(`Create ${routes.truckMaster.title}`);
           let initialData = { ...getObjKeys('', fieldsDataForCreate) };
           setInitialData({
             fields: fieldsDataForCreate,
@@ -85,7 +85,7 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
     if (id && isClone === false) {
       values._id = id;
       axiosInstance()
-        .put(`${routes?.fleetMaster.path}`, values)
+        .put(`${routes?.truckMaster.path}`, values)
         .then(({ data }) => {
           setSubmitting(false);
           onSuccess(data.data);
@@ -101,7 +101,7 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
         });
     } else {
       axiosInstance()
-        .post(`${routes?.fleetMaster.path}`, values)
+        .post(`${routes?.truckMaster.path}`, values)
         .then(({ data: { data, message } }) => {
           setSubmitting(false);
           onSuccess(data);
@@ -279,4 +279,4 @@ const ManageFleetMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
   );
 };
 
-export default ManageFleetMaster;
+export default ManageTruckMaster;

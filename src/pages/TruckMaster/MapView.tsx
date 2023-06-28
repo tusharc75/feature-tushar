@@ -117,7 +117,7 @@ const MapView = ({ handleClose, lat, lng }) => {
       open={true}
     >
       <CustomDialogHeader
-        title={'Fleet Map'}
+        title={'Truck Map'}
         onClose={(e, reason) => {
           handleClose();
         }}
