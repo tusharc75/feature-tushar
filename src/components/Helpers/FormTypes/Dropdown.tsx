@@ -716,7 +716,6 @@ function Dropdown({
                               [fieldData.lookupDependentOn]: values[fieldData?.lookupDependentOn] || ''
                             })
                           };
-                          console.log(tempNewOption)
                           addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
                           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
