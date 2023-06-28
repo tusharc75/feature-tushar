@@ -709,11 +709,12 @@ function Dropdown({
                         setLookupDialog(false);
                         if (data?._id) {
                           let tempNewOption = {
-                            email: data?.email,
                             optionLabel: data?.fullAddress,
                             optionValue: data?._id,
                             order: option.length,
-                            [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
+                            ...(fieldData.lookupDependentOn && {
+                              [fieldData.lookupDependentOn]: values[fieldData?.lookupDependentOn] || ''
+                            })
                           };
                           addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
