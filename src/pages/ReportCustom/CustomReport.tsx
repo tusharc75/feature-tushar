@@ -19,19 +19,20 @@ import Loader from '../../components/Loader';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from '../Report/ReportFilters';
+import { useHistory } from 'react-router-dom';
 
 let cancelTokenSource = null;
 
 const CustomReport = () => {
-
   const theme = useTheme();
+  const history = useHistory();
   const toastConfig = React.useContext(CustomToastContext);
   const {
     state: { permissions, selectedEntity }
   } = useData();
   let { id } = useParams();
   const [resource, setResource] = React.useState('');
-  const [showGrid, setShowGrid] = React.useState(false);
+  const [showGrid, setShowGrid] = React.useState(true);
   const [selectedData, setSelectedData] = React.useState(null);
   const [betweenDate, setBetweenDate] = React.useState(null);
   const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
@@ -54,7 +55,7 @@ const CustomReport = () => {
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
-  const renderedFrom = `custom-report_${id}`
+  const renderedFrom = `custom-report_${id}`;
 
   const fetchGridColumns = async (res) => {
     setLoadingColumns(true);
@@ -81,7 +82,11 @@ const CustomReport = () => {
       if (o?.fieldData?.fieldName === primaryFields[camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)]) {
         o.fieldData.primaryField = true;
       }
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes[`${camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)}Detail`].path);
+      let currentColumn = getColumnData(
+        renderedFrom,
+        o?.fieldData,
+        routes[`${camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)}Detail`].path
+      );
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -111,7 +116,9 @@ const CustomReport = () => {
   React.useEffect(() => {
     if (id) {
       (async () => {
-        let { data: { data } } = await axiosInstance().get(`custom-report/${id}`);
+        let {
+          data: { data }
+        } = await axiosInstance().get(`custom-report/${id}`);
         setCustomReportData(data);
         setResource(data.resource);
         fetchGridColumns(data.resource);
@@ -134,7 +141,7 @@ const CustomReport = () => {
     if (showGrid && resource) {
       fetchResourceData();
     }
-  }, [resource, page, sorting, search, limit, filters, pageSizes, selectedEntity]);
+  }, [resource, page, sorting, search, limit, filters, pageSizes, selectedEntity, customReportData]);
 
   React.useEffect(() => {
     if (!selectedData) return;
@@ -163,9 +170,10 @@ const CustomReport = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    axiosInstance().get(`${camelCase(resource) !== 'quotes' ? routes[camelCase(resource)].path : 'quote-builder'}/report${filterQuery}`, {
-      cancelToken: cancelTokenSource.token
-    })
+    axiosInstance()
+      .get(`${camelCase(resource) !== 'quotes' ? routes[camelCase(resource)].path : 'quote-builder'}/report${filterQuery}`, {
+        cancelToken: cancelTokenSource.token
+      })
       .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
@@ -178,7 +186,9 @@ const CustomReport = () => {
       })
       .catch((err) => {
         if (!axios.isCancel(err)) {
-          setTimeout(() => { dispatch({ type: 'loading', loading: false }); }, gridLoadingTimeout);
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
           toastConfig.setToastConfig(err);
         }
       });
@@ -195,78 +205,93 @@ const CustomReport = () => {
     if (search) {
       filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
-    
-    if (selectedResources.length > 0) {
-      let deepFilter = [];
-      if (selectedData) {
-        const keys = selectedData ? Object.keys(selectedData) : [];
-        const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
-        const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
-
-        let filterById = idFilter.map((key) => {
-          const options = selectedData[key].value;
-          return {
-            field: key,
-            term: {
-              $in: options.map((d: any) => d.optionValue)
-            }
-          };
+    let deepFilter = [];
+    customReportData?.filters?.forEach((filter: any) => {
+      if (filter?.type === 'checkBox') {
+        deepFilter.push({
+          field: filter.term,
+          term: filter.value ? 'Yes' : 'No'
         });
-
-        forDeepFilter.forEach((key) => {
-          if (selectedData[key].type === 'checkBox') {
-            deepFilter.push({
-              field: key,
-              term: selectedData[key].value ? 'Yes' : 'No'
-            });
-          }
-          else {
-            deepFilter.push({
-              field: key,
-              term: selectedData[key].value?.map((d: any) => d.optionValue)
-            });
-          }
-        });
-
-        if (filterById.length > 0) {
-          filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
-        }
-      }
-      if (betweenDate) {
-        const fields = Object.keys(betweenDate);
-        fields.forEach((field) => {
-          if (betweenDate[field]) {
-            deepFilter.push({
-              field,
-              term: moment(betweenDate[field]).format('MM/DD/YYYY')
-            });
-          }
+      } else {
+        deepFilter.push({
+          field: filter.term,
+          term: filter.value
         });
       }
-
-      if (!isObjectEmpty(filters)) {
-        Object.keys(filters).forEach((field) => {
-          deepFilter.push({
-            field: field,
-            term: encodeURI(filters[field].filter)
-          });
-        });
-      }
-
-      if (deepFilter && deepFilter.length > 0) {
-        filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
-      }
+    });
+    if (deepFilter && deepFilter.length > 0) {
+      filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
     }
 
+    // if (selectedResources.length > 0) {
+    //   let deepFilter = [];
+    //   if (selectedData) {
+    //     const keys = selectedData ? Object.keys(selectedData) : [];
+    //     const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
+    //     const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
 
-    if (statusPeriod && statusPeriodDate) {
-      const fields = Object.keys(statusPeriodDate);
-      fields.forEach((field) => {
-        if (statusPeriodDate[field]) {
-          filterQuery = `${filterQuery}${field}=${moment(statusPeriodDate[field]).format('MM/DD/YYYY')}&`;
-        }
-      });
-    }
+    //     let filterById = idFilter.map((key) => {
+    //       const options = selectedData[key].value;
+    //       return {
+    //         field: key,
+    //         term: {
+    //           $in: options.map((d: any) => d.optionValue)
+    //         }
+    //       };
+    //     });
+
+    //     forDeepFilter.forEach((key) => {
+    //       if (selectedData[key].type === 'checkBox') {
+    //         deepFilter.push({
+    //           field: key,
+    //           term: selectedData[key].value ? 'Yes' : 'No'
+    //         });
+    //       } else {
+    //         deepFilter.push({
+    //           field: key,
+    //           term: selectedData[key].value?.map((d: any) => d.optionValue)
+    //         });
+    //       }
+    //     });
+
+    //     if (filterById.length > 0) {
+    //       filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
+    //     }
+    //   }
+    //   if (betweenDate) {
+    //     const fields = Object.keys(betweenDate);
+    //     fields.forEach((field) => {
+    //       if (betweenDate[field]) {
+    //         deepFilter.push({
+    //           field,
+    //           term: moment(betweenDate[field]).format('MM/DD/YYYY')
+    //         });
+    //       }
+    //     });
+    //   }
+
+    //   if (!isObjectEmpty(filters)) {
+    //     Object.keys(filters).forEach((field) => {
+    //       deepFilter.push({
+    //         field: field,
+    //         term: encodeURI(filters[field].filter)
+    //       });
+    //     });
+    //   }
+
+    //   if (deepFilter && deepFilter.length > 0) {
+    //     filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
+    //   }
+    // }
+
+    // if (statusPeriod && statusPeriodDate) {
+    //   const fields = Object.keys(statusPeriodDate);
+    //   fields.forEach((field) => {
+    //     if (statusPeriodDate[field]) {
+    //       filterQuery = `${filterQuery}${field}=${moment(statusPeriodDate[field]).format('MM/DD/YYYY')}&`;
+    //     }
+    //   });
+    // }
 
     return `?${filterQuery}`;
   };
@@ -326,9 +351,7 @@ const CustomReport = () => {
       <div>
         <Grid container className="headerbox">
           <Grid item xs={10}>
-            <CustomBreadCrumbs
-              routes={[{ title: 'Reports', path: '/reports' }, { title: customReportData?.customReportName }]}
-            />
+            <CustomBreadCrumbs routes={[{ title: 'Reports', path: '/reports' }, { title: customReportData?.customReportName }]} />
           </Grid>
           <Grid item xs={2}>
             <Grid container direction="row">
@@ -364,8 +387,9 @@ const CustomReport = () => {
                         color="primary"
                         disableElevation
                         onClick={() => {
-                          setShowGrid(false);
-                          dispatch({ type: 'onlyFilter', filters: {} });
+                          history.goBack();
+                          // setShowGrid(false);
+                          // dispatch({ type: 'onlyFilter', filters: {} });
                         }}
                         startIcon={<MdChevronLeft />}
                       >
@@ -412,29 +436,28 @@ const CustomReport = () => {
           ) : (
             <div>
               {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                (
-                  <CustomAgGrid
-                    columns={customReportData?.column && customReportData?.column.length > 0 ?
-                      columns.filter((col) => customReportData?.column.includes(col.field))
+                <CustomAgGrid
+                  columns={
+                    customReportData?.column && customReportData?.column.length > 0
+                      ? columns.filter((col) => customReportData?.column.includes(col.field))
                       : columns
-                    }
-                    dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={100}
-                    loading={loading}
-                    renderedFrom={renderedFrom}
-                    allowSelection={false}
-                    allowAction={false}
-                    refreshGrid={fetchResourceData}
-                    showOnlyShowFilteredRecordSwitch={false}
-                  />
-                )
+                  }
+                  dataRows={dataRows}
+                  frameworkComponents={frameWorkComponent}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  page={page}
+                  actionWidth={100}
+                  loading={loading}
+                  renderedFrom={renderedFrom}
+                  allowSelection={false}
+                  allowAction={false}
+                  refreshGrid={fetchResourceData}
+                  showOnlyShowFilteredRecordSwitch={false}
+                />
               ) : (
                 <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
               )}
