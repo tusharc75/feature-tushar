@@ -95,6 +95,15 @@ const PLANNING_RESOURCE = [
         start: 'startDate',
         end: 'endDate'
     },
+    {
+        key: 'fieldServiceOrder',
+        resource: sidebarResource.fieldServiceOrder,
+        title: routes.fieldServiceOrderDetail.title,
+        path: routes.fieldServiceOrderDetail.path,
+        fieldName: 'fieldServiceOrderNumber',
+        start: 'estimateStartDate',
+        end: 'estimateEndDate'
+    },
 ]
 
 function PlanningView() {
