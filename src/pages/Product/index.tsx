@@ -89,11 +89,13 @@ const Product = () => {
   });
 
   useEffect(() => {
-    axiosInstance()
-      .get('/product-category?sortBy=name&orderBy=asc')
-      .then(({ data: { data } }) => {
-        setProductCategoryList(data);
-      });
+    if (permissions?.productCategory?.isRead) {
+      axiosInstance()
+        .get('/product-category?sortBy=name&orderBy=asc')
+        .then(({ data: { data } }) => {
+          setProductCategoryList(data);
+        });
+    }
   }, []);
 
   useEffect(() => {
