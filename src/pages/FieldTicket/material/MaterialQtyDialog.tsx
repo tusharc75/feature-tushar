@@ -74,15 +74,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         fetchData();
     }, [rowData]);
 
-    const fetchTaxRate = async (zipcode: any) => {
-        try {
-            const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode/${zipcode}`);
-            return response?.data?.data || [];
-        } catch (e) {
-            toastConfig.setToastConfig(e);
-        }
-    };
-
     const fetchData = async () => {
         setFetchingData(true);
         var { fields: data } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
@@ -205,15 +196,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         }
         if (isBulkedit) {
             fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
-        }
-
-        if (fieldTicketData?.customerAccount?.taxApplicable && fieldTicketData?.billingAddress?.zipCode) {
-            const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress?.zipCode);
-            fields?.forEach((e: any) => {
-                if (e?.fieldName === 'taxCode') {
-                    e.option = taxCodeOptions;
-                }
-            });
         }
 
         const sections = uniq(map(fields, 'sectionName'));
