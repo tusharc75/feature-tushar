@@ -148,7 +148,7 @@ const InventoryProduct = () => {
     });
 
     productInventoryFields?.data?.data?.forEach((o) => {
-      if ((o?.fieldData?.fieldName === 'inventory'|| o?.fieldData?.fieldName ==='minInventory') && user?.user?.brandPolicy?.hideInventoryCount) {
+      if ((o?.fieldData?.fieldName === 'inventory' || o?.fieldData?.fieldName === 'minInventory') && user?.user?.brandPolicy?.hideInventoryCount) {
         return;
       }
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
@@ -184,11 +184,8 @@ const InventoryProduct = () => {
     });
 
     const defaultColumns = [
-      
-      ...( !user?.user?.brandPolicy?.hideInventoryCount ? [{ field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' },{ field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },{ field: 'purchaseOrderQty', headerName: 'On PO', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }]:[]),
-      
+      ...(!user?.user?.brandPolicy?.hideInventoryCount ? [{ field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }, { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' }, { field: 'purchaseOrderQty', headerName: 'On PO', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }] : []),
     ];
-    console.log(columns, defaultColumns);
     setColumns([...columns, ...defaultColumns]);
   };
 
@@ -231,9 +228,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-            .filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+          .filter((d) => d.optionValue !== 'All')
+          .map((d) => d.optionValue)
+          .toString()
         : plantId;
 
     let deepFilter = '';
@@ -341,10 +338,10 @@ const InventoryProduct = () => {
             !permissions?.productInventory?.isUpdate
               ? TOOLTIP_MESSAGE.remove
               : params?.data?.plantId === 'All'
-              ? 'Select Plant'
-              : !params?.data?.availableInventory
-              ? 'Inventory not available'
-              : 'Remove'
+                ? 'Select Plant'
+                : !params?.data?.availableInventory
+                  ? 'Inventory not available'
+                  : 'Remove'
           }
         >
           <span>
@@ -418,7 +415,7 @@ const InventoryProduct = () => {
     }
     axiosInstance()
       .get(api)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -720,9 +717,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d.optionValue !== 'All')
-                    .map((d) => d.optionValue)
-                    .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
                 : plantId
             }
           />
@@ -738,9 +735,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d.optionValue !== 'All')
-                    .map((d) => d.optionValue)
-                    .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
                 : plantId
             }
             storageLocation={storageLocationId}
@@ -756,9 +753,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d.optionValue !== 'All')
-                    .map((d) => d.optionValue)
-                    .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
                 : plantId
             }
           />

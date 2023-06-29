@@ -81,10 +81,10 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   }, [rowData]);
 
   const fetchTaxRate = async (billingAddress: any) => {
-    const zipcode = billingAddress.zipCode;
-    const state = billingAddress['state/Province']
+    const zipCode = billingAddress?.zipCode;
+    const state = billingAddress?.state
     try {
-      const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode/${zipcode}/${state}`);
+      const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}`);
       return response?.data?.data || [];
     } catch (e) {
       toastConfig.setToastConfig(e);
@@ -224,7 +224,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    if ((rentalManagementData?.billingAddress?.zipCode || rentalManagementData?.billingAddress['state/Province'])) {
+    if ((rentalManagementData?.billingAddress?.zipCode || rentalManagementData?.billingAddress?.state)) {
       const taxCodeOptions = await fetchTaxRate(rentalManagementData?.billingAddress);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
