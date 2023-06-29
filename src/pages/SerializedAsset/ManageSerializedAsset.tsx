@@ -73,9 +73,9 @@ const ManageSerializedAsset = ({
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         var fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-        const categoryOptions = data.find((obj) => obj?.fieldData.fieldName === 'productCategory')?.fieldData.option;
-        const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'warehouse')?.fieldData.option;
-        const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData.option;
+        const categoryOptions = data.find((obj) => obj?.fieldData.fieldName === 'productCategory')?.fieldData?.option || [];
+        const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'warehouse')?.fieldData?.option || [];
+        const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData?.option || [];
 
         setProductCategoryOptions(categoryOptions);
         setProductDescriptionOptions(productOptions);
@@ -257,19 +257,20 @@ const ManageSerializedAsset = ({
                                             size="small"
                                             onChange={(_, val) => {
                                               const value = val && val.optionValue ? val.optionValue : '';
-                                              const label = val && val.optionLabel ? val.optionLabel : '';
-                                              const productCategory = val && val?.productCategory ? val?.productCategory : '';
                                               setFieldValue(field.fieldName, value);
-                                              setFieldValue('productCategory', productCategory);
-                                              const productLabel = productCategory
-                                                ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionLabel
-                                                : '';
-                                              const productValue = productCategory
-                                                ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionValue
-                                                : '';
+                                              if (allFields?.some((e) => e.fieldName === 'productCategory')) {
+                                                const productCategory = val && val?.productCategory ? val?.productCategory : '';
+                                                setFieldValue('productCategory', productCategory);
+                                                const productLabel = productCategory
+                                                  ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionLabel
+                                                  : '';
+                                                const productValue = productCategory
+                                                  ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionValue
+                                                  : '';
 
-                                              setProductCategoryID(productValue);
-                                              setProductCategoryName(productLabel);
+                                                setProductCategoryID(productValue);
+                                                setProductCategoryName(productLabel);
+                                              }
                                             }}
                                           />
                                         </Box>
@@ -485,18 +486,20 @@ const ManageSerializedAsset = ({
                               }
                             ];
                           });
-                          setFieldValue('productCategory', data.productCategory);
-                          setProductCategoryOptions((prevState) => {
-                            return [
-                              ...prevState,
-                              {
-                                optionValue: data.productCategory,
-                                order: productDescriptionOptions.length,
-                                default: false
-                              }
-                            ];
-                          });
-                          setProductCategoryID(data.productCategory);
+                          if (allFields?.some((e) => e.fieldName === 'productCategory')) {
+                            setFieldValue('productCategory', data.productCategory);
+                            setProductCategoryOptions((prevState) => {
+                              return [
+                                ...prevState,
+                                {
+                                  optionValue: data.productCategory,
+                                  order: productDescriptionOptions.length,
+                                  default: false
+                                }
+                              ];
+                            });
+                            setProductCategoryID(data.productCategory);
+                          }
                         }
                       }}
                     />
