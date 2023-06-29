@@ -315,8 +315,8 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                   <CustomDialogContent>
                     <List style={{ padding: 0 }}>
                       <ListItem key={product[0]?._id}>
-                        {product?.length === 1 ? (
-                          <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${currentInventory}`} />
+                        {product?.length === 1  ? (
+                          <ListItemText primary={product[0]?.productName} secondary={ !user?.user?.brandPolicy?.hideInventoryCount && `Inventory : ${currentInventory}`} />
                         ) : (
                           <ListItemText primary={`${product?.length} Products`} />
                         )}

@@ -148,6 +148,9 @@ const InventoryProduct = () => {
     });
 
     productInventoryFields?.data?.data?.forEach((o) => {
+      if ((o?.fieldData?.fieldName === 'inventory'|| o?.fieldData?.fieldName ==='minInventory') && user?.user?.brandPolicy?.hideInventoryCount) {
+        return;
+      }
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
       if (currentColumn !== null) {
         if (!['plant', 'product'].includes(currentColumn?.columnData.field)) {
@@ -181,11 +184,11 @@ const InventoryProduct = () => {
     });
 
     const defaultColumns = [
-      { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },
-      { field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' },
-      { field: 'purchaseOrderQty', headerName: 'On PO', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }
+      
+      ...( !user?.user?.brandPolicy?.hideInventoryCount ? [{ field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' },{ field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },{ field: 'purchaseOrderQty', headerName: 'On PO', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }]:[]),
+      
     ];
-
+    console.log(columns, defaultColumns);
     setColumns([...columns, ...defaultColumns]);
   };
 
