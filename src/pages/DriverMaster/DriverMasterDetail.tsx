@@ -12,30 +12,29 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageTruckMaster from './ManageTruckMaster';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
-import TabPanel from '../../components/TabPanel';
-import { FaWpforms } from 'react-icons/fa';
+import ManageDriverMaster from './ManageDriverMaster';
+import { sidebarResource } from 'src/constants/helpers';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { FaWpforms } from 'react-icons/fa';
+import TabPanel from '../../components/TabPanel';
 import History from './History';
 
-const TruckMasterDetail = () => {
+const DriverMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions, user }
-  }: any = useData();
-
-  const [truckMasterData, setTruckMasterData] = useState(null);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.driverMaster]);
+  const [driverMasterData, setDriverMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [statusOptions, setStatusOptions] = useState([]);
   const [tabValue, setTabValue] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [statusOptions, setStatusOptions] = useState([]);
+  const {
+    state: { permissions, user }
+  }: any = useData();
 
   useEffect(() => {
     if (id) {
@@ -46,7 +45,7 @@ const TruckMasterDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.truckMaster}`)
+      .get(`/field?resource=${sidebarResource.driverMaster}`)
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
         if (data.data && data.data.length) {
@@ -68,22 +67,21 @@ const TruckMasterDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`${routes.truckMaster.path}/${id}`);
-      setTruckMasterData(data);
+      } = await axiosInstance().get(`${routes.driverMaster.path}/${id}`);
+      setDriverMasterData(data);
+      setCustomizedRoutes([routes.driverMaster, { title: data?.driverName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
- 
 
   const handleDelete = () => {
     if (id) {
       axiosInstance()
-        .put(`${routes?.truckMaster?.path}/remove`, { ids: [id] })
+        .put(`${routes?.driverMaster?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
           setShowConfirmBox(false);
-
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -121,15 +119,15 @@ const TruckMasterDetail = () => {
 
   const handleChangeStatus = async (status) => {
     try {
-      let res = await axiosInstance().patch(`${routes.truckMaster?.path}/status/${id}`, { status: status });
+      let res = await axiosInstance().patch(`${routes.driverMaster?.path}/status/${id}`, { status: status });
       const historyBody = {
-        truck: id,
-        referenceType: sidebarResource?.truckMaster,
+        driver: id,
+        referenceType: sidebarResource?.driverMaster,
         referenceId: id,
         status: status,
         comments: `Changed Status to ${status}`
       };
-      await axiosInstance().post(`${routes.truckMaster.path}/history/${id}`, historyBody);
+      await axiosInstance().post(`${routes.driverMaster.path}/history/${id}`, historyBody);
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
@@ -145,62 +143,63 @@ const TruckMasterDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.truckMaster, { title: truckMasterData?.truckName }]} />
+          <CustomBreadCrumbs routes={customizedRoutes} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.truckMaster?.isUpdate && (
-              <Button
-                variant={'outlined'}
-                color="primary"
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                size="small"
-                onClick={handleClick}
-                endIcon={<ArrowDropDownIcon />}
+            <>
+              {permissions?.driverMaster?.isUpdate && (
+                <Button
+                  variant={'outlined'}
+                  color="primary"
+                  aria-controls="simple-menu"
+                  aria-haspopup="true"
+                  size="small"
+                  onClick={handleClick}
+                  endIcon={<ArrowDropDownIcon />}
+                >
+                  {'Change Status'}
+                </Button>
+              )}
+              <Menu
+                id="simple-menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right'
+                }}
               >
-                {'Change Status'}
-              </Button>
-            )}
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
-              }}
-            >
-              {truckMasterData &&
-                statusOptions?.map((o, index) => {
-                  return (
-                    <MenuItem
-                      disabled={o?.optionLabel === truckMasterData?.status ? true : false}
-                      onClick={() => {
-                        handleClose();
-                        handleChangeStatus(o?.optionLabel);
-                      }}
-                      value={o}
-                    >
-                      {o?.optionLabel}
-                    </MenuItem>
-                  );
-                })}
-            </Menu>
-            {permissions?.truckMaster?.isUpdate && (
-              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-              </Button>
-            )}
-            {permissions?.truckMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={truckMasterData?._id} resource={ACTIVITY_RESOURCE.truckMaster} />
+                {driverMasterData &&
+                  statusOptions?.map((o, index) => {
+                    return (
+                      <MenuItem
+                        disabled={o?.optionLabel === driverMasterData?.status ? true : false}
+                        onClick={() => {
+                          handleClose();
+                          handleChangeStatus(o?.optionLabel);
+                        }}
+                        value={o}
+                      >
+                        {o?.optionLabel}
+                      </MenuItem>
+                    );
+                  })}
+              </Menu>
+              {permissions?.driverMaster?.isUpdate && (
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.driverMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            </>
           </Box>
         </Box>
       </Box>
@@ -240,22 +239,24 @@ const TruckMasterDetail = () => {
           />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
-          {loading || !fields?.length ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
-          ) : (
-            <DetailsPage data={truckMasterData} fields={fields} />
-          )}
+          <Box>
+            {loading || !fields?.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={driverMasterData} fields={fields} />
+            )}
+          </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <History id={id} status={truckMasterData?.status} />
+          <History id={id} status={driverMasterData?.status} />
         </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.truckMaster?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${routes?.driverMaster?.title?.toLowerCase()} ${driverMasterData.driverName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -263,7 +264,7 @@ const TruckMasterDetail = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageTruckMaster
+        <ManageDriverMaster
           id={id}
           isClone={false}
           onClose={closeUpdateDialog}
@@ -277,4 +278,4 @@ const TruckMasterDetail = () => {
   );
 };
 
-export default TruckMasterDetail;
+export default DriverMasterDetail;
