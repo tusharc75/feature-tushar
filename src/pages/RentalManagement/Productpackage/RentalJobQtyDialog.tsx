@@ -224,7 +224,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    if ((rentalManagementData?.billingAddress?.zipCode || rentalManagementData?.billingAddress?.state)) {
+    if (rentalManagementData?.customerAccount?.taxApplicable && (rentalManagementData?.billingAddress?.zipCode || rentalManagementData?.billingAddress?.state)) {
       const taxCodeOptions = await fetchTaxRate(rentalManagementData?.billingAddress);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
