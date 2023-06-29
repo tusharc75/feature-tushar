@@ -183,7 +183,12 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         });
       }
       setExistingAssets(assetData);
-      dispatch({ type: 'initialize', data: assetData, count: assetData.length });
+      dispatch({
+        type: 'initialize',
+        data: assetData,
+        count: assetData.length,
+        selectedRecords: assetData.filter((f) => f.isChecked === true)
+      });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
@@ -462,7 +467,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                       !canReceive ||
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                        selectedRecords.length
+                      selectedRecords.length
                     }
                     onClick={() => {
                       setShowConfirmBoxReceive(true);
@@ -476,7 +481,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     disabled={
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                        selectedRecords.length
+                      selectedRecords.length
                     }
                     onClick={() => {
                       const products = [];
@@ -501,9 +506,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   </MenuItem>
 
                   {permissions?.transferAsset?.isUpdate &&
-                  selectedRecords.length &&
-                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                    ?.length === selectedRecords?.length ? (
+                    selectedRecords.length &&
+                    selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                      ?.length === selectedRecords?.length ? (
                     <MenuItem
                       onClick={() => {
                         setShowConfirmBox(true);
@@ -537,7 +542,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                 // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
               }}
               extraParamsToCheckDelete={true}
-              onDelete={(data) => {}}
+              onDelete={(data) => { }}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -556,7 +561,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={(data) => {}}
+              onClone={(data) => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
