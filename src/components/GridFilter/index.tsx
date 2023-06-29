@@ -197,33 +197,31 @@ function GridFilter({
       }
       else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
         const options = coloums?.find((item) => item.fieldName == fieldName)?.option || []
-        if (col.type === 'multiSelect' && formValues[fieldName]?.length === 0) {
-          return
+        if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
+          filterModel[fieldName] = {
+            filterType: 'text',
+            operator: 'OR',
+            condition1: {
+              filterType: 'text',
+              type: 'contains',
+              filter: options?.filter((e) => formValues[fieldName]?.includes(e?.optionValue))
+            },
+            condition2: {
+              filterType: 'text',
+              type: 'contains',
+              filter: 'dummy'
+            }
+          };
         }
-        filterModel[fieldName] = {
-          filterType: 'text',
-          operator: 'OR',
-          condition1: {
-            filterType: 'text',
-            type: 'contains',
-            filter: options?.filter((e) => formValues[fieldName]?.includes(e?.optionValue))
-          },
-          condition2: {
-            filterType: 'text',
-            type: 'contains',
-            filter: 'dummy'
-          }
-        };
       }
       else if (['multiSelect', 'dropDown'].includes(col.type) && formValues[fieldName]) {
-        if (col.type === 'multiSelect' && formValues[fieldName]?.length === 0) {
-          return
+        if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
+          filterModel[fieldName] = {
+            filterType: 'text',
+            type: 'contains',
+            filter: formValues[fieldName],
+          };
         }
-        filterModel[fieldName] = {
-          filterType: 'text',
-          type: 'contains',
-          filter: formValues[fieldName],
-        };
       }
       else if (['dateTime', 'date'].includes(col.type)) {
         const from = `from_${fieldName}`;
