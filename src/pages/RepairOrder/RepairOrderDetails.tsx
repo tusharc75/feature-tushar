@@ -149,7 +149,7 @@ const RepairOrderDetails = () => {
         }
         setAllowedToEdit(isAllowedToEdit);
         var steps: any = repairOrderSteps;
-        if (data?.type === REPAIR_ORDER_TYPE.internal) {
+        if (data?.type === REPAIR_ORDER_TYPE.internal && !data?.addQuotationStep) {
           steps = steps?.filter((e) => ['Add Assets', 'Work Order']?.includes(e.name))
           setStepList(steps)
           setStepNames(steps.map((item) => item.name))
@@ -165,7 +165,7 @@ const RepairOrderDetails = () => {
           params.delete('openEdit');
           history.push({ search: params.toString() });
         }
-        if (data?.type === REPAIR_ORDER_TYPE.internal && data?.status !== REPAIR_ORDER_STATUS.completed) {
+        if ((data?.type === REPAIR_ORDER_TYPE.internal || !data?.addQuotationStep) && data?.status !== REPAIR_ORDER_STATUS.completed) {
           checkStatusChange();
         } else {
           setEnableStatusChange(false);
