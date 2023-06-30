@@ -89,11 +89,13 @@ const Product = () => {
   });
 
   useEffect(() => {
-    axiosInstance()
-      .get('/product-category?sortBy=name&orderBy=asc')
-      .then(({ data: { data } }) => {
-        setProductCategoryList(data);
-      });
+    if (permissions?.productCategory?.isRead) {
+      axiosInstance()
+        .get('/product-category?sortBy=name&orderBy=asc')
+        .then(({ data: { data } }) => {
+          setProductCategoryList(data);
+        });
+    }
   }, []);
 
   useEffect(() => {
@@ -569,11 +571,10 @@ const Product = () => {
               },
               {
                 title: 'Child Product Export',
-                api: `${product.api}/unknown/bom/template?export=true${
-                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                    : ''
-                }`,
+                api: `${product.api}/unknown/bom/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                  ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                  : ''
+                  }`,
                 type: 'export'
               },
               {
@@ -588,11 +589,10 @@ const Product = () => {
               },
               {
                 title: 'Service/Consumable Export',
-                api: `${product.api}/unknown/service-master/template?export=true${
-                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                    : ''
-                }`,
+                api: `${product.api}/unknown/service-master/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                  ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                  : ''
+                  }`,
                 type: 'export'
               },
               {
@@ -607,11 +607,10 @@ const Product = () => {
               },
               {
                 title: 'Service Package Export',
-                api: `${product.api}/unknown/package/template?export=true${
-                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                    : ''
-                }`,
+                api: `${product.api}/unknown/package/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                  ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                  : ''
+                  }`,
                 type: 'export'
               },
               {
@@ -685,35 +684,37 @@ const Product = () => {
                   </Grid>
                 </>
               )}
-              <Autocomplete
-                style={{ width: '250px' }}
-                options={productCategoryList}
-                getOptionLabel={(option: any) => (option ? option.name : '')}
-                getOptionSelected={(option: any, val) => option._id === val}
-                value={
-                  productCategoryList.filter((data) => data._id === productCategory).length
-                    ? productCategoryList.filter((data) => data._id === productCategory)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setProductCategory(val && val._id ? val._id : '');
-                }}
-                renderInput={(params) =>
-                  isMobile && !isTablet ? (
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="productCategory"
-                      placeholder="Product Category"
-                      variant="standard"
-                      fullWidth
-                      className={isMobile ? 'serchBox' : ''}
-                    />
-                  ) : (
-                    <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
-                  )
-                }
-              />
+              {permissions?.productCategory?.isRead &&
+                <Autocomplete
+                  style={{ width: '250px' }}
+                  options={productCategoryList}
+                  getOptionLabel={(option: any) => (option ? option.name : '')}
+                  getOptionSelected={(option: any, val) => option._id === val}
+                  value={
+                    productCategoryList.filter((data) => data._id === productCategory).length
+                      ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setProductCategory(val && val._id ? val._id : '');
+                  }}
+                  renderInput={(params) =>
+                    isMobile && !isTablet ? (
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        name="productCategory"
+                        placeholder="Product Category"
+                        variant="standard"
+                        fullWidth
+                        className={isMobile ? 'serchBox' : ''}
+                      />
+                    ) : (
+                      <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+                    )
+                  }
+                />
+              }
               {isProductTemplate && (
                 <Autocomplete
                   style={{ width: '250px' }}

@@ -484,6 +484,7 @@ const WellNumber = () => {
             setShowManageDialog({ open: false, isClone: false, idToClone: null });
             fetchData();
           }}
+          isRedirectToDetailPage={true}
         />
       )}
       {showDeleteConfirmBox && (
