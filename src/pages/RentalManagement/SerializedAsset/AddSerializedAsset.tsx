@@ -666,7 +666,7 @@ const AddSerializedAsset = ({
                               isAdding ||
                               serializedProducts.some((d) => d?.qty < 0)
                             }
-                            className={`${isMobile && !isTablet ? 'mobile_button' : ''} new-dropdown-v1 `}
+                            className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
                             endIcon={isAdding && <CircularProgress size={20} />}
                           >
                             {referenceType === 'Rental Job' ? 'Add to Job' : referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'}
