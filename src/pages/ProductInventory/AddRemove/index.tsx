@@ -117,11 +117,11 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
           product.length > 1
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: [] }))
             : product?.map((e) => ({
-                product: e._id,
-                qty: parseInt(values.qty),
-                price: parseFloat(values.price),
-                serialNumber: values['serialNumbers']
-              })),
+              product: e._id,
+              qty: parseInt(values.qty),
+              price: parseFloat(values.price),
+              serialNumber: values['serialNumbers']
+            })),
         warehouse: warehouse,
         storageLocation: values.storageLocation,
         receiveDate: values.customDate,
@@ -180,10 +180,12 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
 
     if (type === 'remove') {
       if (product?.length === 1) {
-        var validateQty = currentInventory;
-        let maxQty = availableQtyOnRemoveDate !== null ? Math.min(validateQty, availableQtyOnRemoveDate) : validateQty;
-        if (parseInt(values.qty) > maxQty) {
-          errors['qty'] = 'Insufficient Quantity !';
+        if (!user?.user?.brandPolicy?.allowNegativeInventory) {
+          var validateQty = currentInventory;
+          let maxQty = availableQtyOnRemoveDate !== null ? Math.min(validateQty, availableQtyOnRemoveDate) : validateQty;
+          if (parseInt(values.qty) > maxQty) {
+            errors['qty'] = 'Insufficient Quantity !';
+          }
         }
       }
     }
@@ -315,8 +317,8 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                   <CustomDialogContent>
                     <List style={{ padding: 0 }}>
                       <ListItem key={product[0]?._id}>
-                        {product?.length === 1  ? (
-                          <ListItemText primary={product[0]?.productName} secondary={ !user?.user?.brandPolicy?.hideInventoryCount && `Inventory : ${currentInventory}`} />
+                        {product?.length === 1 ? (
+                          <ListItemText primary={product[0]?.productName} secondary={!user?.user?.brandPolicy?.hideInventoryCount && `Inventory : ${currentInventory}`} />
                         ) : (
                           <ListItemText primary={`${product?.length} Products`} />
                         )}
