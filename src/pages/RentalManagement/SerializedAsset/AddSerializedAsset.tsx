@@ -41,6 +41,8 @@ import { Link } from 'react-router-dom';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+
 let searchTimeout;
 
 const AddSerializedAsset = ({
@@ -490,7 +492,7 @@ const AddSerializedAsset = ({
         <CustomDialogContent>
           <Box pt={1} pb={1} className="main-container-v1">
             <Grid container spacing={2}>
-              <Grid item xs={12} md={5}>
+              <Grid item xs={12} md={4}>
                 <Box display="flex">
                   <Box style={{ display: 'inline' }}>
                     {serializedProducts.length > 0
@@ -600,8 +602,8 @@ const AddSerializedAsset = ({
                   </Grid>
                 )}
               </Grid>
-              <Grid item xs={12} md={4}>
-                <Box display="flex">
+              <Grid item xs={12} md={5}>
+                <Box display="flex" alignItems={'center'}>
                   <Box flexGrow={1}>
                     <SearchBox
                       onChange={handleSearch}
@@ -617,6 +619,7 @@ const AddSerializedAsset = ({
                         !checkUniqWarehouse() && (
                           <Box pl={1}>
                             <Button
+                              style={{ minWidth: 'max-content' }}
                               size="small"
                               color="primary"
                               onClick={() => {
@@ -649,6 +652,7 @@ const AddSerializedAsset = ({
                           <Button
                             color="primary"
                             size="small"
+                            style={{ minWidth: 'max-content' }}
                             onClick={() => {
                               if (referenceType === 'Rental Job' && checkMTRValidation) {
                                 if ([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.mtrAttached !== true)) {
@@ -666,7 +670,7 @@ const AddSerializedAsset = ({
                               isAdding ||
                               serializedProducts.some((d) => d?.qty < 0)
                             }
-                            className={`${isMobile && !isTablet ? 'mobile_button' : ''} new-dropdown-v1 `}
+                            className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
                             endIcon={isAdding && <CircularProgress size={20} />}
                           >
                             {referenceType === 'Rental Job' ? 'Add to Job' : referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'}
@@ -684,6 +688,7 @@ const AddSerializedAsset = ({
                         <Button
                           color="primary"
                           size="small"
+                          style={{ minWidth: 'max-content' }}
                           onClick={() => {
                             setInuseAssetConfirmBox(true);
                           }}
@@ -706,42 +711,11 @@ const AddSerializedAsset = ({
             {referenceType === 'Rental Job' && (
               <Grid container spacing={2}>
                 <Grid item>
-                  <Tabs
-                    className="new-tab-container-v1"
-                    variant="scrollable"
-                    scrollButtons="auto"
-                    value={tabValue}
-                    onChange={handleMainTabChange}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    aria-label="Serialized Asset Tab"
-                    TabIndicatorProps={{
-                      style: {
-                        height: 0
-                      }
-                    }}
-                  >
-                    <Tab
-                      className={'tabLayout'}
-                      value={0}
-                      label={<div className="d-flex align-items-center tab-font">Assets</div>}
-                      {...a11yProps(0)}
-                    />
-                    {permissions?.sublease && (
-                      <Tab
-                        className={'tabLayout'}
-                        value={1}
-                        label={<div className="d-flex align-items-center tab-font">Sublease Assets</div>}
-                        {...a11yProps(1)}
-                      />
-                    )}
-                    <Tab
-                      className={'tabLayout'}
-                      value={2}
-                      label={<div className="d-flex align-items-center tab-font">In Use Assets</div>}
-                      {...a11yProps(2)}
-                    />
-                  </Tabs>
+                  <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+                    <CustomTab value={0} index={0} label={'Assets'} {...a11yProps(0)} />
+                    {permissions?.sublease && <CustomTab className={'tabLayout'} value={1} index={1} label={'Sublease Assets'} {...a11yProps(1)} />}
+                    <CustomTab className={'tabLayout'} value={2} index={2} label={'In Use Assets'} {...a11yProps(2)} />
+                  </CustomTabs>
                 </Grid>
               </Grid>
             )}
