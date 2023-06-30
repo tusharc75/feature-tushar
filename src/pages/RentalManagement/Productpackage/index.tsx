@@ -597,32 +597,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                 Add New Package
               </MenuItem>
             </Menu>
-            {/* {permissions?.product?.isRead && (
-              <Button
-                size="small"
-                disabled={isOffline}
-                variant={'contained'}
-                color="primary"
-                onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
-                }}
-              >
-                {isMobile && !isTablet ? 'Product' : `Add Products`}
-              </Button>
-            )}
-            {permissions?.packages?.isRead && (
-              <Button
-                color="primary"
-                size="small"
-                variant="contained"
-                disabled={isOffline}
-                onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                }}
-              >
-                {isMobile && !isTablet ? 'Package' : `Add Product ${routes.packages.title}`}
-              </Button>
-            )} */}
           </Box>
           <Box display="flex" ml={1}>
             {flattenArray(rowsData)?.filter((e) => e?.serializedProduct)?.length > 0 && (
