@@ -342,9 +342,10 @@ const InventoryProduct = () => {
               ? TOOLTIP_MESSAGE.remove
               : params?.data?.plantId === 'All'
                 ? 'Select Plant'
-                : !params?.data?.availableInventory
-                  ? 'Inventory not available'
-                  : 'Remove'
+                : user?.user?.brandPolicy?.allowNegativeInventory ? 'Remove' :
+                  !params?.data?.availableInventory
+                    ? 'Inventory not available'
+                    : 'Remove'
           }
         >
           <span>
