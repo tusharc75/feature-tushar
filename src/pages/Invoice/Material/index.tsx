@@ -75,7 +75,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${row.original?.type === 'serializedAsset' ? 'Asset' : startCase(row.original?.type)} `}</p>
+            <p>{`${startCase(row.original?.type)} `}</p>
           </div>
         )
       },
@@ -86,7 +86,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
         width: 300,
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {allowedToEdit && row.original.type !== 'serializedAsset' ? (
+            {allowedToEdit && row.original.type !== 'asset' ? (
               <p
                 onClick={() => {
                   setMaterialEdit({
@@ -105,7 +105,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
               <p className="text-truncate">{row.original?.detail}</p>
             )}
 
-            {row?.original?.type !== 'service' && row.original.type !== 'serializedAsset' && (
+            {row?.original?.type !== 'service' && row.original.type !== 'asset' && (
               <>
                 <Box ml={1} className="d-flex align-items-center">
                   {row.original?.subRows?.length > 0 && (
@@ -151,7 +151,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === 'product') {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'serializedAsset') {
+                  } else if (row.original.type === 'asset') {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -201,7 +201,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
     data = response?.data?.data;
     let rows = data.material.filter((e) => e.parentId === null);
-    assignedAssets = data.material.filter((e) => e.type === 'serializedAsset' && e.parentId);
+    assignedAssets = data.material.filter((e) => e.type === 'asset' && e.parentId);
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -209,18 +209,18 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'package'
-          ? parent.packageDetail?.packageName
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.serviceDetail?.serviceName;
+            ? parent.packageDetail?.packageName
+            : parent.type === 'asset'
+              ? parent.serializedAssetDetail?.assetNumber
+              : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent.type === 'serializedAsset'
-          ? parent?.description
-          : parent?.serviceDetail?.serviceDescription;
+            ? parent?.packageDetail?.packageDescription
+            : parent.type === 'asset'
+              ? parent?.description
+              : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.assetQty = assignedAssets.filter((i) => i.parentId === parent._id).length;
@@ -243,18 +243,18 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.serviceDetail?.serviceName;
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === 'asset'
+              ? _subRow.serializedAssetDetail.assetNumber
+              : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow.type === 'serializedAsset'
-          ? parent.description
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow.type === 'asset'
+              ? parent.description
+              : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -281,7 +281,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
   const handleAdd = async (rows) => {
     setIsAdding(true);
     const material: any = [];
-    if (addDialog.type === 'serializedAsset' && addDialog.parentId) {
+    if (addDialog.type === 'asset' && addDialog.parentId) {
       rows?.forEach((e) => {
         material.push(e);
       });
@@ -466,7 +466,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
             <MenuItem
               color="primary"
               onClick={() => {
-                setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
+                setAddDialog({ open: true, type: 'asset', parentId: null });
                 closeAddMenu();
               }}
             >
@@ -624,7 +624,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
             {addchildDialog.isSerializedProduct && (
               <MenuItem
                 onClick={() => {
-                  setAddDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId });
+                  setAddDialog({ open: true, type: 'asset', parentId: addchildDialog.parentId });
                   setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct: false });
                 }}
               >
@@ -669,7 +669,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
           packageType={null}
         />
       )}
-      {addDialog.open && addDialog.type === 'serializedAsset' && (
+      {addDialog.open && addDialog.type === 'asset' && (
         <AssignSerializedAssetDialog
           reference={'invoice'}
           handleClose={() => {
@@ -677,13 +677,13 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
             setAssetAssignedProduct([]);
           }}
           ids={flattenArray(rowsData)
-            ?.filter((e) => e.type === 'serializedAsset')
+            ?.filter((e) => e.type === 'asset')
             ?.map((e) => e.materialId)}
           handleSucess={(rows) => {
             if (addDialog.parentId) {
               handleAdd(
                 rows?.map((e) => {
-                  return { materialId: e.asset, type: 'serializedAsset', parentId: e._id };
+                  return { materialId: e.asset, type: 'asset', parentId: e._id };
                 })
               );
             } else {
