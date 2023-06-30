@@ -28,6 +28,8 @@ import { generateCustomTableColumns, flattenArray } from 'src/constants/columns'
 import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AssetAvailability from '../AssetAvailability';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
+import { ExpandMore } from '@material-ui/icons';
+import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 
 const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -56,6 +58,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openAssetAvailibility, setOpenAssetAvailibility] = useState(false);
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
+
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -107,12 +111,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -261,23 +265,22 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'service'
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
-      }`;
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -301,23 +304,22 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'package'
+      _subRow.detail = `${_subRow.type === 'service'
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'package'
           ? _subRow.packageDetail?.packageName
           : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : ''
-      } `;
+            ? _subRow.productDetail?.productName
+            : ''
+        } `;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -541,12 +543,61 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     }
   };
 
+  const openAddActions = (event) => {
+    setAddAnchorEl(event.currentTarget);
+  };
+
+  const closeAddActions = () => {
+    setAddAnchorEl(null);
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            {permissions?.product?.isRead && (
+            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
+              {'Add'}
+              <ExpandMore fontSize="small" />
+            </Button>
+            <Menu
+              anchorEl={addAnchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="add-menu"
+              open={Boolean(addAnchorEl)}
+              onClose={closeAddActions}
+            >
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
+                }}
+              >
+                Add Products
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+                }}
+              >
+                Add Packages
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
+                }}
+              >
+                Add New Package
+              </MenuItem>
+            </Menu>
+            {/* {permissions?.product?.isRead && (
               <Button
                 size="small"
                 disabled={isOffline}
@@ -571,7 +622,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
               >
                 {isMobile && !isTablet ? 'Package' : `Add Product ${routes.packages.title}`}
               </Button>
-            )}
+            )} */}
           </Box>
           <Box display="flex" ml={1}>
             {flattenArray(rowsData)?.filter((e) => e?.serializedProduct)?.length > 0 && (
@@ -706,7 +757,21 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           isInlineEdit={isInlineEdit}
         />
       )}
-      {addExistingProductDialog.open && (
+      {
+        addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
+          <ManagePackageDialog
+            isClone={false}
+            open={addExistingProductDialog.open}
+            packageId={null}
+            onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+            onSuccess={() => {
+              setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+            }}
+            isRedirectToDetailPage={false}
+          />
+        )
+      }
+      {addExistingProductDialog.open && addExistingProductDialog.type !== 'newPackage' && (
         <AddExistingProductInventory
           renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
           isAddingProducts={isAddingProducts}
