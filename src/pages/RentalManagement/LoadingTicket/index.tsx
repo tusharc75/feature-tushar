@@ -160,7 +160,8 @@ const LoadingTicket = ({
               ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
               : '',
             description: d?.product?.productDescription,
-            rentalAssetStatus: d?.status
+            rentalAssetStatus: d?.status,
+            startDate: d?.startDate,
           }))
           .map((u) => ({
             ...u,
@@ -172,7 +173,8 @@ const LoadingTicket = ({
             warehouse: u?.warehouse?.optionLabel,
             warehouseId: u?.warehouse?.optionValue,
             currentOwner: u?.currentOwner,
-            currentLocation: u?.currentLocation?.optionValue
+            currentLocation: u?.currentLocation?.optionValue,
+            startDate: u?.startDate,
           }));
 
         const result = await axiosInstance().get(
@@ -236,6 +238,8 @@ const LoadingTicket = ({
           obj.loadingTicket = ele?.loadingTicket;
           obj.loadingTicketId = ele?.loadingTicketId;
           obj.loadingTicketStatus = ele?.loadingTicketStatus;
+          obj.startDate = element?.actualStartDate;
+
           productAssets.push(obj);
           qty = qty - ele.qty;
         });
@@ -292,7 +296,8 @@ const LoadingTicket = ({
         }
       });
 
-      if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
+      if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0
+        && productAssets?.some((e: any) => e.startDate)) {
         setNextStep(true);
       }
 
