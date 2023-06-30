@@ -345,7 +345,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       const element: any = {};
       element.materialId = d._id;
       element.detail = d.type === 'product' ? d?.productName : d.type === 'package' ? d?.packageName : '';
-      element.type = addExistingProductDialog.type;
+      element.type = d?.type || addExistingProductDialog.type;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -738,8 +738,10 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
             open={addExistingProductDialog.open}
             packageId={null}
             onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
-            onSuccess={() => {
-              setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+            onSuccess={(data) => {
+              data.type = 'package'
+              handleAdd([data]);
+              setAddExistingProductDialog({ open: false, type: '', parentId: null });
             }}
             isRedirectToDetailPage={false}
           />
