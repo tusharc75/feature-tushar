@@ -52,6 +52,7 @@ const Invoice = ({
   const [showCostDialog, setShowCostDialog] = useState(false);
 
   const [columns, setColumns] = useState(null);
+  const [defaultColumns, setDefaultColumns] = useState(['Index', 'Type', 'Details', 'Description', 'Status', 'Qty', 'Unit', `Price ${rentalManagementData?.currency}`, `Total Price ${rentalManagementData?.currency}`, `Final Price ${rentalManagementData?.currency}`])
   const [rowsData, setRowsData] = useState(null);
   useEffect(() => {
     if (
@@ -496,7 +497,7 @@ const Invoice = ({
               </Button>
             </Fragment>
           )}
-          <PreviewDownload resource={sidebarResource.rentalManagement} referenceId={rentalManagementData._id} columns={columns} isSendEmail={false} />
+          <PreviewDownload resource={sidebarResource.rentalManagement} referenceId={rentalManagementData._id} columns={columns} isSendEmail={false} defaultColumns={defaultColumns} />
           {/* {permissions?.rentalManagement?.isRead && !isMobile && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
