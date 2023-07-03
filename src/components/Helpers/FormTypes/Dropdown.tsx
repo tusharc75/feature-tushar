@@ -24,8 +24,9 @@ import ManageMarketSegmentDialog from 'src/pages/MarketSegment/ManageMarketSegme
 import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 import { camelCase, has, isEmpty } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { NewOptionList } from 'src/pages/Job/ManageJobDialog';
 
-function dropdownOptions(options, values, fields, fieldData) {
+function dropdownOptions(options, values, fields, fieldData, newOptionList = []) {
   const lookupDependentOn = fieldData?.lookupDependentOn;
   const lookupDependentOnField = fieldData?.lookupDependentOnField;
 
@@ -58,8 +59,12 @@ function dropdownOptions(options, values, fields, fieldData) {
       if (dependentOnFieldValue) {
         const dependentFieldOption = dependentOnField?.option?.find((e) => e.optionValue === dependentOnFieldValue);
         if (dependentFieldOption) {
+          let option = options;
+          if(newOptionList?.length > options?.length){
+            option = newOptionList
+          }
           const dependentIds = dependentFieldOption[lookupDependentOnField] || [];
-          const newOptions = options?.filter((option: any) => dependentIds?.includes(option.optionValue)) || [];
+          const newOptions = option?.filter((option: any) => dependentIds?.includes(option.optionValue)) || [];
           optionsToShow.push(...newOptions);
         }
       }
@@ -103,6 +108,7 @@ function Dropdown({
     state: { permissions }
   }: any = useData();
   const [lookupDialog, setLookupDialog] = React.useState(false);
+  const { newOptionList, setNewOptionList } = React.useContext(NewOptionList);
 
   return (
     <Box key={fieldData?.lookupResource}>
@@ -163,10 +169,10 @@ function Dropdown({
               <Autocomplete
                 {...rest}
                 disabled={fieldData?.isUneditable || rest?.disabled}
-                options={dropdownOptions(option, values, fields, fieldData) || []}
+                options={dropdownOptions(option, values, fields, fieldData, newOptionList) || []}
                 getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                 getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={[...dropdownOptions(option, values, fields, fieldData)].find((data: any) => data.optionValue === values[name]) || ''}
+                value={[...dropdownOptions(option, values, fields, fieldData, newOptionList)].find((data: any) => data.optionValue === values[name]) || ''}
                 onChange={
                   onChange
                     ? onChange
@@ -718,6 +724,7 @@ function Dropdown({
                           };
                           addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
+                          setNewOptionList([tempNewOption, ...option]);
                           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                         }
                       }}
