@@ -12,8 +12,7 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_FROM_TO_TYPE,
   ASSET_STATUS,
-  COLOUR_MASTER,
-  RESOURCE_LABEL
+  COLOUR_MASTER
 } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -367,7 +366,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       <Box display="flex" flexDirection={'row'} justifyContent={'flex-end'} mx={1} my={1}>
         <Box>
           {permissions?.transferAsset?.isRead && !isMobile && !isMobile && (
-            <PreviewDownload resource={RESOURCE_LABEL.transferAsset} referenceId={transferAssetId} columns={newCols} />
+            <PreviewDownload resource={sidebarResource.transferAsset} referenceId={transferAssetId} columns={newCols} />
           //   <Button
           //     variant={'outlined'}
           //     color="primary"

@@ -19,7 +19,7 @@ import {
   deliveryTicket,
   transferInventory,
   TRANSFER_INVENTORY_STATUS,
-  RESOURCE_LABEL
+  sidebarResource
 } from 'src/constants/helpers';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
@@ -352,7 +352,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         >
           {downloadingFile ? 'Please wait...' : 'Preview'}
         </Button> */}
-        <PreviewDownload resource={RESOURCE_LABEL.transferInventory} referenceId={transferInventoryData._id} columns={newcolumns} />
+        <PreviewDownload resource={sidebarResource.transferInventory} referenceId={transferInventoryData._id} columns={newcolumns} />
         {interPlantTransfer ? (
           <Box ml={1}>
             {allowedToEdit && canReceive && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (

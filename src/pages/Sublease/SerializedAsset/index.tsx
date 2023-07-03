@@ -7,7 +7,7 @@ import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, ASSET_STATUS, serializedAsset, RESOURCE_LABEL } from '../../../constants/helpers';
+import { gridLoadingTimeout, ASSET_STATUS, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
@@ -211,7 +211,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
             />
           </Box>
         )}
-        <PreviewDownload resource={RESOURCE_LABEL.sublease} referenceId={subleaseData?._id} columns={columns} />
+        <PreviewDownload resource={sidebarResource.sublease} referenceId={subleaseData?._id} columns={columns} />
         {/* <Box>
           {!isMobile && (
             <Button

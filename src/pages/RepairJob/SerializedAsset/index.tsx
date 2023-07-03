@@ -21,7 +21,7 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   prepareDataForGrid,
   INVENTORY_OWNER_TYPE,
-  RESOURCE_LABEL,
+  sidebarResource,
   CHILD_RESOURCE
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -321,7 +321,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
               {downlodingFile ? 'Please wait...' : 'Preview'}
             </Button>
           )} */}
-          <PreviewDownload resource={RESOURCE_LABEL.repairJob} referenceId={repairJobData?._id} columns={newColumns} />
+          <PreviewDownload resource={sidebarResource.repairJob} referenceId={repairJobData?._id} columns={newColumns} />
           {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
             <Fragment>
               <Button

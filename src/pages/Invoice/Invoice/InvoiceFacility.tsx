@@ -2,7 +2,7 @@ import Box from '@material-ui/core/Box/Box';
 import { useState, useContext } from 'react';
 import { Button, Dialog, Menu, MenuItem } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, RESOURCE_LABEL, invoice } from '../../../constants/helpers';
+import { CustomDialogTransition, sidebarResource, invoice } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
@@ -125,7 +125,7 @@ const InvoiceFacility = ({ invoiceData, columns }) => {
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center" flexWrap={'wrap'} gridGap={8}>
           {permissions?.invoice?.isRead && (
-            <PreviewDownload resource={RESOURCE_LABEL.invoice} referenceId={invoiceData?._id} columns={columns} />
+            <PreviewDownload resource={sidebarResource.invoice} referenceId={invoiceData?._id} columns={columns} />
             // <Button
             //   variant="outlined"
             //   color="primary"
