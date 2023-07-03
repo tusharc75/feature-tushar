@@ -253,20 +253,20 @@ const Quotation = ({
         parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName;
+            ? parent.productDetail?.productName
+            : parent.type === 'service'
+              ? parent.serviceDetail?.serviceName
+              : parent.packageDetail?.packageName;
       parent.description =
         parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.product?.productDescription
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.serviceDetail?.serviceDescription || ''
+            : parent.type === 'product'
+              ? parent?.productDetail?.productDescription || ''
+              : parent.type === 'package'
+                ? parent?.packageDetail?.packageDescription || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
@@ -289,23 +289,22 @@ const Quotation = ({
 
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
@@ -500,7 +499,7 @@ const Quotation = ({
         className={`flex-wrap`}
         style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
       >
-        <Box display="flex">
+        {repairOrderData?.addQuotationStep ? <Box display="flex">
           <SendEmail
             versionData={quotationData?.versions[currentVersion]}
             quotationData={quotationData}
@@ -515,8 +514,8 @@ const Quotation = ({
             hideSummary={true}
             hideVersions={invoiceStep}
           />
-        </Box>
-        {!isMobileScreen && !invoiceStep && (
+        </Box> : <div />}
+        {!isMobileScreen && !invoiceStep && repairOrderData?.addQuotationStep && (
           <Box display="flex">
             {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
               <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
@@ -538,8 +537,8 @@ const Quotation = ({
         )}
         {allowedToEdit && (
           <Box display={'flex'} gridGap={8}>
-            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-            quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+            {repairOrderData?.addQuotationStep && (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
+              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
               <Button
                 disabled={material
                   .filter((e) => e.parentId === null)
@@ -580,23 +579,23 @@ const Quotation = ({
               >
                 Create New Version
               </Button>
-            ) : null}
+            ) : null)}
             {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
               quotationData?.versions[currentVersion]?.status
             ) && (
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedProducts.length === 0}
-                endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
-              >
-                Actions
-              </Button>
-            )}
+                <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={selectedProducts.length === 0}
+                  endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
+                >
+                  Actions
+                </Button>
+              )}
             <Menu
               anchorEl={anchorEl}
               keepMounted
