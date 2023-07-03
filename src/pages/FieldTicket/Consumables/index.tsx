@@ -6,7 +6,7 @@ import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, IconButton, Menu, MenuItem, Tab, Tabs, TextField } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -17,11 +17,8 @@ import { BiChevronDown } from 'react-icons/bi';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
-import { Autocomplete } from '@material-ui/lab';
 
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-
-const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) => {
+const Consumables = ({ id, allowedToEdit, fieldTicketData }) => {
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -29,23 +26,6 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
-  const [serviceOption, setServiceOption] = useState(null);
-  const [selectedServiceOption, setSelectedServiceOption] = useState(null);
-
-  useEffect(() => {
-    setServiceOption(
-      services?.map((s) => {
-        return {
-          optionLabel: s?.detail,
-          optionValue: s?.materialId
-        };
-      })
-    );
-    if (!services?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
-      setSelectedServiceOption(null);
-    }
-  }, [services]);
 
   const {
     state: { user }
@@ -59,7 +39,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
     if (columns) {
       fetchData();
     }
-  }, [columns, services, selectedServiceOption]);
+  }, [columns]);
 
   const fetchColumns = async () => {
     const column = [];
@@ -125,13 +105,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
         primaryField: true,
         editable: allowedToEdit,
         width: 150,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>,
-        Footer: (info) => {
-          const total = info.rows
-            .filter((f) => f.values.hasOwnProperty('qty') && !isNaN(f.values['qty']))
-            .reduce((sum, row) => parseInt(row.values['qty']) + sum, 0);
-          return <>{total}</>;
-        }
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
       {
         accessor: 'action',
@@ -178,12 +152,8 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
 
   const fetchData = async () => {
     setDataRows(null);
-    let api = `/field-ticket/${id}/material?type=product`;
-    if (selectedServiceOption) {
-      api = `${api}&serviceId=${selectedServiceOption?.optionValue}`;
-    }
     axiosInstance()
-      .get(api)
+      .get(`/field-ticket/${id}/material?type=product`)
       .then(({ data: { data } }) => {
         let rows = data?.material?.map((u, i) => {
           let res: any = {
@@ -296,116 +266,89 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
     setAnchorEl(null);
   };
 
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setTabValue(newValue);
-  };
-
   return (
     <>
-      {allowedToEdit && serviceOption?.length > 0 && (
-        <Box style={{ maxWidth: '400px' }} mb={3}>
-          <Autocomplete
-            size="small"
-            style={{ minWidth: '300px' }}
-            fullWidth
-            options={serviceOption ? serviceOption : []}
-            autoHighlight
-            value={selectedServiceOption}
-            getOptionLabel={(option: any) => option?.optionLabel || ''}
-            getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
-            onChange={(_, val) => setSelectedServiceOption(val)}
-            renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
-          />
+      {allowedToEdit && (
+        <Box display="flex" justifyContent="space-between" mb={2}>
+          <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+            <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
+              Add Products/Consumables
+            </Button>
+          </Box>
+          <Box display="flex" ml={1}>
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              id="demo-positioned-button"
+              onClick={handleClick}
+              disabled={!Boolean(selectedRecords?.length)}
+              endIcon={<BiChevronDown />}
+              className="new-dropdown-v1"
+            >
+              Actions
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              open={open}
+              onClose={handleClose}
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right'
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right'
+              }}
+            >
+              <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
+                <MenuItem
+                  disabled={isDeleting}
+                  onClick={() => {
+                    setDeleteData(
+                      selectedRecords?.map((d) => {
+                        return {
+                          id: d?._id
+                        };
+                      })
+                    );
+                    handleClose();
+                  }}
+                >
+                  Delete
+                </MenuItem>
+              </HtmlTooltip>
+            </Menu>
+          </Box>
         </Box>
       )}
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-        <CustomTab index={0} label={'Products/Consumables'} value={0} primaryColor={true} />
-      </CustomTabs>
-
-      <TabPanel value={tabValue} index={0}>
-        <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-          {allowedToEdit && (
-            <Box display="flex" justifyContent="space-between" mb={2}>
-              <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-                <Button variant="outlined" color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
-                  Add
-                </Button>
-              </Box>
-              <Box display="flex" ml={1}>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
-                  id="demo-positioned-button"
-                  onClick={handleClick}
-                  disabled={!Boolean(selectedRecords?.length)}
-                  endIcon={<BiChevronDown />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  open={open}
-                  onClose={handleClose}
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right'
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right'
-                  }}
-                >
-                  <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
-                    <MenuItem
-                      disabled={isDeleting}
-                      onClick={() => {
-                        setDeleteData(
-                          selectedRecords?.map((d) => {
-                            return {
-                              id: d?._id
-                            };
-                          })
-                        );
-                        handleClose();
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </HtmlTooltip>
-                </Menu>
-              </Box>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={12} sm={12}>
+          {columns && dataRows ? (
+            <CustomReactTable
+              height={'calc(100vh - 345px)'}
+              columns={columns}
+              data={dataRows}
+              // setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+              onSelect={setSelectedRecords}
+              childrenProperty="subRows"
+              uniqueKey="_id"
+              onSaveEdit={onSaveInlineEdit}
+              renderedFrom={'fieldTicket_consumables'}
+              isClientSideGrid={true}
+              hideExpander={true}
+              hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
+            />
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={12} sm={12}>
-              {columns && dataRows ? (
-                <CustomReactTable
-                  height={stepFullScreen ? 'calc(100vh - 440px)' : '278px'}
-                  columns={columns}
-                  data={dataRows}
-                  onSelect={setSelectedRecords}
-                  childrenProperty="subRows"
-                  uniqueKey="_id"
-                  onSaveEdit={onSaveInlineEdit}
-                  renderedFrom={'fieldTicket_consumables'}
-                  isClientSideGrid={true}
-                  hideExpander={true}
-                  hideSelection={!allowedToEdit}
-                  hideAction={!allowedToEdit}
-                />
-              ) : (
-                <Box p={2} height={500}>
-                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Box>
-              )}
-            </Grid>
-          </Grid>
-        </Box>
-      </TabPanel>
+        </Grid>
+      </Grid>
 
       {consumablesDialog && (
         <AssignProductDialog
