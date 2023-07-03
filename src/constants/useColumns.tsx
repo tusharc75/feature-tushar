@@ -46,11 +46,6 @@ export const detailPagePath = {
   supplierContact: routes?.supplierContactDetail?.path
 };
 
-export const hasDetailPageAsPopup = {
-  termsConditions: routes?.termsAndConditions?.path
-};
-
-export const popupResources = ['Terms & Conditions'];
 
 export const disabledColumns = {
   [routes.rentalManagementDetail.title]: [],
@@ -125,8 +120,11 @@ export const getStaticFields = () => {
 
 export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
   let data = localStorage.getItem('gridMetaData');
-  let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
-  if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+  let gridMetaData = {};
+  if (data && data !== 'undefined') {
+    gridMetaData = JSON.parse(data);
+  }
+  if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
     return gridMetaData[renderedFrom]?.hide?.indexOf(fieldName) >= 0 ? false : true;
   }
   return true;
@@ -134,8 +132,11 @@ export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
 
 export const checkStaticField = (renderedFrom, fieldData) => {
   let data = localStorage.getItem('gridMetaData');
-  let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
-  if (gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+  let gridMetaData = {};
+  if (data && data !== 'undefined') {
+    gridMetaData = JSON.parse(data);
+  }
+  if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
     return {
       ...fieldData,
       show: gridMetaData[renderedFrom]?.hide?.indexOf(fieldData?.field) >= 0 ? false : true
@@ -188,7 +189,9 @@ export default function useColumns() {
     state: { permissions, user, selectedEntity }
   }: any = useData();
 
-  const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
+
+  const getColumnData = (title, field, detailScreenRoute = null, openInNewTab = false) => {
+
     let data = localStorage.getItem('gridMetaData');
 
     if (field.type === 'date') {
@@ -223,7 +226,7 @@ export default function useColumns() {
             ...commonFieldData,
             field: 'concatedName',
             cellRenderer: 'nameRenderer',
-            cellRendererParams: { pathName: pathName }
+            cellRendererParams: { pathName: pathName, }
           },
           rendererName: 'nameRenderer'
         };
@@ -236,51 +239,31 @@ export default function useColumns() {
             disabled: true,
             field: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
             cellRenderer: permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? 'linkRenderer' : 'commonRenderer',
-            cellRendererParams: { pathName: detailScreenRoute, property: '_id', isForPopup: hasPopup }
+            cellRendererParams: { pathName: detailScreenRoute, property: '_id', openInNewTab: openInNewTab }
           },
           rendererName: permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? 'linkRenderer' : 'commonRenderer'
         };
       } else if (field?.lookup) {
         let joinedFieldName = field?.fieldName.indexOf(' ') > 0 ? camelCase(field?.fieldName) : field?.fieldName;
-        let pathName = '';
-        let isForPopup = false;
-        if (hasDetailPageAsPopup[joinedFieldName]) {
-          isForPopup = true;
-          pathName = `${hasDetailPageAsPopup[joinedFieldName]}`;
-        } else if (field?.lookupResource && popupResources.indexOf(field?.lookupResource) >= 0) {
-          pathName = routes[`${camelCase(field?.lookupResource)}`]?.path ?? '';
-          isForPopup = true;
-        } else {
-          pathName = detailPagePath[joinedFieldName]
-            ? detailPagePath[joinedFieldName]
-            : field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-              ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-              : routes[joinedFieldName]?.path
-                ? routes[joinedFieldName]?.path
-                : routes[`${joinedFieldName}Detail`]?.path
-                  ? routes[`${joinedFieldName}Detail`]?.path
-                  : `${camelCase(field?.lookupResource)}/detail`;
-        }
+
+        let pathName = routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+          ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+          : `${camelCase(field?.lookupResource)}/detail`;
+
         return {
           columnData: {
             ...commonFieldData,
-            cellRenderer: isForPopup
-              ? permissions[permissionForLinks[field?.lookupResource]]?.isUpdate
-                ? 'linkRenderer'
-                : 'commonRenderer'
-              : 'linkRenderer',
+            cellRenderer: permissions[(permissionForLinks[field?.lookupResource]
+              || camelCase(field?.lookupResource))]?.isRead ? 'linkRenderer' : 'commonRenderer',
             cellRendererParams: {
               pathName: pathName,
               property: joinedFieldName + 'Id',
-              isForPopup: isForPopup,
+              openInNewTab: openInNewTab,
               more: `rest${joinedFieldName}`
             }
           },
-          rendererName: isForPopup
-            ? permissions[permissionForLinks[field?.lookupResource]]?.isUpdate
-              ? 'linkRenderer'
-              : 'commonRenderer'
-            : 'linkRenderer'
+          rendererName: permissions[permissionForLinks[field?.lookupResource]
+            || camelCase(field?.lookupResource)]?.isRead ? 'linkRenderer' : 'commonRenderer'
         };
       } else if (isRenderWithCopy(field?.type)) {
         return {

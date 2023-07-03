@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Grid from '@material-ui/core/Grid/Grid';
 import { Button, Chip, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, dateFormat, formatAmountWithCurrency, rentalManagement, RENTAL_STATUS } from '../../../constants/helpers';
+import { CustomDialogTransition, dateFormat, formatAmountWithCurrency, rentalManagement, RENTAL_STATUS, sidebarResource } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
@@ -20,6 +20,7 @@ import { fetch_rental_product_fields, fetch_rental_cost_fields } from '../../../
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const Invoice = ({
   rentalManagementData,
@@ -51,6 +52,7 @@ const Invoice = ({
   const [showCostDialog, setShowCostDialog] = useState(false);
 
   const [columns, setColumns] = useState(null);
+  const [defaultColumns, setDefaultColumns] = useState(['Index', 'Type', 'Details', 'Description', 'Status', 'Qty', 'Unit', `Price ${rentalManagementData?.currency}`, `Total Price ${rentalManagementData?.currency}`, `Final Price ${rentalManagementData?.currency}`])
   const [rowsData, setRowsData] = useState(null);
   useEffect(() => {
     if (
@@ -100,12 +102,12 @@ const Invoice = ({
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                  : ''}
+                    ? row.original?.packageDetail.packageType === 'Product'
+                      ? '(Product)'
+                      : '(Service)'
+                    : row.original.type === 'service'
+                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                      : ''}
               </p>
             ) : (
               <NoDataCell />
@@ -281,10 +283,10 @@ const Invoice = ({
             item.type === 'product'
               ? item.productDetail?.productName
               : item.type === 'service'
-              ? item.serviceDetail?.serviceName
-              : item.type === 'package'
-              ? item.packageDetail?.packageName
-              : '';
+                ? item.serviceDetail?.serviceName
+                : item.type === 'package'
+                  ? item.packageDetail?.packageName
+                  : '';
           item.type = item.type;
           combinedData.push(item);
         }
@@ -303,20 +305,20 @@ const Invoice = ({
           parent.type === 'Add On'
             ? parent.detail
             : parent.type === 'product'
-            ? parent?.productDetail?.productName
-            : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName;
+              ? parent?.productDetail?.productName
+              : parent.type === 'service'
+                ? parent?.serviceDetail?.serviceName
+                : parent.packageDetail?.packageName;
         parent.description =
           parent?.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent?.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent?.type === 'package'
-            ? parent?.packageDetail?.packageDescription || ''
-            : parent.type === 'Add On'
-            ? parent.description
-            : '';
+              ? parent?.productDetail?.productDescription || ''
+              : parent?.type === 'package'
+                ? parent?.packageDetail?.packageDescription || ''
+                : parent.type === 'Add On'
+                  ? parent.description
+                  : '';
         parent.qty = parent.qty;
         parent.subRows = generateNestedData(material, inventory, parent);
       });
@@ -351,16 +353,16 @@ const Invoice = ({
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow?.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow?.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow?.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow?.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow?.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.qty = `${parent.qty * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
       subRows.push(_subRow);
@@ -495,7 +497,8 @@ const Invoice = ({
               </Button>
             </Fragment>
           )}
-          {permissions?.rentalManagement?.isRead && !isMobile && (
+          <PreviewDownload resource={sidebarResource.rentalManagement} referenceId={rentalManagementData._id} columns={columns} isSendEmail={false} defaultColumns={defaultColumns} />
+          {/* {permissions?.rentalManagement?.isRead && !isMobile && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
               className="btn-outline-v1"
@@ -561,7 +564,7 @@ const Invoice = ({
             >
               Detail
             </MenuItem>
-          </Menu>
+          </Menu> */}
           {permissions?.rentalManagement?.isRead && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -589,8 +592,8 @@ const Invoice = ({
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 365px)'}
                 columns={columns}
                 data={rowsData}
-                setWholeRowsCellColor={() => {}}
-                onSelect={() => {}}
+                setWholeRowsCellColor={() => { }}
+                onSelect={() => { }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}

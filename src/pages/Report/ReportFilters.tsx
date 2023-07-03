@@ -101,57 +101,54 @@ const ReportFilters = (props: FiltersProps) => {
     if (!customReportData) return;
     setLoading(true);
 
-    const initializeData = () => {
-      let newData: any = { ...customReportData };
+    let newData: any = { ...customReportData };
 
-      if (newData?.filters.length > 0) {
-        const filters = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term === filter.fieldName) > -1);
+    if (newData?.filters.length > 0) {
+      const filters = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term === filter.fieldName) > -1);
 
-        const dateFields = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term.split('_')[1] === filter.fieldName) > -1);
+      const dateFields = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term.split('_')[1] === filter.fieldName) > -1);
 
-        const filterData = newData.filters.reduce(
-          (acc, val) => ({
-            ...acc,
-            [val.term]: val.value
-          }),
-          {}
-        );
+      const filterData = newData.filters.reduce(
+        (acc, val) => ({
+          ...acc,
+          [val.term]: val.value
+        }),
+        {}
+      );
 
-        const selectedFiltersData = filters.reduce(
-          (acc, val) => ({
-            ...acc,
-            [val.fieldName]: {
-              type: val.type,
-              lookup: val.lookup,
-              value: val.option.filter((option) => filterData[val.fieldName].includes(option.optionValue))
-            }
-          }),
-          {}
-        );
+      const selectedFiltersData = filters.reduce(
+        (acc, val) => ({
+          ...acc,
+          [val.fieldName]: {
+            type: val.type,
+            lookup: val.lookup,
+            value: val.option.filter((option) => filterData[val.fieldName].includes(option.optionValue))
+          }
+        }),
+        {}
+      );
 
-        setSelectedData(selectedFiltersData);
-        const dateFilterData = {};
-        newData.filters
-          .filter((item) => item.term.includes('from_') || item.term.includes('to_'))
-          .forEach(({ term, value }) => {
-            dateFilterData[term] = value;
-          });
+      setSelectedData(selectedFiltersData);
+      const dateFilterData = {};
+      newData.filters.filter((item) => item.term.includes('from_') || item.term.includes('to_')).forEach(({ term, value }) => {
+        dateFilterData[term] = value;
+      });
 
-        setBetweenDate(dateFilterData);
-        newData.filters = [...filters, ...dateFields];
-        setFormValues(filterData);
-      }
-      setSelectedResources(newData.filters);
-      setLoading(false);
-    };
-    initializeData();
+      setBetweenDate(dateFilterData);
+      newData.filters = [...filters, ...dateFields];
+      setFormValues(filterData);
+    }
+    setSelectedResources(newData.filters);
+    setLoading(false);
+
   }, [customReportData, filterOptions, resourceColumns]);
 
   React.useEffect(() => {
     if (!resourceColumns && resourceColumns.length === 0) return;
     const optionsData: any = {};
     const filteredData = [...resourceColumns]
-      .filter((d: any) => d.isRead && (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect' || d.fieldData.type === 'date'))
+      .filter((d: any) => d.isRead && (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect' || d.fieldData.type === 'date'
+        || d.fieldData.type === 'checkBox'))
       .map((d: any) => {
         if (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect') {
           optionsData[d.fieldData.fieldName] = {
@@ -169,12 +166,18 @@ const ReportFilters = (props: FiltersProps) => {
     setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
   }, [resourceColumns]);
 
-  const handleSelectFilter = (name, value) => {
+  const handleSelectFilter = (type, name, value) => {
     let fieldProps: any = {};
-    if (!name?.includes('Date')) {
+
+    if (type === 'dropDown' || type === 'multiSelect') {
       fieldProps.type = resourceOptions[name].type;
       fieldProps.lookup = resourceOptions[name].lookup;
-    } else {
+    }
+    else if (type === "checkBox") {
+      fieldProps.type = 'checkBox';
+      fieldProps.lookup = false;
+    }
+    else {
       fieldProps.type = 'date';
       fieldProps.lookup = false;
     }
@@ -217,22 +220,11 @@ const ReportFilters = (props: FiltersProps) => {
   };
 
   useEffect(() => {
-    setBetweenDate((prevState) => {
-      let keys = prevState ? Object.keys(prevState) : [];
-      keys.forEach((key) => {
-        if (key?.includes('to') || key?.includes('from')) {
-          if (!selectedResources?.map((d) => d.fieldName)?.includes(key.split('_')[1])) {
-            delete prevState[key];
-          }
-        }
-      });
-      return prevState;
-    });
     setIsStatusPeriod(
       resource?.includes('Serialized Asset') &&
-        Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
-        formValues?.hasOwnProperty('status') &&
-        formValues.status.length > 0
+      Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
+      formValues?.hasOwnProperty('status') &&
+      formValues.status.length > 0
     );
   }, [selectedResources, formValues]);
 
@@ -262,7 +254,6 @@ const ReportFilters = (props: FiltersProps) => {
       const to = new Date(allDateData[`to_${key}`]).getTime();
 
       if (from > to || to < from) {
-        //err[key] = `From ${startCase(key)} should be less then To ${startCase(key)}`;
         err[key] = `Please select valid date range`;
       } else {
         if (errors[key]) {
@@ -277,21 +268,21 @@ const ReportFilters = (props: FiltersProps) => {
   }, [betweenDate, statusPeriodDate]);
 
   const handleDuration = (timeFrameTemp, field, isStatus = false) => {
-    
+
     switch (timeFrameTemp) {
       case 'custom':
         setStatusTimeFrame('custom');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: '',
-              [`to_statusPeriod`]: ''
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: '',
+            [`to_statusPeriod`]: ''
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: '',
-              [`to_${field.fieldName}`]: ''
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: '',
+            [`to_${field.fieldName}`]: ''
+          }));
 
         break;
 
@@ -299,60 +290,60 @@ const ReportFilters = (props: FiltersProps) => {
         setStatusTimeFrame('1-month');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
 
         break;
       case '3-months':
         setStatusTimeFrame('3-months');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
         break;
 
       case '6-months':
         setStatusTimeFrame('6-months');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
         break;
 
       case '1-year':
         setStatusTimeFrame('1-year');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
         break;
 
       default:
@@ -383,7 +374,6 @@ const ReportFilters = (props: FiltersProps) => {
             } else {
               setSelectedResources(val);
             }
-
             if (reason === 'remove-option' && selectedData) {
               const selectedKeys = val.map((f) => f?.fieldName);
               setSelectedData((prev) => {
@@ -410,6 +400,21 @@ const ReportFilters = (props: FiltersProps) => {
                 return prev;
               });
             }
+            
+            if (reason === 'remove-option' && betweenDate) {
+              const selectedKeys = val.map((f) => f?.fieldName);
+              setBetweenDate((prevState) => {
+                let keys = prevState ? Object.keys(prevState) : [];
+                keys.forEach((key) => {
+                  if (key?.includes('to') || key?.includes('from')) {
+                    if (!selectedKeys?.includes(key.split('_')[1])) {
+                      delete prevState[key];
+                    }
+                  }
+                });
+                return prevState;
+              });
+            }
           }}
           fullWidth
           getOptionSelected={(option, val) => option.fieldName === val.fieldName}
@@ -431,14 +436,15 @@ const ReportFilters = (props: FiltersProps) => {
                         name={field.fieldName}
                         type={field.type === 'dropDown' ? 'multiSelect' : field.type}
                         options={field.option}
-                        setFieldValue={handleSelectFilter}
+                        setFieldValue={(name, value) => {
+                          handleSelectFilter(field.type, name, value)
+                        }}
                         required={false}
                         fullWidth
                         size="small"
                       />
                     </Grid>
                   )}
-
                   {field.type === 'date' && (
                     <Grid item xs={12} sm={6}>
                       <FormControl fullWidth size="small" variant="outlined">

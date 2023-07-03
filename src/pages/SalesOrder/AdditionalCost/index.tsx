@@ -29,7 +29,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
   const [columns, setColumns] = useState([]);
   const [rowsData, setRowsData] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
-  const [showCostDialog, setShowCostDialog] = useState({open: false, showSaveAndNext: false});
+  const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
   const [selectedCostData, setSelectedCostData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -41,8 +41,11 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
   }, []);
 
   const handleOpen = (row, rows) => {
-     setShowCostDialog({open: true, showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false });
-     setSelectedCostData(row.original);
+    setShowCostDialog({
+      open: true,
+      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+    });
+    setSelectedCostData(row.original);
   };
 
   const fetchFields = async () => {
@@ -81,7 +84,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
                 size="small"
                 aria-label="Clone"
                 onClick={() => {
-                  handleOpen(row, rows)
+                  handleOpen(row, rows);
                 }}
               >
                 <EditIcon color="primary" />
@@ -125,7 +128,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
       .post(`${salesOrder.api}/additionalcost/${salesOrderData._id}/add`, { additionalCost: rows })
       .then(({ data }) => {
         fetchAdditionalCost();
-        setShowCostDialog({open: false, showSaveAndNext:false});
+        setShowCostDialog({ open: false, showSaveAndNext: false });
         setUpdating(false);
         toastConfig.setToastConfig({
           open: true,
@@ -139,7 +142,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
       });
   };
 
-  const handleUpdateCost = (rows:any, saveAndNext = false) => {
+  const handleUpdateCost = (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
       delete element.index;
       delete element.isValid;
@@ -155,7 +158,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
           type: 'success',
           message: data.message
         });
-        if(saveAndNext) {
+        if (saveAndNext) {
           const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
           setSelectedCostData(rowsData[rowIndex + 1]);
           setShowCostDialog({
@@ -163,7 +166,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
             showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
           });
         } else {
-          setShowCostDialog({open:false, showSaveAndNext: false});
+          setShowCostDialog({ open: false, showSaveAndNext: false });
         }
         fetchAdditionalCost();
       })
@@ -214,7 +217,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
             color="primary"
             size="small"
             onClick={() => {
-              setShowCostDialog({open: true, showSaveAndNext: false});
+              setShowCostDialog({ open: true, showSaveAndNext: false });
               setSelectedCostData(null);
             }}
           >
@@ -232,6 +235,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
                 disabled={selectedRecords.length ? false : true}
                 aria-controls="action-menu"
                 endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
               >
                 {'Actions'}
               </Button>
@@ -287,7 +291,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
       {showCostDialog.open && (
         <AdditionalCostDialog
           onClose={() => {
-            setShowCostDialog({open: false, showSaveAndNext:false});
+            setShowCostDialog({ open: false, showSaveAndNext: false });
             setSelectedCostData(null);
           }}
           handleAddCost={handleAddCost}

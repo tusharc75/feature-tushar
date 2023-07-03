@@ -9,7 +9,6 @@ import {
   prepareDataForGrid,
   getLocalStorageArrayData,
   removeLocalStorage,
-  RESOURCE_LABEL,
   sidebarResource
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
@@ -42,11 +41,11 @@ const Job = () => {
 
   const JobType = [
     {
-      key: `All ${routes?.job.title}`,
+      key: `My ${routes?.job.title}`,
       value: 1
     },
     {
-      key: `My ${routes?.job.title}`,
+      key: `All ${routes?.job.title}`,
       value: 2
     }
   ];
@@ -219,9 +218,13 @@ const Job = () => {
 
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterJob=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterJob=${selectedType}`;
+      deepFilter = `?`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);

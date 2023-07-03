@@ -25,8 +25,11 @@ import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { generateCustomTableColumns, flattenArray } from 'src/constants/columns';
-import InfoIcon from '@material-ui/icons/Info';
+import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AssetAvailability from '../AssetAvailability';
+import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
+import { ExpandMore } from '@material-ui/icons';
+import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 
 const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -55,6 +58,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openAssetAvailibility, setOpenAssetAvailibility] = useState(false);
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
+
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -340,7 +345,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       const element: any = {};
       element.materialId = d._id;
       element.detail = d.type === 'product' ? d?.productName : d.type === 'package' ? d?.packageName : '';
-      element.type = addExistingProductDialog.type;
+      element.type = d?.type || addExistingProductDialog.type;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -538,53 +543,77 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     }
   };
 
+  const openAddActions = (event) => {
+    setAddAnchorEl(event.currentTarget);
+  };
+
+  const closeAddActions = () => {
+    setAddAnchorEl(null);
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            {permissions?.product?.isRead && (
-              <Button
-                size="small"
-                disabled={isOffline}
-                variant={'contained'}
-                color="primary"
+            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
+              {'Add'}
+              <ExpandMore fontSize="small" />
+            </Button>
+            <Menu
+              anchorEl={addAnchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="add-menu"
+              open={Boolean(addAnchorEl)}
+              onClose={closeAddActions}
+            >
+              <MenuItem
                 onClick={() => {
+                  closeAddActions();
                   setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
                 }}
               >
-                {isMobile && !isTablet ? 'Product' : `Add Products`}
-              </Button>
-            )}
-            {permissions?.packages?.isRead && (
-              <Button
-                color="primary"
-                size="small"
-                variant="contained"
-                disabled={isOffline}
+                Add Products
+              </MenuItem>
+              <MenuItem
                 onClick={() => {
+                  closeAddActions();
                   setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                 }}
               >
-                {isMobile && !isTablet ? 'Package' : `Add Product ${routes.packages.title}`}
-              </Button>
-            )}
+                Add Packages
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
+                }}
+              >
+                Add New Package
+              </MenuItem>
+            </Menu>
           </Box>
           <Box display="flex" ml={1}>
-            {rowsData?.length > 0 &&
+            {flattenArray(rowsData)?.filter((e) => e?.serializedProduct)?.length > 0 && (
               <Box mr={1}>
-                <HtmlTooltip title="Check Assets Availibility">
+                <HtmlTooltip title="Check Assets Availability" arrow placement="top">
                   <IconButton
                     size="small"
                     aria-label="Details"
                     onClick={() => {
-                      setOpenAssetAvailibility(true)
-                    }}>
-                    <InfoIcon color={'primary'} />
+                      setOpenAssetAvailibility(true);
+                    }}
+                  >
+                    <AssetAvailabilityIcon color={'var(--dark-primary-text, #163340)'} size={24} />
                   </IconButton>
                 </HtmlTooltip>
               </Box>
-            }
+            )}
             <Button
               variant="outlined"
               color="primary"
@@ -593,6 +622,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
               onClick={handleClick}
               disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
               endIcon={<BiChevronDown />}
+              className="new-dropdown-v1"
             >
               Actions
             </Button>
@@ -701,7 +731,23 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           isInlineEdit={isInlineEdit}
         />
       )}
-      {addExistingProductDialog.open && (
+      {
+        addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
+          <ManagePackageDialog
+            isClone={false}
+            open={addExistingProductDialog.open}
+            packageId={null}
+            onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+            onSuccess={(data) => {
+              data.type = 'package'
+              handleAdd([data]);
+              setAddExistingProductDialog({ open: false, type: '', parentId: null });
+            }}
+            isRedirectToDetailPage={false}
+          />
+        )
+      }
+      {addExistingProductDialog.open && addExistingProductDialog.type !== 'newPackage' && (
         <AddExistingProductInventory
           renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
           isAddingProducts={isAddingProducts}
@@ -785,14 +831,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           }}
         />
       )}
-      {openAssetAvailibility &&
+      {openAssetAvailibility && (
         <AssetAvailability
           rentalId={rentalManagementData?._id}
           handleClose={() => {
-            setOpenAssetAvailibility(false)
+            setOpenAssetAvailibility(false);
           }}
         />
-      }
+      )}
     </Fragment>
   );
 };

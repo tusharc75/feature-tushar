@@ -107,8 +107,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     columns.push({
       accessor: 'detail',
       Header: 'Detail',
-      minWidth: 200,
-      width: 200,
+      minWidth: 300,
+      width: 300,
       primaryField: true,
       Cell: ({ row, rows }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -403,6 +403,26 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
   const handleUpdateQty = (rows, saveAndNext = false) => {
     setLoadingEdit(true);
+    rows.forEach((element) => {
+      delete element?.allowedToEdit;
+      delete element?.assets;
+      delete element?.description;
+      delete element?.detail;
+      delete element?.hideSelection;
+      delete element?.isValid;
+      delete element?.id;
+      delete element?.index;
+      delete element?.isChecked;
+      delete element?.productDetail;
+      delete element?.materialId;
+      delete element?.productNumber;
+      delete element?.serializedProduct;
+      delete element?.serializedProductView;
+      delete element?.type;
+      delete element?.parentId;
+      delete element?.productCategory;
+      delete element?.subRows;
+    });
     axiosInstance()
       .put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
       .then(() => {
@@ -638,6 +658,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 onClick={openActions}
                 disabled={selectedProducts?.filter((e) => !e.hideSelection)?.length ? false : true}
                 aria-controls="action-menu"
+                className="new-dropdown-v1"
               >
                 {'Actions'}
                 <ExpandMore fontSize="small" />

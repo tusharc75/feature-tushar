@@ -36,13 +36,13 @@ let workOrderTimeout;
 const WorkOrder = () => {
   const WorkOrderType = [
     {
-      key: `All ${routes.workOrder.title}`,
+      key: `My ${routes.workOrder.title}`,
       value: 1
     },
     {
-      key: `My ${routes.workOrder.title}`,
+      key: `All ${routes.workOrder.title}`,
       value: 2
-    },
+    }
   ];
 
   let renderedFrom = camelCase(routes?.workOrder.title);
@@ -195,16 +195,15 @@ const WorkOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (WorkOrderType[selectedType - 1].key === `My ${routes.workOrder.title}`) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
       deepFilter = `?`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -215,7 +214,7 @@ const WorkOrder = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -347,8 +346,8 @@ const WorkOrder = () => {
               <Box className={isMobile && !isTablet ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile && !isTablet ? styles.content_box : ''}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={isMobile ? styles.search_box_input : ''}
+                    onChange={handleSearch}
+                    className={isMobile ? styles.search_box_input : ''}
                     width="242px"
                     size="small"
                     value={search}
@@ -367,7 +366,7 @@ const WorkOrder = () => {
               } */}
                 {permissions?.workOrder?.isDelete && (
                   <Button
-                    className={styles.action_submit_btn}
+                    className={`${styles.action_submit_btn} new-dropdown-v1`}
                     variant="outlined"
                     color="default"
                     size="small"
@@ -425,9 +424,9 @@ const WorkOrder = () => {
             dataRows={dataRows}
             selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
             dispatch={dispatch}
-            onEdit={() => { }}
+            onEdit={() => {}}
             extraParamsToCheckDelete={true}
-            onDelete={() => { }}
+            onDelete={() => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -439,7 +438,7 @@ const WorkOrder = () => {
             ]}
             onCreate={null}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -479,8 +478,9 @@ const WorkOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${deleteRecord?.workOrderName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
+              deleteRecord?.workOrderName || ''
+            }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

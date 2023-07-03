@@ -19,8 +19,11 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { Autocomplete } from '@material-ui/lab';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RevertQtyDialog from './RevertQtyDialog';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const History = ({ product, warehouse, storageLocation }) => {
+  const [themeColor] = useAppTheme();
+  const isDarkTheme = themeColor === 'dark';
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -38,9 +41,7 @@ const History = ({ product, warehouse, storageLocation }) => {
   const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse && warehouse?.split(',')?.length === 1 ? warehouse : 'All');
   const [selectedStorageLocation, setSelectedStorageLocation] = useState(storageLocation);
 
-
   const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
-
 
   const renderedFrom = 'Product_Inventory_History';
 
@@ -81,9 +82,9 @@ const History = ({ product, warehouse, storageLocation }) => {
       let tempWarehouse =
         selectedWarehouse === 'All'
           ? warehouseOptions
-            ?.filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+              ?.filter((d) => d.optionValue !== 'All')
+              .map((d) => d.optionValue)
+              .toString()
           : selectedWarehouse;
 
       deepFilter = `${deepFilter}&warehouse=${tempWarehouse}`;
@@ -150,27 +151,27 @@ const History = ({ product, warehouse, storageLocation }) => {
       sortable: false,
       cellStyle: (params) => {
         if (params?.data?.type === 'Credit') {
-          return { backgroundColor: '#90ee90' };
+          return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
         }
         if (params?.data?.type === 'Debit') {
-          return { backgroundColor: '#FFCCCB' };
+          return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
         }
       }
     },
-    { field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
+    ...(!user?.user?.brandPolicy?.hideInventoryCount ?[{ field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false }]:[]),
     { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
     ...(warehouse && warehouse?.split(',')?.length === 1
       ? [
-        {
-          field: 'finalAvgPrice',
-          headerName: 'Final Average Price',
-          show: true,
-          cellRenderer: 'commonRenderer',
-          filter: false,
-          sortable: false
-        }
-      ]
+          {
+            field: 'finalAvgPrice',
+            headerName: 'Final Average Price',
+            show: true,
+            cellRenderer: 'commonRenderer',
+            filter: false,
+            sortable: false
+          }
+        ]
       : []),
     {
       field: 'warehouse',
@@ -182,15 +183,15 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(user?.user?.brandPolicy?.storageLocation
       ? [
-        {
-          field: 'storageLocation',
-          headerName: 'Storage Location',
-          show: true,
-          filter: false,
-          sortable: false,
-          cellRenderer: 'storageLocationRenderer'
-        }
-      ]
+          {
+            field: 'storageLocation',
+            headerName: 'Storage Location',
+            show: true,
+            filter: false,
+            sortable: false,
+            cellRenderer: 'storageLocationRenderer'
+          }
+        ]
       : []),
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer', filter: true, sortable: false },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
@@ -303,37 +304,35 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   const ActionsRenderer = (params) => (
     <>
-      {((['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted)
-        || (['Work Order'].includes(params.data.referenceType)
-          && params.data.type?.toLowerCase() === 'debit'
-          && ((params.data.qty - (params.data?.revertedQty || 0)) > 0)))
-        ? (
-          <Box pl={1}>
-            <HtmlTooltip title="Revert">
-              <IconButton
-                size="small"
-                aria-label="revert"
-                onClick={() => {
-                  if (params.data.referenceType === "Work Order") {
-                    setRevertQtyDialog({
-                      open: true,
-                      productName: '',
-                      product: params.data.product,
-                      qty: params.data.qty,
-                      revertedQty: params?.data?.revertedQty || 0,
-                      ledgerId: params.data._id
-                    })
-                  }
-                  else {
-                    setIsRevertConfirmation({ open: true, _id: params?.data?._id, product: params?.data?.product });
-                  }
-                }}
-              >
-                <Autorenew fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-          </Box>
-        ) : null}
+      {(['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted) ||
+      (['Work Order'].includes(params.data.referenceType) &&
+        params.data.type?.toLowerCase() === 'debit' &&
+        params.data.qty - (params.data?.revertedQty || 0) > 0) ? (
+        <Box pl={1}>
+          <HtmlTooltip title="Revert">
+            <IconButton
+              size="small"
+              aria-label="revert"
+              onClick={() => {
+                if (params.data.referenceType === 'Work Order') {
+                  setRevertQtyDialog({
+                    open: true,
+                    productName: '',
+                    product: params.data.product,
+                    qty: params.data.qty,
+                    revertedQty: params?.data?.revertedQty || 0,
+                    ledgerId: params.data._id
+                  });
+                } else {
+                  setIsRevertConfirmation({ open: true, _id: params?.data?._id, product: params?.data?.product });
+                }
+              }}
+            >
+              <Autorenew fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        </Box>
+      ) : null}
     </>
   );
 
@@ -438,10 +437,10 @@ const History = ({ product, warehouse, storageLocation }) => {
           revertedQty={revertQtyDialog.revertedQty}
           ledgerId={revertQtyDialog.ledgerId}
           onClose={() => {
-            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' })
+            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
           }}
           onSuccess={() => {
-            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' })
+            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
             dispatch({ type: 'initialize', data: [], count: 0 });
             fetchRecords();
           }}

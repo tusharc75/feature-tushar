@@ -32,11 +32,11 @@ const ProductionOrder = () => {
 
     const ProductionOrderType = [
         {
-            key: `All ${routes.productionOrder.title}`,
+            key: `My ${routes.productionOrder.title}`,
             value: 1
           },
           {
-            key: `My ${routes.productionOrder.title}`,
+            key: `All ${routes.productionOrder.title}`,
             value: 2
           }
     ];
@@ -203,22 +203,10 @@ const ProductionOrder = () => {
         </>
     );
 
-    const replaceFieldName = (field) => {
-        switch (field) {
-            case 'createdBy':
-                return 'createdBy.user.concatedName';
-
-            case 'updatedBy':
-                return 'updatedBy.user.concatedName';
-
-            default:
-                return field;
-        }
-    };
 
     const getQueryString = (isExport = false) => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-        if (selectedType === 2) {
+        if (selectedType === 1) {
           deepFilter = deepFilter + `&myRecords=1`;
         }
         if (isExport) {

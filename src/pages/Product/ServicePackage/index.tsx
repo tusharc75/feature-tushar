@@ -122,7 +122,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -139,17 +139,6 @@ const ServicePackage = ({ renderedFrom, productId }) => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
-  };
-
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-      default:
-        return field;
-    }
   };
 
   const ActionsRenderer = (params) => (
@@ -286,6 +275,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
                 aria-controls="action-menu"
                 style={{ marginLeft: '0.6rem' }}
                 endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
               >
                 {isMobile && !isTablet ? '' : 'Actions'}
               </Button>

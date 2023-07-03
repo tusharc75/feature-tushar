@@ -272,18 +272,18 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               <MenuItem
                 onClick={() => {
                   setAnchorEl(null);
-                  setStatusToUpdate({ open: true, isUpdating: false, status: 'Scrap', message: '' });
+                  setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
                 }}
               >
-                Scrap
+                {ASSET_STATUS.scrap}
               </MenuItem>
               <MenuItem
                 onClick={() => {
                   setAnchorEl(null);
-                  setStatusToUpdate({ open: true, isUpdating: false, status: 'Lost', message: '' });
+                  setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
                 }}
               >
-                Lost
+                {ASSET_STATUS.lost}
               </MenuItem>
             </Menu>
 
@@ -294,6 +294,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               size="small"
               onClick={handleClickAction}
               endIcon={<ArrowDropDownIcon />}
+              className="new-dropdown-v1"
             >
               Actions
             </Button>

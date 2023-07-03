@@ -89,11 +89,13 @@ const Product = () => {
   });
 
   useEffect(() => {
-    axiosInstance()
-      .get('/product-category?sortBy=name&orderBy=asc')
-      .then(({ data: { data } }) => {
-        setProductCategoryList(data);
-      });
+    if (permissions?.productCategory?.isRead) {
+      axiosInstance()
+        .get('/product-category?sortBy=name&orderBy=asc')
+        .then(({ data: { data } }) => {
+          setProductCategoryList(data);
+        });
+    }
   }, []);
 
   useEffect(() => {
@@ -306,7 +308,7 @@ const Product = () => {
         }
       } else {
         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-          let currentColumn: any = getColumnData(renderedFrom, ele, routes.product.path, true);
+          let currentColumn: any = getColumnData(renderedFrom, ele, routes.productDetail.path);
           column.push({ ...currentColumn.columnData, leval: 'product-template' });
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
             rendererNames.push(currentColumn?.rendererName);
@@ -569,11 +571,10 @@ const Product = () => {
               },
               {
                 title: 'Child Product Export',
-                api: `${product.api}/unknown/bom/template?export=true${
-                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                    : ''
-                }`,
+                api: `${product.api}/unknown/bom/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                  ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                  : ''
+                  }`,
                 type: 'export'
               },
               {
@@ -588,11 +589,10 @@ const Product = () => {
               },
               {
                 title: 'Service/Consumable Export',
-                api: `${product.api}/unknown/service-master/template?export=true${
-                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                    : ''
-                }`,
+                api: `${product.api}/unknown/service-master/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                  ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                  : ''
+                  }`,
                 type: 'export'
               },
               {
@@ -607,11 +607,10 @@ const Product = () => {
               },
               {
                 title: 'Service Package Export',
-                api: `${product.api}/unknown/package/template?export=true${
-                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                    : ''
-                }`,
+                api: `${product.api}/unknown/package/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                  ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                  : ''
+                  }`,
                 type: 'export'
               },
               {
@@ -685,35 +684,37 @@ const Product = () => {
                   </Grid>
                 </>
               )}
-              <Autocomplete
-                style={{ width: '250px' }}
-                options={productCategoryList}
-                getOptionLabel={(option: any) => (option ? option.name : '')}
-                getOptionSelected={(option: any, val) => option._id === val}
-                value={
-                  productCategoryList.filter((data) => data._id === productCategory).length
-                    ? productCategoryList.filter((data) => data._id === productCategory)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setProductCategory(val && val._id ? val._id : '');
-                }}
-                renderInput={(params) =>
-                  isMobile && !isTablet ? (
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="productCategory"
-                      placeholder="Product Category"
-                      variant="standard"
-                      fullWidth
-                      className={isMobile ? 'serchBox' : ''}
-                    />
-                  ) : (
-                    <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
-                  )
-                }
-              />
+              {permissions?.productCategory?.isRead &&
+                <Autocomplete
+                  style={{ width: '250px' }}
+                  options={productCategoryList}
+                  getOptionLabel={(option: any) => (option ? option.name : '')}
+                  getOptionSelected={(option: any, val) => option._id === val}
+                  value={
+                    productCategoryList.filter((data) => data._id === productCategory).length
+                      ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setProductCategory(val && val._id ? val._id : '');
+                  }}
+                  renderInput={(params) =>
+                    isMobile && !isTablet ? (
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        name="productCategory"
+                        placeholder="Product Category"
+                        variant="standard"
+                        fullWidth
+                        className={isMobile ? 'serchBox' : ''}
+                      />
+                    ) : (
+                      <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+                    )
+                  }
+                />
+              }
               {isProductTemplate && (
                 <Autocomplete
                   style={{ width: '250px' }}
@@ -781,10 +782,10 @@ const Product = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
                 <Box style={{ flexGrow: 1, minWidth: 210 }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile ? '200px' : '210px'}
-                    style={{ width: '100%' }}
+                    style={{ width: '100%', maxWidth: '250px', marginLeft: 'auto', display: 'flex' }}
                     size="small"
                     value={search}
                   />
@@ -811,7 +812,7 @@ const Product = () => {
                     onClick={openActions}
                     disabled={selectedRecords.length ? false : true}
                     aria-controls="action-menu"
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                     endIcon={<ExpandMore />}
                   >
                     {isMobile && !isTablet ? '' : 'Actions'}

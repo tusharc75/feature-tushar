@@ -18,7 +18,7 @@ import { flattenArray, generateCustomTableColumns } from 'src/constants/columns'
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
@@ -184,12 +184,6 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.isValid;
-      delete element.hideSelection;
-    });
     axiosInstance()
       .put(`${routes.job.path}/material/${jobData._id}`, { material: rows })
       .then(({ data }) => {
@@ -237,7 +231,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -259,6 +253,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
                 disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
                 onClick={openActions}
                 endIcon={<KeyboardArrowDown fontSize="small" />}
+                className="new-dropdown-v1"
               >
                 Actions
               </Button>

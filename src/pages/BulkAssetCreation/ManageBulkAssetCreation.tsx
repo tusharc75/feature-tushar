@@ -217,7 +217,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                                     touched={touched}
                                     label={field.fieldLabel}
                                     fieldData={field}
-                                    allFields={initialData.fields}
+                                    fields={initialData.fields}
                                     name={field.fieldName}
                                     type={field.type}
                                     options={field.option}

@@ -353,7 +353,7 @@ const ProductBuilder = (props) => {
             });
             rendererNames.push('productTypeRenderer');
           } else {
-            let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true);
+            let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path);
             if (ele.type === 'decimal' || ele.type === 'percent' || ele.type === 'singleLine' || ele.type === 'multiLine') {
               if (!ele.isFormula && !ele.isUneditable && Editable) {
                 if (ele.type === 'decimal' || ele.type === 'percent') {
@@ -685,7 +685,7 @@ const ProductBuilder = (props) => {
               variant="contained"
               color="primary"
               size="small"
-              className="float-right"
+              className="float-right new-dropdown-v1"
               disabled={
                 isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
                   ? false

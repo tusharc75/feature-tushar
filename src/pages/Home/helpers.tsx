@@ -7,7 +7,8 @@ import {
   ServiceManagementIcon,
   RentalOperationManagementIcon,
   ServiceOperationManagementIcon,
-  PurchasingManagementIcon
+  PurchasingManagementIcon,
+  FieldServiceOperationIcon
 } from '../../assets/sidebar_assets/icons';
 import {
   BiCog,
@@ -91,8 +92,8 @@ export const setDataBySectionName = (secName, index = 0) => {
     sideBarIcon = <FaRegRegistered size={20} />;
   } else if (['Field Service Operations'].includes(secName)) {
     text = 'Fulfill Service Orders Faster.';
-    icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
-    sideBarIcon = <MdMiscellaneousServices size={20} />;
+    icon = <DashboardIcons.FIELD_SERVICE_OPERATION colors={iconColour} />;
+    sideBarIcon = <FieldServiceOperationIcon size={20} />;
   } else if (['Repair & Maintenance Management'].includes(secName)) {
     text = 'Repair & Maintain your product and services at ease.';
     icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColour} />;

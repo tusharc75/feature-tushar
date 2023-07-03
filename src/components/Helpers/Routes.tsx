@@ -165,7 +165,14 @@ const routes = {
       storedRoutes && storedRoutes.termsAndConditions && storedRoutes.termsAndConditions.title
         ? storedRoutes.termsAndConditions?.title
         : RESOURCE_LABEL.termsAndConditions,
-    path: '/terms-conditions'
+    path: '/terms-and-conditions'
+  },
+  termsAndConditionsDetails: {
+    title:
+      storedRoutes && storedRoutes.termsAndConditions && storedRoutes.termsAndConditions.title
+        ? storedRoutes.termsAndConditions?.title
+        : RESOURCE_LABEL.termsAndConditions,
+    path: '/terms-and-conditions/detail'
   },
   profilePage: {
     title: 'Profile',
@@ -230,6 +237,13 @@ const routes = {
         ? storedRoutes.serializedAsset.title
         : RESOURCE_LABEL.serializedAsset,
     path: '/serialized-asset'
+  },
+  serializedAssetsCertification: {
+    title:
+      storedRoutes && storedRoutes.serializedAssetsCertification && storedRoutes.serializedAssetsCertification.title
+        ? storedRoutes.serializedAssetsCertification.title
+        : RESOURCE_LABEL.serializedAssetsCertification,
+    path: '/serialized-assets-certification'
   },
   serializedAssetDetail: {
     title:
@@ -731,14 +745,14 @@ const routes = {
     title:
       storedRoutes && storedRoutes.frequentlyAskedQuestion && storedRoutes.frequentlyAskedQuestion.title
         ? storedRoutes.frequentlyAskedQuestion?.title
-        : RESOURCE_LABEL.freqentlyAskedQuestion,
+        : RESOURCE_LABEL.frequentlyAskedQuestion,
     path: '/frequently-asked-question'
   },
   frequentlyAskedQuestionDetail: {
     title:
       storedRoutes && storedRoutes.frequentlyAskedQuestion && storedRoutes.frequentlyAskedQuestion.title
         ? storedRoutes.frequentlyAskedQuestion?.title
-        : RESOURCE_LABEL.freqentlyAskedQuestion,
+        : RESOURCE_LABEL.frequentlyAskedQuestion,
     path: '/frequently-asked-question/detail'
   },
   blog: {
@@ -881,13 +895,13 @@ const routes = {
         : RESOURCE_LABEL.fleetDispatch,
     path: '/fleet-dispatch'
   },
-  fleetMaster: {
-    title: storedRoutes && storedRoutes.fleetMaster && storedRoutes.fleetMaster.title ? storedRoutes.fleetMaster?.title : RESOURCE_LABEL.fleetMaster,
-    path: '/fleet-master'
+  truckMaster: {
+    title: storedRoutes && storedRoutes.truckMaster && storedRoutes.truckMaster.title ? storedRoutes.truckMaster?.title : RESOURCE_LABEL.truckMaster,
+    path: '/truck-master'
   },
-  fleetMasterDetail: {
-    title: storedRoutes && storedRoutes.fleetMaster && storedRoutes.fleetMaster.title ? storedRoutes.fleetMaster?.title : RESOURCE_LABEL.fleetMaster,
-    path: '/fleet-master/detail'
+  truckMasterDetail: {
+    title: storedRoutes && storedRoutes.truckMaster && storedRoutes.truckMaster.title ? storedRoutes.truckMaster?.title : RESOURCE_LABEL.truckMaster,
+    path: '/truck-master/detail'
   },
   job: {
     title: storedRoutes && storedRoutes.job && storedRoutes.job.title ? storedRoutes.job?.title : RESOURCE_LABEL.job,
@@ -954,6 +968,46 @@ const routes = {
         ? storedRoutes.materialHandling?.title
         : RESOURCE_LABEL.materialHandling,
     path: '/material-handling'
+  },
+  padMaster: {
+    title: storedRoutes && storedRoutes.padMaster && storedRoutes.padMaster.title ? storedRoutes.padMaster?.title : RESOURCE_LABEL.padMaster,
+    path: '/pad-master'
+  },
+  padMasterDetail: {
+    title: storedRoutes && storedRoutes.padMaster && storedRoutes.padMaster.title ? storedRoutes.padMaster?.title : RESOURCE_LABEL.padMaster,
+    path: '/pad-master/detail'
+  },
+  fieldJob: {
+    title: storedRoutes && storedRoutes.fieldJob && storedRoutes.fieldJob.title ? storedRoutes.fieldJob?.title : RESOURCE_LABEL.fieldJob,
+    path: '/field-job'
+  },
+  fieldJobDetail: {
+    title: storedRoutes && storedRoutes.fieldJob && storedRoutes.fieldJob.title ? storedRoutes.fieldJob?.title : RESOURCE_LABEL.fieldJob,
+    path: '/field-job/detail'
+  },
+  driverMaster: {
+    title:
+      storedRoutes && storedRoutes.driverMaster && storedRoutes.driverMaster.title ? storedRoutes.driverMaster?.title : RESOURCE_LABEL.driverMaster,
+    path: '/driver-master'
+  },
+  driverMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.driverMaster && storedRoutes.driverMaster.title ? storedRoutes.driverMaster?.title : RESOURCE_LABEL.driverMaster,
+    path: '/driver-master/detail'
+  },
+  trailerMaster: {
+    title:
+      storedRoutes && storedRoutes.trailerMaster && storedRoutes.trailerMaster.title
+        ? storedRoutes.trailerMaster?.title
+        : RESOURCE_LABEL.trailerMaster,
+    path: '/trailer-master'
+  },
+  trailerMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.trailerMaster && storedRoutes.trailerMaster.title
+        ? storedRoutes.trailerMaster?.title
+        : RESOURCE_LABEL.trailerMaster,
+    path: '/trailer-master/detail'
   }
 };
 

@@ -60,11 +60,11 @@ import { camelCase } from "lodash";
 let quoteTimeout;
 const QuoteType = [
   {
-    key: "All Quotes",
+    key: "My Quotes",
     value: 1,
   },
   {
-    key: "My Quotes",
+    key: "All Quotes",
     value: 2,
   },
 ];
@@ -338,16 +338,6 @@ const QuoteBuilders = () => {
     </>
   );
 
-  const CustomerAccountNameRenderer = (params) => (
-    <Link
-      className="link"
-      title={params.value}
-      to={`${routes.customerAccount.path}/detail/${params.data.customerAccountId}`}
-    >
-      {params.value}
-    </Link>
-  );
-
   const RelatedOpportunityRenderer = params => <>
     {
       params.value ?
@@ -397,21 +387,14 @@ const QuoteBuilders = () => {
     </>
   );
 
-  const frameworkComponents = {
-    quoteNameRenderer: QuoteNameRenderer,
-    customerAccountNameRenderer: CustomerAccountNameRenderer,
-    relatedOpportunityRenderer: RelatedOpportunityRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer,
-  };
-
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterQuotes=${selectedType}`;
-
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     if (isExport) {
-      deepFilter = `filterQuotes=${selectedType}`;
+      deepFilter = `?`;
     }
 
     if (selectedEntity) {
@@ -741,6 +724,7 @@ const QuoteBuilders = () => {
               columns={columns}
               dispatch={dispatch}
               filters={filters}
+              selectedType={selectedType}
             >
               {accountDetails.accountId && (
                 <Chip

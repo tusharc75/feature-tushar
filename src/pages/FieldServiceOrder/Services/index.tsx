@@ -17,12 +17,11 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { startCase } from 'lodash';
-import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
+import { calculateRowsFieldNew, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ServiceOrderQty from './ServiceOrderQty';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
-import CustomEditableGrid from 'src/components/CustomEditableGrid';
 import { flattenArray } from 'src/constants/columns';
 import AddIcon from '@material-ui/icons/Add';
 import { ExpandMore } from '@material-ui/icons';
@@ -37,7 +36,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
   const [material, setMaterial] = useState([]);
   const [deleteData, setDeleteData] = useState(null);
@@ -48,7 +47,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const [rowsData, setRowsData] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [openBulkEdit, setOpenBulkEdit] = useState({ open: false, data: null });
 
   useEffect(() => {
     fetchFields();
@@ -98,6 +96,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                 setIsProductEdit({
                   open: true,
                   data: row.original,
+                  bulkedit: false,
                   showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                 });
               }}
@@ -275,25 +274,10 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       material.push(element);
     });
     axiosInstance()
-      .post(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`, { material: material })
+      .post(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`, { material })
       .then(({ data }) => {
         setUpdating(false);
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        setOpenBulkEdit({
-          open: true,
-          data: data.data.map((d, i) => {
-            return {
-              ...d,
-              srno: i + 1,
-              detail:
-                d.type === 'product'
-                  ? d?.productDetail?.productName
-                  : d.type === 'service'
-                  ? d?.serviceDetail?.serviceName
-                  : d?.packageDetail?.packageName
-            };
-          })
-        });
         fetchProductInventory();
       })
       .catch((error) => {
@@ -303,19 +287,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      delete element.srno;
-      delete element.detail;
-      delete element.isValid;
-      delete element.canDelete;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.serializedAssetDetail;
-      delete element.parentName;
-      delete element.subRows;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`, { material: rows })
@@ -332,10 +303,11 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
           setIsProductEdit({
             open: true,
             data: rowsData[rowIndex + 1],
+            bulkedit: false,
             showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
           });
         } else {
-          setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
+          setIsProductEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
         }
       })
       .catch((error) => {
@@ -389,7 +361,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -450,6 +422,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                   onClick={handleClick}
                   disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => e.canDelete).length)}
                   endIcon={<BiChevronDown />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>
@@ -474,7 +447,12 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                   </MenuItem>
                   <MenuItem
                     onClick={() => {
-                      setOpenBulkEdit({ open: true, data: selectedProducts });
+                      setIsProductEdit({
+                        open: true,
+                        data: selectedProducts?.filter((e) => !e.hideSelection),
+                        bulkedit: true,
+                        showSaveAndNext: false
+                      });
                       handleClose();
                     }}
                   >
@@ -534,15 +512,13 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       {isProductEdit.open && (
         <ServiceOrderQty
           onClose={() => {
-            setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
+            setIsProductEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
           }}
           rowData={isProductEdit.data}
           serviceOrderData={serviceOrderData}
           handleSaveData={handleSaveData}
           showSaveAndNext={isProductEdit?.showSaveAndNext}
-          material={material}
-          selectedProducts={selectedProducts}
-          isBulkedit={openBulkEdit.open}
+          isBulkedit={isProductEdit.bulkedit}
           loadingEdit={isUpdating}
         />
       )}
@@ -568,19 +544,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
           assignedProducts={[]}
           onSuccess={(product) => {
             handleAdd(product);
-          }}
-        />
-      )}
-      {openBulkEdit.open && (
-        <CustomEditableGrid
-          onClose={() => setOpenBulkEdit({ open: false, data: null })}
-          data={openBulkEdit.data}
-          fields={allFields}
-          columns={columns}
-          currency={serviceOrderData?.currency}
-          handleSave={(rows) => {
-            handleSaveData(rows);
-            setOpenBulkEdit({ open: false, data: null });
           }}
         />
       )}

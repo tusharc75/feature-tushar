@@ -136,7 +136,7 @@ const FrequentlyAskedQuestion = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      {permissions?.freqentlyAskedQuestion?.isCreate ? (
+      {permissions?.frequentlyAskedQuestion?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
@@ -156,7 +156,7 @@ const FrequentlyAskedQuestion = () => {
           </IconButton>
         </Tooltip>
       )}
-      {permissions?.freqentlyAskedQuestion?.isDelete ? (
+      {permissions?.frequentlyAskedQuestion?.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -178,14 +178,13 @@ const FrequentlyAskedQuestion = () => {
     </Fragment>
   );
 
-
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -210,7 +209,7 @@ const FrequentlyAskedQuestion = () => {
     }
     return deepFilter;
   };
-  
+
   const handleDelete = () => {
     let ids = [];
     if (deleteRecord) {
@@ -252,7 +251,7 @@ const FrequentlyAskedQuestion = () => {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.freqentlyAskedQuestion}
+            permissions={permissions.frequentlyAskedQuestion}
             module="frequentlyAskedQuestion"
             api={'frequently-asked-question'}
             afterImportCompleted={() => {
@@ -282,8 +281,8 @@ const FrequentlyAskedQuestion = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile ? '200px' : '242px'}
                     style={isMobile ? { flex: 1 } : {}}
                     size="small"
@@ -291,7 +290,7 @@ const FrequentlyAskedQuestion = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.freqentlyAskedQuestion?.isCreate && (
+                  {permissions?.frequentlyAskedQuestion?.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
@@ -306,7 +305,7 @@ const FrequentlyAskedQuestion = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions?.freqentlyAskedQuestion?.isDelete && (
+                  {permissions?.frequentlyAskedQuestion?.isDelete && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -315,7 +314,7 @@ const FrequentlyAskedQuestion = () => {
                         onClick={openActions}
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                         endIcon={<ExpandMore />}
                       >
                         {isMobile && !isTablet ? '' : 'Actions'}
@@ -357,7 +356,7 @@ const FrequentlyAskedQuestion = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.freqentlyAskedQuestion}
+              permissions={permissions.frequentlyAskedQuestion}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
                 setFrequentlyAskedQuestionId(data.id);
@@ -406,7 +405,7 @@ const FrequentlyAskedQuestion = () => {
               refreshGrid={fetchFrequentlyAskedQuestionData}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
-              resource={sidebarResource.freqentlyAskedQuestion}
+              resource={sidebarResource.frequentlyAskedQuestion}
             />
           )
         ) : null}

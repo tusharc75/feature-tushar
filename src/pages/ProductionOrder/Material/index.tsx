@@ -9,12 +9,12 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { CHILD_RESOURCE, RESOURCE_LABEL, productionOrder } from '../../../constants/helpers';
+import { CHILD_RESOURCE, productionOrder, sidebarResource } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
 import { startCase } from 'lodash';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import MaterialDialog from './MaterialDialog';
 import Add from '@material-ui/icons/Add';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -187,9 +187,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-
       parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
-
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
@@ -276,22 +274,12 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.subRows;
-    });
     axiosInstance()
       .put(`${productionOrder.api}/material/${productionOrderData._id}`, { material: rows })
       .then(({ data }) => {
@@ -376,7 +364,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload resource={RESOURCE_LABEL.productionOrder} referenceId={productionOrderData?._id} columns={columns} />
+            <PreviewDownload resource={sidebarResource.productionOrder} referenceId={productionOrderData?._id} columns={columns} />
             <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
@@ -386,6 +374,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               onClick={openActions}
               aria-controls="action-menu"
               endIcon={<ExpandMore />}
+              className="new-dropdown-v1"
             >
               {isMobile ? '' : 'Actions'}
             </Button>

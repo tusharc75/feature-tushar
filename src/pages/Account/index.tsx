@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useReducer } from 'react';
 import { useData } from '../../StateProvider/Provider';
 import { Button, Menu, MenuItem, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
-import { Link, useHistory,} from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { ExpandMore, AddOutlined } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
@@ -23,13 +23,7 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from 'react-icons/md';
-import {
-  gridLoadingTimeout,
-  sidebarResource,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  removeLocalStorage
-} from '../../constants/helpers';
+import { gridLoadingTimeout, sidebarResource, prepareDataForGrid, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from './../../components/Helpers/Routes';
@@ -48,7 +42,7 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { MdAdd } from 'react-icons/all';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
-import {  MdFilterList, MdSort, MdWeb } from 'react-icons/all';
+import { MdFilterList, MdSort, MdWeb } from 'react-icons/all';
 import { FaSuitcase, FaAddressBook, FaAddressCard } from 'react-icons/fa';
 import { camelCase } from 'lodash';
 import WarhouseList from './Warehouse/WarhouseList';
@@ -68,10 +62,11 @@ const AccTypes = [
 const options = ['All', 'Approved', 'Disapproved'];
 
 export default function Account(props) {
-
   const toastConfig = useContext(CustomToastContext);
   const { getColumnData } = useColumns();
-  const { account: { accountApi, accountResource, accountRoute }} = props;
+  const {
+    account: { accountApi, accountResource, accountRoute }
+  } = props;
   const {
     state: { user, permissions, selectedEntity },
     dispatch: entityDispatch
@@ -134,8 +129,8 @@ export default function Account(props) {
 
   const fetchGridColumns = async () => {
     let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`);
-      data = response?.data?.data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`);
+    data = response?.data?.data;
     let columns = [];
     let rendererNames = [];
 
@@ -187,9 +182,8 @@ export default function Account(props) {
 
   useEffect(() => {
     fetchAccounts();
-  },  [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly, type]);
+  }, [page, limit, selectedType, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, type]);
 
- 
   const AccountNameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
       <Link className="link" to={`/${accountRoute}/detail/${params.data._id}`}>
@@ -346,7 +340,6 @@ export default function Account(props) {
     </>
   );
 
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
@@ -426,10 +419,10 @@ export default function Account(props) {
 
     let data, count;
 
-      const response: any = await axiosInstance().get(`${accountApi}${queryString}`);
+    const response: any = await axiosInstance().get(`${accountApi}${queryString}`);
 
-      data = response?.data?.data;
-      count = response?.data?.count;
+    data = response?.data?.data;
+    count = response?.data?.count;
 
     let rows = data.map((u) => {
       let finalObject = prepareDataForGrid(u, user);
@@ -749,77 +742,77 @@ export default function Account(props) {
                   </>
                 )}
 
-                  <div className={`align-items-center gap-1  layout-for-mobile`}>
-                    {AccTypes && (
-                      <ToggleButtonGroup
-                        id="resourceTypeSelector"
-                        size="small"
-                        className={`ml-8 ${'accountActions'}`}
-                        value={filter}
-                        exclusive
-                        onChange={handleFilter}
-                      >
-                        {AccTypes.map((k: any, index) => {
-                          return (
-                            <ToggleButton value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    )}
-
-                    <ButtonGroup
-                      id="approveDisapprove"
+                <div className={`align-items-center gap-1  layout-for-mobile`}>
+                  {AccTypes && (
+                    <ToggleButtonGroup
+                      id="resourceTypeSelector"
                       size="small"
-                      className={'accountActions'}
-                      variant="outlined"
-                      color="primary"
-                      ref={anchorRef}
-                      aria-label="small outlined button group"
+                      className={`ml-8 ${'accountActions'}`}
+                      value={filter}
+                      exclusive
+                      onChange={handleFilter}
                     >
-                      <Button>{options[selectedIndex]}</Button>
-                      <Button
-                        color="primary"
-                        size="small"
-                        aria-controls={open ? 'split-button-menu' : undefined}
-                        aria-expanded={open ? 'true' : undefined}
-                        aria-label="select merge strategy"
-                        aria-haspopup="menu"
-                        onClick={handleToggle}
-                        className="all-button"
+                      {AccTypes.map((k: any, index) => {
+                        return (
+                          <ToggleButton value={k.key} key={index}>
+                            {k.key}
+                          </ToggleButton>
+                        );
+                      })}
+                    </ToggleButtonGroup>
+                  )}
+
+                  <ButtonGroup
+                    id="approveDisapprove"
+                    size="small"
+                    className={'accountActions'}
+                    variant="outlined"
+                    color="primary"
+                    ref={anchorRef}
+                    aria-label="small outlined button group"
+                  >
+                    <Button>{options[selectedIndex]}</Button>
+                    <Button
+                      color="primary"
+                      size="small"
+                      aria-controls={open ? 'split-button-menu' : undefined}
+                      aria-expanded={open ? 'true' : undefined}
+                      aria-label="select merge strategy"
+                      aria-haspopup="menu"
+                      onClick={handleToggle}
+                      className="all-button"
+                    >
+                      <ArrowDropDownIcon className="all-button-sub-icon" />
+                    </Button>
+                  </ButtonGroup>
+                  <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
+                    {({ TransitionProps, placement }) => (
+                      <Grow
+                        {...TransitionProps}
+                        style={{
+                          transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
+                        }}
                       >
-                        <ArrowDropDownIcon className="all-button-sub-icon" />
-                      </Button>
-                    </ButtonGroup>
-                    <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
-                      {({ TransitionProps, placement }) => (
-                        <Grow
-                          {...TransitionProps}
-                          style={{
-                            transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
-                          }}
-                        >
-                          <Paper>
-                            <ClickAwayListener onClickAway={handleClose}>
-                              <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
-                                {options.map((option, index) => (
-                                  <MenuItem
-                                    key={option}
-                                    selected={index === selectedIndex}
-                                    onClick={(event) => handleMenuItemClick(event, index)}
-                                    style={{ color: 'black' }}
-                                  >
-                                    {option}
-                                  </MenuItem>
-                                ))}
-                              </MenuList>
-                            </ClickAwayListener>
-                          </Paper>
-                        </Grow>
-                      )}
-                    </Popper>
-                  </div>
+                        <Paper>
+                          <ClickAwayListener onClickAway={handleClose}>
+                            <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
+                              {options.map((option, index) => (
+                                <MenuItem
+                                  key={option}
+                                  selected={index === selectedIndex}
+                                  onClick={(event) => handleMenuItemClick(event, index)}
+                                  style={{ color: 'black' }}
+                                >
+                                  {option}
+                                </MenuItem>
+                              ))}
+                            </MenuList>
+                          </ClickAwayListener>
+                        </Paper>
+                      </Grow>
+                    )}
+                  </Popper>
+                </div>
               </div>
             </Grid>
             <Grid
@@ -832,18 +825,19 @@ export default function Account(props) {
             >
               <div
                 id="resourceOperations"
-                className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${accountClass['account_header-mobile']
-                  }`}
+                className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${
+                  accountClass['account_header-mobile']
+                }`}
                 style={isMobile && !isTablet ? { flex: 1 } : {}}
               >
                 <Grid style={{ display: 'flex', flex: 1 }}>
-                    <SearchBox
-                      onSearch={handleSearch}
-                      searchbox={isMobile ? accountClass.search_box_input : ''}
-                      style={isMobile ? { flex: 1 } : {}}
-                      value={search}
-                      width={isMobile ? '200px' : 'auto'}
-                    />
+                  <SearchBox
+                    onChange={handleSearch}
+                    className={isMobile ? accountClass.search_box_input : ''}
+                    style={isMobile ? { flex: 1 } : {}}
+                    value={search}
+                    width={isMobile ? '200px' : 'auto'}
+                  />
                 </Grid>
 
                 <Grid style={{ display: 'flex', gap: '5px' }}>
@@ -859,18 +853,18 @@ export default function Account(props) {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                    <Button
-                      disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
-                      size="small"
-                      className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_new_submit_btn}`}
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                    >
-                      {isMobile && !isTablet ? '' : 'Actions'}
-                    </Button>
+                  <Button
+                    disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="default"
+                    size="small"
+                    className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_new_submit_btn} new-dropdown-v1`}
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
+                  >
+                    {isMobile && !isTablet ? '' : 'Actions'}
+                  </Button>
                   <Menu
                     anchorEl={anchorEl}
                     keepMounted
@@ -1098,8 +1092,9 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
-              } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
+              singleApproveDisapproveAccount.accountName
+            } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -1114,8 +1109,9 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
-              } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
+              multipleApproveDisapproveAccount.selectedRecords
+            } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,

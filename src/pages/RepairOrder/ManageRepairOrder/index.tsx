@@ -339,7 +339,6 @@ const ManageRepairOrder = ({
                                                     e.isUneditable = false;
                                                   }
                                                   if (e?.fieldName === 'customerContact') {
-                                                    e.required = true;
                                                     e.isUneditable = false;
                                                   }
                                                 }

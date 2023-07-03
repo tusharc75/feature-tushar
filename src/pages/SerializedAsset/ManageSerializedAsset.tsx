@@ -11,7 +11,14 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, ASSET_STATUS, serializedAsset, setFieldsInAscendingOrder, supplierAccount } from '../../constants/helpers';
+import {
+  CustomDialogTransition,
+  ASSET_STATUS,
+  serializedAsset,
+  setFieldsInAscendingOrder,
+  supplierAccount,
+  ASSET_NUMBER_TYPE
+} from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -66,9 +73,9 @@ const ManageSerializedAsset = ({
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         var fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-        const categoryOptions = data.find((obj) => obj?.fieldData.fieldName === 'productCategory')?.fieldData.option;
-        const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'warehouse')?.fieldData.option;
-        const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData.option;
+        const categoryOptions = data.find((obj) => obj?.fieldData.fieldName === 'productCategory')?.fieldData?.option || [];
+        const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'warehouse')?.fieldData?.option || [];
+        const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData?.option || [];
 
         setProductCategoryOptions(categoryOptions);
         setProductDescriptionOptions(productOptions);
@@ -80,7 +87,7 @@ const ManageSerializedAsset = ({
             .get(`${serializedAsset.api}/` + productInventoryId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, createdBy, updatedBy, assetNumber, ...rest } = data;
+                const { _id, createdBy, updatedBy, assetNumber, mtrAttached, mtrAttachedBy, mtrAttachedDate, ...rest } = data;
                 setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
                 oldValues.status = ASSET_STATUS.new;
@@ -116,6 +123,9 @@ const ManageSerializedAsset = ({
           if (fieldsDataForCreate.some((e) => e.fieldName === 'recertDate')) {
             createValues['recertDate'] = '';
           }
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'mtrAttachedDate')) {
+            createValues['mtrAttachedDate'] = '';
+          }
 
           if (referenceType && referenceType === 'repairOrder') {
             if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount')) {
@@ -146,8 +156,8 @@ const ManageSerializedAsset = ({
   }, [productInventoryId]);
 
   const handleSubmit = (values) => {
-    setProductCategoryID(null)
-    setProductCategoryName(null)
+    setProductCategoryID(null);
+    setProductCategoryName(null);
     setSubmitting(true);
     if (productInventoryId && isClone === false) {
       values._id = productInventoryId;
@@ -247,19 +257,20 @@ const ManageSerializedAsset = ({
                                             size="small"
                                             onChange={(_, val) => {
                                               const value = val && val.optionValue ? val.optionValue : '';
-                                              const label = val && val.optionLabel ? val.optionLabel : '';
-                                              const productCategory = val && val?.productCategory ? val?.productCategory : '';
                                               setFieldValue(field.fieldName, value);
-                                              setFieldValue('productCategory', productCategory);
-                                              const productLabel = productCategory
-                                                ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionLabel
-                                                : '';
-                                              const productValue = productCategory
-                                                ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionValue
-                                                : '';
+                                              if (allFields?.some((e) => e.fieldName === 'productCategory')) {
+                                                const productCategory = val && val?.productCategory ? val?.productCategory : '';
+                                                setFieldValue('productCategory', productCategory);
+                                                const productLabel = productCategory
+                                                  ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionLabel
+                                                  : '';
+                                                const productValue = productCategory
+                                                  ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionValue
+                                                  : '';
 
-                                              setProductCategoryID(productValue)
-                                              setProductCategoryName(productLabel)
+                                                setProductCategoryID(productValue);
+                                                setProductCategoryName(productLabel);
+                                              }
                                             }}
                                           />
                                         </Box>
@@ -307,8 +318,8 @@ const ManageSerializedAsset = ({
                                               const label = val && val.optionLabel ? val.optionLabel : '';
                                               setFieldValue(field.fieldName, value);
                                               setFieldValue('product', '');
-                                              setProductCategoryID(value)
-                                              setProductCategoryName(label)
+                                              setProductCategoryID(value);
+                                              setProductCategoryName(label);
                                             }}
                                           />
                                         </Box>
@@ -359,31 +370,66 @@ const ManageSerializedAsset = ({
                                         }
                                       }}
                                     />
-                                  ) : (
+                                  ) : field.fieldName === 'assetNumber' ? (
                                     <FormTypes
                                       isNew={Boolean(productInventoryId)}
                                       {...field}
                                       disabled={
-                                        (Boolean(productInventoryId) && field.disableOnEdit && !isClone) ||
-                                        (field.fieldName === 'assetNumber' && field.isUneditable)
+                                        values['assetNumberType']
+                                          ? values['assetNumberType'] === ASSET_NUMBER_TYPE.manual
+                                            ? false
+                                            : true
+                                          : Boolean(productInventoryId) && !isClone
+                                            ? field.disableOnEdit || field.isUneditable
+                                            : field.isUneditable
                                       }
-                                      values={values}
-                                      errors={errors}
                                       fieldData={field}
+                                      values={values}
+                                      hidelookupAddButton={true}
+                                      errors={errors}
                                       touched={touched}
                                       label={field.fieldLabel}
                                       name={field.fieldName}
                                       type={field.type}
                                       options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
                                       required={field.required}
                                       fullWidth
                                       isTooltip={field?.isTooltip || false}
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                      }}
                                     />
+                                  ) : (
+                                    <>
+                                      <FormTypes
+                                        isNew={Boolean(productInventoryId)}
+                                        {...field}
+                                        disabled={
+                                          Boolean(productInventoryId) && !isClone ? field?.disableOnEdit || field?.isUneditable : field?.isUneditable
+                                        }
+                                        values={values}
+                                        errors={errors}
+                                        fieldData={field}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value);
+                                          if (field.fieldName === 'assetNumberType') {
+                                            setFieldValue('assetNumber', value === ASSET_NUMBER_TYPE.manual ? '' : 'Auto Generate');
+                                          }
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                      />
+                                    </>
                                   )}
                                 </Grid>
                               ))}
@@ -400,8 +446,8 @@ const ManageSerializedAsset = ({
                         setOpen({ open: false, isClone: false });
                         if (data._id) {
                           setFieldValue('productCategory', data._id);
-                          setProductCategoryID(data?._id)
-                          setProductCategoryName(data?.productRendererNames)
+                          setProductCategoryID(data?._id);
+                          setProductCategoryName(data?.productRendererNames);
                           setProductCategoryOptions((prevState) => {
                             return [
                               ...prevState,
@@ -440,18 +486,20 @@ const ManageSerializedAsset = ({
                               }
                             ];
                           });
-                          setFieldValue('productCategory', data.productCategory);
-                          setProductCategoryOptions((prevState) => {
-                            return [
-                              ...prevState,
-                              {
-                                optionValue: data.productCategory,
-                                order: productDescriptionOptions.length,
-                                default: false
-                              }
-                            ];
-                          });
-                          setProductCategoryID(data.productCategory)
+                          if (allFields?.some((e) => e.fieldName === 'productCategory')) {
+                            setFieldValue('productCategory', data.productCategory);
+                            setProductCategoryOptions((prevState) => {
+                              return [
+                                ...prevState,
+                                {
+                                  optionValue: data.productCategory,
+                                  order: productDescriptionOptions.length,
+                                  default: false
+                                }
+                              ];
+                            });
+                            setProductCategoryID(data.productCategory);
+                          }
                         }
                       }}
                     />
@@ -465,9 +513,8 @@ const ManageSerializedAsset = ({
                     onClick={() => {
                       if (isEqual(initialData.values, values)) onClose();
                       else setShowConfirmDialog(true);
-                      setProductCategoryID(null)
-                      setProductCategoryName(null)
-
+                      setProductCategoryID(null);
+                      setProductCategoryName(null);
                     }}
                   >
                     Cancel
@@ -484,16 +531,14 @@ const ManageSerializedAsset = ({
                     onSave={() => {
                       setShowConfirmDialog(false);
                       submitForm();
-                      setProductCategoryID(null)
-                      setProductCategoryName(null)
-
+                      setProductCategoryID(null);
+                      setProductCategoryName(null);
                     }}
                     onClose={() => {
                       setShowConfirmDialog(false);
                       onClose();
-                      setProductCategoryID(null)
-                      setProductCategoryName(null)
-
+                      setProductCategoryID(null);
+                      setProductCategoryName(null);
                     }}
                   />
                 ) : null}

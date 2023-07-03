@@ -344,12 +344,11 @@ const User: FC = () => {
 
           const [firstRegionalWideRole, ...restRegionalWideRoles] = allRegionalWideRoles;
 
-
           let finalObject = prepareDataForGrid(u);
           finalObject["canDelete"] = permissions?.user?.isDelete;
           finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
           finalObject["allowedToEdit"] = permissions?.user?.isUpdate;
-
+          finalObject['email'] = u.hideEmail ? null : u?.email;
           let res = {
             ...finalObject,
             status: u.blocked ? u.blocked : false,
@@ -562,6 +561,25 @@ const User: FC = () => {
     }
   }
 
+  const handleEmailVisibility = (data) => {
+    let userIds = selectedRecords.map((o) => o?._id)
+    if (userIds && userIds.length > 0) {
+      axiosInstance()
+        .post(`/user/hide-email`, { "users": [...userIds], "hideEmail": data })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+          fetchUsers();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
   const isLoggedInUserBrandAdmin = 'userType' in user?.user && user?.user?.userType === userType.brandAdmin;
   const isRoleSetUpPermission = permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate;
   const isUserSetupPermission = isLoggedInUserBrandAdmin || isRoleSetUpPermission;
@@ -704,6 +722,7 @@ const User: FC = () => {
               onSearch={handleSearch}
               searchVal={search}
               userPermissions={permissions?.user}
+              superAdminAccess={user?.role?.selectedEntity?.superAdminAccess}
               onCreate={handleCreate}
               showConfirmBox={showConfirmBox}
               openApprovalProcessDialog={() => setShowApprovalProcessDialog(true)}
@@ -739,6 +758,7 @@ const User: FC = () => {
               dispatch={dispatch}
               filters={filters}
               handleResetPassword={handleResetPassword}
+              handleEmailVisibility={handleEmailVisibility}
             />
           </div>
 

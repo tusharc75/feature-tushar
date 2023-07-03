@@ -214,7 +214,7 @@ const ProductBuilder = () => {
               )}
               {permission?.isDelete && (
                 <Button
-                  className={isMobile ? 'mobile_button ml-2' : `${styles.action_submit_btn} ${'ml-2'}`}
+                  className={isMobile ? 'mobile_button ml-2' : `${styles.action_submit_btn} ${'ml-2'} new-dropdown-v1`}
                   // className={styles.action_submit_btn}
                   variant={isMobile ? 'text' : 'outlined'}
                   color="default"

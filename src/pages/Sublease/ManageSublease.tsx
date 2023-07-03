@@ -68,7 +68,7 @@ const ManageSublease = ({
                 if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
                   rest['subleaseName'] = `SL_${generateUniqueIdOnly()}`;
                 }
-                rest['status'] = 'New';
+                rest['status'] = SUBLEASE_STATUS.new;
                 rest['estimateStartDate'] = new Date();
                 rest['estimateEndDate'] = '';
                 rest['actualStartDate'] = '';

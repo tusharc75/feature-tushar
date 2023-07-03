@@ -26,7 +26,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [showCostDialog, setShowCostDialog] = useState({open: false, showSaveAndNext: false});
+  const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
   const [selectedCostData, setSelectedCostData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
   const [isUpdating, setUpdating] = useState(false);
@@ -44,9 +44,12 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   }, []);
 
   const handleOpen = (row, rows) => {
-    setShowCostDialog({open: true, showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false });
+    setShowCostDialog({
+      open: true,
+      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+    });
     setSelectedCostData(row.original);
- };
+  };
 
   const fetchFields = async () => {
     setNextStep(false);
@@ -90,7 +93,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                 size="small"
                 aria-label="Clone"
                 onClick={() => {
-                  handleOpen(row, rows)
+                  handleOpen(row, rows);
                 }}
               >
                 <EditIcon color="primary" fontSize="small" />
@@ -154,7 +157,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       .post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/add`, { additionalCost: rows })
       .then(() => {
         fetchAdditionalCost();
-        setShowCostDialog({open: false, showSaveAndNext:false});
+        setShowCostDialog({ open: false, showSaveAndNext: false });
         setUpdating(false);
       })
       .catch((error) => {
@@ -163,18 +166,18 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       });
   };
 
-  const handleUpdateCost = (rows:any, saveAndNext = false) => {
+  const handleUpdateCost = (rows: any, saveAndNext = false) => {
     setUpdating(true);
     axiosInstance()
       .put(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/update`, { additionalCost: rows })
-      .then(({data}) => {
+      .then(({ data }) => {
         setUpdating(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        if(saveAndNext) {
+        if (saveAndNext) {
           const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
           setSelectedCostData(rowsData[rowIndex + 1]);
           setShowCostDialog({
@@ -182,7 +185,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
             showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
           });
         } else {
-          setShowCostDialog({open:false, showSaveAndNext: false});
+          setShowCostDialog({ open: false, showSaveAndNext: false });
         }
         fetchAdditionalCost();
       })
@@ -232,7 +235,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
               size="small"
               disabled={isOffline}
               onClick={() => {
-                setShowCostDialog({open: true, showSaveAndNext: false});
+                setShowCostDialog({ open: true, showSaveAndNext: false });
                 setSelectedCostData(null);
               }}
             >
@@ -247,6 +250,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
               onClick={handleClick}
               disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
               endIcon={<BiChevronDown />}
+              className="new-dropdown-v1"
             >
               Actions
             </Button>
@@ -301,7 +305,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       {showCostDialog.open && (
         <AdditionalCostDialog
           onClose={() => {
-            setShowCostDialog({open: false, showSaveAndNext:false});
+            setShowCostDialog({ open: false, showSaveAndNext: false });
             setSelectedCostData(null);
           }}
           handleAddCost={handleAddCost}

@@ -9,7 +9,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import FormTypes from '../Helpers/FormTypes';
-import { dateFormat } from 'src/constants/helpers';
+import { dateFormat, sidebarResource } from 'src/constants/helpers';
 import moment from 'moment';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -59,7 +59,8 @@ function GridFilter({
     'signature',
     'colorPicker',
     'number',
-    'decimal'
+    'decimal',
+    'switch'
   ];
 
   const fetchColumns = () => {
@@ -67,13 +68,33 @@ function GridFilter({
       .get(`/field?resource=${resource}`)
       .then(({ data: { data } }) => {
         const coloum = data?.filter((e) => !FILTER_NOT_APPLIED.includes(e?.fieldData?.type));
-        const modifiedColumn = coloum?.map((col: any) => {
+        var modifiedColumn: any = coloum?.map((col: any) => {
           const d = col.fieldData;
           if (d?.type === 'dropDown') {
             d.type = 'multiSelect';
           }
           return d;
         });
+        if (resource === sidebarResource.user) {
+          modifiedColumn?.forEach((e) => {
+            if (e.fieldName === 'firstName') {
+              e.fieldName = 'concatedName';
+              e.fieldLabel = 'Name';
+              e.type = 'singleLine';
+            }
+          })
+          modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName')
+        }
+        else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact) {
+          modifiedColumn?.forEach((e) => {
+            if (e.fieldName === 'firstName') {
+              e.fieldName = 'concatedName';
+              e.fieldLabel = 'Name';
+              e.type = 'singleLine';
+            }
+          })
+          modifiedColumn = modifiedColumn?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e.fieldName))
+        }
         setColoums(modifiedColumn);
       })
       .catch((err) => {
@@ -176,30 +197,31 @@ function GridFilter({
       }
       else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
         const options = coloums?.find((item) => item.fieldName == fieldName)?.option || []
-        if (col.type === 'multiSelect' && formValues[fieldName]?.length === 0) {
-          return
+        if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
+          filterModel[fieldName] = {
+            filterType: 'text',
+            operator: 'OR',
+            condition1: {
+              filterType: 'text',
+              type: 'contains',
+              filter: options?.filter((e) => formValues[fieldName]?.includes(e?.optionValue))
+            },
+            condition2: {
+              filterType: 'text',
+              type: 'contains',
+              filter: 'dummy'
+            }
+          };
         }
-        filterModel[fieldName] = {
-          filterType: 'text',
-          operator: 'OR',
-          condition1: {
-            filterType: 'text',
-            type: 'contains',
-            filter: options?.filter((e) => formValues[fieldName]?.includes(e?.optionValue))
-          },
-          condition2: {
-            filterType: 'text',
-            type: 'contains',
-            filter: 'dummy'
-          }
-        };
       }
       else if (['multiSelect', 'dropDown'].includes(col.type) && formValues[fieldName]) {
-        filterModel[fieldName] = {
-          filterType: 'text',
-          type: 'contains',
-          filter: formValues[fieldName],
-        };
+        if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
+          filterModel[fieldName] = {
+            filterType: 'text',
+            type: 'contains',
+            filter: formValues[fieldName],
+          };
+        }
       }
       else if (['dateTime', 'date'].includes(col.type)) {
         const from = `from_${fieldName}`;
@@ -385,7 +407,8 @@ function GridFilter({
                               InputLabelProps={{
                                 shrink: true
                               }}
-                              minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
+                              minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] :
+                                formValues[`to_${field.fieldName}`] ? formValues[`to_${field.fieldName}`] : new Date()}
                             />
                           </Grid>
                         </Fragment>

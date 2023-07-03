@@ -144,7 +144,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     if (!resourceColumns && resourceColumns.length === 0) return;
     const optionsData: any = {};
     const filteredData = [...resourceColumns]
-      .filter((d: any) => d.isRead && (d.fieldData.type === 'dropDown' || d.fieldData.type === 'date'))
+      .filter((d: any) => d.isRead && (d.fieldData.type === 'dropDown' || d.fieldData.type === 'date' || d.fieldData.type === 'checkBox'))
       .map((d: any) => {
         if (d.fieldData.type === 'dropDown') {
           optionsData[d.fieldData.fieldName] = {
@@ -292,21 +292,24 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     }
   };
 
-  const handleSelectFilter = (name: string, value: any) => {
+  const handleSelectFilter = (type: string, name: string, value: any) => {
     let fieldProps: any = {};
-    if (!name?.includes('Date')) {
-      fieldProps.type = resourceOptions[name].type;
-      fieldProps.lookup = resourceOptions[name].lookup;
-    } else {
+    if (type === 'date') {
       fieldProps.type = 'date';
       fieldProps.lookup = false;
     }
-
+    else if (type === 'checkBox') {
+      fieldProps.type = 'checkBox';
+      fieldProps.lookup = false;
+    }
+    else {
+      fieldProps.type = resourceOptions[name].type;
+      fieldProps.lookup = resourceOptions[name].lookup;
+    }
     const newData: any = {
       type: fieldProps.type,
       lookup: fieldProps.lookup
     };
-
     if (Array.isArray(value)) {
       newData.value = resourceOptions[name].options?.filter((d) => value?.includes(d.optionValue));
       setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
@@ -333,13 +336,23 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     if (selectedData) {
       const filterKeys = Object.keys(selectedData);
       filterKeys.forEach((key) => {
-        if (selectedData[key] && selectedData[key]?.value?.length) {
+        if (selectedData[key]?.type === 'checkBox') {
           let obj = {
+            type: selectedData[key]?.type,
             term: key,
-            value: selectedData[key]?.value.map((item) => item.optionValue)
+            value: selectedData[key].value ? true : false
           };
-
           filters.push(obj);
+        }
+        else {
+          if (selectedData[key] && selectedData[key]?.value?.length) {
+            let obj = {
+              type: selectedData[key]?.type,
+              term: key,
+              value: selectedData[key]?.value.map((item) => item.optionValue)
+            };
+            filters.push(obj);
+          }
         }
       });
     }
@@ -348,22 +361,20 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
       filterKeys.forEach((key) => {
         if (betweenDate[key] && betweenDate[key]) {
           let obj = {
+            type: selectedData[key]?.type,
             term: key,
             value: betweenDate[key]
           };
-
           filters.push(obj);
         }
       });
     }
-
     const newValues = {
       ...values,
       filters,
       resource: values.resource?.value,
       column: values.column.length > 0 ? values.column.map((field) => field.fieldName) : []
     };
-
     setSubmitting(true);
     if (id) {
       let newData = { _id: id, ...newValues };

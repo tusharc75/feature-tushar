@@ -216,7 +216,7 @@ function Product({ id }) {
                   setOpenAssignProductDialog(true);
                 }}
               >
-                Add Product
+                Add
               </Button>
             </Grid>
             <Grid item xs={6} md={6} sm={6}>
@@ -229,6 +229,7 @@ function Product({ id }) {
                   aria-controls="action-menu"
                   disabled={selectedRecords.length === 0}
                   endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>

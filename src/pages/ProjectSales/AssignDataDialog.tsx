@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from 'react';
 import {
   Button,
   Checkbox,
@@ -11,30 +11,21 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Typography,
-} from "@material-ui/core";
-import { startCase, camelCase, kebabCase, lowerCase } from "lodash";
+  Typography
+} from '@material-ui/core';
+import { startCase, camelCase, kebabCase, lowerCase } from 'lodash';
 
-import Loader from "../../components/Loader";
-import axiosInstance from "../../axios/axiosInstance";
-import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import SearchBox from "../../components/Helpers/SearchBox";
-import { useData } from "../../StateProvider/Provider";
+import Loader from '../../components/Loader';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import SearchBox from '../../components/Helpers/SearchBox';
+import { useData } from '../../StateProvider/Provider';
 
 const AssignDataDialog = (props) => {
-  const {
-    dialogOpen,
-    onSuccess,
-    handleCloseDialog,
-    type,
-    projectID,
-    existingData,
-    accountId = "",
-    entityIds = []
-  } = props;
+  const { dialogOpen, onSuccess, handleCloseDialog, type, projectID, existingData, accountId = '', entityIds = [] } = props;
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user }
@@ -44,32 +35,31 @@ const AssignDataDialog = (props) => {
   const [loading, setLoading] = useState(false);
   const [selectedData, setSelectedData] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
-
     let url = `/${type}?limit=0`;
 
     switch (type) {
-      case "customer-account":
-        url = `/${type}?filterById=[{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]`
+      case 'customer-account':
+        url = `/${type}?filterById=[{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]`;
         break;
 
-      case "customer-contact":
-        url = `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`
+      case 'customer-contact':
+        url = `/${type}?filterById=[{"field":"accountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`;
         break;
 
-      case "opportunity":
-        url = `/${type}?filterById=[{"field":"customerAccount", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`
+      case 'opportunity':
+        url = `/${type}?filterById=[{"field":"customerAccount", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`;
         break;
 
-      case "quote-builder":
-        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`
+      case 'quote-builder':
+        url = `/${type}?filterById=[{"field":"customerAccountName", "term": "${accountId}"},{"field":"ownerCollaborator", "term": "${user?.user?._id}"} ]&filterType=and`;
         break;
 
-      case "user":
+      case 'user':
         if (entityIds.length > 0) {
-          url = `/${type}?filterById=[{"field":"entities.entity", "term": {"$in": [${entityIds.map(m => `"${m}"`)}] } }]`
+          url = `/${type}?filterById=[{"field":"entities.entity", "term": {"$in": [${entityIds.map((m) => `"${m}"`)}] } }]`;
         }
         break;
     }
@@ -78,9 +68,7 @@ const AssignDataDialog = (props) => {
     axiosInstance()
       .get(url)
       .then(({ data: { data } }) => {
-        const filteredData = data.filter(
-          (_d) => !existingData().some((item) => item === _d?._id)
-        );
+        const filteredData = data.filter((_d) => !existingData().some((item) => item === _d?._id));
 
         setData(filteredData);
         setDataConst(filteredData);
@@ -106,13 +94,13 @@ const AssignDataDialog = (props) => {
 
   const changeType = (type) => {
     let newType;
-    if (type !== "quote-builder") {
+    if (type !== 'quote-builder') {
       newType = type;
     } else {
-      newType = "quote"
+      newType = 'quote';
     }
     return newType;
-  }
+  };
 
   const handleSave = () => {
     if (selectedData.length) {
@@ -120,7 +108,7 @@ const AssignDataDialog = (props) => {
 
       const dataObj = {
         [camelCase(type)]: [...selectedData, ...existingData()],
-        _id: projectID,
+        _id: projectID
       };
 
       axiosInstance()
@@ -129,8 +117,8 @@ const AssignDataDialog = (props) => {
           setAssigning(false);
           toastConfig.setToastConfig({
             message: `${startCase(type)} added successfully`,
-            type: "success",
-            open: true,
+            type: 'success',
+            open: true
           });
 
           onSuccess();
@@ -144,18 +132,18 @@ const AssignDataDialog = (props) => {
 
   const getHeading = (type: string, data: any) => {
     switch (type) {
-      case "user":
-        return `${data?.firstName ?? ""}  ${data.lastName}`;
-      case "lead":
-        return `${data?.salutation ?? ""} ${data?.firstName ?? ""} ${data?.middleName ?? ""}  ${data.lastName}`;
-      case "opportunity":
+      case 'user':
+        return `${data?.firstName ?? ''}  ${data.lastName}`;
+      case 'lead':
+        return `${data?.salutation ?? ''} ${data?.firstName ?? ''} ${data?.middleName ?? ''}  ${data.lastName}`;
+      case 'opportunity':
         return `${data.opportunityName}`;
-      case "quote-builder":
-        return `${data.quoteName}`
-      case "customer-account":
+      case 'quote-builder':
+        return `${data.quoteName}`;
+      case 'customer-account':
         return `${data.accountName}`;
-      case "customer-contact":
-        return `${data?.salutation ?? ""} ${data?.concatedName ?? ""}`;
+      case 'customer-contact':
+        return `${data?.salutation ?? ''} ${data?.concatedName ?? ''}`;
       default:
         break;
     }
@@ -163,24 +151,22 @@ const AssignDataDialog = (props) => {
 
   const getSubHeading = (type: string, data: any) => {
     switch (type) {
-      case "user":
+      case 'user':
         return data.email;
-      case "lead":
-        return "";
-      case "opportunity":
-        return "";
-      case "quote-builder":
-        return "";
-      case "customer-account":
-        return "";
-      case "customer-contact":
-        return "";
+      case 'lead':
+        return '';
+      case 'opportunity':
+        return '';
+      case 'quote-builder':
+        return '';
+      case 'customer-account':
+        return '';
+      case 'customer-contact':
+        return '';
       default:
-        return "";
+        return '';
     }
   };
-
-
 
   const handleSearch = (e) => {
     let value = e.target.value;
@@ -188,18 +174,32 @@ const AssignDataDialog = (props) => {
     let result = [];
     result = dataConst.filter((data) => {
       switch (type) {
-        case "user":
-          return data.firstName.toLowerCase().search(value.toLowerCase()) !== -1 || data.lastName.toLowerCase().search(value.toLowerCase()) !== -1 || data.email.toLowerCase().search(value.toLowerCase()) !== -1;
-        case "lead":
-          return data.salutation.toLowerCase().search(value.toLowerCase()) !== -1 || data.firstName.toLowerCase().search(value.toLowerCase()) !== -1 || data.middleName.toLowerCase().search(value.toLowerCase()) !== -1 || data.lastName.toLowerCase().search(value.toLowerCase()) !== -1;
-        case "opportunity":
+        case 'user':
+          return (
+            data.firstName.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data.lastName.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data.email.toLowerCase().search(value.toLowerCase()) !== -1
+          );
+        case 'lead':
+          return (
+            data.salutation.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data.firstName.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data.middleName.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data.lastName.toLowerCase().search(value.toLowerCase()) !== -1
+          );
+        case 'opportunity':
           return data.opportunityName.toLowerCase().search(value.toLowerCase()) !== -1;
-        case "quote-builder":
+        case 'quote-builder':
           return data.quoteName.toLowerCase().search(value.toLowerCase()) !== -1;
-        case "customer-account":
+        case 'customer-account':
           return data.accountName.toLowerCase().search(value.toLowerCase()) !== -1;
-        case "customer-contact":
-          return data.salutation.toLowerCase().search(value.toLowerCase()) !== -1 || data.firstName.toLowerCase().search(value.toLowerCase()) !== -1 || data.middleName.toLowerCase().search(value.toLowerCase()) !== -1 || data.lastName.toLowerCase().search(value.toLowerCase()) !== -1;
+        case 'customer-contact':
+          return (
+            data.salutation.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data.firstName.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data.middleName.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data.lastName.toLowerCase().search(value.toLowerCase()) !== -1
+          );
         default:
           break;
       }
@@ -208,13 +208,7 @@ const AssignDataDialog = (props) => {
   };
 
   return (
-    <Dialog
-      fullWidth
-      maxWidth="xs"
-      open={dialogOpen}
-      onClose={handleCloseDialog}
-      aria-labelledby="assign-dialog"
-    >
+    <Dialog fullWidth maxWidth="xs" open={dialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-dialog">
       <CustomDialogHeader title={`Assign ${startCase(type)}`} />
       <CustomDialogContent>
         {loading ? (
@@ -230,27 +224,21 @@ const AssignDataDialog = (props) => {
                       <Checkbox
                         // edge="start"
                         onChange={(e) => {
-                          data.forEach((data) => data.isChecked = e.target.checked)
-                          setSelectedData(data.filter(r => r.isChecked).map(obj => obj._id))
-                        }
-                        }
-                        checked={data.every(x => x.isChecked)}
-                        inputProps={{
-                          "aria-labelledby": `checkbox-list-label-select-all`,
+                          data.forEach((data) => (data.isChecked = e.target.checked));
+                          setSelectedData(data.filter((r) => r.isChecked).map((obj) => obj._id));
                         }}
-                      />}
+                        checked={data.every((x) => x.isChecked)}
+                        inputProps={{
+                          'aria-labelledby': `checkbox-list-label-select-all`
+                        }}
+                      />
+                    }
                     label="Select All"
                   />
                 </FormControl>
-
               </Grid>
               <Grid item xs={12} md={6} sm={6} container justify="flex-end">
-                <SearchBox
-                  onSearch={handleSearch}
-                  searchbox="terms_header_search_bar"
-                  width="300px"
-                  value={search}
-                />
+                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
               </Grid>
             </Grid>
 
@@ -263,42 +251,27 @@ const AssignDataDialog = (props) => {
                       onChange={(e) => handleUserSelection(e, _d._id)}
                       checked={selectedData.indexOf(_d._id) >= 0}
                       inputProps={{
-                        "aria-labelledby": `checkbox-list-label-${_d._id}`,
+                        'aria-labelledby': `checkbox-list-label-${_d._id}`
                       }}
                     />
                   </ListItemIcon>
-                  <ListItemText
-                    primary={getHeading(type, _d)}
-                    secondary={getSubHeading(type, _d)}
-                  />
+                  <ListItemText primary={getHeading(type, _d)} secondary={getSubHeading(type, _d)} />
                 </ListItem>
               ))}
             </List>
           </>
         ) : (
           <Typography>
-            There are no {lowerCase(type)} or you have already added all{" "}
-            {lowerCase(type)}
+            There are no {lowerCase(type)} or you have already added all {lowerCase(type)}
           </Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button
-          disabled={isAssigning}
-          onClick={handleCloseDialog}
-          color="primary"
-          size="small"
-        >
+        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
           Cancel
         </Button>
-        <Button
-          disabled={!selectedData.length || isAssigning}
-          onClick={handleSave}
-          color="primary"
-          size="small"
-          variant="contained"
-        >
-          {isAssigning ? <CircularProgress size={22} /> : "Save"}
+        <Button disabled={!selectedData.length || isAssigning} onClick={handleSave} color="primary" size="small" variant="contained">
+          {isAssigning ? <CircularProgress size={22} /> : 'Save'}
         </Button>
       </CustomDialogFooter>
     </Dialog>

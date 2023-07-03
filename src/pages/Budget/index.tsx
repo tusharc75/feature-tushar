@@ -167,14 +167,6 @@ function Budget() {
     </>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      default:
-        return field;
-    }
-  };
-
-
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
@@ -374,8 +366,8 @@ function Budget() {
               <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
                 <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                   <SearchBox
-                    onSearch={onSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={onSearch}
+                    className={styles.search_box_input}
                     value={search}
                     size="small"
                     placeholder="Search Budget"
@@ -404,7 +396,9 @@ function Budget() {
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
                         color="default"
                         size="small"
-                        className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_new_submit_btn}`}
+                        className={
+                          isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_new_submit_btn} new-dropdown-v1`
+                        }
                         onClick={openActions}
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"

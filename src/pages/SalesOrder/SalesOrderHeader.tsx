@@ -29,7 +29,8 @@ function SalesOrderHeader(props) {
     columns,
     dispatch,
     showTransferEntityDialog,
-    filters
+    filters,
+    selectedType
     // showCloneRentalManagementDialog
   } = props;
 
@@ -61,16 +62,13 @@ function SalesOrderHeader(props) {
     setAnchorEl(null);
   };
 
-  const [filter, setFilter] = useState(options[0].key);
-
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
-      setFilter(newFilter);
       onTypeChange(options.find((d) => d.key === newFilter).value);
     }
   };
   let toggleInner = options && (
-    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
           <ToggleButton value={k.key} key={index}>
@@ -137,7 +135,7 @@ function SalesOrderHeader(props) {
           </div>
         ) : (
           options && (
-            <ToggleButtonGroup size="small" className="ml-2" value={filter} exclusive onChange={handleFilter}>
+            <ToggleButtonGroup size="small" className="ml-2" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
               {options.map((k, index) => {
                 return (
                   <ToggleButton value={k.key} key={index}>
@@ -154,8 +152,8 @@ function SalesOrderHeader(props) {
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
           <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox
-              onSearch={onSearch}
-              searchbox={styles.search_box_input}
+              onChange={onSearch}
+              className={styles.search_box_input}
               value={searchVal}
               size="small"
               width="200px"
@@ -185,7 +183,7 @@ function SalesOrderHeader(props) {
                   color="default"
                   size="small"
                   onClick={openActions}
-                  className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                  className={`${isMobile ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                   aria-controls="action-menu"
                   endIcon={<ExpandMore />}
                 >

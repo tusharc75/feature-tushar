@@ -90,12 +90,6 @@
   border-style: solid;
 }
 
-.cardBody {
-  --body-column-gap: 22px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--body-column-gap, 15px);
-}
 .bodyColumn {
   & > p {
     font-weight: 500;
@@ -137,4 +131,22 @@
     color: #fff;
     background-color: #ff9900;
   }
+}
+.selectall {
+  margin-left: 21px;
+
+  svg {
+    color: var(--new_theme_color) !important;
+  }
+  label > span + span {
+    margin-left: 10px;
+    user-select: none;
+    font-weight: 500;
+  }
+}
+.collapsible {
+  height: auto;
+  transition: height 0.3s ease-out;
+  display: flex;
+  align-items: flex-start;
 }

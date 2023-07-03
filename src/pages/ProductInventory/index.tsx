@@ -147,30 +147,33 @@ const InventoryProduct = () => {
       }
     });
 
-    productInventoryFields?.data?.data?.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
-      if (currentColumn !== null) {
-        if (!['plant', 'product'].includes(currentColumn?.columnData.field)) {
-          if (o.fieldData.type === 'number' && ['minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
-            columns.push({
-              ...currentColumn?.columnData,
-              cellEditor: 'numericCellEditor',
-              cellRenderer: 'numberRenderer',
-              filter: false,
-              editable: plantId === 'All' ? false : permissions?.productInventory?.isUpdate
-            });
-          } else if (['inventory'].includes(currentColumn?.columnData.field)) {
-            columns.push({
-              ...currentColumn?.columnData,
-              cellRenderer: 'numberRenderer',
-              filter: false
-            });
-          } else {
-            columns.push(currentColumn?.columnData);
+    if (!user?.user?.brandPolicy?.hideInventoryCount) {
+      productInventoryFields?.data?.data?.forEach((o) => {
+        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
+        if (currentColumn !== null) {
+          if (!['plant', 'product'].includes(currentColumn?.columnData.field)) {
+            if (o.fieldData.type === 'number' && ['minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
+              columns.push({
+                ...currentColumn?.columnData,
+                cellEditor: 'numericCellEditor',
+                cellRenderer: 'numberRenderer',
+                filter: false,
+                editable: plantId === 'All' ? false : permissions?.productInventory?.isUpdate
+              });
+            } else if (['inventory'].includes(currentColumn?.columnData.field)) {
+              columns.push({
+                ...currentColumn?.columnData,
+                cellRenderer: 'numberRenderer',
+                filter: false
+              });
+            } else {
+              columns.push(currentColumn?.columnData);
+            }
           }
         }
-      }
-    });
+      });
+
+    }
 
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     setFrameworkComponents({
@@ -181,11 +184,11 @@ const InventoryProduct = () => {
     });
 
     const defaultColumns = [
-      { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },
-      { field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' },
-      { field: 'purchaseOrderQty', headerName: 'On PO', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }
+      ...(!user?.user?.brandPolicy?.hideInventoryCount ?
+        [{ field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' },
+        { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },
+        { field: 'purchaseOrderQty', headerName: 'On PO', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }] : []),
     ];
-
     setColumns([...columns, ...defaultColumns]);
   };
 
@@ -228,9 +231,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-            .filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+          .filter((d) => d.optionValue !== 'All')
+          .map((d) => d.optionValue)
+          .toString()
         : plantId;
 
     let deepFilter = '';
@@ -261,7 +264,7 @@ const InventoryProduct = () => {
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -338,17 +341,20 @@ const InventoryProduct = () => {
             !permissions?.productInventory?.isUpdate
               ? TOOLTIP_MESSAGE.remove
               : params?.data?.plantId === 'All'
-              ? 'Select Plant'
-              : !params?.data?.availableInventory
-              ? 'Inventory not available'
-              : 'Remove'
+                ? 'Select Plant'
+                : user?.user?.brandPolicy?.allowNegativeInventory ? 'Remove' :
+                  !params?.data?.availableInventory
+                    ? 'Inventory not available'
+                    : 'Remove'
           }
         >
           <span>
             <IconButton
               size="small"
               aria-label="Clone"
-              disabled={permissions?.productInventory?.isUpdate && params?.data?.availableInventory && params?.data?.plantId !== 'All' ? false : true}
+              disabled={permissions?.productInventory?.isUpdate && params?.data?.plantId !== 'All' ?
+                user?.user?.brandPolicy?.allowNegativeInventory ? false :
+                  params?.data?.availableInventory ? false : true : true}
               onClick={() => {
                 setInventory({ open: true, product: [params?.data], type: 'remove' });
               }}
@@ -356,9 +362,9 @@ const InventoryProduct = () => {
               <RemoveCircleOutlineIcon
                 fontSize="small"
                 color={
-                  permissions?.productInventory?.isUpdate && params?.data?.availableInventory && params?.data?.plantId !== 'All'
-                    ? 'error'
-                    : 'disabled'
+                  permissions?.productInventory?.isUpdate && params?.data?.plantId !== 'All'
+                    ? user?.user?.brandPolicy?.allowNegativeInventory ? 'error' :
+                      params?.data?.availableInventory ? 'error' : 'disabled' : 'disabled'
                 }
               />
             </IconButton>
@@ -396,19 +402,6 @@ const InventoryProduct = () => {
     </Fragment>
   );
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'productName':
-        return 'productName';
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-      default:
-        return field;
-    }
-  };
-
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState && columns) {
     columns?.forEach((item) => {
@@ -428,8 +421,7 @@ const InventoryProduct = () => {
     }
     axiosInstance()
       .get(api)
-      .then(({ data }) => {
-      })
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -591,8 +583,8 @@ const InventoryProduct = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile ? '200px' : '242px'}
                     style={isMobile ? { flex: 1 } : {}}
                     size="small"
@@ -607,7 +599,7 @@ const InventoryProduct = () => {
                     color="default"
                     size="small"
                     disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length && plantId !== 'All' ? false : true}
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                     onClick={openActions}
                     aria-controls="action-menu"
                     endIcon={<ExpandMore />}
@@ -731,9 +723,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d.optionValue !== 'All')
-                    .map((d) => d.optionValue)
-                    .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
                 : plantId
             }
           />
@@ -749,9 +741,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d.optionValue !== 'All')
-                    .map((d) => d.optionValue)
-                    .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
                 : plantId
             }
             storageLocation={storageLocationId}
@@ -767,9 +759,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                    .filter((d) => d.optionValue !== 'All')
-                    .map((d) => d.optionValue)
-                    .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
                 : plantId
             }
           />

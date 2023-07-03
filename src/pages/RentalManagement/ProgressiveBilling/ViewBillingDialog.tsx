@@ -429,6 +429,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   aria-controls="action-menu"
                   disabled={selectedProducts?.length ? false : true}
                   endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>

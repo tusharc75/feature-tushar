@@ -231,7 +231,12 @@ function RentalManagementHeader({
                   <ToggleButtonGroup size="small">
                     <ToggleButton
                       onClick={() => {
-                        history.push(`${routes.planningView.path}`);
+                        history.push({
+                          pathname: routes.planningView.path,
+                          state: {
+                            resource: sidebarResource?.rentalManagement
+                          }
+                        });
                       }}
                     >
                       <span>{`Calendar`}</span>
@@ -250,8 +255,8 @@ function RentalManagementHeader({
           <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
             <HideWhenOffline>
               <SearchBox
-                onSearch={onSearch}
-                searchbox={isMobile ? styles.search_box_input : ''}
+                onChange={onSearch}
+                className={isMobile ? styles.search_box_input : ''}
                 value={searchVal}
                 size="small"
                 placeholder={`Search ${routes.rentalManagement.title}`}
@@ -280,7 +285,7 @@ function RentalManagementHeader({
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
                       color="default"
                       size="small"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                       onClick={openActions}
                       // className={styles.action_submit_btn}
                       aria-controls="action-menu"

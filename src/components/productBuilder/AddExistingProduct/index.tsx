@@ -283,7 +283,7 @@ const AddExistingProduct = (props) => {
         }
       } else {
         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-          let currentColumn: any = getColumnData(routes.product.title, ele, routes.product.path, true);
+          let currentColumn: any = getColumnData(routes.product.title, ele, routes.productDetail.path);
           column.push({ ...currentColumn.columnData, leval: 'product-template' });
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
             rendererNames.push(currentColumn?.rendererName);
@@ -385,7 +385,7 @@ const AddExistingProduct = (props) => {
               )}
             </Grid>
             <Grid item xs={12} sm={6} container justify="flex-end">
-              <SearchBox onSearch={handleSearch} searchbox="terms_header_search_bar" width="300px" value={search} />
+              <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
               <Box ml={1} mt={1}>
                 <Button
                   size="small"

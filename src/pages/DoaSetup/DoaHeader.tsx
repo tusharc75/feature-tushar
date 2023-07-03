@@ -24,7 +24,7 @@ function DoaHeader(props) {
       </Grid>
       <Grid item xs={6} className={styles.filter_side}>
         <Box className={styles.filter_side_header} component="div">
-          <SearchBox onSearch={onSearch} searchbox={styles.search_box_input} value={searchVal} size="small" placeholder="Search Doa" width="242px" />
+          <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Doa" width="242px" />
 
           {DoaPermissions.isDelete && (
             <>
@@ -34,7 +34,7 @@ function DoaHeader(props) {
                 color="default"
                 size="small"
                 onClick={openActions}
-                className={styles.action_submit_btn}
+                className={`${styles.action_submit_btn} new-dropdown-v1`}
                 aria-controls="action-menu"
                 endIcon={<ExpandMore />}
               >

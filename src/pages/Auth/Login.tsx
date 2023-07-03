@@ -13,7 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
-import { isEmpty } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
 import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
 import { AzureLogin } from '../../components/Azure/Azure';
 import { SiMicrosoftoffice } from 'react-icons/si';
@@ -120,12 +120,9 @@ const Login = () => {
           });
         }
 
-        if (data?.role && data?.role?.selectedEntity && data?.role?.selectedEntity?.resource?.length) {
-          const result = data?.role?.selectedEntity?.resource?.filter((e) => e.isRead === true && !e.isHidden);
-          if (result?.length === 1) {
-            history.push({
-              pathname: routes.workOrderTechnician.path
-            });
+        if (data?.user?.defaultResource) {
+          if (routes[camelCase(data?.user?.defaultResource)]?.path) {
+            history.push({ pathname: routes[camelCase(data?.user?.defaultResource)]?.path });
           }
         }
 
@@ -184,8 +181,8 @@ const Login = () => {
               </div>
               <Formik
                 initialValues={{
-                  email: ['local'].includes(process.env.REACT_APP_ENV) ? 'gagan@test.com' : '',
-                  password: ['local'].includes(process.env.REACT_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
+                  email: ['local'].includes(import.meta.env.VITE_APP_ENV) ? 'gagan@test.com' : '',
+                  password: ['local'].includes(import.meta.env.VITE_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
                 }}
                 validate={validateForm}
                 onSubmit={handleSubmit}

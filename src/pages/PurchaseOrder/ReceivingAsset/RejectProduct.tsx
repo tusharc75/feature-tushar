@@ -7,7 +7,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { convertDateInDateTime, productInventory, sidebarResource } from 'src/constants/helpers';
+import { convertDateInDateTime, convertDateTimToDate, productInventory, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
 import { dateFormatForInputControl } from '../../../constants/helpers';
@@ -122,6 +122,9 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
       errors['storageLocation'] = `Storage Location is required`;
     }
 
+    if (moment(values["rejectDate"]).isBefore(convertDateTimToDate(purchaseOrderData?.purchaseOrderDate))) {
+      errors['rejectDate'] = `Date entered prior to the purchase order date`;
+    }
 
     if (lockDate) {
       if (!moment(values["rejectDate"]).isSameOrAfter(moment(lockDate))) {
@@ -289,6 +292,8 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                     onChange={(value) => {
                       setFieldValue('rejectDate', convertDateInDateTime(value));
                     }}
+                    error={touched['rejectDate'] && Boolean(errors['rejectDate'])}
+                    helperText={touched['rejectDate'] && errors['rejectDate']}
                   />
                 </Box>
               </CustomDialogContent>

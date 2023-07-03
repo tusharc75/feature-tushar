@@ -174,7 +174,7 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
             materialId: item?.materialId,
             product: item?.product,
             qty: item.qty - ((item?.consumedQty || 0) + (item?.requestedQty || 0)),
-            consumedQty: 0,
+            consumedQty: item.qty - ((item?.consumedQty || 0) + (item?.requestedQty || 0)),
             storageLocation: null
           }))
         }}

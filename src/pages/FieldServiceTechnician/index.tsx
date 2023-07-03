@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem, Tab, Tabs, Typography } from '@material-ui/core';
+import { Box, Button, BoxProps, Grid, IconButton, Menu, MenuItem, Tab, Tabs, Typography } from '@material-ui/core';
 import { useContext, useEffect, useRef, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -24,25 +24,44 @@ const status = {
 };
 
 const style = {
-  serviceHead: {
+  date: {
+    fontSize: 13,
+    fontWeight: 400,
     display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: '10px',
-    marginBottom: '5px',
+    gap: 5,
+    alignItems: 'center'
+  },
+  title: {
     '& p': {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '5px',
-      fontWeight: 500
-    },
-    '& p:first-of-type': {
-      gap: '0',
-      fontWeight: 500
+      fontSize: 14,
+      fontWeight: 600,
+      lineHeight: '20px',
+      '& span': {
+        fontSize: 13
+      }
     }
   },
+  titleText: {
+    fontSize: 14,
+    fontWeight: 600,
+    lineHeight: '20px',
+    marginBottom: 7
+  },
+  subTitleText: {
+    fontSize: 13,
+    fontWeight: 400
+  },
+  serviceHead: {
+    '& p': {
+      fontSize: 14,
+      fontWeight: 600,
+      lineHeight: '20px',
+      marginBottom: 9
+    },
+    '& span': {}
+  },
   borderBottom: {
-    borderBottom: '1px solid rgb(211, 211, 211)'
+    borderBottom: '1px solid var(--common-border-color)'
   },
   serviceItem: {
     display: 'flex',
@@ -114,7 +133,7 @@ const FieldServiceTechnician = () => {
 
   const getBgColor = (data) => {
     const currentStatus = data?.technicianAssign?.status;
-    let color = 'white';
+    let color = 'var(--dark-secondary, white)';
     switch (currentStatus) {
       case status.assigned:
         color = '#F2FDFF';
@@ -126,7 +145,7 @@ const FieldServiceTechnician = () => {
         color = '#F2FFEE';
         break;
       default:
-        color = 'white';
+        color = 'var(--dark-secondary, white)';
         break;
     }
     return color;
@@ -174,149 +193,135 @@ const FieldServiceTechnician = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         {fieldService ? (
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={4} sm={12}>
-              {fieldService?.map((data, index) => {
-                return (
-                  <Box
-                    mb={2}
-                    key={index}
-                    onClick={() => {
-                      setSelectedFieldService(data);
-                    }}
-                    style={{
-                      cursor: 'pointer',
-                      backgroundColor: selectedFieldService === data ? '#0f9fa9' : getBgColor(data),
-                      color: selectedFieldService === data ? 'white' : 'black',
-                      border: '1px solid #ebebeb'
-                    }}
-                    sx={{ position: 'relative' }}
-                  >
-                    <Box p={3}>
-                      <Box sx={style.serviceHead}>
-                        <Typography>
-                          <span>{data?.fieldServiceOrderNumber}</span>
-                        </Typography>
-                        <Typography>{data?.service?.serviceName}</Typography>
+          <>
+            <Box textAlign={'right'} mb={2}>
+              <Button
+                onClick={() => {
+                  clearAll(objectStore.fieldServiceTechnician);
+                  clearAll(objectStore.fieldTicket);
+                  findAllStoredData();
+                }}
+              >
+                Clear Offline
+              </Button>
+              <IconButton size="small" onClick={() => fetchData()} style={{ marginLeft: '8px' }}>
+                <RefreshIcon />
+              </IconButton>
+            </Box>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={12} md={4} xl={3}>
+                <Box p={2} className="container-with-border">
+                  {fieldService?.map((data, index) => {
+                    return (
+                      <Box
+                        mb={2}
+                        key={index}
+                        onClick={() => {
+                          setSelectedFieldService(data);
+                        }}
+                        style={{
+                          cursor: 'pointer',
+                          backgroundColor: selectedFieldService === data ? 'var(--dark-secondary, #fff)' : getBgColor(data),
+                          border: selectedFieldService === data ? '2px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
+                          borderRadius: '8px'
+                        }}
+                        sx={{ position: 'relative' }}
+                      >
+                        <Box p={3}>
+                          <Box sx={{ ...style.serviceItem, ...style.title }}>
+                            <Typography>{data?.fieldServiceOrderNumber}</Typography>
+                            <Typography className={`chip chip-${data?.technicianAssign?.status}`} style={{ fontWeight: '500' }}>
+                              {data?.technicianAssign?.status}
+                            </Typography>
+                          </Box>
+                          <Box style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', ...style.borderBottom }}>
+                            <Box sx={{ ...style.title, textAlign: 'unset' }}>
+                              <Typography>
+                                Service Name : <span>{data?.service?.serviceName}</span>
+                              </Typography>
+                              <Typography component={'span'} style={{ ...style.date, marginBottom: '8px', marginTop: '5px' }}>
+                                <EventNoteIcon style={{ fontSize: '15px' }} />
+                                {moment(data?.technicianAssign?.estimateStartDate).format(dateFormat)} -{' '}
+                                {moment(data?.technicianAssign?.estimateEndDate).format(dateFormat)}
+                              </Typography>
+                            </Box>
+                            {!isOffline && (
+                              <>
+                                <IconButton size="small" onClick={(e) => openActions(data._id, e)} aria-controls={`action-menu-${data._id}`}>
+                                  <MoreHorizIcon />
+                                </IconButton>
+                                <Menu
+                                  anchorEl={anchorEl[data._id]}
+                                  keepMounted
+                                  getContentAnchorEl={null}
+                                  anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'left'
+                                  }}
+                                  id={`action-menu-${data._id}`}
+                                  open={Boolean(anchorEl[data._id])}
+                                  onClose={closeActions}
+                                >
+                                  {!offlineStore?.includes(data._id) ? (
+                                    <MenuItem onClick={() => handleAddOffline(data)}>Add Offline</MenuItem>
+                                  ) : (
+                                    <MenuItem onClick={() => handleRemoveOffline(data)}>Remove Offline</MenuItem>
+                                  )}
+                                </Menu>
+                              </>
+                            )}
+                          </Box>
+
+                          <Box mt={1}>
+                            <Typography style={style.titleText}>
+                              Customer: <span style={style.subTitleText}>{data?.customerAccount?.optionLabel}</span>
+                            </Typography>
+                            <Typography style={{ ...style.titleText, marginBottom: 0 }}>
+                              Location: <span style={style.subTitleText}>{data?.shippingAddress?.optionLabel}</span>
+                            </Typography>
+                          </Box>
+                        </Box>
                       </Box>
-                      <Box sx={{ ...style.serviceItem, ...style.borderBottom }}>
-                        <Typography style={{ fontSize: '12px', fontWeight: '400', color: selectedFieldService === data ? 'white' : 'gray' }}>
-                          <EventNoteIcon style={{ fontSize: '15px' }} />
-                          {moment(data?.technicianAssign?.estimateStartDate).format(dateFormat)} -{' '}
-                          {moment(data?.technicianAssign?.estimateEndDate).format(dateFormat)}
-                        </Typography>
-                        <Typography style={{ fontWeight: '500' }}>{data?.technicianAssign?.status}</Typography>
+                    );
+                  })}
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={12} md={8} xl={9}>
+                {selectedFieldService && (
+                  <Box p={2} className="container-with-border">
+                    <Tabs
+                      className="new-tab-container-v1"
+                      value={tabValue}
+                      onChange={handleMainTabChange}
+                      textColor="primary"
+                      TabIndicatorProps={{
+                        style: {
+                          display: 'none'
+                        }
+                      }}
+                    >
+                      <Tab
+                        className={'tabLayout'}
+                        label={<div className="d-flex align-items-center tab-font">{routes.fieldTicket.title}</div>}
+                        {...a11yProps(0)}
+                      />
+                      <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Consumables</div>} {...a11yProps(1)} />
+                    </Tabs>
+                    <TabPanel value={tabValue} index={0}>
+                      <Box>
+                        <FieldTicket selectedFieldService={selectedFieldService} fieldRef={fieldRef} fieldRemoveRef={fieldRemoveRef} />
                       </Box>
-                      <Box sx={style.serviceItem}>
-                        <Typography style={{ fontSize: '14px' }}>Customer: {data?.customerAccount?.optionLabel}</Typography>
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={1}>
+                      <Box>
+                        <Consumables selectedFieldService={selectedFieldService} recall={fetchData} />
                       </Box>
-                      <Box sx={style.serviceItem}>
-                        <Typography style={{ fontSize: '14px' }}>Location: {data?.shippingAddress?.optionLabel}</Typography>
-                      </Box>
-                    </Box>
-                    {!isOffline && (
-                      <Box style={{ position: 'absolute', right: '5px', bottom: '5px' }}>
-                        <IconButton
-                          style={{ color: 'white' }}
-                          size="small"
-                          onClick={(e) => openActions(data._id, e)}
-                          aria-controls={`action-menu-${data._id}`}
-                        >
-                          <MoreHorizIcon />
-                        </IconButton>
-                        <Menu
-                          anchorEl={anchorEl[data._id]}
-                          keepMounted
-                          getContentAnchorEl={null}
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left'
-                          }}
-                          id={`action-menu-${data._id}`}
-                          open={Boolean(anchorEl[data._id])}
-                          onClose={closeActions}
-                        >
-                          {!offlineStore?.includes(data._id) ? (
-                            <MenuItem onClick={() => handleAddOffline(data)}>Add Offline</MenuItem>
-                          ) : (
-                            <MenuItem onClick={() => handleRemoveOffline(data)}>Remove Offline</MenuItem>
-                          )}
-                        </Menu>
-                      </Box>
-                    )}
+                    </TabPanel>
                   </Box>
-                );
-              })}
+                )}
+              </Grid>
             </Grid>
-            <Grid item xs={12} md={8} sm={12}>
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Box display={'flex'} justifyContent={'flex-end'}>
-                  <Button
-                    onClick={() => {
-                      clearAll(objectStore.fieldServiceTechnician);
-                      clearAll(objectStore.fieldTicket);
-                      findAllStoredData();
-                    }}
-                  >
-                    Clear Offline
-                  </Button>
-                  <Box ml={1} />
-                  <IconButton size="small" onClick={() => fetchData()}>
-                    <RefreshIcon />
-                  </IconButton>
-                </Box>
-              </div>
-              {selectedFieldService && (
-                <Box
-                  style={{
-                    border: '1px solid #D3D3D3',
-                    borderTop: 'none'
-                  }}
-                >
-                  <Tabs
-                    className="new-tab-container-v1"
-                    value={tabValue}
-                    onChange={handleMainTabChange}
-                    textColor="primary"
-                    TabIndicatorProps={{
-                      style: {
-                        display: 'none'
-                      }
-                    }}
-                  >
-                    <Tab
-                      className={'tabLayout'}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          {routes.fieldTicket.title}
-                        </div>
-                      }
-                      {...a11yProps(0)}
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          Consumables
-                        </div>
-                      }
-                      {...a11yProps(1)}
-                    />
-                  </Tabs>
-                  <TabPanel value={tabValue} index={0}>
-                    <Box>
-                      <FieldTicket selectedFieldService={selectedFieldService} fieldRef={fieldRef} fieldRemoveRef={fieldRemoveRef} />
-                    </Box>
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={1}>
-                    <Box>
-                      <Consumables selectedFieldService={selectedFieldService} recall={fetchData} />
-                    </Box>
-                  </TabPanel>
-                </Box>
-              )}
-            </Grid>
-          </Grid>
+          </>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />

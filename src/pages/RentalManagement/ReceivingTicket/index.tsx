@@ -635,10 +635,10 @@ const ReceivingTicket = ({
       <HtmlTooltip
         title={
           params?.data?.isAllowedStartDate === false && params?.data?.isAllowedEndDate === false
-            ? `Invoice created cannot update start date`
+            ? `Invoice Created - Cannot change Start Date`
             : params?.data?.isAllowedEndDate === false && params?.data?.isAllowedStartDate !== true
-              ? `Can change the end date after received`
-              : 'Update start date / end date'
+              ? `Can change the End Date after received`
+              : 'Update - Start Date/End Date'
         }
       >
         <span>
@@ -703,9 +703,7 @@ const ReceivingTicket = ({
       disabled: true,
       cellRenderer: 'inventoryRenderer',
       cellStyle: (params) => {
-        if (
-          [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)
-        ) {
+        if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
           return { backgroundColor: COLOUR_MASTER.lostAssets.background };
         }
         return null;
@@ -882,12 +880,9 @@ const ReceivingTicket = ({
     } else if (
       selectedRecords.filter(
         (f) =>
-          [
-            ASSET_STATUS.available,
-            ASSET_STATUS.underReview,
-            RENTAL_INTERNAL_ASSET_STATUS.complete,
-            RENTAL_INTERNAL_ASSET_STATUS.consumed
-          ].includes(f.status) && [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.consumed].includes(f.rentalAssetStatus)
+          [ASSET_STATUS.available, ASSET_STATUS.underReview, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.consumed].includes(
+            f.status
+          ) && [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.consumed].includes(f.rentalAssetStatus)
       ).length === selectedRecords.length
     ) {
       return true;
@@ -924,7 +919,11 @@ const ReceivingTicket = ({
             type: 'success',
             message: `Receiving Successfully`
           });
-          if (receivingTicketId?.length && selectedRecords?.filter((e) => e.type === "Asset")?.length && user?.user?.brandPolicy?.workOrderAutoComplete) {
+          if (
+            receivingTicketId?.length &&
+            selectedRecords?.filter((e) => e.type === 'Asset')?.length &&
+            user?.user?.brandPolicy?.workOrderAutoComplete
+          ) {
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -1253,6 +1252,7 @@ const ReceivingTicket = ({
             aria-controls="action-menu"
             disabled={selectedRecords.length === 0}
             endIcon={<ExpandMore />}
+            className="new-dropdown-v1"
           >
             Actions
           </Button>
@@ -1278,13 +1278,9 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('returnTicketId') ||
                     !f.hasOwnProperty('loadingTicketId') ||
                     [ASSET_STATUS.lost].includes(f.status) ||
-                    ![
-                      ASSET_STATUS.inUse,
-                      ASSET_STATUS.scrap,
-                      ASSET_STATUS.needRepair,
-                      ASSET_STATUS.needRecert,
-                      ASSET_STATUS.notApplied
-                    ].includes(f.status)
+                    ![ASSET_STATUS.inUse, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.notApplied].includes(
+                      f.status
+                    )
                 )
               }
               onClick={() => {
@@ -1392,13 +1388,9 @@ const ReceivingTicket = ({
                   ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                     (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                     f.status === ASSET_STATUS.scrap) &&
-                  [
-                    ASSET_STATUS.underReview,
-                    ASSET_STATUS.scrap,
-                    ASSET_STATUS.available,
-                    ASSET_STATUS.needRecert,
-                    ASSET_STATUS.needRepair
-                  ].includes(f.status) &&
+                  [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(
+                    f.status
+                  ) &&
                   !f.subleaseAsset &&
                   checkUniqWarehouse()
               )?.length === selectedRecords?.length &&
@@ -1420,13 +1412,9 @@ const ReceivingTicket = ({
                   ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                     (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                     f.status === ASSET_STATUS.scrap) &&
-                  [
-                    ASSET_STATUS.underReview,
-                    ASSET_STATUS.scrap,
-                    ASSET_STATUS.available,
-                    ASSET_STATUS.needRecert,
-                    ASSET_STATUS.needRepair
-                  ].includes(f.status) &&
+                  [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(
+                    f.status
+                  ) &&
                   !f.subleaseAsset &&
                   checkUniqWarehouse()
               )?.length === selectedRecords?.length &&

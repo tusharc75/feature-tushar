@@ -120,15 +120,22 @@ const ScheduleReport = () => {
       gridApi.setRowData([]);
     }
     try {
-      let { data: { data, count } } = await axiosInstance().get(`schedule-report`);
+      let {
+        data: { data, count }
+      } = await axiosInstance().get(`schedule-report`);
 
       data = data.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource
-        finalObject.subscribeUsers = finalObject.subscribeUsers.length ? finalObject.subscribeUsers.map((user: any) => `${user?.firstName} ${user?.lastName}`).join(', ') : [];
+        finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource;
+        finalObject.subscribeUsers = finalObject.subscribeUsers.length
+          ? finalObject.subscribeUsers.map((user: any) => `${user?.firstName} ${user?.lastName}`).join(', ')
+          : [];
         finalObject.date = new Date(finalObject.date).toDateString();
         finalObject.time = new Date(finalObject.time).toLocaleTimeString();
-        finalObject.column = finalObject.column.split(',').map((s: string) => startCase(s)).join(', ');
+        finalObject.column = finalObject.column
+          .split(',')
+          .map((s: string) => startCase(s))
+          .join(', ');
         finalObject.filters = finalObject.filters.length > 0 ? finalObject.filters.map((item) => startCase(item.term)) : [];
         return finalObject;
       });
@@ -280,6 +287,7 @@ const ScheduleReport = () => {
                       onClick={openActions}
                       aria-controls="action-menu"
                       disabled={selectedRecords.length === 0 || !permissions?.scheduleReport?.isDelete}
+                      className="new-dropdown-v1"
                     >
                       Actions
                     </Button>
@@ -324,7 +332,7 @@ const ScheduleReport = () => {
                   selectedRecords={[]}
                   dataRows={dataRows}
                   dispatch={dispatch}
-                  onEdit={() => { }}
+                  onEdit={() => {}}
                   extraParamsToCheckDelete={false}
                   rowCount={rowCount}
                   page={page}
@@ -339,8 +347,8 @@ const ScheduleReport = () => {
                   owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                   onCreate={false}
                   showClone={false}
-                  onDelete={(data) => { }}
-                  onClone={(data) => { }}
+                  onDelete={(data) => {}}
+                  onClone={(data) => {}}
                   renderedFrom={routes.transferAsset?.title}
                 />
               ) : (

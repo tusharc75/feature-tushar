@@ -132,7 +132,7 @@ const WellNumber = ({ wellName }) => {
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -214,17 +214,6 @@ const WellNumber = ({ wellName }) => {
     setAnchorActionEl(null);
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-      default:
-        return field;
-    }
-  };
-
   return (
     <Fragment>
       <Box p={1} pb={2}>
@@ -251,6 +240,7 @@ const WellNumber = ({ wellName }) => {
                 aria-controls="action-menu"
                 disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
               >
                 Actions
               </Button>

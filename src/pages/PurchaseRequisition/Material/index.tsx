@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
@@ -20,7 +20,7 @@ import MaterialDialog from './materialDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE, RESOURCE_LABEL } from 'src/constants/helpers';
+import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import PreviewDownload from 'src/components/PreviewDownload';
 
@@ -215,17 +215,6 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.subRows;
-    });
     axiosInstance()
       .put(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`, { material: rows })
       .then(({ data }) => {
@@ -297,7 +286,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -341,7 +330,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload resource={RESOURCE_LABEL.purchaseRequisition} referenceId={purchaseRequisitionData?._id} columns={columns} />
+            <PreviewDownload resource={sidebarResource.purchaseRequisition} referenceId={purchaseRequisitionData?._id} columns={columns} />
             <Box ml={1} />
 
             <Button
@@ -351,6 +340,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
               size="small"
               onClick={openActions}
               aria-controls="action-menu"
+              className="new-dropdown-v1"
             >
               {isMobile ? '' : 'Actions'} <ExpandMore />
             </Button>

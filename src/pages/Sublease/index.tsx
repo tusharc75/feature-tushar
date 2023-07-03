@@ -15,7 +15,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { sublease, isObjectEmpty, gridLoadingTimeout, RESOURCE_LABEL, getLocalStorageArrayData, sidebarResource } from '../../constants/helpers';
+import { sublease, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -39,11 +39,11 @@ import { camelCase } from 'lodash';
 const Sublease = () => {
   const SubleaseType = [
     {
-      key: `All ${routes.sublease.title}`,
+      key: `My ${routes.sublease.title}`,
       value: 1
     },
     {
-      key: `My ${routes.sublease.title}`,
+      key: `All ${routes.sublease.title}`,
       value: 2
     }
   ];
@@ -154,7 +154,7 @@ const Sublease = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
@@ -171,7 +171,7 @@ const Sublease = () => {
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -259,19 +259,6 @@ const Sublease = () => {
 
   const closeActions = () => {
     setAnchorEl(null);
-  };
-
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
   };
 
   const handleOpen = () => {
@@ -413,8 +400,8 @@ const Sublease = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={styles.content_box}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={isMobile ? styles.search_box_input : ''}
+                    onChange={handleSearch}
+                    className={isMobile ? styles.search_box_input : ''}
                     width="242px"
                     size="small"
                     value={search}

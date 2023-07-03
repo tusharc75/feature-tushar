@@ -23,7 +23,7 @@ import {
   serializedAsset,
   DELIVERY_FROM_TO_TYPE,
   COLOUR_MASTER,
-  INVENTORY_OWNER_TYPE,
+  INVENTORY_OWNER_TYPE
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { useHistory } from 'react-router-dom';
@@ -107,7 +107,6 @@ const LoadingTicket = ({
   const [checkMTRValidation, setCheckMTRValidation] = useState(false);
   const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
 
-
   useEffect(() => {
     fetchRecords();
     getColumn();
@@ -161,7 +160,8 @@ const LoadingTicket = ({
               ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
               : '',
             description: d?.product?.productDescription,
-            rentalAssetStatus: d?.status
+            rentalAssetStatus: d?.status,
+            startDate: d?.startDate,
           }))
           .map((u) => ({
             ...u,
@@ -173,7 +173,8 @@ const LoadingTicket = ({
             warehouse: u?.warehouse?.optionLabel,
             warehouseId: u?.warehouse?.optionValue,
             currentOwner: u?.currentOwner,
-            currentLocation: u?.currentLocation?.optionValue
+            currentLocation: u?.currentLocation?.optionValue,
+            startDate: u?.startDate,
           }));
 
         const result = await axiosInstance().get(
@@ -237,6 +238,8 @@ const LoadingTicket = ({
           obj.loadingTicket = ele?.loadingTicket;
           obj.loadingTicketId = ele?.loadingTicketId;
           obj.loadingTicketStatus = ele?.loadingTicketStatus;
+          obj.startDate = element?.actualStartDate;
+
           productAssets.push(obj);
           qty = qty - ele.qty;
         });
@@ -293,7 +296,8 @@ const LoadingTicket = ({
         }
       });
 
-      if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
+      if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0
+        && productAssets?.some((e: any) => e.startDate)) {
         setNextStep(true);
       }
 
@@ -427,9 +431,7 @@ const LoadingTicket = ({
       disabled: true,
       cellRenderer: 'inventoryRenderer',
       cellStyle: (params) => {
-        if (
-          [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)
-        ) {
+        if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
           return { backgroundColor: COLOUR_MASTER.lostAssets.background };
         }
         if (params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue) {
@@ -452,13 +454,12 @@ const LoadingTicket = ({
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
     { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
   ];
 
   if (findHeader(columnHeader?.assetFields, 'mtrAttached')) {
-    columns.push({ field: 'mtrAttached', headerName: 'MTR Attached', show: true, cellRenderer: 'checkboxRenderer' })
+    columns.push({ field: 'mtrAttached', headerName: 'MTR Attached', show: true, cellRenderer: 'checkboxRenderer' });
   }
-
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
@@ -654,7 +655,8 @@ const LoadingTicket = ({
 
   const handleChangeStatusInUse = () => {
     const assets = selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id);
-    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse`, { assets })
+    axiosInstance()
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse`, { assets })
       .then(({ data }) => {
         fetchRecords();
         toastConfig.setToastConfig({
@@ -747,7 +749,7 @@ const LoadingTicket = ({
                 setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
               }}
             >
-              Scrap
+              {ASSET_STATUS.scrap}
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -755,7 +757,7 @@ const LoadingTicket = ({
                 setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
               }}
             >
-              Lost
+              {ASSET_STATUS.lost}
             </MenuItem>
           </Menu>
           {(allowedToEdit || isProcessor) && (
@@ -768,6 +770,7 @@ const LoadingTicket = ({
                 aria-controls="action-menu"
                 disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
               >
                 Actions
               </Button>
@@ -786,10 +789,9 @@ const LoadingTicket = ({
                 <MenuItem
                   onClick={() => {
                     closeActions();
-                    if (checkMTRValidation && selectedRecords?.some((e) => e.type === "Asset" && e.mtrAttached !== true)) {
-                      setMtrConfirmBox(true)
-                    }
-                    else {
+                    if (checkMTRValidation && selectedRecords?.some((e) => e.type === 'Asset' && e.mtrAttached !== true)) {
+                      setMtrConfirmBox(true);
+                    } else {
                       handleDeliveryTicketDialog();
                     }
                   }}
@@ -811,18 +813,19 @@ const LoadingTicket = ({
                   Delivered to Customer
                 </MenuItem>
 
-                {(selectedRecords.length > 0 &&
-                  selectedRecords.filter((e: any) =>
-                    e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && e?.status === ASSET_STATUS.delivered).length === selectedRecords.length) &&
-                  <MenuItem
-                    onClick={() => {
-                      handleChangeStatusInUse();
-                      closeActions();
-                    }}
-                  >
-                    Assets In-Use
-                  </MenuItem>
-                }
+                {selectedRecords.length > 0 &&
+                  selectedRecords.filter(
+                    (e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && e?.status === ASSET_STATUS.delivered
+                  ).length === selectedRecords.length && (
+                    <MenuItem
+                      onClick={() => {
+                        handleChangeStatusInUse();
+                        closeActions();
+                      }}
+                    >
+                      Change Status to In-Use
+                    </MenuItem>
+                  )}
 
                 {selectedRecords.length &&
                   selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)

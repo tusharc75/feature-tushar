@@ -144,7 +144,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -187,21 +187,6 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     checkboxRenderer: CheckboxRenderer,
     nameRenderer: NameRenderer,
     commonRenderer: CommonRenderer
-  };
-
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'productName':
-        return 'productName';
-      case 'plant':
-        return 'plant';
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-      default:
-        return field;
-    }
   };
 
   const onCellValueChanged = ({ data }) => {
@@ -253,8 +238,8 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
           </div>
           <Box order={isMobile ? 1 : 2} display="flex" justifyContent={'space-between'} minWidth={isMobile ? '100%' : '300px'}>
             <SearchBox
-              onSearch={handleSearch}
-              searchbox={styles.search_box_input}
+              onChange={handleSearch}
+              className={styles.search_box_input}
               width={'245px'}
               style={isMobile ? { flex: 1 } : {}}
               size="small"

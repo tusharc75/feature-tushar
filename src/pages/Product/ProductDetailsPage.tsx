@@ -382,7 +382,7 @@ const ProductDetailsPage = () => {
                     <Box mt={3}>
                       <Grid item xs={12} sm={12} md={12} lg={12} className={'form-v1'}>
                         <Grid container spacing={2}>
-                          {permissions?.productInventory?.isRead && (
+                          {permissions?.productInventory?.isRead && !user?.user?.brandPolicy?.hideInventoryCount && (
                             <Grid item xs={12} sm={6} md={4} xl={3}>
                               <div style={{ overflow: 'hidden' }} className="single-form-v1">
                                 <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
@@ -704,6 +704,7 @@ const ProductDetailsPage = () => {
             onClose={() => setOpenProductInventoryDialog(false)}
             onSuccess={() => {
               setOpenProductInventoryDialog(false);
+              setSelectedWarehouse(null);
               if (permissions?.serializedAsset) {
                 getWarehouses();
               }

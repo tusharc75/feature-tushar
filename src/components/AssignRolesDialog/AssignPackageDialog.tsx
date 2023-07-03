@@ -60,7 +60,7 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -182,7 +182,7 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
             <Grid item xs={6} className="d-flex align-items-center gap-1"></Grid>
             <Grid item xs={6} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
-                <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
+                <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
                   disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                   onClick={() => {

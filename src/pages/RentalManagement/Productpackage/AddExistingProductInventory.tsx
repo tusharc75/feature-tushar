@@ -184,7 +184,12 @@ const AddExistingProductInventory = ({
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, type === 'product' ? routes.productDetail.path : routes.packagesDetail.path);
+          let currentColumn = getColumnData(
+            renderedFrom,
+            o?.fieldData,
+            type === 'product' ? routes.productDetail.path : routes.packagesDetail.path,
+            true
+          );
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -252,7 +257,7 @@ const AddExistingProductInventory = ({
           <Box mb={2}>
             <Grid container>
               <Grid item xs={10} sm={10} md={11} container justify="flex-end">
-                <SearchBox onSearch={handleSearch} searchbox="terms_header_search_bar" width="300px" value={search} />
+                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
               </Grid>
               <Grid item xs={2} sm={2} md={1} container justify="flex-end">
                 <Box ml={1}>

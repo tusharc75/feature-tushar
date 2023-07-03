@@ -13,14 +13,14 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
 import { startCase } from 'lodash';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import MaterialDialog from './MaterialDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { CHILD_RESOURCE, RESOURCE_LABEL } from 'src/constants/helpers';
+import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
@@ -198,8 +198,8 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
+       _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.type === 'package' ? _subRow.packageDetail?.packageName : _subRow.serviceDetail?.serviceName;
+      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -237,16 +237,6 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.subRows;
-    });
     axiosInstance()
       .put(`${routes.demandOrder.path}/material/${salesOrderData._id}`, { material: rows })
       .then(({ data }) => {
@@ -281,7 +271,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -362,7 +352,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload resource={RESOURCE_LABEL.demandOrder} referenceId={salesOrderData?._id} columns={columns} />
+            <PreviewDownload resource={sidebarResource.demandOrder} referenceId={salesOrderData?._id} columns={columns} />
             <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}

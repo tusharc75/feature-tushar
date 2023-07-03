@@ -149,8 +149,8 @@ const RoleHeader = (props) => {
         <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header}>
           <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox
-              searchbox={styles.search_box_input}
-              onSearch={onSearch}
+              onChange={onSearch}
+              className={styles.search_box_input}
               value={searchVal}
               size="small"
               placeholder="Search Role"
@@ -177,7 +177,7 @@ const RoleHeader = (props) => {
               <>
                 <Button
                   disabled={selectedRecords.length === 0}
-                  className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                  className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                   variant={isMobile && !isTablet ? 'text' : 'outlined'}
                   color="default"
                   size="small"

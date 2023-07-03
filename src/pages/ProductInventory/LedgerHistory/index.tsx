@@ -16,8 +16,11 @@ import { capitalize } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueId }) => {
+  const [themeColor] = useAppTheme();
+  const isDarkTheme = themeColor === 'dark';
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
@@ -66,10 +69,10 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       sortable: false,
       cellStyle: (params) => {
         if (params?.data?.type === 'Credit') {
-          return { backgroundColor: '#90ee90' };
+          return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
         }
         if (params?.data?.type === 'Debit') {
-          return { backgroundColor: '#FFCCCB' };
+          return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
         }
       }
     },
@@ -83,10 +86,10 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       sortable: false,
       cellStyle: (params) => {
         if (params?.data?.type === 'Credit') {
-          return { backgroundColor: '#90ee90' };
+          return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
         }
         if (params?.data?.type === 'Debit') {
-          return { backgroundColor: '#FFCCCB' };
+          return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
         }
       }
     },

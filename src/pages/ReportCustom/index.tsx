@@ -1,5 +1,5 @@
 import React, { useState, useReducer, useContext, useEffect, Fragment } from 'react';
-import { Grid, useTheme, useMediaQuery, Button, Box, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Grid, useTheme, Button, Box, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { camelCase, startCase } from 'lodash';
 import { MdDescription } from 'react-icons/md';
 import styles from 'src/pages/Leads/Header.module.scss';
@@ -10,25 +10,19 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { prepareDataForGrid, gridLoadingTimeout } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ManageCustomReport from './ManageCustomReport';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import { getStaticFields, staticFrameworkRender } from '../../constants/useColumns';
 
 const CustomReport = () => {
   const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
 
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions, selectedEntity }
-  } = useData();
+
   const renderedFrom = 'custom-report';
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -37,7 +31,6 @@ const CustomReport = () => {
   const [isDeleting, setDeleting] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
-  // Grid Configs
   const [columns] = useState([
     {
       field: 'customReportName',
@@ -88,11 +81,16 @@ const CustomReport = () => {
       gridApi.setRowData([]);
     }
     try {
-      let { data: { data, count } } = await axiosInstance().get(`custom-report`);
+      let {
+        data: { data, count }
+      } = await axiosInstance().get(`custom-report`);
       data = data.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource
-        finalObject.column = finalObject.column?.split(',')?.map((s: string) => startCase(s))?.join(', ');
+        finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource;
+        finalObject.column = finalObject.column
+          ?.split(',')
+          ?.map((s: string) => startCase(s))
+          ?.join(', ');
         finalObject.filters = finalObject.filters.length > 0 ? finalObject?.filters?.map((item) => startCase(item.term)) : [];
         return finalObject;
       });
@@ -206,12 +204,7 @@ const CustomReport = () => {
               <Grid item xs={8}>
                 <Box display="flex" alignItems="center" justifyContent="flex-end">
                   <Box mr={1}>
-                    <Button
-                      onClick={() => setShowManageDialog((prev) => ({ ...prev, open: true }))}
-                      variant="contained"
-                      size="small"
-                      color="primary"
-                    >
+                    <Button onClick={() => setShowManageDialog((prev) => ({ ...prev, open: true }))} variant="contained" size="small" color="primary">
                       Add
                     </Button>
                   </Box>
@@ -224,6 +217,7 @@ const CustomReport = () => {
                       onClick={openActions}
                       aria-controls="action-menu"
                       disabled={selectedRecords.length === 0}
+                      className="new-dropdown-v1"
                     >
                       Actions
                     </Button>
@@ -255,58 +249,25 @@ const CustomReport = () => {
           </div>
           <div>
             {Object.keys(frameworkComponents).length > 0 && columns ? (
-              isSmall ? (
-                <CustomSwipableList
-                  allowSelection={false}
-                  allowSwipe={false}
-                  permissions={permissions?.reports}
-                  primaryField={columns?.find((d: any) => d.primaryField)}
-                  onClick={(data) => {
-                    //   history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
-                  }}
-                  selectedRecords={[]}
-                  dataRows={dataRows}
-                  dispatch={dispatch}
-                  onEdit={() => { }}
-                  extraParamsToCheckDelete={false}
-                  rowCount={rowCount}
-                  page={page}
-                  loading={loading}
-                  chips={columns
-                    .filter((col) => col.hasOwnProperty('cellRendererParams'))
-                    .map((col) => ({
-                      field: col.field,
-                      label: col.headerName
-                    }))}
-                  additionalDetails={[]}
-                  owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                  onCreate={false}
-                  showClone={false}
-                  onDelete={(data) => { }}
-                  onClone={(data) => { }}
-                  renderedFrom={routes.transferAsset?.title}
-                />
-              ) : (
-                <CustomAgGrid
-                  columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameworkComponents}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  isClientSideGrid={true}
-                  actionWidth={100}
-                  loading={loading}
-                  renderedFrom={renderedFrom}
-                  allowSelection={true}
-                  allowAction={true}
-                  refreshGrid={fetchResourceData}
-                  showOnlyShowFilteredRecordSwitch={false}
-                />
-              )
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameworkComponents}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                isClientSideGrid={true}
+                actionWidth={100}
+                loading={loading}
+                renderedFrom={renderedFrom}
+                allowSelection={true}
+                allowAction={true}
+                refreshGrid={fetchResourceData}
+                showOnlyShowFilteredRecordSwitch={false}
+              />
             ) : (
               <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
             )}

@@ -62,6 +62,11 @@ export const rentalManagementSteps: stepInterface[] = [
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
+export const fieldTicketSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Add-on', title: 'Add-on', icon: 'add' }
+];
+
 export const demandOrderSteps = ['Add Products'];
 
 export const purchaseRequisitionSteps = ['Add Products'];
@@ -139,6 +144,7 @@ export const repairOrderSteps: stepInterface[] = [
 ];
 
 export const serviceOrderSteps: stepInterface[] = [
+  { name: 'Field Ticket', title: 'Field Ticket', icon: 'receivingTicket'},
   { name: 'Add Services', title: 'Add', icon: 'add' },
   { name: 'Add Products', title: 'Products', icon: 'assign' },
   { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
@@ -223,7 +229,7 @@ export const sidebarResource = {
   product: 'Product',
   productTemplate: 'Product Template',
   doa: 'DOA',
-  termsAndConditions: 'Terms & Conditions',
+  termsAndConditions: 'Terms And Conditions',
   equiptmentRentalMaster: 'Equiptment Rental Master',
   productBuilder: 'Product Builder',
   formBuilder: 'Form Builder',
@@ -287,7 +293,7 @@ export const sidebarResource = {
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
-  freqentlyAskedQuestion: 'Frequently Asked Question',
+  frequentlyAskedQuestion: 'Frequently Asked Question',
   blog: 'Blog',
   demandOrder: 'Demand Order',
   surveys: 'Surveys',
@@ -305,7 +311,7 @@ export const sidebarResource = {
   fieldServiceTechnician: `Field Service Technician`,
   rentalPlanningCalendar: `Rental Planning Calendar`,
   resourceLogs: `Resource Logs`,
-  fleetMaster: `Fleet Master`,
+  truckMaster: `Truck Master`,
   job: 'Job',
   fleetDispatch: 'Fleet Dispatch',
   fleetReceiver: 'Fleet Receiver',
@@ -314,7 +320,11 @@ export const sidebarResource = {
   wellNumber: 'Well Number',
   planningView: 'Planning View',
   taxMaster: 'Tax Master',
-  competencies: 'Competencies'
+  competencies: 'Competencies',
+  padMaster: 'Pad Master',
+  driverMaster: 'Driver Master',
+  fieldJob: 'Field Job',
+  trailerMaster: `Trailer Master`,
 };
 
 export const primaryFields = {
@@ -342,11 +352,12 @@ export const RESOURCE_LABEL = {
   productCategory: 'Product Categories',
   productInventory: 'Product Inventory',
   serializedAsset: 'Serialized Asset',
+  serializedAssetsCertification: 'Serialized Assets Certification',
   priceTemplate: 'Price Templates',
   product: 'Product Master',
   productTemplate: 'Product Templates',
   doa: 'DOA',
-  termsAndConditions: 'T&Cs',
+  termsAndConditions: 'Terms And Conditions',
   equiptmentRentalMaster: 'Equiptment Rental Master',
   projectSales: 'Project Sales',
   productBuilder: 'Price Builder',
@@ -405,7 +416,7 @@ export const RESOURCE_LABEL = {
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
-  freqentlyAskedQuestion: 'Frequently Asked Question',
+  frequentlyAskedQuestion: 'Frequently Asked Question',
   blog: 'Blog',
   eCommerceHome: 'e-Commerce Home',
   surveys: 'Surveys',
@@ -422,7 +433,7 @@ export const RESOURCE_LABEL = {
   fieldServiceTechnician: `Field Service Technician`,
   fleetDispatch: `Fleet Dispatch`,
   resourceLogs: `Resource Logs`,
-  fleetMaster: `Fleet Master`,
+  truckMaster: `Truck Master`,
   job: 'Job',
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
@@ -430,7 +441,11 @@ export const RESOURCE_LABEL = {
   wellNumber: 'Well Number',
   taxMaster: 'Tax Master',
   competencies: 'Competencies',
-  materialHandling: 'Material Handling'
+  materialHandling: 'Material Handling',
+  padMaster: 'Pad Master',
+  driverMaster: 'Driver Master',
+  fieldJob: 'Field Job',
+  trailerMaster: `Trailer Master`,
 };
 
 export const CHILD_RESOURCE = {
@@ -455,6 +470,7 @@ export const CHILD_RESOURCE = {
   fieldServiceOrderDetails: 'Field Service Order Detail',
   fieldServiceOrderAddon: 'Field Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',
+  fieldTicketMateial: 'Field Ticket Material',
   jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
@@ -647,6 +663,13 @@ export const serializedAsset = {
   route: '/serialized-asset',
   permission: 'serializedAsset',
   resource: 'Serialized Asset'
+};
+
+export const serializedAssetsCertification = {
+  api: '/serialized-assets-certification',
+  route: '/serialized-assets-certification',
+  permission: 'serializedAssetsCertification',
+  resource: 'Serialized Assets Certification'
 };
 
 export const workOrderSupervisor = {
@@ -943,21 +966,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1098,6 +1121,15 @@ export const convertDateInDateTime = (date) => {
   var newDate = new Date(date);
   var currentDate = new Date();
   newDate.setHours(currentDate.getHours(), currentDate.getMinutes(), currentDate.getSeconds());
+  return newDate;
+};
+
+export const convertDateTimToDate = (date) => {
+  if (!date) {
+    return date;
+  }
+  var newDate = moment(date);
+  newDate.set({ hour: 0, minute: 0, second: 0 });
   return newDate;
 };
 
@@ -1813,6 +1845,11 @@ export const ASSET_STATUS = {
   notApplied: 'N/A'
 };
 
+export const ASSET_NUMBER_TYPE = {
+  auto: 'Auto',
+  manual: 'Manual',
+}
+
 export const INVENTORY_HISTORY_TYPE = {
   rental: 'Rental',
   repair: 'Repair',
@@ -1967,7 +2004,7 @@ export const ACTIVITY_RESOURCE = {
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
   fieldTicket: 'fieldTicket',
-  fleetMaster: 'fleetMaster',
+  truckMaster: 'truckMaster',
   job: 'Job',
   purchaseRequisition: 'purchaseRequisition',
   planning: 'planning',
@@ -1984,13 +2021,13 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket'
+  irtTicket: 'irtTicket',
 };
 
 export const LOG_RESOURCE = {
   serializedAsset: sidebarResource.serializedAsset,
   serviceMaster: sidebarResource.serviceMaster,
-  fleetMaster: sidebarResource.fleetMaster,
+  truckMaster: sidebarResource.truckMaster,
   job: sidebarResource.job,
   quotation: sidebarResource.quotation,
   lead: sidebarResource.lead,
@@ -2031,7 +2068,6 @@ export const LOG_RESOURCE = {
   user: sidebarResource.user,
   wellMaster: sidebarResource.wellMaster,
   inventoryCycle: sidebarResource.inventoryCycle,
-  // frequentlyAskedQuestion: sidebarResource.freqentlyAskedQuestion,
   competencyType: sidebarResource.competencyType,
   bulkAssetCreation: sidebarResource.bulkAssetCreation,
   salesOrder: sidebarResource.salesOrder,

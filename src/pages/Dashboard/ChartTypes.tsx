@@ -71,7 +71,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
     let values = [];
     keys.forEach((key: string) => {
       if (!filterValues[key]) return;
-      const isEmpty = Object.keys(filterValues[key]).length === 0;
+      const isEmpty = Array.isArray(filterValues[key]) ? Object.keys(filterValues[key]).length === 0 : filterValues[key] === 0;
       if (!isEmpty) {
         values.push(key);
       }
@@ -98,6 +98,10 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
     keys.forEach((key) => {
       if (Array.isArray(params[key]) && params[key].length > 0) {
         url = `${url}${key}=${JSON.stringify(params[key].map((p: any) => p.optionValue))}&`;
+      }
+
+      if (typeof params[key] === 'number' && params[key] > 0) {
+        url = `${url}${key}=${params[key]}&`;
       }
 
       if (params[key]) {
@@ -185,7 +189,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
           display="flex"
           flexDirection="column"
           justifyContent="space-between"
-          sx={{ border: '1px solid #EFFBF9', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
+          sx={{ border: '1px solid var(--common-border-color)', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
         >
           <Box style={{ padding: '15px 10px' }}>
             <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -282,7 +286,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
             )}
           </Box>
 
-          <Box minHeight={fullScreen ? window.innerHeight - 150 : isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500}>
+          <Box height={fullScreen ? window.innerHeight - 200 : isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500}>
             {loading ? (
               <Loader noLoader={false} text="" style={{ minHeight: '100%' }} />
             ) : !chartData || chartData.length === 0 ? (
@@ -303,18 +307,29 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                 <Chart
                   id={chart.uniqueId}
                   type={chart.chartType?.toLowerCase()}
-                  data={chartData}
+                  data={{
+                    ...chartData,
+                    datasets: chartData.datasets?.map((d: any) => {
+                      if (!chart.stack) {
+                        delete d.stack;
+                      }
+                      return d;
+                    })
+                  }}
                   options={{
                     maintainAspectRatio: false,
                     indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
-                    ...(chart.stack && {scales: {
-                      x: {
-                        stacked: true,
-                      },
-                      y: {
-                        stacked: true,
-                      },
-                    }})  
+                    ...(chart.stack &&
+                      !chartData.datasets.some((d) => d.stack === 'stacked') && {
+                        scales: {
+                          x: {
+                            stacked: true
+                          },
+                          y: {
+                            stacked: true
+                          }
+                        }
+                      })
                   }}
                 />
               )

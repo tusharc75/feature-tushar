@@ -5,7 +5,7 @@ import { Box, Tabs, Tab } from '@material-ui/core';
 import TabPanel from '../../components/TabPanel';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { sidebarResource, RESOURCE_LABEL } from 'src/constants/helpers';
+import { sidebarResource } from 'src/constants/helpers';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { useData } from 'src/StateProvider/Provider';
 import { FaWpforms } from 'react-icons/fa';
@@ -17,7 +17,7 @@ const PLANNING_RESOURCE = [
     {
         key: 'rentalManagement',
         resource: sidebarResource.rentalManagement,
-        title: RESOURCE_LABEL.rentalManagement,
+        title: routes.rentalManagementDetail.title,
         path: routes.rentalManagementDetail.path,
         fieldName: 'rentalJobName',
         start: 'estimateStartDate',
@@ -26,7 +26,7 @@ const PLANNING_RESOURCE = [
     {
         key: 'planning',
         resource: sidebarResource.planning,
-        title: RESOURCE_LABEL.planning,
+        title: routes.planningDetail.title,
         path: routes.planningDetail.path,
         fieldName: 'planningNumber',
         start: 'startDate',
@@ -35,7 +35,7 @@ const PLANNING_RESOURCE = [
     {
         key: 'demandOrder',
         resource: sidebarResource.demandOrder,
-        title: RESOURCE_LABEL.demandOrder,
+        title: routes.demandOrderDetail.title,
         path: routes.demandOrderDetail.path,
         fieldName: 'demandOrderNumber',
         start: 'createDate',
@@ -44,7 +44,7 @@ const PLANNING_RESOURCE = [
     {
         key: 'productionOrder',
         resource: sidebarResource.productionOrder,
-        title: RESOURCE_LABEL.productionOrder,
+        title: routes.productionOrderDetail.title,
         path: routes.productionOrderDetail.path,
         fieldName: 'productionOrderNumber',
         start: 'createDate',
@@ -53,7 +53,7 @@ const PLANNING_RESOURCE = [
     {
         key: 'purchaseRequisition',
         resource: sidebarResource.purchaseRequisition,
-        title: RESOURCE_LABEL.purchaseRequisition,
+        title: routes.purchaseRequisitionDetail.title,
         path: routes.purchaseRequisitionDetail.path,
         fieldName: 'purchaseRequisitionNumber',
         start: 'createDate',
@@ -62,7 +62,7 @@ const PLANNING_RESOURCE = [
     {
         key: 'purchaseOrder',
         resource: sidebarResource.purchaseOrder,
-        title: RESOURCE_LABEL.purchaseOrder,
+        title: routes.purchaseOrderDetail.title,
         path: routes.purchaseOrderDetail.path,
         fieldName: 'purchaseOrderNumber',
         start: 'purchaseOrderDate',
@@ -71,7 +71,7 @@ const PLANNING_RESOURCE = [
     {
         key: 'repairJob',
         resource: sidebarResource.repairJob,
-        title: RESOURCE_LABEL.repairJob,
+        title: routes.repairJobDetail.title,
         path: routes.repairJobDetail.path,
         fieldName: 'repairJobName',
         start: 'startDate',
@@ -80,7 +80,7 @@ const PLANNING_RESOURCE = [
     {
         key: 'sublease',
         resource: sidebarResource.sublease,
-        title: RESOURCE_LABEL.sublease,
+        title: routes.subleaseDetail.title,
         path: routes.subleaseDetail.path,
         fieldName: 'subleaseName',
         start: 'estimateStartDate',
@@ -89,11 +89,20 @@ const PLANNING_RESOURCE = [
     {
         key: 'projectSales',
         resource: sidebarResource.projectSales,
-        title: RESOURCE_LABEL.projectSales,
+        title: routes.projectSalesDetail.title,
         path: routes.projectSalesDetail.path,
         fieldName: 'projectName',
         start: 'startDate',
         end: 'endDate'
+    },
+    {
+        key: 'fieldServiceOrder',
+        resource: sidebarResource.fieldServiceOrder,
+        title: routes.fieldServiceOrderDetail.title,
+        path: routes.fieldServiceOrderDetail.path,
+        fieldName: 'fieldServiceOrderNumber',
+        start: 'estimateStartDate',
+        end: 'estimateEndDate'
     },
 ]
 
@@ -110,6 +119,7 @@ function PlanningView() {
 
     const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
     const [resourceList, setResourceList] = useState([])
+    const [selectedResource, setSelectedResource] = useState(null)
 
     useEffect(() => {
         const options: any = [];
@@ -120,6 +130,13 @@ function PlanningView() {
         })
         setResourceList(options)
     }, [])
+
+    useEffect(() => {
+        const resource = history?.location?.state?.resource;
+        if (resource && resourceList?.find(_r => _r?.resource === resource)) {
+            setSelectedResource(resourceList?.find(_r => _r?.resource === resource))
+        }
+    }, [resourceList, history?.location?.state?.resource])
 
     const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
         setTabValue(newValue);
@@ -174,12 +191,18 @@ function PlanningView() {
                     </Tabs>
                     <TabPanel value={tabValue} index={0}>
                         <Box>
-                            <CalendarView resourceList={resourceList} />
+                            <CalendarView
+                                resourceList={resourceList}
+                                selectedResource={selectedResource}
+                                setSelectedResource={setSelectedResource} />
                         </Box>
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
                         <Box>
-                            <ListView resourceList={resourceList} />
+                            <ListView
+                                resourceList={resourceList}
+                                selectedResource={selectedResource}
+                                setSelectedResource={setSelectedResource} />
                         </Box>
                     </TabPanel>
                 </Box>

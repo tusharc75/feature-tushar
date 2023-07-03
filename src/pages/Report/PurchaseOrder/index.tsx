@@ -21,7 +21,7 @@ import {
   primaryFields,
   productInventory,
   isObjectEmpty,
-  RESOURCE_LABEL
+  sidebarResource
 } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
@@ -33,10 +33,13 @@ import HistoryIcon from '@material-ui/icons/History';
 import AverageCostHistory from '../AverageCostHistory';
 import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 let cancelTokenSource = null;
 
 const Report = () => {
+  const [themeColor] = useAppTheme();
+  const isDarkTheme = themeColor === 'dark';
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
   const initialRender = React.useRef(true);
@@ -363,14 +366,14 @@ const Report = () => {
               addManualOptionInExcel: false,
               addAdditionalOption: false,
               lookup: true,
-              lookupResource: RESOURCE_LABEL.storageLocation,
+              lookupResource: sidebarResource.storageLocation,
               isDropdown: false,
               isWarningTooltip: false,
               warningTooltipMessage: '',
               defaultValue: '',
               fieldName: 'storageLocation',
               sectionName: 'PO Information',
-              resource: RESOURCE_LABEL.purchaseOrder,
+              resource: sidebarResource.purchaseOrder,
               brand: user.brand
             },
             isCreate: true,
@@ -412,24 +415,26 @@ const Report = () => {
             sortable: false,
             cellStyle: (params) => {
               if (params?.data?.type === 'credit') {
-                return { backgroundColor: '#90ee90' };
+                return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
               }
               if (params?.data?.type === 'debit') {
-                return { backgroundColor: '#FFCCCB' };
+                return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
               }
             }
           },
           { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
           { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
           { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
-          ...(user?.user?.brandPolicy?.storageLocation ? [
-            {
-              field: 'storageLocation',
-              headerName: 'Storage Location',
-              show: true,
-              cellRenderer: 'commonRenderer'
-            }
-          ] : []),
+          ...(user?.user?.brandPolicy?.storageLocation
+            ? [
+                {
+                  field: 'storageLocation',
+                  headerName: 'Storage Location',
+                  show: true,
+                  cellRenderer: 'commonRenderer'
+                }
+              ]
+            : []),
           { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
           { field: 'serialNumber', headerName: 'Serial Number', filter: false, show: true, cellRenderer: 'serialNumberRenderer' },
           { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'commonRenderer' }
@@ -701,13 +706,14 @@ const Report = () => {
     }
     axiosInstance()
       .get(
-        `${resourceCamelCase === 'purchaseOrderDetails'
-          ? `${productInventory.api}/report/purchase-order-product-wise-report`
-          : resourceCamelCase === 'inventoryEvaluation'
+        `${
+          resourceCamelCase === 'purchaseOrderDetails'
+            ? `${productInventory.api}/report/purchase-order-product-wise-report`
+            : resourceCamelCase === 'inventoryEvaluation'
             ? `${productInventory.api}/report/purchase-order-price`
             : resourceCamelCase === 'inventoryHistory'
-              ? `${productInventory.api}/report/history-report`
-              : `${productInventory.api}/report/supplier-product-price`
+            ? `${productInventory.api}/report/history-report`
+            : `${productInventory.api}/report/supplier-product-price`
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -852,13 +858,14 @@ const Report = () => {
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${resourceCamelCase === 'purchaseOrderDetails'
-          ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
-          : resourceCamelCase === 'inventoryEvaluation'
+        `${
+          resourceCamelCase === 'purchaseOrderDetails'
+            ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
+            : resourceCamelCase === 'inventoryEvaluation'
             ? `${productInventory.api}/report/purchase-order-price/export`
             : resourceCamelCase === 'inventoryHistory'
-              ? `${productInventory.api}/report/history-report/export`
-              : `${productInventory.api}/report/supplier-product-price/export`
+            ? `${productInventory.api}/report/history-report/export`
+            : `${productInventory.api}/report/supplier-product-price/export`
         }${filterQuery}&exportColumn=${JSON.stringify(columns)} `,
         {
           responseType: 'arraybuffer'
@@ -942,7 +949,6 @@ const Report = () => {
                 </Grid>
               </Grid>
             </div>
-            <hr />
             {!showGrid ? (
               <ReportFilters
                 resourceColumns={resourceColumns}

@@ -19,7 +19,7 @@ import routes from '../Helpers/Routes';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
-function PreviewDownload({ resource, referenceId, columns, isSendEmail = false }) {
+function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [] }) {
   const toastConfig = useContext(CustomToastContext);
   const columnFilter = ['Action'];
   const allColumn = columns?.filter((d) => !columnFilter.includes(d.Header || d.headerName))?.map((d) => d.Header || d.headerName) || [];
@@ -92,7 +92,8 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false }
   };
 
   useEffect(() => {
-    setVisibleColumnsExcel(allColumn);
+    const defaultColumnsToShow = defaultColumns?.length > 0 ? allColumn?.filter((c) => defaultColumns?.includes(c)) : allColumn;
+    setVisibleColumnsExcel([...defaultColumnsToShow]);
   }, [columns]);
 
   const fetchEmailAttachment = () => {
@@ -281,7 +282,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false }
                           style={{ marginRight: 8 }}
                           checked={
                             showExcelArrangeColumns &&
-                            ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
+                              ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
                               ? true
                               : selected
                           }

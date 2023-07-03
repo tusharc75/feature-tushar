@@ -129,9 +129,9 @@ const Competencies = ({ competencyType }) => {
       deepFilter = `?`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    filterByIds.push({ field: 'competencyType', term: competencyType })
+    filterByIds.push({ field: 'competencyType', term: competencyType });
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -217,17 +217,6 @@ const Competencies = ({ competencyType }) => {
     setAnchorActionEl(null);
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-      default:
-        return field;
-    }
-  };
-
   return (
     <Fragment>
       <Box p={1} pb={2}>
@@ -254,6 +243,7 @@ const Competencies = ({ competencyType }) => {
                 aria-controls="action-menu"
                 disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
               >
                 Actions
               </Button>

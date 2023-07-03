@@ -355,18 +355,18 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
-                    setStatusToUpdate({ open: true, isUpdating: false, status: 'Scrap', message: '' });
+                    setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
                   }}
                 >
-                  Scrap
+                  {ASSET_STATUS.scrap}
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
-                    setStatusToUpdate({ open: true, isUpdating: false, status: 'Lost', message: '' });
+                    setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
                   }}
                 >
-                  Lost
+                  {ASSET_STATUS.lost}
                 </MenuItem>
               </Menu>
               <Box mx={1} />
@@ -394,6 +394,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 aria-controls="action-menu"
                 disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
               >
                 Actions
               </Button>

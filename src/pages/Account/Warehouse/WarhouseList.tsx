@@ -3,25 +3,13 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, CircularProgress, TextField } from '@material-ui/core';
+import { Box, CircularProgress } from '@material-ui/core';
 import SearchBox from '../../../components/Helpers/SearchBox';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import {
-  gridLoadingTimeout,
-  CustomDialogTransition,
-  packages,
-  product,
-  isObjectEmpty,
-  prepareDataForGrid,
-  getLocalStorageArrayData
-} from '../../../constants/helpers';
+import { gridLoadingTimeout, CustomDialogTransition, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Dialog from '@material-ui/core/Dialog/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import CustomAgGridEditable from '../../../components/AgGridComponents/CustomAgGridEditable';
-import { startCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -125,7 +113,7 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes?.warehouseDetail?.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes?.warehouseDetail?.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -155,7 +143,7 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
           <Box mb={2}>
             <Grid container>
               <Grid item xs={12} sm={12} container justify="flex-end">
-                <SearchBox onSearch={handleSearch} searchbox="terms_header_search_bar" width="300px" value={search} />
+                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
                 <Box ml={1}>
                   <Button
                     size="small"

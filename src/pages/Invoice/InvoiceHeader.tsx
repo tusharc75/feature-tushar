@@ -154,8 +154,8 @@ function InvoiceHeader(props) {
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
           <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox
-              onSearch={onSearch}
-              searchbox={styles.search_box_input}
+              onChange={onSearch}
+              className={styles.search_box_input}
               value={searchVal}
               size="small"
               width="200px"
@@ -185,7 +185,7 @@ function InvoiceHeader(props) {
                   color="default"
                   size="small"
                   onClick={openActions}
-                  className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                  className={`${isMobile ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                   aria-controls="action-menu"
                   endIcon={<ExpandMore />}
                 >

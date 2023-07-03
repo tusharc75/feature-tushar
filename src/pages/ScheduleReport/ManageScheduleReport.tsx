@@ -181,7 +181,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     if (!resourceColumns && resourceColumns.length === 0) return;
     const optionsData: any = {};
     const filteredData = [...resourceColumns]
-      .filter((d: any) => d.isRead && (d.fieldData.type === 'dropDown' || d.fieldData.type === 'date'))
+      .filter((d: any) => d.isRead && (d.fieldData.type === 'dropDown' || d.fieldData.type === 'date' || d.fieldData.type === 'checkBox'))
       .map((d: any) => {
         if (d.fieldData.type === 'dropDown') {
           optionsData[d.fieldData.fieldName] = {
@@ -328,14 +328,19 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     }
   };
 
-  const handleSelectFilter = (name: string, value: any) => {
+  const handleSelectFilter = (type: string, name: string, value: any) => {
     let fieldProps: any = {};
-    if (!name?.includes('Date')) {
-      fieldProps.type = resourceOptions[name].type;
-      fieldProps.lookup = resourceOptions[name].lookup;
-    } else {
+    if (type === 'date') {
       fieldProps.type = 'date';
       fieldProps.lookup = false;
+    }
+    else if (type === 'checkBox') {
+      fieldProps.type = 'checkBox';
+      fieldProps.lookup = false;
+    }
+    else {
+      fieldProps.type = resourceOptions[name].type;
+      fieldProps.lookup = resourceOptions[name].lookup;
     }
 
     const newData: any = {
@@ -385,13 +390,21 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     if (selectedData) {
       const filterKeys = Object.keys(selectedData);
       filterKeys.forEach((key) => {
-        if (selectedData[key] && selectedData[key]?.value?.length) {
+        if (selectedData[key]?.type === 'checkBox') {
           let obj = {
             term: key,
-            value: selectedData[key]?.value.map((item) => item.optionValue)
+            value: selectedData[key]?.value
           };
-
           filters.push(obj);
+        }
+        else {
+          if (selectedData[key] && selectedData[key]?.value?.length) {
+            let obj = {
+              term: key,
+              value: selectedData[key]?.value.map((item) => item.optionValue)
+            };
+            filters.push(obj);
+          }
         }
       });
     }

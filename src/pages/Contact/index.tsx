@@ -4,7 +4,7 @@ import { useData } from '../../StateProvider/Provider';
 import { Link } from 'react-router-dom';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageContactDialog from './ManageContact/index';
+import ManageContactDialog from './ManageContact';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import SearchBox from '../../components/Helpers/SearchBox';
 import CustomContainer from '../../components/CustomContainer';
@@ -15,13 +15,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  userType,
-  getLocalStorageArrayData,
-  removeLocalStorage
-} from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, userType, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Chip } from '@material-ui/core';
@@ -688,8 +682,8 @@ export default function Contact(props) {
               <Box id="resourceOperations" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid style={{ display: 'flex', flex: 1 }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     value={search}
                     size="small"
                     width={isMobile ? '200px' : '242px'}
@@ -721,7 +715,7 @@ export default function Contact(props) {
                         color="default"
                         size="small"
                         onClick={openActions}
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                         aria-controls="action-menu"
                         endIcon={<ExpandMore />}
                       >
@@ -911,20 +905,17 @@ export default function Contact(props) {
               onOk={handleDeleteContact}
             />
           ) : null}
-
           {showCreateContactDialog?.open && (
             <ManageContactDialog
-              open={showCreateContactDialog?.open}
-              onClose={() => setShowCreateContactDialog({ open: false, isClone: false, idToClone: null })}
-              onSuccess={() => {
-                setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
-                getContacts();
-              }}
               contactResource={contactResource}
               contactApi={contactApi}
-              account={account}
               contactId={showCreateContactDialog?.idToClone}
               isClone={showCreateContactDialog?.isClone}
+              onClose={() => {
+                setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
+              }}
+              onSuccess={() => {}}
+              isRedirectToDetailPage={true}
             />
           )}
           {showAssignEntityDialog && (

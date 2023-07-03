@@ -245,18 +245,6 @@ const Report = () => {
       });
   };
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
 
   // Create and return query for filters
   const getFilter = (isExport = false) => {
@@ -272,6 +260,7 @@ const Report = () => {
     if (search) {
       filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
     }
+
     if (selectedResources.length > 0) {
       if (selectedData) {
         const keys = selectedData ? Object.keys(selectedData) : [];
@@ -279,7 +268,7 @@ const Report = () => {
         const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
 
         let filterById = idFilter.map((key) => {
-          const options = selectedData[key].value;
+          const options = selectedData[key]?.value;
           return {
             field: key,
             term: {
@@ -289,18 +278,16 @@ const Report = () => {
         });
 
         forDeepFilter.forEach((key) => {
-          const options = selectedData[key].value;
-          if (selectedData[key].type === 'dropDown') {
+          if (selectedData[key].type === 'checkBox') {
             deepFilter.push({
               field: key,
-              term: options.map((d: any) => d.optionValue)
+              term: selectedData[key].value ? 'Yes' : 'No'
             });
-          } else {
-            options.forEach((o: any) => {
-              deepFilter.push({
-                field: key,
-                term: o.optionValue
-              });
+          }
+          else {
+            deepFilter.push({
+              field: key,
+              term: selectedData[key].value?.map((d: any) => d.optionValue)
             });
           }
         });
@@ -325,7 +312,7 @@ const Report = () => {
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         deepFilter.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -452,7 +439,6 @@ const Report = () => {
                 </Grid>
               </Grid>
             </div>
-            {/* <hr /> */}
             {!showGrid ? (
               <ReportFilters
                 resourceColumns={resourceColumns}
@@ -498,7 +484,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => {}}
+                      onEdit={() => { }}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -513,8 +499,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => {}}
-                      onClone={(data) => {}}
+                      onDelete={(data) => { }}
+                      onClone={(data) => { }}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (

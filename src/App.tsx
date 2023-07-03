@@ -50,6 +50,7 @@ import Roles from './pages/Role';
 import RoleDetailsPage from './pages/Role/RoleDetailsPage';
 import Product from './pages/Product';
 import TermsAndConditions from './pages/TermsAndConditions';
+import TermsAndConditionDetail from './pages/TermsAndConditions/TermsAndConditionDetail';
 import PriceTemplate from './pages/PriceTemplate';
 import CreatePriceTemplate from './pages/PriceTemplate/CreatePriceTemplate';
 import ProductBuilder from './pages/ProductBuilder';
@@ -75,6 +76,7 @@ import QuotePdfTemplate from './pages/QuotePdfTemplate';
 import Warehouse from './pages/Warehouse';
 import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
 import SerializedAsset from './pages/SerializedAsset';
+import SerializedAssetsCertification from './pages/SerializedAssetsCertification';
 import SerializedAssetDetailsPage from './pages/SerializedAsset/SerializedAssetDetailsPage';
 import EquipmentRentalMaster from './pages/EquipmentRentalMaster';
 import ProductDetailsPage from './pages/Product/ProductDetailsPage';
@@ -115,7 +117,7 @@ import TransferInventoryDetailPage from './pages/TransferInventory/TransferInven
 import Zone from './pages/zone';
 import ZoneDetailPage from './pages/zone/ZoneDetailPage';
 import { Button, Snackbar } from '@material-ui/core';
-import * as serviceWorkerRegistration from 'src/serviceWorkerRegistration';
+import { registerSW } from 'virtual:pwa-register';
 import MuiAlert from '@material-ui/lab/Alert';
 import WellMaster from './pages/WellMaster';
 import DashboardBuilder from './pages/DashboardBuilder/DashboardManager';
@@ -193,8 +195,8 @@ import FieldTicket from './pages/FieldTicket';
 import FieldTicketDetail from './pages/FieldTicket/FieldTicketDetail';
 import FieldServiceTechnician from './pages/FieldServiceTechnician';
 import FleetDispatch from './pages/FleetDispatch';
-import FleetMaster from './pages/FleetMaster';
-import FleetMasterDetail from './pages/FleetMaster/FleetMasterDetail';
+import TruckMaster from './pages/TruckMaster';
+import TruckMasterDetail from './pages/TruckMaster/TruckMasterDetail';
 import Job from './pages/Job';
 import JobDetail from './pages/Job/JobDetail';
 import FleetReceiver from './pages/FleetReceiver';
@@ -213,49 +215,24 @@ import DynamicFormDetail from './pages/DynamicForm/DynamicFormDetail';
 import Competencies from './pages/Competencies';
 import CompetenciesDetail from './pages/Competencies/CompetenciesDetail';
 import MaterialHandling from './pages/MaterialHandling';
+import ScreenOrientationOverlay from './components/ScreenOrientationOverlay';
+import PadMaster from './pages/PadMaster';
+import PadMasterDetail from './pages/PadMaster/PadMasterDetail';
+import FieldJob from './pages/FieldJob';
+import FieldJobDetail from './pages/FieldJob/FieldJobDetail';
+import DriverMaster from './pages/DriverMaster';
+import DriverMasterDetail from './pages/DriverMaster/DriverMasterDetail';
+import TrailerMaster from './pages/TrailerMaster';
+import TrailerMasterDetail from './pages/TrailerMaster/TrailerMasterDetail';
 
 var notificationInterval: any = null;
 
-function Alert(props) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
-
 function App() {
-  const [serviceWorkerData, setServiceWorkerData] = useState<{
-    newVersionAvailable: boolean;
-    waitingWorker: { [key: string]: any };
-  }>({
-    newVersionAvailable: false,
-    waitingWorker: {}
-  });
-
-  const [refreshSnackBar, setRefreshSnackBar] = useState(false);
-
-  const updateServiceWorker = () => {
-    const { waitingWorker } = serviceWorkerData;
-    localStorage.removeItem('newVersionAvailable');
-    waitingWorker && waitingWorker.postMessage && waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-    setServiceWorkerData({ ...serviceWorkerData, newVersionAvailable: false });
-    window.location.reload();
-  };
-
-  const onServiceWorkerUpdate = (registration) => {
-    localStorage.setItem('newVersionAvailable', 'true');
-    setRefreshSnackBar(true);
-    setServiceWorkerData({
-      waitingWorker: registration && registration.waiting,
-      newVersionAvailable: true
-    });
-  };
-
   useEffect(() => {
-    serviceWorkerRegistration.register({ onUpdate: onServiceWorkerUpdate });
+    if ('serviceWorker' in navigator) {
+      registerSW();
+    }
   }, []);
-
-  useEffect(() => {
-    const newVersionAvailable = localStorage.getItem('newVersionAvailable');
-    if (newVersionAvailable === 'true') setRefreshSnackBar(true);
-  }, [setRefreshSnackBar]);
 
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
@@ -318,7 +295,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -387,10 +364,8 @@ function App() {
     }
 
     return !user ? (
-      // <Suspense fallback={<div>Loading...</div>}>
       <Comp />
     ) : (
-      // </Suspense>
       <Redirect
         to={{
           pathname: redirectToAnotherScreen
@@ -409,30 +384,6 @@ function App() {
       <CssBaseline />
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
-          <Snackbar
-            open={refreshSnackBar}
-            autoHideDuration={null}
-            onClose={(event, reason) => {
-              if (reason === 'clickaway') return;
-              setRefreshSnackBar(false);
-            }}
-          >
-            <Alert
-              onClose={() => {
-                setRefreshSnackBar(false);
-                updateServiceWorker();
-              }}
-              severity="success"
-            >
-              <div style={{ display: 'flex', width: '100%', alignItems: 'start', justifyContent: 'space-between', gap: 20 }}>
-                <div style={{ flex: 1 }}>New Version of Equipt Portal is available. Please refresh to get the latest changes.</div>
-                <Button className="snackbar-button" size="medium" variant="contained" color="secondary" onClick={updateServiceWorker}>
-                  Refresh
-                </Button>
-              </div>
-            </Alert>
-          </Snackbar>
-          {/* <Switch location={location} key={location.key}> */}
           <Switch>
             <Route
               // exact
@@ -576,6 +527,9 @@ function App() {
             <PrivateRoute exact path={routes.serializedAsset.path}>
               <SerializedAsset />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.serializedAssetsCertification.path}>
+              <SerializedAssetsCertification />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAsset.path + '-new'}>
               <SerializedAssetTest />
             </PrivateRoute>
@@ -627,8 +581,11 @@ function App() {
             <PrivateRoute exact path={`${routes.formBuilder.path}${routes.formBuilderResource.path}`}>
               <CreateFormBuilder />
             </PrivateRoute>
-            <PrivateRoute exact path={termsAndCondition.route}>
-              <TermsAndConditions termsAndConditionBreadcrumb={routes.termsAndConditions} />
+            <PrivateRoute exact path={routes.termsAndConditions.path}>
+              <TermsAndConditions />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.termsAndConditionsDetails.path}/:id`}>
+              <TermsAndConditionDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.priceTemplate.path}>
               <PriceTemplate />
@@ -972,11 +929,11 @@ function App() {
             <PrivateRoute exact path={`${routes.fleetDispatch.path}`}>
               <FleetDispatch />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fleetMaster.path}`}>
-              <FleetMaster />
+            <PrivateRoute exact path={`${routes.truckMaster.path}`}>
+              <TruckMaster />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fleetMasterDetail.path}/:id`}>
-              <FleetMasterDetail />
+            <PrivateRoute exact path={`${routes.truckMasterDetail.path}/:id`}>
+              <TruckMasterDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.job.path}`}>
               <Job />
@@ -1023,6 +980,30 @@ function App() {
             <PrivateRoute exact path={`${routes.materialHandling.path}`}>
               <MaterialHandling />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.padMaster.path}`}>
+              <PadMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.padMasterDetail.path}/:id`}>
+              <PadMasterDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldJob.path}`}>
+              <FieldJob />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldJobDetail.path}/:id`}>
+              <FieldJobDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.driverMaster.path}`}>
+              <DriverMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.driverMasterDetail.path}/:id`}>
+              <DriverMasterDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.trailerMaster.path}`}>
+              <TrailerMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.trailerMasterDetail.path}/:id`}>
+              <TrailerMasterDetail />
+            </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
             </Route>
@@ -1034,6 +1015,7 @@ function App() {
             </PrivateRoute>
             <Route path="*" component={NotFound} />
           </Switch>
+          <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
         </ErrorBoundaryComponent>
       </AnimatePresence>
       {toast?.toastConfig?.open &&
@@ -1052,10 +1034,6 @@ function App() {
         ) : (
           ''
         ))}
-      {/* {
-        isOffline ?
-          <OfflineStatusDialog /> : null
-      } */}
     </ColorModeProvider>
   );
 }

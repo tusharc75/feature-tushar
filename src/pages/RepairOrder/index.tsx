@@ -1,14 +1,10 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
-// import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaClone } from 'react-icons/fa';
 import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
 import {
-  isObjectEmpty,
-  customerAccount,
-  supplierAccount,
   gridLoadingTimeout,
   repairOrder,
   prepareDataForGrid,
@@ -42,11 +38,11 @@ const RepairOrder = () => {
 
   const RepairOrderType = [
     {
-      key: `All ${routes?.repairOrder.title}`,
+      key: `My ${routes?.repairOrder.title}`,
       value: 1
     },
     {
-      key: `My ${routes?.repairOrder.title}`,
+      key: `All ${routes?.repairOrder.title}`,
       value: 2
     }
   ];
@@ -221,7 +217,7 @@ const RepairOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {

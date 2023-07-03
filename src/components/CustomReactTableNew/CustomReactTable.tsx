@@ -27,7 +27,8 @@ import {
   useFilters,
   useColumnOrder,
   usePagination,
-  useRowState
+  useRowState,
+  CheckboxProps
 } from 'react-table';
 import { useSticky } from 'react-table-sticky';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -45,7 +46,13 @@ import ArrangeViewButton from './ArrangeViewButton';
 import { GrFormClose } from 'react-icons/gr';
 import { CgSearch } from 'react-icons/cg';
 
-const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, ...rest }: any, ref) => {
+interface CustomCheckBoxProps extends CheckboxProps {
+  indeterminate: any;
+  from?: string;
+  style?: React.CSSProperties;
+}
+
+const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, style, ...rest }: CustomCheckBoxProps, ref) => {
   const defaultRef = React.useRef();
   const resolvedRef: any = ref || defaultRef;
   useEffect(() => {
@@ -58,7 +65,7 @@ const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, ...rest }
       {...rest}
       defaultChecked={false}
       color="primary"
-      style={from === 'Header' ? { padding: '0px', color: 'white' } : { padding: '0px' }}
+      style={{ ...style, color: from === 'Header' ? 'white' : 'inherit', padding: 0 }}
       inputProps={{ 'aria-label': 'secondary checkbox' }}
     />
   );
@@ -268,7 +275,9 @@ function CustomReactTable({
               minWidth: 50,
               width: 50,
               maxWidth: 50,
-              Header: ({ getToggleAllRowsSelectedProps }) => <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />,
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
+              ),
               Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
             },
             ...baseColumns.map((m) => {
@@ -281,7 +290,9 @@ function CustomReactTable({
               minWidth: 50,
               width: 50,
               maxWidth: 50,
-              Header: ({ getToggleAllRowsSelectedProps }) => <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />,
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
+              ),
               Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
             },
             ...baseColumns.map((m) => {
@@ -307,7 +318,6 @@ function CustomReactTable({
     headerGroups,
     footerGroups,
     prepareRow,
-
     allColumns,
     setHiddenColumns,
     getToggleHideAllColumnsProps,

@@ -46,9 +46,9 @@ import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
 const SerializedAsset = () => {
-
   const renderedFrom = camelCase(routes?.serializedAsset.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -71,6 +71,7 @@ const SerializedAsset = () => {
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
+  const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false);
 
   const {
     state: { permissions }
@@ -113,11 +114,13 @@ const SerializedAsset = () => {
   ]);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/product-category?sortBy=name&orderBy=asc`)
-      .then(({ data: { data } }) => {
-        setProductCategoryList(data);
-      });
+    if (permissions?.productCategory?.isRead) {
+      axiosInstance()
+        .get(`/product-category?sortBy=name&orderBy=asc`)
+        .then(({ data: { data } }) => {
+          setProductCategoryList(data);
+        });
+    }
   }, []);
 
   useEffect(() => {
@@ -127,8 +130,6 @@ const SerializedAsset = () => {
         setWarehouseOptions(data['Warehouse']);
       });
   }, []);
-
-
 
   useEffect(() => {
     if (productCategory && productCategory !== '') {
@@ -169,11 +170,7 @@ const SerializedAsset = () => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
             e.cellStyle = (params) => {
-              if (
-                [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                  params?.data?.status
-                )
-              ) {
+              if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
                 return { backgroundColor: COLOUR_MASTER.lostAssets.background };
               }
               // if (params.data?.recertDate) {
@@ -259,7 +256,7 @@ const SerializedAsset = () => {
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (warehouse?.optionValue) {
       filterByIds.push({ field: 'warehouse', term: warehouse?.optionValue });
@@ -434,22 +431,27 @@ const SerializedAsset = () => {
     setAnchorEl(null);
   };
 
-  const handleMTRAttached = (status: boolean) => {
-    const _ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => d?._id);
-    axiosInstance().post(`${serializedAsset.api}/update-bulk-data`, { _ids, mtrAttached: status })
-      .then(({ data }) => {
-        localStorage.removeItem(localStorageSelectedRecords);
-        fetchProductInventory();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+  const handleCertificationSupplier = async (data) => {
+    const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((item) => item?._id);
+    const certificationSupplier = data?.map((item) => item?._id);
+    const body = {
+      _ids: ids,
+      certificationSupplier: certificationSupplier
+    };
+    try {
+      let response = await axiosInstance().put(`${routes?.serializedAsset?.path}/update-bulk-data`, body);
+      removeLocalStorage(localStorageSelectedRecords);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: response?.data?.message
       });
-  }
+      setOpenSupplierAccountDialog(false);
+      fetchProductInventory();
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   return (
     <Fragment>
@@ -532,35 +534,36 @@ const SerializedAsset = () => {
                 </Fragment>
               ) : (
                 <Fragment>
-                  <Autocomplete
-                    style={{ width: '250px' }}
-                    options={productCategoryList}
-                    getOptionLabel={(option: any) => (option ? option.name : '')}
-                    getOptionSelected={(option: any, val) => option._id === val}
-                    value={
-                      productCategoryList.filter((data) => data._id === productCategory).length
-                        ? productCategoryList.filter((data) => data._id === productCategory)[0]
-                        : ''
-                    }
-                    onChange={(e, val) => {
-                      setProductCategory(val && val._id ? val._id : '');
-                    }}
-                    renderInput={(params) =>
-                      isMobile && !isTablet ? (
-                        <TextField
-                          {...params}
-                          margin="dense"
-                          name="productCategory"
-                          placeholder="Product Category"
-                          variant="standard"
-                          fullWidth
-                          className={isMobile ? 'serchBox' : ''}
-                        />
-                      ) : (
-                        <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
-                      )
-                    }
-                  />
+                  {permissions?.productCategory?.isRead &&
+                    <Autocomplete
+                      style={{ width: '250px' }}
+                      options={productCategoryList}
+                      getOptionLabel={(option: any) => (option ? option.name : '')}
+                      getOptionSelected={(option: any, val) => option._id === val}
+                      value={
+                        productCategoryList.filter((data) => data._id === productCategory).length
+                          ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                          : ''
+                      }
+                      onChange={(e, val) => {
+                        setProductCategory(val && val._id ? val._id : '');
+                      }}
+                      renderInput={(params) =>
+                        isMobile && !isTablet ? (
+                          <TextField
+                            {...params}
+                            margin="dense"
+                            name="productCategory"
+                            placeholder="Product Category"
+                            variant="standard"
+                            fullWidth
+                            className={isMobile ? 'serchBox' : ''}
+                          />
+                        ) : (
+                          <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+                        )
+                      }
+                    />}
                   {productCategory && (
                     <Autocomplete
                       style={{ width: '250px' }}
@@ -583,9 +586,10 @@ const SerializedAsset = () => {
                     options={warehouseOptions}
                     getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                     getOptionSelected={(option: any, val) => option.optionValue === val}
-                    value={warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-                      ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
-                      : ''
+                    value={
+                      warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                        ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                        : ''
                     }
                     onChange={(e, val) => {
                       setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
@@ -628,10 +632,10 @@ const SerializedAsset = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Box style={{ flexGrow: '1' }}>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile ? '200px' : '210px'}
-                    style={{ width: ['100%'] }}
+                    style={{ width: '100%', maxWidth: 250, display: 'flex' }}
                     size="small"
                     value={search}
                   />
@@ -653,7 +657,7 @@ const SerializedAsset = () => {
                   )}
                   {(permissions?.serializedAsset?.isDelete || permissions?.serializedAsset?.isUpdate) && (
                     <Button
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
                       color="default"
                       size="small"
@@ -715,9 +719,8 @@ const SerializedAsset = () => {
                               handleStatusUpdate(ASSET_STATUS.needRepair);
                             }}
                             disabled={
-                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter(
-                                (o) => ![ASSET_STATUS.needRepair].includes(o.status)
-                              ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRepair].includes(o.status))
+                                .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
                                 ? false
                                 : true
                             }
@@ -730,9 +733,8 @@ const SerializedAsset = () => {
                               handleStatusUpdate(ASSET_STATUS.needRecert);
                             }}
                             disabled={
-                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter(
-                                (o) => ![ASSET_STATUS.needRecert].includes(o.status)
-                              ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRecert].includes(o.status))
+                                .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
                                 ? false
                                 : true
                             }
@@ -767,10 +769,20 @@ const SerializedAsset = () => {
                           >
                             {`Status Change - ${ASSET_STATUS.lost}`}
                           </MenuItem>
+                          {columns?.some((e) => e.field === 'certificationSupplier') && (
+                            <MenuItem
+                              disabled={!permissions?.serializedAsset?.isUpdate}
+                              onClick={() => {
+                                closeActions();
+                                setOpenSupplierAccountDialog(true);
+                              }}
+                            >
+                              {`Assign Certification Supplier`}
+                            </MenuItem>
+                          )}
                         </>
-                      )
-                    }
-                    {columns?.some(e => e.field === "mtrAttached") &&
+                      )}
+                    {/* {columns?.some(e => e.field === "mtrAttached") &&
                       <>
                         <MenuItem
                           onClick={() => {
@@ -789,7 +801,7 @@ const SerializedAsset = () => {
                           MTR Attach - No
                         </MenuItem>
                       </>
-                    }
+                    } */}
                   </Menu>
                 </Box>
               </Box>
@@ -919,6 +931,20 @@ const SerializedAsset = () => {
             setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {openSupplierAccountDialog && (
+        <AssignDynamicDialog
+          reference={routes.serializedAsset.title}
+          onSuccess={(data) => {
+            handleCertificationSupplier(data);
+          }}
+          handleClose={() => {
+            setOpenSupplierAccountDialog(false);
+          }}
+          ids={[]}
+          resource={sidebarResource?.supplierAccount}
+          path={routes?.supplierAccount?.path}
         />
       )}
     </Fragment>

@@ -51,7 +51,7 @@ const PurchaseRequisition = () => {
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, currency: null, warehouse: null, products: [], services: [] });
-  const [convertedPurchaseRequisitionId, setConvertedPurchaseRequisitionId] = useState(null)
+  const [convertedPurchaseRequisitionId, setConvertedPurchaseRequisitionId] = useState(null);
   const { getColumnData } = useColumns();
 
   const fetchGridColumns = () => {
@@ -124,9 +124,9 @@ const PurchaseRequisition = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter =  `?page=${page}&limit=${limit}` ;
+    let deepFilter = `?page=${page}&limit=${limit}`;
     if (isExport) {
-      deepFilter = `?`
+      deepFilter = `?`;
     }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -193,29 +193,34 @@ const PurchaseRequisition = () => {
         </Tooltip>
       )}
 
-      {
-        params?.data?.status === 'Converted' ?
-          <Tooltip className="cursor-stop" title="This purchase requisition is already converted into purchase order">
-            <IconButton aria-label="Clone" size="small">
-              <AutorenewIcon fontSize="small" color='disabled' />
-            </IconButton>
-          </Tooltip>
-          :
-          <Tooltip title='Convert'>
-            <IconButton
-              size="small"
-              aria-label="Convert"
-              onClick={() => {
-                setConvertedPurchaseRequisitionId(params?.data?.id)
-                const products = params?.data?.material?.filter((item: any) => item?.type == "product")
-                const services = params?.data?.material?.filter((item: any) => item?.type == "service")
-                setOrderDialog({ open: true, currency: params?.data?.currency, warehouse: params?.data?.warehouseId, products: products, services: services })
-              }}
-            >
-              <AutorenewIcon fontSize="small" color='primary' />
-            </IconButton>
-          </Tooltip>
-      }
+      {params?.data?.status === 'Converted' ? (
+        <Tooltip className="cursor-stop" title="This purchase requisition is already converted into purchase order">
+          <IconButton aria-label="Clone" size="small">
+            <AutorenewIcon fontSize="small" color="disabled" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip title="Convert">
+          <IconButton
+            size="small"
+            aria-label="Convert"
+            onClick={() => {
+              setConvertedPurchaseRequisitionId(params?.data?.id);
+              const products = params?.data?.material?.filter((item: any) => item?.type == 'product');
+              const services = params?.data?.material?.filter((item: any) => item?.type == 'service');
+              setOrderDialog({
+                open: true,
+                currency: params?.data?.currency,
+                warehouse: params?.data?.warehouseId,
+                products: products,
+                services: services
+              });
+            }}
+          >
+            <AutorenewIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      )}
 
       {params?.data?.canDelete ? (
         <Tooltip title="Delete">
@@ -281,7 +286,7 @@ const PurchaseRequisition = () => {
         status: 'Converted'
       })
       .then(({ data }) => {
-        fetchPurchaseRequisitionData()
+        fetchPurchaseRequisitionData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -289,9 +294,9 @@ const PurchaseRequisition = () => {
         });
       })
       .catch((err) => {
-        fetchPurchaseRequisitionData()
+        fetchPurchaseRequisitionData();
       });
-  }
+  };
 
   return (
     <Fragment>
@@ -331,8 +336,8 @@ const PurchaseRequisition = () => {
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
                   <SearchBox
-                    onSearch={handleSearch}
-                    searchbox={styles.search_box_input}
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
                     width={isMobile ? '200px' : '242px'}
                     style={isMobile ? { flex: 1 } : {}}
                     size="small"
@@ -364,7 +369,7 @@ const PurchaseRequisition = () => {
                         onClick={openActions}
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                         endIcon={<ExpandMore />}
                       >
                         {isMobile && !isTablet ? '' : 'Actions'}
@@ -493,16 +498,14 @@ const PurchaseRequisition = () => {
             purchaseOrderId={null}
             onClose={() => setOrderDialog((prevState) => ({ ...prevState, open: false }))}
             onSuccess={(data: any) => {
-              handleConvertSuccess(data)
+              handleConvertSuccess(data);
             }}
-            products={showOrderDialog?.products
-              ?.map((e) => {
-                return { product: e._id, unit: e.unit, qty: e.qty };
-              })}
-            services={showOrderDialog?.services
-              ?.map((e) => {
-                return { service: e._id, unit: e.unit, qty: e.qty };
-              })}
+            products={showOrderDialog?.products?.map((e) => {
+              return { product: e._id, unit: e.unit, qty: e.qty };
+            })}
+            services={showOrderDialog?.services?.map((e) => {
+              return { service: e._id, unit: e.unit, qty: e.qty };
+            })}
             currency={showOrderDialog.currency}
             warehouseId={showOrderDialog?.warehouse}
           />

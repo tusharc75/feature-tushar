@@ -100,7 +100,7 @@ const FrequencyAskedQuestionDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
               <>
-                {permissions?.freqentlyAskedQuestion?.isUpdate && (
+                {permissions?.frequentlyAskedQuestion?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     className="btn-outline-v1"
@@ -109,7 +109,7 @@ const FrequencyAskedQuestionDetail = () => {
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 )}
-                {permissions?.freqentlyAskedQuestion?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {permissions?.frequentlyAskedQuestion?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
           </Box>
         </Box>
