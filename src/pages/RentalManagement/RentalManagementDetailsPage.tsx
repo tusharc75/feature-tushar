@@ -230,8 +230,11 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-      const steps = (user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep) ? rentalManagementSteps
-        : rentalManagementSteps?.filter((e) => !['Quotation', 'Add Services'].includes(e.name))
+      var steps = (user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep) ? rentalManagementSteps :
+        rentalManagementSteps?.filter((e) => !['Quotation'].includes(e.name))
+      if (!user?.user?.brandPolicy?.rentalService) {
+        steps = steps?.filter((e) => !['Add Services'].includes(e.name))
+      }
       setRentalSteps(steps)
       setCurrentStep(getIndex(data?.processStatus, steps));
       setLoadingDetails(false);
