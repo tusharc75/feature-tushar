@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment, createContext } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
 import { Box, Button, Grid } from '@material-ui/core';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -26,13 +26,6 @@ import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 
-interface NewOptionListContextType {
-  newOptionList: any[];
-  setNewOptionList: React.Dispatch<React.SetStateAction<any[]>>;
-}
-
-export const NewOptionList = createContext<NewOptionListContextType | undefined>(undefined)
-
 const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, open, referenceData = null, isDisableCustomerAccount = false }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -48,7 +41,6 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [jobDetails, setJobDetails] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
-  const [newOptionList, setNewOptionList] = useState([]);
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
@@ -230,7 +222,6 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (
                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                      <NewOptionList.Provider value={{ newOptionList, setNewOptionList }}>
                                         <FormTypes
                                           jobId={jobId}
                                           {...field}
@@ -266,7 +257,6 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
                                           }
                                           fields={initialData?.fields}
                                         />
-                                      </NewOptionList.Provider>
                                     </Grid>
                                   ))}
                                 </Grid>
