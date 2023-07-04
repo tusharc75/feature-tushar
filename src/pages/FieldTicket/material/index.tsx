@@ -385,7 +385,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       )}
 
       <Box mt={3}>
-        <Consumables stepFullScreen={stepFullScreen} id={id} allowedToEdit={allowedToEdit} services={rowsData} />
+        <Consumables stepFullScreen={stepFullScreen} id={id} allowedToEdit={allowedToEdit} services={rowsData} fieldTicketData={fieldTicketData} />
       </Box>
 
       {addExistingServiceDialog && (

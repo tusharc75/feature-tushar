@@ -147,7 +147,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
 
     const updatedFilters = [];
     if (selectedCompetency?.length > 0) {
-      updatedFilters.push(...selectedCompetency.map((i) => ({ field: 'competencyType', term: i.optionLabel })));
+      updatedFilters.push(...selectedCompetency.map((i) => ({ field: 'competencyType', term: i?.optionLabel })));
     }
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {

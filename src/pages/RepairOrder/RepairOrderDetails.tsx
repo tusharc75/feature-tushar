@@ -148,12 +148,23 @@ const RepairOrderDetails = () => {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit);
-        var steps: any = repairOrderSteps;
-        if (data?.type === REPAIR_ORDER_TYPE.internal && !data?.addQuotationStep) {
-          steps = steps?.filter((e) => ['Add Assets', 'Work Order']?.includes(e.name))
-          setStepList(steps)
-          setStepNames(steps.map((item) => item.name))
+        var steps: any = JSON.parse(JSON.stringify(repairOrderSteps));
+        if (data?.type === REPAIR_ORDER_TYPE.internal) {
+          steps = steps?.filter((e) => !['Loading Ticket']?.includes(e.name))
         }
+        if (!user?.user?.brandPolicy?.repairOrderPrice) {
+          steps = steps?.filter((e) => !['Quotation', 'Post Work Service', 'Invoice']?.includes(e.name))
+        }
+        if (!data?.addQuotationStep) {
+          steps = steps?.map((e) => {
+            if (e.name === 'Quotation') {
+              e.title = 'Price'
+            }
+            return e
+          })
+        }
+        setStepList(steps)
+        setStepNames(steps.map((item) => item.name))
 
         setCurrentStep(steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0);
 

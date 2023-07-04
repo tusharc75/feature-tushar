@@ -18,10 +18,10 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
 import { Autocomplete } from '@material-ui/lab';
-
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import Technicians from './Technicians';
 
-const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) => {
+const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fieldTicketData }) => {
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -34,14 +34,14 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
   const [selectedServiceOption, setSelectedServiceOption] = useState(null);
 
   useEffect(() => {
-    setServiceOption(
-      services?.map((s) => {
-        return {
-          optionLabel: s?.detail,
-          optionValue: s?.materialId
-        };
-      })
-    );
+    setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
+    ...services?.map((s) => {
+      return {
+        optionLabel: s?.detail,
+        optionValue: s?.materialId,
+        _id: s?._id
+      };
+    })]);
     if (!services?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
       setSelectedServiceOption(null);
     }
@@ -179,7 +179,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
   const fetchData = async () => {
     setDataRows(null);
     let api = `/field-ticket/${id}/material?type=product`;
-    if (selectedServiceOption) {
+    if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedServiceOption?.optionValue}`;
     }
     axiosInstance()
@@ -310,7 +310,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
             fullWidth
             options={serviceOption ? serviceOption : []}
             autoHighlight
-            value={selectedServiceOption}
+            value={selectedServiceOption ? selectedServiceOption : { optionLabel: 'All', optionValue: 'All' }}
             getOptionLabel={(option: any) => option?.optionLabel || ''}
             getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
             onChange={(_, val) => setSelectedServiceOption(val)}
@@ -320,6 +320,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
       )}
       <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
         <CustomTab index={0} label={'Products/Consumables'} value={0} primaryColor={true} />
+        <CustomTab index={1} label={'Technicians'} value={1} primaryColor={true} />
       </CustomTabs>
 
       <TabPanel value={tabValue} index={0}>
@@ -405,6 +406,10 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
             </Grid>
           </Grid>
         </Box>
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={1}>
+        <Technicians id={id} allowedToEdit={allowedToEdit} stepFullScreen={stepFullScreen} fieldTicketData={fieldTicketData} selectedService={selectedServiceOption} />
       </TabPanel>
 
       {consumablesDialog && (

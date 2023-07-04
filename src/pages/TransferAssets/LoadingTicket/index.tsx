@@ -30,6 +30,7 @@ import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAsset
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 interface LoadingGridProps {
   permissions: any;
@@ -87,6 +88,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [columns, setColumns] = useState(null);
+  const [newCols, setNewCols] = useState(null);
 
   useEffect(() => {
     if (transferAssetId) {
@@ -143,6 +145,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
       { field: 'loadingTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
     ];
+    const newCols = [
+      {
+        field: 'assetNumber',
+        headerName: 'Asset Number',
+      },
+      { field: 'product', headerName: 'Product Type' },
+      { field: 'productDescription', headerName: 'Product Description' },
+      { field: 'status', headerName: 'Status' },
+    ]
+    setNewCols(newCols);
     setColumns(column);
   };
 
@@ -354,36 +366,37 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       <Box display="flex" flexDirection={'row'} justifyContent={'flex-end'} mx={1} my={1}>
         <Box>
           {permissions?.transferAsset?.isRead && !isMobile && !isMobile && (
-            <Button
-              variant={'outlined'}
-              color="primary"
-              type="button"
-              size="small"
-              startIcon={<AiFillFilePdf />}
-              disabled={fileDownloading}
-              onClick={() => {
-                handleViewPdf(false);
-              }}
-            >
-              {fileDownloading ? 'Please wait...' : 'Preview'}
-            </Button>
-          )}
-          <Box component="span" mx={1} />
-          {permissions?.transferAsset?.isRead && (
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
-              type="button"
-              size="small"
-              style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
-              startIcon={isMobile ? '' : <IoMdDownload />}
-              disabled={fileDownloading}
-              onClick={() => {
-                handleViewPdf(true);
-              }}
-            >
-              {isMobile && !isTablet ? <IoMdDownload size={20} /> : fileDownloading ? 'Please wait...' : 'Download'}
-            </Button>
+            <PreviewDownload resource={sidebarResource.transferAsset} referenceId={transferAssetId} columns={newCols} />
+          //   <Button
+          //     variant={'outlined'}
+          //     color="primary"
+          //     type="button"
+          //     size="small"
+          //     startIcon={<AiFillFilePdf />}
+          //     disabled={fileDownloading}
+          //     onClick={() => {
+          //       handleViewPdf(false);
+          //     }}
+          //   >
+          //     {fileDownloading ? 'Please wait...' : 'Preview'}
+          //   </Button>
+          // )}
+          // <Box component="span" mx={1} />
+          // {permissions?.transferAsset?.isRead && (
+          //   <Button
+          //     variant={isMobile && !isTablet ? 'text' : 'outlined'}
+          //     color="primary"
+          //     type="button"
+          //     size="small"
+          //     style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
+          //     startIcon={isMobile ? '' : <IoMdDownload />}
+          //     disabled={fileDownloading}
+          //     onClick={() => {
+          //       handleViewPdf(true);
+          //     }}
+          //   >
+          //     {isMobile && !isTablet ? <IoMdDownload size={20} /> : fileDownloading ? 'Please wait...' : 'Download'}
+          //   </Button>
           )}
           <Box component="span" mx={1} />
         </Box>

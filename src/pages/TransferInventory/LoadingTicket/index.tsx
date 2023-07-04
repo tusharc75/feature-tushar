@@ -18,7 +18,8 @@ import {
   gridLoadingTimeout,
   deliveryTicket,
   transferInventory,
-  TRANSFER_INVENTORY_STATUS
+  TRANSFER_INVENTORY_STATUS,
+  sidebarResource
 } from 'src/constants/helpers';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
@@ -26,6 +27,7 @@ import { AiFillFilePdf } from 'react-icons/ai';
 import ReceiveDialog from './ReceiveDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -43,6 +45,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
   const [downloadingFile, setDownlodingFile] = useState(false);
   const [columns, setColumns] = useState(null);
+  const [newcolumns, setNewColumns] = useState(null);
 
   const [interPlantTransfer, setInterPlantTransfer] = useState(false);
   const [showConfirmInterPlantTransfer, setShowConfirmInterPlantTransfer] = useState(false);
@@ -97,6 +100,22 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
     ];
     setColumns([...column, ...extracolumns]);
+    let c = [
+        { Header: 'Product Type', accessor: 'productName' },
+        {
+          Header: 'Serialized Product',
+          accessor: 'serializedProduct',    
+        },
+        {
+          Header: 'Quantity',
+          accessor: 'qty',       
+        },
+        {
+          Header: 'Serial Number',
+          accessor: 'serialNumber',
+        },
+      ]
+    setNewColumns(c);
   };
 
   const TicketRenderer = (params) =>
@@ -296,7 +315,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   return (
     <Fragment>
       <Box display="flex" justifyContent="flex-end" m={1}>
-        <Button
+        {/* <Button
           onClick={() => {
             setDownlodingFile(true);
             axiosInstance()
@@ -332,7 +351,8 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           startIcon={<AiFillFilePdf />}
         >
           {downloadingFile ? 'Please wait...' : 'Preview'}
-        </Button>
+        </Button> */}
+        <PreviewDownload resource={sidebarResource.transferInventory} referenceId={transferInventoryData._id} columns={newcolumns} />
         {interPlantTransfer ? (
           <Box ml={1}>
             {allowedToEdit && canReceive && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (

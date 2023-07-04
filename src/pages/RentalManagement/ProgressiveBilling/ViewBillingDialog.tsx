@@ -419,7 +419,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         <CustomDialogContent>
           <Fragment>
             <Box display="flex" justifyContent="space-between">
-              {invoiceData && <InvoiceFacility invoiceData={invoiceData} />}
+              {invoiceData && <InvoiceFacility invoiceData={invoiceData}  columns={columns}/>}
               <Box display="flex" alignItems="center">
                 <Button
                   variant="outlined"
