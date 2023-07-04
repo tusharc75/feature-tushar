@@ -18,10 +18,10 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
 import { Autocomplete } from '@material-ui/lab';
-
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import Technicians from './Technicians';
 
-const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) => {
+const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fieldTicketData }) => {
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -38,7 +38,8 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
     ...services?.map((s) => {
       return {
         optionLabel: s?.detail,
-        optionValue: s?.materialId
+        optionValue: s?.materialId,
+        _id: s?._id
       };
     })]);
     if (!services?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
@@ -405,6 +406,10 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false }) =>
             </Grid>
           </Grid>
         </Box>
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={1}>
+        <Technicians id={id} allowedToEdit={allowedToEdit} stepFullScreen={stepFullScreen} fieldTicketData={fieldTicketData} selectedService={selectedServiceOption} />
       </TabPanel>
 
       {consumablesDialog && (
