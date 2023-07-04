@@ -20,10 +20,10 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ManageFieldJob from './ManageFieldJob';
+import ManageAssetsReceiving from './ManageAssetsReceiving';
 
-const FieldJob = () => {
-  const renderedFrom = camelCase(routes?.fieldJob.title);
+const AssetsReceiving = () => {
+  const renderedFrom = camelCase(routes?.assetsReceiving.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -33,7 +33,7 @@ const FieldJob = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [fieldJobId, setFieldJobId] = useState(null);
+  const [assetsReceivingId, setAssetsReceivingId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -45,12 +45,12 @@ const FieldJob = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.fieldJob}`)
+      .get(`/field?resource=${sidebarResource?.assetsReceiving}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldJobDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.assetsReceivingDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -69,7 +69,7 @@ const FieldJob = () => {
       });
   };
 
-  const fetchFieldJobData = () => {
+  const fetchAssetsReceivingData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
@@ -77,14 +77,14 @@ const FieldJob = () => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes?.fieldJob.path}${queryString}`)
+      .get(`${routes?.assetsReceiving.path}${queryString}`)
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.fieldJob?.isDelete;
+          finalObject['canDelete'] = permissions?.assetsReceiving?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.fieldJob?.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.assetsReceiving?.isUpdate;
 
           return {
             ...finalObject
@@ -165,12 +165,12 @@ const FieldJob = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      {permissions?.fieldJob?.isCreate ? (
+      {permissions?.assetsReceiving?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             aria-label="Clone"
             onClick={() => {
-              setFieldJobId(params.data.id);
+              setAssetsReceivingId(params.data.id);
               setOpen({ open: true, isClone: true });
             }}
           >
@@ -215,10 +215,10 @@ const FieldJob = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`${routes?.fieldJob?.path}/remove`, { ids: ids })
+      .put(`${routes?.assetsReceiving?.path}/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
-        fetchFieldJobData();
+        fetchAssetsReceivingData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -237,22 +237,22 @@ const FieldJob = () => {
   }, []);
 
   useEffect(() => {
-    fetchFieldJobData();
+    fetchAssetsReceivingData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   return (
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.fieldJob.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.assetsReceiving.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions?.fieldJob}
-            module="fieldJob"
-            api={'field-job'}
+            permissions={permissions?.assetsReceiving}
+            module="assetsReceiving"
+            api={'assets-Receiving'}
             afterImportCompleted={() => {
-              fetchFieldJobData();
+              fetchAssetsReceivingData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -264,7 +264,7 @@ const FieldJob = () => {
             }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
-              else fetchFieldJobData();
+              else fetchAssetsReceivingData();
             }}
             additionalParams={getQueryString(true)}
           />
@@ -287,11 +287,11 @@ const FieldJob = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.fieldJob?.isCreate && (
+                  {permissions?.assetsReceiving?.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
-                        setFieldJobId(null);
+                        setAssetsReceivingId(null);
                         setOpen({ open: true, isClone: false });
                       }}
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -302,7 +302,7 @@ const FieldJob = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions?.fieldJob?.isDelete && (
+                  {permissions?.assetsReceiving?.isDelete && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -359,17 +359,17 @@ const FieldJob = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.fieldJob}
+              permissions={permissions.assetsReceiving}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
-                setFieldJobId(data.id);
+                setAssetsReceivingId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                setFieldJobId(data.id);
+                setAssetsReceivingId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               extraParamsToCheckDelete={true}
@@ -385,7 +385,7 @@ const FieldJob = () => {
               onCreate={false}
               showClone={true}
               onClone={(data) => {
-                setFieldJobId(data.id);
+                setAssetsReceivingId(data.id);
                 setOpen({ open: true, isClone: true });
               }}
               chips={[]}
@@ -405,17 +405,17 @@ const FieldJob = () => {
               allowAction={true}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchFieldJobData}
+              refreshGrid={fetchAssetsReceivingData}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
-              resource={sidebarResource.fieldJob}
+              resource={sidebarResource.assetsReceiving}
             />
           )
         ) : null}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.fieldJob?.title?.toLowerCase()}  ${deleteRecord?.fieldJobNumber || ''} ?`}
+            message={`Are you sure you want to delete ${routes?.assetsReceiving?.title?.toLowerCase()}  ${deleteRecord?.assetsReceivingNumber || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -424,13 +424,13 @@ const FieldJob = () => {
           />
         )}
         {open?.open && (
-          <ManageFieldJob
-            id={fieldJobId}
+          <ManageAssetsReceiving
+            id={assetsReceivingId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-              fetchFieldJobData();
+              fetchAssetsReceivingData();
             }}
           />
         )}
@@ -439,4 +439,4 @@ const FieldJob = () => {
   );
 };
 
-export default FieldJob;
+export default AssetsReceiving;
