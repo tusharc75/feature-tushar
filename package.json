@@ -104,6 +104,7 @@
     "react-material-ui-carousel": "^2.3.1",
     "react-number-format": "4.4.4",
     "react-qr-barcode-scanner": "^1.0.6",
+    "react-responsive-carousel": "^3.2.23",
     "react-router-dom": "5.2.0",
     "react-rte": "^0.16.3",
     "react-signature-canvas": "^1.0.3",

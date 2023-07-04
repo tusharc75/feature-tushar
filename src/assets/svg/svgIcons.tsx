@@ -477,7 +477,7 @@ export const AiIcon: React.FC<svgInterfaceWithSize> = ({ width = 37, height = 37
 
 export const LightIcon: React.FC<svgInterfaceWithSize> = ({ width = 19, height = 19, size = 19, ...rest }) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 19 19">
+    <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 19 19" {...rest}>
       <path
         fill="#50758D"
         d="M11.523 15.317v.456a1.073 1.073 0 01-1.073 1.073H8.805a1.073 1.073 0 01-1.073-1.073v-.456c.142.063.3.098.465.098h2.861c.166 0 .323-.035.465-.098z"
@@ -507,6 +507,26 @@ export const LightIcon: React.FC<svgInterfaceWithSize> = ({ width = 19, height =
         fill="#FAA515"
         d="M9.7 9.745a.59.59 0 01-.904.033l-1.68-1.86a.59.59 0 01.875-.79l1.208 1.337 1.929-2.484a.59.59 0 11.932.724L9.7 9.745z"
       ></path>
+    </svg>
+  );
+};
+
+export const BellIcon: React.FC<svgInterfaceWithSize> = ({ width = 26, height = 26, size = 26, ...rest }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} {...rest} fill="none" viewBox="0 0 26 27">
+      <g clipPath="url(#clip0_4675_52876)">
+        <path
+          fill="#FFB800"
+          fillRule="evenodd"
+          d="M9.606 2.667a2.167 2.167 0 00-2.145 1.86l-.558 3.905a9.75 9.75 0 01-1.853 4.472l-1.428 1.905c-.48.639-.287 1.652.572 1.971.808.301 3.076.953 7.722 1.043v6.51a1.083 1.083 0 102.167 0v-6.51c4.647-.09 6.914-.742 7.722-1.043.859-.32 1.05-1.332.572-1.972l-1.429-1.904a9.751 9.751 0 01-1.852-4.472l-.557-3.905a2.166 2.166 0 00-2.145-1.86H9.606z"
+          clipRule="evenodd"
+        ></path>
+      </g>
+      <defs>
+        <clipPath id="clip0_4675_52876">
+          <path fill="#fff" d="M0 0H26V26H0z" transform="translate(0 .5)"></path>
+        </clipPath>
+      </defs>
     </svg>
   );
 };
