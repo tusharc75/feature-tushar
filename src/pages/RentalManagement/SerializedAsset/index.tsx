@@ -746,7 +746,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 color="primary"
                 type="button"
                 size="small"
-                disabled={disableAssignSerializedAssets()}
+                // disabled={disableAssignSerializedAssets()}
                 onClick={() => {
                   if (isOffline) {
                     setAddNonSerializedAssetDialog(true);
