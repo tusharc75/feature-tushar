@@ -211,57 +211,11 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
             />
           </Box>
         )}
-        <PreviewDownload resource={sidebarResource.sublease} referenceId={subleaseData?._id} columns={columns} />
-        {/* <Box>
-          {!isMobile && (
-            <Button
-              onClick={() => {
-                setDownlodingFile(true);
-                axiosInstance()
-                  .get(`${sublease.api}/${subleaseData._id}/pdf`)
-                  .then(({ data }) => {
-                    axiosInstance()
-                      .get(`user/download?fileName=${data.data.fileName}`, {
-                        responseType: 'blob'
-                      })
-                      .then(({ data }) => {
-                        const file = new Blob([data], { type: 'application/pdf' });
-                        const fileURL = URL.createObjectURL(file);
-                        const pdfWindow = window.open();
-                        pdfWindow.location.href = fileURL;
-                        toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                        setDownlodingFile(false);
-                      })
-                      .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                        setDownlodingFile(false);
-                      });
-                  })
-                  .catch((err) => {
-                    toastConfig.setToastConfig(err);
-                    setDownlodingFile(false);
-                  });
-              }}
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
-              type="button"
-              size="small"
-              disabled={downlodingFile}
-              style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-              startIcon={isMobile ? '' : <AiFillFilePdf />}
-            >
-              {isMobile && !isTablet ? (
-                <AiFillFilePdf size={18} />
-              ) : isMobile && !isTablet ? (
-                <AiFillFilePdf size={18} />
-              ) : downlodingFile ? (
-                'Please wait...'
-              ) : (
-                'Preview'
-              )}
-            </Button>
-          )}
-        </Box> */}
+        <PreviewDownload
+          resource={sidebarResource.sublease}
+          referenceId={subleaseData?._id}
+          hideDetailButton={true}
+          columns={columns?.filter((e) => ['assetNumber', 'product', 'serialNumber', 'supplierSerialNumber']?.includes(e.field))} />
         {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
           <Fragment>
             {/* {currentStep === 1 && (

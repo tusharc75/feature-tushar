@@ -107,7 +107,19 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
         Cell: ({ row }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
-      }
+      },
+      {
+        accessor: 'competencyType',
+        Header: 'Competency Type',
+        width: 250,
+        Cell: ({ row }) => (row.original['competencyType'] ? <p>{row.original?.competencyType}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'competencies',
+        Header: 'Competencies',
+        width: 250,
+        Cell: ({ row }) => (row.original['competencies'] ? <p>{row.original?.competencies}</p> : <NoDataCell />)
+      },
     ];
     column = [...column, ...newColumns];
     column.push({
@@ -148,6 +160,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       parent.srno = i + 1;
       parent.detail = `${parent?.serviceDetail?.serviceName}`;
       parent.description = `${parent?.serviceDetail?.serviceDescription || ''}`;
+      parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
       parent.qtyDisplay = parent.qty;
       parent.type = parent.type;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;

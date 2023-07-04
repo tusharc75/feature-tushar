@@ -42,6 +42,7 @@ import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket'
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 let searchTimeout;
 
@@ -61,6 +62,7 @@ const AddSerializedAsset = ({
   handleSuccess = null
 }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const [theme] = useAppTheme();
 
   const toastConfig = useContext(CustomToastContext);
   const [serializedProducts, setSerializedProducts] = useState([]);
@@ -286,15 +288,15 @@ const AddSerializedAsset = ({
   const getRowStyleScheduled = (params) => {
     if (params?.data?.reserved) {
       return {
-        'background-color': '#FAEAE9'
+        'background-color': theme === 'dark' ? 'hsl(4, 63%, 8%)' : '#FAEAE9'
       };
     } else if ([ASSET_STATUS.available, ASSET_STATUS.new]?.includes(params?.data?.status)) {
       return {
-        'background-color': '#DBF8DB'
+        'background-color': theme === 'dark' ? 'hsl(120, 67%, 8%)' : '#DBF8DB'
       };
     } else if ([ASSET_STATUS.inUse]?.includes(params?.data?.status)) {
       return {
-        'background-color': '#FFD580'
+        'background-color': theme === 'dark' ? '	hsl(40, 100%, 8%)' : '#FFD580'
       };
     }
     return null;
@@ -502,7 +504,7 @@ const AddSerializedAsset = ({
                             p={1}
                             border={1}
                             className="cursor-pointer"
-                            borderColor="grey.300"
+                            borderColor="var(--common-bordre-color)"
                             onClick={() => {
                               if (selectedProduct === d.id) {
                                 setSelectedProduct(null);
@@ -512,7 +514,7 @@ const AddSerializedAsset = ({
                             }}
                             style={{ display: 'inline-block' }}
                             bgcolor={d.id === selectedProduct && 'primary.main'}
-                            color={d.id === selectedProduct && 'white'}
+                            color={d.id === selectedProduct && theme === 'dark' ? 'var(--dark-secondary)' : 'white'}
                           >
                             {d?.qty < 0 ? (
                               <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>

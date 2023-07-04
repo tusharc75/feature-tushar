@@ -564,7 +564,11 @@ body::-webkit-scrollbar-thumb {
   & .MuiTablePagination-root:last-child {
     padding: 0;
     background: #f7f7f7;
-    border: 1px solid #e9e8e8;
+    border: 1px solid var(--common-border-color);
+    [data-mode='dark'] {
+      background-color: var(--dark-primary) !important;
+      box-shadow: none !important;
+    }
   }
 }
 
@@ -3369,6 +3373,9 @@ body {
   }
 }
 .pagination-v1 {
+  [data-mode='dark'] & {
+    background-color: var(--primary) !important;
+  }
   & > div {
     padding: 30px 0 14px;
   }
@@ -3728,7 +3735,7 @@ body {
   border-style: solid;
   color: #2a3042 !important;
   font-weight: 600 !important;
-  max-height: 30.75px !important;
+  min-height: 100% !important;
   &:disabled {
     background-color: var(--new_theme_secondary_color) !important;
     opacity: 0.7 !important;

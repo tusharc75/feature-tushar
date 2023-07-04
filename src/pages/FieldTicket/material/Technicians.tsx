@@ -77,7 +77,7 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                 accessor: 'competencyType',
                 Header: 'Competency Type',
                 width: 250,
-                Cell: ({ row }) => (row.original['competencyType'] ? <p>{row.original?.competencyType}</p> : <NoDataCell />)
+                Cell: ({ row }) => (row.original['competencyType']?.optionLabel ? <p>{row.original?.competencyType?.optionLabel}</p> : <NoDataCell />)
             },
             {
                 accessor: 'competencies',
@@ -141,8 +141,23 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                         ...prepareDataForGrid(u)
                     };
                     res.srno = i + 1;
-                    res.technicianName = u?.technician?.firstName + " " + u?.technician?.lastName;
-                    res.technicianId = u?.technician?._id;
+                    res.technicianName = u?.technician['firstName'] + " " + u?.technician['lastName'];
+                    res.technicianId = u?.technician['_id'];
+                    res.competencyType = u?.technician['competencyType'];
+                    const competencies = u?.technician['competencies'];
+                    let data = '';
+                    competencies.forEach((f, i) => {
+                        if (f.optionLabel) {
+                            if (i === competencies?.length - 1) {
+                                data = data + " " + f.optionLabel
+                            } else {
+                                data = data + " " + f.optionLabel + ','
+                            }
+                        }
+                    })
+
+                    res['competencies'] = data
+
                     return res;
                 });
                 setDataRows(rows);
