@@ -287,7 +287,10 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom }) => {
             wellName: serviceOrderData?.wellName?.optionValue || '',
             wellNumber: serviceOrderData?.wellNumber?.map((m) => m.optionValue) || [],
             estimateStartDate: serviceOrderData?.estimateStartDate || '',
-            estimateEndDate: serviceOrderData?.estimateEndDate || ''
+            estimateEndDate: serviceOrderData?.estimateEndDate || '',
+            customerAccount: serviceOrderData?.customerAccount?.optionValue || '',
+            billingAddress: serviceOrderData?.billingAddress?.optionValue || '',
+            shippingAddress: serviceOrderData?.shippingAddress?.optionValue || ''
           }}
           onSuccess={() => {
             setOpenDialog({ open: false, id: null });
