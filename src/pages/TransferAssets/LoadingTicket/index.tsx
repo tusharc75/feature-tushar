@@ -21,8 +21,6 @@ import { CommonRenderer, DateRenderer } from 'src/components/AgGridComponents/Cu
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { AiFillFilePdf } from 'react-icons/ai';
-import { IoMdDownload } from 'react-icons/io';
 import { uniq, map, groupBy } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
@@ -88,7 +86,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [columns, setColumns] = useState(null);
-  const [newCols, setNewCols] = useState(null);
 
   useEffect(() => {
     if (transferAssetId) {
@@ -141,20 +138,11 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       },
       { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
       { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-      { field: 'productDescription', headerName: 'Product Type', show: true, cellRenderer: 'productRenderer' },
+      { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productRenderer' },
+      { field: 'productDescription', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
       { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
       { field: 'loadingTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
     ];
-    const newCols = [
-      {
-        field: 'assetNumber',
-        headerName: 'Asset Number',
-      },
-      { field: 'product', headerName: 'Product Type' },
-      { field: 'productDescription', headerName: 'Product Description' },
-      { field: 'status', headerName: 'Status' },
-    ]
-    setNewCols(newCols);
     setColumns(column);
   };
 
@@ -168,7 +156,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       const result = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`);
       let assetData = result?.data?.data?.assets?.map((d: any) => ({
         ...d,
-        productDescription: d?.product?.optionLabel ?? '',
+        productName: d?.product?.optionLabel || '',
+        productDescription: d?.productDescription?.optionLabel || '',
         productId: d?.product?.optionValue ?? '',
         isChecked: false
       }));
@@ -364,44 +353,14 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   return (
     <Fragment>
       <Box display="flex" flexDirection={'row'} justifyContent={'flex-end'} mx={1} my={1}>
-        <Box>
-          {permissions?.transferAsset?.isRead && !isMobile && !isMobile && (
-            <PreviewDownload resource={sidebarResource.transferAsset} referenceId={transferAssetId} columns={newCols} />
-          //   <Button
-          //     variant={'outlined'}
-          //     color="primary"
-          //     type="button"
-          //     size="small"
-          //     startIcon={<AiFillFilePdf />}
-          //     disabled={fileDownloading}
-          //     onClick={() => {
-          //       handleViewPdf(false);
-          //     }}
-          //   >
-          //     {fileDownloading ? 'Please wait...' : 'Preview'}
-          //   </Button>
-          // )}
-          // <Box component="span" mx={1} />
-          // {permissions?.transferAsset?.isRead && (
-          //   <Button
-          //     variant={isMobile && !isTablet ? 'text' : 'outlined'}
-          //     color="primary"
-          //     type="button"
-          //     size="small"
-          //     style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
-          //     startIcon={isMobile ? '' : <IoMdDownload />}
-          //     disabled={fileDownloading}
-          //     onClick={() => {
-          //       handleViewPdf(true);
-          //     }}
-          //   >
-          //     {isMobile && !isTablet ? <IoMdDownload size={20} /> : fileDownloading ? 'Please wait...' : 'Download'}
-          //   </Button>
-          )}
-          <Box component="span" mx={1} />
-        </Box>
+        <PreviewDownload
+          resource={sidebarResource.transferAsset}
+          referenceId={transferAssetId}
+          columns={columns?.filter((e) => ['assetNumber', 'productName', 'productDescription', 'status']?.includes(e.field))}
+          hideDetailButton={true}
+        />
         {allowedToEdit && !isTransferEnded && (
-          <Box>
+          <Box pl={1}>
             {permissions?.transferAsset?.isUpdate && (
               <Fragment>
                 <Button
