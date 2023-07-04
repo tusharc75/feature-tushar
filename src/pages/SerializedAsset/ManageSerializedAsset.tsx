@@ -127,7 +127,7 @@ const ManageSerializedAsset = ({
             createValues['mtrAttachedDate'] = '';
           }
 
-          if (referenceType && referenceType === 'repairOrder') {
+          if ( referenceType === 'repairOrder' || referenceType === "assetsReceiving") {
             if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount')) {
               createValues['customerAccount'] = referenceData?.customerAccount;
             }
