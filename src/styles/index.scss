@@ -564,7 +564,11 @@ body::-webkit-scrollbar-thumb {
   & .MuiTablePagination-root:last-child {
     padding: 0;
     background: #f7f7f7;
-    border: 1px solid #e9e8e8;
+    border: 1px solid var(--common-border-color);
+    [data-mode='dark'] {
+      background-color: var(--dark-primary) !important;
+      box-shadow: none !important;
+    }
   }
 }
 
@@ -3369,6 +3373,9 @@ body {
   }
 }
 .pagination-v1 {
+  [data-mode='dark'] & {
+    background-color: var(--primary) !important;
+  }
   & > div {
     padding: 30px 0 14px;
   }

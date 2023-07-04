@@ -24,6 +24,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { CircularProgress } from '@material-ui/core';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { addAssetsInRental } from '../rentalOfflineHelper';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 interface DialogProps {
   closeDialog: () => void;
@@ -55,6 +56,7 @@ const useClasses = makeStyles(() => ({
 }));
 
 const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }: DialogProps) => {
+  const [theme] = useAppTheme();
   const classes = useClasses();
   const { setToastConfig } = useContext(CustomToastContext);
   const [productData, setProductData] = useState<TableContent[]>([]);
@@ -135,15 +137,15 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
         dataParse?.forEach((row) => {
           let rowInsert = {};
           if (row[0] && row[1] && row[2]) {
-            rowInsert["srno"] = row[0]?.toString();
-            rowInsert["product"] = row[1]?.toString();
-            rowInsert["assetNumber"] = row[2]?.toString();
+            rowInsert['srno'] = row[0]?.toString();
+            rowInsert['product'] = row[1]?.toString();
+            rowInsert['assetNumber'] = row[2]?.toString();
             option.push(rowInsert);
           }
         });
         setTableData((state) =>
           state?.map((s, i) => {
-            const foundRows = option?.find((p) => p["srno"] === s['srno']);
+            const foundRows = option?.find((p) => p['srno'] === s['srno']);
             if (foundRows) {
               return {
                 ...s,
