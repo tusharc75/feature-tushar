@@ -1,7 +1,6 @@
 import { useState, useContext, useEffect, useReducer, Fragment } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import { Grid, Box, IconButton, Button } from '@material-ui/core';
-import { Info } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -17,13 +16,11 @@ import {
   DELIVERY_TICKET_TYPE,
   gridLoadingTimeout,
   deliveryTicket,
-  transferInventory,
   TRANSFER_INVENTORY_STATUS,
   sidebarResource
 } from 'src/constants/helpers';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
-import { AiFillFilePdf } from 'react-icons/ai';
 import ReceiveDialog from './ReceiveDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
@@ -43,9 +40,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
-  const [downloadingFile, setDownlodingFile] = useState(false);
   const [columns, setColumns] = useState(null);
-  const [newcolumns, setNewColumns] = useState(null);
 
   const [interPlantTransfer, setInterPlantTransfer] = useState(false);
   const [showConfirmInterPlantTransfer, setShowConfirmInterPlantTransfer] = useState(false);
@@ -100,22 +95,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
     ];
     setColumns([...column, ...extracolumns]);
-    let c = [
-        { Header: 'Product Type', accessor: 'productName' },
-        {
-          Header: 'Serialized Product',
-          accessor: 'serializedProduct',    
-        },
-        {
-          Header: 'Quantity',
-          accessor: 'qty',       
-        },
-        {
-          Header: 'Serial Number',
-          accessor: 'serialNumber',
-        },
-      ]
-    setNewColumns(c);
   };
 
   const TicketRenderer = (params) =>
@@ -315,44 +294,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   return (
     <Fragment>
       <Box display="flex" justifyContent="flex-end" m={1}>
-        {/* <Button
-          onClick={() => {
-            setDownlodingFile(true);
-            axiosInstance()
-              .get(`${transferInventory.api}/${transferInventoryData._id}/pdf`)
-              .then(({ data }) => {
-                axiosInstance()
-                  .get(`user/download?fileName=${data.data.fileName}`, {
-                    responseType: 'blob'
-                  })
-                  .then(({ data }) => {
-                    const file = new Blob([data], { type: 'application/pdf' });
-                    const fileURL = URL.createObjectURL(file);
-                    const pdfWindow = window.open();
-                    pdfWindow.location.href = fileURL;
-                    toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                    setDownlodingFile(false);
-                  })
-                  .catch((err) => {
-                    toastConfig.setToastConfig(err);
-                    setDownlodingFile(false);
-                  });
-              })
-              .catch((err) => {
-                toastConfig.setToastConfig(err);
-                setDownlodingFile(false);
-              });
-          }}
-          variant={'outlined'}
-          color="primary"
-          type="button"
-          size="small"
-          disabled={downloadingFile || dataRows.length === 0}
-          startIcon={<AiFillFilePdf />}
-        >
-          {downloadingFile ? 'Please wait...' : 'Preview'}
-        </Button> */}
-        <PreviewDownload resource={sidebarResource.transferInventory} referenceId={transferInventoryData._id} columns={newcolumns} />
+        <PreviewDownload
+          hideDetailButton={true}
+          resource={sidebarResource.transferInventory}
+          referenceId={transferInventoryData._id}
+          columns={columns?.filter((e) => ['productName', 'productNumber', 'productDescription', 'productDescription', 'qty']?.includes(e.field))} />
         {interPlantTransfer ? (
           <Box ml={1}>
             {allowedToEdit && canReceive && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
@@ -448,7 +394,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (

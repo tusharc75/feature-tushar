@@ -115,9 +115,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
-        axiosInstance()
-        .get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`)
-        .then((apiResponse) => {
+        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`).then((apiResponse) => {
           const newColumns = apiResponse.data.data.map((item) => {
             return {
               Header: item.fieldLabel,
@@ -128,14 +126,14 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             Header: 'Asset Number',
             accessor: 'assetNumber',
           },
-          {
-            Header: 'Status',
-            accessor: 'status',
-          },
-          {
-            Header : 'Product Description',
-            accessor : 'product'
-          })
+            {
+              Header: 'Status',
+              accessor: 'status',
+            },
+            {
+              Header: 'Product Description',
+              accessor: 'product'
+            })
           setNewColumns(newColumns);
         })
         fetchRecords();
@@ -321,7 +319,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
               {downlodingFile ? 'Please wait...' : 'Preview'}
             </Button>
           )} */}
-          <PreviewDownload resource={sidebarResource.repairJob} referenceId={repairJobData?._id} columns={newColumns} />
+          <PreviewDownload resource={sidebarResource.repairJob} referenceId={repairJobData?._id} columns={newColumns} hideDetailButton={true} />
           {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
             <Fragment>
               <Button
@@ -470,7 +468,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 setRepairProcessDialog({ open: true, assetId: data._id, assetNumber: data.assetNumber, repaired: data.repaired });
               }}
               extraParamsToCheckDelete={true}
-              onDelete={() => {}}
+              onDelete={() => { }}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -484,7 +482,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -578,9 +576,8 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       {repairAssetDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to mark repair complete for ${
-            repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
-          } ? `}
+          message={`Are you sure you want to mark repair complete for ${repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
+            } ? `}
           onClose={() => {
             setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
           }}

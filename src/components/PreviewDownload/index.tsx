@@ -15,11 +15,13 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { MdEmail } from 'react-icons/md';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
-import routes from '../Helpers/Routes';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
-function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [] }) {
+
+function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [], hideDetailButton = false }) {
+
+
   const toastConfig = useContext(CustomToastContext);
   const columnFilter = ['Action'];
   const allColumn = columns?.filter((d) => !columnFilter.includes(d.Header || d.headerName))?.map((d) => d.Header || d.headerName) || [];
@@ -42,8 +44,8 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
         if (k === 'qtyDisplay') {
           return 'qty';
         } else {
-        return k.endsWith('_usd') ? k : k.split('_')[0];
-      }
+          return k.endsWith('_usd') ? k : k.split('_')[0];
+        }
       });
     if (PDFType === 'Regular') {
       setLoading('Regular');
@@ -69,7 +71,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
               const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
               const link = document.createElement('a');
               link.href = url;
-              link.setAttribute('download', `Quotation-${resource}.pdf`);
+              link.setAttribute('download', `${resource}.pdf`);
               document.body.appendChild(link);
               link.click();
             } else {
@@ -313,18 +315,19 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                 >
                   Regular
                 </CustomButton>
-                <CustomButton
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  loading={loading === 'Detail' || excelArrangeColumnLoading}
-                  disabled={loading || visibleColumnsExcel?.length === 0}
-                  onClick={(e) => {
-                    handleViewPdf(downlodingFile, 'Detail', visibleColumnsExcel);
-                  }}
-                >
-                  Detail
-                </CustomButton>
+                {hideDetailButton ? null :
+                  <CustomButton
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    loading={loading === 'Detail' || excelArrangeColumnLoading}
+                    disabled={loading || visibleColumnsExcel?.length === 0}
+                    onClick={(e) => {
+                      handleViewPdf(downlodingFile, 'Detail', visibleColumnsExcel);
+                    }}
+                  >
+                    Detail
+                  </CustomButton>}
               </>
             }
           </CustomDialogFooter>
