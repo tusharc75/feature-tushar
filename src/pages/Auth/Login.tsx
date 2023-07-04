@@ -21,6 +21,7 @@ import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import { entity } from '../../constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { Logo, LoginImage } from 'src/assets/authenticationAssets';
+import AuthSlider from './AuthSlider';
 
 import styles from './index.module.scss';
 
@@ -172,7 +173,7 @@ const Login = () => {
   return (
     <>
       <CssBaseline />
-      <div className={styles.main}>
+      <div className={styles.main} style={{ '--custom-grid-cols': '1fr 1fr' } as React.CSSProperties}>
         <div className={styles.bg}>
           <div className={styles.contentContainer}>
             <div className={styles.left}>
@@ -277,15 +278,8 @@ const Login = () => {
                 )}
               </Formik>
             </div>
-            <div className={styles.right} style={{ '--right-padding': '71px 51px 83px 51px' } as React.CSSProperties}>
-              <div className={styles.illustration}>
-                <LoginImage />
-              </div>
-              <Typography component="h2">Modernizing Business Transactions</Typography>
-              <Typography component="p">
-                Making B2B transactions and operations as <br />
-                easy as consumer apps
-              </Typography>
+            <div className={styles.rightSlider}>
+              <AuthSlider />
             </div>
           </div>
         </div>
