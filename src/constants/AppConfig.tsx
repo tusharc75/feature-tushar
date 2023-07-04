@@ -27,12 +27,11 @@ export default function ColorModeProvider({ children }: ColorModeInterface) {
     if (localTheme) {
       const theme = localTheme as ThemeColor;
       setStore({ [THEME]: theme });
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setThemeToLocal(prefersDark ? 'dark' : 'light');
+      setStore({ [THEME]: prefersDark ? 'dark' : 'light' });
     }
-    //  else {
-    //   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    //   setThemeToLocal(prefersDark ? 'dark' : 'light');
-    //   setStore({ [THEME]: prefersDark ? 'dark' : 'light' });
-    // }
   }, []);
 
   useEffect(() => {
