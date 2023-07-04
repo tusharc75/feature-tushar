@@ -120,6 +120,15 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
             if (referenceData?.warehouse && fieldsDataForCreate?.some((e) => e.fieldName === 'warehouse')) {
               tempInitialData['warehouse'] = referenceData?.warehouse;
             }
+            if (referenceData?.customerAccount && fieldsDataForCreate?.some((e) => e.fieldName === 'customerAccount')) {
+              tempInitialData['customerAccount'] = referenceData?.customerAccount;
+            }
+            if (referenceData?.billingAddress && fieldsDataForCreate?.some((e) => e.fieldName === 'billingAddress')) {
+              tempInitialData['billingAddress'] = referenceData?.billingAddress;
+            }
+            if (referenceData?.shippingAddress && fieldsDataForCreate?.some((e) => e.fieldName === 'shippingAddress')) {
+              tempInitialData['shippingAddress'] = referenceData?.shippingAddress;
+            }
             if (referenceData?.estimateStartDate && fieldsDataForCreate?.some((e) => e.fieldName === 'estimateStartDate')) {
               tempInitialData['estimateStartDate'] = referenceData?.estimateStartDate;
             }
