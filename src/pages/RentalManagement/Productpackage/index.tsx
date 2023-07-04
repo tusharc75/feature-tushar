@@ -740,6 +740,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
             onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
             onSuccess={(data) => {
               data.type = 'package'
+              data.unitMain = data?.unit;
+              data.pricingMethodMain = data?.pricingMethod;
               handleAdd([data]);
               setAddExistingProductDialog({ open: false, type: '', parentId: null });
             }}
@@ -784,7 +786,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
               }}
             >
-              Product
+              Add Products
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -792,7 +794,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
               }}
             >
-              Package
+              Add Packages
             </MenuItem>
             {/* <MenuItem
               onClick={() => {
