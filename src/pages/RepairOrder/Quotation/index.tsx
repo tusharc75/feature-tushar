@@ -81,7 +81,7 @@ const Quotation = ({
 
   useEffect(() => {
     if (quotationData?.versions[currentVersion] && quotationData?.versions[currentVersion]?._id) {
-      fetchProductInventory();
+      fetchData();
     }
   }, [currentVersion]);
 
@@ -98,7 +98,12 @@ const Quotation = ({
     setCurrentVersion(tempCurrentVersion);
     setQuotationVersionData({ quotationId: quotationInfo?._id, ...quotationInfo?.versions[tempCurrentVersion] });
 
-    setNextStep(quotationInfo?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false);
+    if (repairOrderData?.addQuotationStep) {
+      setNextStep(quotationInfo?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false);
+    }
+    else {
+      setNextStep(true);
+    }
 
     var data = await fetch_quotation_product_fields(quotationInfo?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
@@ -230,7 +235,7 @@ const Quotation = ({
     setAllColumn(column.map((d) => d.Header));
   };
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     var data: any = [];
     const response = await axiosInstance().get(
       `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
@@ -354,7 +359,7 @@ const Quotation = ({
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
-        fetchProductInventory();
+        fetchData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -368,7 +373,7 @@ const Quotation = ({
       .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
-        fetchProductInventory();
+        fetchData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -710,7 +715,7 @@ const Quotation = ({
           }}
           handleSucess={() => {
             setLeadTimeDialog({ open: false, data: null });
-            fetchProductInventory();
+            fetchData();
           }}
         />
       )}

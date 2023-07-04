@@ -148,10 +148,7 @@ const RepairOrderDetails = () => {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit);
-        var steps: any = repairOrderSteps;
-        // if (data?.type === REPAIR_ORDER_TYPE.internal && !data?.addQuotationStep) {
-        //   steps = steps?.filter((e) => ['Add Assets', 'Work Order']?.includes(e.name))
-        // }
+        var steps: any = JSON.parse(JSON.stringify(repairOrderSteps));
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
           steps = steps?.filter((e) => !['Loading Ticket']?.includes(e.name))
         }
@@ -161,7 +158,7 @@ const RepairOrderDetails = () => {
         if (!data?.addQuotationStep) {
           steps = steps?.map((e) => {
             if (e.name === 'Quotation') {
-              e.title = 'Rate'
+              e.title = 'Price'
             }
             return e
           })
