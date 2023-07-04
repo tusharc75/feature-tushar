@@ -143,6 +143,10 @@ export const repairOrderSteps: stepInterface[] = [
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
+export const assetsReceivingSteps: stepInterface[] = [
+  { name: 'Add Assets', title: 'Add', icon: 'add' },
+];
+
 export const serviceOrderSteps: stepInterface[] = [
   { name: 'Field Ticket', title: 'Field Ticket', icon: 'receivingTicket'},
   { name: 'Add Services', title: 'Add', icon: 'add' },
@@ -323,8 +327,8 @@ export const sidebarResource = {
   competencies: 'Competencies',
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
-  fieldJob: 'Field Job',
-  trailerMaster: `Trailer Master`,
+  trailerMaster: 'Trailer Master',
+  assetsReceiving: 'Assets Receiving',
 };
 
 export const primaryFields = {
@@ -444,8 +448,8 @@ export const RESOURCE_LABEL = {
   materialHandling: 'Material Handling',
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
-  fieldJob: 'Field Job',
-  trailerMaster: `Trailer Master`,
+  trailerMaster: 'Trailer Master',
+  assetsReceiving: 'Assets Receiving',
 };
 
 export const CHILD_RESOURCE = {

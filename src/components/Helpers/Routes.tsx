@@ -977,14 +977,6 @@ const routes = {
     title: storedRoutes && storedRoutes.padMaster && storedRoutes.padMaster.title ? storedRoutes.padMaster?.title : RESOURCE_LABEL.padMaster,
     path: '/pad-master/detail'
   },
-  fieldJob: {
-    title: storedRoutes && storedRoutes.fieldJob && storedRoutes.fieldJob.title ? storedRoutes.fieldJob?.title : RESOURCE_LABEL.fieldJob,
-    path: '/field-job'
-  },
-  fieldJobDetail: {
-    title: storedRoutes && storedRoutes.fieldJob && storedRoutes.fieldJob.title ? storedRoutes.fieldJob?.title : RESOURCE_LABEL.fieldJob,
-    path: '/field-job/detail'
-  },
   driverMaster: {
     title:
       storedRoutes && storedRoutes.driverMaster && storedRoutes.driverMaster.title ? storedRoutes.driverMaster?.title : RESOURCE_LABEL.driverMaster,
@@ -1008,7 +1000,15 @@ const routes = {
         ? storedRoutes.trailerMaster?.title
         : RESOURCE_LABEL.trailerMaster,
     path: '/trailer-master/detail'
-  }
+  },
+  assetsReceiving: {
+    title: storedRoutes && storedRoutes.assetsReceiving && storedRoutes.assetsReceiving.title ? storedRoutes.assetsReceiving?.title : RESOURCE_LABEL.assetsReceiving,
+    path: '/assets-receiving'
+  },
+  assetsReceivingDetail: {
+    title: storedRoutes && storedRoutes.assetsReceiving && storedRoutes.assetsReceiving.title ? storedRoutes.assetsReceiving?.title : RESOURCE_LABEL.assetsReceiving,
+    path: '/assets-receiving/detail'
+  },
 };
 
 export default routes;
