@@ -17,9 +17,12 @@ import ManageAssetsReceiving from './ManageAssetsReceiving';
 import TabPanel from 'src/components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
 import Steps from 'src/components/Steps';
-
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import Material from './Material';
+import { camelCase } from 'lodash';
 
 const AssetsReceivingDetail = () => {
+  const renderedFrom = camelCase(routes?.assetsReceiving.title);
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -32,7 +35,10 @@ const AssetsReceivingDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [stepList, setStepList] = useState(assetsReceivingSteps);
+  const [stepNames, setStepNames] = useState(assetsReceivingSteps.map((item) => item.name));
   const [currentStep, setCurrentStep] = useState(null);
   const {
     state: { permissions, user }
@@ -64,12 +70,31 @@ const AssetsReceivingDetail = () => {
       });
   };
 
+  const updateProcessStatus = (processStatus) => {
+    axiosInstance()
+      .put(`${routes.assetsReceiving.path}/${id}/process-status`, { processStatus: processStatus })
+      .then(({ data }) => {})
+      .catch((error) => {});
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.assetsReceiving.path}/${id}`);
+      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
+      setAllowedToEdit(isAllowedToEdit);
+      var steps: any = JSON.parse(JSON.stringify(assetsReceivingSteps));
+      setStepList(steps);
+      setStepNames(steps.map((item) => item.name));
+      setCurrentStep(
+        steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
+      );
+      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setAssetsReceivingData(data);
       setCustomizedRoutes([routes.assetsReceiving, { title: data?.assetsReceivingNumber }]);
       setLoading(false);
@@ -107,6 +132,14 @@ const AssetsReceivingDetail = () => {
     setOpenUpdateDialog(false);
   };
 
+  useEffect(() => {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= stepNames.length) {
+      fetchData();
+      updateProcessStatus(stepNames[currentStep]);
+    }
+    if (['Add Assets'].includes(stepNames[currentStep])) fetchData();
+  }, [currentStep]);
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -116,12 +149,12 @@ const AssetsReceivingDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.assetsReceiving?.isUpdate && (
+              {permissions?.assetsReceiving?.isUpdate && allowedToEdit && (
                 <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.assetsReceiving?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.assetsReceiving?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
           </Box>
         </Box>
@@ -176,13 +209,25 @@ const AssetsReceivingDetail = () => {
             isStepEnded={false}
             setStepFullScreen={() => setStepFullScreen(true)}
             handlePrev={() => {
-                setCurrentStep((prevStep) => {
-                  const newStep = prevStep - 1;
-                  return newStep;
-                });
-              }
-            }
+              setCurrentStep((prevStep) => {
+                const newStep = prevStep - 1;
+                return newStep;
+              });
+            }}
           />
+          <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          {stepNames[currentStep] === 'Add Assets' && assetsReceivingData && (
+            <Material 
+            fetchAssetsReceivingData={fetchData}
+            assetsReceivingData={assetsReceivingData}
+            setNextStep={setNextStep}
+            renderedFrom={`${renderedFrom}grid_1`}
+            stepFullScreen={setStepFullScreen}
+            allowedToDelete={allowedToDelete}
+            allowedToEdit={allowedToEdit}
+            />
+          )}
+          </ContentFullScreen>
         </TabPanel>
       </Box>
       {showConfirmBox && (
