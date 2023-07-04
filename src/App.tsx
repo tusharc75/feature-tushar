@@ -218,12 +218,12 @@ import MaterialHandling from './pages/MaterialHandling';
 import ScreenOrientationOverlay from './components/ScreenOrientationOverlay';
 import PadMaster from './pages/PadMaster';
 import PadMasterDetail from './pages/PadMaster/PadMasterDetail';
-import FieldJob from './pages/FieldJob';
-import FieldJobDetail from './pages/FieldJob/FieldJobDetail';
 import DriverMaster from './pages/DriverMaster';
 import DriverMasterDetail from './pages/DriverMaster/DriverMasterDetail';
 import TrailerMaster from './pages/TrailerMaster';
 import TrailerMasterDetail from './pages/TrailerMaster/TrailerMasterDetail';
+import AssetsReceiving from './pages/AssetsReceiving';
+import AssetsReceivingDetail from './pages/AssetsReceiving/AssetsReceivingDetail';
 
 var notificationInterval: any = null;
 
@@ -986,12 +986,6 @@ function App() {
             <PrivateRoute exact path={`${routes.padMasterDetail.path}/:id`}>
               <PadMasterDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fieldJob.path}`}>
-              <FieldJob />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fieldJobDetail.path}/:id`}>
-              <FieldJobDetail />
-            </PrivateRoute>
             <PrivateRoute exact path={`${routes.driverMaster.path}`}>
               <DriverMaster />
             </PrivateRoute>
@@ -1003,6 +997,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.trailerMasterDetail.path}/:id`}>
               <TrailerMasterDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.assetsReceiving.path}`}>
+              <AssetsReceiving />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.assetsReceivingDetail.path}/:id`}>
+              <AssetsReceivingDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
