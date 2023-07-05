@@ -5,7 +5,7 @@ import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition, quotation } from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomButton from '../Helpers/CustomButton';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
@@ -21,7 +21,6 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [], hideDetailButton = false }) {
 
-
   const toastConfig = useContext(CustomToastContext);
   const columnFilter = ['Action'];
   const allColumn = columns?.filter((d) => !columnFilter.includes(d.Header || d.headerName))?.map((d) => d.Header || d.headerName) || [];
@@ -29,35 +28,29 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [sendEmail, setSendEmail] = useState(false);
-  const [pdfFileBase64, setPdfFileBase64] = useState(null);
   const [loading, setLoading] = useState(null);
   const [downlodingFile, setDownlodingFile] = useState(null);
   const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
   const [excelArrangeColumnLoading, setExcelArrangeColumnLoading] = useState(false);
   const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState({ open: false, type: '' });
+  const [emailAttachments, setEmailAttachments] = useState([]);
 
-  const handleViewPdf = (type, PDFType, visibleColumns) => {
-    let tempColumns = columns
-      .filter((d) => visibleColumns?.includes(d?.Header || d?.headerName) && (d?.Header || d?.headerName) !== 'Action')
-      .map((d) => {
-        let k = d?.accessor || d?.field;
-        if (k === 'qtyDisplay') {
-          return 'qty';
-        } else {
-          return k.endsWith('_usd') ? k : k.split('_')[0];
-        }
-      });
-    if (PDFType === 'Regular') {
-      setLoading('Regular');
-    } else {
-      setLoading('Detail');
-    }
-    axiosInstance()
-      .get(
-        PDFType === 'Detail'
-          ? `/pdf/${referenceId}/detail?resource=${resource}&columns=${tempColumns}`
-          : `/pdf/${referenceId}?resource=${resource}&columns=${tempColumns}`
-      )
+  const handleViewPdf = (type, pdfType, visibleColumns) => {
+
+    let showColumns = columns?.filter((d) => visibleColumns?.includes(d?.Header || d?.headerName) && (d?.Header || d?.headerName) !== 'Action').map((d) => {
+      let k = d?.accessor || d?.field;
+      if (k === 'qtyDisplay') {
+        return 'qty';
+      }
+      return k;
+    });
+
+    setLoading(pdfType);
+    axiosInstance().get(
+      pdfType === 'Detail'
+        ? `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`
+        : `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`
+    )
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -74,12 +67,15 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
               link.setAttribute('download', `${resource}.pdf`);
               document.body.appendChild(link);
               link.click();
-            } else {
+            } else if (type === 'Preview') {
               const file = new Blob([data], { type: 'application/pdf' });
               const fileURL = URL.createObjectURL(file);
               const pdfWindow = window.open();
               pdfWindow.location.href = fileURL;
               toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+            } else {
+              const file = new Blob([data], { type: 'application/pdf' });
+              generateBase64forFile(file, 'pdf', pdfType);
             }
           })
           .catch((err) => {
@@ -93,87 +89,29 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
       });
   };
 
-  useEffect(() => {
-    const defaultColumnsToShow = defaultColumns?.length > 0 ? allColumn?.filter((c) => defaultColumns?.includes(c)) : allColumn;
-    setVisibleColumnsExcel([...defaultColumnsToShow]);
-  }, [columns]);
-
-  const fetchEmailAttachment = () => {
-    let tempColumns = columns
-      .filter((d) => visibleColumnsExcel?.includes(d?.Header || d?.headerName))
-      .map((d) => {
-        if (d?.accessor === 'qtyDisplay') {
-          return 'qty';
-        } else {
-          return d?.accessor.split('_')[0];
-        }
-      });
-
-    axiosInstance()
-      .get(`/pdf/${referenceId}/detail?resource=${resource}&columns=${tempColumns}`)
-      .then(({ data }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            const file = new Blob([data], { type: 'application/pdf' });
-            generateBase64forFile(file, 'pdf');
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'error',
-              message: 'PDF generating error'
-            });
-          });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
-  const generateBase64forFile = (blobData, type) => {
+  const generateBase64forFile = (blobData, type, pdfType) => {
     let reader = new FileReader();
     reader.readAsDataURL(blobData);
     reader.onloadend = function () {
-      let base64data = reader.result;
+      let base64data: any = reader.result;
       if (type === 'pdf') {
-        setPdfFileBase64(base64data);
+        const attachments = {
+          base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+          contentType: base64data.split(';')[0].split(':')[1],
+          name: `${resource}-${pdfType}`
+        };
+        setEmailAttachments((prevState) => {
+          return [...prevState, attachments];
+        });
         setSendEmail(true);
-        setLoading(null);
       }
     };
   };
 
-  let attachments = [];
-  if (pdfFileBase64) {
-    attachments.push({
-      base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(',') + 1)),
-      contentType: pdfFileBase64.split(';')[0].split(':')[1],
-      name: `Planning-${referenceId}`
-    });
-  }
-
-  const onSendEmailSuccess = () => {
-    setSendEmail(false);
-    handleAttachments();
-  };
-
-  const handleAttachments = () => {
-    let request;
-    request = {
-      name: 'Planning',
-      fileUrl: '',
-      relatedTo: [
-        {
-          type: resource,
-          referenceId: referenceId,
-          access: true
-        }
-      ]
-    };
-  };
+  useEffect(() => {
+    const defaultColumnsToShow = defaultColumns?.length > 0 ? allColumn?.filter((c) => defaultColumns?.includes(c)) : allColumn;
+    setVisibleColumnsExcel([...defaultColumnsToShow]);
+  }, [columns]);
 
   return (
     <Box display="flex" justifyContent="space-between">
@@ -194,7 +132,6 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
           >
             {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loading === 'view' ? 'Please wait...' : 'Preview'}
           </Button>
-
           <Button
             className="btn-outline-v1"
             variant="outlined"
@@ -210,7 +147,6 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
           >
             {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
           </Button>
-
           {isSendEmail && (
             <Button
               variant="outlined"
@@ -221,7 +157,11 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
               startIcon={isMobile ? '' : <MdEmail />}
               onClick={() => {
                 setLoading('email');
-                fetchEmailAttachment();
+                handleViewPdf('Email', 'Detail', columns);
+                if (!hideDetailButton) {
+                  handleViewPdf('Email', 'Regular', columns);
+                }
+                setSendEmail(true);
               }}
             >
               {isMobile && !isTablet ? <MdEmail size={20} /> : loading === 'email' ? 'Please wait...' : `Send Email`}
@@ -229,7 +169,6 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
           )}
         </Box>
       </Box>
-
       {showExcelArrangeColumns.open && (
         <Dialog
           open={showExcelArrangeColumns.open}
@@ -259,7 +198,6 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                 <FormControl fullWidth>
                   <Autocomplete
                     id="demo-mutiple-chip"
-                    // disabled={!allowedToEdit}
                     fullWidth
                     size="small"
                     multiple
@@ -301,39 +239,34 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
-            {
-              <>
-                <CustomButton
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  loading={loading === 'Regular' || excelArrangeColumnLoading}
-                  disabled={loading || visibleColumnsExcel?.length === 0}
-                  onClick={(e) => {
-                    handleViewPdf(downlodingFile, 'Regular', visibleColumnsExcel);
-                  }}
-                >
-                  Regular
-                </CustomButton>
-                {hideDetailButton ? null :
-                  <CustomButton
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    loading={loading === 'Detail' || excelArrangeColumnLoading}
-                    disabled={loading || visibleColumnsExcel?.length === 0}
-                    onClick={(e) => {
-                      handleViewPdf(downlodingFile, 'Detail', visibleColumnsExcel);
-                    }}
-                  >
-                    Detail
-                  </CustomButton>}
-              </>
-            }
+            <CustomButton
+              variant="contained"
+              color="primary"
+              size="small"
+              loading={loading === 'Regular' || excelArrangeColumnLoading}
+              disabled={loading || visibleColumnsExcel?.length === 0}
+              onClick={(e) => {
+                handleViewPdf(downlodingFile, 'Regular', visibleColumnsExcel);
+              }}
+            >
+              Regular
+            </CustomButton>
+            {hideDetailButton ? null :
+              <CustomButton
+                variant="contained"
+                color="primary"
+                size="small"
+                loading={loading === 'Detail' || excelArrangeColumnLoading}
+                disabled={loading || visibleColumnsExcel?.length === 0}
+                onClick={(e) => {
+                  handleViewPdf(downlodingFile, 'Detail', visibleColumnsExcel);
+                }}
+              >
+                Detail
+              </CustomButton>}
           </CustomDialogFooter>
         </Dialog>
       )}
-
       {sendEmail && (
         <Dialog
           open={sendEmail}
@@ -353,19 +286,21 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
               setSendEmail(false);
               setFullScreen(false);
             }}
-            fetchData={onSendEmailSuccess}
+            fetchData={() => {
+              setSendEmail(false);
+            }}
             id={referenceId}
             isQuoteBuilder={true}
             emailId={null}
-            qouteBuilderAttachments={attachments}
-            subject={`hello`}
+            qouteBuilderAttachments={emailAttachments}
+            subject={``}
             fromQuote={true}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            referenceType="planning"
+            referenceType={resource}
           />
         </Dialog>
       )}
