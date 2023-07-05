@@ -11,7 +11,7 @@ import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { repairOrder } from '../../../constants/helpers';
+import { REPAIR_ORDER_TYPE, repairOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
@@ -95,15 +95,14 @@ const Productpackage = ({
             <a
               className="link text-truncate"
               target="_blank"
-              href={`${
-                row.original.type === 'service'
+              href={`${row.original.type === 'service'
                   ? routes.serviceMasterDetail.path
                   : row.original.type === 'product'
-                  ? routes.productDetail.path
-                  : row.original.type === 'serializedAsset'
-                  ? routes.serializedAssetDetail.path
-                  : routes.packagesDetail.path
-              }/${row.original.materialId}`}
+                    ? routes.productDetail.path
+                    : row.original.type === 'serializedAsset'
+                      ? routes.serializedAssetDetail.path
+                      : routes.packagesDetail.path
+                }/${row.original.materialId}`}
             >
               {row.original.detail}
             </a>
@@ -204,40 +203,38 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
+      parent.detail = `${parent.type === 'service'
           ? parent.serviceDetail?.serviceName
           : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.assetNumber
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.productDetail?.productName
+            : parent.type === 'serializedAsset'
+              ? parent.serializedAssetDetail.assetNumber
+              : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent?.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.status = `${
-        parent.type === 'service'
+      parent.status = `${parent.type === 'service'
           ? parent.serviceDetail?.status
           : parent.type === 'product'
-          ? parent?.productDetail?.status
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent?.productDetail?.status
+            : parent.type === 'serializedAsset'
+              ? parent?.serializedAssetDetail?.status
+              : parent.packageDetail?.status
+        }`;
     });
 
     if (rows.length !== 0) {
@@ -261,23 +258,22 @@ const Productpackage = ({
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'service'
+      _subRow.detail = `${_subRow.type === 'service'
           ? _subRow.serviceDetail?.serviceName
           : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.productDetail?.productName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow.serializedAssetDetail.assetNumber
+              : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -285,15 +281,14 @@ const Productpackage = ({
       _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
-      parent.status = `${
-        parent.type === 'service'
+      parent.status = `${parent.type === 'service'
           ? parent.serviceDetail?.status
           : parent.type === 'product'
-          ? parent.productDetail?.status
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent.productDetail?.status
+            : parent.type === 'serializedAsset'
+              ? parent.serializedAssetDetail.status
+              : parent.packageDetail?.status
+        }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -543,7 +538,7 @@ const Productpackage = ({
           handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false })}
           ids={[...rowsData?.filter((e) => e.type === 'serializedAsset')?.map((e: any) => e?.serializedAssetDetail?._id)]}
           referenceData={{
-            customerAccount: repairOrderData?.customerAccount?.optionValue,
+            customerAccount: repairOrderData?.type === REPAIR_ORDER_TYPE.external ? repairOrderData?.customerAccount?.optionValue : null,
             warehouse: repairOrderData?.warehouse?.optionValue
           }}
           isAssigning={false}
