@@ -16,10 +16,11 @@ import { assetsReceivingSteps, sidebarResource } from 'src/constants/helpers';
 import ManageAssetsReceiving from './ManageAssetsReceiving';
 import TabPanel from 'src/components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
-import Steps from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Material from './Material';
 import { camelCase } from 'lodash';
+import ReceivingTicket from './ReceivingTicket';
 
 const AssetsReceivingDetail = () => {
   const renderedFrom = camelCase(routes?.assetsReceiving.title);
@@ -27,7 +28,7 @@ const AssetsReceivingDetail = () => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [tabValue, setTabValue] = useState(0);
-  const [nextStep, setNextStep] = useState(true);
+  const [nextStep, setNextStep] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.assetsReceiving]);
   const [assetsReceivingData, setAssetsReceivingData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -50,6 +51,13 @@ const AssetsReceivingDetail = () => {
       fetchData();
     }
   }, [id]);
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -91,9 +99,7 @@ const AssetsReceivingDetail = () => {
       var steps: any = JSON.parse(JSON.stringify(assetsReceivingSteps));
       setStepList(steps);
       setStepNames(steps.map((item) => item.name));
-      setCurrentStep(
-        steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
-      );
+      setCurrentStep(getIndex(data?.processStatus, steps));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setAssetsReceivingData(data);
       setCustomizedRoutes([routes.assetsReceiving, { title: data?.assetsReceivingNumber }]);
@@ -131,13 +137,10 @@ const AssetsReceivingDetail = () => {
   const closeUpdateDialog = () => {
     setOpenUpdateDialog(false);
   };
-
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= stepNames.length) {
-      fetchData();
-      updateProcessStatus(stepNames[currentStep]);
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
+      updateProcessStatus(assetsReceivingSteps[currentStep]?.name);
     }
-    if (['Add Assets'].includes(stepNames[currentStep])) fetchData();
   }, [currentStep]);
 
   return (
@@ -178,6 +181,7 @@ const AssetsReceivingDetail = () => {
                 <FaWpforms className="mr-1" fontSize="inherit" /> Header
               </div>
             }
+            {...a11yProps(0)}
           />
           <Tab
             className={'tabLayout'}
@@ -186,6 +190,7 @@ const AssetsReceivingDetail = () => {
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
               </div>
             }
+            {...a11yProps(1)}
           />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
@@ -216,17 +221,28 @@ const AssetsReceivingDetail = () => {
             }}
           />
           <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-          {stepNames[currentStep] === 'Add Assets' && assetsReceivingData && (
-            <Material 
-            fetchAssetsReceivingData={fetchData}
-            assetsReceivingData={assetsReceivingData}
-            setNextStep={setNextStep}
-            renderedFrom={`${renderedFrom}grid_1`}
-            stepFullScreen={setStepFullScreen}
-            allowedToDelete={allowedToDelete}
-            allowedToEdit={allowedToEdit}
-            />
-          )}
+            {stepNames[currentStep] === 'Add Assets' && assetsReceivingData && (
+              <Material
+                fetchAssetsReceivingData={fetchData}
+                assetsReceivingData={assetsReceivingData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}grid_1`}
+                stepFullScreen={setStepFullScreen}
+                allowedToDelete={allowedToDelete}
+                allowedToEdit={allowedToEdit}
+              />
+            )}
+            {stepNames[currentStep] === 'Receiving Ticket' && assetsReceivingData && (
+              <ReceivingTicket
+                fetchAssetsReceivingData={fetchData}
+                assetsReceivingData={assetsReceivingData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}grid_2`}
+                stepFullScreen={setStepFullScreen}
+                allowedToDelete={true}
+                allowedToEdit={allowedToEdit}
+              />
+            )}
           </ContentFullScreen>
         </TabPanel>
       </Box>
