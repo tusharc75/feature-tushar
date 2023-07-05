@@ -178,7 +178,6 @@ function Dropdown({
                           setFieldValue(val.fieldName, val.value);
                         });
                         const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                        console.log(filterFields)
                         if (filterFields?.length) {
                           filterFields?.forEach((ele: any) => {
                             if (ele?.lookupDependentOnField && ele?.type === "dropDown" && val[ele?.lookupDependentOnField]) {
