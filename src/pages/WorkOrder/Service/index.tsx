@@ -1043,7 +1043,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   setAnchorEl(null);
                 }}
               >
-                Add Step
+                Add Steps
               </MenuItem>
               <MenuItem
                 onClick={() => {

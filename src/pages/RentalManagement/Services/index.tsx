@@ -528,7 +528,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                     setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                   }}
                 >
-                  {`Add Service ${routes.packages.title}`}
+                  {`Add Service Packages`}
                 </MenuItem>
               )}
               <MenuItem
@@ -537,7 +537,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                   setAddExistingProductDialog({ open: true, type: 'newService', parentId: null });
                 }}
               >
-                Add New Services
+                Add New Service
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -545,7 +545,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                   setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
                 }}
               >
-                {`Add New Service ${routes.packages.title}`}
+                {`Add New Service Package`}
               </MenuItem>
             </Menu>
           </Box>
@@ -673,6 +673,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
         <ManagePackageDialog
           isClone={false}
+          referenceData={{ packageType: 'Service' }}
           open={addExistingProductDialog.open}
           packageId={null}
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}

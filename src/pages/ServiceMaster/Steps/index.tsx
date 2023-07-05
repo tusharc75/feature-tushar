@@ -199,7 +199,7 @@ const Steps = ({ serviceId }) => {
                   setStepDialog({ open: true, stepId: '' });
                 }}
               >
-                Add Step
+                Add Steps
               </Button>
             </Grid>
             <Grid item xs={9} md={9} sm={9}>
