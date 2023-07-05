@@ -52,7 +52,7 @@ const Invoice = ({
   const [showCostDialog, setShowCostDialog] = useState(false);
 
   const [columns, setColumns] = useState(null);
-  const [defaultColumns, setDefaultColumns] = useState(['Index', 'Type', 'Details', 'Description', 'Status', 'Qty', 'Unit', `Price ${rentalManagementData?.currency}`, `Total Price ${rentalManagementData?.currency}`, `Final Price ${rentalManagementData?.currency}`])
+  const [defaultColumns, setDefaultColumns] = useState(['Index', 'Type', 'Details', 'Description', 'Qty', 'Unit', `Price ${rentalManagementData?.currency}`, `Total Price ${rentalManagementData?.currency}`, `Final Price ${rentalManagementData?.currency}`])
   const [rowsData, setRowsData] = useState(null);
   useEffect(() => {
     if (
