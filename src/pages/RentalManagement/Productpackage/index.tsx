@@ -594,7 +594,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                   setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
                 }}
               >
-                Add New Package
+                Add New Product Package
               </MenuItem>
             </Menu>
           </Box>
@@ -734,6 +734,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       {
         addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
           <ManagePackageDialog
+            referenceData={{ packageType: 'Product' }}
             isClone={false}
             open={addExistingProductDialog.open}
             packageId={null}
