@@ -359,6 +359,20 @@ function Dropdown({
                           } else {
                             handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                           }
+
+                          const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                          if (filterFields?.length) {
+                            filterFields?.forEach((ele: any) => {
+                              if (ele?.lookupDependentOnField && ele?.type === "dropDown" && tempNewOption[ele?.lookupDependentOnField]) {
+                                if (Array.isArray(tempNewOption[ele?.lookupDependentOnField]) && tempNewOption[ele?.lookupDependentOnField]?.length === 1) {
+                                  setFieldValue(ele?.fieldName, tempNewOption[ele?.lookupDependentOnField][0]);
+                                }
+                                else {
+                                  setFieldValue(ele?.fieldName, tempNewOption[ele?.lookupDependentOnField]);
+                                }
+                              }
+                            });
+                          }
                         }
                       }}
                     />
