@@ -27,7 +27,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 
-const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isRedirectToDetailPage = true }) => {
+const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isRedirectToDetailPage = true, referenceData = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -79,6 +79,11 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
         }
       } else {
         let initialData = getObjKeys('', fieldsDataForCreate);
+        if (referenceData) {
+          if (referenceData?.packageType && fieldsDataForCreate?.find((e) => e.fieldName === 'packageType')) {
+            initialData['packageType'] = referenceData?.packageType
+          }
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
