@@ -21,7 +21,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 
-const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose, onSuccess }) => {
+const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose, onSuccess, isRedirectToDetailPage = true }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -105,13 +105,16 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
       axiosInstance()
         .post(`${serviceMaster.api}`, values)
         .then(({ data }) => {
+          if (isRedirectToDetailPage) {
+            history.push(`${routes.serviceMaster.path}/detail/${data?.data?._id}`);
+          }
+          setLoading(false);
+          onSuccess(data);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: data.message
           });
-          setLoading(false);
-          history.push(`${routes.serviceMaster.path}/detail/${data?.data?._id}`);
         })
         .catch((error) => {
           setLoading(false);
