@@ -177,6 +177,20 @@ function Dropdown({
                         fieldChange?.forEach((val: any) => {
                           setFieldValue(val.fieldName, val.value);
                         });
+                        const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                        console.log(filterFields)
+                        if (filterFields?.length) {
+                          filterFields?.forEach((ele: any) => {
+                            if (ele?.lookupDependentOnField && ele?.type === "dropDown" && val[ele?.lookupDependentOnField]) {
+                              if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
+                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+                              }
+                              else {
+                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
+                              }
+                            }
+                          });
+                        }
                       }
                     }
                 }
