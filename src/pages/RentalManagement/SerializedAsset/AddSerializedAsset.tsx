@@ -504,7 +504,7 @@ const AddSerializedAsset = ({
                             p={1}
                             border={1}
                             className="cursor-pointer"
-                            borderColor="var(--common-bordre-color)"
+                            borderColor="var(--common-border-color)"
                             onClick={() => {
                               if (selectedProduct === d.id) {
                                 setSelectedProduct(null);
@@ -513,8 +513,8 @@ const AddSerializedAsset = ({
                               }
                             }}
                             style={{ display: 'inline-block' }}
-                            bgcolor={d.id === selectedProduct && 'primary.main'}
-                            color={d.id === selectedProduct && theme === 'dark' ? 'var(--dark-secondary)' : 'white'}
+                            bgcolor={d.id === selectedProduct ? 'var(--dark-primary, var(--primary))' : 'var(--dark-secondary, transparent)'}
+                            color={d.id === selectedProduct && 'white'}
                           >
                             {d?.qty < 0 ? (
                               <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
