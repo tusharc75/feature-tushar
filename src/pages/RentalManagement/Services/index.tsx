@@ -638,7 +638,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           packageType="service"
-          ids={rowsData.filter((d) => d.type === 'pacakge').map((d) => d?.materialId)}
+          ids={[]}
         />
       )}
       {isProductEdit.open && (
@@ -667,7 +667,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
-          ids={rowsData.filter((d) => d.type === 'service').map((d) => d?.materialId)}
+          ids={[]}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
