@@ -96,12 +96,12 @@ const Productpackage = ({
               className="link text-truncate"
               target="_blank"
               href={`${row.original.type === 'service'
-                  ? routes.serviceMasterDetail.path
-                  : row.original.type === 'product'
-                    ? routes.productDetail.path
-                    : row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : routes.packagesDetail.path
+                ? routes.serviceMasterDetail.path
+                : row.original.type === 'product'
+                  ? routes.productDetail.path
+                  : row.original.type === 'serializedAsset'
+                    ? routes.serializedAssetDetail.path
+                    : routes.packagesDetail.path
                 }/${row.original.materialId}`}
             >
               {row.original.detail}
@@ -204,12 +204,12 @@ const Productpackage = ({
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail.assetNumber
-              : parent.packageDetail?.packageName
+        ? parent.serviceDetail?.serviceName
+        : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'serializedAsset'
+            ? parent.serializedAssetDetail.assetNumber
+            : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'service'
@@ -228,12 +228,12 @@ const Productpackage = ({
       parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
       parent.status = `${parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
-            ? parent?.productDetail?.status
-            : parent.type === 'serializedAsset'
-              ? parent?.serializedAssetDetail?.status
-              : parent.packageDetail?.status
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
+          ? parent?.productDetail?.status
+          : parent.type === 'serializedAsset'
+            ? parent?.serializedAssetDetail?.status
+            : parent.packageDetail?.status
         }`;
     });
 
@@ -259,12 +259,12 @@ const Productpackage = ({
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
       _subRow.detail = `${_subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow.serializedAssetDetail.assetNumber
-              : _subRow.packageDetail?.packageName
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+            ? _subRow.serializedAssetDetail.assetNumber
+            : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
         _subRow.type === 'service'
@@ -282,12 +282,12 @@ const Productpackage = ({
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
       parent.status = `${parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
-            ? parent.productDetail?.status
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail.status
-              : parent.packageDetail?.status
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
+          ? parent.productDetail?.status
+          : parent.type === 'serializedAsset'
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
         }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
@@ -523,7 +523,7 @@ const Productpackage = ({
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false })}
           referenceType={'repairOrder'}
           referenceData={{
-            customerAccount: repairOrderData?.customerAccount?.optionValue,
+            customerAccount: repairOrderData?.type === REPAIR_ORDER_TYPE.external ? repairOrderData?.customerAccount?.optionValue : null,
             warehouse: repairOrderData?.warehouse?.optionValue
           }}
           onSuccess={(data) => {
