@@ -37,6 +37,7 @@ import LoadingTicket from './LoadingTicket';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 function a11yProps(index: any) {
   return {
@@ -80,6 +81,19 @@ const RepairOrderDetails = () => {
 
   const [stepList, setStepList] = useState(repairOrderSteps);
   const [stepNames, setStepNames] = useState(repairOrderSteps.map((item) => item.name));
+  const columns = [
+    { Header: 'Qty', accessor: 'qty' },
+    { Header: 'Unit', accessor: 'unit' },
+    { Header: 'Supplier Account', accessor: 'supplierAccount' },
+    { Header: 'Supplier Price ($)', accessor: 'supplierPrice_usd' },
+    { Header: 'Price ($)', accessor: 'price_usd' },
+    { Header: 'Total Price ($)', accessor: 'totalPrice_usd' },
+    { Header: 'Discount Percentage', accessor: 'discountPercentage' },
+    { Header: 'Discount ($)', accessor: 'discount_usd' },
+    { Header: 'Tax Percentage', accessor: 'taxPercentage' },
+    { Header: 'Tax ($)', accessor: 'tax_usd' },
+    { Header: 'Final Price ($)', accessor: 'finalPrice_usd' }
+  ];
 
   useEffect(() => {
     return history.listen((location) => {
@@ -100,7 +114,6 @@ const RepairOrderDetails = () => {
       }
     });
   }, [locationKeys]);
-
 
   useEffect(() => {
     if (id) {
@@ -150,23 +163,25 @@ const RepairOrderDetails = () => {
         setAllowedToEdit(isAllowedToEdit);
         var steps: any = JSON.parse(JSON.stringify(repairOrderSteps));
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
-          steps = steps?.filter((e) => !['Loading Ticket']?.includes(e.name))
+          steps = steps?.filter((e) => !['Loading Ticket']?.includes(e.name));
         }
         if (!user?.user?.brandPolicy?.repairOrderPrice) {
-          steps = steps?.filter((e) => !['Quotation', 'Post Work Service', 'Invoice']?.includes(e.name))
+          steps = steps?.filter((e) => !['Quotation', 'Post Work Service', 'Invoice']?.includes(e.name));
         }
         if (!data?.addQuotationStep) {
           steps = steps?.map((e) => {
             if (e.name === 'Quotation') {
-              e.title = 'Price'
+              e.title = 'Price';
             }
-            return e
-          })
+            return e;
+          });
         }
-        setStepList(steps)
-        setStepNames(steps.map((item) => item.name))
+        setStepList(steps);
+        setStepNames(steps.map((item) => item.name));
 
-        setCurrentStep(steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0);
+        setCurrentStep(
+          steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
+        );
 
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setRepairOrderData({ ...data });
@@ -227,8 +242,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -378,9 +393,10 @@ const RepairOrderDetails = () => {
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
                   ![REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) &&
-                  !([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                    quotationVersionData?.status) &&
-                    ['Add Assets', 'Work Order'].includes(stepNames[currentStep])
+                  !(
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                      quotationVersionData?.status
+                    ) && ['Add Assets', 'Work Order'].includes(stepNames[currentStep])
                   ) && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -469,6 +485,11 @@ const RepairOrderDetails = () => {
               }
             }}
           />
+          <Box className='ml-2'>
+          {currentStep === 5 && (
+            <PreviewDownload resource={sidebarResource.repairOrder} referenceId={id} columns={columns} />
+          )}
+          </Box>          
           <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {stepNames[currentStep] === 'Add Assets' && repairOrderData && (
               <Productpackage
@@ -497,10 +518,10 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
-                      ? false
-                      : allowedToEdit
+                        quotationVersionData?.status
+                      )
+                    ? false
+                    : allowedToEdit
                 }
                 allowedToDelete={allowedToDelete}
                 isPostWorkService={Boolean(currentStep === 3)}
