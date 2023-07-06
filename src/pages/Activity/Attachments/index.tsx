@@ -36,7 +36,8 @@ import _ from 'lodash';
 import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined';
 import FolderIcon from '@material-ui/icons/Folder';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 function reducer(state, action) {
   switch (action.type) {
     case 'loading':
@@ -140,6 +141,7 @@ export default function Attachment() {
   const [isConfirmDialogVisible, setIsConfirmDialogVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [sendMail, setSendMail] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -150,6 +152,7 @@ export default function Attachment() {
   const { dataRows, rowCount, selectedRecords, loading, page, limit, pageSizes, search, filters, sorting } = state;
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
+  const [emailAttachment, setEmailAttachment] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
@@ -300,6 +303,18 @@ export default function Attachment() {
                 </IconButton>
               </Tooltip>
             )}
+            {allPdf && row.original.type === 'file' && (
+              <Tooltip
+                title="Mail"
+                onClick={() => {
+                  handleMail(row.original);
+                }}
+              >
+                <IconButton size="small">
+                  <ArrowUpwardIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Tooltip>
+            )}
             {row.original.canEdit ? (
               <Tooltip title="Delete">
                 <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
@@ -416,6 +431,39 @@ export default function Attachment() {
           setIsDownloading(false);
         });
     }
+  };
+  const handleMail = (data) => {
+    const file = data?.file;
+    axiosInstance()
+      .get(`user/download?fileName=${file[0].url}`, {
+        responseType: 'blob'
+      })
+      .then(({ data }) => {
+        const tempfile = new Blob([data], { type: 'application/pdf' });
+        generateBase64forFile(tempfile, file[0].name, 'pdf');
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const generateBase64forFile = (blobData, fileName, type) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data: any = reader.result;
+      if (type === 'pdf') {
+        const attachments = [
+          {
+            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+            contentType: base64data.split(';')[0].split(':')[1],
+            name: fileName
+          }
+        ];
+        setEmailAttachment(attachments);
+        setSendMail(true);
+      }
+    };
   };
 
   const viewPdf = (event, data) => {
@@ -875,6 +923,40 @@ export default function Attachment() {
             />
           </Dialog>
         ) : null}
+        {sendMail && (
+          <Dialog
+            fullScreen={fullScreen || isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+            open={sendMail}
+            aria-labelledby="customized-dialog-title"
+            maxWidth={'md'}
+            onClose={() => {
+              setSendMail(false);
+              setFullScreen(false);
+            }}
+            fullWidth
+          >
+            <CreateEmail
+              emailId={null}
+              // relatedTo={relatedTo}
+              handleClose={() => {
+                setSendMail(false);
+                setFullScreen(false);
+              }}
+              fetchData={() => {
+                setSendMail(false);
+                setFullScreen(false);
+              }}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              isMinimized={!fullScreen}
+              showManimizeMaximize={true}
+              qouteBuilderAttachments={emailAttachment}
+              isQuoteBuilder={true}
+            />
+          </Dialog>
+        )}
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}

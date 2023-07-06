@@ -65,7 +65,7 @@ const ShowProduct = ({ product }) => {
       }}
     >
       <div>
-        <Typography style={styles.typographyh}>Product Name</Typography>
+        <Typography style={styles.typographyh}>Product Type</Typography>
         <Typography style={styles.typographyd}>{product?.productName}</Typography>
       </div>
       <div>
@@ -122,12 +122,12 @@ export default function AssetAvailability({ rentalId, handleClose }) {
   useEffect(() => {
     if (canFulfil) {
       setModalContent({
-        title: 'Serialized Assets Available',
+        title: `${routes.serializedAsset.title} Available`,
         icon: <CheckCircleIcon color="secondary" />
       });
     } else {
       setModalContent({
-        title: `Unable to fulfill Asset requirement(s) from this ${routes.warehouse.title}.`,
+        title: `Unable to fulfill ${routes.serializedAsset.title} requirement(s) from this ${routes.warehouse.title}.`,
         icon: <ErrorIcon color="error" />
       });
     }
@@ -153,8 +153,8 @@ export default function AssetAvailability({ rentalId, handleClose }) {
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <SerializedAssetAvailableIllustration />
             <Typography style={{ fontSize: '16px', fontWeight: '500', marginTop: '20px', lineHeight: '1.8' }}>
-              Serialized Assets are available for all the products.
-              <br /> Rental job can be fulfilled.
+              {routes.serializedAsset.title} are available for all the products.
+              <br /> job can be fulfilled.
             </Typography>
           </div>
         ) : (
@@ -178,7 +178,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
                     maxWidth: 'max-content',
                     color: '#fff'
                   }}
-                >{`Serialized Assets are available in other ${routes.warehouse.title}`}</Typography>
+                >{`${routes.serializedAsset.title} are available in other ${routes.warehouse.title}`}</Typography>
                 <div className="mt-2">
                   {products
                     ?.filter((e) => !e.baseWarehouse)

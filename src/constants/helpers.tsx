@@ -145,6 +145,7 @@ export const repairOrderSteps: stepInterface[] = [
 
 export const assetsReceivingSteps: stepInterface[] = [
   { name: 'Add Assets', title: 'Add', icon: 'add' },
+  { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
 ];
 
 export const serviceOrderSteps: stepInterface[] = [
@@ -1927,7 +1928,8 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   salesOrder: 'Sales Order',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  assetsReceiving: 'Asset Receiving',
 };
 
 export const DELIVERY_FROM_TO_TYPE = {

@@ -24,10 +24,12 @@ import { TreeItem, TreeView } from '@material-ui/lab';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import { AiOutlineFileAdd, AiOutlineFolderAdd, AiOutlineDelete, AiOutlineFile } from 'react-icons/ai';
 import { FiEdit2 } from 'react-icons/fi';
 import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CreateEmail } from '../Email/CreateEmail';
 
 const order = ['file', 'folder'];
 
@@ -39,6 +41,8 @@ const sortFileStructure = (a, b) => {
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
+  const [sendMail, setSendMail] = useState(false);
+  const [emailAttachment, setEmailAttachment] = useState(null);
   const [loading, setLoading] = useState(false);
   const [attachments, setAttachments] = useState(null);
   const [attachmentId, setAttachmentId] = useState(null);
@@ -226,14 +230,24 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                   {permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
                                     <>
                                       {_attachment.type !== 'folder' ? (
-                                        <IconButton
-                                          size="small"
-                                          color="primary"
-                                          aria-label="delete"
-                                          onClick={(event) => handleOpenMenu(event, _attachment._id, _attachment)}
-                                        >
-                                          <MoreHorizIcon />
-                                        </IconButton>
+                                        <Box style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                          <IconButton
+                                            size="small"
+                                            color="primary"
+                                            aria-label="delete"
+                                            onClick={(event) => handleSendMail(event, _attachment)}
+                                          >
+                                            <ArrowUpwardIcon fontSize="small" color="primary" />
+                                          </IconButton>
+                                          <IconButton
+                                            size="small"
+                                            color="primary"
+                                            aria-label="delete"
+                                            onClick={(event) => handleOpenMenu(event, _attachment._id, _attachment)}
+                                          >
+                                            <MoreHorizIcon />
+                                          </IconButton>
+                                        </Box>
                                       ) : (
                                         <>
                                           <Box style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -510,7 +524,10 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     setAttachmentId(_id);
     if (data && data?._id) setAttachmentData(data);
   };
-
+  const handleSendMail = (event, data) => {
+    event.stopPropagation();
+    handleMail(data);
+  };
   const handleCloseMenu = (event) => {
     event.stopPropagation();
     setAnchorEl(null);
@@ -570,6 +587,40 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     handleActivityRefresh();
   };
 
+  const handleMail = (data) => {
+    const file = data?.file;
+    axiosInstance()
+      .get(`user/download?fileName=${file[0].url}`, {
+        responseType: 'blob'
+      })
+      .then(({ data }) => {
+        const tempfile = new Blob([data], { type: 'application/pdf' });
+        generateBase64forFile(tempfile, file[0].name, 'pdf');
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const generateBase64forFile = (blobData, fileName, type) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data: any = reader.result;
+      if (type === 'pdf') {
+        const attachments = [
+          {
+            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+            contentType: base64data.split(';')[0].split(':')[1],
+            name: fileName
+          }
+        ];
+        setEmailAttachment(attachments);
+        setSendMail(true);
+      }
+    };
+  };
+
   const handleDownload = () => {
     setAnchorEl(null);
     const file = attachmentData?.file;
@@ -614,6 +665,47 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           toastConfig.setToastConfig(err);
         });
     }
+  };
+
+  const CreateMail = () => {
+    return (
+      <>
+        {sendMail && (
+          <Dialog
+            fullScreen={fullScreen || isMobile || isTablet}
+            TransitionComponent={CustomDialogTransition}
+            open={sendMail}
+            aria-labelledby="customized-dialog-title"
+            maxWidth={'md'}
+            onClose={() => {
+              setSendMail(false);
+              setFullScreen(false);
+            }}
+            fullWidth
+          >
+            <CreateEmail
+              emailId={null}
+              relatedTo={relatedTo}
+              handleClose={() => {
+                setSendMail(false);
+                setFullScreen(false);
+              }}
+              fetchData={() => {
+                setSendMail(false);
+                setFullScreen(false);
+              }}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              isMinimized={!fullScreen}
+              showManimizeMaximize={true}
+              qouteBuilderAttachments={emailAttachment}
+              isQuoteBuilder={true}
+            />
+          </Dialog>
+        )}
+      </>
+    );
   };
 
   const RenderFolderEditMenu = () => {
@@ -669,7 +761,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
       <></>
     );
   };
-
   return (
     <Box className="activityDetailBox  attachment">
       {loading ? (
@@ -690,6 +781,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               </Box>
             )}
             <RenderFolderEditMenu />
+            {sendMail && <CreateMail />}
 
             <Menu
               id="simple-menu"
@@ -705,6 +797,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               <MenuItem onClick={handleDownload}>Download</MenuItem>
               {permissions['attachment']?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
             </Menu>
+
             <Dialog
               open={open.open}
               aria-labelledby="customized-dialog-title"

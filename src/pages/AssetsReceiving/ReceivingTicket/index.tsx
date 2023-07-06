@@ -9,15 +9,23 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
-import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
+import { DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE } from 'src/constants/helpers';
+import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
-const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete }) => {
+const ReceivingTicket = ({
+  fetchAssetsReceivingData,
+  assetsReceivingData,
+  setNextStep,
+  renderedFrom,
+  stepFullScreen,
+  allowedToEdit,
+  allowedToDelete
+}) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -26,10 +34,10 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [material, setMaterial] = useState([]);
-  const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
+  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {} });
 
   useEffect(() => {
     fetchFields();
@@ -76,7 +84,8 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
                   : row.original.type === 'serializedAsset'
                   ? routes.serializedAssetDetail.path
                   : routes.packagesDetail.path
-              }/${row.original.materialId}`} rel="noreferrer"
+              }/${row.original.materialId}`}
+              rel="noreferrer"
             >
               {row.original.detail}
             </a>
@@ -119,6 +128,19 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
         }
       },
       {
+        accessor: 'receivingTicket',
+        Header: 'Receiving Ticket',
+        width: 150,
+        Cell: ({ row }) =>
+          row.original['receivingTicket'] ? (
+            <a className="link text-truncate" href={`${routes.deliveryTicketDetail.path}/${row.original['receivingTicket']._id}`} target="_blank" rel="noreferrer">
+              {row.original['receivingTicket'].ticketName}
+            </a>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
         accessor: 'status',
         Header: 'Status',
         width: 100,
@@ -135,7 +157,7 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          <HtmlTooltip title={allowedToDelete && row.original?.allowedToDelete ? 'Asset is already assigned' : 'Delete'}>
+          <HtmlTooltip title={allowedToDelete ? 'Asset is already assigned' : 'Delete'}>
             <IconButton
               size="small"
               aria-label="Details"
@@ -143,9 +165,9 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
                 const obj: any = [row.original._id];
                 setDeleteData(obj);
               }}
-              disabled={allowedToDelete && row.original?.allowedToDelete}
+              disabled={allowedToDelete}
             >
-              <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.allowedToDelete ? 'disabled' : 'error'} />
+              <DeleteIcon fontSize="small" color={allowedToDelete ? 'disabled' : 'error'} />
             </IconButton>
           </HtmlTooltip>
         </>
@@ -200,7 +222,6 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
       parent.status = `${
         parent.type === 'service'
@@ -224,6 +245,21 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
     }
     setRowsData(rows);
     setSelectedProducts([]);
+  };
+
+  const handleTicketDialog = (ticketType, deliveryToType) => {
+    const data = {};
+    data['ticketName'] = assetsReceivingData.assetsReceivingNumber;
+    data['referenceId'] = assetsReceivingData._id;
+    data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
+    data['pickupFrom'] = assetsReceivingData?.customerAccount?.optionValue;
+    data['deliveryToType'] = deliveryToType;
+    data['deliveryTo'] = assetsReceivingData?.warehouse?.optionValue;
+    data['deliveryToAddress'] = assetsReceivingData?.warehouse?.address;
+    data['isPickupFromDisable'] = true;
+    data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+    setShowTicketDialog({ open: ticketType === DELIVERY_TICKET_TYPE.receiving ? true : false, ticketType: ticketType, data: data });
+    closeActions();
   };
 
   const generateNestedData = (material, parent) => {
@@ -275,29 +311,6 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
     return sortBy(subRows, ['type']);
   };
 
-  const handleAdd = async (rows) => {
-    const material: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = addDialog.type;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.parentId = addDialog.parentId;
-      material.push(element);
-    });
-    axiosInstance()
-      .post(`${routes.assetsReceiving.path}/material/${assetsReceivingData._id}`, { material })
-      .then(() => {
-        setAddDialog({ open: false, type: '', parentId: null });
-        fetchData();
-        fetchAssetsReceivingData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
@@ -315,16 +328,16 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
       });
   };
 
-  const handleDeleteMultiple = () => {
-    const obj: any = [];
-    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
-    dataToDelete?.forEach((ele) => {
-      obj.push(ele._id);
-    });
-    dataToDelete?.forEach((ele) => {
-      getNestedSubRows(obj, ele);
-    });
-    setDeleteData(obj);
+  const handleSaveData = async (rows: any) => {
+    axiosInstance()
+      .put(`${routes.assetsReceiving.path}/material/${assetsReceivingData._id}`, { material: rows })
+      .then(({ data }) => {
+        fetchAssetsReceivingData();
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const openActions = (event) => {
@@ -339,23 +352,7 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
     <Fragment>
       {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" flexWrap={'wrap'} gridGap={1} m={1}>
-          <Box display="flex" flexWrap={'wrap'}>
-            {permissions?.serializedAsset?.isRead && allowedToEdit && (
-              <>
-                <Button
-                  size="small"
-                  variant="contained"
-                  color="primary"
-                  onClick={() => {
-                    setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
-                  }}
-                >
-                  {`Create ${routes.serializedAsset.title}`}
-                </Button>
-                <Box ml={1} />
-              </>
-            )}
-          </Box>
+          <Box display="flex" flexWrap={'wrap'} />
           <Box display="flex">
             <Button
               variant="outlined"
@@ -382,13 +379,11 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
               onClose={closeActions}
             >
               <MenuItem
-                disabled={allowedToDelete && selectedProducts?.filter((e) => e.allowedToDelete)?.length === selectedProducts?.length ? true : false}
                 onClick={() => {
-                  closeActions();
-                  handleDeleteMultiple();
+                  handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
                 }}
               >
-                Delete
+                Create Receiving Ticket
               </MenuItem>
             </Menu>
           </Box>
@@ -426,17 +421,28 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
         />
       )}
 
-      {addDialog.open && (
-        <ManageSerializedAsset
-          onClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          referenceType={'assetsReceiving'}
-          referenceData={{
-            customerAccount: assetsReceivingData?.customerAccount?.optionValue,
-            warehouse: assetsReceivingData?.warehouse?.optionValue
-          }}
+      {showTicketDialog.open && (
+        <ManageDeliveryTicket
+          ticketType={showTicketDialog.ticketType}
+          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.assetsReceiving}
+          referenceData={showTicketDialog.data}
+          productInventory={[]}
+          products={[]}
+          onClose={() => setShowTicketDialog({ open: false, ticketType: '', data: {} })}
           onSuccess={(data) => {
-            setAddDialog({ open: false, type: '', parentId: null });
-            handleAdd([data]);
+            setShowTicketDialog({ open: false, ticketType: '', data: {} });
+            let rows = selectedProducts.map((i) => ({
+                _id: i._id,
+                materialId: i.materialId,
+                type: i.type,
+                unit: i.unit,
+                qty: i.qty,
+                parentId: i.parentId,
+                receivingTicket: {_id: data._id, ticketName: data.ticketName}
+            }))
+            handleSaveData(rows)
+            fetchAssetsReceivingData();
+            fetchData();
           }}
         />
       )}
@@ -444,4 +450,4 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
   );
 };
 
-export default Material;
+export default ReceivingTicket;
