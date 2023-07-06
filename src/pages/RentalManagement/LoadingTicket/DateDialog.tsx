@@ -7,14 +7,26 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import moment from 'moment';
+import axiosInstance from 'src/axios/axiosInstance';
 
-const DateDialog = ({ title, onClose, handleSubmit, loading }) => {
+const DateDialog = ({ title, onClose, handleSubmit, loading, assets = [] }) => {
+
+  const [minDate, setMinDate] = useState(null)
 
   function validate(values) {
     const errors = {};
 
     return errors;
   }
+
+  const findLastDate = async () => {
+    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets })
+    setMinDate(new Date(data?.date))
+  }
+
+  useEffect(() => {
+    findLastDate()
+  }, [assets])
 
   return (
     <Dialog
@@ -44,6 +56,7 @@ const DateDialog = ({ title, onClose, handleSubmit, loading }) => {
                     fullWidth
                     values={values}
                     maxDate={new Date()}
+                    minDate={minDate}
                     errors={errors}
                     touched={touched}
                     type="date"
