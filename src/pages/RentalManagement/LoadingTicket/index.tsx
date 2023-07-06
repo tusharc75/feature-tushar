@@ -664,7 +664,7 @@ const LoadingTicket = ({
     setOpenDateDialog((prev) => ({ ...prev, loading: true }))
     const assets = selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id);
     axiosInstance()
-      .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse`, { assets, status: status, date: date })
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse-standby`, { assets, status: status, date: date })
       .then(({ data }) => {
         fetchRecords();
         toastConfig.setToastConfig({
@@ -676,6 +676,7 @@ const LoadingTicket = ({
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setOpenDateDialog((prev) => ({ ...prev, loading: false }))
       });
   };
 

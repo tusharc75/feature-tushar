@@ -65,9 +65,15 @@ const AssetHistory = ({ id }) => {
           <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link>
-        ) : (
-          params.value
         )
+          : params.data?.type === 'Asset Receiving' ? (
+            <Link className="link" title={params.value} to={`${routes.assetsReceiving.path}/${params.data.referenceId}`}>
+              {params.value}
+            </Link>
+          )
+            : (
+              params.value
+            )
       ) : (
         <NoDataCell />
       )}

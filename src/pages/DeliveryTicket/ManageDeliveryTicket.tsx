@@ -324,6 +324,8 @@ const ManageDeliveryTicket = ({
             tempInitialData['transferInventory'] = referenceData?.referenceId;
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.repairOrder) {
             tempInitialData['repairOrder'] = referenceData?.referenceId;
+          } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.assetsReceiving) {
+            tempInitialData['assetReceiving'] = referenceData?.referenceId;
           }
 
           tempInitialData['pickupFromType'] = referenceData?.pickupFromType;
@@ -579,8 +581,8 @@ const ManageDeliveryTicket = ({
                   }
                 }}
                 title={`${deliveryTicketId
-                    ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
-                    : `Create Transaction Ticket`
+                  ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
+                  : `Create Transaction Ticket`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
