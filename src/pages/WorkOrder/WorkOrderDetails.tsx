@@ -31,6 +31,7 @@ import { GrStatusInfo } from 'react-icons/gr';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { FaWpforms } from 'react-icons/fa';
 import { RiFlowChart } from 'react-icons/ri';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -56,6 +57,14 @@ const WorkOrderDetails = () => {
   const [completed, setCompleted] = useState(false);
 
   const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
+
+  const columns = [
+    {accessor: 'serviceName', Header: 'Service'},
+    {accessor: 'serviceType', Header: 'Service Type'},
+    {accessor: 'assignedTechnician', Header: 'Assigned Technician'},
+    {accessor: 'status', Header: 'Status'},
+    {accessor: 'serviceStatus', Header: 'Result'},
+  ]
 
   useEffect(() => {
     return history.listen((location) => {
@@ -264,7 +273,8 @@ const WorkOrderDetails = () => {
                       </Button>
                     </Fragment>
                   )}
-                <Button
+                  <PreviewDownload resource={sidebarResource.workOrder} referenceId={id} columns={columns} />
+                {/* <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   size="small"
                   onClick={previewWorkOrderPdf}
@@ -272,7 +282,7 @@ const WorkOrderDetails = () => {
                   disabled={previewPdf}
                 >
                   {isMobile && !isTablet ? <VisibilityIcon color="primary" /> : 'Preview'}
-                </Button>
+                </Button> */}
                 {permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && !completed && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}

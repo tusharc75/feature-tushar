@@ -1,7 +1,7 @@
 import { Box, Chip, Grid, IconButton, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import ManageWarehouse from 'src/pages/Warehouse/ManageWarehouse';
 import {
@@ -24,8 +24,10 @@ import ManageMarketSegmentDialog from 'src/pages/MarketSegment/ManageMarketSegme
 import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 import { camelCase, has, isEmpty } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { NewAddressOptionList } from '../../../StateProvider/AddressProvider'
 
-function dropdownOptions(options, values, fields, fieldData) {
+function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
+
   const lookupDependentOn = fieldData?.lookupDependentOn;
   const lookupDependentOnField = fieldData?.lookupDependentOnField;
 
@@ -59,7 +61,15 @@ function dropdownOptions(options, values, fields, fieldData) {
         const dependentFieldOption = dependentOnField?.option?.find((e) => e.optionValue === dependentOnFieldValue);
         if (dependentFieldOption) {
           const dependentIds = dependentFieldOption[lookupDependentOnField] || [];
-          const newOptions = options?.filter((option: any) => dependentIds?.includes(option.optionValue)) || [];
+          let option = options;
+          if (fieldData?.lookupResource === 'Address' && newAddressOptionList?.length) {
+            newAddressOptionList?.forEach((ele: any) => {
+              if (!option?.find((e) => e.optionValue === ele.optionValue)) {
+                option.push(ele);
+              }
+            });
+          }
+          const newOptions = option?.filter((option: any) => dependentIds?.includes(option.optionValue)) || [];
           optionsToShow.push(...newOptions);
         }
       }
@@ -103,6 +113,7 @@ function Dropdown({
     state: { permissions }
   }: any = useData();
   const [lookupDialog, setLookupDialog] = React.useState(false);
+  const { newAddressOptionList, setNewAddressOptionList } = React.useContext(NewAddressOptionList);
 
   return (
     <Box key={fieldData?.lookupResource}>
@@ -163,10 +174,10 @@ function Dropdown({
               <Autocomplete
                 {...rest}
                 disabled={fieldData?.isUneditable || rest?.disabled}
-                options={dropdownOptions(option, values, fields, fieldData) || []}
+                options={dropdownOptions(option, values, fields, fieldData, newAddressOptionList) || []}
                 getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                 getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={[...dropdownOptions(option, values, fields, fieldData)].find((data: any) => data.optionValue === values[name]) || ''}
+                value={[...dropdownOptions(option, values, fields, fieldData, newAddressOptionList)].find((data: any) => data.optionValue === values[name]) || ''}
                 onChange={
                   onChange
                     ? onChange
@@ -180,7 +191,7 @@ function Dropdown({
                         const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
                         if (filterFields?.length) {
                           filterFields?.forEach((ele: any) => {
-                            if (ele?.lookupDependentOnField && ele?.type === "dropDown" && val[ele?.lookupDependentOnField]) {
+                            if (ele?.lookupDependentOnField && ele?.type === "dropDown" && val && val[ele?.lookupDependentOnField]) {
                               if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
                                 setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
                               }
@@ -745,6 +756,7 @@ function Dropdown({
                           };
                           addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
+                          setNewAddressOptionList([...newAddressOptionList, tempNewOption]);
                           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                         }
                       }}
