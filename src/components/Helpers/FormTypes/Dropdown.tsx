@@ -27,6 +27,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { NewAddressOptionList } from '../../../StateProvider/AddressProvider'
 
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
+
   const lookupDependentOn = fieldData?.lookupDependentOn;
   const lookupDependentOnField = fieldData?.lookupDependentOnField;
 
@@ -60,11 +61,13 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
         const dependentFieldOption = dependentOnField?.option?.find((e) => e.optionValue === dependentOnFieldValue);
         if (dependentFieldOption) {
           const dependentIds = dependentFieldOption[lookupDependentOnField] || [];
-          let option = []
-          if (newAddressOptionList?.length > 0) {
-            option = newAddressOptionList
-          } else{
-            option = options
+          let option = options;
+          if (fieldData?.lookupResource === 'Address' && newAddressOptionList?.length) {
+            newAddressOptionList?.forEach((ele: any) => {
+              if (!option?.find((e) => e.optionValue === ele.optionValue)) {
+                option.push(ele);
+              }
+            });
           }
           const newOptions = option?.filter((option: any) => dependentIds?.includes(option.optionValue)) || [];
           optionsToShow.push(...newOptions);
@@ -753,7 +756,7 @@ function Dropdown({
                           };
                           addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
-                          setNewAddressOptionList([tempNewOption, ...option]);
+                          setNewAddressOptionList([...newAddressOptionList, tempNewOption]);
                           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                         }
                       }}
