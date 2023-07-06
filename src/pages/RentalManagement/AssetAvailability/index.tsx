@@ -53,6 +53,23 @@ const styles: CssObj = {
 };
 
 const ShowProduct = ({ product }) => {
+  const [productHeader, setProductHeader] = useState(null)
+  const findLabel = async () => {
+    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+          fieldNames: ['productName']
+        },
+      ]
+    });
+    setProductHeader(data[0].fieldNames[0])
+  }
+
+  useEffect(() => {
+    findLabel()
+  }, [])
+
   return (
     <div
       className="d-flex pl-3 pr-3 mt-3 flex-wrap"
@@ -65,7 +82,7 @@ const ShowProduct = ({ product }) => {
       }}
     >
       <div>
-        <Typography style={styles.typographyh}>Product Type</Typography>
+        <Typography style={styles.typographyh}>{productHeader ? productHeader?.fieldLabel : 'Product Type'}</Typography>
         <Typography style={styles.typographyd}>{product?.productName}</Typography>
       </div>
       <div>
