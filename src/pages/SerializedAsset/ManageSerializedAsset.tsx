@@ -127,11 +127,11 @@ const ManageSerializedAsset = ({
             createValues['mtrAttachedDate'] = '';
           }
 
-          if ( referenceType === 'repairOrder' || referenceType === "assetsReceiving") {
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount')) {
+          if (referenceType === 'repairOrder' || referenceType === "assetsReceiving") {
+            if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount') && referenceData?.customerAccount) {
               createValues['customerAccount'] = referenceData?.customerAccount;
             }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'warehouse')) {
+            if (fieldsDataForCreate.some((e) => e.fieldName === 'warehouse') && referenceData?.warehouse) {
               createValues['warehouse'] = referenceData?.warehouse;
               const warehouseAddress = plantsOptions?.find((e) => e.optionValue === referenceData?.warehouse);
               if (warehouseAddress && fieldsDataForCreate.some((e) => e.fieldName === 'currentLocation')) {

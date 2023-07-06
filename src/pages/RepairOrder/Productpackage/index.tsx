@@ -548,7 +548,7 @@ const Productpackage = ({
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false })}
           referenceType={'repairOrder'}
           referenceData={{
-            customerAccount: repairOrderData?.customerAccount?.optionValue,
+            customerAccount: repairOrderData?.type === REPAIR_ORDER_TYPE.external ? repairOrderData?.customerAccount?.optionValue : null,
             warehouse: repairOrderData?.warehouse?.optionValue
           }}
           onSuccess={(data) => {
