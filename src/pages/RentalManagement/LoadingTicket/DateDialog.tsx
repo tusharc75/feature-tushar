@@ -62,7 +62,7 @@ const DateDialog = ({ title, onClose, handleSubmit, loading, assets = [] }) => {
                     fullWidth
                     values={values}
                     maxDate={new Date()}
-                    // minDate={minDate}
+                    minDate={minDate}
                     errors={errors}
                     touched={touched}
                     type="date"
