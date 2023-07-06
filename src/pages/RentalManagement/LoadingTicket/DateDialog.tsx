@@ -8,10 +8,15 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
+import { object, date } from 'yup';
 
 const DateDialog = ({ title, onClose, handleSubmit, loading, assets = [] }) => {
 
-  const [minDate, setMinDate] = useState(null)
+  const [minDate, setMinDate] = useState(new Date())
+
+  const DateTemplateSchema = object().shape({
+    date: date().required('Date is required').min(minDate, 'Date must be in the future').max(new Date(), 'Date must be till today or before today'),
+  });
 
   function validate(values) {
     const errors = {};
@@ -41,6 +46,7 @@ const DateDialog = ({ title, onClose, handleSubmit, loading, assets = [] }) => {
       fullWidth>
       <Formik
         initialValues={{ date: new Date() }}
+        validationSchema={DateTemplateSchema}
         validate={validate}
         onSubmit={(values) => {
           handleSubmit(moment(values.date).format('MM/DD/YYYY'));
@@ -56,7 +62,7 @@ const DateDialog = ({ title, onClose, handleSubmit, loading, assets = [] }) => {
                     fullWidth
                     values={values}
                     maxDate={new Date()}
-                    minDate={minDate}
+                    // minDate={minDate}
                     errors={errors}
                     touched={touched}
                     type="date"
