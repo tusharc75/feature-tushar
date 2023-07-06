@@ -81,8 +81,8 @@ const AssetsReceivingDetail = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${routes.assetsReceiving.path}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchData = async () => {
@@ -239,7 +239,7 @@ const AssetsReceivingDetail = () => {
                 setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}grid_2`}
                 stepFullScreen={setStepFullScreen}
-                allowedToDelete={true}
+                allowedToDelete={allowedToDelete}
                 allowedToEdit={allowedToEdit}
               />
             )}
