@@ -49,6 +49,8 @@ import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import { ExpandMore } from '@material-ui/icons';
 import AddSerializedAsset from '../SerializedAsset/AddSerializedAsset';
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
+import { useData } from 'src/StateProvider/Provider';
+import DateDialog from './DateDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -76,6 +78,8 @@ const LoadingTicket = ({
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const classes = useStyles();
+
+  const { state: { user } }: any = useData();
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -106,6 +110,8 @@ const LoadingTicket = ({
 
   const [checkMTRValidation, setCheckMTRValidation] = useState(false);
   const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
+
+  const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, loading: false });
 
   useEffect(() => {
     fetchRecords();
@@ -317,7 +323,7 @@ const LoadingTicket = ({
 
   const TicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
+      <Link className="link text-truncate" target='_blank' title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
         {params.value}
       </Link>
     ) : (
@@ -326,7 +332,7 @@ const LoadingTicket = ({
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`}>
+      <Link className="link text-truncate" target='_blank' title={params.value} to={`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`}>
         {params.value}
       </Link>
     ) : (
@@ -338,6 +344,7 @@ const LoadingTicket = ({
       <Link
         className="link text-truncate"
         title={params.value}
+        target='_blank'
         to={`${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`}
       >
         {params.value}
@@ -379,7 +386,7 @@ const LoadingTicket = ({
   );
 
   const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
+    <Link className="link text-truncate" target='_blank' title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
       {params.value}
     </Link>
   );
@@ -653,10 +660,11 @@ const LoadingTicket = ({
     }
   };
 
-  const handleChangeStatusInUse = () => {
+  const handleChangeStatusInUse = (status, date) => {
+    setOpenDateDialog((prev) => ({ ...prev, loading: true }))
     const assets = selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id);
     axiosInstance()
-      .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse`, { assets })
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse`, { assets, status: status, date: date })
       .then(({ data }) => {
         fetchRecords();
         toastConfig.setToastConfig({
@@ -664,6 +672,7 @@ const LoadingTicket = ({
           type: 'success',
           message: data.message
         });
+        setOpenDateDialog({ open: false, type: null, status: null, loading: false });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -812,21 +821,33 @@ const LoadingTicket = ({
                 >
                   Delivered to Customer
                 </MenuItem>
-
-                {selectedRecords.length > 0 &&
-                  selectedRecords.filter(
-                    (e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && e?.status === ASSET_STATUS.delivered
-                  ).length === selectedRecords.length && (
-                    <MenuItem
-                      onClick={() => {
-                        handleChangeStatusInUse();
-                        closeActions();
-                      }}
-                    >
-                      Change Status to In-Use
-                    </MenuItem>
-                  )}
-
+                {user?.user?.brandPolicy?.assetDeliveredStatus &&
+                  <Fragment>
+                    {selectedRecords.length > 0 &&
+                      selectedRecords.filter((e: any) => e?.loadingTicketStatus ===
+                        DELIVERY_TICKET_STATUS.delivered && [ASSET_STATUS.delivered, ASSET_STATUS.inUse].includes(e?.status)).length === selectedRecords.length && (
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            setOpenDateDialog({ open: true, type: 'changeStatus', status: ASSET_STATUS.standBy, loading: false });
+                          }}
+                        >
+                          {`Change Status to ${ASSET_STATUS.standBy}`}
+                        </MenuItem>
+                      )}
+                    {selectedRecords.length > 0 &&
+                      selectedRecords.filter((e: any) => e?.loadingTicketStatus ===
+                        DELIVERY_TICKET_STATUS.delivered && [ASSET_STATUS.delivered, ASSET_STATUS.standBy].includes(e?.status)).length === selectedRecords.length && (
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            setOpenDateDialog({ open: true, type: 'changeStatus', status: ASSET_STATUS.inUse, loading: false });
+                          }}
+                        >
+                          {`Change Status to ${ASSET_STATUS.inUse}`}
+                        </MenuItem>
+                      )}
+                  </Fragment>}
                 {selectedRecords.length &&
                   selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
                     ?.length === selectedRecords?.length ? (
@@ -1197,6 +1218,20 @@ const LoadingTicket = ({
             handleDeliveryTicketDialog();
             setMtrConfirmBox(false);
           }}
+        />
+      )}
+      {openDateDialog.open && (
+        <DateDialog
+          loading={openDateDialog.loading}
+          onClose={() => {
+            setOpenDateDialog({ open: false, type: null, status: null, loading: false });
+          }}
+          handleSubmit={(date) => {
+            if (openDateDialog.type === 'changeStatus') {
+              handleChangeStatusInUse(openDateDialog.status, date)
+            }
+          }}
+          title={openDateDialog.type === 'changeStatus' ? `Change Status ${openDateDialog.status}` : ''}
         />
       )}
     </>

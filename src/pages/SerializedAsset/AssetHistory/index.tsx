@@ -84,6 +84,7 @@ const AssetHistory = ({ id }) => {
     { field: 'reference', headerName: 'Reference', show: true, cellRenderer: 'nameRenderer' },
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'date', headerName: 'Date & Time', show: true, disabled: true, filter: false, cellRenderer: 'dateTimeRenderer' },
+    { field: 'days', headerName: 'Days', show: true, disabled: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'comments', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
     { field: 'location', headerName: 'Location', show: true, cellRenderer: 'commonRenderer' },

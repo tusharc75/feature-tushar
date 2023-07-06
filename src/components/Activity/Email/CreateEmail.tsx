@@ -145,10 +145,8 @@ export const CreateEmail = ({
   }, [qouteBuilderAttachments]);
 
   useEffect(() => {
-    if (emailUsersOptions.length > 0) {
-      fetchEmailDetail();
-    }
-  }, [emailUsersOptions]);
+      fetchEmailDetail(); 
+  }, []);
 
   const checkImageUrl = (url) => {
     let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
@@ -202,7 +200,7 @@ export const CreateEmail = ({
         subject: subject ?? '',
         file: '',
         content: RichTextEditor.createEmptyValue(),
-        to: isQuoteBuilder && emailUsersOptions.length ? [emailUsersOptions[0]] : [],
+        to: [],
         cc: isQuoteBuilder ? [...cc] : []
       };
       setInitialValues(initialData);
@@ -506,7 +504,6 @@ export const CreateEmail = ({
                                 setFieldValue('subject', e.target.value.trimStart());
                               }}
                             />
-                            {console.log(emailUsersOptions)}
                             <Autocomplete
                               multiple
                               disableCloseOnSelect={true}
