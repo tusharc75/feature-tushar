@@ -506,7 +506,6 @@ export const CreateEmail = ({
                                 setFieldValue('subject', e.target.value.trimStart());
                               }}
                             />
-                            {console.log(emailUsersOptions)}
                             <Autocomplete
                               multiple
                               disableCloseOnSelect={true}
