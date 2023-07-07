@@ -1244,7 +1244,6 @@ const LoadingTicket = ({
           }}
           title={openDateDialog.type === 'changeStatus' ? `Change Status ${openDateDialog.status}` : ''}
           assets={selectedRecords?.map(d => d?._id)}
-          status={openDateDialog.status}
         />
       )}
     </>
