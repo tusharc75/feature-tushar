@@ -7,7 +7,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { quotation, pricingCondition, repairOrder, QUOTATION_STATUS, REPAIR_ORDER_STATUS } from '../../../constants/helpers';
+import { quotation, pricingCondition, repairOrder, QUOTATION_STATUS, REPAIR_ORDER_STATUS, sidebarResource } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
@@ -23,6 +23,7 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SendEmail from 'src/pages/Quotation/SendEmail';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const Quotation = ({
   repairOrderData,
@@ -89,7 +90,7 @@ const Quotation = ({
     setNextStep(false);
     setColumns(null);
 
-    const quotationResponse = await axiosInstance().get(`${repairOrder.api}/${repairOrderData?._id}/check-create/quotation`);
+    const quotationResponse = await axiosInstance().get(`${repairOrder.api}/${repairOrderData?._id}/check-create/quotation?approval=${repairOrderData?.addQuotationStep ? 1 : 0}`);
     const quotationInfo: any = quotationResponse?.data?.data;
 
     setQuotationData(quotationInfo);
@@ -219,18 +220,6 @@ const Quotation = ({
       newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
     column = [...column, ...newColumns];
-    column.push({
-      accessor: 'action',
-      Header: '',
-      minWidth: 50,
-      width: 50,
-      sticky: 'right',
-      disableFilters: true,
-      canDrag: false,
-      Cell: ({ row }) => {
-        return <></>;
-      }
-    });
     setColumns(column);
     setAllColumn(column.map((d) => d.Header));
   };
@@ -497,154 +486,162 @@ const Quotation = ({
 
   return (
     <Fragment>
-      <Box
-        display="flex"
-        m={1}
-        my={1}
-        className={`flex-wrap`}
-        style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
-      >
-        {repairOrderData?.addQuotationStep ? <Box display="flex">
-          <SendEmail
-            versionData={quotationData?.versions[currentVersion]}
-            quotationData={quotationData}
-            allowedToEdit={invoiceStep ? !allowedToEdit : allowedToEdit}
-            versionId={quotationData?.versions[currentVersion]?._id}
+      {invoiceStep ?
+        <Box p={2} >
+          <PreviewDownload
+            resource={sidebarResource.repairOrder}
+            referenceId={repairOrderData?._id}
             columns={columns}
-            allColumn={allColumn}
-            setShowAllVersionStatus={setShowAllVersionStatus}
-            setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
-            currentVersion={currentVersion}
             isSendEmail={true}
-            hideSummary={true}
-            hideVersions={invoiceStep}
           />
-        </Box> : <div />}
-        {!isMobileScreen && !invoiceStep && repairOrderData?.addQuotationStep && (
-          <Box display="flex">
-            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                <FcClock size={25} />
-                <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-              </div>
-            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                <FcOk size={25} />
-                <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-              </div>
-            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                <FcCancel size={25} />
-                <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-              </div>
-            ) : null}
-          </Box>
-        )}
-        {allowedToEdit && (
-          <Box display={'flex'} gridGap={8}>
-            {repairOrderData?.addQuotationStep && (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
-              <Button
-                disabled={material
-                  .filter((e) => e.parentId === null)
-                  .some(
-                    (d) =>
-                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
-                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
-                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
-                  )}
-                onClick={handleSendToCustomer}
-                variant="contained"
-                size="small"
-                color="primary"
-              >
-                Process Quote
-              </Button>
-            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-              <Button
-                onClick={() => {
-                  setCustomerAcceptable(true);
-                }}
-                variant="contained"
-                size="small"
-                className="mx-1"
-                color="primary"
-              >
-                Accept / Reject
-              </Button>
-            ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(quotationData?.versions[currentVersion]?.status) ? (
-              <Button
-                onClick={() => {
-                  cloneVersion();
-                }}
-                variant="contained"
-                size="small"
-                className="mx-1"
-                color="primary"
-              >
-                Create New Version
-              </Button>
-            ) : null)}
-            {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-              quotationData?.versions[currentVersion]?.status
-            ) && (
+        </Box>
+        : <Box display="flex" m={1} my={1} className={`flex-wrap`}
+          style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
+        >
+          {repairOrderData?.addQuotationStep ? <Box display="flex">
+            <SendEmail
+              versionData={quotationData?.versions[currentVersion]}
+              quotationData={quotationData}
+              allowedToEdit={allowedToEdit}
+              versionId={quotationData?.versions[currentVersion]?._id}
+              columns={columns}
+              allColumn={allColumn}
+              setShowAllVersionStatus={setShowAllVersionStatus}
+              setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
+              currentVersion={currentVersion}
+              isSendEmail={true}
+              hideSummary={true}
+              hideVersions={false}
+            />
+          </Box> : <div />}
+          {!isMobileScreen && repairOrderData?.addQuotationStep && (
+            <Box display="flex">
+              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                  <FcClock size={25} />
+                  <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+                </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                  <FcOk size={25} />
+                  <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+                </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                  <FcCancel size={25} />
+                  <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+                </div>
+              ) : null}
+            </Box>
+          )}
+          {allowedToEdit && (
+            <Box display={'flex'} gridGap={8}>
+              {repairOrderData?.addQuotationStep && (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
-                  variant="outlined"
-                  color="default"
+                  disabled={material
+                    .filter((e) => e.parentId === null)
+                    .some(
+                      (d) =>
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+                    )}
+                  onClick={handleSendToCustomer}
+                  variant="contained"
                   size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedProducts.length === 0}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
+                  color="primary"
                 >
-                  Actions
+                  Process Quote
                 </Button>
-              )}
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setIsProductEdit({ open: true, isBulkedit: true });
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                <Button
+                  onClick={() => {
+                    setCustomerAcceptable(true);
+                  }}
+                  variant="contained"
+                  size="small"
+                  className="mx-1"
+                  color="primary"
+                >
+                  Accept / Reject
+                </Button>
+              ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(quotationData?.versions[currentVersion]?.status) ? (
+                <Button
+                  onClick={() => {
+                    cloneVersion();
+                  }}
+                  variant="contained"
+                  size="small"
+                  className="mx-1"
+                  color="primary"
+                >
+                  Create New Version
+                </Button>
+              ) : null)}
+              {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationData?.versions[currentVersion]?.status
+              ) && (
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedProducts.length === 0}
+                    endIcon={<ExpandMore />}
+                    className="new-dropdown-v1"
+                  >
+                    Actions
+                  </Button>
+                )}
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
                 }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
               >
-                Bulk Edit
-              </MenuItem>
-            </Menu>
-          </Box>
-        )}
-        {isMobileScreen && (
-          <Box display="flex" style={{ margin: '0 auto' }}>
-            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                <FcClock size={25} />
-                <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-              </div>
-            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                <FcOk size={25} />
-                <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-              </div>
-            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                <FcCancel size={25} />
-                <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-              </div>
-            ) : null}
-          </Box>
-        )}
-      </Box>
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    setIsProductEdit({ open: true, isBulkedit: true });
+                  }}
+                >
+                  Bulk Edit
+                </MenuItem>
+              </Menu>
+            </Box>
+          )}
+          {isMobileScreen && (
+            <Box display="flex" style={{ margin: '0 auto' }}>
+              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                  <FcClock size={25} />
+                  <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+                </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                  <FcOk size={25} />
+                  <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+                </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                  <FcCancel size={25} />
+                  <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+                </div>
+              ) : null}
+            </Box>
+          )}
+        </Box>
+      }
+
+
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
