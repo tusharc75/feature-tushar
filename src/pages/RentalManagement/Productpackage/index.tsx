@@ -173,7 +173,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === 'product') {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'asset') {
+                  } else if (row.original.type === 'serializedAsset') {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
