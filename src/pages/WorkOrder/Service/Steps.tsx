@@ -1061,10 +1061,12 @@ const Steps = ({
     ) : (
       <>
         <Box p={2} height={500} textAlign="center">
-          {(referencType !== 'workOrderTechnician' && serviceDetails?.status !== WORKORDER_SERVICE_STATUS.completed) && (
+          {(referencType !== 'workOrderTechnician') && (
             <Button
               variant="contained"
               color="primary"
+              size="small"
+              disabled={selectedService?.status !== WORKORDER_SERVICE_STATUS.completed ? false : true}
               onClick={(e) => {
                 e.stopPropagation();
                 setAssignSteps(true);
