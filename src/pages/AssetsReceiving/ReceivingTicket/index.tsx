@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, CircularProgress, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { capitalize, isEqual, map, sortBy, uniq } from 'lodash';
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -13,7 +13,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, deliveryTicket } from 'src/constants/helpers';
+import { ASSETS_RECEIVING_STATUS, ASSET_STATUS, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, deliveryTicket } from 'src/constants/helpers';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -24,7 +24,8 @@ const ReceivingTicket = ({
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
-  allowedToDelete
+  allowedToDelete,
+  updateNextStep
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -38,6 +39,7 @@ const ReceivingTicket = ({
   const [rowsData, setRowsData] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {} });
+  const [actionLoading, setActionLoading] = useState(false)
 
   useEffect(() => {
     fetchFields();
@@ -159,31 +161,7 @@ const ReceivingTicket = ({
         Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
       }
     ];
-    coloum.push({
-      accessor: 'action',
-      Header: '',
-      minWidth: 70,
-      width: 70,
-      sticky: 'right',
-      disableFilters: true,
-      canDrag: false,
-      Cell: ({ row }) => (
-        <>
-          <HtmlTooltip title={allowedToDelete ? 'Asset is already assigned' : 'Delete'}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                setDeleteData([row.original]);
-              }}
-              disabled={allowedToDelete}
-            >
-              <DeleteIcon fontSize="small" color={allowedToDelete ? 'disabled' : 'error'} />
-            </IconButton>
-          </HtmlTooltip>
-        </>
-      )
-    });
+
     coloum.forEach((element) => {
       if (element.accessor === 'qty') {
         element['Footer'] = (info) => {
@@ -269,15 +247,7 @@ const ReceivingTicket = ({
         }`;
     });
 
-    if (rows.length !== 0) {
-      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
-        setNextStep(false);
-      } else {
-        setNextStep(true);
-      }
-    } else {
-      setNextStep(false);
-    }
+    setNextStep(false);
     setRowsData(rows);
     setSelectedProducts([]);
   };
@@ -291,6 +261,7 @@ const ReceivingTicket = ({
     data['deliveryToType'] = deliveryToType;
     data['deliveryTo'] = assetsReceivingData?.warehouse?.optionValue;
     data['deliveryToAddress'] = assetsReceivingData?.warehouse?.address;
+    data['pickupFromAddress'] = assetsReceivingData?.customerAccount?.shippingAddress[0];
     data['isPickupFromDisable'] = true;
     data['status'] = DELIVERY_TICKET_STATUS.indTransit;
     setShowTicketDialog({ open: ticketType === DELIVERY_TICKET_TYPE.receiving ? true : false, ticketType: ticketType, data: data });
@@ -368,6 +339,8 @@ const ReceivingTicket = ({
   };
 
   const handelProcessTickets = () => {
+    setActionLoading(true)
+    closeActions();
     let data = {};
     const receivingTicketId = uniq(map(selectedProducts, 'receivingTicketId'));
     const ticketIds: any = [];
@@ -389,6 +362,8 @@ const ReceivingTicket = ({
             type: 'success',
             message: `Receiving Successfully`
           });
+          axiosInstance().put(`${routes.assetsReceiving.path}/${assetsReceivingData._id}/process-status`, { status: ASSETS_RECEIVING_STATUS.complete })
+          updateNextStep()
           if (
             receivingTicketId?.length &&
             selectedProducts?.filter((e) => e.type === 'serializedAsset')?.length
@@ -399,11 +374,13 @@ const ReceivingTicket = ({
               message: 'Repair Order created for received assets'
             });
           }
+          setActionLoading(false)
           setSelectedProducts([])
-          closeActions();
+          fetchAssetsReceivingData();
           fetchData();
         })
         .catch((error) => {
+          setActionLoading(false)
           toastConfig.setToastConfig(error);
         });
     }
@@ -430,11 +407,11 @@ const ReceivingTicket = ({
               size="small"
               onClick={openActions}
               aria-controls="action-menu"
-              disabled={selectedProducts.length === 0}
+              disabled={selectedProducts.length === 0 || actionLoading}
               endIcon={<ExpandMore />}
               className="new-dropdown-v1"
             >
-              Actions
+              Actions {actionLoading && <CircularProgress size={20} style={{ marginLeft: 10 }} />}
             </Button>
             <Menu
               anchorEl={anchorActionEl}
@@ -449,7 +426,7 @@ const ReceivingTicket = ({
               onClose={closeActions}
             >
               <MenuItem
-                disabled={selectedProducts?.filter((e) => e?.receivingTicket)?.length > 0}
+                disabled={selectedProducts?.filter((e) => e?.receivingTicket)?.length > 0 || actionLoading}
                 onClick={() => {
                   handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
                 }}
@@ -457,7 +434,7 @@ const ReceivingTicket = ({
                 Create Receiving Ticket
               </MenuItem>
               <MenuItem
-                disabled={selectedProducts?.filter((e) => e?.receivingTicket && e?.receivingTicketStatus === "Delivered")?.length > 0}
+                disabled={selectedProducts?.filter((e) => e?.receivingTicket && e?.receivingTicketStatus === "Delivered")?.length > 0 || selectedProducts?.filter((e) => !e?.receivingTicket)?.length > 0 || actionLoading}
                 onClick={() => {
                   handelProcessTickets();
                 }}

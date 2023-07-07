@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { assetsReceivingSteps, sidebarResource } from 'src/constants/helpers';
+import { ASSETS_RECEIVING_STATUS, assetsReceivingSteps, sidebarResource } from 'src/constants/helpers';
 import ManageAssetsReceiving from './ManageAssetsReceiving';
 import TabPanel from 'src/components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
@@ -21,6 +21,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import Material from './Material';
 import { camelCase } from 'lodash';
 import ReceivingTicket from './ReceivingTicket';
+import Complete from './Complete';
 
 const AssetsReceivingDetail = () => {
   const renderedFrom = camelCase(routes?.assetsReceiving.title);
@@ -150,7 +151,7 @@ const AssetsReceivingDetail = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-v1">
+          {assetsReceivingData?.status !== ASSETS_RECEIVING_STATUS.complete && <Box className="control-buttons-v1">
             <>
               {permissions?.assetsReceiving?.isUpdate && allowedToEdit && (
                 <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
@@ -159,7 +160,7 @@ const AssetsReceivingDetail = () => {
               )}
               {permissions?.assetsReceiving?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
-          </Box>
+          </Box>}
         </Box>
       </Box>
       <Box className="detail-container-v1">
@@ -234,6 +235,24 @@ const AssetsReceivingDetail = () => {
             )}
             {stepNames[currentStep] === 'Receiving Ticket' && assetsReceivingData && (
               <ReceivingTicket
+                fetchAssetsReceivingData={fetchData}
+                assetsReceivingData={assetsReceivingData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}grid_2`}
+                stepFullScreen={setStepFullScreen}
+                allowedToDelete={allowedToDelete}
+                allowedToEdit={allowedToEdit}
+                updateNextStep={() => {
+                  setCurrentStep((prevStep) => {
+                    const newStep = prevStep + 1;
+                    return newStep;
+                  }
+                  );
+                }}
+              />
+            )}
+            {stepNames[currentStep] === 'Complete' && assetsReceivingData && (
+              <Complete
                 fetchAssetsReceivingData={fetchData}
                 assetsReceivingData={assetsReceivingData}
                 setNextStep={setNextStep}
