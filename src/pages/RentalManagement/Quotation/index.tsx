@@ -104,7 +104,8 @@ const Quotation = ({
       setNextStep(true);
     }
   }, [quotationData?.versions[currentVersion]?._id]);
-  const additionalCost = ['service', 'product', 'package', 'asset'];
+
+
   const fetchFields = async (currency) => {
     // setNextStep(false)
     var data = await fetch_quotation_product_fields(rentalManagementData?.currency);
@@ -134,12 +135,12 @@ const Quotation = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -159,7 +160,7 @@ const Quotation = ({
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
               </span>
             </Box>
-            {additionalCost.includes(row.original.type) && (
+            {['service', 'product', 'package', 'serializedAsset']?.includes(row.original.type) && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -167,7 +168,7 @@ const Quotation = ({
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === 'product') {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'asset') {
+                  } else if (row.original.type === 'serializedAsset') {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                   } else if (row.original.type === 'package') {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -289,23 +290,22 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
           ? _subRow?.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName
-      }`;
+            ? _subRow?.productDetail?.productName
+            : _subRow.type === 'service'
+              ? _subRow?.serviceDetail?.serviceName
+              : _subRow?.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = parent?.qty * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -349,25 +349,24 @@ const Quotation = ({
     const rows = [...rowsMaterial, ...additionalCostData];
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
+      parent.detail = `${parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'package'
-          ? parent.packageDetail?.packageName
-          : parent.detail
-      }`;
+            ? parent.productDetail?.productName
+            : parent.type === 'service'
+              ? parent.serviceDetail?.serviceName
+              : parent.type === 'package'
+                ? parent.packageDetail?.packageName
+                : parent.detail
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent?.description;
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent?.description;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -527,7 +526,7 @@ const Quotation = ({
               {allowedToEdit && (
                 <div>
                   {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                    quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                     <Button
                       disabled={material
                         .filter((e) => e.parentId === null)
@@ -625,7 +624,7 @@ const Quotation = ({
               {allowedToEdit && (
                 <div>
                   {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                    quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                     <Button
                       disabled={material
                         .filter((e) => e.parentId === null)

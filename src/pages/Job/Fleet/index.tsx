@@ -48,7 +48,7 @@ const Fleet = ({ jobData, renderedFrom, setNextStep }) => {
                 onClick={() => {
                   row.original.type === 'asset'
                     ? window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`)
-                    : window.open(`${routes.fleetMasterDetail.path}/${row.original.materialId}`);
+                    : window.open(`${routes.truckMaster.path}/${row.original.materialId}`);
                 }}
               >
                 <OpenInNewIcon fontSize="small" color="primary" />
