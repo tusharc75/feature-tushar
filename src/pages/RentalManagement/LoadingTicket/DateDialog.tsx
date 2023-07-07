@@ -4,13 +4,13 @@ import { Button, CircularProgress, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { ASSET_STATUS, CustomDialogTransition } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import { object, date } from 'yup';
 
-const DateDialog = ({ title, onClose, handleSubmit, loading, assets = [] }) => {
+const DateDialog = ({ title, onClose, status, handleSubmit, loading, assets = [] }) => {
 
   const [minDate, setMinDate] = useState(new Date())
 
@@ -25,7 +25,8 @@ const DateDialog = ({ title, onClose, handleSubmit, loading, assets = [] }) => {
   }
 
   const findLastDate = async () => {
-    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets })
+    const last = 1
+    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets, last })
     setMinDate(new Date(data?.date))
   }
 
