@@ -706,7 +706,7 @@ const LoadingTicket = ({
 
   const handleChangeDate = (date) => {
     setOpenDateDialog((prev) => ({ ...prev, loading: true }))
-    axiosInstance().put(`${rentalManagement.api}/assets-date-update`, { assets: openDateDialog.assets, date: date })
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/assets-date-update`, { assets: openDateDialog.assets, date: date })
       .then(({ data }) => {
         fetchRecords();
         toastConfig.setToastConfig({
@@ -902,6 +902,23 @@ const LoadingTicket = ({
                           }}
                         >
                           {`Change Status to ${ASSET_STATUS.inUse}`}
+                        </MenuItem>
+                      )}
+
+                    {selectedRecords.length > 0 &&
+                      selectedRecords.filter((e: any) =>
+                        e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && 
+                        [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy].includes(e?.rentalAssetStatus)).length === selectedRecords.length && (
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            setOpenDateDialog({
+                              open: true, type: 'changeDate', status: '',
+                              assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id), loading: false
+                            });
+                          }}
+                        >
+                          {`Change Date`}
                         </MenuItem>
                       )}
                   </Fragment>}
