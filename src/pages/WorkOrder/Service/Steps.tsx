@@ -1061,7 +1061,7 @@ const Steps = ({
     ) : (
       <>
         <Box p={2} height={500} textAlign="center">
-          {referencType !== 'workOrderTechnician' && (
+          {(referencType !== 'workOrderTechnician' && serviceDetails?.status !== WORKORDER_SERVICE_STATUS.completed) && (
             <Button
               variant="contained"
               color="primary"
