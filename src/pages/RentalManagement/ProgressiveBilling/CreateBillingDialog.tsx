@@ -135,7 +135,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === 'product') {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'asset') {
+                  } else if (row.original.type === 'serializedAsset') {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -336,7 +336,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         data?.inventory
           ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
           ?.forEach((ele: any) => {
-            ele.type = 'asset';
+            ele.type = 'serializedAsset';
             ele.qty = 1;
             ele._id = ele?.inventoryDetail?._id;
             ele.materialId = ele?.inventoryDetail?._id;
@@ -367,7 +367,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
               ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
               ?.forEach((ele: any) => {
                 ele.parentId = element?._id;
-                ele.type = 'asset';
+                ele.type = 'serializedAsset';
                 ele.qty = 1;
                 ele._id = ele?.inventoryDetail?._id;
                 ele.materialId = ele?.inventoryDetail?._id;
@@ -446,7 +446,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           ? parent.productDetail?.productName
           : parent.type === 'service'
           ? parent?.serviceDetail?.serviceName
-          : parent.type === 'asset'
+          : parent.type === 'serializedAsset'
           ? parent?.inventoryDetail?.assetNumber
           : parent.type === 'additionalCost'
           ? parent?.costType
@@ -458,12 +458,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'package'
           ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'asset'
+          : parent.type === 'serializedAsset'
           ? parent?.description || ''
           : '';
       parent.qtyDisplay = parent.qty;
       parent.isEditable =
-        ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'asset' || parent.type === 'additionalCost'
+        ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'serializedAsset' || parent.type === 'additionalCost'
           ? false
           : true;
       parent.subRows = generateNestedData(material, parent);
@@ -481,7 +481,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === 'asset'
+          : _subRow.type === 'serializedAsset'
           ? _subRow?.inventoryDetail?.assetNumber
           : _subRow?.packageDetail?.packageName;
       _subRow.description =
@@ -491,7 +491,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'package'
           ? _subRow?.packageDetail?.packageDescription || ''
-          : _subRow.type === 'asset'
+          : _subRow.type === 'serializedAsset'
           ? _subRow?.description || ''
           : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
