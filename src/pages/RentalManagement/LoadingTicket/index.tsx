@@ -706,7 +706,7 @@ const LoadingTicket = ({
 
   const handleChangeDate = (date) => {
     setOpenDateDialog((prev) => ({ ...prev, loading: true }))
-    axiosInstance().put(`${rentalManagement.api}/assets-date-update`, { assets: openDateDialog.assets, date: date })
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/assets-date-update`, { assets: openDateDialog.assets, date: date })
       .then(({ data }) => {
         fetchRecords();
         toastConfig.setToastConfig({
