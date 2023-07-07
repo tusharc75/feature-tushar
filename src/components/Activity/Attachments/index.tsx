@@ -24,7 +24,7 @@ import { TreeItem, TreeView } from '@material-ui/lab';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
-import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import SendIcon from '@material-ui/icons/Send';
 import { AiOutlineFileAdd, AiOutlineFolderAdd, AiOutlineDelete, AiOutlineFile } from 'react-icons/ai';
 import { FiEdit2 } from 'react-icons/fi';
 import moment from 'moment';
@@ -231,14 +231,16 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                     <>
                                       {_attachment.type !== 'folder' ? (
                                         <Box style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                                          <IconButton
-                                            size="small"
-                                            color="primary"
-                                            aria-label="delete"
-                                            onClick={(event) => handleSendMail(event, _attachment)}
-                                          >
-                                            <ArrowUpwardIcon fontSize="small" color="primary" />
-                                          </IconButton>
+                                          <HtmlTooltip title={'Send Email'}>
+                                            <IconButton
+                                              size="small"
+                                              color="primary"
+                                              aria-label="delete"
+                                              onClick={(event) => handleSendMail(event, _attachment)}
+                                            >
+                                              <SendIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+                                            </IconButton>
+                                          </HtmlTooltip>
                                           <IconButton
                                             size="small"
                                             color="primary"
@@ -418,14 +420,21 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                           {permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
                             <>
                               {_attachment.type !== 'folder' ? (
-                                <IconButton
-                                  size="small"
-                                  color="primary"
-                                  aria-label="delete"
-                                  onClick={(event) => handleOpenMenu(event, _attachment._id, _attachment)}
-                                >
-                                  <MoreHorizIcon />
-                                </IconButton>
+                                <Box style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                  <HtmlTooltip title={'Send Email'}>
+                                    <IconButton size="small" onClick={(event) => handleSendMail(event, _attachment)}>
+                                      <SendIcon style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+                                    </IconButton>
+                                  </HtmlTooltip>
+                                  <IconButton
+                                    size="small"
+                                    color="primary"
+                                    aria-label="delete"
+                                    onClick={(event) => handleOpenMenu(event, _attachment._id, _attachment)}
+                                  >
+                                    <MoreHorizIcon />
+                                  </IconButton>
+                                </Box>
                               ) : (
                                 <>
                                   <Box style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>

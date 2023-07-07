@@ -36,7 +36,7 @@ import _ from 'lodash';
 import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined';
 import FolderIcon from '@material-ui/icons/Folder';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import SendIcon from '@material-ui/icons/Send';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 function reducer(state, action) {
   switch (action.type) {
@@ -284,6 +284,18 @@ export default function Attachment() {
         const allPdf = _.every(row.original?.file, (d) => _.endsWith(d?.url, '.pdf'));
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
+            {row.original.type === 'file' && (
+              <Tooltip
+                title="Send Email"
+                onClick={() => {
+                  handleMail(row.original);
+                }}
+              >
+                <IconButton size="small">
+                  <SendIcon color="primary" style={{ maxWidth: '18px' }} />
+                </IconButton>
+              </Tooltip>
+            )}
             {row.original.type !== 'folder' && (
               <Tooltip title="Download">
                 <IconButton size="small" aria-label="Delete" onClick={() => downloadFile(row.original)}>
@@ -303,18 +315,7 @@ export default function Attachment() {
                 </IconButton>
               </Tooltip>
             )}
-            {allPdf && row.original.type === 'file' && (
-              <Tooltip
-                title="Mail"
-                onClick={() => {
-                  handleMail(row.original);
-                }}
-              >
-                <IconButton size="small">
-                  <ArrowUpwardIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Tooltip>
-            )}
+
             {row.original.canEdit ? (
               <Tooltip title="Delete">
                 <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
