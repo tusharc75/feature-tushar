@@ -4,34 +4,37 @@ import { Button, CircularProgress, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { CustomDialogTransition } from 'src/constants/helpers';
-import FormTypes from 'src/components/Helpers/FormTypes';
+import { CustomDialogTransition, dateFormatForInputControl } from 'src/constants/helpers';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
-import { object, date } from 'yup';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DateUtils from '@date-io/date-fns';
 
 const DateDialog = ({ title, onClose, handleSubmit, loading, assets = [] }) => {
 
   const [minDate, setMinDate] = useState(new Date())
 
-  const DateTemplateSchema = object().shape({
-    date: date().required('Date is required').min(minDate, 'Date must be in the future').max(new Date(), 'Date must be till today or before today'),
-  });
+  useEffect(() => {
+    findValidationDate()
+  }, [assets])
 
-  function validate(values) {
-    const errors = {};
-
-    return errors;
-  }
-
-  const findLastDate = async () => {
-    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets })
+  const findValidationDate = async () => {
+    const last = 1
+    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets, last })
     setMinDate(new Date(data?.date))
   }
 
-  useEffect(() => {
-    findLastDate()
-  }, [assets])
+
+  function validate(values) {
+    const errors = {};
+    if (!moment(values['date']).isSameOrAfter(moment(minDate))) {
+      errors['date'] = `Please select valid date`;
+    }
+    if (moment(values['date']).isAfter(moment())) {
+      errors['date'] = `Please select valid date`;
+    }
+    return errors;
+  }
 
   return (
     <Dialog
@@ -46,7 +49,6 @@ const DateDialog = ({ title, onClose, handleSubmit, loading, assets = [] }) => {
       fullWidth>
       <Formik
         initialValues={{ date: new Date() }}
-        validationSchema={DateTemplateSchema}
         validate={validate}
         onSubmit={(values) => {
           handleSubmit(moment(values.date).format('MM/DD/YYYY'));
@@ -57,21 +59,29 @@ const DateDialog = ({ title, onClose, handleSubmit, loading, assets = [] }) => {
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>
-                  <FormTypes
-                    size="small"
-                    fullWidth
-                    values={values}
-                    maxDate={new Date()}
-                    minDate={minDate}
-                    errors={errors}
-                    touched={touched}
-                    type="date"
-                    label="Date"
-                    name="date"
-                    onChange={(date) => {
-                      setFieldValue('date', date);
-                    }}
-                  />
+                  <MuiPickersUtilsProvider utils={DateUtils}>
+                    <KeyboardDatePicker
+                      fullWidth
+                      size="small"
+                      margin="dense"
+                      autoOk
+                      required
+                      variant="inline"
+                      inputVariant="outlined"
+                      value={values.date}
+                      name="date"
+                      placeholder={'Date'}
+                      label="Date"
+                      format={dateFormatForInputControl}
+                      maxDate={new Date()}
+                      minDate={minDate}
+                      error={touched['date'] && Boolean(errors['date'])}
+                      helperText={touched['date'] && errors['date']}
+                      onChange={(value) => {
+                        setFieldValue('date', value);
+                      }}
+                    />
+                  </MuiPickersUtilsProvider>
                 </Grid>
               </Box>
             </CustomDialogContent>

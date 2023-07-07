@@ -34,10 +34,7 @@ import Productpackage from './Productpackage';
 import Quotation from './Quotation';
 import WorkOrder from './WorkOrder';
 import LoadingTicket from './LoadingTicket';
-import { ExpandMore } from '@material-ui/icons';
-import { GrStatusInfo } from 'react-icons/gr';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import PreviewDownload from 'src/components/PreviewDownload';
 
 function a11yProps(index: any) {
   return {
@@ -242,8 +239,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -485,11 +482,6 @@ const RepairOrderDetails = () => {
               }
             }}
           />
-          <Box className='ml-2'>
-          {currentStep === 5 && (
-            <PreviewDownload resource={sidebarResource.repairOrder} referenceId={id} columns={columns} />
-          )}
-          </Box>          
           <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {stepNames[currentStep] === 'Add Assets' && repairOrderData && (
               <Productpackage
@@ -518,10 +510,10 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                        quotationVersionData?.status
-                      )
-                    ? false
-                    : allowedToEdit
+                      quotationVersionData?.status
+                    )
+                      ? false
+                      : allowedToEdit
                 }
                 allowedToDelete={allowedToDelete}
                 isPostWorkService={Boolean(currentStep === 3)}

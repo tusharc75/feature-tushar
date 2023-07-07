@@ -360,6 +360,7 @@ const WorkOrder = ({
   const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
+    
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
     data = response?.data?.data;
 
