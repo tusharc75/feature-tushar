@@ -1882,7 +1882,7 @@ export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
   delivered: 'Delivered',
-  cancelled: 'Cancelled'
+  cancelled: 'Cancelled',
 };
 
 export const RENTAL_STATUS = {
@@ -1903,7 +1903,8 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   inUse: 'In-Use',
   complete: 'Complete',
   return: 'Return',
-  consumed: 'Consumed'
+  consumed: 'Consumed',
+  standBy: 'Stand By',
 } as const;
 
 export const REPAIR_JOB_STATUS = {

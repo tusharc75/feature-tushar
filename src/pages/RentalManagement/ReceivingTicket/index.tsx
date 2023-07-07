@@ -597,7 +597,7 @@ const ReceivingTicket = ({
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate"  target='_blank'  title={params?.value} to={`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`}>
+      <Link className="link text-truncate" target='_blank' title={params?.value} to={`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`}>
         {params?.value}
       </Link>
     ) : (
@@ -1279,7 +1279,7 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('returnTicketId') ||
                     !f.hasOwnProperty('loadingTicketId') ||
                     [ASSET_STATUS.lost].includes(f.status) ||
-                    ![ASSET_STATUS.inUse, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.notApplied].includes(
+                    ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.notApplied].includes(
                       f.status
                     )
                 )
@@ -1321,6 +1321,7 @@ const ReceivingTicket = ({
                     [ASSET_STATUS.lost].includes(f.status) ||
                     ![
                       ASSET_STATUS.inUse,
+                      ASSET_STATUS.standBy,
                       ASSET_STATUS.reserved,
                       ASSET_STATUS.scrap,
                       ASSET_STATUS.needRepair,

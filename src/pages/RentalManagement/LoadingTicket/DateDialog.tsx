@@ -10,7 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateUtils from '@date-io/date-fns';
 
-const DateDialog = ({ title, onClose, handleSubmit, loading, assets = [] }) => {
+const DateDialog = ({ title, type, onClose, handleSubmit, loading, assets = [] }) => {
 
   const [minDate, setMinDate] = useState(new Date())
 
@@ -19,7 +19,7 @@ const DateDialog = ({ title, onClose, handleSubmit, loading, assets = [] }) => {
   }, [assets])
 
   const findValidationDate = async () => {
-    const last = 1
+    const last = type === 'changeStatus' ? 1 : 2
     const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets, last })
     setMinDate(new Date(data?.date))
   }
