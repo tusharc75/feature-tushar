@@ -589,7 +589,7 @@ const LoadingTicket = ({
       });
   };
 
-  const handelProcessTickets = () => {
+  const handelProcessTickets = (date = new Date()) => {
     let data = {};
     const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
     if (loadingTicketIds.length) {
@@ -597,11 +597,13 @@ const LoadingTicket = ({
       data['status'] = DELIVERY_TICKET_STATUS.delivered;
       data['signatures'] = [];
       data['warehouse'] = rentalManagementData?.warehouse?.optionValue;
+      data['receiveDate'] = date;
       axiosInstance()
         .post(`${deliveryTicket.api}/updatebulk`, data)
         .then(({ data: { data } }) => {
           fetchRecords();
           checkProgressiveBilling();
+          setOpenDateDialog({ open: false, type: null, status: null, loading: false });
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -816,7 +818,12 @@ const LoadingTicket = ({
                     selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
                   }
                   onClick={() => {
-                    handelProcessTickets();
+                    if (user?.user?.brandPolicy?.assetDeliveredStatus) {
+                      setOpenDateDialog({ open: true, type: 'changeStatus', status: ASSET_STATUS.delivered, loading: false });
+                    }
+                    else {
+                      handelProcessTickets();
+                    }
                     closeActions();
                   }}
                 >
@@ -849,7 +856,7 @@ const LoadingTicket = ({
                         </MenuItem>
                       )}
                   </Fragment>}
-                {selectedRecords.length &&
+                {selectedRecords.length > 0 &&
                   selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
                     ?.length === selectedRecords?.length ? (
                   <Fragment>
@@ -1228,12 +1235,16 @@ const LoadingTicket = ({
             setOpenDateDialog({ open: false, type: null, status: null, loading: false });
           }}
           handleSubmit={(date) => {
-            if (openDateDialog.type === 'changeStatus') {
+            if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.inUse, ASSET_STATUS.standBy]?.includes(openDateDialog.status)) {
               handleChangeStatusInUse(openDateDialog.status, date)
+            }
+            else if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.delivered]?.includes(openDateDialog.status)) {
+              handelProcessTickets(date);
             }
           }}
           title={openDateDialog.type === 'changeStatus' ? `Change Status ${openDateDialog.status}` : ''}
           assets={selectedRecords?.map(d => d?._id)}
+          status={openDateDialog.status}
         />
       )}
     </>
