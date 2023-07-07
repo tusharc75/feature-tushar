@@ -78,19 +78,6 @@ const RepairOrderDetails = () => {
 
   const [stepList, setStepList] = useState(repairOrderSteps);
   const [stepNames, setStepNames] = useState(repairOrderSteps.map((item) => item.name));
-  const columns = [
-    { Header: 'Qty', accessor: 'qty' },
-    { Header: 'Unit', accessor: 'unit' },
-    { Header: 'Supplier Account', accessor: 'supplierAccount' },
-    { Header: 'Supplier Price ($)', accessor: 'supplierPrice_usd' },
-    { Header: 'Price ($)', accessor: 'price_usd' },
-    { Header: 'Total Price ($)', accessor: 'totalPrice_usd' },
-    { Header: 'Discount Percentage', accessor: 'discountPercentage' },
-    { Header: 'Discount ($)', accessor: 'discount_usd' },
-    { Header: 'Tax Percentage', accessor: 'taxPercentage' },
-    { Header: 'Tax ($)', accessor: 'tax_usd' },
-    { Header: 'Final Price ($)', accessor: 'finalPrice_usd' }
-  ];
 
   useEffect(() => {
     return history.listen((location) => {
