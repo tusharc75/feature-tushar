@@ -904,6 +904,23 @@ const LoadingTicket = ({
                           {`Change Status to ${ASSET_STATUS.inUse}`}
                         </MenuItem>
                       )}
+
+                    {selectedRecords.length > 0 &&
+                      selectedRecords.filter((e: any) =>
+                        e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && 
+                        [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy].includes(e?.rentalAssetStatus)).length === selectedRecords.length && (
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            setOpenDateDialog({
+                              open: true, type: 'changeDate', status: '',
+                              assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id), loading: false
+                            });
+                          }}
+                        >
+                          {`Change Date`}
+                        </MenuItem>
+                      )}
                   </Fragment>}
                 {selectedRecords.length > 0 &&
                   selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
