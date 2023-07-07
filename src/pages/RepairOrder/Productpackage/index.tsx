@@ -97,15 +97,14 @@ const Productpackage = ({
             <a
               className="link text-truncate"
               target="_blank"
-              href={`${
-                row.original.type === 'service'
-                  ? routes.serviceMasterDetail.path
-                  : row.original.type === 'product'
+              href={`${row.original.type === 'service'
+                ? routes.serviceMasterDetail.path
+                : row.original.type === 'product'
                   ? routes.productDetail.path
                   : row.original.type === 'serializedAsset'
-                  ? routes.serializedAssetDetail.path
-                  : routes.packagesDetail.path
-              }/${row.original.materialId}`}
+                    ? routes.serializedAssetDetail.path
+                    : routes.packagesDetail.path
+                }/${row.original.materialId}`}
             >
               {row.original.detail}
             </a>
@@ -206,40 +205,38 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'service'
+        ? parent.serviceDetail?.serviceName
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.assetNumber
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serializedAssetDetail.assetNumber
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent?.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.status = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
+      parent.status = `${parent.type === 'service'
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
           ? parent?.productDetail?.status
           : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent?.serializedAssetDetail?.status
+            : parent.packageDetail?.status
+        }`;
     });
 
     if (rows.length !== 0) {
@@ -263,23 +260,22 @@ const Productpackage = ({
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'service'
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serializedAssetDetail.assetNumber
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -287,15 +283,14 @@ const Productpackage = ({
       _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
-      parent.status = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
+      parent.status = `${parent.type === 'service'
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
+        }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -410,8 +405,8 @@ const Productpackage = ({
       {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" flexWrap={'wrap'} gridGap={1} m={1}>
           <Box display="flex" flexWrap={'wrap'}>
-            {permissions?.serializedAsset?.isRead && allowedToEdit && (
-              <>
+            {allowedToEdit && (
+              <Fragment>
                 <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
                   {'Add'}
                   <ExpandMore fontSize="small" />
@@ -429,22 +424,26 @@ const Productpackage = ({
                   onClose={closeAddActions}
                 >
                   <MenuItem
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null, existing: false });
-                    }}
-                  >
-                    {`Create ${routes.serializedAsset.title}`}
-                  </MenuItem>
-                  <MenuItem
                     disabled={rowsData ? false : true}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null, existing: true });
+                      closeAddActions()
                     }}
                   >
-                    {`Add Existing ${routes.serializedAsset.title}`}
+                    {`Add ${routes.serializedAsset.title}`}
                   </MenuItem>
+                  {permissions?.serializedAsset?.isCreate &&
+                    <MenuItem
+                      onClick={() => {
+                        setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null, existing: false });
+                        closeAddActions()
+                      }}
+                    >
+                      {`Add New ${routes.serializedAsset.title}`}
+                    </MenuItem>
+                  }
                 </Menu>
-              </>
+              </Fragment>
             )}
           </Box>
           <Box display="flex">
