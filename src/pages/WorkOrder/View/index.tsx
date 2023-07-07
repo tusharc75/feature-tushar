@@ -197,6 +197,7 @@ const WorkOrderViews = (props) => {
   const onLoad = (reactFlowInstance) => {
     reactFlowInstance.fitView({ padding: 0.1 });
   };
+
   const onElementClick = (event, element) => {
     switch (element.data.ref_type) {
       case 'repairJob':
@@ -204,7 +205,7 @@ const WorkOrderViews = (props) => {
       case 'deliveryTicket':
         history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
-      case 'asset':
+      case 'serializedAsset':
         history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
     }

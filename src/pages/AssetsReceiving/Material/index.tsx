@@ -68,15 +68,14 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
             <a
               className="link text-truncate"
               target="_blank"
-              href={`${
-                row.original.type === 'service'
-                  ? routes.serviceMasterDetail.path
-                  : row.original.type === 'product'
+              href={`${row.original.type === 'service'
+                ? routes.serviceMasterDetail.path
+                : row.original.type === 'product'
                   ? routes.productDetail.path
                   : row.original.type === 'serializedAsset'
-                  ? routes.serializedAssetDetail.path
-                  : routes.packagesDetail.path
-              }/${row.original.materialId}`} rel="noreferrer"
+                    ? routes.serializedAssetDetail.path
+                    : routes.packagesDetail.path
+                }/${row.original.materialId}`} rel="noreferrer"
             >
               {row.original.detail}
             </a>
@@ -140,8 +139,7 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
               size="small"
               aria-label="Details"
               onClick={() => {
-                const obj: any = [row.original._id];
-                setDeleteData(obj);
+                setDeleteData([row.original]);
               }}
               disabled={allowedToDelete && row.original?.allowedToDelete}
             >
@@ -177,40 +175,38 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'service'
+        ? parent.serviceDetail?.serviceName
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.assetNumber
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serializedAssetDetail.assetNumber
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent?.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.status = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
+      parent.status = `${parent.type === 'service'
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
           ? parent?.productDetail?.status
           : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent?.serializedAssetDetail?.status
+            : parent.packageDetail?.status
+        }`;
     });
 
     if (rows.length !== 0) {
@@ -232,23 +228,22 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'service'
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serializedAssetDetail.assetNumber
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -256,15 +251,14 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
       _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
-      parent.status = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
+      parent.status = `${parent.type === 'service'
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
+        }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -301,9 +295,10 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${routes.assetsReceiving.path}/material/${assetsReceivingData?._id}/delete`, { ids: rows })
+      .put(`${routes.assetsReceiving.path}/material/${assetsReceivingData?._id}/delete`, { rows })
       .then(() => {
         setDeleting(false);
+        setSelectedProducts([]);
         fetchData();
         fetchAssetsReceivingData();
         setDeleteData(null);
@@ -313,18 +308,6 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
         toastConfig.setToastConfig(error);
         setDeleteData(null);
       });
-  };
-
-  const handleDeleteMultiple = () => {
-    const obj: any = [];
-    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
-    dataToDelete?.forEach((ele) => {
-      obj.push(ele._id);
-    });
-    dataToDelete?.forEach((ele) => {
-      getNestedSubRows(obj, ele);
-    });
-    setDeleteData(obj);
   };
 
   const openActions = (event) => {
@@ -385,7 +368,7 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
                 disabled={allowedToDelete && selectedProducts?.filter((e) => e.allowedToDelete)?.length === selectedProducts?.length ? true : false}
                 onClick={() => {
                   closeActions();
-                  handleDeleteMultiple();
+                  handleDelete(selectedProducts)
                 }}
               >
                 Delete
@@ -419,7 +402,7 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
       {deleteData && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to delete the record(s)?`}
+          message={`Are you sure you want to delete the record ${deleteData?.length === 1 ? deleteData[0].serializedAssetDetail?.assetNumber : "(s)"}?`}
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}

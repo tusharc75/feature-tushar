@@ -518,6 +518,7 @@ const ReceivingTicket = ({
       <Link
         className="link text-truncate"
         title={params.value}
+        target='_blank'
         to={`${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`}
       >
         {params.value}
@@ -587,7 +588,7 @@ const ReceivingTicket = ({
   );
 
   const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
+    <Link className="link text-truncate" target='_blank' title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
       {params?.value}
     </Link>
   );
@@ -596,7 +597,7 @@ const ReceivingTicket = ({
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" title={params?.value} to={`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`}>
+      <Link className="link text-truncate"  target='_blank'  title={params?.value} to={`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`}>
         {params?.value}
       </Link>
     ) : (
@@ -605,7 +606,7 @@ const ReceivingTicket = ({
 
   const DeliveryTicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
+      <Link className="link" target='_blank' title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
         {params.value}
       </Link>
     ) : (
@@ -614,7 +615,7 @@ const ReceivingTicket = ({
 
   const ReceivingTicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`}>
+      <Link className="link" target='_blank' title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`}>
         {params.value}
       </Link>
     ) : (
@@ -623,7 +624,7 @@ const ReceivingTicket = ({
 
   const ReturnTicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.returnTicketId}`}>
+      <Link className="link" target='_blank' title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.returnTicketId}`}>
         {params.value}
       </Link>
     ) : (
