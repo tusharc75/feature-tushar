@@ -1192,14 +1192,14 @@ const ReceivingTicket = ({
             }}
           >
             {selectedRecords?.filter((f) => f.type === 'Asset').length === selectedRecords.length && allowUpdateStatus && (
-              <Box>
+              <Fragment>
                 {selectedRecords?.filter(
                   (f) =>
                     ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                       (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
                     [ASSET_STATUS.underReview].includes(f.status)
                 )?.length === selectedRecords?.length && (
-                    <Box>
+                    <Fragment>
                       <MenuItem
                         onClick={() => {
                           setAnchorEl(null);
@@ -1208,7 +1208,7 @@ const ReceivingTicket = ({
                       >
                         {ASSET_STATUS.available}
                       </MenuItem>
-                    </Box>
+                    </Fragment>
                   )}
                 <MenuItem
                   onClick={() => {
@@ -1242,7 +1242,7 @@ const ReceivingTicket = ({
                 >
                   {ASSET_STATUS.needRecert}
                 </MenuItem>
-              </Box>
+              </Fragment>
             )}
           </Menu>
           <Button
@@ -1468,7 +1468,7 @@ const ReceivingTicket = ({
             {selectedRecords.length &&
               selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
                 ?.length === selectedRecords?.length ? (
-              <Box>
+              <Fragment>
                 <MenuItem
                   onClick={() => {
                     closeActions();
@@ -1485,7 +1485,7 @@ const ReceivingTicket = ({
                 >
                   Cancel Receiving Ticket
                 </MenuItem>
-              </Box>
+              </Fragment>
             ) : null}
 
             {selectedRecords?.filter(

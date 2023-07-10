@@ -129,7 +129,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     fetchServiceData();
   }, [workOrderData]);
 
-  const fetchServiceData = async (from = "service") => {
+  const fetchServiceData = async () => {
     var quotation: any = null;
     var isQuotation: any = false;
 
@@ -155,10 +155,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         }
       }
     }
-    if (serviceData?.length <= 0 || from !== 'steps') {
-      const stepDataResponse = await axiosInstance().get(`${workOrder.api}/${workOrderId}/steps-data`);
-      setServiceData(stepDataResponse?.data?.data || []);
-    }
+
+    const stepDataResponse = await axiosInstance().get(`${workOrder.api}/${workOrderId}/steps-data`);
+    setServiceData(stepDataResponse?.data?.data || []);
 
     const serviceDataResponse = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`);
     const data: any = serviceDataResponse?.data?.data;
@@ -769,11 +768,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                         selectedService={selectedService}
                         allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                         setDisableCompleteFail={setDisableCompleteFail}
-                        fetchService={() => {
-                          fetchServiceData('steps')
-                        }}
-                        serviceData={serviceData}
-                        setServiceData={setServiceData}
+                        fetchService={fetchServiceData}
                         referencType="workOrder"
                       />
                     ) : (
