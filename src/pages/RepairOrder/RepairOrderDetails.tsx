@@ -149,7 +149,7 @@ const RepairOrderDetails = () => {
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
           steps = steps?.filter((e) => !['Loading Ticket']?.includes(e.name));
         }
-        if (!user?.user?.brandPolicy?.repairOrderPrice) {
+        if (!user?.user?.brandPolicy?.repairOrderPrice && !data?.addQuotationStep) {
           steps = steps?.filter((e) => !['Quotation', 'Post Work Service', 'Invoice']?.includes(e.name));
         }
         if (!data?.addQuotationStep) {
