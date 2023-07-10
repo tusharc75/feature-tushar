@@ -298,7 +298,7 @@ const WellNumber = ({ wellName }) => {
         <ManageWellNumber
           id={openDialog.id}
           onClose={() => setOpenDialog({ open: false, id: null })}
-          referenceData={{ wellName: wellName }}
+          refrenceData={{ wellName: wellName }}
           onSuccess={() => {
             setOpenDialog({ open: false, id: null });
             fetchData();

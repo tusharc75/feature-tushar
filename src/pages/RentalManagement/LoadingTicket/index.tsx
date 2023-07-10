@@ -873,7 +873,7 @@ const LoadingTicket = ({
                   Delivered to Customer
                 </MenuItem>
                 {user?.user?.brandPolicy?.assetDeliveredStatus &&
-                  <Box>
+                  <Fragment>
                     {selectedRecords.length > 0 &&
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus ===
                         DELIVERY_TICKET_STATUS.delivered && [ASSET_STATUS.delivered, ASSET_STATUS.inUse].includes(e?.status)).length === selectedRecords.length && (
@@ -921,11 +921,11 @@ const LoadingTicket = ({
                           {`Change Date`}
                         </MenuItem>
                       )}
-                  </Box>}
+                  </Fragment>}
                 {selectedRecords.length > 0 &&
                   selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
                     ?.length === selectedRecords?.length ? (
-                  <Box>
+                  <Fragment>
                     <MenuItem
                       onClick={() => {
                         closeActions();
@@ -942,7 +942,7 @@ const LoadingTicket = ({
                     >
                       Cancel Loading Ticket
                     </MenuItem>
-                  </Box>
+                  </Fragment>
                 ) : null}
                 {selectedRecords.length &&
                   selectedRecords?.filter(
