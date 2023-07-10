@@ -115,7 +115,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                         window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                       } else if (row.original.type === 'product') {
                         window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      } else if (row.original.type === 'asset') {
+                      } else if (row.original.type === 'serializedAsset') {
                         window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                       } else {
                         window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -200,7 +200,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         ? parent.productDetail?.productName
         : parent.type === 'package'
           ? parent.packageDetail?.packageName
-          : parent.type === 'asset'
+          : parent.type === 'serializedAsset'
             ? parent.serializedAssetDetail?.assetNumber
             : parent.serviceDetail?.serviceName
         }`;
@@ -211,7 +211,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             ? parent?.productDetail?.productDescription || ''
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'asset'
+              : parent.type === 'serializedAsset'
                 ? parent.serializedAssetDetail?.product?.productDescription || ''
                 : '';
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
@@ -241,7 +241,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         ? _subRow?.productDetail?.productName
         : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
-          : _subRow?.type === 'asset'
+          : _subRow?.type === 'serializedAsset'
             ? _subRow?.serializedAssetDetail?.assetNumber
             : _subRow?.serviceDetail?.serviceName
         }`;
@@ -252,7 +252,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             ? _subRow?.productDetail?.productDescription || ''
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
-              : _subRow.type === 'asset'
+              : _subRow.type === 'serializedAsset'
                 ? _subRow.serializedAssetDetail?.product?.productDescription || ''
                 : '';
       _subRow.isEditable = false;

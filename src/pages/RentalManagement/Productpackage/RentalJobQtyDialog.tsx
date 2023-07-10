@@ -83,8 +83,13 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const fetchTaxRate = async (billingAddress: any) => {
     const zipCode = billingAddress?.zipCode;
     const state = billingAddress?.state
+    let materialType;
+    if (isBulkedit)
+      materialType = rowData[0]?.type;
+    else
+      materialType = rowData?.type
     try {
-      const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}`);
+      const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}`);
       return response?.data?.data || [];
     } catch (e) {
       toastConfig.setToastConfig(e);

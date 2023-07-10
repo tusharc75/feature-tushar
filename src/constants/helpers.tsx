@@ -146,6 +146,8 @@ export const repairOrderSteps: stepInterface[] = [
 export const assetsReceivingSteps: stepInterface[] = [
   { name: 'Add Assets', title: 'Add', icon: 'add' },
   { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
+  { name: 'Complete', title: 'Complete', icon: 'end' },
+
 ];
 
 export const serviceOrderSteps: stepInterface[] = [
@@ -1880,7 +1882,7 @@ export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
   delivered: 'Delivered',
-  cancelled: 'Cancelled'
+  cancelled: 'Cancelled',
 };
 
 export const RENTAL_STATUS = {
@@ -1901,7 +1903,8 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   inUse: 'In-Use',
   complete: 'Complete',
   return: 'Return',
-  consumed: 'Consumed'
+  consumed: 'Consumed',
+  standBy: 'Stand By',
 } as const;
 
 export const REPAIR_JOB_STATUS = {
@@ -1930,7 +1933,7 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
   repairOrder: 'Repair Order',
-  assetsReceiving: 'Asset Receiving',
+  assetsReceiving: 'Assets Receiving',
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2413,6 +2416,12 @@ export const MATERIAL_REQUEST_STATUS = {
   processed: 'Processed',
   closed: 'Closed'
 };
+
+export const ASSETS_RECEIVING_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  complete: 'Complete'
+}
 
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {

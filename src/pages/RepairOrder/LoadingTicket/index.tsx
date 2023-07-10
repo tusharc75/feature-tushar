@@ -152,7 +152,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
 
   const TicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
+      <Link className="link text-truncate" target='_blank' title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
         {params.value}
       </Link>
     ) : (
@@ -161,7 +161,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
 
   const WorkOrderRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.workOrderId}`}>
+      <Link className="link text-truncate" target='_blank'  title={params.value} to={`${routes.workOrderDetail.path}/${params.data.workOrderId}`}>
         {params.value}
       </Link>
     ) : (
@@ -170,14 +170,14 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
 
   const InventoryRenderer = (params) => (
     <Fragment>
-      <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params?.data?._id}`}>
+      <Link className="link text-truncate" target='_blank'  title={params.value} to={`${routes.serializedAssetDetail.path}/${params?.data?._id}`}>
         {params.value}
       </Link>
     </Fragment>
   );
 
   const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
+    <Link className="link text-truncate" target='_blank'  title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
       {params.value}
     </Link>
   );
