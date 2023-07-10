@@ -1,7 +1,7 @@
 import { Box, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 
-const DefaultResources = ({ resourceList, resourceName, setResourceName, isEdit}) => {
+const DefaultResources = ({ resourceList, resourceName, setResourceName, isEdit }) => {
   return (
     <Box>
       <Box p={1}>
@@ -9,9 +9,13 @@ const DefaultResources = ({ resourceList, resourceName, setResourceName, isEdit}
           id="tags-outlined"
           disableCloseOnSelect={true}
           options={resourceList}
-          getOptionLabel={(option: any) => option}
-          value={resourceName || ''}
-          onChange={(_event, newValue) => setResourceName(newValue)}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+          getOptionSelected={(option: any, val) => option.optionValue === val}
+          value={resourceList && resourceList?.filter((data) => data.optionValue === resourceName)?.length
+            ? resourceList && resourceList?.filter((data) => data.optionValue === resourceName)[0]
+            : ''
+          }
+          onChange={(_event, newValue) => setResourceName(newValue && newValue?.optionValue ? newValue.optionValue : '')}
           renderInput={(params) => <TextField {...params} variant="outlined" label="Default Resource" placeholder="Resources" margin="dense" />}
           disabled={!isEdit}
         />

@@ -185,7 +185,6 @@ const CreateRole = ({
         }}
         showManimizeMaximize={true}
       />
-
       {loading ? (
         <>
           <CustomDialogContent>
@@ -223,7 +222,6 @@ const CreateRole = ({
                     setValues({ ...values, name: e.target.value.trimStart() })
                   }
                 />
-
                 <TextField
                   required
                   variant="outlined"
@@ -238,7 +236,6 @@ const CreateRole = ({
                 />
               </Box>
               <Paper>
-
                 {loading ? (
                   <div className="d-flex align-items-center justify-content-center" style={{ minHeight: 200 }}>
                     <Loader
