@@ -139,7 +139,10 @@ const ManageSerializedAsset = ({
               }
             }
             fieldsDataForCreate?.forEach((e) => {
-              if (['customerAccount', 'warehouse', 'currentLocation'].includes(e.fieldName)) {
+              if (referenceData?.customerAccount && ['customerAccount'].includes(e.fieldName)) {
+                e.isUneditable = true;
+              }
+              if (['warehouse', 'currentLocation'].includes(e.fieldName)) {
                 e.isUneditable = true;
               }
             });
