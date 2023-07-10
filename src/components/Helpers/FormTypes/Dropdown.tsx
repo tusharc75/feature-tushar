@@ -24,10 +24,9 @@ import ManageMarketSegmentDialog from 'src/pages/MarketSegment/ManageMarketSegme
 import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 import { camelCase, has, isEmpty } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { NewAddressOptionList } from '../../../StateProvider/AddressProvider'
+import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
 
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
-
   const lookupDependentOn = fieldData?.lookupDependentOn;
   const lookupDependentOnField = fieldData?.lookupDependentOnField;
 
@@ -148,13 +147,13 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, value: any, reason) => {
-                      if (setFieldValue) {
-                        setFieldValue(
-                          name,
-                          value.map((val) => val.optionValue)
-                        );
+                        if (setFieldValue) {
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
+                        }
                       }
-                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -177,32 +176,35 @@ function Dropdown({
                 options={dropdownOptions(option, values, fields, fieldData, newAddressOptionList) || []}
                 getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                 getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={[...dropdownOptions(option, values, fields, fieldData, newAddressOptionList)].find((data: any) => data.optionValue === values[name]) || ''}
+                value={
+                  [...dropdownOptions(option, values, fields, fieldData, newAddressOptionList)].find(
+                    (data: any) => data.optionValue === values[name]
+                  ) || ''
+                }
                 onChange={
                   onChange
                     ? onChange
                     : (e, val) => {
-                      if (setFieldValue) {
-                        handleChange(name, val && val.optionValue ? val.optionValue : '');
-                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                        fieldChange?.forEach((val: any) => {
-                          setFieldValue(val.fieldName, val.value);
-                        });
-                        const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                        if (filterFields?.length) {
-                          filterFields?.forEach((ele: any) => {
-                            if (ele?.lookupDependentOnField && ele?.type === "dropDown" && val && val[ele?.lookupDependentOnField]) {
-                              if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
-                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
-                              }
-                              else {
-                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
-                              }
-                            }
+                        if (setFieldValue) {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
                           });
+                          const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                          if (filterFields?.length) {
+                            filterFields?.forEach((ele: any) => {
+                              if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
+                                if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
+                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+                                } else {
+                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
+                                }
+                              }
+                            });
+                          }
                         }
                       }
-                    }
                 }
                 selectOnFocus
                 clearOnBlur
@@ -374,11 +376,13 @@ function Dropdown({
                           const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
                           if (filterFields?.length) {
                             filterFields?.forEach((ele: any) => {
-                              if (ele?.lookupDependentOnField && ele?.type === "dropDown" && tempNewOption[ele?.lookupDependentOnField]) {
-                                if (Array.isArray(tempNewOption[ele?.lookupDependentOnField]) && tempNewOption[ele?.lookupDependentOnField]?.length === 1) {
+                              if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && tempNewOption[ele?.lookupDependentOnField]) {
+                                if (
+                                  Array.isArray(tempNewOption[ele?.lookupDependentOnField]) &&
+                                  tempNewOption[ele?.lookupDependentOnField]?.length === 1
+                                ) {
                                   setFieldValue(ele?.fieldName, tempNewOption[ele?.lookupDependentOnField][0]);
-                                }
-                                else {
+                                } else {
                                   setFieldValue(ele?.fieldName, tempNewOption[ele?.lookupDependentOnField]);
                                 }
                               }
