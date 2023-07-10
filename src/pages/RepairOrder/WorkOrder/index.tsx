@@ -136,7 +136,7 @@ const WorkOrder = ({
                 {`(${row.original?.subRows?.length})`}
               </Box>
             ) : null}
-            {user?.brandPolicy?.repairOrderQuotation && row.original.type === 'service' && (
+            {user?.brandPolicy?.servicePrePost && row.original.type === 'service' && (
               <Box ml={1}>
                 {row?.original?.preWork ? (
                   <HtmlTooltip title="Pre Work Service">

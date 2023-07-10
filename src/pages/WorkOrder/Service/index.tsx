@@ -614,9 +614,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                         <Box ml={'10px'}>
                                           <Typography style={{ fontWeight: 600 }}>{data?.serviceName}</Typography>
                                         </Box>
-
-                                        {/* Icons */}
-                                        {user?.brandPolicy?.repairOrderQuotation && data?.type === 'service' && (
+                                        {user?.brandPolicy?.servicePrePost && data?.type === 'service' && (
                                           <Box ml={1}>
                                             {data?.preWork ? (
                                               <HtmlTooltip title="Pre Work Service">
@@ -633,7 +631,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             )}
                                           </Box>
                                         )}
-
                                         {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
                                           <Box ml={1}>
                                             <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
@@ -874,7 +871,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             <Box ml={'10px'}>
                                               <Typography>{data?.serviceName}</Typography>
                                             </Box>
-                                            {user?.brandPolicy?.repairOrderQuotation && data?.type === 'service' && (
+                                            {user?.brandPolicy?.servicePrePost && data?.type === 'service' && (
                                               <Box ml={1}>
                                                 {data?.preWork ? (
                                                   <HtmlTooltip title="Pre Work Service">
