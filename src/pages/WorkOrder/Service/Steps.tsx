@@ -180,7 +180,6 @@ const Steps = ({
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  console.log(allServices, 'allServices');
 
   const [serviceDetails, setServiceDetails] = useState(null);
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, type: '' });
