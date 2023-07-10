@@ -95,6 +95,14 @@ function GridFilter({
           })
           modifiedColumn = modifiedColumn?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e.fieldName))
         }
+        if (resource === sidebarResource.serializedAsset) {
+          const currentOwner: any = modifiedColumn?.find((e) => e.fieldName === 'currentOwner')
+          if (currentOwner) {
+            currentOwner.lookup = true
+            currentOwner.option = [...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.customerAccount)?.option || []),
+            ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.supplierAccount)?.option || [])]
+          }
+        }
         setColoums(modifiedColumn);
       })
       .catch((err) => {
@@ -408,7 +416,7 @@ function GridFilter({
                                 shrink: true
                               }}
                               minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] :
-                                formValues[`to_${field.fieldName}`] ? formValues[`to_${field.fieldName}`] : new Date()}
+                                formValues[`from_${field.fieldName}`] ? formValues[`from_${field.fieldName}`] : new Date()}
                             />
                           </Grid>
                         </Fragment>
