@@ -258,11 +258,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     ];
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
-    fetchProductInventory();
+    fetchData();
     setNextStep(true);
   };
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     setNextStep(false);
     try {
       var data: any = [];
@@ -587,7 +587,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         .post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data })
         .then(({ data }) => {
           setAddSerializedAssetDialog({ open: false });
-          fetchProductInventory();
+          fetchData();
           setSelectedRecords([]);
           setAssetAssignedProduct([]);
           setAdding(false);
@@ -615,7 +615,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         setDeleting(false);
         setDeleteData(null);
         setShowConfirmBox(false);
-        fetchProductInventory();
+        fetchData();
       } else {
         deleteData?.forEach((e) => {
           delete e.assetNumber;
@@ -625,7 +625,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           .put(`${rentalManagement.api}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
           .then(() => {
             setDeleting(false);
-            fetchProductInventory();
+            fetchData();
             setDeleteData(null);
             setShowConfirmBox(false);
             setNextStep(true);
@@ -978,7 +978,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           filterByPlant={rentalManagementData?.warehouse?.optionValue}
           handleSuccess={() => {
             setAddSerializedAssetDialog({ open: false });
-            fetchProductInventory();
+            fetchData();
             setSelectedRecords([]);
             setAssetAssignedProduct([]);
             setAdding(false);
@@ -990,7 +990,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           closeDialog={() => {
             setAddNonSerializedAssetDialog(false);
             setSelectedRecords([]);
-            fetchProductInventory();
+            fetchData();
           }}
           products={isOffline ? [...assetAssignedProduct, ...nonSerializedAssetProduct] : nonSerializedAssetProduct}
           warehouse={rentalManagementData?.warehouse?.optionValue}
@@ -1017,7 +1017,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           onSuccess={() => {
             setOrderDialog({ open: false, products: [], type: '' });
             setSelectedRecords([]);
-            fetchProductInventory();
+            fetchData();
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -1044,7 +1044,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           onSuccess={() => {
             setOrderDialog({ open: false, products: [], type: '' });
             setSelectedRecords([]);
-            fetchProductInventory();
+            fetchData();
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -1076,7 +1076,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           onSuccess={() => {
             setOrderDialog({ open: false, products: [], type: '' });
             setSelectedRecords([]);
-            fetchProductInventory();
+            fetchData();
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
