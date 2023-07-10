@@ -66,7 +66,7 @@ const WorkOrderViews = (props) => {
     state: { user }
   }: any = useData();
 
-  if (!user?.user?.brandPolicy?.repairOrderQuotation) {
+  if (!user?.user?.brandPolicy?.servicePrePost) {
     customNodeStyles.preWorkService.name = 'Services';
     delete customNodeStyles.postWorkService;
   }
@@ -137,7 +137,7 @@ const WorkOrderViews = (props) => {
             )
           },
           position: { x: xPosition, y: sIdx * 80 },
-          style: s?.preWork || !user?.user?.brandPolicy?.repairOrderQuotation ? customNodeStyles.preWorkService : customNodeStyles.postWorkService
+          style: s?.preWork || !user?.user?.brandPolicy?.servicePrePost ? customNodeStyles.preWorkService : customNodeStyles.postWorkService
         });
         flowEdge.push({
           id: `workOrder-service-${serviceId}-${workOrderId}`,
