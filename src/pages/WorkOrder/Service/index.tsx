@@ -656,7 +656,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                     ? '#E1FCE3'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
                                                       ? '#fabebe'
-                                                      : '#FFF5DD',
+                                                      : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
+                                                        ? '#D3D3D3' : '#FFF5DD',
                                                 color:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
@@ -664,7 +665,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                       : '#EE0E06'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
                                                       ? '#fa0202'
-                                                      : '#FF8C21',
+                                                      : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
+                                                        ? 'inherit' : '#FF8C21',
                                                 background:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
@@ -672,7 +674,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                       : '#FFECEB'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
                                                       ? '#fabebe'
-                                                      : '#FFF5DD',
+                                                      : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
+                                                        ? '#D3D3D3'
+                                                        : '#FFF5DD',
                                                 fontWeight: 700
                                               }}
                                             />
