@@ -37,10 +37,8 @@ import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialo
 import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/AssignRegionalRolesUserDialog';
 import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import { PERMISSION } from '../../constants/Roles';
-import { roleTypes } from '../../constants/helpers';
-import React from 'react';
+import { roleTypes, sidebarResource } from '../../constants/helpers';
 import { startCase, camelCase } from 'lodash';
-import { RiNurseFill } from 'react-icons/ri';
 import PolicyResources from './PolicyResources';
 import DashboardResources from './DashboardResources';
 import DefaultResources from './DefaultResources';
@@ -110,32 +108,32 @@ const RoleDetailsPage = () => {
 
   const policyResources = [
     {
-      resource: 'Rental Management',
+      resource: sidebarResource.rentalManagement,
       fieldLabel: 'Pricing Information',
       fieldName: 'isPricingRentalManagement'
     },
     {
-      resource: 'Rental Management',
+      resource: sidebarResource.rentalManagement,
       fieldLabel: 'Re-open',
       fieldName: 'isRentalReopen'
     },
     {
-      resource: 'Sublease',
+      resource: sidebarResource.sublease,
       fieldLabel: 'Pricing Information',
       fieldName: 'isPricingSublease'
     },
     {
-      resource: 'Purchase Order',
+      resource: sidebarResource.purchaseOrder,
       fieldLabel: 'Pricing Information',
       fieldName: 'isPricingPurchaseOrder'
     },
     {
-      resource: 'Quote Builder',
+      resource: sidebarResource.quotation,
       fieldLabel: 'Ask Supplier Quote',
       fieldName: 'isQuoteAskSupplierPrice'
     },
     {
-      resource: 'Product Inventory',
+      resource: sidebarResource.productInventory,
       fieldLabel: 'Product Inventory Settings',
       fieldName: 'isProductInventorySettings'
     }
@@ -271,11 +269,7 @@ const RoleDetailsPage = () => {
         SetPolicyFieldCheckBox((prevState) => ({ ...prevState, ...copyOfResourcePolicy }));
         handlePolicyResourceCheckBox(copyOfResourcePolicy);
       }
-      let copyOfDashBoardOption =
-        data?.resource?.map((obj) => {
-          return obj?.resourceLabel;
-        }) || [];
-      setResourceOption([...copyOfDashBoardOption]);
+      setResourceOption(data?.resource?.map((obj) => { return { optionLabel: obj?.resourceLabel, optionValue: obj?.name } }) || []);
       setDefaultResourceName(data?.defaultResource || '');
       setSuperAdminAccess(data?.superAdminAccess || false);
       setCanAssignByAnyuser(data?.canAssignByAnyuser || false);
@@ -558,7 +552,10 @@ const RoleDetailsPage = () => {
                     {dashBoardOption?.length > 0 && (
                       <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} isEdit={isEdit} />
                     )}
-                    <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} isEdit={isEdit} />
+                    <DefaultResources
+                      resourceList={resourceOption}
+                      resourceName={defaultResourceName}
+                      setResourceName={setDefaultResourceName} isEdit={isEdit} />
                     {!isEditDeleteDisable &&
                       <Box p={1}>
                         <FormControlLabel
