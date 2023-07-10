@@ -48,8 +48,7 @@ const ManageDeliveryTicket = ({
   referenceData = null,
   productInventory = null,
   products = null,
-  serialNumber = null,
-  assets = []
+  serialNumber = null
 }) => {
   const {
     state: { user }
@@ -88,10 +87,10 @@ const ManageDeliveryTicket = ({
     if (initialData?.fields?.some(field => field?.fieldName === "createDate")) {
       findValidationDate()
     }
-  }, [initialData, assets])
+  }, [initialData, productInventory])
 
   const findValidationDate = async () => {
-    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets, last: 1 })
+    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: productInventory?.map((e) => e._id), last: 1 })
     setMinDate(new Date(data?.date))
   }
 
