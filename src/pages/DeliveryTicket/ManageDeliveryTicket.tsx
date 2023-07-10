@@ -76,6 +76,9 @@ const ManageDeliveryTicket = ({
   const [pickupFromAddress, setPickupFromAddress] = useState([]);
   const [deliveryToAddress, setDeliveryToAddress] = useState([]);
 
+  const [staticDeliveryToAddress, setStaticDeliveryToAddress] = useState(null);
+  const [staticPickupFromAddress, setStaticPickupFromAddress] = useState(null);
+
   const [showAddressDialog, setShowAddressDialog] = useState(false);
   const [addressType, setAddressType] = useState('');
 
@@ -355,7 +358,6 @@ const ManageDeliveryTicket = ({
               }
             }
           }
-
           if (!tempInitialData['deliveryToAddress']) {
             if (referenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
               const customerAccountData = fieldsDataForCreate?.find((d) => d?.fieldName === 'customerAccount')?.option || [];
@@ -370,6 +372,13 @@ const ManageDeliveryTicket = ({
                 tempInitialData['deliveryToAddress'] = supplierShippingAddress[0];
               }
             }
+          }
+
+          if (referenceData?.pickupFromType === DELIVERY_FROM_TO_TYPE.customer && tempInitialData['pickupFromAddress']) {
+            setStaticPickupFromAddress(tempInitialData['pickupFromAddress'])
+          }
+          if (referenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer && tempInitialData['deliveryToAddress']) {
+            setStaticDeliveryToAddress(tempInitialData['deliveryToAddress'])
           }
         }
         fieldsDataForCreate = updateFieldProperty(
@@ -518,8 +527,9 @@ const ManageDeliveryTicket = ({
       }
     } else if (pickupFromType === DELIVERY_FROM_TO_TYPE.customer) {
       let filterAddress = customerData.find((d) => d.optionValue === pickupFrom)?.shippingAddress;
-      if (filterAddress || pickupFromAddress) {
-        setPickupFromAddress(addressData.filter((d) => filterAddress?.some((u) => u === d.optionValue) || d.optionValue === pickupFromAddress));
+      if (filterAddress || pickupFromAddress || staticPickupFromAddress) {
+        setPickupFromAddress(addressData.filter((d) => filterAddress?.some((u) => u === d.optionValue)
+          || d.optionValue === pickupFromAddress || d.optionValue === staticPickupFromAddress));
       } else {
         setPickupFromAddress([]);
       }
@@ -538,8 +548,9 @@ const ManageDeliveryTicket = ({
       }
     } else if (deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
       let filterAddress = customerData.find((d) => d.optionValue === deliveryTo)?.shippingAddress;
-      if (filterAddress || deliveryToAddress) {
-        setDeliveryToAddress(addressData.filter((d) => filterAddress?.some((u) => u === d.optionValue) || d.optionValue === deliveryToAddress));
+      if (filterAddress || deliveryToAddress || staticDeliveryToAddress) {
+        setDeliveryToAddress(addressData.filter((d) => filterAddress?.some((u) => u === d.optionValue)
+          || d.optionValue === deliveryToAddress || d.optionValue === staticDeliveryToAddress));
       } else {
         setDeliveryToAddress([]);
       }
