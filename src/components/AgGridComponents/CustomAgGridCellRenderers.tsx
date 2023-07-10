@@ -80,7 +80,8 @@ export const LinkRenderer = (params) =>
         className="link text-truncate"
         to={`${params?.pathName}/${params?.data[params?.property]}`}
         title={params?.value}
-        target={params?.openInNewTab ? '_blank' : '_self'}
+        target={!params?.openInNewTab ? '_self' : '_blank'}
+        rel="noopener noreferrer"
       >
         {params?.value}
       </Link>
