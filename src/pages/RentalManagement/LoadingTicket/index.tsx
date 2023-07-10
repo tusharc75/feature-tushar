@@ -93,7 +93,7 @@ const LoadingTicket = ({
   const [anchorEl, setAnchorEl] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
 
-  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
+  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, assets: [],  data: {} });
   const [showRemoveTicketDialog, setShowRemoveTicketDialog] = useState(false);
 
   const [uniqueLoadingTicket, setUniqueLoadingTicket] = useState([]);
@@ -545,7 +545,7 @@ const LoadingTicket = ({
         data['processor'] = rentalManagementData?.processor?.optionValue;
       }
       data['status'] = DELIVERY_TICKET_STATUS.indTransit;
-      setShowTicketDialog({ open: true, data: data });
+      setShowTicketDialog({ open: true, assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id), data: data });
     }
   };
 
@@ -1093,14 +1093,15 @@ const LoadingTicket = ({
           ticketType={DELIVERY_TICKET_TYPE.loading}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
           referenceData={showTicketDialog.data}
-          onClose={() => setShowTicketDialog({ open: false, data: {} })}
+          onClose={() => setShowTicketDialog({ open: false, assets: [], data: {} })}
           productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
           products={selectedRecords?.filter((e) => e.type === 'Product')}
           onSuccess={() => {
-            setShowTicketDialog({ open: false, data: {} });
+            setShowTicketDialog({ open: false, assets: [], data: {} });
             fetchRecords();
             fetchRentalData();
           }}
+          assets={showTicketDialog.assets}
         />
       )}
       {showRemoveTicketDialog && (

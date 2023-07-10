@@ -48,7 +48,8 @@ const ManageDeliveryTicket = ({
   referenceData = null,
   productInventory = null,
   products = null,
-  serialNumber = null
+  serialNumber = null,
+  assets = []
 }) => {
   const {
     state: { user }
@@ -81,6 +82,18 @@ const ManageDeliveryTicket = ({
 
   const [showAddressDialog, setShowAddressDialog] = useState(false);
   const [addressType, setAddressType] = useState('');
+  const [minDate, setMinDate] = useState(new Date())
+
+  useEffect(() => {
+    if (initialData?.fields?.some(field => field?.fieldName === "createDate")) {
+      findValidationDate()
+    }
+  }, [initialData, assets])
+
+  const findValidationDate = async () => {
+    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets, last: 1 })
+    setMinDate(new Date(data?.date))
+  }
 
   useEffect(() => {
     const fields = initialData.fields;
@@ -502,6 +515,9 @@ const ManageDeliveryTicket = ({
     if (endDate.diff(startDate, 'days') < 0) {
       errors['pickUpDate'] = 'Please enter valid pick-Up  date';
     }
+    if (!moment(values['createDate']).isSameOrAfter(moment(minDate))) {
+      errors['createDate'] = `Please select valid date`;
+    }
     return errors;
   }
 
@@ -653,6 +669,29 @@ const ManageDeliveryTicket = ({
                                       // maxDate={
                                       //     referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob ? referenceData.estimateStartDate ? moment(referenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
                                       //         : referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
+                                      />
+                                    ) : (field.fieldName === "createDate" && referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob) ? (
+                                      <FormTypes
+                                        {...field}
+                                        fieldData={field}
+                                        fields={initialData.fields}
+                                        isNew={!Boolean(deliveryTicketId)}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value);
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        minDate={minDate}
                                       />
                                     ) : field.fieldName === 'deliveryDate' ? (
                                       <FormTypes
