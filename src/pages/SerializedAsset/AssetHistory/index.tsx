@@ -22,9 +22,9 @@ const AssetHistory = ({ id }) => {
     <>
       {params.value ? (
         params.data.type === 'Loading Ticket' ||
-        params.data.type === 'Receiving Ticket' ||
-        params.data.type === 'Return Ticket' ||
-        params.data.type === 'Delivery Ticket' ? (
+          params.data.type === 'Receiving Ticket' ||
+          params.data.type === 'Return Ticket' ||
+          params.data.type === 'Delivery Ticket' ? (
           <Link
             className="link"
             title={params.value}
@@ -143,9 +143,20 @@ const AssetHistory = ({ id }) => {
     </>
   );
 
+  const DaysRenderer = (params: any) => (
+    <>
+      {params.value ? (
+        <span>{params.value}</span>
+      ) : (
+        <span>Less than a day</span>
+      )}
+    </>
+  );
+
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     commonRenderer: CommonRenderer,
+    daysRenderer: DaysRenderer,
     dateTimeRenderer: DateTimeRenderer
   };
 
@@ -153,7 +164,7 @@ const AssetHistory = ({ id }) => {
     { field: 'reference', headerName: 'Reference', show: true, cellRenderer: 'nameRenderer' },
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'date', headerName: 'Date & Time', show: true, disabled: true, filter: false, cellRenderer: 'dateTimeRenderer' },
-    { field: 'days', headerName: 'Days', show: true, disabled: true, filter: false, cellRenderer: 'commonRenderer' },
+    { field: 'days', headerName: 'Days', show: true, disabled: true, filter: false, cellRenderer: 'daysRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'comments', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
     { field: 'location', headerName: 'Location', show: true, cellRenderer: 'commonRenderer' },
