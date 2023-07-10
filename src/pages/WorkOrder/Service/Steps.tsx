@@ -175,6 +175,8 @@ const Steps = ({
   setDisableCompleteFail,
   fetchService,
   referencType,
+  serviceData,
+  setServiceData,
   handelClose = null
 }) => {
   const classes = useStyles();
@@ -183,7 +185,7 @@ const Steps = ({
   const [serviceDetails, setServiceDetails] = useState(null);
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, type: '' });
   const [stepState, setStepState] = useState(null);
-  const [serviceData, setServiceData] = useState([]);
+  // const [serviceData, setServiceData] = useState([]);
   const [arrangeView, setArrangeView] = useState(false);
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
@@ -211,13 +213,16 @@ const Steps = ({
       selectedServiceRef.current = selectedService._id;
       setServiceDetails(null);
     }
-    fetchServiceData();
+    fetchServiceData("service");
   }, [selectedService]);
 
-  const fetchServiceData = async () => {
-    const stepDataResponse = await axiosInstance().get(`${workOrder.api}/${workOrderId}/steps-data`);
-    const stepsData = stepDataResponse?.data?.data || [];
-    setServiceData(stepsData);
+  const fetchServiceData = async (from = "steps") => {
+    let stepsData = []
+    if (serviceData?.length <= 0 || from === 'steps') {
+      const stepDataResponse = await axiosInstance().get(`${workOrder.api}/${workOrderId}/steps-data`);
+      stepsData = stepDataResponse?.data?.data || [];
+      setServiceData(stepsData);
+    }
     const serviceDetailResponse = await axiosInstance().get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`);
     var serviceDetail = serviceDetailResponse?.data?.data;
     serviceDetail.steps = serviceDetail?.steps?.sort((a, b) => a?.order - b?.order);
@@ -279,11 +284,13 @@ const Steps = ({
     }
   };
 
-  const updateServiceStatus = (uniqueId, status) => {
+  const updateServiceStatus = (uniqueId, status, from = 'completed') => {
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status, comment })
       .then(({ data: { data } }) => {
-        fetchService();
+        if (from !== 'start') {
+          fetchService();
+        }
         if (openCompleteDialog) {
           setOpenCompleteDialog(false);
         }
@@ -708,7 +715,7 @@ const Steps = ({
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
-                                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
+                                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress, "start");
                                 }
                                 handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.start, step._id);
                               }}
