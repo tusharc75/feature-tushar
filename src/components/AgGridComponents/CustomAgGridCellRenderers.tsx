@@ -98,7 +98,7 @@ export const LinkRenderer = (params) =>
 
 export const NameRenderer = (params) =>
   params.value ? (
-    <Link className="link" to={`${params?.pathName}/${params?.data?._id}`} title={params?.value}>
+    <Link className="link" to={`${params?.pathName}/${params?.data?._id}`} title={params?.value} target="_blank" rel="noopener noreferrer">
       {params?.value}
     </Link>
   ) : (
