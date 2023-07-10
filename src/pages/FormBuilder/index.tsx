@@ -18,6 +18,9 @@ import styles from './Header.module.scss';
 import ArrangeView from './ArrangeView';
 
 const FormBuilder = () => {
+
+  const renderedFrom = 'form-builder';
+  
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -28,16 +31,22 @@ const FormBuilder = () => {
   const [resource, setResource] = useState([]);
 
   const columns = [
+    { field: 'resource', headerName: 'Resource', show: false, cellRenderer: 'commonRenderer' },
     { field: 'resourceLabel', headerName: 'Resource Label', show: true, disabled: true, cellRenderer: 'resourceRenderer' },
     { field: 'homePageLabel', headerName: 'Home Page Label', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    //{ field: 'resource', headerName: 'Resource', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    {
-      field: 'section',
-      headerName: 'Section',
-      show: true,
-      disabled: true
-    }
+    { field: 'section', headerName: 'Section', show: true, disabled: true },
   ];
+
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+  if (columnState) {
+    columns?.forEach((item) => {
+      columnState?.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
 
   const ResourceRenderer = (params) => (
     <Link className="link" to={'/form-builder/' + params.data.resource}>
@@ -102,7 +111,7 @@ const FormBuilder = () => {
                   setArrangeViewOpen(true);
                 }}
               >
-                Arrange View
+                Change Resource Order
               </Button>
             </Grid>
           </Grid>
@@ -132,7 +141,7 @@ const FormBuilder = () => {
             onCreate={() => { }}
             showClone={false}
             onClone={() => { }}
-            renderedFrom={'form-builder'}
+            renderedFrom={renderedFrom}
           />
         ) : (
           <CustomAgGrid
@@ -150,7 +159,7 @@ const FormBuilder = () => {
             isClientSideGrid={true}
             loading={loading}
             refreshGrid={fetchGetBrandResource}
-            renderedFrom={routes.formBuilder.title}
+            renderedFrom={renderedFrom}
           />
         )}
       </CustomContainer>

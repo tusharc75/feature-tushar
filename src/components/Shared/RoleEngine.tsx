@@ -264,6 +264,7 @@ const RoleEngine = (props: RoleProps) => {
     }
   };
 
+
   return (
     <TableContainer style={{ height: 400, minHeight: 400, ...style }}>
       <Table
@@ -358,10 +359,7 @@ const RoleEngine = (props: RoleProps) => {
         </TableHead>
         <TableBody>
           {resource.map((_resource, outerIndex) => {
-            const resourceFields = field
-              .filter((_field) => _field.fieldData.resource === _resource.name)
-              .sort((a, b) => a.order - b.order);
-
+            const resourceFields = field.filter((_field) => _field.fieldData.resource === _resource.name).sort((a, b) => a.order - b.order);
             return (
               <React.Fragment key={outerIndex}>
                 <Row
@@ -373,7 +371,6 @@ const RoleEngine = (props: RoleProps) => {
               </React.Fragment>
             );
           })}
-          {/* </Container> */}
         </TableBody>
       </Table>
     </TableContainer>
@@ -396,7 +393,7 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
       <TableRow>
         <TableCell style={{ minWidth: 300 }}>
           <Box display='flex' justifyContent={'flex-start'} alignItems={'center'}>
-            <Typography className="tableMainHeader">{_resource.name}</Typography>
+            <Typography className="tableMainHeader">{_resource?.resourceLabel}</Typography>
             {fieldCheckbox.length > 0 && <Box ml={1}>
               <IconButton
                 size="small"
