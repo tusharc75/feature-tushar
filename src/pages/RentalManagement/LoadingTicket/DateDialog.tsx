@@ -4,7 +4,7 @@ import { Button, CircularProgress, Dialog, Grid, Box, Typography, FormControl, R
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { ASSET_STATUS, CustomDialogTransition, dateFormatForInputControl } from 'src/constants/helpers';
+import { ASSET_STATUS, CustomDialogTransition, convertDateInDateTime, dateFormatForInputControl } from 'src/constants/helpers';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -78,7 +78,7 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
                       error={touched['date'] && Boolean(errors['date'])}
                       helperText={touched['date'] && errors['date']}
                       onChange={(value) => {
-                        setFieldValue('date', value);
+                        setFieldValue('date', convertDateInDateTime(value));
                       }}
                     />
                     {status === ASSET_STATUS.delivered &&
