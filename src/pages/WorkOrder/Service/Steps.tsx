@@ -15,7 +15,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import StepFieldsDialog from './StepFieldsDialog';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import CompleteDialog from './CompleteDialog';
@@ -171,6 +171,7 @@ const Steps = ({
   workOrderId,
   warehouse,
   selectedService,
+  allServices,
   allowedToEdit,
   setDisableCompleteFail,
   fetchService,
@@ -179,6 +180,7 @@ const Steps = ({
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
+  console.log(allServices, 'allServices');
 
   const [serviceDetails, setServiceDetails] = useState(null);
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, type: '' });
@@ -525,6 +527,11 @@ const Steps = ({
               step: returnStep
             }));
           }
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isSkipServiceOnPass && !isEmpty(result?.skipServiceOnPass)) {
+          setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.passed, open: true, type: 'skipServices', services: result?.skipServiceOnPass }));
+        }
+        else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isSkipServiceOnFail && !isEmpty(result?.skipServiceOnFail)) {
+          setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'skipServices', services: result?.skipServiceOnFail }));
         }
         toastConfig.setToastConfig({
           open: true,
@@ -984,7 +991,9 @@ const Steps = ({
         {addServiceConfirmation.open && (
           <ConfirmationDialog
             open={true}
-            message={
+            message={addServiceConfirmation.type === 'skipServices' ? `As per the logic applied on this step, service${addServiceConfirmation?.services?.length > 0 ? "s" : ""}  ${allServices?.filter(s => [...addServiceConfirmation?.services].includes(s.materialId))
+              ?.map((e) => e?.serviceName || "")
+              ?.toString()} has been skipped. Do you want to Skip ? ` :
               addServiceConfirmation.type === 'returnToStepOnFail'
                 ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
                 }. Do you want to continue ?`
