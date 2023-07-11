@@ -66,6 +66,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
           inventoryQuantity: parseInt(element?.inventoryQuantity),
           assetQuantity: parseInt(element?.assetQuantity),
           serialNumber: element?.serialNumber,
+          supplierPartNumber: element?.supplierPartNumber,
           comment: element?.comment
         });
       }
@@ -237,6 +238,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
               serializedProduct: d.serializedProduct || false,
               serialNumber: [],
               comment: '',
+              supplierPartNumber: '',
               row: d
             }))
           }}
@@ -469,23 +471,43 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                             </Box>
                                           )}
                                           <Box mt={2}>
-                                            <Grid item xs={12} md={8}>
-                                              <TextField
-                                                fullWidth
-                                                label="Comment"
-                                                variant="outlined"
-                                                type="text"
-                                                size="small"
-                                                name="comment"
-                                                placeholder="Comment"
-                                                value={data.comment}
-                                                onChange={(e) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.seriaizedAsset[index],
-                                                    ['comment']: e.target.value
-                                                  });
-                                                }}
-                                              />
+                                            <Grid container spacing={2} alignItems="center">
+                                              <Grid item xs={12} md={6}>
+                                                <TextField
+                                                  fullWidth
+                                                  label="Supplier Part Number"
+                                                  variant="outlined"
+                                                  type="text"
+                                                  size="small"
+                                                  name="supplierPartNumber"
+                                                  placeholder="Supplier Part Number"
+                                                  value={data.supplierPartNumber}
+                                                  onChange={(e) => {
+                                                    arrayHelpers.replace(index, {
+                                                      ...values.seriaizedAsset[index],
+                                                      ['supplierPartNumber']: e.target.value
+                                                    });
+                                                  }}
+                                                />
+                                              </Grid>
+                                              <Grid item xs={12} md={6}>
+                                                <TextField
+                                                  fullWidth
+                                                  label="Comment"
+                                                  variant="outlined"
+                                                  type="text"
+                                                  size="small"
+                                                  name="comment"
+                                                  placeholder="Comment"
+                                                  value={data.comment}
+                                                  onChange={(e) => {
+                                                    arrayHelpers.replace(index, {
+                                                      ...values.seriaizedAsset[index],
+                                                      ['comment']: e.target.value
+                                                    });
+                                                  }}
+                                                />
+                                              </Grid>
                                             </Grid>
                                           </Box>
                                         </Grid>
