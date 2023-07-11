@@ -171,7 +171,6 @@ const Steps = ({
   workOrderId,
   warehouse,
   selectedService,
-  allServices,
   allowedToEdit,
   setDisableCompleteFail,
   fetchService,
@@ -990,8 +989,7 @@ const Steps = ({
         {addServiceConfirmation.open && (
           <ConfirmationDialog
             open={true}
-            message={addServiceConfirmation.type === 'skipServices' ? `As per the logic applied on this step, service${addServiceConfirmation?.services?.length > 0 ? "s" : ""}  ${allServices?.filter(s => [...addServiceConfirmation?.services].includes(s.materialId))
-              ?.map((e) => e?.serviceName || "")
+            message={addServiceConfirmation.type === 'skipServices' ? `As per the logic applied on this step, service${addServiceConfirmation?.services?.length > 1 ? "s" : ""}  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || "")
               ?.toString()} has been skipped. Do you want to Skip ? ` :
               addServiceConfirmation.type === 'returnToStepOnFail'
                 ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
