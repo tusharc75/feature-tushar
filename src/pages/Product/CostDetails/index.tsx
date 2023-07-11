@@ -67,7 +67,7 @@ const CostDetails = ({ product, productData, minHeight = null }) => {
                   <AccordionDetails>
                     <Box style={{ width: '100%' }}>
                       <Box display="flex" justifyContent="space-between">
-                        <Typography className="table-head-v1">List Price</Typography>
+                        <Typography className="table-head-v1">Customer Price</Typography>
                         <Typography className="table-data-v1" style={{ borderTopWidth: '1px' }}>
                           {listPrice}
                         </Typography>

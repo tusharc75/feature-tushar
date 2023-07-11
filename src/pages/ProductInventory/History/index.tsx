@@ -159,13 +159,13 @@ const History = ({ product, warehouse, storageLocation }) => {
       }
     },
     ...(!user?.user?.brandPolicy?.hideInventoryCount ? [{ field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false }] : []),
-    { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
+    { field: 'price', headerName: 'Average Cost', show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
     ...(warehouse && warehouse?.split(',')?.length === 1
       ? [
         {
           field: 'finalAvgPrice',
-          headerName: 'Final Average Price',
+          headerName: 'Final Average Cost',
           show: true,
           cellRenderer: 'commonRenderer',
           filter: false,

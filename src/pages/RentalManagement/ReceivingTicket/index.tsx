@@ -514,15 +514,22 @@ const ReceivingTicket = ({
   };
 
   const InventoryRenderer = (params) => (
-    <Fragment>
-      <Link
-        className="link text-truncate"
-        title={params.value}
-        target='_blank'
-        to={`${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`}
-      >
-        {params.value}
-      </Link>
+    <div className="d-flex gap-2 align-items-center">
+      <p className="text-truncate">{params.value}</p>
+
+      <HtmlTooltip title={`${params.data.type}`}>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(
+              `${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`
+            );
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </HtmlTooltip>
+
       {params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
         <HtmlTooltip title="This asset will be shipped from different facility">
           <IconButton size="small">
@@ -584,49 +591,99 @@ const ReceivingTicket = ({
           </HtmlTooltip>
         </Box>
       )}
-    </Fragment>
+    </div>
   );
 
   const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" target='_blank' title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
-      {params?.value}
-    </Link>
+    <div className="d-flex gap-2 align-items-center">
+      <p className="text-truncate">{params?.value}</p>
+      <HtmlTooltip title={`${routes.product.title}`}>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.productDetail.path}/${params.data?.productId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </HtmlTooltip>
+    </div>
   );
 
   const ParentNameRenderer = (params) => (params.data?.parentId ? <span>{params?.data?.parentName}</span> : <NoDataCell />);
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" target='_blank' title={params?.value} to={`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`}>
-        {params?.value}
-      </Link>
+      <div className="d-flex gap-2 align-items-center">
+        <p className="text-truncate">{params?.value}</p>
+        <HtmlTooltip title={`${routes.warehouse.title}`}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`);
+            }}
+          >
+            <OpenInNewIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      </div>
     ) : (
       <NoDataCell />
     );
 
   const DeliveryTicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link" target='_blank' title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
-        {params.value}
-      </Link>
+      <div className="d-flex gap-2 align-items-center">
+        <p className="text-truncate">{params?.value}</p>
+        <HtmlTooltip title={`${routes.deliveryTicket.title}`}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`);
+            }}
+          >
+            <OpenInNewIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      </div>
     ) : (
       <NoDataCell />
     );
 
   const ReceivingTicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link" target='_blank' title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`}>
-        {params.value}
-      </Link>
+      <div className="d-flex gap-2 align-items-center">
+        <p className="text-truncate">{params?.value}</p>
+        <HtmlTooltip title={`${routes.deliveryTicket.title}`}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`);
+            }}
+          >
+            <OpenInNewIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      </div>
     ) : (
       <NoDataCell />
     );
 
   const ReturnTicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link" target='_blank' title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.returnTicketId}`}>
-        {params.value}
-      </Link>
+      <div className="d-flex gap-2 align-items-center">
+      <p className="text-truncate">{params?.value}</p>
+      <HtmlTooltip title={`${routes.deliveryTicket.title}`}>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.deliveryTicketDetail.path}/${params.data.returnTicketId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </HtmlTooltip>
+    </div>
     ) : (
       <NoDataCell />
     );
@@ -1279,9 +1336,14 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('returnTicketId') ||
                     !f.hasOwnProperty('loadingTicketId') ||
                     [ASSET_STATUS.lost].includes(f.status) ||
-                    ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.notApplied].includes(
-                      f.status
-                    )
+                    ![
+                      ASSET_STATUS.inUse,
+                      ASSET_STATUS.standBy,
+                      ASSET_STATUS.scrap,
+                      ASSET_STATUS.needRepair,
+                      ASSET_STATUS.needRecert,
+                      ASSET_STATUS.notApplied
+                    ].includes(f.status)
                 )
               }
               onClick={() => {
