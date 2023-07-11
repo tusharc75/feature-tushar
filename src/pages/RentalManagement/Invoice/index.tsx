@@ -2,7 +2,7 @@ import Box from '@material-ui/core/Box/Box';
 import React, { useState, useEffect, useReducer, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Grid from '@material-ui/core/Grid/Grid';
-import { Button, } from '@material-ui/core';
+import { Button, IconButton } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { rentalManagement, RENTAL_STATUS, sidebarResource } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
@@ -18,15 +18,10 @@ import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
-const Invoice = ({
-  rentalManagementData,
-  updateJobStatus,
-  statusOptions,
-  stepFullScreen,
-  allowedToEdit,
-  renderedFrom
-}) => {
+const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFullScreen, allowedToEdit, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -95,12 +90,12 @@ const Invoice = ({
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                    ? row.original?.packageDetail.packageType === 'Product'
-                      ? '(Product)'
-                      : '(Service)'
-                    : row.original.type === 'service'
-                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                      : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                  : ''}
               </p>
             ) : (
               <NoDataCell />
@@ -110,35 +105,34 @@ const Invoice = ({
           accessor: 'detail',
           Header: 'Details',
           width: 300,
-          Cell: ({ row }) => (
-            <div className="d-flex gap-2 align-items-center">
-              <p className="text-truncate" title={row.original.detail}>
-                {!isOffline ? (
-                  row.original?.type === 'product' ? (
-                    <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.materialId}`} target="_blank">
-                      {row.original.detail}
-                    </a>
-                  ) : row.original?.type === 'service' ? (
-                    <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original.materialId}`} target="_blank">
-                      {row.original.detail}
-                    </a>
-                  ) : row.original?.type === 'package' ? (
-                    <a className="link text-truncate" href={`${routes.packagesDetail.path}/${row.original.materialId}`} target="_blank">
-                      {row.original.detail}
-                    </a>
-                  ) : row.original?.type === 'Asset' ? (
-                    <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original._id}`} target="_blank">
-                      {row.original.detail}
-                    </a>
-                  ) : (
-                    <p className="text-truncate">{row.original.detail}</p>
-                  )
-                ) : (
-                  <p className="text-truncate">{row.original.detail}</p>
+          Cell: ({ row }) =>
+            row.original['type'] ? (
+              <div className="d-flex gap-2 align-items-center">
+                <p className="text-truncate">{row.original.detail}</p>
+                {row.original.type !== 'Add On' && (
+                  <HtmlTooltip title={`${row.original.type}`}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        if (row.original.type === 'service') {
+                          window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                        } else if (row.original.type === 'product') {
+                          window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                        } else if (row.original.type === 'asset') {
+                          window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                        } else {
+                          window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                        }
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </HtmlTooltip>
                 )}
-              </p>
-            </div>
-          )
+              </div>
+            ) : (
+              <NoDataCell />
+            )
         },
         {
           accessor: 'description',
@@ -187,10 +181,10 @@ const Invoice = ({
             item.type === 'product'
               ? item.productDetail?.productName
               : item.type === 'service'
-                ? item.serviceDetail?.serviceName
-                : item.type === 'package'
-                  ? item.packageDetail?.packageName
-                  : '';
+              ? item.serviceDetail?.serviceName
+              : item.type === 'package'
+              ? item.packageDetail?.packageName
+              : '';
           item.type = item.type;
           combinedData.push(item);
         }
@@ -209,20 +203,20 @@ const Invoice = ({
           parent.type === 'Add On'
             ? parent.detail
             : parent.type === 'product'
-              ? parent?.productDetail?.productName
-              : parent.type === 'service'
-                ? parent?.serviceDetail?.serviceName
-                : parent.packageDetail?.packageName;
+            ? parent?.productDetail?.productName
+            : parent.type === 'service'
+            ? parent?.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName;
         parent.description =
           parent?.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent?.type === 'product'
-              ? parent?.productDetail?.productDescription || ''
-              : parent?.type === 'package'
-                ? parent?.packageDetail?.packageDescription || ''
-                : parent.type === 'Add On'
-                  ? parent.description
-                  : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent?.type === 'package'
+            ? parent?.packageDetail?.packageDescription || ''
+            : parent.type === 'Add On'
+            ? parent.description
+            : '';
         parent.qty = parent.qty;
         parent.subRows = generateNestedData(material, inventory, parent);
       });
@@ -257,16 +251,16 @@ const Invoice = ({
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow?.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow?.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow?.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow?.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.qty = `${parent.qty * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
       subRows.push(_subRow);
@@ -310,10 +304,20 @@ const Invoice = ({
             referenceId={rentalManagementData._id}
             columns={columns}
             isSendEmail={true}
-            defaultColumns={['index', 'type', 'details', 'description', 'qty', 'unit', 'inUseDays', 'standByDays',
+            defaultColumns={[
+              'index',
+              'type',
+              'details',
+              'description',
+              'qty',
+              'unit',
+              'inUseDays',
+              'standByDays',
               `price_${rentalManagementData?.currency?.toLowerCase()}`,
               `totalPrice_${rentalManagementData?.currency?.toLowerCase()}`,
-              `finalPrice_${rentalManagementData?.currency?.toLowerCase()}`]} />
+              `finalPrice_${rentalManagementData?.currency?.toLowerCase()}`
+            ]}
+          />
         </Box>
       </Box>
       <Grid container spacing={2}>
@@ -324,8 +328,8 @@ const Invoice = ({
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 365px)'}
                 columns={columns}
                 data={rowsData}
-                setWholeRowsCellColor={() => { }}
-                onSelect={() => { }}
+                setWholeRowsCellColor={() => {}}
+                onSelect={() => {}}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
