@@ -346,6 +346,18 @@ const CustomReport = () => {
     });
   }
 
+  const colum = () => {
+    const column = columns.filter((col) => customReportData?.column.includes(col.field));
+    if (column?.length < 6) {
+      column.forEach(e => {
+        e.width = 280;
+      });
+    }
+    return customReportData?.column && customReportData?.column.length > 0
+      ? column
+      : columns
+  }
+
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
       <div>
@@ -437,11 +449,7 @@ const CustomReport = () => {
             <div>
               {Object.keys(frameWorkComponent).length > 0 && columns ? (
                 <CustomAgGrid
-                  columns={
-                    customReportData?.column && customReportData?.column.length > 0
-                      ? columns.filter((col) => customReportData?.column.includes(col.field))
-                      : columns
-                  }
+                  columns={colum()}
                   dataRows={dataRows}
                   frameworkComponents={frameWorkComponent}
                   setGridApi={setGridApi}
