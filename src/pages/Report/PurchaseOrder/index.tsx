@@ -276,7 +276,7 @@ const Report = () => {
           },
           {
             field: 'averagePrice',
-            headerName: 'Average Price',
+            headerName: 'Average Cost',
             show: true,
             disabled: false,
             filter: false,
@@ -511,7 +511,7 @@ const Report = () => {
           },
           {
             field: 'averagePrice',
-            headerName: 'Average Price',
+            headerName: 'Average Cost',
             show: true,
             disabled: false,
             filter: false,
