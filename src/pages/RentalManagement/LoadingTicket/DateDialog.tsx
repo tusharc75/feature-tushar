@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Form, Formik } from 'formik';
-import { Button, CircularProgress, Dialog, Grid, Box } from '@material-ui/core';
+import { Button, CircularProgress, Dialog, Grid, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { CustomDialogTransition, dateFormatForInputControl } from 'src/constants/helpers';
+import { ASSET_STATUS, CustomDialogTransition, convertDateInDateTime, dateFormatForInputControl } from 'src/constants/helpers';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateUtils from '@date-io/date-fns';
 
-const DateDialog = ({ title, type, onClose, handleSubmit, loading, assets = [] }) => {
+const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, assets = [] }) => {
 
   const [minDate, setMinDate] = useState(new Date())
 
@@ -51,7 +51,7 @@ const DateDialog = ({ title, type, onClose, handleSubmit, loading, assets = [] }
         initialValues={{ date: new Date() }}
         validate={validate}
         onSubmit={(values) => {
-          handleSubmit(moment(values.date).format('MM/DD/YYYY'));
+          handleSubmit(moment(values.date).format('MM/DD/YYYY'), values?.status);
         }}>
         {({ values, errors, touched, setFieldValue }) => (
           <Form >
@@ -70,17 +70,32 @@ const DateDialog = ({ title, type, onClose, handleSubmit, loading, assets = [] }
                       inputVariant="outlined"
                       value={values.date}
                       name="date"
-                      placeholder={'Date'}
-                      label="Date"
+                      placeholder={`${type === 'changeStatus' ? status : ''} Date`}
+                      label={`${type === 'changeStatus' ? status : ''} Date`}
                       format={dateFormatForInputControl}
                       maxDate={new Date()}
                       minDate={minDate}
                       error={touched['date'] && Boolean(errors['date'])}
                       helperText={touched['date'] && errors['date']}
                       onChange={(value) => {
-                        setFieldValue('date', value);
+                        setFieldValue('date', convertDateInDateTime(value));
                       }}
                     />
+                    {status === ASSET_STATUS.delivered &&
+                      <Box pt={2}>
+                        <Typography>Would you like to change status ?</Typography>
+                        <Box pt={1}>
+                          <FormControl component="fieldset">
+                            <RadioGroup row aria-label="status" name="status" value={values['status']} onChange={(e) => {
+                              setFieldValue('status', e.target.value);
+                            }}>
+                              <FormControlLabel value={ASSET_STATUS.inUse} control={<Radio />} label={ASSET_STATUS.inUse} />
+                              <FormControlLabel value={ASSET_STATUS.standBy} control={<Radio />} label={ASSET_STATUS.standBy} />
+                            </RadioGroup>
+                          </FormControl>
+                        </Box>
+                      </Box>
+                    }
                   </MuiPickersUtilsProvider>
                 </Grid>
               </Box>
