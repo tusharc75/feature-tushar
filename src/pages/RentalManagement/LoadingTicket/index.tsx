@@ -53,6 +53,7 @@ import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAsset
 import { useData } from 'src/StateProvider/Provider';
 import DateDialog from './DateDialog';
 import Edit from '@material-ui/icons/Edit';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -81,7 +82,9 @@ const LoadingTicket = ({
   const history = useHistory();
   const classes = useStyles();
 
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -169,7 +172,7 @@ const LoadingTicket = ({
               : '',
             description: d?.product?.productDescription,
             rentalAssetStatus: d?.status,
-            startDate: d?.startDate,
+            startDate: d?.startDate
           }))
           .map((u) => ({
             ...u,
@@ -182,7 +185,7 @@ const LoadingTicket = ({
             warehouseId: u?.warehouse?.optionValue,
             currentOwner: u?.currentOwner,
             currentLocation: u?.currentLocation?.optionValue,
-            startDate: u?.startDate,
+            startDate: u?.startDate
           }));
 
         const result = await axiosInstance().get(
@@ -227,10 +230,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDescription || ''
-                : element.type === 'package'
-                  ? element?.packageDetail?.packageDescription || ''
-                  : '';
+              ? element?.productDetail?.productDescription || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -261,10 +264,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDescription || ''
-                : element.type === 'package'
-                  ? element?.packageDetail?.packageDescription || ''
-                  : '';
+              ? element?.productDetail?.productDescription || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.assetNumber = element?.productDetail?.productName;
@@ -304,8 +307,10 @@ const LoadingTicket = ({
         }
       });
 
-      if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0
-        && productAssets?.some((e: any) => e.startDate)) {
+      if (
+        productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0 &&
+        productAssets?.some((e: any) => e.startDate)
+      ) {
         setNextStep(true);
       }
 
@@ -325,16 +330,31 @@ const LoadingTicket = ({
 
   const TicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" target='_blank' title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
-        {params.value}
-      </Link>
+      <div className="d-flex gap-2 align-items-center">
+        <p className="text-truncate">{params.value}</p>
+        <HtmlTooltip title={routes.deliveryTicket.title}>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color={'primary'} />
+        </IconButton>
+        </HtmlTooltip>
+      </div>
     ) : (
       <NoDataCell />
     );
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" target='_blank' title={params.value} to={`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`}>
+      <Link
+        className="link text-truncate"
+        target="_blank"
+        title={params.value}
+        to={`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`}
+      >
         {params.value}
       </Link>
     ) : (
@@ -343,14 +363,24 @@ const LoadingTicket = ({
 
   const InventoryRenderer = (params) => (
     <Fragment>
-      <Link
-        className="link text-truncate"
-        title={params.value}
-        target='_blank'
-        to={`${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`}
-      >
+      <p className="text-truncate" title={params.value}>
         {params.value}
-      </Link>
+      </p>
+      <Box ml={1}>
+        <HtmlTooltip title={`${params.data.type }`}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(
+                `${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`
+              );
+            }}
+          >
+            <OpenInNewIcon fontSize="small" color={'primary'} />
+          </IconButton>
+        </HtmlTooltip>
+      </Box>
+
       {params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
         <HtmlTooltip title="This asset will be shipped from different facility">
           <IconButton size="small">
@@ -388,17 +418,27 @@ const LoadingTicket = ({
   );
 
   const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" target='_blank' title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
-      {params.value}
-    </Link>
+    <div className="d-flex gap-2 align-items-center">
+      <p className="text-truncate">{params.value}</p>
+      <HtmlTooltip title={`${routes.product.title}`}>
+      <IconButton
+        size="small"
+        onClick={() => {
+          window.open(`${routes.productDetail.path}/${params.data?.productId}`);
+        }}
+      >
+        <OpenInNewIcon fontSize="small" color="primary" />
+      </IconButton>
+      </HtmlTooltip>
+    </div>
   );
 
   const ParentNameRenderer = (params) => (params.data?.parentId ? <span>{params?.data?.parentName}</span> : <NoDataCell />);
 
   const ActionRenderer = (params) =>
-    ([RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy]?.includes(params?.data?.rentalAssetStatus)
-      && params?.data?.type === 'Asset') ? (
-      <HtmlTooltip title={'Change Date'}   >
+    [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy]?.includes(params?.data?.rentalAssetStatus) &&
+    params?.data?.type === 'Asset' ? (
+      <HtmlTooltip title={'Change Date'}>
         <span>
           <IconButton
             size="small"
@@ -481,7 +521,7 @@ const LoadingTicket = ({
       cellRenderer: 'commonRenderer'
     },
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
-    { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
+    { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer', width: 250 },
     { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
   ];
@@ -624,15 +664,14 @@ const LoadingTicket = ({
         .post(`${deliveryTicket.api}/updatebulk`, data)
         .then(({ data: { data } }) => {
           if (status) {
-            handleChangeStatusInUse(status, date)
-          }
-          else {
+            handleChangeStatusInUse(status, date);
+          } else {
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
               message: `Delivered Successfully`
             });
-            setOpenDateDialog((prev) => ({ ...prev, loading: false }))
+            setOpenDateDialog((prev) => ({ ...prev, loading: false }));
           }
           fetchRecords();
           checkProgressiveBilling();
@@ -690,7 +729,7 @@ const LoadingTicket = ({
   };
 
   const handleChangeStatusInUse = (status, date) => {
-    setOpenDateDialog((prev) => ({ ...prev, loading: true }))
+    setOpenDateDialog((prev) => ({ ...prev, loading: true }));
     const assets = selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id);
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse-standby`, { assets, status: status, date: date })
@@ -705,13 +744,14 @@ const LoadingTicket = ({
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setOpenDateDialog((prev) => ({ ...prev, loading: false }))
+        setOpenDateDialog((prev) => ({ ...prev, loading: false }));
       });
   };
 
   const handleChangeDate = (date) => {
-    setOpenDateDialog((prev) => ({ ...prev, loading: true }))
-    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/assets-date-update`, { assets: openDateDialog.assets, date: date })
+    setOpenDateDialog((prev) => ({ ...prev, loading: true }));
+    axiosInstance()
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-date-update`, { assets: openDateDialog.assets, date: date })
       .then(({ data }) => {
         fetchRecords();
         toastConfig.setToastConfig({
@@ -723,7 +763,7 @@ const LoadingTicket = ({
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setOpenDateDialog((prev) => ({ ...prev, loading: false }))
+        setOpenDateDialog((prev) => ({ ...prev, loading: false }));
       });
   };
 
@@ -865,11 +905,13 @@ const LoadingTicket = ({
                   onClick={() => {
                     if (user?.user?.brandPolicy?.assetDeliveredStatus) {
                       setOpenDateDialog({
-                        open: true, type: 'changeStatus', status: ASSET_STATUS.delivered,
-                        assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id), loading: false
+                        open: true,
+                        type: 'changeStatus',
+                        status: ASSET_STATUS.delivered,
+                        assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
+                        loading: false
                       });
-                    }
-                    else {
+                    } else {
                       handelProcessTickets();
                     }
                     closeActions();
@@ -877,17 +919,23 @@ const LoadingTicket = ({
                 >
                   Delivered to Customer
                 </MenuItem>
-                {user?.user?.brandPolicy?.assetDeliveredStatus &&
+                {user?.user?.brandPolicy?.assetDeliveredStatus && (
                   <Box>
                     {selectedRecords.length > 0 &&
-                      selectedRecords.filter((e: any) => e?.loadingTicketStatus ===
-                        DELIVERY_TICKET_STATUS.delivered && [ASSET_STATUS.delivered, ASSET_STATUS.inUse].includes(e?.status)).length === selectedRecords.length && (
+                      selectedRecords.filter(
+                        (e: any) =>
+                          e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+                          [ASSET_STATUS.delivered, ASSET_STATUS.inUse].includes(e?.status)
+                      ).length === selectedRecords.length && (
                         <MenuItem
                           onClick={() => {
                             closeActions();
                             setOpenDateDialog({
-                              open: true, type: 'changeStatus', status: ASSET_STATUS.standBy,
-                              assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id), loading: false
+                              open: true,
+                              type: 'changeStatus',
+                              status: ASSET_STATUS.standBy,
+                              assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
+                              loading: false
                             });
                           }}
                         >
@@ -895,14 +943,20 @@ const LoadingTicket = ({
                         </MenuItem>
                       )}
                     {selectedRecords.length > 0 &&
-                      selectedRecords.filter((e: any) => e?.loadingTicketStatus ===
-                        DELIVERY_TICKET_STATUS.delivered && [ASSET_STATUS.delivered, ASSET_STATUS.standBy].includes(e?.status)).length === selectedRecords.length && (
+                      selectedRecords.filter(
+                        (e: any) =>
+                          e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+                          [ASSET_STATUS.delivered, ASSET_STATUS.standBy].includes(e?.status)
+                      ).length === selectedRecords.length && (
                         <MenuItem
                           onClick={() => {
                             closeActions();
                             setOpenDateDialog({
-                              open: true, type: 'changeStatus', status: ASSET_STATUS.inUse,
-                              assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id), loading: false
+                              open: true,
+                              type: 'changeStatus',
+                              status: ASSET_STATUS.inUse,
+                              assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
+                              loading: false
                             });
                           }}
                         >
@@ -911,25 +965,31 @@ const LoadingTicket = ({
                       )}
 
                     {selectedRecords.length > 0 &&
-                      selectedRecords.filter((e: any) =>
-                        e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
-                        [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy].includes(e?.rentalAssetStatus)).length === selectedRecords.length && (
+                      selectedRecords.filter(
+                        (e: any) =>
+                          e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+                          [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy].includes(e?.rentalAssetStatus)
+                      ).length === selectedRecords.length && (
                         <MenuItem
                           onClick={() => {
                             closeActions();
                             setOpenDateDialog({
-                              open: true, type: 'changeDate', status: '',
-                              assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id), loading: false
+                              open: true,
+                              type: 'changeDate',
+                              status: '',
+                              assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
+                              loading: false
                             });
                           }}
                         >
                           {`Change Date`}
                         </MenuItem>
                       )}
-                  </Box>}
+                  </Box>
+                )}
                 {selectedRecords.length > 0 &&
-                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
-                    ?.length === selectedRecords?.length ? (
+                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
+                  ?.length === selectedRecords?.length ? (
                   <Box>
                     <MenuItem
                       onClick={() => {
@@ -983,7 +1043,7 @@ const LoadingTicket = ({
                   )}
               </Menu>
               {selectedRecords.length &&
-                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
                 <Box>
                   <Tooltip title="Remove Assets From Loading Ticket(s)">
@@ -1059,7 +1119,7 @@ const LoadingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -1308,20 +1368,22 @@ const LoadingTicket = ({
           }}
           handleSubmit={(date, status) => {
             if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.inUse, ASSET_STATUS.standBy]?.includes(openDateDialog.status)) {
-              handleChangeStatusInUse(openDateDialog.status, date)
-            }
-            else if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.delivered]?.includes(openDateDialog.status)) {
+              handleChangeStatusInUse(openDateDialog.status, date);
+            } else if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.delivered]?.includes(openDateDialog.status)) {
               handelProcessTickets(date, status);
-            }
-            else if (openDateDialog.type === 'changeDate') {
-              handleChangeDate(date)
+            } else if (openDateDialog.type === 'changeDate') {
+              handleChangeDate(date);
             }
           }}
           type={openDateDialog.type}
           status={openDateDialog.status}
-          title={openDateDialog.type === 'changeStatus' ?
-            openDateDialog.status === ASSET_STATUS.delivered ? 'Delivered Date' :
-              `Change Status ${openDateDialog.status}` : `Change Date ${openDateDialog.status}`}
+          title={
+            openDateDialog.type === 'changeStatus'
+              ? openDateDialog.status === ASSET_STATUS.delivered
+                ? 'Delivered Date'
+                : `Change Status ${openDateDialog.status}`
+              : `Change Date ${openDateDialog.status}`
+          }
           assets={openDateDialog.assets}
         />
       )}

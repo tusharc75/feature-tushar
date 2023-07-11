@@ -123,31 +123,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
             <p className="text-truncate" title={row.original.detail}>
-              {!isOffline ? (
-                row.original?.type === 'service' ? (
-                  <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original.materialId}`} target="_blank">
-                    {row.original.detail}
-                  </a>
-                ) : row.original?.type === 'product' ? (
-                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.materialId}`} target="_blank">
-                    {row.original.detail}
-                  </a>
-                ) : row.original?.type === 'package' ? (
-                  <a className="link text-truncate" href={`${routes.packagesDetail.path}/${row.original.materialId}`} target="_blank">
-                    {row.original.detail}
-                  </a>
-                ) : row.original?.type === 'asset' && !row.original?.isNonSerializeAsset ? (
-                  <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original.inventory}`} target="_blank">
-                    {row.original.detail}
-                  </a>
-                ) : (
-                  row.original.detail
-                )
-              ) : (
-                row.original.detail
-              )}
+              {row.original.detail}
             </p>
-            {row.original.isPurchaseOrder && (
+            { !isOffline && row.original.isPurchaseOrder ? (
               <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton
                   size="small"
@@ -159,6 +137,25 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 >
                   <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
+              </HtmlTooltip>
+            ) : (
+              <HtmlTooltip title={`${row.original.type}`}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
               </HtmlTooltip>
             )}
 
