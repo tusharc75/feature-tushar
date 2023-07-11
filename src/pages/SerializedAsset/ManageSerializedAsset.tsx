@@ -123,10 +123,6 @@ const ManageSerializedAsset = ({
           if (fieldsDataForCreate.some((e) => e.fieldName === 'mtrAttachedDate')) {
             createValues['mtrAttachedDate'] = '';
           }
-          if (fieldsDataForCreate.some((e) => e.fieldName === 'productDescription')) {
-            createValues['productDescription'] = '';
-          }
-
           if (referenceType === 'repairOrder' || referenceType === "assetsReceiving") {
             if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount') && referenceData?.customerAccount) {
               createValues['customerAccount'] = referenceData?.customerAccount;
@@ -253,7 +249,8 @@ const ManageSerializedAsset = ({
                                             label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
-                                            options={productTypeOptions}
+                                            options={values['productCategory'] ?
+                                              productTypeOptions?.filter((e) => e?.productCategory === values['productCategory']) : productTypeOptions}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
@@ -262,7 +259,6 @@ const ManageSerializedAsset = ({
                                             onChange={(_, val) => {
                                               const value = val && val.optionValue ? val.optionValue : '';
                                               setFieldValue(field.fieldName, value);
-                                              setFieldValue('productDescription', val && val?.productDescription ? val?.productDescription : '');
                                               if (allFields?.some((e) => e.fieldName === 'productCategory')) {
                                                 const productCategory = val && val?.productCategory ? val?.productCategory : '';
                                                 setFieldValue('productCategory', productCategory);
@@ -325,12 +321,6 @@ const ManageSerializedAsset = ({
                                               setFieldValue('product', '');
                                               setProductCategoryID(value);
                                               setProductCategoryName(label);
-                                              const productOptions = allFields?.filter(field => field.fieldName === 'product')[0]?.option;
-                                              let productOption = productOptions;
-                                              if (value) {
-                                                productOption = productOptions?.filter(p => p?.productCategory === value);
-                                              }
-                                              setProductTypeOptions(productOption)
                                             }}
                                           />
                                         </Box>
@@ -359,7 +349,10 @@ const ManageSerializedAsset = ({
                                       {...field}
                                       disabled={true}
                                       fieldData={field}
-                                      values={values}
+                                      values={{
+                                        ...values,
+                                        productDescription: productTypeOptions?.find((e) => e.optionValue === values['product'])?.productDescription || ''
+                                      }}
                                       hidelookupAddButton={true}
                                       errors={errors}
                                       touched={touched}
@@ -372,8 +365,6 @@ const ManageSerializedAsset = ({
                                       isTooltip={field?.isTooltip || false}
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
-                                      onChange={(e, value) => {
-                                      }}
                                     />
                                   ) : field.fieldName === 'warehouse' ? (
                                     <FormTypes
