@@ -70,8 +70,8 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
                       inputVariant="outlined"
                       value={values.date}
                       name="date"
-                      placeholder={'Date'}
-                      label="Date"
+                      placeholder={`${type === 'changeStatus' ? status : ''} Date`}
+                      label={`${type === 'changeStatus' ? status : ''} Date`}
                       format={dateFormatForInputControl}
                       maxDate={new Date()}
                       minDate={minDate}

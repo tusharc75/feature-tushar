@@ -1319,7 +1319,9 @@ const LoadingTicket = ({
           }}
           type={openDateDialog.type}
           status={openDateDialog.status}
-          title={openDateDialog.type === 'changeStatus' ? `Change Status ${openDateDialog.status}` : `Change Date ${openDateDialog.status}`}
+          title={openDateDialog.type === 'changeStatus' ?
+            openDateDialog.status === ASSET_STATUS.delivered ? 'Delivered Date' :
+              `Change Status ${openDateDialog.status}` : `Change Date ${openDateDialog.status}`}
           assets={openDateDialog.assets}
         />
       )}
