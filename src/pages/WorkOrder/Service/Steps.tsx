@@ -528,7 +528,7 @@ const Steps = ({
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isSkipServiceOnPass && !isEmpty(result?.skipServiceOnPass)) {
           setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.passed, open: true, type: 'skipServices', services: result?.skipServiceOnPass }));
         }
-        else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isSkipServiceOnFail && !isEmpty(result?.skipServiceOnFail)) {
+        else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isSkipServiceOnFail && !isEmpty(result?.skipServiceOnFail)) {
           setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'skipServices', services: result?.skipServiceOnFail }));
         }
         toastConfig.setToastConfig({
