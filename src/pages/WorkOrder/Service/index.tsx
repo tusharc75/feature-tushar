@@ -466,7 +466,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const isAllowedToServiceEdit =
     !completed &&
     (allowedToEdit || (selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate));
-
+  console.log(selectedService)
   return (
     <Box>
       {serviceSteps ? (
@@ -1038,7 +1038,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 Add Services
               </MenuItem>
               <MenuItem
-                disabled={!allowedToEdit || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(selectedService?.status)}
+                disabled={!allowedToEdit || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status)}
                 onClick={() => {
                   setAssignSteps(true);
                   setAnchorEl(null);
@@ -1076,7 +1076,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               </MenuItem>
               <MenuItem
                 disabled={
-                  disableCompleteFail || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(selectedService?.status)
+                  disableCompleteFail || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status)
                 }
                 onClick={() => {
                   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
