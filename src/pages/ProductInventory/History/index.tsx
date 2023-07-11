@@ -82,9 +82,9 @@ const History = ({ product, warehouse, storageLocation }) => {
       let tempWarehouse =
         selectedWarehouse === 'All'
           ? warehouseOptions
-              ?.filter((d) => d.optionValue !== 'All')
-              .map((d) => d.optionValue)
-              .toString()
+            ?.filter((d) => d.optionValue !== 'All')
+            .map((d) => d.optionValue)
+            .toString()
           : selectedWarehouse;
 
       deepFilter = `${deepFilter}&warehouse=${tempWarehouse}`;
@@ -158,20 +158,20 @@ const History = ({ product, warehouse, storageLocation }) => {
         }
       }
     },
-    ...(!user?.user?.brandPolicy?.hideInventoryCount ?[{ field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false }]:[]),
+    ...(!user?.user?.brandPolicy?.hideInventoryCount ? [{ field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false }] : []),
     { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
     ...(warehouse && warehouse?.split(',')?.length === 1
       ? [
-          {
-            field: 'finalAvgPrice',
-            headerName: 'Final Average Price',
-            show: true,
-            cellRenderer: 'commonRenderer',
-            filter: false,
-            sortable: false
-          }
-        ]
+        {
+          field: 'finalAvgPrice',
+          headerName: 'Final Average Price',
+          show: true,
+          cellRenderer: 'commonRenderer',
+          filter: false,
+          sortable: false
+        }
+      ]
       : []),
     {
       field: 'warehouse',
@@ -183,20 +183,20 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(user?.user?.brandPolicy?.storageLocation
       ? [
-          {
-            field: 'storageLocation',
-            headerName: 'Storage Location',
-            show: true,
-            filter: false,
-            sortable: false,
-            cellRenderer: 'storageLocationRenderer'
-          }
-        ]
+        {
+          field: 'storageLocation',
+          headerName: 'Storage Location',
+          show: true,
+          filter: false,
+          sortable: false,
+          cellRenderer: 'storageLocationRenderer'
+        }
+      ]
       : []),
+    { field: 'supplierPartNumber', headerName: 'Supplier Part Number', show: true, cellRenderer: 'commonRenderer', filter: true, sortable: false },
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer', filter: true, sortable: false },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
     { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'userRenderer', filter: true, sortable: false },
-    //{ field: 'purchaseOrderRejectedDate', headerName: 'Purchase Order Rejected Date', filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' },
     { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
   ];
 
@@ -305,9 +305,9 @@ const History = ({ product, warehouse, storageLocation }) => {
   const ActionsRenderer = (params) => (
     <>
       {(['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted) ||
-      (['Work Order'].includes(params.data.referenceType) &&
-        params.data.type?.toLowerCase() === 'debit' &&
-        params.data.qty - (params.data?.revertedQty || 0) > 0) ? (
+        (['Work Order'].includes(params.data.referenceType) &&
+          params.data.type?.toLowerCase() === 'debit' &&
+          params.data.qty - (params.data?.revertedQty || 0) > 0) ? (
         <Box pl={1}>
           <HtmlTooltip title="Revert">
             <IconButton

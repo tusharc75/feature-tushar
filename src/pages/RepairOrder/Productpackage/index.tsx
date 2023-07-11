@@ -430,7 +430,7 @@ const Productpackage = ({
                       closeAddActions()
                     }}
                   >
-                    {`Add ${routes.serializedAsset.title}`}
+                    {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Customer Assets` : `Add ${routes.serializedAsset.title}`}
                   </MenuItem>
                   {permissions?.serializedAsset?.isCreate &&
                     <MenuItem
@@ -439,7 +439,7 @@ const Productpackage = ({
                         closeAddActions()
                       }}
                     >
-                      {`Add New ${routes.serializedAsset.title}`}
+                      {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add New Customer Assets` : `Add New ${routes.serializedAsset.title}`}
                     </MenuItem>
                   }
                 </Menu>
