@@ -72,6 +72,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
           serializedProduct: element.serializedProduct,
           qty: parseInt(element?.rejectQuantity),
           comment: element?.comment === '' ? 'Rejected' : element?.comment,
+          supplierPartNumber: element?.supplierPartNumber,
           serialNumber: [],
           storageLocation: user?.user?.brandPolicy?.storageLocation ? element?.storageLocation?.optionValue : null,
         });
@@ -166,6 +167,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
               productId: d.productId,
               rejectQuantity: 0,
               comment: '',
+              supplierPartNumber: '',
               row: d
             }))
           }}
@@ -275,6 +277,24 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                                   onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                   error={validate([data])?.rejectQuantity}
                                                   helperText={validate([data]).rejectQuantity ? 'Reject quantity is more than quantity' : ''}
+                                                />
+                                              </Grid>
+                                              <Grid item xs={12} md={3}>
+                                                <TextField
+                                                  fullWidth
+                                                  label="Supplier Part Number"
+                                                  variant="outlined"
+                                                  type="text"
+                                                  size="small"
+                                                  name="supplierPartNumber"
+                                                  placeholder="Supplier Part Number"
+                                                  value={data.supplierPartNumber}
+                                                  onChange={(e) => {
+                                                    arrayHelpers.replace(index, {
+                                                      ...values.products[index],
+                                                      ['supplierPartNumber']: e.target.value
+                                                    });
+                                                  }}
                                                 />
                                               </Grid>
                                               <Grid item xs={12} md={3}>

@@ -104,12 +104,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -258,11 +258,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     ];
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
-    fetchProductInventory();
+    fetchData();
     setNextStep(true);
   };
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     setNextStep(false);
     try {
       var data: any = [];
@@ -314,24 +314,28 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         }
       }
 
-      let rows = data.material.filter((e) => e.parentId === null);
+      let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== 'service');
+
+      let products = rows.filter((e) => e.type === 'product' && !e?.isConsumbale);
+      let packages = rows.filter((e) => e.type === 'package' && e.packageDetail?.packageType !== 'Service');
+
+      rows = [...products, ...packages];
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${
-          parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === 'product'
+        parent.detail = `${parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent?.packageDetail?.packageName
-        }`;
+          }`;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription || ''
-            : '';
+              ? parent?.productDetail?.productDescription || ''
+              : parent.type === 'package'
+                ? parent?.packageDetail?.packageDescription || ''
+                : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
@@ -371,10 +375,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
             ? true
             : false
           : parent.subRows.length !== 0
-          ? parent.assetAssignedQty ===
-              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+            ? parent.assetAssignedQty ===
+            parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
             parent.subRows.every((d) => d.isValid)
-          : true;
+            : true;
 
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
@@ -477,16 +481,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.productDetail?.productName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
       // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
       _subRow.assetQty =
@@ -529,11 +533,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           ? true
           : false
         : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
-        ? true
-        : _subRow.assetAssignedQty ===
-          tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
-        ? true
-        : false;
+          ? true
+          : _subRow.assetAssignedQty ===
+            tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+            ? true
+            : false;
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
@@ -587,7 +591,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         .post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data })
         .then(({ data }) => {
           setAddSerializedAssetDialog({ open: false });
-          fetchProductInventory();
+          fetchData();
           setSelectedRecords([]);
           setAssetAssignedProduct([]);
           setAdding(false);
@@ -615,7 +619,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         setDeleting(false);
         setDeleteData(null);
         setShowConfirmBox(false);
-        fetchProductInventory();
+        fetchData();
       } else {
         deleteData?.forEach((e) => {
           delete e.assetNumber;
@@ -625,7 +629,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           .put(`${rentalManagement.api}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
           .then(() => {
             setDeleting(false);
-            fetchProductInventory();
+            fetchData();
             setDeleteData(null);
             setShowConfirmBox(false);
             setNextStep(true);
@@ -978,7 +982,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           filterByPlant={rentalManagementData?.warehouse?.optionValue}
           handleSuccess={() => {
             setAddSerializedAssetDialog({ open: false });
-            fetchProductInventory();
+            fetchData();
             setSelectedRecords([]);
             setAssetAssignedProduct([]);
             setAdding(false);
@@ -990,7 +994,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           closeDialog={() => {
             setAddNonSerializedAssetDialog(false);
             setSelectedRecords([]);
-            fetchProductInventory();
+            fetchData();
           }}
           products={isOffline ? [...assetAssignedProduct, ...nonSerializedAssetProduct] : nonSerializedAssetProduct}
           warehouse={rentalManagementData?.warehouse?.optionValue}
@@ -1017,7 +1021,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           onSuccess={() => {
             setOrderDialog({ open: false, products: [], type: '' });
             setSelectedRecords([]);
-            fetchProductInventory();
+            fetchData();
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -1044,7 +1048,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           onSuccess={() => {
             setOrderDialog({ open: false, products: [], type: '' });
             setSelectedRecords([]);
-            fetchProductInventory();
+            fetchData();
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -1076,7 +1080,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           onSuccess={() => {
             setOrderDialog({ open: false, products: [], type: '' });
             setSelectedRecords([]);
-            fetchProductInventory();
+            fetchData();
             toastConfig.setToastConfig({
               open: true,
               type: 'success',

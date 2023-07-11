@@ -611,7 +611,7 @@ const LoadingTicket = ({
       });
   };
 
-  const handelProcessTickets = (date = new Date()) => {
+  const handelProcessTickets = (date = new Date(), status = null) => {
     let data = {};
     const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
     if (loadingTicketIds.length) {
@@ -623,14 +623,19 @@ const LoadingTicket = ({
       axiosInstance()
         .post(`${deliveryTicket.api}/updatebulk`, data)
         .then(({ data: { data } }) => {
+          if (status) {
+            handleChangeStatusInUse(status, date)
+          }
+          else {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: `Delivered Successfully`
+            });
+            setOpenDateDialog((prev) => ({ ...prev, loading: false }))
+          }
           fetchRecords();
           checkProgressiveBilling();
-          setOpenDateDialog({ open: false, type: null, status: null, assets: [], loading: false });
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `Delivered Successfully`
-          });
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -873,7 +878,7 @@ const LoadingTicket = ({
                   Delivered to Customer
                 </MenuItem>
                 {user?.user?.brandPolicy?.assetDeliveredStatus &&
-                  <Fragment>
+                  <Box>
                     {selectedRecords.length > 0 &&
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus ===
                         DELIVERY_TICKET_STATUS.delivered && [ASSET_STATUS.delivered, ASSET_STATUS.inUse].includes(e?.status)).length === selectedRecords.length && (
@@ -907,7 +912,7 @@ const LoadingTicket = ({
 
                     {selectedRecords.length > 0 &&
                       selectedRecords.filter((e: any) =>
-                        e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && 
+                        e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
                         [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy].includes(e?.rentalAssetStatus)).length === selectedRecords.length && (
                         <MenuItem
                           onClick={() => {
@@ -921,11 +926,11 @@ const LoadingTicket = ({
                           {`Change Date`}
                         </MenuItem>
                       )}
-                  </Fragment>}
+                  </Box>}
                 {selectedRecords.length > 0 &&
                   selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
                     ?.length === selectedRecords?.length ? (
-                  <Fragment>
+                  <Box>
                     <MenuItem
                       onClick={() => {
                         closeActions();
@@ -942,7 +947,7 @@ const LoadingTicket = ({
                     >
                       Cancel Loading Ticket
                     </MenuItem>
-                  </Fragment>
+                  </Box>
                 ) : null}
                 {selectedRecords.length &&
                   selectedRecords?.filter(
@@ -980,7 +985,7 @@ const LoadingTicket = ({
               {selectedRecords.length &&
                 selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
-                <Fragment>
+                <Box>
                   <Tooltip title="Remove Assets From Loading Ticket(s)">
                     <Button
                       onClick={() => {
@@ -997,10 +1002,10 @@ const LoadingTicket = ({
                       {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : 'Remove Loading Ticket'}
                     </Button>
                   </Tooltip>
-                </Fragment>
+                </Box>
               ) : null}
               {showProcessDeliveryTicket && !isOffline && (
-                <Fragment>
+                <Box>
                   <Tooltip title="Process Multiple Loading Ticket(s)">
                     <Button
                       onClick={() => {
@@ -1013,7 +1018,7 @@ const LoadingTicket = ({
                       {isMobile && !isTablet ? <AddBoxRoundedIcon /> : 'Process Loading Ticket'}
                     </Button>
                   </Tooltip>
-                </Fragment>
+                </Box>
               )}
             </Fragment>
           )}
@@ -1301,19 +1306,22 @@ const LoadingTicket = ({
           onClose={() => {
             setOpenDateDialog({ open: false, type: null, status: null, assets: [], loading: false });
           }}
-          handleSubmit={(date) => {
+          handleSubmit={(date, status) => {
             if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.inUse, ASSET_STATUS.standBy]?.includes(openDateDialog.status)) {
               handleChangeStatusInUse(openDateDialog.status, date)
             }
             else if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.delivered]?.includes(openDateDialog.status)) {
-              handelProcessTickets(date);
+              handelProcessTickets(date, status);
             }
             else if (openDateDialog.type === 'changeDate') {
               handleChangeDate(date)
             }
           }}
           type={openDateDialog.type}
-          title={openDateDialog.type === 'changeStatus' ? `Change Status ${openDateDialog.status}` : `Change Date ${openDateDialog.status}`}
+          status={openDateDialog.status}
+          title={openDateDialog.type === 'changeStatus' ?
+            openDateDialog.status === ASSET_STATUS.delivered ? 'Delivered Date' :
+              `Change Status ${openDateDialog.status}` : `Change Date ${openDateDialog.status}`}
           assets={openDateDialog.assets}
         />
       )}

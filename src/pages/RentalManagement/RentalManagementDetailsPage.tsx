@@ -751,14 +751,11 @@ const RentalManagementDetailsPage = () => {
               {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (
                 <Invoice
                   rentalManagementData={rentalManagementData}
-                  setNextStep={setNextStep}
-                  fetchRentalData={fetchRentalManagementData}
                   updateJobStatus={updateJobStatus}
                   statusOptions={statusOptions}
-                  renderedFrom={`${renderedFrom}_grid-5`}
-                  currencySymbol={currencySymbol}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
+                  renderedFrom={`${renderedFrom}_grid-5`}
                 />
               )}
             </ContentFullScreen>

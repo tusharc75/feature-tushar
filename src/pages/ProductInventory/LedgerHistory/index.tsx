@@ -103,19 +103,19 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
     },
     ...(user?.user?.brandPolicy?.storageLocation
       ? [
-          {
-            field: 'storageLocation',
-            headerName: 'Storage Location',
-            show: true,
-            filter: false,
-            sortable: false,
-            cellRenderer: 'storageLocationRenderer'
-          }
-        ]
+        {
+          field: 'storageLocation',
+          headerName: 'Storage Location',
+          show: true,
+          filter: false,
+          sortable: false,
+          cellRenderer: 'storageLocationRenderer'
+        }
+      ]
       : []),
+    { field: 'supplierPartNumber', headerName: 'Supplier Part Number', show: true, cellRenderer: 'commonRenderer' },
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
     { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'userRenderer' },
-    //{ field: 'purchaseOrderRejectedDate', headerName: 'Purchase Order Rejected Date', filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' },
     { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
   ];
 
