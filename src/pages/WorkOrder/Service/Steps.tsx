@@ -175,6 +175,7 @@ const Steps = ({
   setDisableCompleteFail,
   fetchService,
   referencType,
+  stepSubmitedData,
   handelClose = null
 }) => {
   const classes = useStyles();
@@ -183,7 +184,6 @@ const Steps = ({
   const [serviceDetails, setServiceDetails] = useState(null);
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, type: '' });
   const [stepState, setStepState] = useState(null);
-  const [serviceData, setServiceData] = useState([]);
   const [arrangeView, setArrangeView] = useState(false);
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
@@ -215,9 +215,7 @@ const Steps = ({
   }, [selectedService]);
 
   const fetchServiceData = async () => {
-    const stepDataResponse = await axiosInstance().get(`${workOrder.api}/${workOrderId}/steps-data`);
-    const stepsData = stepDataResponse?.data?.data || [];
-    setServiceData(stepsData);
+
     const serviceDetailResponse = await axiosInstance().get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`);
     var serviceDetail = serviceDetailResponse?.data?.data;
     serviceDetail.steps = serviceDetail?.steps?.sort((a, b) => a?.order - b?.order);
@@ -229,10 +227,10 @@ const Steps = ({
           ele.isAllowToPerform = true;
         } else if (index > 0) {
           const prevStep = serviceDetail?.steps[index - 1];
-          const prevStepData = stepsData?.find(
+          const prevStepData = stepSubmitedData?.find(
             (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === prevStep?._id
           );
-          const currStepData = stepsData?.find(
+          const currStepData = stepSubmitedData?.find(
             (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === ele?._id
           );
           if (prevStepData?.passFailStatus || currStepData?.passFailStatus) {
@@ -255,7 +253,7 @@ const Steps = ({
     setServiceDetails(serviceDetail);
 
     if (serviceDetail?.steps?.length) {
-      const completedSteps = stepsData.filter(
+      const completedSteps = stepSubmitedData.filter(
         (d) =>
           d.uniqueId === selectedService?.uniqueId &&
           d.serviceId === selectedService._id &&
@@ -279,7 +277,7 @@ const Steps = ({
     }
   };
 
-  const updateServiceStatus = (uniqueId, status) => {
+  const updateServiceStatus = (uniqueId, status, handelClose = null) => {
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status, comment })
       .then(({ data: { data } }) => {
@@ -288,6 +286,9 @@ const Steps = ({
           setOpenCompleteDialog(false);
         }
         setComment('');
+        if (handelClose) {
+          handelClose();
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -307,7 +308,6 @@ const Steps = ({
           severity: 'success'
         });
         setAssignSteps(false);
-        fetchServiceData();
         fetchService();
       })
       .catch((error) => {
@@ -354,7 +354,7 @@ const Steps = ({
     let stepData = null;
     let fieldData = { fields: [], formsData: [], values: {} };
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
-    let tempServiceData = serviceData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
+    let tempServiceData = stepSubmitedData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
 
     if (tempServiceData) {
       stepData = tempServiceData;
@@ -412,7 +412,6 @@ const Steps = ({
         });
         setSelectedStep(null);
         setFieldDialog(false);
-        fetchServiceData();
         fetchService();
         if (step?.isPassFail) {
           const type = automatePassFail(values, step);
@@ -454,7 +453,6 @@ const Steps = ({
           type: 'success',
           message: data.message
         });
-        fetchServiceData();
         fetchService();
       })
       .catch((error) => {
@@ -536,7 +534,6 @@ const Steps = ({
           type: 'success',
           message: data.message
         });
-        fetchServiceData();
         fetchService();
       })
       .catch((error) => {
@@ -559,7 +556,6 @@ const Steps = ({
           type: 'success',
           message: data.message
         });
-        fetchServiceData();
         fetchService();
       })
       .catch((error) => {
@@ -962,10 +958,7 @@ const Steps = ({
             comment={comment}
             setComment={setComment}
             updateStatus={() => {
-              updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
-              if (handelClose) {
-                handelClose();
-              }
+              updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed, handelClose);
             }}
             handleClose={() => {
               setComment('');
@@ -1101,7 +1094,7 @@ const Steps = ({
       </>
     )
   ) : (
-    <Box p={2} height={500}>
+    <Box m={2} height={500}>
       <CommonSkeleton lenArray={[...Array(10).keys()]} />
     </Box>
   );
