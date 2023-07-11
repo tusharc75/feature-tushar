@@ -48,7 +48,7 @@ const ManageSerializedAsset = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [productCategoryOptions, setProductCategoryOptions] = useState([]);
   const [allFields, setAllFields] = useState([]);
-  const [productDescriptionOptions, setProductDescriptionOptions] = useState([]);
+  const [productTypeOptions, setProductTypeOptions] = useState([]);
   const [cloneHeading, setCloneHeading] = useState('');
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [productOpen, setProductOpen] = useState({ open: false, isClone: false });
@@ -65,9 +65,7 @@ const ManageSerializedAsset = ({
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         data = data.filter(
-          (d) =>
-            d.fieldData.type !== 'lookUpDisplay' &&
-            !['currentOwnerType', 'currentOwner', 'purchaseOrder', 'bulkAssetCreation'].includes(d.fieldData.fieldName)
+          (d) => !['currentOwnerType', 'currentOwner', 'purchaseOrder', 'bulkAssetCreation'].includes(d.fieldData.fieldName)
         );
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -78,8 +76,7 @@ const ManageSerializedAsset = ({
         const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData?.option || [];
 
         setProductCategoryOptions(categoryOptions);
-        setProductDescriptionOptions(productOptions);
-
+        setProductTypeOptions(productOptions);
         setAllFields(productInventoryId ? fieldsDataForUpdate : fieldsDataForCreate);
 
         if (productInventoryId) {
@@ -126,7 +123,6 @@ const ManageSerializedAsset = ({
           if (fieldsDataForCreate.some((e) => e.fieldName === 'mtrAttachedDate')) {
             createValues['mtrAttachedDate'] = '';
           }
-
           if (referenceType === 'repairOrder' || referenceType === "assetsReceiving") {
             if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount') && referenceData?.customerAccount) {
               createValues['customerAccount'] = referenceData?.customerAccount;
@@ -162,6 +158,7 @@ const ManageSerializedAsset = ({
     setProductCategoryID(null);
     setProductCategoryName(null);
     setSubmitting(true);
+    delete values?.productDescription;
     if (productInventoryId && isClone === false) {
       values._id = productInventoryId;
       axiosInstance()
@@ -252,7 +249,8 @@ const ManageSerializedAsset = ({
                                             label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
-                                            options={productDescriptionOptions}
+                                            options={values['productCategory'] ?
+                                              productTypeOptions?.filter((e) => e?.productCategory === values['productCategory']) : productTypeOptions}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
@@ -345,6 +343,29 @@ const ManageSerializedAsset = ({
                                         )}
                                       </Box>
                                     </Grid>
+                                  ) : field.fieldName === 'productDescription' ? (
+                                    <FormTypes
+                                      isNew={Boolean(productInventoryId)}
+                                      {...field}
+                                      disabled={true}
+                                      fieldData={field}
+                                      values={{
+                                        ...values,
+                                        productDescription: productTypeOptions?.find((e) => e.optionValue === values['product'])?.productDescription || ''
+                                      }}
+                                      hidelookupAddButton={true}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={'singleLine'}
+                                      options={[]}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                    />
                                   ) : field.fieldName === 'warehouse' ? (
                                     <FormTypes
                                       isNew={Boolean(productInventoryId)}
@@ -478,13 +499,13 @@ const ManageSerializedAsset = ({
                         setProductOpen({ open: false, isClone: false });
                         if (data._id) {
                           setFieldValue('product', data._id);
-                          setProductDescriptionOptions((prevState) => {
+                          setProductTypeOptions((prevState) => {
                             return [
                               ...prevState,
                               {
                                 optionValue: data._id,
                                 optionLabel: data.productName,
-                                order: productDescriptionOptions.length,
+                                order: productTypeOptions.length,
                                 default: false
                               }
                             ];
@@ -496,7 +517,7 @@ const ManageSerializedAsset = ({
                                 ...prevState,
                                 {
                                   optionValue: data.productCategory,
-                                  order: productDescriptionOptions.length,
+                                  order: productTypeOptions.length,
                                   default: false
                                 }
                               ];
