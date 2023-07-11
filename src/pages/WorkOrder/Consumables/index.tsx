@@ -34,7 +34,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
 
   const {
-    state: { user }
+    state: { user, permissions }
   }: any = useData();
 
   useEffect(() => {
@@ -318,7 +318,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" mb={2}>
           <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            {isCreate && (
+            {(isCreate && permissions?.product?.isRead) && (
               <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
                 Add Products/Consumables
               </Button>
