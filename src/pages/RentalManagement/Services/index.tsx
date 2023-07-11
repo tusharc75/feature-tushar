@@ -159,7 +159,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
               </Box>
             }
             {!isOffline && (
-              <>
+              <HtmlTooltip title={startCase(row.original.type)}>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -176,7 +176,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                 >
                   <OpenInNewIcon fontSize="small" color="primary" />
                 </IconButton>
-              </>
+              </HtmlTooltip>
             )}
           </div>
         )
