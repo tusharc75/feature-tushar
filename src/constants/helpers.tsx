@@ -2339,7 +2339,8 @@ export const WORKORDER_SERVICE_STATUS = {
   backlog: 'Backlog',
   inProgress: 'In-Progress',
   completed: 'Completed',
-  failed: 'Failed'
+  failed: 'Failed',
+  skipped: 'Skipped',
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
