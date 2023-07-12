@@ -395,10 +395,10 @@ const RentalManagementViews = (props) => {
               subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset
                 ? `${item.inventoryDetail.supplierAccount}`
                 : bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)
-                ? `${item.inventoryDetail.bulkAssetCreation}`
-                : allAssets[item.inventoryDetail.assetNumber]
-                ? allAssets[item.inventoryDetail.assetNumber]
-                : `${item._id}`,
+                  ? `${item.inventoryDetail.bulkAssetCreation}`
+                  : allAssets[item.inventoryDetail.assetNumber]
+                    ? allAssets[item.inventoryDetail.assetNumber]
+                    : `${item._id}`,
             arrowHeadType: 'arrow',
             target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
           });
@@ -406,13 +406,16 @@ const RentalManagementViews = (props) => {
       });
 
       var loadingProductData = [];
+      const productServices = {}
       product?.material
         ?.filter((i) => !i?.productDetail?.serializedProduct && i.type !== 'package')
         ?.map((item) => {
           if (!loadingProductData.includes(`${item.materialId}`)) {
-            loadingProductData.push(`${item.materialId}`);
+            // loadingProductData.push(`${item.materialId}`);
+            productServices[item.productDetail?.productName || item.serviceDetail?.serviceName] = item._id
             flow.push({
-              id: `${item.productDetail?.productName || item.serviceDetail?.serviceName}`,
+              id: item._id,
+              // id: `${item.productDetail?.productName || item.serviceDetail?.serviceName}`,
               sourcePosition: 'right',
               targetPosition: 'left',
               type: 'default',
@@ -436,11 +439,11 @@ const RentalManagementViews = (props) => {
             id: `edge-assets-product-parent-${item.productDetail?.productName || item.serviceDetail?.serviceName}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,
             source: item?.parentId && allPackagesAndProductIds.includes(item?.parentId) ? `${item?.parentId}` : rentalId,
             arrowHeadType: 'arrow',
-            target: `${item.productDetail?.productName || item.serviceDetail?.serviceName}`
+            target: productServices[item.productDetail?.productName || item.serviceDetail?.serviceName]
           });
           flowEdge.push({
             id: `edge-assets-product-${item.productDetail?.productName || item.serviceDetail?.serviceName}-${assetsInLoading[item?.materialId]}-${_.random(0, 1000)}`,
-            source: `${item.productDetail?.productName || item.serviceDetail?.serviceName}`,
+            source: productServices[item.productDetail?.productName || item.serviceDetail?.serviceName],
             arrowHeadType: 'arrow',
             target: `${assetsInLoading[item?.materialId]}`
           });
