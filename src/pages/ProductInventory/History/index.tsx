@@ -5,14 +5,14 @@ import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridCo
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { displayDate, gridLoadingTimeout, isObjectEmpty, productInventory } from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, productInventory } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { capitalize } from 'lodash';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { IconButton, TextField, Tooltip } from '@material-ui/core';
+import { IconButton, TextField } from '@material-ui/core';
 import { Autorenew } from '@material-ui/icons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -46,8 +46,8 @@ const History = ({ product, warehouse, storageLocation }) => {
   const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
 
   const [duration, setDuration] = useState({
-    from: new Date(moment().startOf('year').calendar()),
-    to: new Date(moment().endOf('year').calendar()),
+    from: new Date(moment().subtract('1', 'year').calendar()),
+    to: new Date(),
   })
 
   const renderedFrom = 'Product_Inventory_History';
@@ -118,8 +118,8 @@ const History = ({ product, warehouse, storageLocation }) => {
       updatedFilters.push({
         field: 'date',
         term: {
-          from: displayDate(duration?.from),
-          to: displayDate(duration?.to)
+          from: moment(duration?.from).format('MM/DD/YYYY'),
+          to: moment(duration?.to).format('MM/DD/YYYY')
         }
       })
     }
@@ -368,10 +368,10 @@ const History = ({ product, warehouse, storageLocation }) => {
   return (
     <>
       {warehouseOptions && (
-        <Grid container md={11} sm={11} lg={11} justifyContent='space-between'>
-          <Grid item md={5} sm={12} xs={12}>
-            <Grid container spacing={2}>
-              <Grid item md={6} sm={6} xs={12}>
+        <Grid container justifyContent='space-between'>
+          <Grid item md={10} sm={10} xs={10}>
+            <Grid container spacing={2} justifyContent='space-between'>
+              <Grid item md={3} sm={6} xs={12}>
                 <Autocomplete
                   options={warehouseOptions}
                   getOptionLabel={(option: any) => option.optionLabel}
@@ -393,7 +393,7 @@ const History = ({ product, warehouse, storageLocation }) => {
                   )}
                 />
               </Grid>
-              <Grid item md={6} sm={6} xs={12}>
+              <Grid item md={3} sm={6} xs={12}>
                 {user?.user?.brandPolicy?.storageLocation && (
                   <Autocomplete
                     options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
@@ -413,16 +413,16 @@ const History = ({ product, warehouse, storageLocation }) => {
                   />
                 )}
               </Grid>
+              <Grid item md={6} sm={12} xs={12}>
+                <Box mt={1}>
+                  <DurationFilter
+                    duration={duration}
+                    setDuration={setDuration}
+                    disabled={false}
+                  />
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-          <Grid item md={6} sm={12} xs={12}>
-            <Box mt={1}>
-              <DurationFilter
-                duration={duration}
-                setDuration={setDuration}
-                disabled={false}
-              />
-            </Box>
           </Grid>
         </Grid>
       )}
