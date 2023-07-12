@@ -30,6 +30,7 @@ import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Comments from './Comments';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const TimerComponent = ({ stepData, updateTime = true }) => {
   const [time, setTime] = useState(null);
@@ -696,7 +697,7 @@ const Steps = ({
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       flexWrap: 'wrap',
-                      flexBasis: 'calc(100% - 80px)'
+                      flexBasis: 'calc(100% - 105px)'
                     }}
                     gridGap={'8px'}
                   >
@@ -895,15 +896,6 @@ const Steps = ({
 
                     <IconButton
                       size="small"
-                      color="inherit"
-                      style={{ color: 'red' }}
-                      aria-label="delete"
-                      onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
-                    >
-                      <DeleteOutlineIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
                       color="primary"
                       aria-label="delete"
                       disabled={!allowedToEdit}
@@ -914,6 +906,25 @@ const Steps = ({
                     >
                       <MoreHorizIcon />
                     </IconButton>
+                    <HtmlTooltip title="Delete" placement="top" arrow>
+                      <IconButton
+                        size="small"
+                        color="inherit"
+                        style={{ color: 'red' }}
+                        aria-label="delete"
+                        disabled={
+                          !allowedToEdit ||
+                          [
+                            WORKORDER_SERVICE_STEP_STATUS.passed,
+                            WORKORDER_SERVICE_STEP_STATUS.failed,
+                            WORKORDER_SERVICE_STEP_STATUS.completed
+                          ].includes(stepData?.passFailStatus)
+                        }
+                        onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
+                      >
+                        <DeleteOutlineIcon style={{ fontSize: '20px' }} />
+                      </IconButton>
+                    </HtmlTooltip>
                   </Box>
                 </Box>
               </Box>
