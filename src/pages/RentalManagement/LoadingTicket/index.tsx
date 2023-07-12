@@ -666,7 +666,7 @@ const LoadingTicket = ({
               type: 'success',
               message: `Delivered Successfully`
             });
-            setOpenDateDialog((prev) => ({ ...prev, loading: false }));
+            setOpenDateDialog({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
           }
           fetchRecords();
           checkProgressiveBilling();
