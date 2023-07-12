@@ -114,7 +114,6 @@ const WorkOrder = ({
               <p className="text-truncate">{row.original?.detail}</p>
             )}
             <Box ml={1}>
-              <HtmlTooltip title={startCase(`${row.original.type}`)}>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -131,7 +130,6 @@ const WorkOrder = ({
               >
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
-              </HtmlTooltip>
             </Box>
             {row.original?.subRows?.length ? (
               <Box ml={1} className="d-flex align-items-center">
@@ -168,16 +166,14 @@ const WorkOrder = ({
               <p className="text-truncate">
                 {row.original['workOrderNumber']}
               </p>
-              <HtmlTooltip title={`${routes.workOrder.title}`}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                   window.open(`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`)
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`)
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color={'primary'} />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />
@@ -188,23 +184,21 @@ const WorkOrder = ({
         Header: 'Product',
         width: 200,
         Cell: ({ row }) => (
-          row.original.productName ? 
-          <div className="d-flex gap-2 align-items-center">
-            <p className="text-truncate" title={row.original?.productName}>
-             {row.original.productName}
-            </p>
-            <HtmlTooltip title={routes.product.title}>
+          row.original.productName ?
+            <div className="d-flex gap-2 align-items-center">
+              <p className="text-truncate" title={row.original?.productName}>
+                {row.original.productName}
+              </p>
               <IconButton
                 size="small"
-                onClick={()=>{
+                onClick={() => {
                   window.open(`${routes.productDetail.path}/${row.original?.productId}`)
                 }}
               >
 
               </IconButton>
-            </HtmlTooltip>
-          </div>
-          : <NoDataCell />
+            </div>
+            : <NoDataCell />
         )
       },
       {
@@ -269,8 +263,8 @@ const WorkOrder = ({
                 row?.original?.type === 'package' && row?.original?.subRows?.length === 0
                   ? false
                   : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
-                  ? false
-                  : true
+                    ? false
+                    : true
               }
               size="small"
               aria-label="Details"
@@ -285,8 +279,8 @@ const WorkOrder = ({
                   row?.original?.type === 'package' && row?.original?.subRows?.length === 0
                     ? 'error'
                     : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
-                    ? 'error'
-                    : 'disabled'
+                      ? 'error'
+                      : 'disabled'
                 }
               />
             </IconButton>
@@ -386,37 +380,35 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'service'
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'serializedAsset'
-          ? parent?.serializedAsset?.assetNumber
-          : parent?.packageDetail?.packageName
-      }`;
+            ? parent?.serializedAsset?.assetNumber
+            : parent?.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent?.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
+      parent.status = `${parent.type === 'service'
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
+        }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
@@ -460,18 +452,18 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow?.serializedAsset?.assetNumber
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.productDetail?.productName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow?.serializedAsset?.assetNumber
+              : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -659,19 +651,19 @@ const WorkOrder = ({
                 disabled={
                   selectedProducts?.filter((e) => e.type === 'service').length
                     ? selectedServices?.filter(
-                        (d) =>
-                          d.type === 'service' &&
-                          d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
-                          d.status === WORKORDER_SERVICE_STATUS.pending
-                      )?.length === selectedServices?.length
+                      (d) =>
+                        d.type === 'service' &&
+                        d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
+                        d.status === WORKORDER_SERVICE_STATUS.pending
+                    )?.length === selectedServices?.length
                       ? false
                       : true
                     : selectedAssets?.length
-                    ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
-                      selectedAssets?.length
-                      ? false
+                      ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
+                        selectedAssets?.length
+                        ? false
+                        : true
                       : true
-                    : true
                 }
               >
                 Delete

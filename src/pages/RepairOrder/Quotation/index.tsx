@@ -72,10 +72,7 @@ const Quotation = ({
   }, [repairOrderData]);
 
   useEffect(() => {
-    if (
-      invoiceStep &&
-      ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)
-    ) {
+    if (invoiceStep && ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)) {
       updateOrderStatus(REPAIR_ORDER_STATUS.readyToInvoice);
     }
   }, [invoiceStep]);
@@ -144,9 +141,9 @@ const Quotation = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+            {([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
               quotationInfo?.versions[tempCurrentVersion]?.status
-            ) ? (
+            ) || invoiceStep) ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
@@ -186,20 +183,24 @@ const Quotation = ({
         width: 200,
         primaryField: true,
         Cell: ({ row }) => (
-          <div className="d-flex gap-2 align-items-center">
-            <p className="text-truncate" title={row.original?.productName}>
-              {row.original?.productName ? (
-                row.original?.productId ? (
-                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
-                    {row.original?.productName}
-                  </a>
-                ) : (
-                  row.original?.productName
-                )
-              ) : (
-                <NoDataCell />
-              )}
-            </p>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {row.original?.productName ?
+              <>
+                <p className="text-truncate" title={row.original?.productName}>{row.original?.productName}</p>
+                <Box pl={1}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row.original.productId}`);
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </Box>
+              </>
+              :
+              <NoDataCell />
+            }
           </div>
         )
       },

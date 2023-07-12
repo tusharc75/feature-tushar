@@ -27,7 +27,6 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
@@ -148,15 +147,14 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
       show: true,
       cellRenderer: 'commonRenderer'
     });
-    column.push({ field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer', width: 250});
+    column.push({ field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer', width: 250 });
     setColumns(column);
   };
 
   const TicketRenderer = (params) =>
     params?.value ? (
       <div className="d-flex gap-2 align-items-center">
-      <p className="text-truncate">{params?.value}</p>
-      <HtmlTooltip title={`${routes.deliveryTicket.title}`}>
+        <p className="text-truncate">{params?.value}</p>
         <IconButton
           size="small"
           onClick={() => {
@@ -165,61 +163,54 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
         >
           <OpenInNewIcon fontSize="small" color="primary" />
         </IconButton>
-      </HtmlTooltip>
-    </div>
+      </div>
     ) : (
       <NoDataCell />
     );
 
-  const WorkOrderRenderer = (params) => 
+  const WorkOrderRenderer = (params) =>
     params?.value ? (
-       <div className="d-flex gap-2 align-items-center">
-       <p className="text-truncate">{params?.value}</p>
-       <HtmlTooltip title={`${routes.workOrder.title}`}>
-         <IconButton
-           size="small"
-           onClick={() => {
-             window.open(`${routes.workOrderDetail.path}/${params.data?.workOrderId}`);
-           }}
-         >
-           <OpenInNewIcon fontSize="small" color="primary" />
-         </IconButton>
-       </HtmlTooltip>
-     </div>
+      <div className="d-flex gap-2 align-items-center">
+        <p className="text-truncate">{params?.value}</p>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.workOrderDetail.path}/${params.data?.workOrderId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </div>
     ) : (
       <NoDataCell />
     );
 
   const InventoryRenderer = (params) => (
-      <div className="d-flex gap-2 align-items-center">
+    <div className="d-flex gap-2 align-items-center">
       <p className="text-truncate">{params?.value}</p>
-      <HtmlTooltip title={`${routes.serializedAsset.title}`}>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(`${routes.serializedAssetDetail.path}/${params.data?._id}`);
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
-      </HtmlTooltip>
+      <IconButton
+        size="small"
+        onClick={() => {
+          window.open(`${routes.serializedAssetDetail.path}/${params.data?._id}`);
+        }}
+      >
+        <OpenInNewIcon fontSize="small" color="primary" />
+      </IconButton>
     </div>
   );
 
   const ProductNameRenderer = (params) => (
-     <div className="d-flex gap-2 align-items-center">
-     <p className="text-truncate">{params?.value}</p>
-     <HtmlTooltip title={`${routes.product.title}`}>
-       <IconButton
-         size="small"
-         onClick={() => {
-           window.open(`${routes.productDetail.path}/${params.data?.productId}`);
-         }}
-       >
-         <OpenInNewIcon fontSize="small" color="primary" />
-       </IconButton>
-     </HtmlTooltip>
-   </div>
+    <div className="d-flex gap-2 align-items-center">
+      <p className="text-truncate">{params?.value}</p>
+      <IconButton
+        size="small"
+        onClick={() => {
+          window.open(`${routes.productDetail.path}/${params.data?.productId}`);
+        }}
+      >
+        <OpenInNewIcon fontSize="small" color="primary" />
+      </IconButton>
+    </div>
   );
 
   const frameworkComponents = {
@@ -377,7 +368,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (

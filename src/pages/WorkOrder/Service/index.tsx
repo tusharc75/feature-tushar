@@ -57,7 +57,7 @@ const getTotalTime = (stepTimes: any) => {
       totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
     }
   });
-  stepTimes.forEach((item) => {});
+  stepTimes.forEach((item) => { });
   return { shouldTimerRun, totalTimes };
 };
 
@@ -140,21 +140,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     const workOrderDetail = workOrderDetailResponce?.data?.data;
 
     if (workOrderDetail.type === 'Repair Order' && workOrderDetail?.repairOrder) {
-      if (workOrderDetail?.repairOrder?.addQuotationStep) {
+      if (workOrderDetail?.repairOrder?.addQuotationStep && workOrderDetail?.quotation) {
         isQuotation = true;
-        const quotationResponse = await axiosInstance().get(`${repairOrder.api}/${workOrderData?.repairOrder?.optionValue}/check/quotation`);
-        if (quotationResponse?.data?.data) {
-          let keys = Object.keys(quotationResponse?.data?.data?.versions);
-          if (keys?.length) {
-            const version = quotationResponse?.data?.data?.versions[parseInt(keys[keys.length - 1])];
-            quotation = {
-              _id: quotationResponse?.data?.data?._id,
-              versionId: version?._id,
-              quotationNumber: quotationResponse?.data?.data?.quotationNumber,
-              status: version?.status
-            };
-            setQuotationData(quotation);
-          }
+        if (workOrderDetail?.quotation?.version) {
+          quotation = {
+            _id: workOrderDetail?.quotation?._id,
+            versionId: workOrderDetail?.quotation?.version?._id,
+            quotationNumber: workOrderDetail?.quotation?.quotationNumber,
+            status: workOrderDetail?.quotation?.version?.status
+          };
+          setQuotationData(quotation);
         }
       }
     }
@@ -228,7 +223,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       setServiceSteps(services);
       if (
         services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
-          services.filter((e) => e.type === 'service')?.length &&
+        services.filter((e) => e.type === 'service')?.length &&
         workOrderData?.status !== WORK_ORDER_STATUS.completed
       ) {
         fetchWorkOrderData();
@@ -651,30 +646,30 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? '#E1FCE3'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                    ? '#fabebe'
-                                                    : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
-                                                    ? '#D3D3D3'
-                                                    : '#FFF5DD',
+                                                      ? '#fabebe'
+                                                      : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
+                                                        ? '#D3D3D3'
+                                                        : '#FFF5DD',
                                                 color:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
                                                       ? '#059825'
                                                       : '#EE0E06'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                    ? '#fa0202'
-                                                    : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
-                                                    ? 'inherit'
-                                                    : '#FF8C21',
+                                                      ? '#fa0202'
+                                                      : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
+                                                        ? 'inherit'
+                                                        : '#FF8C21',
                                                 background:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
                                                       ? '#E1FCE3'
                                                       : '#FFECEB'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                    ? '#fabebe'
-                                                    : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
-                                                    ? '#D3D3D3'
-                                                    : '#FFF5DD',
+                                                      ? '#fabebe'
+                                                      : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
+                                                        ? '#D3D3D3'
+                                                        : '#FFF5DD',
                                                 fontWeight: 700
                                               }}
                                             />
@@ -781,7 +776,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 <>
                   {selectedService?.type === 'service' ? (
                     allowedToEdit ||
-                    (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
+                      (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                       <Steps
                         workOrderId={workOrderId}
                         warehouse={workOrderData?.warehouse}
@@ -945,20 +940,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                        ? '#fabebe'
-                                                        : '#FFF5DD',
+                                                          ? '#fabebe'
+                                                          : '#FFF5DD',
                                                     color:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#048E0A'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                        ? '#fa0202'
-                                                        : '#FF8C21',
+                                                          ? '#fa0202'
+                                                          : '#FF8C21',
                                                     background:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                        ? '#fabebe'
-                                                        : '#FFF5DD',
+                                                          ? '#fabebe'
+                                                          : '#FFF5DD',
                                                     fontWeight: 700
                                                   }}
                                                 />
@@ -1283,7 +1278,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => {
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
-          handleSuccess={() => {}}
+          handleSuccess={() => { }}
         />
       )}
       {showManagePurchaseOrder && (
