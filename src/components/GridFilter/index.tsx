@@ -384,7 +384,6 @@ function GridFilter({
                               name={`from_${field.fieldName}`}
                               label={`From ${field.fieldLabel}`}
                               value={formValues[`from_${field.fieldName}`] ? formValues[`from_${field.fieldName}`] : null}
-                              maxDate={new Date()}
                               onChange={(date: any) => {
                                 setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
                                 handleSelectFilter(`from_${field.fieldName}`, date);
@@ -406,7 +405,6 @@ function GridFilter({
                               name={`to_${field.fieldName}`}
                               label={`To ${field.fieldLabel}`}
                               value={formValues[`to_${field.fieldName}`] ? formValues[`to_${field.fieldName}`] : null}
-                              maxDate={new Date()}
                               onChange={(date: any) => {
                                 setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
                                 handleSelectFilter(`to_${field.fieldName}`, date);

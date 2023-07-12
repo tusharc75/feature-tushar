@@ -12,7 +12,9 @@ const LogIn = () => {
   const azureLogin = async () => {
     try {
       await instance.loginPopup();
-    } catch (e) {}
+    } catch (e) {
+      console.log(e)
+    }
   };
   return (
     <>
