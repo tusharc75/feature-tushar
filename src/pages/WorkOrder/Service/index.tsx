@@ -1,6 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import {
   convertMsToTime,
   QUOTATION_STATUS,
@@ -45,6 +46,7 @@ import AttachmentDialog from './AttachmentDialog';
 import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { PassIcon, FailIcon } from 'src/assets/svg/svgIcons';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -55,7 +57,7 @@ const getTotalTime = (stepTimes: any) => {
       totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
     }
   });
-  stepTimes.forEach((item) => { });
+  stepTimes.forEach((item) => {});
   return { shouldTimerRun, totalTimes };
 };
 
@@ -124,6 +126,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [assignSteps, setAssignSteps] = useState(false);
   const [quotationData, setQuotationData] = useState(null);
   const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
 
   useEffect(() => {
     fetchServiceData();
@@ -134,7 +137,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     var isQuotation: any = false;
 
     const workOrderDetailResponce: any = await axiosInstance().get(`${workOrder.api}/${workOrderId}/detail`);
-    const workOrderDetail = workOrderDetailResponce?.data?.data
+    const workOrderDetail = workOrderDetailResponce?.data?.data;
 
     if (workOrderDetail.type === 'Repair Order' && workOrderDetail?.repairOrder) {
       if (workOrderDetail?.repairOrder?.addQuotationStep) {
@@ -225,7 +228,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       setServiceSteps(services);
       if (
         services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
-        services.filter((e) => e.type === 'service')?.length &&
+          services.filter((e) => e.type === 'service')?.length &&
         workOrderData?.status !== WORK_ORDER_STATUS.completed
       ) {
         fetchWorkOrderData();
@@ -463,7 +466,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     !completed &&
     (allowedToEdit || (selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate));
 
-    return (
+  return (
     <Box>
       {serviceSteps ? (
         <Grid container spacing={2}>
@@ -559,7 +562,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                             }}
                           >
                             <Grid container>
-                              <Grid item xs={10}>
+                              <Grid item xs={9}>
                                 <Box
                                   display="flex"
                                   style={{
@@ -648,28 +651,30 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? '#E1FCE3'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                      ? '#fabebe'
-                                                      : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
-                                                        ? '#D3D3D3' : '#FFF5DD',
+                                                    ? '#fabebe'
+                                                    : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
+                                                    ? '#D3D3D3'
+                                                    : '#FFF5DD',
                                                 color:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
                                                       ? '#059825'
                                                       : '#EE0E06'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                      ? '#fa0202'
-                                                      : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
-                                                        ? 'inherit' : '#FF8C21',
+                                                    ? '#fa0202'
+                                                    : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
+                                                    ? 'inherit'
+                                                    : '#FF8C21',
                                                 background:
                                                   data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                     ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
                                                       ? '#E1FCE3'
                                                       : '#FFECEB'
                                                     : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                      ? '#fabebe'
-                                                      : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
-                                                        ? '#D3D3D3'
-                                                        : '#FFF5DD',
+                                                    ? '#fabebe'
+                                                    : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
+                                                    ? '#D3D3D3'
+                                                    : '#FFF5DD',
                                                 fontWeight: 700
                                               }}
                                             />
@@ -690,34 +695,50 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                               {!isColapsed && (
                                 <>
                                   {data?.type === 'service' && (
-                                    <Grid item xs={2} container justify="flex-end">
-                                      <div>
-                                        <IconButton
-                                          size="small"
-                                          color="primary"
-                                          aria-label="delete"
-                                          disabled={!isAllowedToServiceEdit}
-                                          onClick={(event) => {
-                                            handleOpenMenu(event);
-                                            setSelectedService(data);
-                                          }}
-                                        >
-                                          <MoreHorizIcon />
-                                        </IconButton>
-                                        {/* PassFail */}
+                                    <Grid item xs={3} container style={{ justifyContent: 'flex-end' }}>
+                                      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                                        <div style={{ flexBasis: '40%' }}>
+                                          <IconButton
+                                            size="small"
+                                            color="inherit"
+                                            style={{ color: 'red' }}
+                                            aria-label="delete"
+                                            disabled={!allowedToEdit || selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
+                                            onClick={() => setShowConfirmBox(true)}
+                                          >
+                                            <DeleteOutlineIcon />
+                                          </IconButton>
+                                        </div>
                                         <>
-                                          {data?.type === 'service' && data?.serviceStatus && (
-                                            <RenderStatusIcon
-                                              style={{ maxWidth: 24, height: 24, margin: '5px auto 0' }}
-                                              stepStatus={data?.serviceStatus}
-                                            />
-                                          )}
-                                          {data?.type === 'quotation' && quotationData && (
-                                            <RenderStatusIcon
-                                              style={{ maxWidth: 24, height: 24, margin: '5px auto 0' }}
-                                              stepStatus={quotationData?.status}
-                                            />
-                                          )}
+                                          <div style={{ flexBasis: 'max-content' }}>
+                                            <IconButton
+                                              size="small"
+                                              color="primary"
+                                              aria-label="menu"
+                                              disabled={!isAllowedToServiceEdit}
+                                              onClick={(event) => {
+                                                handleOpenMenu(event);
+                                                setSelectedService(data);
+                                              }}
+                                            >
+                                              <MoreHorizIcon />
+                                            </IconButton>
+                                          </div>
+                                          {/* PassFail */}
+                                          <div style={{ flexBasis: '100%' }}>
+                                            {data?.type === 'service' && data?.serviceStatus && (
+                                              <RenderStatusIcon
+                                                style={{ maxWidth: 24, height: 24, margin: '5px 3px 0 auto' }}
+                                                stepStatus={data?.serviceStatus}
+                                              />
+                                            )}
+                                            {data?.type === 'quotation' && quotationData && (
+                                              <RenderStatusIcon
+                                                style={{ maxWidth: 24, height: 24, margin: '5px 3px 0 auto' }}
+                                                stepStatus={quotationData?.status}
+                                              />
+                                            )}
+                                          </div>
                                         </>
                                       </div>
                                     </Grid>
@@ -734,6 +755,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               </Box>
             </Grid>
           )}
+
+          {/* ------------------ RIGHT SIDE CONTENTS ------------------ */}
           <Grid
             item
             xs={12}
@@ -758,7 +781,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 <>
                   {selectedService?.type === 'service' ? (
                     allowedToEdit ||
-                      (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
+                    (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                       <Steps
                         workOrderId={workOrderId}
                         warehouse={workOrderData?.warehouse}
@@ -922,20 +945,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fabebe'
-                                                          : '#FFF5DD',
+                                                        ? '#fabebe'
+                                                        : '#FFF5DD',
                                                     color:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#048E0A'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fa0202'
-                                                          : '#FF8C21',
+                                                        ? '#fa0202'
+                                                        : '#FF8C21',
                                                     background:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fabebe'
-                                                          : '#FFF5DD',
+                                                        ? '#fabebe'
+                                                        : '#FFF5DD',
                                                     fontWeight: 700
                                                   }}
                                                 />
@@ -1035,7 +1058,12 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 Add Services
               </MenuItem>
               <MenuItem
-                disabled={!allowedToEdit || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status)}
+                disabled={
+                  !allowedToEdit ||
+                  [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                    selectedService?.status
+                  )
+                }
                 onClick={() => {
                   setAssignSteps(true);
                   setAnchorEl(null);
@@ -1073,7 +1101,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               </MenuItem>
               <MenuItem
                 disabled={
-                  disableCompleteFail || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status)
+                  disableCompleteFail ||
+                  [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                    selectedService?.status
+                  )
                 }
                 onClick={() => {
                   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
@@ -1252,7 +1283,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => {
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
-          handleSuccess={() => { }}
+          handleSuccess={() => {}}
         />
       )}
       {showManagePurchaseOrder && (
@@ -1272,6 +1303,19 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
             }
           ]}
           warehouseId={workOrderData?.warehouse?.optionValue}
+        />
+      )}
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete ${selectedService?.serviceName}?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={() => {
+            handleRemoveService(selectedService?.uniqueId);
+            setShowConfirmBox(false);
+          }}
         />
       )}
     </Box>
