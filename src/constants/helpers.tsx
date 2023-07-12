@@ -1839,6 +1839,7 @@ export const ASSET_STATUS = {
   inSale: 'In Sale',
   inUse: 'In-Use',
   standBy: 'Stand By',
+  standByNotChargeable: 'Stand By-Not Chargeable',
   delivered: 'Delivered',
   indTransit: 'In-Transit',
   underReview: 'Under Review',
@@ -1907,6 +1908,7 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   return: 'Return',
   consumed: 'Consumed',
   standBy: 'Stand By',
+  standByNotChargeable: 'Stand By-Not Chargeable',
 } as const;
 
 export const REPAIR_JOB_STATUS = {

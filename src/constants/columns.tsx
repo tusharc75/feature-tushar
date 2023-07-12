@@ -4,6 +4,8 @@ import { dateFormat, dateTimeFormat, formatAmountWithCurrency, getUniqueCurrenci
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { flatMapDeep } from 'lodash';
 import moment from 'moment';
+import { Box, IconButton } from '@material-ui/core';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 export const headerName = {
   firstName: 'Name'
@@ -290,7 +292,7 @@ const columnData = (ele, row) => {
             {row.original[ele.fieldName]
               ?.map((d) => {
                 return (
-                  <a className={`text-truncate ${path ? 'link' : ''}`} href={`${path}/${d.optionValue}`}>
+                  <a className={`text-truncate ${path ? 'link' : ''}`} target='_blank' href={`${path}/${d.optionValue}`}>
                     {d.optionLabel}
                   </a>
                 );
@@ -304,15 +306,27 @@ const columnData = (ele, row) => {
     );
   } else if (ele.type === 'dropDown' && ele.lookup) {
     return (
-      <p>
+      <>
         {row.original[ele.fieldName]?.optionLabel ? (
-          <a className={`text-truncate ${path ? 'link' : ''}`} href={`${path}/${row.original[ele.fieldName]?.optionValue}`}>
-            {row.original[ele.fieldName]?.optionLabel}
-          </a>
+          <div className="d-flex gap-2 align-items-center">
+            <p className='text-truncate' title={row.original[ele.fieldName]?.optionLabel}>
+              {row.original[ele.fieldName]?.optionLabel}
+            </p>
+            {path &&
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${path}/${row.original[ele.fieldName]?.optionValue}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            }
+          </div>
         ) : (
           <NoDataCell />
         )}
-      </p>
+      </ >
     );
   } else {
     return row.original[ele.fieldName]?.optionLabel ? (

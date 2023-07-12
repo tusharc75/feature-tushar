@@ -7,7 +7,7 @@ import DateFnsUtils from '@date-io/date-fns';
 
 const DurationFilter = ({ duration, setDuration, disabled }) => {
 
-    const [timeFrame, setTimeFrame] = React.useState<any>('current-year');
+    const [timeFrame, setTimeFrame] = React.useState<any>('1-year');
 
     React.useEffect(() => {
         switch (timeFrame) {
@@ -49,7 +49,7 @@ const DurationFilter = ({ duration, setDuration, disabled }) => {
                 break;
         }
     }, [timeFrame]);
-   
+
     return (
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <Grid container spacing={2}>
@@ -79,10 +79,10 @@ const DurationFilter = ({ duration, setDuration, disabled }) => {
                         variant="inline"
                         fullWidth
                         size="small"
-                        openTo="year"
                         format={dateFormatForInputControl}
                         maxDate={duration.to}
                         label="From"
+                        autoOk
                         views={['year', 'month', 'date']}
                         value={duration.from}
                         onChange={(date) => {
@@ -97,8 +97,8 @@ const DurationFilter = ({ duration, setDuration, disabled }) => {
                         variant="inline"
                         fullWidth
                         size="small"
+                        autoOk
                         minDate={duration.from}
-                        openTo="year"
                         format={dateFormatForInputControl}
                         label="To"
                         views={['year', 'month', 'date']}

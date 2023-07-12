@@ -89,8 +89,9 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
                             <RadioGroup row aria-label="status" name="status" value={values['status']} onChange={(e) => {
                               setFieldValue('status', e.target.value);
                             }}>
-                              <FormControlLabel value={ASSET_STATUS.inUse} control={<Radio />} label={ASSET_STATUS.inUse} />
+                              <FormControlLabel value={ASSET_STATUS.standByNotChargeable} control={<Radio />} label={ASSET_STATUS.standByNotChargeable} />
                               <FormControlLabel value={ASSET_STATUS.standBy} control={<Radio />} label={ASSET_STATUS.standBy} />
+                              <FormControlLabel value={ASSET_STATUS.inUse} control={<Radio />} label={ASSET_STATUS.inUse} />
                             </RadioGroup>
                           </FormControl>
                         </Box>
