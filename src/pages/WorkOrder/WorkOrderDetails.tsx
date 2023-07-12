@@ -16,7 +16,7 @@ import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import TabPanel from 'src/components/TabPanel';
+// import TabPanel from 'src/components/TabPanel';
 import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 import accountClass from '../Account/account.module.scss';
@@ -32,6 +32,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import { FaWpforms } from 'react-icons/fa';
 import { RiFlowChart } from 'react-icons/ri';
 import PreviewDownload from 'src/components/PreviewDownload';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -59,12 +60,12 @@ const WorkOrderDetails = () => {
   const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
 
   const columns = [
-    {accessor: 'serviceName', Header: 'Service'},
-    {accessor: 'serviceType', Header: 'Service Type'},
-    {accessor: 'assignedTechnician', Header: 'Assigned Technician'},
-    {accessor: 'status', Header: 'Status'},
-    {accessor: 'serviceStatus', Header: 'Result'},
-  ]
+    { accessor: 'serviceName', Header: 'Service' },
+    { accessor: 'serviceType', Header: 'Service Type' },
+    { accessor: 'assignedTechnician', Header: 'Assigned Technician' },
+    { accessor: 'status', Header: 'Status' },
+    { accessor: 'serviceStatus', Header: 'Result' }
+  ];
 
   useEffect(() => {
     return history.listen((location) => {
@@ -273,7 +274,7 @@ const WorkOrderDetails = () => {
                       </Button>
                     </Fragment>
                   )}
-                  <PreviewDownload resource={sidebarResource.workOrder} referenceId={id} columns={columns} />
+                <PreviewDownload resource={sidebarResource.workOrder} referenceId={id} columns={columns} />
                 {/* <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   size="small"
@@ -305,54 +306,20 @@ const WorkOrderDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Services
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
-              </div>
-            }
-            {...a11yProps(2)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-              </div>
-            }
-            {...a11yProps(2)}
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab index={0} {...a11yProps(0)}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab index={1} {...a11yProps(1)}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Services
+          </CustomTab>
+          <CustomTab index={2} className={'tabLayout'} {...a11yProps(2)}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
+          </CustomTab>
+          <CustomTab index={3} className={'tabLayout'} {...a11yProps(3)}>
+            <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+          </CustomTab>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {workOrderData && workOrderFields.length ? (
