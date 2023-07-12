@@ -97,24 +97,22 @@ const Productpackage = ({
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p className="text-truncate">{row.original.detail}</p>
             <Box ml={1} className="d-flex align-items-center">
-              <HtmlTooltip title={startCase(`${row.original.type}`)}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === 'service') {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'product') {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'serializedAsset') {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                    } else {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </HtmlTooltip>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'serializedAsset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
             </Box>
             <Box ml={1} className="d-flex align-items-center">
               <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
@@ -130,14 +128,13 @@ const Productpackage = ({
         width: 200,
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
-              {row.original?.productName ? (
-                row.original?.productId ? (
-                  <>
+            {row.original?.productName ? (
+              row.original?.productId ? (
+                <>
                   <p className="text-truncate">
                     {row.original?.productName}
                   </p>
                   <Box ml={1}>
-                  <HtmlTooltip title={`${routes.product.title}`}>
                     <IconButton
                       size="small"
                       onClick={() => {
@@ -146,15 +143,14 @@ const Productpackage = ({
                     >
                       <OpenInNewIcon fontSize="small" color="primary" />
                     </IconButton>
-                  </HtmlTooltip>
-                </Box>
+                  </Box>
                 </>
-                ) : (
-                  row.original?.productName
-                )
               ) : (
-                <NoDataCell />
-              )}
+                row.original?.productName
+              )
+            ) : (
+              <NoDataCell />
+            )}
           </div>
         )
       },
@@ -183,18 +179,20 @@ const Productpackage = ({
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          <HtmlTooltip title={allowedToDelete && row.original?.allowedToDelete ? 'Asset is already assigned' : 'Delete'}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [row.original._id];
-                setDeleteData(obj);
-              }}
-              disabled={allowedToDelete && row.original?.allowedToDelete}
-            >
-              <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.allowedToDelete ? 'disabled' : 'error'} />
-            </IconButton>
+          <HtmlTooltip title={allowedToDelete && row.original?.canDelete ? 'Deletion not allowed - Work Order Created' : 'Delete'}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [row.original._id];
+                  setDeleteData(obj);
+                }}
+                disabled={allowedToDelete && row.original?.canDelete}
+              >
+                <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.canDelete ? 'disabled' : 'error'} />
+              </IconButton>
+            </span>
           </HtmlTooltip>
         </>
       )
@@ -225,40 +223,38 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'service'
+        ? parent.serviceDetail?.serviceName
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.assetNumber
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serializedAssetDetail.assetNumber
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent?.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.allowedToDelete = parent.workOrder ? true : false;
+      parent.canDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.status = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
+      parent.status = `${parent.type === 'service'
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
           ? parent?.productDetail?.status
           : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent?.serializedAssetDetail?.status
+            : parent.packageDetail?.status
+        }`;
     });
 
     if (rows.length !== 0) {
@@ -282,23 +278,22 @@ const Productpackage = ({
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'service'
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serializedAssetDetail.assetNumber
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -306,15 +301,14 @@ const Productpackage = ({
       _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
-      parent.status = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
+      parent.status = `${parent.type === 'service'
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
+        }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -496,7 +490,7 @@ const Productpackage = ({
               onClose={closeActions}
             >
               <MenuItem
-                disabled={allowedToDelete && selectedProducts?.filter((e) => e.allowedToDelete)?.length === selectedProducts?.length ? true : false}
+                disabled={allowedToDelete ? selectedProducts?.filter((e) => !e.canDelete)?.length === selectedProducts?.length ? false : true : true}
                 onClick={() => {
                   closeActions();
                   handleDeleteMultiple();
