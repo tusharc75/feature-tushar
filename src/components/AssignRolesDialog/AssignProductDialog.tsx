@@ -297,7 +297,7 @@ const AssignProductDialog = ({
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={productsDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader
-        title={`Assign ${routes.product.title}`}
+        title={`Add ${routes.product.title}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleCloseDialog}
