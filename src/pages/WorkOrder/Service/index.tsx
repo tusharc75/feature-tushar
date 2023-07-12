@@ -592,7 +592,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                       <span>{data?.order}</span>
                                     </Box>
                                   ) : (
-                                    data?.type === 'quotation' && <FormatQuoteIcon />
+                                    data?.type === 'quotation' && <FormatQuoteIcon style={{ maxWidth: '20px', marginRight: '-10px' }} />
                                   )}
 
                                   {!isColapsed && (
@@ -878,7 +878,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                           <span>{data?.order}</span>
                                         </Box>
                                       ) : (
-                                        data?.type === 'quotation' && <FormatQuoteIcon />
+                                        data?.type === 'quotation' && <FormatQuoteIcon style={{ maxWidth: '20px', marginRight: '-10px' }} />
                                       )}
 
                                       {!isColapsed && (
