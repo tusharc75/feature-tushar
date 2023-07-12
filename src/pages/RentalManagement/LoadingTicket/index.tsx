@@ -332,7 +332,6 @@ const LoadingTicket = ({
     params?.value ? (
       <div className="d-flex gap-2 align-items-center">
         <p className="text-truncate">{params.value}</p>
-        <HtmlTooltip title={routes.deliveryTicket.title}>
         <IconButton
           size="small"
           onClick={() => {
@@ -341,7 +340,6 @@ const LoadingTicket = ({
         >
           <OpenInNewIcon fontSize="small" color={'primary'} />
         </IconButton>
-        </HtmlTooltip>
       </div>
     ) : (
       <NoDataCell />
@@ -367,7 +365,6 @@ const LoadingTicket = ({
         {params.value}
       </p>
       <Box ml={1}>
-        <HtmlTooltip title={`${params.data.type }`}>
           <IconButton
             size="small"
             onClick={() => {
@@ -378,7 +375,6 @@ const LoadingTicket = ({
           >
             <OpenInNewIcon fontSize="small" color={'primary'} />
           </IconButton>
-        </HtmlTooltip>
       </Box>
 
       {params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
@@ -420,7 +416,6 @@ const LoadingTicket = ({
   const ProductNameRenderer = (params) => (
     <div className="d-flex gap-2 align-items-center">
       <p className="text-truncate">{params.value}</p>
-      <HtmlTooltip title={`${routes.product.title}`}>
       <IconButton
         size="small"
         onClick={() => {
@@ -429,7 +424,6 @@ const LoadingTicket = ({
       >
         <OpenInNewIcon fontSize="small" color="primary" />
       </IconButton>
-      </HtmlTooltip>
     </div>
   );
 
