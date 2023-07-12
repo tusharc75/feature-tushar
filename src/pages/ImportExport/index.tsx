@@ -53,7 +53,7 @@ const BrandBackup = () => {
   const [isImgUploading, setImgUploading] = useState(false);
   const [isRestoring, setRestoring] = useState(false);
   const [fileName, setFileName] = useState('');
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState({ loading: false, type: null });
   const [excelUploadUrl, setExcelUploadUrl] = useState(null);
   const [selectResource, setSelectResource] = useState(null);
   const fileUploadMaxSize = { ...documentUploadMaxSize };
@@ -62,6 +62,7 @@ const BrandBackup = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
+
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -156,9 +157,11 @@ const BrandBackup = () => {
   };
 
   const handleExportExcel = async () => {
+    setDownloading({ loading: true, type: 'export' });
     axiosInstance()
       .get(`/import-export/export${selectResource ? `?resource=${selectResource}` : ''}`)
       .then((data) => {
+        setDownloading({ loading: false, type: null });
         fetchAllExportHistory();
         toastConfig.setToastConfig({
           open: true,
@@ -166,16 +169,20 @@ const BrandBackup = () => {
           message: 'Data Export Initiated'
         });
       })
-      .catch((err) => { });
+      .catch((err) => {
+        setDownloading({ loading: false, type: null });
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const handleDownloadTemplate = async () => {
+    setDownloading({ loading: true, type: 'template' });
     axiosInstance()
       .get(`/import-export/template${selectResource ? `?resource=${selectResource}` : ''}`, {
         responseType: 'arraybuffer',
       })
       .then((response) => {
-        setDownloading(false);
+        setDownloading({ loading: false, type: null });
         const fileName = response.headers['content-disposition'].split('filename=')[1];
         downloadExcel(response, fileName);
 
@@ -185,7 +192,10 @@ const BrandBackup = () => {
           message: 'Exported to excel successfully.'
         });
       })
-      .catch((err) => { });
+      .catch((err) => {
+        setDownloading({ loading: false, type: null });
+        toastConfig.setToastConfig(err);
+      });
   };
 
 
@@ -217,25 +227,6 @@ const BrandBackup = () => {
   ];
   const ActionRenderer = (params) => (
     <>
-      {/* <Button
-        onClick={() => {
-          handleDownloadFile(params.row._id);
-          setFileName(params.row._id);
-        }}
-        variant="contained"
-        color="primary"
-        size="small"
-        disabled={params.row?.status !== 'Complete'}
-      >
-        {downloading && fileName === params.row.fileName ? (
-          <>
-            <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
-            Downloading ...{' '}
-          </>
-        ) : (
-          '  Download'
-        )}
-      </Button> */}
       <Tooltip title={params?.value === 'Complete' ? 'Download' : 'Download Not available'}>
         <IconButton
           size="small"
@@ -284,13 +275,13 @@ const BrandBackup = () => {
   ];
 
   const handleDownloadFile = (fileId) => {
-    setDownloading(true);
+    setDownloading({ loading: true, type: 'file' });
     axiosInstance()
       .get(`/import-export/download-file/${fileId}`, {
         responseType: 'arraybuffer'
       })
       .then((data) => {
-        setDownloading(false);
+        setDownloading({ loading: false, type: null });
         let fileText = data.data;
         const fileName = data.headers['content-disposition'].split('filename=')[1];
         fileText && download(fileName, fileText);
@@ -303,7 +294,7 @@ const BrandBackup = () => {
       .catch((error) => {
         console.error(error, 'error');
         toastConfig.setToastConfig(error);
-        setDownloading(false);
+        setDownloading({ loading: false, type: null });
       });
   };
 
@@ -435,7 +426,7 @@ const BrandBackup = () => {
                           handleDownloadTemplate();
                         }}
                       >
-                        Download Template
+                        Download Template {downloading.loading && downloading.type === 'template' && <CircularProgress size={20} />}
                       </Button>
                     </Box>
                   </Grid>
@@ -465,11 +456,14 @@ const BrandBackup = () => {
                       type="button"
                       size="small"
                       color="primary"
-                      variant="contained"
+                      variant="outlined"
                       onClick={handleExportExcel}
+                      startIcon={<AiOutlineExport />}
                       disabled={selectResource == null}
                     >
-                      Export to Excel
+                      Export to Excel {
+                        downloading.loading && downloading.type === 'export' && <CircularProgress size={20} />
+                      }
                     </Button>
                   </Grid>
                 </Box>
