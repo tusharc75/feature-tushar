@@ -23,6 +23,9 @@ import Receive from './Receive';
 import Reject from './Reject';
 import Logs from './Logs';
 import History from 'src/pages/ProductInventory/LedgerHistory';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { startCase } from 'lodash';
+
 
 const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -82,20 +85,25 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       width: 300,
       disabled: true,
       Cell: ({ row }) => (
-        <p className="text-truncate">
-          {row.original.type === 'Product' ? (
-            <Link className="link" title={row.original.detail} to={`${routes.productDetail.path}/${row.original.productId}`}>
-              {row.original.detail}
-            </Link>
-          ) : row.original.type === 'Asset' ? (
-            <Link className="link" title={row.original.detail} to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}>
-              {row.original.detail}
-            </Link>
-          ) : (
-            <p className="text-truncate">{row.original.detail}</p>
-          )}
-        </p>
-      )
+        <div className="d-flex gap-2 align-items-center">
+        <p className="text-truncate">{row.original.detail}</p>
+        <HtmlTooltip title={startCase(`${row.original.type}`)}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              if(row.original.type === 'Product') {
+               window.open(`${routes.productDetail.path}/${row.original.productId}`)
+              } 
+              else if (row.original.type === 'Asset') {
+                window.open(`${routes.serializedAssetDetail.path}/${row.original.assetId}`)
+              } 
+            }}
+          >
+            <OpenInNewIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      </div>
+        )
     });
     column.push({
       accessor: 'description',

@@ -139,7 +139,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 </IconButton>
               </HtmlTooltip>
             ) : (
-              <HtmlTooltip title={`${row.original.type}`}>
+              <HtmlTooltip title={startCase(`${row.original.type}`)}>
               <IconButton
                 size="small"
                 onClick={() => {

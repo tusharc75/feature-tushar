@@ -15,7 +15,7 @@ import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { capitalize, sortBy } from 'lodash';
+import { capitalize, sortBy, startCase } from 'lodash';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
@@ -114,6 +114,7 @@ const WorkOrder = ({
               <p className="text-truncate">{row.original?.detail}</p>
             )}
             <Box ml={1}>
+              <HtmlTooltip title={startCase(`${row.original.type}`)}>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -130,6 +131,7 @@ const WorkOrder = ({
               >
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
+              </HtmlTooltip>
             </Box>
             {row.original?.subRows?.length ? (
               <Box ml={1} className="d-flex align-items-center">
@@ -159,11 +161,24 @@ const WorkOrder = ({
       {
         accessor: 'workOrderNumber',
         Header: 'Work Order',
+        width: 200,
         Cell: ({ row }) =>
           row.original['workOrder'] ? (
-            <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`} target="_blank">
-              {row.original['workOrderNumber']}
-            </a>
+            <div className="d-flex gap-2 align-items-center">
+              <p className="text-truncate">
+                {row.original['workOrderNumber']}
+              </p>
+              <HtmlTooltip title={`${routes.workOrder.title}`}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                   window.open(`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`)
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            </div>
           ) : (
             <NoDataCell />
           )
@@ -173,21 +188,23 @@ const WorkOrder = ({
         Header: 'Product',
         width: 200,
         Cell: ({ row }) => (
+          row.original.productName ? 
           <div className="d-flex gap-2 align-items-center">
             <p className="text-truncate" title={row.original?.productName}>
-              {row.original?.productName ? (
-                row.original?.productId ? (
-                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
-                    {row.original?.productName}
-                  </a>
-                ) : (
-                  row.original?.productName
-                )
-              ) : (
-                <NoDataCell />
-              )}
+             {row.original.productName}
             </p>
+            <HtmlTooltip title={routes.product.title}>
+              <IconButton
+                size="small"
+                onClick={()=>{
+                  window.open(`${routes.productDetail.path}/${row.original?.productId}`)
+                }}
+              >
+
+              </IconButton>
+            </HtmlTooltip>
           </div>
+          : <NoDataCell />
         )
       },
       {
@@ -216,11 +233,11 @@ const WorkOrder = ({
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers']?.map((e, i) => {
               return i === row?.original['assignedUsers'].length - 1 ? (
-                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`}>
+                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
                   {e?.optionLabel}
                 </a>
               ) : (
-                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`}>
+                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
                   {e?.optionLabel},{' '}
                 </a>
               );
@@ -360,7 +377,7 @@ const WorkOrder = ({
   const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
-    
+
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
     data = response?.data?.data;
 

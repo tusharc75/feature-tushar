@@ -50,7 +50,6 @@ const TransferAssetViews = (props) => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // const viewsData = await axiosInstance().get(`${rentalManagement.api}/views/${rentalId}`);
       const assets = await axiosInstance().get(`${transferAsset.api}/get-asset/${tAId}`);
       const loadingTicket = await axiosInstance().get(
         `${deliveryTicket.api}/typewise?referenceType=${sidebarResource.transferAsset}&referenceId=${tAId}`

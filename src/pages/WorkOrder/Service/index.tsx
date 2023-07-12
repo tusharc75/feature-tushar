@@ -106,7 +106,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   } = useData();
   const [serviceSteps, setServiceSteps] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
-  const [serviceData, setServiceData] = useState([]);
+  const [stepSubmitedData, setStepSubmitedData] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [serviceDialog, setServiceDialog] = useState({ open: false, uniqueId: null, preWork: null });
@@ -133,11 +133,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     var quotation: any = null;
     var isQuotation: any = false;
 
-    if (workOrderData.type === 'Repair Order' && workOrderData?.repairOrder?.optionValue) {
-      const repairOrderResponse = await axiosInstance().get(`${repairOrder.api}/${workOrderData?.repairOrder?.optionValue}`);
-      const repairOrderData: any = repairOrderResponse?.data?.data;
+    const workOrderDetailResponce: any = await axiosInstance().get(`${workOrder.api}/${workOrderId}/detail`);
+    const workOrderDetail = workOrderDetailResponce?.data?.data
 
-      if (repairOrderData?.addQuotationStep) {
+    if (workOrderDetail.type === 'Repair Order' && workOrderDetail?.repairOrder) {
+      if (workOrderDetail?.repairOrder?.addQuotationStep) {
         isQuotation = true;
         const quotationResponse = await axiosInstance().get(`${repairOrder.api}/${workOrderData?.repairOrder?.optionValue}/check/quotation`);
         if (quotationResponse?.data?.data) {
@@ -156,18 +156,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       }
     }
 
-    const stepDataResponse = await axiosInstance().get(`${workOrder.api}/${workOrderId}/steps-data`);
-    setServiceData(stepDataResponse?.data?.data || []);
+    setStepSubmitedData(workOrderDetail?.stepData || []);
 
-    const serviceDataResponse = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`);
-    const data: any = serviceDataResponse?.data?.data;
-
-    if (data?.length) {
-      data?.forEach((e) => {
+    if (workOrderDetail?.services?.length) {
+      workOrderDetail?.services?.forEach((e) => {
         e.type = 'service';
       });
-      const preWorkService = data?.filter((e) => e.preWork)?.sort((a, b) => (a.order > b.order ? 1 : -1));
-      const postWorkService = data?.filter((e) => !e.preWork)?.sort((a, b) => (a.order > b.order ? 1 : -1));
+      const preWorkService = workOrderDetail?.services?.filter((e) => e.preWork)?.sort((a, b) => (a.order > b.order ? 1 : -1));
+      const postWorkService = workOrderDetail?.services?.filter((e) => !e.preWork)?.sort((a, b) => (a.order > b.order ? 1 : -1));
       const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
       const services = isQuotation ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
 
@@ -431,8 +427,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       });
   };
 
-  const getFieldsWithOtherDetails = (step: any, serviceData) => {
-    const steps = serviceData?.filter((item: any) => item?.uniqueId === step?.uniqueId);
+  const getFieldsWithOtherDetails = (step: any, stepSubmitedData) => {
+    const steps = stepSubmitedData?.filter((item: any) => item?.uniqueId === step?.uniqueId);
     const stepTimes = [];
     steps.forEach((item) => {
       let obj: any = {};
@@ -466,8 +462,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const isAllowedToServiceEdit =
     !completed &&
     (allowedToEdit || (selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate));
-  console.log(selectedService)
-  return (
+
+    return (
     <Box>
       {serviceSteps ? (
         <Grid container spacing={2}>
@@ -547,7 +543,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   >
                     {serviceSteps?.map((data, index) => {
                       const style = stylesForEveryTab(selectedService, data, index, mobScreen);
-                      const stepTimes = getFieldsWithOtherDetails(data, serviceData);
+                      const stepTimes = getFieldsWithOtherDetails(data, stepSubmitedData);
                       return (
                         <Grid item xs={12} key={index}>
                           <Box
@@ -771,6 +767,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                         setDisableCompleteFail={setDisableCompleteFail}
                         fetchService={fetchServiceData}
                         referencType="workOrder"
+                        stepSubmitedData={stepSubmitedData}
                       />
                     ) : (
                       <Box textAlign="center">
