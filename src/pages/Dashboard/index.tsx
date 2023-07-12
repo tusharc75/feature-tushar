@@ -127,84 +127,86 @@ const DashbaordNew = () => {
 
   return (
     <div className="main-container-v1">
-      <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: 'Dashboards' }]} />
-      </div>
-      <div className="detail-container-v1">
-        {!userLoading ? (
-          <React.Fragment>
-            <GlobalFilter
-              dashboardList={dashboardList.map((d) => ({ id: d._id, name: d.name }))}
-              globalFilters={globalFilters}
-              setGlobalFilters={setGlobalFilters}
-              disabled={dashboardList.length === 0}
-            />
-            <Box pt={1}>
-              {dashboardLoading ? (
-                <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboards..." />
-              ) : dashboardList.length === 0 ? (
-                <Box
-                  style={{ height: 'calc(100vh - 256px)', minHeight: '400px' }}
-                  width={'100%'}
-                  display={'flex'}
-                  flexDirection="column"
-                  justifyContent={'center'}
-                  alignItems={'center'}
-                  className="asdfkasjhdfkjsdh"
-                >
-                  <img width={400} height={340} src={placeholder_img} alt="dashboard" />
-                  <Typography color="textSecondary" variant="h5">
-                    You don't have access to any dashboard
-                  </Typography>
-                </Box>
-              ) : (
-                <Grid
-                  container
-                  spacing={1}
-                  justifyContent="space-between"
-                  alignItems="stretch"
-                  style={{ height: 'calc(100vh - 256px)', minHeight: '600px', overflow: 'auto' }}
-                >
-                  {charts.map((chart: ChartDataType, index: number) => (
-                    <ChartTypes
-                      globalFilters={globalFilters}
-                      key={chart.chartType + ' ' + index + 1}
-                      chart={chart}
-                      filterData={{ ...filtersOptions }}
-                      setSelectedChart={(currentChart: ChartDataType) => {
-                        setSelectedChart(currentChart);
-                        setOpenFullScreenChart(true);
-                      }}
-                      selectedDashboardId={selectedDashboardId}
-                      fetchDashboards={fetchDashboards}
-                    />
-                  ))}
-                  {globalFilters.dashboardType?.includes('Asset') && (
-                    <Grid item xs={12}>
-                      <AssetStats />
-                    </Grid>
-                  )}
-                </Grid>
-              )}
-            </Box>
-          </React.Fragment>
-        ) : (
-          <Loader minHeight="100%" noLoader={false} text="Loading Data..." />
+      <MuiPickersUtilsProvider utils={DateFnsUtils}>
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[{ title: 'Dashboards' }]} />
+        </div>
+        <div className="detail-container-v1">
+          {!userLoading ? (
+            <React.Fragment>
+              <GlobalFilter
+                dashboardList={dashboardList.map((d) => ({ id: d._id, name: d.name }))}
+                globalFilters={globalFilters}
+                setGlobalFilters={setGlobalFilters}
+                disabled={dashboardList.length === 0}
+              />
+              <Box pt={1}>
+                {dashboardLoading ? (
+                  <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboards..." />
+                ) : dashboardList.length === 0 ? (
+                  <Box
+                    style={{ height: 'calc(100vh - 256px)', minHeight: '400px' }}
+                    width={'100%'}
+                    display={'flex'}
+                    flexDirection="column"
+                    justifyContent={'center'}
+                    alignItems={'center'}
+                    className="asdfkasjhdfkjsdh"
+                  >
+                    <img width={400} height={340} src={placeholder_img} alt="dashboard" />
+                    <Typography color="textSecondary" variant="h5">
+                      You don't have access to any dashboard
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Grid
+                    container
+                    spacing={1}
+                    justifyContent="space-between"
+                    alignItems="stretch"
+                    style={{ height: 'calc(100vh - 256px)', minHeight: '600px', overflow: 'auto' }}
+                  >
+                    {charts.map((chart: ChartDataType, index: number) => (
+                      <ChartTypes
+                        globalFilters={globalFilters}
+                        key={chart.chartType + ' ' + index + 1}
+                        chart={chart}
+                        filterData={{ ...filtersOptions }}
+                        setSelectedChart={(currentChart: ChartDataType) => {
+                          setSelectedChart(currentChart);
+                          setOpenFullScreenChart(true);
+                        }}
+                        selectedDashboardId={selectedDashboardId}
+                        fetchDashboards={fetchDashboards}
+                      />
+                    ))}
+                    {globalFilters.dashboardType?.includes('Asset') && (
+                      <Grid item xs={12}>
+                        <AssetStats />
+                      </Grid>
+                    )}
+                  </Grid>
+                )}
+              </Box>
+            </React.Fragment>
+          ) : (
+            <Loader minHeight="100%" noLoader={false} text="Loading Data..." />
+          )}
+        </div>
+        {openFullScreenChart && (
+          <FullScreenChart
+            chart={selectedChart}
+            globalFilters={globalFilters}
+            filterData={{ ...filtersOptions }}
+            close={() => {
+              setOpenFullScreenChart(false);
+              setSelectedChart(null);
+            }}
+            selectedDashboardId={selectedDashboardId}
+            fetchDashboards={fetchDashboards}
+          />
         )}
-      </div>
-      {openFullScreenChart && (
-        <FullScreenChart
-          chart={selectedChart}
-          globalFilters={globalFilters}
-          filterData={{ ...filtersOptions }}
-          close={() => {
-            setOpenFullScreenChart(false);
-            setSelectedChart(null);
-          }}
-          selectedDashboardId={selectedDashboardId}
-          fetchDashboards={fetchDashboards}
-        />
-      )}
+      </MuiPickersUtilsProvider>
     </div>
   );
 };
