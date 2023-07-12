@@ -87,7 +87,6 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
         <p className="text-truncate">{row.original.detail}</p>
-        <HtmlTooltip title={startCase(`${row.original.type}`)}>
           <IconButton
             size="small"
             onClick={() => {
@@ -101,7 +100,6 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           >
             <OpenInNewIcon fontSize="small" color="primary" />
           </IconButton>
-        </HtmlTooltip>
       </div>
         )
     });

@@ -126,7 +126,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
               {row.original.detail}
             </p>
             { !isOffline && row.original.isPurchaseOrder ? (
-              <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -137,9 +136,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 >
                   <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
-              </HtmlTooltip>
             ) : (
-              <HtmlTooltip title={startCase(`${row.original.type}`)}>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -156,7 +153,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
               >
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
-              </HtmlTooltip>
             )}
 
             {row.original.isBulkAssetCreation && (

@@ -127,7 +127,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           )}
           <Box ml={1} />
           {row.original.type === 'Product' && (
-            <HtmlTooltip title={startCase(row.original.type)}>
             <IconButton
               size="small"
               onClick={() => {
@@ -136,10 +135,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
-            </HtmlTooltip>
           )}
           {row.original.type === 'Service' && (
-          <HtmlTooltip title={startCase(row.original.type)}>
             <IconButton
               size="small"
               onClick={() => {
@@ -148,7 +145,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
-          </HtmlTooltip>
           )}
         </div>
       )
