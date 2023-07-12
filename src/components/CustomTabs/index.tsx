@@ -45,7 +45,11 @@ interface CustomTabProps extends TabProps {
 const CustomTab: React.FC<CustomTabProps> = ({ children, className = '', index = 0, primaryColor = false, ...props }) => {
   return (
     <Tab
-      label={<div className="tab-font">{children}</div>}
+      label={
+        <div className="tab-font" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {children}
+        </div>
+      }
       className={`tabLayout ${className} ${primaryColor ? 'primaryColoredTab' : ''}`}
       aria-controls={`main-tabpanel-${index}`}
       {...props}

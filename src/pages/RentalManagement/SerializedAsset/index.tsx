@@ -104,12 +104,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -125,7 +125,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
             <p className="text-truncate" title={row.original.detail}>
               {row.original.detail}
             </p>
-            { !isOffline && row.original.isPurchaseOrder ? (
+            {!isOffline && row.original.isPurchaseOrder ? (
               <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton
                   size="small"
@@ -139,7 +139,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 </IconButton>
               </HtmlTooltip>
             ) : (
-              <HtmlTooltip title={`${row.original.type}`}>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -156,7 +155,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
               >
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
-              </HtmlTooltip>
             )}
 
             {row.original.isBulkAssetCreation && (
@@ -319,20 +317,21 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       rows = [...products, ...packages];
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
+        parent.detail = `${
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent?.packageDetail?.packageName
-          }`;
+        }`;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-              ? parent?.productDetail?.productDescription || ''
-              : parent.type === 'package'
-                ? parent?.packageDetail?.packageDescription || ''
-                : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+            ? parent?.packageDetail?.packageDescription || ''
+            : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
@@ -372,10 +371,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
             ? true
             : false
           : parent.subRows.length !== 0
-            ? parent.assetAssignedQty ===
-            parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+          ? parent.assetAssignedQty ===
+              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
             parent.subRows.every((d) => d.isValid)
-            : true;
+          : true;
 
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
@@ -478,16 +477,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
       // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
       _subRow.assetQty =
@@ -530,11 +529,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           ? true
           : false
         : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
-          ? true
-          : _subRow.assetAssignedQty ===
-            tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
-            ? true
-            : false;
+        ? true
+        : _subRow.assetAssignedQty ===
+          tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+        ? true
+        : false;
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });

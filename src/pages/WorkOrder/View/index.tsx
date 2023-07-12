@@ -102,7 +102,7 @@ const WorkOrderViews = (props) => {
         }
       ];
       var flowEdge: any[] = [];
-      const workOrderServices = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}/views`);
+      const workOrderServices = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`);
       const allServices = workOrderServices?.data?.data || [];
       const allSteps = [];
       if (allServices?.length) xPosition += 300;

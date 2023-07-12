@@ -516,8 +516,6 @@ const ReceivingTicket = ({
   const InventoryRenderer = (params) => (
     <div className="d-flex gap-2 align-items-center">
       <p className="text-truncate">{params.value}</p>
-
-      <HtmlTooltip title={`${params.data.type}`}>
         <IconButton
           size="small"
           onClick={() => {
@@ -528,7 +526,6 @@ const ReceivingTicket = ({
         >
           <OpenInNewIcon fontSize="small" color="primary" />
         </IconButton>
-      </HtmlTooltip>
 
       {params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
         <HtmlTooltip title="This asset will be shipped from different facility">
@@ -574,12 +571,12 @@ const ReceivingTicket = ({
             >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
-          </HtmlTooltip>
+            </HtmlTooltip>
         </Box>
       )}
       {params?.data?.isRepairOrder && (
         <Box ml={1}>
-          <HtmlTooltip title={`${routes.repairOrder.title}`}>
+            <HtmlTooltip title={`${routes.repairOrder.title}`}>
             <IconButton
               size="small"
               onClick={() => {
@@ -588,7 +585,7 @@ const ReceivingTicket = ({
             >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
-          </HtmlTooltip>
+            </HtmlTooltip>
         </Box>
       )}
     </div>
@@ -597,7 +594,6 @@ const ReceivingTicket = ({
   const ProductNameRenderer = (params) => (
     <div className="d-flex gap-2 align-items-center">
       <p className="text-truncate">{params?.value}</p>
-      <HtmlTooltip title={`${routes.product.title}`}>
         <IconButton
           size="small"
           onClick={() => {
@@ -606,7 +602,6 @@ const ReceivingTicket = ({
         >
           <OpenInNewIcon fontSize="small" color="primary" />
         </IconButton>
-      </HtmlTooltip>
     </div>
   );
 
@@ -616,7 +611,6 @@ const ReceivingTicket = ({
     params?.value ? (
       <div className="d-flex gap-2 align-items-center">
         <p className="text-truncate">{params?.value}</p>
-        <HtmlTooltip title={`${routes.warehouse.title}`}>
           <IconButton
             size="small"
             onClick={() => {
@@ -625,7 +619,6 @@ const ReceivingTicket = ({
           >
             <OpenInNewIcon fontSize="small" color="primary" />
           </IconButton>
-        </HtmlTooltip>
       </div>
     ) : (
       <NoDataCell />
@@ -635,7 +628,6 @@ const ReceivingTicket = ({
     params?.value ? (
       <div className="d-flex gap-2 align-items-center">
         <p className="text-truncate">{params?.value}</p>
-        <HtmlTooltip title={`${routes.deliveryTicket.title}`}>
           <IconButton
             size="small"
             onClick={() => {
@@ -644,7 +636,6 @@ const ReceivingTicket = ({
           >
             <OpenInNewIcon fontSize="small" color="primary" />
           </IconButton>
-        </HtmlTooltip>
       </div>
     ) : (
       <NoDataCell />
@@ -654,7 +645,6 @@ const ReceivingTicket = ({
     params?.value ? (
       <div className="d-flex gap-2 align-items-center">
         <p className="text-truncate">{params?.value}</p>
-        <HtmlTooltip title={`${routes.deliveryTicket.title}`}>
           <IconButton
             size="small"
             onClick={() => {
@@ -663,7 +653,6 @@ const ReceivingTicket = ({
           >
             <OpenInNewIcon fontSize="small" color="primary" />
           </IconButton>
-        </HtmlTooltip>
       </div>
     ) : (
       <NoDataCell />
@@ -673,7 +662,6 @@ const ReceivingTicket = ({
     params?.value ? (
       <div className="d-flex gap-2 align-items-center">
       <p className="text-truncate">{params?.value}</p>
-      <HtmlTooltip title={`${routes.deliveryTicket.title}`}>
         <IconButton
           size="small"
           onClick={() => {
@@ -682,7 +670,6 @@ const ReceivingTicket = ({
         >
           <OpenInNewIcon fontSize="small" color="primary" />
         </IconButton>
-      </HtmlTooltip>
     </div>
     ) : (
       <NoDataCell />

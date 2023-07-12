@@ -136,10 +136,12 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
             errors.storageLocation = 'Storage Location is required';
           }
         }
-        let tempProduct = selectedRecords.find((u) => u._id === d._id);
-        let qty = tempProduct.qty - ((tempProduct?.consumedQty || 0) + (tempProduct?.requestedQty || 0));
-        if (tempProduct && d.consumedQty > qty) {
-          errors.consumedQty = `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.`;
+        if (!consumeRequest) {
+          let tempProduct = selectedRecords.find((u) => u._id === d._id);
+          let qty = tempProduct.qty - ((tempProduct?.consumedQty || 0) + (tempProduct?.requestedQty || 0));
+          if (tempProduct && d.consumedQty > qty) {
+            errors.consumedQty = `Consume Qty is limited to Qty.`;
+          }
         }
       });
     }

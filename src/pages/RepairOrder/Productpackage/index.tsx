@@ -19,7 +19,8 @@ import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAss
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { ExpandMore } from '@material-ui/icons';
 import Add from '@material-ui/icons/Add';
-import { capitalize, sortBy } from 'lodash';
+import { capitalize, sortBy, startCase } from 'lodash';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
@@ -94,20 +95,25 @@ const Productpackage = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <a
-              className="link text-truncate"
-              target="_blank"
-              href={`${row.original.type === 'service'
-                ? routes.serviceMasterDetail.path
-                : row.original.type === 'product'
-                  ? routes.productDetail.path
-                  : row.original.type === 'serializedAsset'
-                    ? routes.serializedAssetDetail.path
-                    : routes.packagesDetail.path
-                }/${row.original.materialId}`}
-            >
-              {row.original.detail}
-            </a>
+            <p className="text-truncate">{row.original.detail}</p>
+            <Box ml={1} className="d-flex align-items-center">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'serializedAsset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
             <Box ml={1} className="d-flex align-items-center">
               <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
@@ -122,19 +128,29 @@ const Productpackage = ({
         width: 200,
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
-            <p className="text-truncate" title={row.original?.productName}>
-              {row.original?.productName ? (
-                row.original?.productId ? (
-                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
+            {row.original?.productName ? (
+              row.original?.productId ? (
+                <>
+                  <p className="text-truncate">
                     {row.original?.productName}
-                  </a>
-                ) : (
-                  row.original?.productName
-                )
+                  </p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.productDetail.path}/${row.original?.productId}`)
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </>
               ) : (
-                <NoDataCell />
-              )}
-            </p>
+                row.original?.productName
+              )
+            ) : (
+              <NoDataCell />
+            )}
           </div>
         )
       },
@@ -163,18 +179,20 @@ const Productpackage = ({
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          <HtmlTooltip title={allowedToDelete && row.original?.allowedToDelete ? 'Asset is already assigned' : 'Delete'}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [row.original._id];
-                setDeleteData(obj);
-              }}
-              disabled={allowedToDelete && row.original?.allowedToDelete}
-            >
-              <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.allowedToDelete ? 'disabled' : 'error'} />
-            </IconButton>
+          <HtmlTooltip title={allowedToDelete && row.original?.canDelete ? 'Deletion not allowed - Work Order Created' : 'Delete'}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [row.original._id];
+                  setDeleteData(obj);
+                }}
+                disabled={allowedToDelete && row.original?.canDelete}
+              >
+                <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.canDelete ? 'disabled' : 'error'} />
+              </IconButton>
+            </span>
           </HtmlTooltip>
         </>
       )
@@ -227,7 +245,7 @@ const Productpackage = ({
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.allowedToDelete = parent.workOrder ? true : false;
+      parent.canDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
       parent.status = `${parent.type === 'service'
         ? parent.serviceDetail?.status
@@ -427,21 +445,21 @@ const Productpackage = ({
                     disabled={rowsData ? false : true}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null, existing: true });
-                      closeAddActions()
+                      closeAddActions();
                     }}
                   >
                     {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Customer Assets` : `Add ${routes.serializedAsset.title}`}
                   </MenuItem>
-                  {permissions?.serializedAsset?.isCreate &&
+                  {permissions?.serializedAsset?.isCreate && (
                     <MenuItem
                       onClick={() => {
                         setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null, existing: false });
-                        closeAddActions()
+                        closeAddActions();
                       }}
                     >
                       {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add New Customer Assets` : `Add New ${routes.serializedAsset.title}`}
                     </MenuItem>
-                  }
+                  )}
                 </Menu>
               </Fragment>
             )}
@@ -472,7 +490,7 @@ const Productpackage = ({
               onClose={closeActions}
             >
               <MenuItem
-                disabled={allowedToDelete && selectedProducts?.filter((e) => e.allowedToDelete)?.length === selectedProducts?.length ? true : false}
+                disabled={allowedToDelete ? selectedProducts?.filter((e) => !e.canDelete)?.length === selectedProducts?.length ? false : true : true}
                 onClick={() => {
                   closeActions();
                   handleDeleteMultiple();

@@ -166,7 +166,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
               </Box>
             }
             {!isOffline && (
-              <IconButton
+                <IconButton
                 size="small"
                 onClick={() => {
                   if (row.original.type === 'service') {

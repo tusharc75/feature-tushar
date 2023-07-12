@@ -159,6 +159,8 @@ export const serviceOrderSteps: stepInterface[] = [
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
+export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed'];
+
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
 

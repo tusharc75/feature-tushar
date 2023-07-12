@@ -19,6 +19,7 @@ import HistoryIcon from '@material-ui/icons/History';
 import { useData } from 'src/StateProvider/Provider';
 import History from '../../ProductInventory/LedgerHistory';
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
 
@@ -34,7 +35,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
 
   const {
-    state: { user }
+    state: { user, permissions }
   }: any = useData();
 
   useEffect(() => {
@@ -51,7 +52,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
     setConsumeRequest(allowRequest)
     fetchColumns();
     fetchData();
-  }, [allowedToEdit, workOrderId]);
+  }, [allowedToEdit, workOrderId, consumeRequest]);
 
   const fetchColumns = async () => {
     const column = [];
@@ -71,13 +72,25 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         column.push({
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
-          width: 200,
+          width: 250,
           primaryField: true,
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
-              <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
-                {row.original[e?.fieldName]}
-              </a>
+              <div className="d-flex gap-2 align-items-center">
+              <p className="text-truncate">
+              {row.original[e?.fieldName]}
+              </p>
+              <HtmlTooltip title={`${routes.product.title}`}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                   window.open(`${routes.productDetail.path}/${row.original?.productId}`)
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            </div>
             ) : (
               <NoDataCell />
             );
@@ -99,14 +112,24 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       {
         accessor: 'service',
         Header: 'Service',
-        width: 200,
+        width: 250,
         Cell: ({ row }) =>
           row?.original?.service ? (
-            <p className="text-truncate" title={row?.original?.service}>
-              <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original.serviceId}`} target="_blank">
-                {row.original.service}
-              </a>
-            </p>
+            <div className="d-flex gap-2 align-items-center">
+              <p className="text-truncate">
+              {row.original.service}
+              </p>
+              <HtmlTooltip title={`${routes.serviceMaster.title}`}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                   window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`)
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            </div>
           ) : (
             <NoDataCell />
           )
@@ -222,7 +245,9 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           res.productName = u?.product?.optionLabel;
           res.productDescription = u?.product?.productDescription;
           res.productNumber = u?.product?.productNumber;
-          res.hideSelection = u?.qty - ((u?.consumedQty || 0) + (u?.requestedQty || 0)) === 0 ? true : false;
+          if (!consumeRequest) {
+            res.hideSelection = u?.qty - ((u?.consumedQty || 0) + (u?.requestedQty || 0)) === 0 ? true : false;
+          }
           return res;
         });
         setDataRows(rows);
@@ -318,7 +343,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" mb={2}>
           <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            {isCreate && (
+            {(isCreate && permissions?.product?.isRead) && (
               <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
                 Add Products/Consumables
               </Button>

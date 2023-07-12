@@ -159,7 +159,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
               </Box>
             }
             {!isOffline && (
-              <>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -176,7 +175,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                 >
                   <OpenInNewIcon fontSize="small" color="primary" />
                 </IconButton>
-              </>
             )}
           </div>
         )
