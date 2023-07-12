@@ -29,6 +29,7 @@ import { GrDrag } from 'react-icons/gr';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Comments from './Comments';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 
 const TimerComponent = ({ stepData, updateTime = true }) => {
   const [time, setTime] = useState(null);
@@ -206,6 +207,7 @@ const Steps = ({
   const [isFieldDialogEditable, setIsFieldDialogEditable] = useState(true);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
   const selectedServiceRef = React.useRef(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, loading: false, steps: [] });
 
   useEffect(() => {
     if ((!selectedServiceRef.current || selectedServiceRef.current !== selectedService._id) && selectedService._id) {
@@ -214,6 +216,28 @@ const Steps = ({
     }
     fetchServiceData();
   }, [selectedService]);
+
+  const delteSteps = async () => {
+    setShowDeleteConfirmBox((prev) => ({ ...prev, loading: true }));
+    const payload = {
+      serviceUniqueId: selectedService?.uniqueId,
+      steps: showDeleteConfirmBox.steps.map((item) => item._id)
+    };
+    const api = `/work-order/${workOrderId}/step/remove`;
+    try {
+      const response = await axiosInstance().put(api, payload);
+      toastConfig.setToastConfig({
+        open: true,
+        message: response.data.message,
+        severity: 'success'
+      });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    } finally {
+      setShowDeleteConfirmBox({ open: false, loading: false, steps: [] });
+      fetchServiceData();
+    }
+  };
 
   const fetchServiceData = async () => {
     const serviceDetailResponse = await axiosInstance().get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`);
@@ -672,7 +696,7 @@ const Steps = ({
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       flexWrap: 'wrap',
-                      flexBasis: 'calc(100% - 70px)'
+                      flexBasis: 'calc(100% - 80px)'
                     }}
                     gridGap={'8px'}
                   >
@@ -868,6 +892,16 @@ const Steps = ({
                         <InfoIcon fontSize="inherit" />
                       </IconButton>
                     )}
+
+                    <IconButton
+                      size="small"
+                      color="inherit"
+                      style={{ color: 'red' }}
+                      aria-label="delete"
+                      onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
+                    >
+                      <DeleteOutlineIcon />
+                    </IconButton>
                     <IconButton
                       size="small"
                       color="primary"
@@ -1113,6 +1147,19 @@ const Steps = ({
             uniqueId={selectedService?.uniqueId}
           />
         )}
+        {showDeleteConfirmBox.open && (
+          <ConfirmationDialog
+            open={showDeleteConfirmBox.open}
+            message={`Are you sure you want to delete "${showDeleteConfirmBox.steps.map((item) => item.stepName).join(', ')}"?`}
+            onClose={() => {
+              setShowDeleteConfirmBox({ open: false, loading: false, steps: [] });
+            }}
+            okBtnLoading={showDeleteConfirmBox.loading}
+            onOk={() => {
+              delteSteps();
+            }}
+          />
+        )}
       </Box>
     ) : (
       <>
@@ -1135,6 +1182,22 @@ const Steps = ({
             </Button>
           )}
         </Box>
+        {assignSteps && (
+          <StepDialog
+            handleClose={() => {
+              setAssignSteps(false);
+            }}
+            handleSucess={(data) => {
+              handleAddStep(data);
+            }}
+            stepId={''}
+            steps={serviceDetails?.steps}
+            reference={'workOrder'}
+            workOrderId={workOrderId}
+            serviceId={selectedService?._id}
+            uniqueId={selectedService?.uniqueId}
+          />
+        )}
       </>
     )
   ) : (
