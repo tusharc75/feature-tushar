@@ -24,12 +24,14 @@ import ManageRepairOrder from './ManageRepairOrder';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
+import { RiFlowChart } from 'react-icons/ri';
 import TabPanel from 'src/components/TabPanel';
 import Steps from 'src/components/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
+import View from './View';
 import Productpackage from './Productpackage';
 import Quotation from './Quotation';
 import WorkOrder from './WorkOrder';
@@ -226,8 +228,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -431,7 +433,17 @@ const RepairOrderDetails = () => {
             }
             {...a11yProps(1)}
           />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+              </div>
+            }
+            {...a11yProps(1)}
+          />
         </Tabs>
+
         <TabPanel value={tabValue} index={0}>
           <Box>
             {repairOrderData && repairOrderFields.length ? (
@@ -469,6 +481,7 @@ const RepairOrderDetails = () => {
               }
             }}
           />
+
           <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {stepNames[currentStep] === 'Add Assets' && repairOrderData && (
               <Productpackage
@@ -497,10 +510,10 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
-                      ? false
-                      : allowedToEdit
+                        quotationVersionData?.status
+                      )
+                    ? false
+                    : allowedToEdit
                 }
                 allowedToDelete={allowedToDelete}
                 isPostWorkService={Boolean(currentStep === 3)}
@@ -543,6 +556,11 @@ const RepairOrderDetails = () => {
               />
             )}
           </ContentFullScreen>
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Box>
+            <View repairOrderNumber={repairOrderData?.repairOrderNumber || ''} repairOrderId={id} repairOrderStatus={repairOrderData?.status} />
+          </Box>
         </TabPanel>
       </Box>
       {showConfirmBox && (
