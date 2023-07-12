@@ -25,7 +25,7 @@ import CostDialog from './CostDialog';
 import ServiceDialog from './ServiceDialog';
 import AddIcon from '@material-ui/icons/Add';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { map, uniq } from 'lodash';
+import { map, startCase, uniq } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
@@ -127,6 +127,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           )}
           <Box ml={1} />
           {row.original.type === 'Product' && (
+            <HtmlTooltip title={startCase(row.original.type)}>
             <IconButton
               size="small"
               onClick={() => {
@@ -135,8 +136,10 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
+            </HtmlTooltip>
           )}
           {row.original.type === 'Service' && (
+          <HtmlTooltip title={startCase(row.original.type)}>
             <IconButton
               size="small"
               onClick={() => {
@@ -145,6 +148,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
+          </HtmlTooltip>
           )}
         </div>
       )

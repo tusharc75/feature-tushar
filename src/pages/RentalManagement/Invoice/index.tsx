@@ -110,7 +110,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
               <div className="d-flex gap-2 align-items-center">
                 <p className="text-truncate">{row.original.detail}</p>
                 {row.original.type !== 'Add On' && (
-                  <HtmlTooltip title={`${row.original.type}`}>
+                  <HtmlTooltip title={startCase(`${row.original.type}`)}>
                     <IconButton
                       size="small"
                       onClick={() => {

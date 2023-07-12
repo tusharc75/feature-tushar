@@ -166,7 +166,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
               </Box>
             }
             {!isOffline && (
-              <IconButton
+              <HtmlTooltip title={startCase(row.original.type)}>
+                <IconButton
                 size="small"
                 onClick={() => {
                   if (row.original.type === 'service') {
@@ -182,6 +183,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
               >
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
+              </HtmlTooltip>
+             
             )}
           </div>
         )
