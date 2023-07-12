@@ -5,7 +5,7 @@ import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridCo
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, isObjectEmpty, productInventory } from 'src/constants/helpers';
+import { displayDate, gridLoadingTimeout, isObjectEmpty, productInventory } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
@@ -20,6 +20,8 @@ import { Autocomplete } from '@material-ui/lab';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RevertQtyDialog from './RevertQtyDialog';
 import { useAppTheme } from 'src/constants/AppConfig';
+import DurationFilter from 'src/components/DurationFilter';
+import moment from 'moment';
 
 const History = ({ product, warehouse, storageLocation }) => {
   const [themeColor] = useAppTheme();
@@ -43,6 +45,11 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
 
+  const [duration, setDuration] = useState({
+    from: new Date(moment().startOf('year').calendar()),
+    to: new Date(moment().endOf('year').calendar()),
+  })
+
   const renderedFrom = 'Product_Inventory_History';
 
   useEffect(() => {
@@ -53,7 +60,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     if (warehouseOptions) {
       fetchRecords();
     }
-  }, [page, limit, filters, sorting, selectedEntity, selectedWarehouse, selectedStorageLocation, warehouseOptions]);
+  }, [page, limit, filters, sorting, selectedEntity, selectedWarehouse, selectedStorageLocation, warehouseOptions, duration]);
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -98,14 +105,25 @@ const History = ({ product, warehouse, storageLocation }) => {
     if (filterById.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
     }
+    const updatedFilters = [];
     if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: field,
           term: filters[field].filter
         });
       });
+    }
+    if (duration) {
+      updatedFilters.push({
+        field: 'date',
+        term: {
+          from: displayDate(duration?.from),
+          to: displayDate(duration?.to)
+        }
+      })
+    }
+    if (updatedFilters?.length > 0) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
     if (sorting.length > 0) {
@@ -350,48 +368,63 @@ const History = ({ product, warehouse, storageLocation }) => {
   return (
     <>
       {warehouseOptions && (
-        <Box display="flex">
-          <Autocomplete
-            style={{ width: '250px' }}
-            options={warehouseOptions}
-            getOptionLabel={(option: any) => option.optionLabel}
-            disableClearable
-            getOptionSelected={(option: any, val) => option.optionValue === val}
-            value={
-              warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-                ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
-                : ''
-            }
-            onChange={(e, val) => {
-              if (val !== null) {
-                setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
-                setSelectedStorageLocation(null);
-              }
-            }}
-            renderInput={(params) => (
-              <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-            )}
-          />
-          {user?.user?.brandPolicy?.storageLocation && (
-            <Autocomplete
-              style={{ width: '250px', marginLeft: '10px' }}
-              options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
-              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
-              value={
-                storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation).length
-                  ? storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation)[0]
-                  : ''
-              }
-              onChange={(e, val) => {
-                setSelectedStorageLocation(val?.optionValue);
-              }}
-              renderInput={(params) => (
-                <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
-              )}
-            />
-          )}
-        </Box>
+        <Grid container md={11} sm={11} lg={11} justifyContent='space-between'>
+          <Grid item md={5} sm={12} xs={12}>
+            <Grid container spacing={2}>
+              <Grid item md={6} sm={6} xs={12}>
+                <Autocomplete
+                  options={warehouseOptions}
+                  getOptionLabel={(option: any) => option.optionLabel}
+                  disableClearable
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={
+                    warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                      ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    if (val !== null) {
+                      setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+                      setSelectedStorageLocation(null);
+                    }
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                  )}
+                />
+              </Grid>
+              <Grid item md={6} sm={6} xs={12}>
+                {user?.user?.brandPolicy?.storageLocation && (
+                  <Autocomplete
+                    options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
+                    getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                    getOptionSelected={(option: any, val) => option.optionValue === val}
+                    value={
+                      storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation).length
+                        ? storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation)[0]
+                        : ''
+                    }
+                    onChange={(e, val) => {
+                      setSelectedStorageLocation(val?.optionValue);
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+                    )}
+                  />
+                )}
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item md={6} sm={12} xs={12}>
+            <Box mt={1}>
+              <DurationFilter
+                duration={duration}
+                setDuration={setDuration}
+                disabled={false}
+              />
+            </Box>
+          </Grid>
+        </Grid>
       )}
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
