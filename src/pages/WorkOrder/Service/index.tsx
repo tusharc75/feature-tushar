@@ -697,18 +697,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                   {data?.type === 'service' && (
                                     <Grid item xs={3} container style={{ justifyContent: 'flex-end' }}>
                                       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                                        <div style={{ flexBasis: '40%' }}>
-                                          <IconButton
-                                            size="small"
-                                            color="inherit"
-                                            style={{ color: 'red' }}
-                                            aria-label="delete"
-                                            disabled={!allowedToEdit || selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
-                                            onClick={() => setShowConfirmBox(true)}
-                                          >
-                                            <DeleteOutlineIcon />
-                                          </IconButton>
-                                        </div>
                                         <>
                                           <div style={{ flexBasis: 'max-content' }}>
                                             <IconButton
@@ -723,6 +711,22 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             >
                                               <MoreHorizIcon />
                                             </IconButton>
+                                          </div>
+                                          <div style={{ flexBasis: 'max-content' }}>
+                                            <HtmlTooltip title="Delete" placement="top" arrow>
+                                              <IconButton
+                                                size="small"
+                                                color="inherit"
+                                                style={{ color: 'red', marginTop: '3px' }}
+                                                aria-label="delete"
+                                                disabled={
+                                                  !allowedToEdit || selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true
+                                                }
+                                                onClick={() => setShowConfirmBox(true)}
+                                              >
+                                                <DeleteOutlineIcon style={{ fontSize: '18px' }} />
+                                              </IconButton>
+                                            </HtmlTooltip>
                                           </div>
                                           {/* PassFail */}
                                           <div style={{ flexBasis: '100%' }}>
@@ -1115,15 +1119,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               </MenuItem>
 
               <MenuItem
-                disabled={!allowedToEdit || selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
-                onClick={() => {
-                  handleRemoveService(selectedService?.uniqueId);
-                  setAnchorEl(null);
-                }}
-              >
-                Remove
-              </MenuItem>
-              <MenuItem
                 onClick={() => {
                   setLogsDialog(true);
                   setAnchorEl(null);
@@ -1149,6 +1144,15 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   Subcontract PO
                 </MenuItem>
               )}
+              <MenuItem
+                disabled={!allowedToEdit || selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
+                onClick={() => {
+                  handleRemoveService(selectedService?.uniqueId);
+                  setAnchorEl(null);
+                }}
+              >
+                Delete
+              </MenuItem>
             </Menu>
           )}
         </Grid>
