@@ -51,7 +51,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
     setConsumeRequest(allowRequest)
     fetchColumns();
     fetchData();
-  }, [allowedToEdit, workOrderId]);
+  }, [allowedToEdit, workOrderId, consumeRequest]);
 
   const fetchColumns = async () => {
     const column = [];
@@ -222,7 +222,9 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           res.productName = u?.product?.optionLabel;
           res.productDescription = u?.product?.productDescription;
           res.productNumber = u?.product?.productNumber;
-          res.hideSelection = u?.qty - ((u?.consumedQty || 0) + (u?.requestedQty || 0)) === 0 ? true : false;
+          if (!consumeRequest) {
+            res.hideSelection = u?.qty - ((u?.consumedQty || 0) + (u?.requestedQty || 0)) === 0 ? true : false;
+          }
           return res;
         });
         setDataRows(rows);
