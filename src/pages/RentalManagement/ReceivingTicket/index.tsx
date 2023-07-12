@@ -516,7 +516,6 @@ const ReceivingTicket = ({
   const InventoryRenderer = (params) => (
     <div className="d-flex gap-2 align-items-center">
       <p className="text-truncate">{params.value}</p>
-
         <IconButton
           size="small"
           onClick={() => {
@@ -563,6 +562,7 @@ const ReceivingTicket = ({
       )}
       {params?.data?.isRepairJob && (
         <Box ml={1}>
+          <HtmlTooltip title={`${routes.repairJob.title}`}>
             <IconButton
               size="small"
               onClick={() => {
@@ -571,11 +571,12 @@ const ReceivingTicket = ({
             >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
+            </HtmlTooltip>
         </Box>
       )}
       {params?.data?.isRepairOrder && (
         <Box ml={1}>
-  
+            <HtmlTooltip title={`${routes.repairOrder.title}`}>
             <IconButton
               size="small"
               onClick={() => {
@@ -584,6 +585,7 @@ const ReceivingTicket = ({
             >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
+            </HtmlTooltip>
         </Box>
       )}
     </div>
