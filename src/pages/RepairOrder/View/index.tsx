@@ -235,13 +235,13 @@ const RepairOrderViews = (props) => {
   const onElementClick = (event, element) => {
     switch (element.data.ref_type) {
       case 'asset':
-        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'workorder':
-        history.push(`${routes.workOrderDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.workOrderDetail.path}/${element.data.ref_id}`);
         break;
       case 'loadingTicket':
-        history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
+        window.open(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
     }
   };
