@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { MATERIAL_REQUEST_STATUS, dateTimeFormat } from 'src/constants/helpers';
+import { MATERIAL_REQUEST_STATUS, RESOURCE_LABEL, dateTimeFormat } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -182,7 +182,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName, product })
 
   const fetchData = () => {
     axiosInstance()
-      .get(`/material-handling/request/${workOrderId}`)
+      .get(`/material-handling/request/${workOrderId}/${RESOURCE_LABEL.workOrder.replace(" ","-")}`)
       .then(({ data: { data } }) => {
         const filteredData = data?.filter((e) => e.uniqueId === uniqueId);
         filteredData?.forEach((e) => {

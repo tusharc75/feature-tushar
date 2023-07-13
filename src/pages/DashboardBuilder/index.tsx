@@ -199,6 +199,7 @@ const Dashboards = () => {
               onClick={openActions}
               aria-controls="action-menu"
               disabled={selectedRecords.length === 0}
+              className="new-dropdown-v1"
             >
               Actions
             </Button>

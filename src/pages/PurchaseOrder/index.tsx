@@ -106,7 +106,7 @@ const PurchaseOrder = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.purchaseOrderDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.purchaseOrderDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -506,7 +506,7 @@ const PurchaseOrder = () => {
                         onClick={openActions}
                         disabled={selectedRecords.length ? false : true}
                         aria-controls="action-menu"
-                        className={isMobile ? 'mobile_button' : styles.add_submit_btn}
+                        className={`${isMobile ? 'mobile_button' : styles.add_submit_btn} new-dropdown-v1`}
                         endIcon={<ExpandMore />}
                       >
                         {isMobile ? '' : 'Actions'}

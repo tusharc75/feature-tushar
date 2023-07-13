@@ -95,6 +95,12 @@ export default function StepDialog({
         failAddon: stepData?.failAddon && Array.isArray(stepData?.failAddon) ? stepData?.failAddon : [],
         isPassAddon: stepData?.isPassAddon === null ? false : stepData?.isPassAddon,
         passAddon: stepData?.passAddon && Array.isArray(stepData?.passAddon) ? stepData?.passAddon : [],
+        isSkipServiceOnPass: stepData?.isSkipServiceOnPass === null ? false : stepData?.isSkipServiceOnPass,
+        skipServiceOnPass: stepData?.skipServiceOnPass && Array.isArray(stepData?.skipServiceOnPass) ? stepData?.skipServiceOnPass : [],
+        isSkipServiceOnFail: stepData?.isSkipServiceOnFail === null ? false : stepData?.isSkipServiceOnFail,
+        skipServiceOnFail: stepData?.skipServiceOnFail && Array.isArray(stepData?.skipServiceOnFail) ? stepData?.skipServiceOnFail : [],
+        isAddStepsOnPass: stepData?.isAddStepsOnPass === null ? false : stepData?.isAddStepsOnPass,
+        isAddStepsOnFail: stepData?.isAddStepsOnFail === null ? false : stepData?.isAddStepsOnFail,
         isJumpStepPass: stepData?.isJumpStepPass === null ? false : stepData?.isJumpStepPass,
         jumpStepsPass: stepData?.jumpStepsPass && Array.isArray(stepData?.jumpStepsPass) ? stepData?.jumpStepsPass : [],
         isJumpStepFail: stepData?.isJumpStepFail === null ? false : stepData?.isJumpStepFail,
@@ -120,6 +126,12 @@ export default function StepDialog({
             failAddon: data?.failAddon && Array.isArray(data?.failAddon) ? data?.failAddon : [],
             isPassAddon: data?.isPassAddon === null ? false : data?.isPassAddon,
             passAddon: data?.passAddon && Array.isArray(data?.passAddon) ? data?.passAddon : [],
+            isSkipServiceOnPass: stepData?.isSkipServiceOnPass === null ? false : stepData?.isSkipServiceOnPass,
+            skipServiceOnPass: stepData?.skipServiceOnPass && Array.isArray(stepData?.skipServiceOnPass) ? stepData?.skipServiceOnPass : [],
+            isSkipServiceOnFail: stepData?.isSkipServiceOnFail === null ? false : stepData?.isSkipServiceOnFail,
+            skipServiceOnFail: stepData?.skipServiceOnFail && Array.isArray(stepData?.skipServiceOnFail) ? stepData?.skipServiceOnFail : [],
+            isAddStepsOnPass: stepData?.isAddStepsOnPass === null ? false : stepData?.isAddStepsOnPass,
+            isAddStepsOnFail: stepData?.isAddStepsOnFail === null ? false : stepData?.isAddStepsOnFail,
             isJumpStepPass: data?.isJumpStepPass === null ? false : data?.isJumpStepPass,
             jumpStepsPass: data?.jumpStepsPass && Array.isArray(data?.jumpStepsPass) ? data?.jumpStepsPass : [],
             isJumpStepFail: data?.isJumpStepFail === null ? false : data?.isJumpStepFail,
@@ -146,6 +158,12 @@ export default function StepDialog({
         failAddon: [],
         isPassAddon: false,
         passAddon: [],
+        isSkipServiceOnPass: false,
+        skipServiceOnPass: [],
+        isSkipServiceOnFail: false,
+        skipServiceOnFail: [],
+        isAddStepsOnPass: false,
+        isAddStepsOnFail: false,
         isJumpStepPass: false,
         jumpStepsPass: [],
         isJumpStepFail: false,
@@ -159,7 +177,7 @@ export default function StepDialog({
     }
   }, []);
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = (values) => {
     values.leadDay = parseInt(values.leadDay);
     values.costPrice = parseFloat(values.costPrice);
     values.listPrice = parseFloat(values.listPrice);
@@ -245,7 +263,11 @@ export default function StepDialog({
         fullWidth
       >
         {stepDetails ? (
-          <Formik initialValues={stepDetails} onSubmit={handleSubmit} validateOnMount validate={validate}>
+          <Formik
+            initialValues={stepDetails}
+            onSubmit={handleSubmit}
+            validateOnMount
+            validate={validate}>
             {({ submitForm, touched, errors, setFieldValue, values }) => (
               <Fragment>
                 <CustomDialogHeader
@@ -260,8 +282,8 @@ export default function StepDialog({
                   showManimizeMaximize={true}
                   showRequiredLabel={false}
                 />
-                <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <CustomDialogContent>
+                <CustomDialogContent>
+                  <Form autoComplete="off" autoCorrect="off" noValidate>
                     <Grid container spacing={2}>
                       <Grid xs={12} md={6} sm={6} item>
                         <TextField
@@ -336,9 +358,8 @@ export default function StepDialog({
                         <TextField
                           InputProps={{
                             startAdornment: (
-                              <InputAdornment position="start">{`${
-                                values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                              }`}</InputAdornment>
+                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                                }`}</InputAdornment>
                             )
                           }}
                           margin="dense"
@@ -361,9 +382,8 @@ export default function StepDialog({
                         <TextField
                           InputProps={{
                             startAdornment: (
-                              <InputAdornment position="start">{`${
-                                values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                              }`}</InputAdornment>
+                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                                }`}</InputAdornment>
                             )
                           }}
                           margin="dense"
@@ -498,6 +518,144 @@ export default function StepDialog({
                                   )}
                                 />
                               )}
+                            </Grid>
+                          </Grid>
+                        </Box>
+                        <Box pt={2}>
+                          <Grid container>
+                            <Grid item xs={6}>
+                              <FormControlLabel
+                                disabled={notEditable}
+                                control={
+                                  <Checkbox
+                                    name="isSkipServiceOnPass"
+                                    disabled={notEditable}
+                                    checked={values['isSkipServiceOnPass']}
+                                    onChange={(e) => {
+                                      setFieldValue('isSkipServiceOnPass', e.target.checked);
+                                      setFieldValue('skipServiceOnPass', []);
+                                    }}
+                                    color="primary"
+                                  />
+                                }
+                                label="Skip Services on Pass"
+                              />
+                            </Grid>
+                            <Grid item xs={6}>
+                              {values['isSkipServiceOnPass'] && (
+                                <Autocomplete
+                                  options={[
+                                    { optionValue: 'all', optionLabel: 'Select All Consequent Services' },
+                                    ...services?.filter((data: any) => data.optionValue !== serviceId)
+                                  ]}
+                                  fullWidth
+                                  multiple
+                                  disabled={notEditable}
+                                  size="small"
+                                  value={values?.skipServiceOnPass ? services?.filter((data: any) => values?.skipServiceOnPass?.includes(data.optionValue)) : []}
+                                  getOptionLabel={(option) => option.optionLabel}
+                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  onChange={(_, newVal: any) => {
+                                    const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
+                                    const values = isAll
+                                      ? [...services?.filter((data: any) => data.optionValue !== serviceId)].map((o) => o.optionValue)
+                                      : newVal?.map((val) => val.optionValue);
+                                    setFieldValue('skipServiceOnPass', values);
+                                  }}
+                                  renderInput={(params) => (
+                                    <TextField {...params} label="Skip Services on Pass" name="skipServiceOnPass" disabled={notEditable} variant="outlined" />
+                                  )}
+                                />
+                              )}
+                            </Grid>
+                          </Grid>
+                        </Box>
+                        <Box pt={2}>
+                          <Grid container>
+                            <Grid item xs={6}>
+                              <FormControlLabel
+                                disabled={notEditable}
+                                control={
+                                  <Checkbox
+                                    name="isSkipServiceOnFail"
+                                    disabled={notEditable}
+                                    checked={values['isSkipServiceOnFail']}
+                                    onChange={(e) => {
+                                      setFieldValue('isSkipServiceOnFail', e.target.checked);
+                                      setFieldValue('skipServiceOnFail', []);
+                                    }}
+                                    color="primary"
+                                  />
+                                }
+                                label="Skip Services on Fail"
+                              />
+                            </Grid>
+                            <Grid item xs={6}>
+                              {values['isSkipServiceOnFail'] && (
+                                <Autocomplete
+                                  options={[
+                                    { optionValue: 'all', optionLabel: 'Select All Consequent Services' },
+                                    ...services?.filter((data: any) => data.optionValue !== serviceId)
+                                  ]}
+                                  fullWidth
+                                  multiple
+                                  disabled={notEditable}
+                                  size="small"
+                                  value={values?.skipServiceOnFail ? services?.filter((data: any) => values?.skipServiceOnFail?.includes(data.optionValue)) : []}
+                                  getOptionLabel={(option) => option.optionLabel}
+                                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                  onChange={(_, newVal: any) => {
+                                    const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
+                                    const values = isAll
+                                      ? [...services?.filter((data: any) => data.optionValue !== serviceId)].map((o) => o.optionValue)
+                                      : newVal?.map((val) => val.optionValue);
+                                    setFieldValue('skipServiceOnFail', values);
+                                  }}
+                                  renderInput={(params) => (
+                                    <TextField {...params} label="Skip Services on Fail" name="skipServiceOnFail" disabled={notEditable} variant="outlined" />
+                                  )}
+                                />
+                              )}
+                            </Grid>
+                          </Grid>
+                        </Box>
+                        <Box pt={2}>
+                          <Grid container>
+                            <Grid item xs={6}>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    name="isAddStepsOnPass"
+                                    disabled={notEditable}
+                                    checked={values?.isAddStepsOnPass}
+                                    onChange={(e) => {
+                                      setFieldValue('isAddStepsOnPass', e.target.checked);
+                                    }}
+                                    color="primary"
+                                  />
+                                }
+                                label="Add Steps On Pass"
+                              />
+                            </Grid>
+                          </Grid>
+                        </Box>
+                        <Box pt={2}>
+                          <Grid container>
+                            <Grid item xs={6}>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    name="isAddStepsOnFail"
+                                    disabled={notEditable}
+                                    checked={values?.isAddStepsOnFail}
+                                    onChange={(e) => {
+                                      setFieldValue('isAddStepsOnFail', e.target.checked);
+                                    }}
+                                    color="primary"
+                                  />
+                                }
+                                label="Add Steps On Fail"
+                              />
                             </Grid>
                           </Grid>
                         </Box>
@@ -730,33 +888,38 @@ export default function StepDialog({
                         </Box>
                       </Box>
                     )}
-                    {reference === 'workOrder' && (
-                      <Box mt={2}>
-                        <Divider />
-                        <Box mb={2} />
-                        <Button size="small" color="primary" variant="contained" onClick={() => setOpenFieldDialog(true)}>
-                          Configure Fields
-                        </Button>
-                      </Box>
-                    )}
-                  </CustomDialogContent>
-                  <CustomDialogFooter>
-                    <Button
-                      size="small"
-                      color="primary"
-                      onClick={() => {
-                        handleClose();
-                      }}
-                    >
-                      Cancel
+                  </Form>
+                </CustomDialogContent>
+                <CustomDialogFooter>
+                  {reference === 'workOrder' && (
+                    <Button size="small" color="primary" variant="contained" onClick={() => setOpenFieldDialog(true)}>
+                      Configure Fields
                     </Button>
-                    {reference === 'workOrder' && notEditable ? null : (
-                      <CustomButton loading={loading} disabled={loading} onSubmit={submitForm} variant="contained" color="primary" type="submit">
-                        Save
-                      </CustomButton>
-                    )}
-                  </CustomDialogFooter>
-                </Form>
+                  )}
+                  <div style={{ flex: '1 0 0' }} />
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={() => {
+                      handleClose();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  {reference === 'workOrder' && notEditable ? null : (
+                    <CustomButton
+                      loading={loading}
+                      disabled={loading}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        submitForm();
+                      }}
+                      variant="contained"
+                      color="primary">
+                      Save
+                    </CustomButton>
+                  )}
+                </CustomDialogFooter>
               </Fragment>
             )}
           </Formik>

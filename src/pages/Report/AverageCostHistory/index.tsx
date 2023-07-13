@@ -16,8 +16,11 @@ import Dialog from '@material-ui/core/Dialog';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const AverageCostHistory = ({ handleClose, product, productName, showPricefilter }) => {
+  const [themeColor] = useAppTheme();
+  const isDarkTheme = themeColor === 'dark';
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
@@ -73,14 +76,14 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
       sortable: false,
       cellStyle: (params) => {
         if (params?.data?.type === 'Credit') {
-          return { backgroundColor: '#90ee90' };
+          return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
         }
         if (params?.data?.type === 'Debit') {
-          return { backgroundColor: '#FFCCCB' };
+          return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
         }
       }
     },
-    { field: 'price', headerName: 'Price', show: true, cellRenderer: 'numberRenderer', filter: false, sortable: false },
+    { field: 'price', headerName: 'Cost', show: true, cellRenderer: 'numberRenderer', filter: false, sortable: false },
     {
       field: 'amount',
       headerName: 'Amount',
@@ -90,15 +93,14 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
       sortable: false,
       cellStyle: (params) => {
         if (params?.data?.type === 'Credit') {
-          return { backgroundColor: '#90ee90' };
+          return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
         }
         if (params?.data?.type === 'Debit') {
-          return { backgroundColor: '#FFCCCB' };
+          return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
         }
       }
     },
     { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
-    //{ field: 'purchaseOrderRejectedDate', headerName: 'Purchase Order Rejected Date', filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' },
     { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
   ];
 

@@ -66,7 +66,7 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
                                         <TableCell>Plant</TableCell>
                                         <TableCell>PO Qty</TableCell>
                                         <TableCell>Inventory</TableCell>
-                                        <TableCell>Average Price</TableCell>
+                                        <TableCell>Average Cost</TableCell>
                                         <TableCell>Total Amount</TableCell>
                                         <TableCell>Inventory Age</TableCell>
                                         <TableCell>Contact Person</TableCell>

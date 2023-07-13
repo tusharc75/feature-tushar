@@ -15,7 +15,7 @@ import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { capitalize, sortBy } from 'lodash';
+import { capitalize, sortBy, startCase } from 'lodash';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
@@ -136,7 +136,7 @@ const WorkOrder = ({
                 {`(${row.original?.subRows?.length})`}
               </Box>
             ) : null}
-            {user?.brandPolicy?.repairOrderQuotation && row.original.type === 'service' && (
+            {user?.brandPolicy?.servicePrePost && row.original.type === 'service' && (
               <Box ml={1}>
                 {row?.original?.preWork ? (
                   <HtmlTooltip title="Pre Work Service">
@@ -159,11 +159,22 @@ const WorkOrder = ({
       {
         accessor: 'workOrderNumber',
         Header: 'Work Order',
+        width: 200,
         Cell: ({ row }) =>
           row.original['workOrder'] ? (
-            <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`} target="_blank">
-              {row.original['workOrderNumber']}
-            </a>
+            <div className="d-flex gap-2 align-items-center">
+              <p className="text-truncate">
+                {row.original['workOrderNumber']}
+              </p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`)
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </div>
           ) : (
             <NoDataCell />
           )
@@ -173,21 +184,21 @@ const WorkOrder = ({
         Header: 'Product',
         width: 200,
         Cell: ({ row }) => (
-          <div className="d-flex gap-2 align-items-center">
-            <p className="text-truncate" title={row.original?.productName}>
-              {row.original?.productName ? (
-                row.original?.productId ? (
-                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
-                    {row.original?.productName}
-                  </a>
-                ) : (
-                  row.original?.productName
-                )
-              ) : (
-                <NoDataCell />
-              )}
-            </p>
-          </div>
+          row.original.productName ?
+            <div className="d-flex gap-2 align-items-center">
+              <p className="text-truncate" title={row.original?.productName}>
+                {row.original.productName}
+              </p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.productDetail.path}/${row.original?.productId}`)
+                }}
+              >
+
+              </IconButton>
+            </div>
+            : <NoDataCell />
         )
       },
       {
@@ -216,11 +227,11 @@ const WorkOrder = ({
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers']?.map((e, i) => {
               return i === row?.original['assignedUsers'].length - 1 ? (
-                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`}>
+                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
                   {e?.optionLabel}
                 </a>
               ) : (
-                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`}>
+                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
                   {e?.optionLabel},{' '}
                 </a>
               );
@@ -252,8 +263,8 @@ const WorkOrder = ({
                 row?.original?.type === 'package' && row?.original?.subRows?.length === 0
                   ? false
                   : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
-                  ? false
-                  : true
+                    ? false
+                    : true
               }
               size="small"
               aria-label="Details"
@@ -268,8 +279,8 @@ const WorkOrder = ({
                   row?.original?.type === 'package' && row?.original?.subRows?.length === 0
                     ? 'error'
                     : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
-                    ? 'error'
-                    : 'disabled'
+                      ? 'error'
+                      : 'disabled'
                 }
               />
             </IconButton>
@@ -360,6 +371,7 @@ const WorkOrder = ({
   const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
+
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
     data = response?.data?.data;
 
@@ -368,37 +380,35 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'service'
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'serializedAsset'
-          ? parent?.serializedAsset?.assetNumber
-          : parent?.packageDetail?.packageName
-      }`;
+            ? parent?.serializedAsset?.assetNumber
+            : parent?.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent?.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
+      parent.status = `${parent.type === 'service'
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
+        }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
@@ -442,18 +452,18 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow?.serializedAsset?.assetNumber
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.productDetail?.productName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow?.serializedAsset?.assetNumber
+              : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -588,6 +598,7 @@ const WorkOrder = ({
               aria-controls="action-menu"
               disabled={selectedProducts?.length === 0}
               endIcon={<ExpandMore />}
+              className="new-dropdown-v1"
             >
               Actions
             </Button>
@@ -640,19 +651,19 @@ const WorkOrder = ({
                 disabled={
                   selectedProducts?.filter((e) => e.type === 'service').length
                     ? selectedServices?.filter(
-                        (d) =>
-                          d.type === 'service' &&
-                          d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
-                          d.status === WORKORDER_SERVICE_STATUS.pending
-                      )?.length === selectedServices?.length
+                      (d) =>
+                        d.type === 'service' &&
+                        d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
+                        d.status === WORKORDER_SERVICE_STATUS.pending
+                    )?.length === selectedServices?.length
                       ? false
                       : true
                     : selectedAssets?.length
-                    ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
-                      selectedAssets?.length
-                      ? false
+                      ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
+                        selectedAssets?.length
+                        ? false
+                        : true
                       : true
-                    : true
                 }
               >
                 Delete

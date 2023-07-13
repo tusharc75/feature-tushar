@@ -173,7 +173,7 @@ const ArrangeView = (props) => {
       }}
       fullWidth
     >
-      <CustomDialogHeader title={`Arrange View`} onClose={close} showRequiredLabel={false} showManimizeMaximize={false} />
+      <CustomDialogHeader title={`Change Resource Order`} onClose={close} showRequiredLabel={false} showManimizeMaximize={false} />
       <CustomDialogContent>
         <Box my={1} color="#555">
           <h3>Drag & Drop to arrange</h3>

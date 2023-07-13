@@ -127,7 +127,7 @@ const ManageRepairOrder = ({
             initialData['customerContact'] = referenceData?.customerContact;
           }
           if (fieldsDataForCreate?.some((e) => e?.fieldName === 'type')) {
-            initialData['type'] = REPAIR_ORDER_TYPE.external;
+            initialData['type'] = REPAIR_ORDER_TYPE.internal;
           }
         }
         setInitialData({
@@ -195,6 +195,14 @@ const ManageRepairOrder = ({
     }
   };
 
+  function validate(values) {
+    const errors = {};
+    if (values?.type === REPAIR_ORDER_TYPE.external && !values?.customerAccount) {
+      errors['customerAccount'] = 'Customer Account is required';
+    }
+    return errors;
+  }
+
   return (
     <Dialog
       maxWidth="md"
@@ -210,7 +218,7 @@ const ManageRepairOrder = ({
       open={true}
     >
       {formsData && formsData?.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validate={validate} validateOnMount onSubmit={handleSubmit}>
           {({ values, errors, touched, setFieldValue, handleSubmit }) => (
             <>
               <CustomDialogHeader
@@ -319,33 +327,6 @@ const ManageRepairOrder = ({
                                           } else if (initialData.fields.find((d) => d.fieldName === 'customerContact')) {
                                             setFieldValue('customerContact', '');
                                           }
-                                          setInitialData((prevState: any) => ({
-                                            ...prevState,
-                                            fields: [
-                                              ...prevState?.fields?.map((e) => {
-                                                if (value?.optionValue === REPAIR_ORDER_TYPE.internal) {
-                                                  if (e?.fieldName === 'customerAccount') {
-                                                    e.required = false;
-                                                    e.isUneditable = true;
-                                                  }
-                                                  if (e?.fieldName === 'customerContact') {
-                                                    e.required = false;
-                                                    e.isUneditable = true;
-                                                  }
-                                                }
-                                                if (value?.optionValue === REPAIR_ORDER_TYPE.external) {
-                                                  if (e?.fieldName === 'customerAccount') {
-                                                    e.required = true;
-                                                    e.isUneditable = false;
-                                                  }
-                                                  if (e?.fieldName === 'customerContact') {
-                                                    e.isUneditable = false;
-                                                  }
-                                                }
-                                                return e;
-                                              })
-                                            ]
-                                          }));
                                         }}
                                         required={field.required}
                                         fullWidth
@@ -362,6 +343,7 @@ const ManageRepairOrder = ({
                                         values={values}
                                         errors={errors}
                                         touched={touched}
+                                        required={field?.fieldName === 'customerAccount' ? values?.type === REPAIR_ORDER_TYPE.external ? true : false : field.required}
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
@@ -369,7 +351,6 @@ const ManageRepairOrder = ({
                                         setFieldValue={(name, value) => {
                                           setFieldValue(name, value);
                                         }}
-                                        required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}

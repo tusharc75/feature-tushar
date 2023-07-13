@@ -86,7 +86,7 @@ const WorkOrder = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${routes.workOrder.path}/detail`);
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.workOrderDetail.path, true);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -366,7 +366,7 @@ const WorkOrder = () => {
               } */}
                 {permissions?.workOrder?.isDelete && (
                   <Button
-                    className={styles.action_submit_btn}
+                    className={`${styles.action_submit_btn} new-dropdown-v1`}
                     variant="outlined"
                     color="default"
                     size="small"
@@ -424,9 +424,9 @@ const WorkOrder = () => {
             dataRows={dataRows}
             selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
             dispatch={dispatch}
-            onEdit={() => {}}
+            onEdit={() => { }}
             extraParamsToCheckDelete={true}
-            onDelete={() => {}}
+            onDelete={() => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -438,7 +438,7 @@ const WorkOrder = () => {
             ]}
             onCreate={null}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -478,9 +478,8 @@ const WorkOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
-              deleteRecord?.workOrderName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${deleteRecord?.workOrderName || ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

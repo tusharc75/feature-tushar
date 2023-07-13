@@ -85,6 +85,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
       {
         _id: product._id,
         comment: values?.comment === '' ? 'Rejected' : values?.comment,
+        supplierPartNumber: values?.supplierPartNumber,
         product: product.productId,
         qty: parseInt(values.qty),
         serialNumber: serialNumberIds?.map((item) => item?._id),
@@ -153,7 +154,14 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
       aria-labelledby="assign-roles-dialog"
     >
       <MuiPickersUtilsProvider utils={DateUtils}>
-        <Formik initialValues={{ qty: 1, rejectDate: new Date(), comment: '', storageLocation: purchaseOrderData?.storageLocation?.optionValue || null, }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+        <Formik initialValues={{
+          qty: 1,
+          rejectDate: new Date(),
+          comment: '',
+          supplierPartNumber: '',
+          storageLocation: purchaseOrderData?.storageLocation?.optionValue || null,
+        }}
+          onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogHeader
@@ -190,6 +198,22 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                     />
                   </ListItem>
                 </List>
+                <Box m={1}>
+                  <TextField
+                    margin="dense"
+                    type="text"
+                    label="Supplier Part Number"
+                    name="supplierPartNumber"
+                    variant="outlined"
+                    fullWidth
+                    value={values['supplierPartNumber']}
+                    error={touched['supplierPartNumber'] && Boolean(errors['supplierPartNumber'])}
+                    helperText={touched['supplierPartNumber'] && errors['supplierPartNumber']}
+                    onChange={(e) => {
+                      setFieldValue('supplierPartNumber', e.target.value);
+                    }}
+                  />
+                </Box>
                 <Box m={1}>
                   <TextField
                     margin="dense"

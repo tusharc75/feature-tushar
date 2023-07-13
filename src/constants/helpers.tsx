@@ -64,7 +64,8 @@ export const rentalManagementSteps: stepInterface[] = [
 
 export const fieldTicketSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Add-on', title: 'Add-on', icon: 'add' }
+  { name: 'Add-on', title: 'Add-on', icon: 'add' },
+  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
 export const demandOrderSteps = ['Add Products'];
@@ -138,19 +139,28 @@ export const repairOrderSteps: stepInterface[] = [
   { name: 'Add Assets', title: 'Add', icon: 'add' },
   { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
-  { name: 'Post Work Service', title: 'Post Work', icon: 'postWork' },
+  { name: 'Execute', title: 'Execute', icon: 'postWork' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'dispatch' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
+export const assetsReceivingSteps: stepInterface[] = [
+  { name: 'Add Assets', title: 'Add', icon: 'add' },
+  { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
+  { name: 'Complete', title: 'Complete', icon: 'end' },
+
+];
+
 export const serviceOrderSteps: stepInterface[] = [
-  { name: 'Field Ticket', title: 'Field Ticket', icon: 'receivingTicket'},
+  { name: 'Field Ticket', title: 'Field Ticket', icon: 'receivingTicket' },
   { name: 'Add Services', title: 'Add', icon: 'add' },
   { name: 'Add Products', title: 'Products', icon: 'assign' },
   { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
   { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
+
+export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -311,7 +321,7 @@ export const sidebarResource = {
   fieldServiceTechnician: `Field Service Technician`,
   rentalPlanningCalendar: `Rental Planning Calendar`,
   resourceLogs: `Resource Logs`,
-  fleetMaster: `Fleet Master`,
+  truckMaster: `Truck Master`,
   job: 'Job',
   fleetDispatch: 'Fleet Dispatch',
   fleetReceiver: 'Fleet Receiver',
@@ -322,7 +332,9 @@ export const sidebarResource = {
   taxMaster: 'Tax Master',
   competencies: 'Competencies',
   padMaster: 'Pad Master',
-  fieldJob: 'Field Job',
+  driverMaster: 'Driver Master',
+  trailerMaster: 'Trailer Master',
+  assetsReceiving: 'Assets Receiving',
 };
 
 export const primaryFields = {
@@ -431,7 +443,7 @@ export const RESOURCE_LABEL = {
   fieldServiceTechnician: `Field Service Technician`,
   fleetDispatch: `Fleet Dispatch`,
   resourceLogs: `Resource Logs`,
-  fleetMaster: `Fleet Master`,
+  truckMaster: `Truck Master`,
   job: 'Job',
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
@@ -441,7 +453,9 @@ export const RESOURCE_LABEL = {
   competencies: 'Competencies',
   materialHandling: 'Material Handling',
   padMaster: 'Pad Master',
-  fieldJob: 'Field Job',
+  driverMaster: 'Driver Master',
+  trailerMaster: 'Trailer Master',
+  assetsReceiving: 'Assets Receiving',
 };
 
 export const CHILD_RESOURCE = {
@@ -1825,6 +1839,8 @@ export const ASSET_STATUS = {
   reserved: 'Reserved',
   inSale: 'In Sale',
   inUse: 'In-Use',
+  standBy: 'Stand By',
+  standByNotChargeable: 'Stand By-Not Chargeable',
   delivered: 'Delivered',
   indTransit: 'In-Transit',
   underReview: 'Under Review',
@@ -1870,7 +1886,7 @@ export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
   delivered: 'Delivered',
-  cancelled: 'Cancelled'
+  cancelled: 'Cancelled',
 };
 
 export const RENTAL_STATUS = {
@@ -1891,7 +1907,9 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   inUse: 'In-Use',
   complete: 'Complete',
   return: 'Return',
-  consumed: 'Consumed'
+  consumed: 'Consumed',
+  standBy: 'Stand By',
+  standByNotChargeable: 'Stand By-Not Chargeable',
 } as const;
 
 export const REPAIR_JOB_STATUS = {
@@ -1919,7 +1937,8 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   salesOrder: 'Sales Order',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  assetsReceiving: 'Assets Receiving',
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2000,7 +2019,7 @@ export const ACTIVITY_RESOURCE = {
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
   fieldTicket: 'fieldTicket',
-  fleetMaster: 'fleetMaster',
+  truckMaster: 'truckMaster',
   job: 'Job',
   purchaseRequisition: 'purchaseRequisition',
   planning: 'planning',
@@ -2017,13 +2036,13 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket'
+  irtTicket: 'irtTicket',
 };
 
 export const LOG_RESOURCE = {
   serializedAsset: sidebarResource.serializedAsset,
   serviceMaster: sidebarResource.serviceMaster,
-  fleetMaster: sidebarResource.fleetMaster,
+  truckMaster: sidebarResource.truckMaster,
   job: sidebarResource.job,
   quotation: sidebarResource.quotation,
   lead: sidebarResource.lead,
@@ -2325,7 +2344,8 @@ export const WORKORDER_SERVICE_STATUS = {
   backlog: 'Backlog',
   inProgress: 'In-Progress',
   completed: 'Completed',
-  failed: 'Failed'
+  failed: 'Failed',
+  skipped: 'Skipped',
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
@@ -2402,6 +2422,12 @@ export const MATERIAL_REQUEST_STATUS = {
   processed: 'Processed',
   closed: 'Closed'
 };
+
+export const ASSETS_RECEIVING_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  complete: 'Complete'
+}
 
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {

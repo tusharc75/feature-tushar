@@ -33,7 +33,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false,  showSaveAndNext: false });
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false, showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
   const [recordToUpdate, setRecordToUpdate] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
@@ -340,7 +340,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     setUpdating(true);
     axiosInstance()
       .put(`${salesOrder.api}/material/${salesOrderData._id}`, { material: rows })
-      .then(({data}) => {
+      .then(({ data }) => {
         setUpdating(false);
         toastConfig.setToastConfig({
           open: true,
@@ -355,7 +355,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
             isBulkedit: false,
             showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
           });
-        }else{
+        } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
         fetchMaterialData();
@@ -383,7 +383,11 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   };
 
   const handleOpen = (row, rows) => {
-    setIsProductEdit({ open: true, isBulkedit: false,  showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false  });
+    setIsProductEdit({
+      open: true,
+      isBulkedit: false,
+      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+    });
     setRecordToUpdate(row.original);
   };
 
@@ -480,6 +484,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
                 disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
                 onClick={openActions}
                 endIcon={<KeyboardArrowDown fontSize="small" />}
+                className="new-dropdown-v1"
               >
                 Actions
               </Button>

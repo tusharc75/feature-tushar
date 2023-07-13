@@ -7,7 +7,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { CustomDialogTransition, productInventory } from 'src/constants/helpers';
+import { CustomDialogTransition, RESOURCE_LABEL, productInventory } from 'src/constants/helpers';
 
 function RevertQtyDialog({ referenceType, productName, product, onClose, onSuccess, qty, revertedQty, ledgerId }) {
 
@@ -29,7 +29,7 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
     setLoading(true);
     let data = { revertQty: parseInt(values.revertQty), comment: values.comment };
     if (referenceType === "workOrder") {
-      axiosInstance().put(`/material-handling/revert/${ledgerId}`, data)
+      axiosInstance().put(`/material-handling/revert/${ledgerId}`, {...data,referenceType:RESOURCE_LABEL.workOrder})
         .then(({ data: { data } }) => {
           setLoading(false);
           onSuccess();

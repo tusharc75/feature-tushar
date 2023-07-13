@@ -5,7 +5,6 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
-import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
@@ -15,15 +14,27 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { MdAdd } from 'react-icons/md';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
-import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
+import {
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource
+} from 'src/constants/helpers';
+import { Link } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ManageFieldJob from './ManageFieldJob';
+import styles from '../Leads/Header.module.scss';
+import ManageTrailerMaster from './ManageTrailerMaster';
+import CardView from './CardView';
+import AppsIcon from '@material-ui/icons/Apps';
+import ViewListIcon from '@material-ui/icons/ViewList';
 
-const FieldJob = () => {
-  const renderedFrom = camelCase(routes?.fieldJob.title);
+const TrailerMaster = () => {
+  const renderedFrom = camelCase(routes?.trailerMaster.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -33,7 +44,7 @@ const FieldJob = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [fieldJobId, setFieldJobId] = useState(null);
+  const [trailerMasterId, setTrailerMasterId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -43,14 +54,17 @@ const FieldJob = () => {
   const [gridApi, setGridApi] = useState(null);
   const { getColumnData } = useColumns();
 
+  const [viewType, setViewType] = useState(2);
+  const [cardViewData, setCardViewData] = useState([]);
+
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.fieldJob}`)
+      .get(`/field?resource=${sidebarResource?.trailerMaster}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldJobDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.trailerMasterDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -69,23 +83,21 @@ const FieldJob = () => {
       });
   };
 
-  const fetchFieldJobData = () => {
+  const fetchTrailerMasterData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes?.fieldJob.path}${queryString}`)
+      .get(`${routes?.trailerMaster.path}${queryString}`)
       .then(({ data: { data } }) => {
-        let count = data?.count;
+        setCardViewData(data?.data);
         let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.fieldJob?.isDelete;
+          finalObject['canDelete'] = permissions?.trailerMaster?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.fieldJob?.isUpdate;
-
+          finalObject['allowedToEdit'] = permissions?.trailerMaster?.isUpdate;
           return {
             ...finalObject
           };
@@ -94,18 +106,18 @@ const FieldJob = () => {
           dispatch({
             type: 'initialize',
             data: [...dataRows, ...rows],
-            count: count,
+            count: data?.count,
             selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
-            count: count,
+            count: data?.count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-        dispatch({ type: 'initialize', data: rows, count: count });
+        dispatch({ type: 'initialize', data: rows, count: data?.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -113,12 +125,7 @@ const FieldJob = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-
-    if (isExport) {
-      deepFilter = `?`;
-    }
-
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -142,12 +149,10 @@ const FieldJob = () => {
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
-
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-
     return deepFilter;
   };
 
@@ -165,12 +170,13 @@ const FieldJob = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      {permissions?.fieldJob?.isCreate ? (
+      {permissions?.trailerMaster?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
+            size="small"
             aria-label="Clone"
             onClick={() => {
-              setFieldJobId(params.data.id);
+              setTrailerMasterId(params.data.id);
               setOpen({ open: true, isClone: true });
             }}
           >
@@ -215,10 +221,10 @@ const FieldJob = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`${routes?.fieldJob?.path}/remove`, { ids: ids })
+      .put(`${routes?.trailerMaster?.path}/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
-        fetchFieldJobData();
+        fetchTrailerMasterData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -237,22 +243,22 @@ const FieldJob = () => {
   }, []);
 
   useEffect(() => {
-    fetchFieldJobData();
+    fetchTrailerMasterData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   return (
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.fieldJob.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.trailerMaster.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions?.fieldJob}
-            module="fieldJob"
-            api={'field-job'}
+            permissions={permissions.trailerMaster}
+            module="trailerMaster"
+            api={'trailer-master'}
             afterImportCompleted={() => {
-              fetchFieldJobData();
+              fetchTrailerMasterData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -264,7 +270,7 @@ const FieldJob = () => {
             }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
-              else fetchFieldJobData();
+              else fetchTrailerMasterData();
             }}
             additionalParams={getQueryString(true)}
           />
@@ -273,7 +279,26 @@ const FieldJob = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                  setViewType(1);
+                }}
+              >
+                <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
+              </IconButton>
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                  setViewType(2);
+                }}
+              >
+                <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
+              </IconButton>
+            </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
@@ -287,11 +312,11 @@ const FieldJob = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.fieldJob?.isCreate && (
+                  {permissions?.trailerMaster?.isCreate && (
                     <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
-                        setFieldJobId(null);
+                        setTrailerMasterId(null);
                         setOpen({ open: true, isClone: false });
                       }}
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -302,7 +327,7 @@ const FieldJob = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
-                  {permissions?.fieldJob?.isDelete && (
+                  {permissions?.trailerMaster?.isDelete && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -354,68 +379,81 @@ const FieldJob = () => {
             </Grid>
           </Grid>
         </div>
-        {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions.fieldJob}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                setFieldJobId(data.id);
-                setOpen({ open: true, isClone: false });
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                setFieldJobId(data.id);
-                setOpen({ open: true, isClone: false });
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setDeleteRecord(data);
-                setShowDeleteConfirmBox(true);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              owerCollaboratorInitialsOrImages=""
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setFieldJobId(data.id);
-                setOpen({ open: true, isClone: true });
-              }}
-              chips={[]}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={true}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchFieldJobData}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.fieldJob}
-            />
-          )
-        ) : null}
+        {viewType === 1 && (
+          <CardView
+            data={cardViewData}
+            fields={columns}
+            setTrailerMasterId={setTrailerMasterId}
+            setOpen={setOpen}
+            setDeleteRecord={setDeleteRecord}
+            setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+          />
+        )}
+        {viewType === 2 && (
+          <>
+            {Object.keys(frameWorkComponent).length > 0 ? (
+              isMobile && !isTablet ? (
+                <CustomSwipableList
+                  allowSelection={true}
+                  allowSwipe={true}
+                  permissions={permissions.trailerMaster}
+                  primaryField={columns?.find((d) => d.primaryField)}
+                  onClick={(data) => {
+                    setTrailerMasterId(data.id);
+                    setOpen({ open: true, isClone: false });
+                  }}
+                  dataRows={dataRows}
+                  selectedRecords={selectedRecords}
+                  dispatch={dispatch}
+                  onEdit={(data) => {
+                    setTrailerMasterId(data.id);
+                    setOpen({ open: true, isClone: false });
+                  }}
+                  extraParamsToCheckDelete={true}
+                  onDelete={(data) => {
+                    setDeleteRecord(data);
+                    setShowDeleteConfirmBox(true);
+                  }}
+                  rowCount={rowCount}
+                  page={page}
+                  loading={loading}
+                  additionalDetails={[]}
+                  owerCollaboratorInitialsOrImages=""
+                  onCreate={false}
+                  showClone={true}
+                  onClone={(data) => {
+                    setTrailerMasterId(data.id);
+                    setOpen({ open: true, isClone: true });
+                  }}
+                  chips={[]}
+                  renderedFrom={renderedFrom}
+                />
+              ) : (
+                <CustomAgGrid
+                  columns={columns}
+                  dataRows={dataRows}
+                  frameworkComponents={frameWorkComponent}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  page={page}
+                  allowAction={true}
+                  loading={loading}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchTrailerMasterData}
+                  showOnlyShowFilteredRecordSwitch={true}
+                />
+              )
+            ) : null}
+          </>
+        )}
+
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.fieldJob?.title?.toLowerCase()}  ${deleteRecord?.fieldJobNumber || ''} ?`}
+            message={`Are you sure you want to delete Trailer Master  ${deleteRecord?.trailerName || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -424,13 +462,13 @@ const FieldJob = () => {
           />
         )}
         {open?.open && (
-          <ManageFieldJob
-            id={fieldJobId}
+          <ManageTrailerMaster
+            id={trailerMasterId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-              fetchFieldJobData();
+              fetchTrailerMasterData();
             }}
           />
         )}
@@ -439,4 +477,4 @@ const FieldJob = () => {
   );
 };
 
-export default FieldJob;
+export default TrailerMaster;

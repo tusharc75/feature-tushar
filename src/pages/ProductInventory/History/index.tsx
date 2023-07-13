@@ -12,15 +12,20 @@ import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComp
 import { capitalize } from 'lodash';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { IconButton, TextField, Tooltip } from '@material-ui/core';
+import { IconButton, TextField } from '@material-ui/core';
 import { Autorenew } from '@material-ui/icons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { Autocomplete } from '@material-ui/lab';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RevertQtyDialog from './RevertQtyDialog';
+import { useAppTheme } from 'src/constants/AppConfig';
+import DurationFilter from 'src/components/DurationFilter';
+import moment from 'moment';
 
 const History = ({ product, warehouse, storageLocation }) => {
+  const [themeColor] = useAppTheme();
+  const isDarkTheme = themeColor === 'dark';
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -38,9 +43,12 @@ const History = ({ product, warehouse, storageLocation }) => {
   const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse && warehouse?.split(',')?.length === 1 ? warehouse : 'All');
   const [selectedStorageLocation, setSelectedStorageLocation] = useState(storageLocation);
 
-
   const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
 
+  const [duration, setDuration] = useState({
+    from: new Date(moment().subtract('1', 'year').calendar()),
+    to: new Date(),
+  })
 
   const renderedFrom = 'Product_Inventory_History';
 
@@ -52,7 +60,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     if (warehouseOptions) {
       fetchRecords();
     }
-  }, [page, limit, filters, sorting, selectedEntity, selectedWarehouse, selectedStorageLocation, warehouseOptions]);
+  }, [page, limit, filters, sorting, selectedEntity, selectedWarehouse, selectedStorageLocation, warehouseOptions, duration]);
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -97,14 +105,25 @@ const History = ({ product, warehouse, storageLocation }) => {
     if (filterById.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
     }
+    const updatedFilters = [];
     if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: field,
           term: filters[field].filter
         });
       });
+    }
+    if (duration) {
+      updatedFilters.push({
+        field: 'date',
+        term: {
+          from: moment(duration?.from).format('MM/DD/YYYY'),
+          to: moment(duration?.to).format('MM/DD/YYYY')
+        }
+      })
+    }
+    if (updatedFilters?.length > 0) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
     if (sorting.length > 0) {
@@ -150,21 +169,21 @@ const History = ({ product, warehouse, storageLocation }) => {
       sortable: false,
       cellStyle: (params) => {
         if (params?.data?.type === 'Credit') {
-          return { backgroundColor: '#90ee90' };
+          return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
         }
         if (params?.data?.type === 'Debit') {
-          return { backgroundColor: '#FFCCCB' };
+          return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
         }
       }
     },
-    { field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
-    { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
+    ...(!user?.user?.brandPolicy?.hideInventoryCount ? [{ field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false }] : []),
+    { field: 'price', headerName: 'Average Cost', show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
     ...(warehouse && warehouse?.split(',')?.length === 1
       ? [
         {
           field: 'finalAvgPrice',
-          headerName: 'Final Average Price',
+          headerName: 'Final Average Cost',
           show: true,
           cellRenderer: 'commonRenderer',
           filter: false,
@@ -192,10 +211,10 @@ const History = ({ product, warehouse, storageLocation }) => {
         }
       ]
       : []),
+    { field: 'supplierPartNumber', headerName: 'Supplier Part Number', show: true, cellRenderer: 'commonRenderer', filter: true, sortable: false },
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer', filter: true, sortable: false },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
     { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'userRenderer', filter: true, sortable: false },
-    //{ field: 'purchaseOrderRejectedDate', headerName: 'Purchase Order Rejected Date', filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' },
     { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
   ];
 
@@ -303,37 +322,35 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   const ActionsRenderer = (params) => (
     <>
-      {((['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted)
-        || (['Work Order'].includes(params.data.referenceType)
-          && params.data.type?.toLowerCase() === 'debit'
-          && ((params.data.qty - (params.data?.revertedQty || 0)) > 0)))
-        ? (
-          <Box pl={1}>
-            <HtmlTooltip title="Revert">
-              <IconButton
-                size="small"
-                aria-label="revert"
-                onClick={() => {
-                  if (params.data.referenceType === "Work Order") {
-                    setRevertQtyDialog({
-                      open: true,
-                      productName: '',
-                      product: params.data.product,
-                      qty: params.data.qty,
-                      revertedQty: params?.data?.revertedQty || 0,
-                      ledgerId: params.data._id
-                    })
-                  }
-                  else {
-                    setIsRevertConfirmation({ open: true, _id: params?.data?._id, product: params?.data?.product });
-                  }
-                }}
-              >
-                <Autorenew fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-          </Box>
-        ) : null}
+      {(['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted) ||
+        (['Work Order'].includes(params.data.referenceType) &&
+          params.data.type?.toLowerCase() === 'debit' &&
+          params.data.qty - (params.data?.revertedQty || 0) > 0) ? (
+        <Box pl={1}>
+          <HtmlTooltip title="Revert">
+            <IconButton
+              size="small"
+              aria-label="revert"
+              onClick={() => {
+                if (params.data.referenceType === 'Work Order') {
+                  setRevertQtyDialog({
+                    open: true,
+                    productName: '',
+                    product: params.data.product,
+                    qty: params.data.qty,
+                    revertedQty: params?.data?.revertedQty || 0,
+                    ledgerId: params.data._id
+                  });
+                } else {
+                  setIsRevertConfirmation({ open: true, _id: params?.data?._id, product: params?.data?.product });
+                }
+              }}
+            >
+              <Autorenew fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        </Box>
+      ) : null}
     </>
   );
 
@@ -351,48 +368,63 @@ const History = ({ product, warehouse, storageLocation }) => {
   return (
     <>
       {warehouseOptions && (
-        <Box display="flex">
-          <Autocomplete
-            style={{ width: '250px' }}
-            options={warehouseOptions}
-            getOptionLabel={(option: any) => option.optionLabel}
-            disableClearable
-            getOptionSelected={(option: any, val) => option.optionValue === val}
-            value={
-              warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-                ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
-                : ''
-            }
-            onChange={(e, val) => {
-              if (val !== null) {
-                setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
-                setSelectedStorageLocation(null);
-              }
-            }}
-            renderInput={(params) => (
-              <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-            )}
-          />
-          {user?.user?.brandPolicy?.storageLocation && (
-            <Autocomplete
-              style={{ width: '250px', marginLeft: '10px' }}
-              options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
-              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
-              value={
-                storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation).length
-                  ? storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation)[0]
-                  : ''
-              }
-              onChange={(e, val) => {
-                setSelectedStorageLocation(val?.optionValue);
-              }}
-              renderInput={(params) => (
-                <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
-              )}
-            />
-          )}
-        </Box>
+        <Grid container justifyContent='space-between'>
+          <Grid item md={10} sm={10} xs={10}>
+            <Grid container spacing={2} justifyContent='space-between'>
+              <Grid item md={3} sm={6} xs={12}>
+                <Autocomplete
+                  options={warehouseOptions}
+                  getOptionLabel={(option: any) => option.optionLabel}
+                  disableClearable
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={
+                    warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                      ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    if (val !== null) {
+                      setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+                      setSelectedStorageLocation(null);
+                    }
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                  )}
+                />
+              </Grid>
+              <Grid item md={3} sm={6} xs={12}>
+                {user?.user?.brandPolicy?.storageLocation && (
+                  <Autocomplete
+                    options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
+                    getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                    getOptionSelected={(option: any, val) => option.optionValue === val}
+                    value={
+                      storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation).length
+                        ? storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation)[0]
+                        : ''
+                    }
+                    onChange={(e, val) => {
+                      setSelectedStorageLocation(val?.optionValue);
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+                    )}
+                  />
+                )}
+              </Grid>
+              <Grid item md={6} sm={12} xs={12}>
+                <Box mt={1}>
+                  <DurationFilter
+                    duration={duration}
+                    setDuration={setDuration}
+                    disabled={false}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
       )}
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
@@ -438,10 +470,10 @@ const History = ({ product, warehouse, storageLocation }) => {
           revertedQty={revertQtyDialog.revertedQty}
           ledgerId={revertQtyDialog.ledgerId}
           onClose={() => {
-            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' })
+            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
           }}
           onSuccess={() => {
-            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' })
+            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
             dispatch({ type: 'initialize', data: [], count: 0 });
             fetchRecords();
           }}

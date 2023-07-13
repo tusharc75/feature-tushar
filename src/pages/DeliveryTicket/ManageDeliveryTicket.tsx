@@ -13,7 +13,8 @@ import {
   CustomDialogTransition,
   setFieldsInAscendingOrder,
   generateUniqueIdOnly,
-  DELIVERY_TICKET_STATUS
+  DELIVERY_TICKET_STATUS,
+  convertDateInDateTime
 } from './../../constants/helpers';
 import {
   getObjKeysWithValues,
@@ -76,8 +77,28 @@ const ManageDeliveryTicket = ({
   const [pickupFromAddress, setPickupFromAddress] = useState([]);
   const [deliveryToAddress, setDeliveryToAddress] = useState([]);
 
+  const [staticDeliveryToAddress, setStaticDeliveryToAddress] = useState(null);
+  const [staticPickupFromAddress, setStaticPickupFromAddress] = useState(null);
+
   const [showAddressDialog, setShowAddressDialog] = useState(false);
   const [addressType, setAddressType] = useState('');
+  const [createDateMin, setCreateDateMin] = useState(new Date())
+
+  useEffect(() => {
+    if (initialData?.fields?.some(field => field?.fieldName === "createDate") && productInventory?.length) {
+      findValidationDate()
+    }
+  }, [initialData, productInventory])
+
+  const findValidationDate = async () => {
+    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: productInventory?.map((e) => e._id), last: 1 })
+    var lastDate: any = new Date();
+    if (data?.date) {
+      lastDate = new Date(data?.date);
+      lastDate.setHours(0, 0, 0);
+    }
+    setCreateDateMin(lastDate)
+  }
 
   useEffect(() => {
     const fields = initialData.fields;
@@ -324,6 +345,8 @@ const ManageDeliveryTicket = ({
             tempInitialData['transferInventory'] = referenceData?.referenceId;
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.repairOrder) {
             tempInitialData['repairOrder'] = referenceData?.referenceId;
+          } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.assetsReceiving) {
+            tempInitialData['assetsReceiving'] = referenceData?.referenceId;
           }
 
           tempInitialData['pickupFromType'] = referenceData?.pickupFromType;
@@ -353,7 +376,6 @@ const ManageDeliveryTicket = ({
               }
             }
           }
-
           if (!tempInitialData['deliveryToAddress']) {
             if (referenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
               const customerAccountData = fieldsDataForCreate?.find((d) => d?.fieldName === 'customerAccount')?.option || [];
@@ -368,6 +390,13 @@ const ManageDeliveryTicket = ({
                 tempInitialData['deliveryToAddress'] = supplierShippingAddress[0];
               }
             }
+          }
+
+          if (referenceData?.pickupFromType === DELIVERY_FROM_TO_TYPE.customer && tempInitialData['pickupFromAddress']) {
+            setStaticPickupFromAddress(tempInitialData['pickupFromAddress'])
+          }
+          if (referenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer && tempInitialData['deliveryToAddress']) {
+            setStaticDeliveryToAddress(tempInitialData['deliveryToAddress'])
           }
         }
         fieldsDataForCreate = updateFieldProperty(
@@ -486,10 +515,15 @@ const ManageDeliveryTicket = ({
 
   function validate(values) {
     const errors = {};
-    let startDate = moment(values?.pickUpDate);
-    let endDate = moment(values?.deliveryDate);
-    if (endDate.diff(startDate, 'days') < 0) {
-      errors['pickUpDate'] = 'Please enter valid pick-Up  date';
+    if (initialData?.fields?.some(field => field?.fieldName === "createDate") && productInventory?.length) {
+      let startDate = moment(values?.pickUpDate);
+      let endDate = moment(values?.deliveryDate);
+      if (endDate.diff(startDate, 'days') < 0) {
+        errors['pickUpDate'] = 'Please enter valid pick-Up date';
+      }
+      if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
+        errors['createDate'] = `Please select valid date`;
+      }
     }
     return errors;
   }
@@ -516,8 +550,9 @@ const ManageDeliveryTicket = ({
       }
     } else if (pickupFromType === DELIVERY_FROM_TO_TYPE.customer) {
       let filterAddress = customerData.find((d) => d.optionValue === pickupFrom)?.shippingAddress;
-      if (filterAddress || pickupFromAddress) {
-        setPickupFromAddress(addressData.filter((d) => filterAddress?.some((u) => u === d.optionValue) || d.optionValue === pickupFromAddress));
+      if (filterAddress || pickupFromAddress || staticPickupFromAddress) {
+        setPickupFromAddress(addressData.filter((d) => filterAddress?.some((u) => u === d.optionValue)
+          || d.optionValue === pickupFromAddress || d.optionValue === staticPickupFromAddress));
       } else {
         setPickupFromAddress([]);
       }
@@ -536,8 +571,9 @@ const ManageDeliveryTicket = ({
       }
     } else if (deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
       let filterAddress = customerData.find((d) => d.optionValue === deliveryTo)?.shippingAddress;
-      if (filterAddress || deliveryToAddress) {
-        setDeliveryToAddress(addressData.filter((d) => filterAddress?.some((u) => u === d.optionValue) || d.optionValue === deliveryToAddress));
+      if (filterAddress || deliveryToAddress || staticDeliveryToAddress) {
+        setDeliveryToAddress(addressData.filter((d) => filterAddress?.some((u) => u === d.optionValue)
+          || d.optionValue === deliveryToAddress || d.optionValue === staticDeliveryToAddress));
       } else {
         setDeliveryToAddress([]);
       }
@@ -579,8 +615,8 @@ const ManageDeliveryTicket = ({
                   }
                 }}
                 title={`${deliveryTicketId
-                    ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
-                    : `Create Transaction Ticket`
+                  ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
+                  : `Create Transaction Ticket`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -640,6 +676,31 @@ const ManageDeliveryTicket = ({
                                       // maxDate={
                                       //     referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob ? referenceData.estimateStartDate ? moment(referenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
                                       //         : referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
+                                      />
+                                    ) : (field.fieldName === "createDate") ? (
+                                      <FormTypes
+                                        {...field}
+                                        fieldData={field}
+                                        fields={initialData.fields}
+                                        isNew={!Boolean(deliveryTicketId)}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          var newDate = convertDateInDateTime(value);
+                                          setFieldValue(name, newDate);
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        minDate={createDateMin}
+                                        maxDate={new Date()}
                                       />
                                     ) : field.fieldName === 'deliveryDate' ? (
                                       <FormTypes

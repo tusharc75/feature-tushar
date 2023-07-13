@@ -80,9 +80,16 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     fetchData();
   }, [rowData]);
 
-  const fetchTaxRate = async (zipcode: any) => {
+  const fetchTaxRate = async (billingAddress: any) => {
+    const zipCode = billingAddress?.zipCode;
+    const state = billingAddress?.state
+    let materialType;
+    if (isBulkedit)
+      materialType = rowData[0]?.type;
+    else
+      materialType = rowData?.type
     try {
-      const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode/${zipcode}`);
+      const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}`);
       return response?.data?.data || [];
     } catch (e) {
       toastConfig.setToastConfig(e);
@@ -222,8 +229,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    if (rentalManagementData?.customerAccount?.taxApplicable && rentalManagementData?.billingAddress?.zipCode) {
-      const taxCodeOptions = await fetchTaxRate(rentalManagementData?.billingAddress?.zipCode);
+    if (rentalManagementData?.customerAccount?.taxApplicable && (rentalManagementData?.billingAddress?.zipCode || rentalManagementData?.billingAddress?.state)) {
+      const taxCodeOptions = await fetchTaxRate(rentalManagementData?.billingAddress);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
           e.option = taxCodeOptions;

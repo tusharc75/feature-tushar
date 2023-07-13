@@ -1,14 +1,10 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
-// import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaClone } from 'react-icons/fa';
 import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
 import {
-  isObjectEmpty,
-  customerAccount,
-  supplierAccount,
   gridLoadingTimeout,
   repairOrder,
   prepareDataForGrid,
@@ -95,7 +91,7 @@ const RepairOrder = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.repairOrderDetail.path);
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.repairOrderDetail.path, true);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

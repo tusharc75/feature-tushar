@@ -4,12 +4,10 @@ import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { useData } from 'src/StateProvider/Provider';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import moment from 'moment';
-import { CustomDialogTransition, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -18,16 +16,16 @@ import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { Add, Delete, Edit, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import styles from '../../Leads/Header.module.scss';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import InvoiceFacility from 'src/pages/Invoice/Invoice/InvoiceFacility';
 import { startCase } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, estimateStartDate, onClose, onSuccess }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -46,14 +44,22 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
+    fetchData();
   }, [columns]);
 
   const fetchFields = async () => {
     try {
       let data = await fetch_invoice_product_fields(invoiceData?.currency);
+      data?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
       setAllFields(JSON.parse(JSON.stringify(data)));
-      const coloum: any = [
+      const newColumns = generateCustomTableColumns(data, invoiceData?.currency, 'rental_management_view_billing');
+      let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+      if (qtyIndex > -1) {
+        newColumns[qtyIndex].accessor = 'qtyDisplay';
+      }
+      var column: any = [
         {
           accessor: 'srno',
           Header: 'Index',
@@ -79,12 +85,12 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                  : ''}
+                    ? row.original?.packageDetail.packageType === 'Product'
+                      ? '(Product)'
+                      : '(Service)'
+                    : row.original.type === 'service'
+                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                      : ''}
               </p>
             ) : (
               <NoDataCell />
@@ -109,7 +115,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                         window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                       } else if (row.original.type === 'product') {
                         window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      } else if (row.original.type === 'asset') {
+                      } else if (row.original.type === 'serializedAsset') {
                         window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                       } else {
                         window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -132,163 +138,54 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           }
         }
       ];
-
-      data.forEach((element) => {
-        if (element.type === 'date') {
-          coloum.push({
-            accessor: element.fieldName,
-            Header: element.fieldLabel,
-            disableFilters: true,
-            Cell: ({ row }) =>
-              row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName])?.format(dateFormat)}</p> : <NoDataCell />
-          });
-        } else if (element.fieldName === 'supplierAccount') {
-          coloum.push({
-            accessor: element.fieldName,
-            Header: element.fieldLabel,
-            Cell: ({ row }) =>
-              row.original[element.fieldName]?.length ? (
-                <p className="text-truncate">{row.original[element.fieldName]?.map((d) => d?.optionLabel)?.toString()}</p>
-              ) : (
-                <NoDataCell />
-              )
-          });
-        } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-          if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-            element.displayUnits.forEach((_unit) => {
-              let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-              });
-            });
-          } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-            element.displayUnits.forEach((_unit) => {
-              element.displayCurrency.forEach((_currency) => {
-                let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-                let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-                coloum.push({
-                  accessor: fieldName,
-                  Header: fieldLabel,
-                  Cell: ({ row }) =>
-                    row.original[fieldName] ? (
-                      <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                    ) : (
-                      <NoDataCell />
-                    )
-                });
-              });
-            });
-          } else if (element.type === 'currencyAmount') {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          }
-        } else {
-          if (element.fieldName === 'qty') {
-            element.fieldName = 'qtyDisplay';
-          }
-          coloum.push({
-            accessor: element.fieldName,
-            Header: element.fieldLabel,
-            Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-          });
-        }
-      });
-      {
-        isMobile ? (
-          <Box display={'none'} />
-        ) : (
-          coloum.push({
-            accessor: 'action',
-            Header: '',
-            minWidth: 100,
-            width: 100,
-            sticky: 'right',
-            disableFilters: true,
-            canDrag: false,
-            Cell: ({ row }) => (
-              <Grid container spacing={1}>
-                {row.original.isEditable && row.original.qty > 1 && (
-                  <>
-                    <IconButton
-                      size="small"
-                      aria-label="Details"
-                      onClick={() => {
-                        setIsProductEdit({ open: true, rowData: row.original });
-                      }}
-                    >
-                      <EditIcon color="primary" />
-                    </IconButton>
-                    <Box ml={1} />
-                  </>
-                )}
+      column = [...column, ...newColumns];
+      column.push({
+        accessor: 'action',
+        Header: 'Action',
+        minWidth: 100,
+        width: 100,
+        sticky: 'right',
+        disableFilters: true,
+        canDrag: false,
+        Cell: ({ row }) => (
+          <Grid container spacing={1}>
+            {row.original.isEditable && row.original.qty > 1 && (
+              <>
                 <IconButton
-                  disabled={!invoiceData?.isLatestInvoice}
                   size="small"
                   aria-label="Details"
                   onClick={() => {
-                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                    getNestedSubRows(obj, row.original);
-                    setViewBillDialogConfirm({ open: true, rows: obj });
+                    setIsProductEdit({ open: true, rowData: row.original });
                   }}
                 >
-                  <Delete color={invoiceData?.isLatestInvoice ? 'error' : 'disabled'} />
+                  <EditIcon color="primary" />
                 </IconButton>
-              </Grid>
-            )
-          })
-        );
-      }
-      coloum.forEach((element) => {
-        if (element.Header === 'Actual Start Date') {
-          element.Header = 'Bill Start Date';
-        }
-        if (element.Header === 'Actual End Date') {
-          element.Header = 'Bill End Date';
-        }
-
-        if (element.accessor === 'qtyDisplay') {
-          element['Footer'] = (info) => {
-            const qtyTotal = info.rows
-              .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-              .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-            return <>{qtyTotal}</>;
-          };
-        } else if (element.accessor.includes('finalPrice')) {
-          element['Footer'] = (info) => {
-            const total = info.rows
-              .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-              .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-            return (
-              <>
-                {currencySymbol} {formatAmountWithCurrency(invoiceData?.currency, total)?.amountWithouCurrencyCode ?? total}
+                <Box ml={1} />
               </>
-            );
-          };
-        }
-      });
-      setColumns(coloum);
-      fetchProductInventory();
+            )}
+            <IconButton
+              disabled={!invoiceData?.isLatestInvoice}
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                getNestedSubRows(obj, row.original);
+                setViewBillDialogConfirm({ open: true, rows: obj });
+              }}
+            >
+              <Delete color={invoiceData?.isLatestInvoice ? 'error' : 'disabled'} />
+            </IconButton>
+          </Grid>
+        )
+      })
+      setColumns(column);
+      fetchData();
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     var data: any = [];
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
     data = response?.data?.data;
@@ -299,25 +196,24 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'package'
+      parent.detail = `${parent.type === 'product'
+        ? parent.productDetail?.productName
+        : parent.type === 'package'
           ? parent.packageDetail?.packageName
-          : parent.type === 'asset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.serviceDetail?.serviceName
-      }`;
+          : parent.type === 'serializedAsset'
+            ? parent.serializedAssetDetail?.assetNumber
+            : parent.serviceDetail?.serviceName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'asset'
-          ? parent.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
@@ -341,25 +237,24 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow?.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === 'package'
+      _subRow.detail = `${_subRow?.type === 'product'
+        ? _subRow?.productDetail?.productName
+        : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
-          : _subRow?.type === 'asset'
-          ? _subRow?.serializedAssetDetail?.assetNumber
-          : _subRow?.serviceDetail?.serviceName
-      }`;
+          : _subRow?.type === 'serializedAsset'
+            ? _subRow?.serializedAssetDetail?.assetNumber
+            : _subRow?.serviceDetail?.serviceName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : _subRow.type === 'asset'
-          ? _subRow.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow.type === 'serializedAsset'
+                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       _subRow.isEditable = false;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -387,7 +282,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
       .then((res) => {
         setIsLoadingUpdate(false);
         setIsProductEdit({ open: false, rowData: null });
-        fetchProductInventory();
+        fetchData();
         onSuccess();
       })
       .catch((error) => {
@@ -404,7 +299,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/remove`, data)
       .then((res) => {
-        fetchProductInventory();
+        fetchData();
         setViewBillDialogConfirm({ open: false, rows: [] });
       })
       .catch((error) => {
@@ -418,8 +313,15 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         <CustomDialogHeader title={`Invoice Number : ${invoiceData?.invoiceNumber}`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
-            <Box display="flex" justifyContent="space-between">
-              {invoiceData && <InvoiceFacility invoiceData={invoiceData} />}
+            <Box display="flex" justifyContent="space-between" p={1}>
+              {invoiceData &&
+                <PreviewDownload
+                  resource={sidebarResource.invoice}
+                  referenceId={invoiceData?._id}
+                  columns={columns}
+                  isSendEmail={true}
+                />
+              }
               <Box display="flex" alignItems="center">
                 <Button
                   variant="outlined"
@@ -429,6 +331,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   aria-controls="action-menu"
                   disabled={selectedProducts?.length ? false : true}
                   endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>
@@ -477,7 +380,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   uniqueKey="_id"
                   hideSelection={false}
                   hideAction={false}
-                  renderedFrom="rental_management_create_billing"
+                  renderedFrom="rental_management_view_billing"
                   isClientSideGrid={true}
                 />
               </Box>

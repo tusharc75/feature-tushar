@@ -3,18 +3,21 @@ import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flo
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { COLOUR_MASTER, WORKORDER_SERVICE_COLOR, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
+import { COLOUR_MASTER, WORKORDER_SERVICE_COLOR, WORKORDER_SERVICE_STEP_STATUS, WORK_ORDER_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
-import { Box, Button, Paper } from '@material-ui/core';
-import _ from 'lodash';
+import { Box, Button, Paper, Typography } from '@material-ui/core';
+import _, { capitalize } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 
 const customNodeStyles = {
   workOrder: { name: 'WorkOrder', ...COLOUR_MASTER.repairJob },
+  workOrderClosed: {
+    name: 'WorkOrder Closed', ...COLOUR_MASTER.repairJob
+  },
   preWorkService: {
     name: 'Pre Work Service',
     background: WORKORDER_SERVICE_COLOR.preWork,
@@ -63,7 +66,7 @@ const WorkOrderViews = (props) => {
     state: { user }
   }: any = useData();
 
-  if (!user?.user?.brandPolicy?.repairOrderQuotation) {
+  if (!user?.user?.brandPolicy?.servicePrePost) {
     customNodeStyles.preWorkService.name = 'Services';
     delete customNodeStyles.postWorkService;
   }
@@ -99,16 +102,19 @@ const WorkOrderViews = (props) => {
         }
       ];
       var flowEdge: any[] = [];
-      const workOrderServices = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}/views`);
+      const workOrderServices = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`);
       const allServices = workOrderServices?.data?.data || [];
       const allSteps = [];
       if (allServices?.length) xPosition += 300;
       let serviceStepIdx = 0;
+      const allStepsIds = [];
+      const servicesWithNoSteps = []
       allServices?.map((s, sIdx) => {
         allSteps.push(...(s?.steps || []));
         // all assigned users should output as a single string
         const allAssignUsers = s?.assignedUsers?.map((u) => u?.optionLabel).join(', ') || '';
         const serviceId = `${s?._id}_${s?.uniqueId}`;
+        if (!s?.steps?.length) servicesWithNoSteps.push(serviceId)
         flow.push({
           id: `${serviceId}`,
           sourcePosition: 'right',
@@ -121,16 +127,17 @@ const WorkOrderViews = (props) => {
               <HtmlTooltip
                 arrow
                 placement="top"
-                title={`${allAssignUsers !== '' ? `Technician: ${allAssignUsers}` : 'Service'}${
-                  s?.serviceStatus ? `, Status: ${s?.serviceStatus}` : ''
-                }`}
+                title={capitalize(s.type)}
               >
-                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s?.serviceDetail?.serviceName || ''}</div>
+                <div >
+                  <Typography variant="body2">{s?.serviceDetail?.serviceName || ''}</Typography>
+                  <Typography variant="subtitle2">{s?.status || ''}</Typography>
+                </div>
               </HtmlTooltip>
             )
           },
           position: { x: xPosition, y: sIdx * 80 },
-          style: s?.preWork || !user?.user?.brandPolicy?.repairOrderQuotation ? customNodeStyles.preWorkService : customNodeStyles.postWorkService
+          style: s?.preWork || !user?.user?.brandPolicy?.servicePrePost ? customNodeStyles.preWorkService : customNodeStyles.postWorkService
         });
         flowEdge.push({
           id: `workOrder-service-${serviceId}-${workOrderId}`,
@@ -140,6 +147,7 @@ const WorkOrderViews = (props) => {
         });
         s?.steps?.map((step) => {
           const stepId = `${step?._id}_${_.random(1000, 9999)}`;
+          allStepsIds.push(stepId);
           flow.push({
             id: `${stepId}`,
             sourcePosition: 'right',
@@ -152,17 +160,12 @@ const WorkOrderViews = (props) => {
                 <HtmlTooltip
                   arrow
                   placement="top"
-                  title={
-                    stepDatas[step?._id] && stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.passed
-                      ? 'Step Passed'
-                      : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.failed
-                      ? 'Step Failed'
-                      : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.skipped
-                      ? 'Step Skipped'
-                      : 'Step'
-                  }
+                  title={'Step'}
                 >
-                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{step?.stepName || ''}</div>
+                  <div>
+                    <Typography variant="body2">{step?.stepName || ''}</Typography>
+                    <Typography variant="subtitle2">{s?.status || ''}</Typography>
+                  </div>
                 </HtmlTooltip>
               )
             },
@@ -171,10 +174,10 @@ const WorkOrderViews = (props) => {
               stepDatas[step?._id] && stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.passed
                 ? customNodeStyles.stepPassed
                 : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.failed
-                ? customNodeStyles.stepFailed
-                : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.skipped
-                ? customNodeStyles?.stepSkipped
-                : customNodeStyles.step
+                  ? customNodeStyles.stepFailed
+                  : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.skipped
+                    ? customNodeStyles?.stepSkipped
+                    : customNodeStyles.step
           });
           flowEdge.push({
             id: `workOrder-service-steps-${s?._id}_${s?.uniqueId}-${stepId}`,
@@ -185,7 +188,43 @@ const WorkOrderViews = (props) => {
           serviceStepIdx++;
         });
       });
-      if (allSteps?.length) xPosition += 300;
+      if (workOrderStatus === WORK_ORDER_STATUS.completed) {
+        xPosition += 600;
+
+        flow.push({
+          id: `${workOrderId}-closed`,
+          type: 'output',
+          className: 'dark-node',
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          data: {
+            ref_type: 'repairJob',
+            ref_id: workOrderId,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{workOrderName ?? ''}</div>
+          },
+          position: { x: xPosition, y: 70 },
+          style: customNodeStyles.workOrderClosed
+        });
+
+        allStepsIds.map((id, idx) => {
+          flowEdge.push({
+            id: `workOrder-service-steps-${workOrderId}-${id}`,
+            source: `${id}`,
+            arrowHeadType: 'arrow',
+            target: `${workOrderId}-closed`
+          })
+        })
+        servicesWithNoSteps?.map((id, idx) => {
+          flowEdge.push({
+            id: `workOrder-service-steps-${workOrderId}-${id}`,
+            source: `${id}`,
+            arrowHeadType: 'arrow',
+            target: `${workOrderId}-closed`
+          })
+        })
+
+      }
+
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);
     } catch (err) {
@@ -197,6 +236,7 @@ const WorkOrderViews = (props) => {
   const onLoad = (reactFlowInstance) => {
     reactFlowInstance.fitView({ padding: 0.1 });
   };
+
   const onElementClick = (event, element) => {
     switch (element.data.ref_type) {
       case 'repairJob':
@@ -204,7 +244,7 @@ const WorkOrderViews = (props) => {
       case 'deliveryTicket':
         history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
         break;
-      case 'asset':
+      case 'serializedAsset':
         history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
     }

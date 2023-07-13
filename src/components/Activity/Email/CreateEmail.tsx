@@ -124,6 +124,11 @@ export const CreateEmail = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [quoteBuilderOtherAttachments, setQuoteBuilderOtherAttachments] = useState([]);
   const [stateQuoteBuilderAttachments, setStateQuoteBuilderAttachments] = useState([]);
+  const [emailUsersOptions, setEmailUsersOptions] = useState([]);
+
+  useEffect(() => {
+    options.length ? setEmailUsersOptions(options) : fetchUsersEmails();
+  }, []);
 
   useEffect(() => {
     if (fromQuote) {
@@ -140,13 +145,30 @@ export const CreateEmail = ({
   }, [qouteBuilderAttachments]);
 
   useEffect(() => {
-    fetchEmailDetail();
+      fetchEmailDetail(); 
   }, []);
 
   const checkImageUrl = (url) => {
     let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
     let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
     return imageExtensions.indexOf(extension) >= 0;
+  };
+
+  const fetchUsersEmails = async () => {
+    axiosInstance()
+      .get('/user')
+      .then(({ data: { data, count } }) => {
+        data = data.reduce((emails, obj) => {
+          if (obj?.email && emailUsersOptions.indexOf(obj.email) < 0) emails.push(obj.email);
+          return emails;
+        }, []);
+        setEmailUsersOptions((prevState) => {
+          return [...prevState, ...data];
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const fetchEmailDetail = async () => {
@@ -178,7 +200,7 @@ export const CreateEmail = ({
         subject: subject ?? '',
         file: '',
         content: RichTextEditor.createEmptyValue(),
-        to: isQuoteBuilder && options.length ? [options[0]] : [],
+        to: [],
         cc: isQuoteBuilder ? [...cc] : []
       };
       setInitialValues(initialData);
@@ -485,7 +507,7 @@ export const CreateEmail = ({
                             <Autocomplete
                               multiple
                               disableCloseOnSelect={true}
-                              options={options.filter((option) => values.cc.indexOf(option) < 0)}
+                              options={emailUsersOptions.filter((option) => values.cc.indexOf(option) < 0)}
                               freeSolo
                               renderTags={(value, getTagProps) =>
                                 value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
@@ -526,7 +548,7 @@ export const CreateEmail = ({
                             <Autocomplete
                               multiple
                               disableCloseOnSelect={true}
-                              options={isQuoteBuilder ? cc : options.filter((option) => values.to.indexOf(option) < 0)}
+                              options={isQuoteBuilder ? cc : emailUsersOptions.filter((option) => values.to.indexOf(option) < 0)}
                               freeSolo
                               renderTags={(value, getTagProps) =>
                                 value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)

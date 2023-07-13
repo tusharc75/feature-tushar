@@ -6,7 +6,7 @@ import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGri
 import { Link } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
-import { Button, Menu, MenuItem } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
@@ -27,6 +27,7 @@ import CustomSwipableList from '../../../components/SwipableListComponents/Custo
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -138,7 +139,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
         cellRenderer: cellRenderer
       });
     });
-    column.push({ field: 'workOrder', headerName: 'Work Order', show: true, cellRenderer: 'workOrderRenderer' });
+    column.push({ field: 'workOrder', headerName: 'Work Order', show: true, cellRenderer: 'workOrderRenderer', width: 200 });
     column.push({ field: 'workOrderStatus', headerName: 'Work Order Status', show: true, cellRenderer: 'commonRenderer' });
     column.push({
       field: 'status',
@@ -146,40 +147,70 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
       show: true,
       cellRenderer: 'commonRenderer'
     });
-    column.push({ field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' });
+    column.push({ field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer', width: 250 });
     setColumns(column);
   };
 
   const TicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
-        {params.value}
-      </Link>
+      <div className="d-flex gap-2 align-items-center">
+        <p className="text-truncate">{params?.value}</p>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </div>
     ) : (
       <NoDataCell />
     );
 
   const WorkOrderRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.workOrderId}`}>
-        {params.value}
-      </Link>
+      <div className="d-flex gap-2 align-items-center">
+        <p className="text-truncate">{params?.value}</p>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.workOrderDetail.path}/${params.data?.workOrderId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </div>
     ) : (
       <NoDataCell />
     );
 
   const InventoryRenderer = (params) => (
-    <Fragment>
-      <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params?.data?._id}`}>
-        {params.value}
-      </Link>
-    </Fragment>
+    <div className="d-flex gap-2 align-items-center">
+      <p className="text-truncate">{params?.value}</p>
+      <IconButton
+        size="small"
+        onClick={() => {
+          window.open(`${routes.serializedAssetDetail.path}/${params.data?._id}`);
+        }}
+      >
+        <OpenInNewIcon fontSize="small" color="primary" />
+      </IconButton>
+    </div>
   );
 
   const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
-      {params.value}
-    </Link>
+    <div className="d-flex gap-2 align-items-center">
+      <p className="text-truncate">{params?.value}</p>
+      <IconButton
+        size="small"
+        onClick={() => {
+          window.open(`${routes.productDetail.path}/${params.data?.productId}`);
+        }}
+      >
+        <OpenInNewIcon fontSize="small" color="primary" />
+      </IconButton>
+    </div>
   );
 
   const frameworkComponents = {
@@ -259,6 +290,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
                 aria-controls="action-menu"
                 disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
               >
                 Actions
               </Button>
@@ -336,7 +368,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (

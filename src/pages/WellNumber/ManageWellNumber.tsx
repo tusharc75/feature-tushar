@@ -21,7 +21,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 
-const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, referenceData = null }) => {
+const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, referenceData = null, isRedirectToDetailPage = false }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -134,10 +134,10 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refe
             message: data.message
           });
           setLoading(false);
-          if (referenceData) {
-            onSuccess(data.data);
-          } else {
+          if (isRedirectToDetailPage) {
             history.push(`${routes.wellNumberDetail.path}/${data?.data?._id}`);
+          } else {
+            onSuccess(data.data);
           }
         })
         .catch((error) => {
@@ -215,6 +215,7 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refe
                                   isNew={Boolean(id)}
                                   {...field}
                                   fieldData={field}
+                                  fields={initialData.fields}
                                   disabled={Boolean(id) && field.disableOnEdit && !isClone}
                                   values={values}
                                   errors={errors}

@@ -199,7 +199,7 @@ const Steps = ({ serviceId }) => {
                   setStepDialog({ open: true, stepId: '' });
                 }}
               >
-                Add Step
+                Add Steps
               </Button>
             </Grid>
             <Grid item xs={9} md={9} sm={9}>
@@ -219,6 +219,7 @@ const Steps = ({ serviceId }) => {
                   aria-controls="action-menu"
                   disabled={selectedRecords.length === 0}
                   endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>

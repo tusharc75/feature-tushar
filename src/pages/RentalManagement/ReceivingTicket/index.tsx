@@ -514,14 +514,18 @@ const ReceivingTicket = ({
   };
 
   const InventoryRenderer = (params) => (
-    <Fragment>
-      <Link
-        className="link text-truncate"
-        title={params.value}
-        to={`${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`}
+    <div className="d-flex gap-2 align-items-center">
+      <p className="text-truncate">{params.value}</p>
+      <IconButton
+        size="small"
+        onClick={() => {
+          window.open(
+            `${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`
+          );
+        }}
       >
-        {params.value}
-      </Link>
+        <OpenInNewIcon fontSize="small" color="primary" />
+      </IconButton>
       {params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
         <HtmlTooltip title="This asset will be shipped from different facility">
           <IconButton size="small">
@@ -530,102 +534,134 @@ const ReceivingTicket = ({
         </HtmlTooltip>
       )}
       {params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0 && (
-        <Box ml={1}>
-          <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
-            <IconButton
-              size="small"
-              onClick={() => {
-                setShowNonSerializeAsset({
-                  open: true,
-                  data: { productName: params?.data?.productName, nonSerializeAsset: params?.data?.nonSerializeAsset }
-                });
-              }}
-            >
-              <InfoIcon fontSize="small" color={'primary'} />
-            </IconButton>
-          </HtmlTooltip>
-        </Box>
-      )}
-      {params?.data?.isReplaced && (
-        <Box ml={1}>
-          <HtmlTooltip
-            title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}
+        <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              setShowNonSerializeAsset({
+                open: true,
+                data: { productName: params?.data?.productName, nonSerializeAsset: params?.data?.nonSerializeAsset }
+              });
+            }}
           >
             <InfoIcon fontSize="small" color={'primary'} />
-          </HtmlTooltip>
-        </Box>
+          </IconButton>
+        </HtmlTooltip>
+      )}
+      {params?.data?.isReplaced && (
+        <HtmlTooltip
+          title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}
+        >
+          <InfoIcon fontSize="small" color={'primary'} />
+        </HtmlTooltip>
       )}
       {params?.data?.isRepairJob && (
-        <Box ml={1}>
-          <HtmlTooltip title={`${routes.repairJob.title}`}>
-            <IconButton
-              size="small"
-              onClick={() => {
-                history.push(`${routes.repairJobDetail.path}/${params?.data?.repairJob}`);
-              }}
-            >
-              <OpenInNewIcon fontSize="small" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-        </Box>
+        <HtmlTooltip title={`${routes.repairJob.title}`}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.repairJobDetail.path}/${params?.data?.repairJob}`)
+            }}
+          >
+            <OpenInNewIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
       )}
       {params?.data?.isRepairOrder && (
-        <Box ml={1}>
-          <HtmlTooltip title={`${routes.repairOrder.title}`}>
-            <IconButton
-              size="small"
-              onClick={() => {
-                history.push(`${routes.repairOrderDetail.path}/${params?.data?.repairOrder}`);
-              }}
-            >
-              <OpenInNewIcon fontSize="small" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-        </Box>
+        <HtmlTooltip title={`${routes.repairOrder.title}`}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.repairOrderDetail.path}/${params?.data?.repairOrder}`)
+            }}
+          >
+            <OpenInNewIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
       )}
-    </Fragment>
+    </div>
   );
 
   const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
-      {params?.value}
-    </Link>
+    <div className="d-flex gap-2 align-items-center">
+      <p className="text-truncate">{params?.value}</p>
+      <IconButton
+        size="small"
+        onClick={() => {
+          window.open(`${routes.productDetail.path}/${params.data?.productId}`);
+        }}
+      >
+        <OpenInNewIcon fontSize="small" color="primary" />
+      </IconButton>
+    </div>
   );
 
   const ParentNameRenderer = (params) => (params.data?.parentId ? <span>{params?.data?.parentName}</span> : <NoDataCell />);
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" title={params?.value} to={`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`}>
-        {params?.value}
-      </Link>
+      <div className="d-flex gap-2 align-items-center">
+        <p className="text-truncate">{params?.value}</p>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </div>
     ) : (
       <NoDataCell />
     );
 
   const DeliveryTicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
-        {params.value}
-      </Link>
+      <div className="d-flex gap-2 align-items-center">
+        <p className="text-truncate">{params?.value}</p>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </div>
     ) : (
       <NoDataCell />
     );
 
   const ReceivingTicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`}>
-        {params.value}
-      </Link>
+      <div className="d-flex gap-2 align-items-center">
+        <p className="text-truncate">{params?.value}</p>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </div>
     ) : (
       <NoDataCell />
     );
 
   const ReturnTicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.returnTicketId}`}>
-        {params.value}
-      </Link>
+      <div className="d-flex gap-2 align-items-center">
+        <p className="text-truncate">{params?.value}</p>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.deliveryTicketDetail.path}/${params.data.returnTicketId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </div>
     ) : (
       <NoDataCell />
     );
@@ -635,10 +671,10 @@ const ReceivingTicket = ({
       <HtmlTooltip
         title={
           params?.data?.isAllowedStartDate === false && params?.data?.isAllowedEndDate === false
-            ? `Invoice created cannot update start date`
+            ? `Invoice Created - Cannot change Start Date`
             : params?.data?.isAllowedEndDate === false && params?.data?.isAllowedStartDate !== true
-              ? `Can change the end date after received`
-              : 'Update start date / end date'
+              ? `Can change the End Date after received`
+              : 'Update - Start Date/End Date'
         }
       >
         <span>
@@ -703,9 +739,7 @@ const ReceivingTicket = ({
       disabled: true,
       cellRenderer: 'inventoryRenderer',
       cellStyle: (params) => {
-        if (
-          [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)
-        ) {
+        if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
           return { backgroundColor: COLOUR_MASTER.lostAssets.background };
         }
         return null;
@@ -721,7 +755,7 @@ const ReceivingTicket = ({
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'deliveryTicketRenderer' },
     { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingTicketRenderer' },
     { field: 'returnTicket', headerName: 'Return Ticket', show: true, cellRenderer: 'returnTicketRenderer' },
-    { field: 'returnQty', headerName: 'Returned Qty', show: true, cellRenderer: 'returnTicketRenderer' },
+    { field: 'returnQty', headerName: 'Returned Qty', show: true, cellRenderer: 'commonRenderer' },
     { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'manualStartDate', headerName: 'Start Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'manualEndDate', headerName: 'End Date', show: true, cellRenderer: 'dateRenderer' },
@@ -882,12 +916,9 @@ const ReceivingTicket = ({
     } else if (
       selectedRecords.filter(
         (f) =>
-          [
-            ASSET_STATUS.available,
-            ASSET_STATUS.underReview,
-            RENTAL_INTERNAL_ASSET_STATUS.complete,
-            RENTAL_INTERNAL_ASSET_STATUS.consumed
-          ].includes(f.status) && [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.consumed].includes(f.rentalAssetStatus)
+          [ASSET_STATUS.available, ASSET_STATUS.underReview, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.consumed].includes(
+            f.status
+          ) && [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.consumed].includes(f.rentalAssetStatus)
       ).length === selectedRecords.length
     ) {
       return true;
@@ -924,7 +955,7 @@ const ReceivingTicket = ({
             type: 'success',
             message: `Receiving Successfully`
           });
-          if (receivingTicketId?.length && selectedRecords?.filter((e) => e.type === "Asset")?.length && user?.user?.brandPolicy?.workOrderAutoComplete) {
+          if (receivingTicketId?.length && selectedRecords?.filter((e) => e.type === 'Asset')?.length && user?.user?.brandPolicy?.rentalRepairAutoCreate) {
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -1253,6 +1284,7 @@ const ReceivingTicket = ({
             aria-controls="action-menu"
             disabled={selectedRecords.length === 0}
             endIcon={<ExpandMore />}
+            className="new-dropdown-v1"
           >
             Actions
           </Button>
@@ -1280,6 +1312,7 @@ const ReceivingTicket = ({
                     [ASSET_STATUS.lost].includes(f.status) ||
                     ![
                       ASSET_STATUS.inUse,
+                      ASSET_STATUS.standBy,
                       ASSET_STATUS.scrap,
                       ASSET_STATUS.needRepair,
                       ASSET_STATUS.needRecert,
@@ -1324,6 +1357,7 @@ const ReceivingTicket = ({
                     [ASSET_STATUS.lost].includes(f.status) ||
                     ![
                       ASSET_STATUS.inUse,
+                      ASSET_STATUS.standBy,
                       ASSET_STATUS.reserved,
                       ASSET_STATUS.scrap,
                       ASSET_STATUS.needRepair,
@@ -1392,13 +1426,9 @@ const ReceivingTicket = ({
                   ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                     (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                     f.status === ASSET_STATUS.scrap) &&
-                  [
-                    ASSET_STATUS.underReview,
-                    ASSET_STATUS.scrap,
-                    ASSET_STATUS.available,
-                    ASSET_STATUS.needRecert,
-                    ASSET_STATUS.needRepair
-                  ].includes(f.status) &&
+                  [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(
+                    f.status
+                  ) &&
                   !f.subleaseAsset &&
                   checkUniqWarehouse()
               )?.length === selectedRecords?.length &&
@@ -1420,13 +1450,9 @@ const ReceivingTicket = ({
                   ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                     (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
                     f.status === ASSET_STATUS.scrap) &&
-                  [
-                    ASSET_STATUS.underReview,
-                    ASSET_STATUS.scrap,
-                    ASSET_STATUS.available,
-                    ASSET_STATUS.needRecert,
-                    ASSET_STATUS.needRepair
-                  ].includes(f.status) &&
+                  [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(
+                    f.status
+                  ) &&
                   !f.subleaseAsset &&
                   checkUniqWarehouse()
               )?.length === selectedRecords?.length &&

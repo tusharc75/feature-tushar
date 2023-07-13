@@ -12,7 +12,7 @@ const TabPanel = (props: TabPanelProps) => {
   const { children, value, index, ...other } = props;
   return (
     <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-      {children}
+      {value === index ? children : null}
     </div>
   );
 };
@@ -40,12 +40,17 @@ const CustomTabs: React.FC<CustomTabInterface> = ({ children, className = '', ..
 interface CustomTabProps extends TabProps {
   children?: React.ReactNode | string;
   index: number;
+  primaryColor?: boolean;
 }
-const CustomTab: React.FC<CustomTabProps> = ({ children, className = '', index = 0, ...props }) => {
+const CustomTab: React.FC<CustomTabProps> = ({ children, className = '', index = 0, primaryColor = false, ...props }) => {
   return (
     <Tab
-      label={<div className="tab-font">{children}</div>}
-      className={`tabLayout ${className}`}
+      label={
+        <div className="tab-font" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {children}
+        </div>
+      }
+      className={`tabLayout ${className} ${primaryColor ? 'primaryColoredTab' : ''}`}
       aria-controls={`main-tabpanel-${index}`}
       {...props}
     />

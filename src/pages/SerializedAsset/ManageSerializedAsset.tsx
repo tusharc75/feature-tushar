@@ -48,7 +48,7 @@ const ManageSerializedAsset = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [productCategoryOptions, setProductCategoryOptions] = useState([]);
   const [allFields, setAllFields] = useState([]);
-  const [productDescriptionOptions, setProductDescriptionOptions] = useState([]);
+  const [productTypeOptions, setProductTypeOptions] = useState([]);
   const [cloneHeading, setCloneHeading] = useState('');
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [productOpen, setProductOpen] = useState({ open: false, isClone: false });
@@ -65,21 +65,18 @@ const ManageSerializedAsset = ({
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         data = data.filter(
-          (d) =>
-            d.fieldData.type !== 'lookUpDisplay' &&
-            !['currentOwnerType', 'currentOwner', 'purchaseOrder', 'bulkAssetCreation'].includes(d.fieldData.fieldName)
+          (d) => !['currentOwnerType', 'currentOwner', 'purchaseOrder', 'bulkAssetCreation'].includes(d.fieldData.fieldName)
         );
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         var fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-        const categoryOptions = data.find((obj) => obj?.fieldData.fieldName === 'productCategory')?.fieldData.option;
-        const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'warehouse')?.fieldData.option;
-        const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData.option;
+        const categoryOptions = data.find((obj) => obj?.fieldData.fieldName === 'productCategory')?.fieldData?.option || [];
+        const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'warehouse')?.fieldData?.option || [];
+        const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData?.option || [];
 
         setProductCategoryOptions(categoryOptions);
-        setProductDescriptionOptions(productOptions);
-
+        setProductTypeOptions(productOptions);
         setAllFields(productInventoryId ? fieldsDataForUpdate : fieldsDataForCreate);
 
         if (productInventoryId) {
@@ -126,12 +123,11 @@ const ManageSerializedAsset = ({
           if (fieldsDataForCreate.some((e) => e.fieldName === 'mtrAttachedDate')) {
             createValues['mtrAttachedDate'] = '';
           }
-
-          if (referenceType && referenceType === 'repairOrder') {
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount')) {
+          if (referenceType === 'repairOrder' || referenceType === "assetsReceiving") {
+            if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount') && referenceData?.customerAccount) {
               createValues['customerAccount'] = referenceData?.customerAccount;
             }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'warehouse')) {
+            if (fieldsDataForCreate.some((e) => e.fieldName === 'warehouse') && referenceData?.warehouse) {
               createValues['warehouse'] = referenceData?.warehouse;
               const warehouseAddress = plantsOptions?.find((e) => e.optionValue === referenceData?.warehouse);
               if (warehouseAddress && fieldsDataForCreate.some((e) => e.fieldName === 'currentLocation')) {
@@ -139,10 +135,20 @@ const ManageSerializedAsset = ({
               }
             }
             fieldsDataForCreate?.forEach((e) => {
-              if (['customerAccount', 'warehouse', 'currentLocation'].includes(e.fieldName)) {
+              if (referenceData?.customerAccount && ['customerAccount'].includes(e.fieldName)) {
+                e.isUneditable = true;
+              }
+              if (['warehouse', 'currentLocation'].includes(e.fieldName)) {
                 e.isUneditable = true;
               }
             });
+          }
+
+          if (createValues['warehouse'] && !createValues['currentLocation']) {
+            const warehouseAddress = plantsOptions?.find((e) => e.optionValue === createValues['warehouse']);
+            if (warehouseAddress && fieldsDataForCreate.some((e) => e.fieldName === 'currentLocation')) {
+              createValues['currentLocation'] = warehouseAddress?.address;
+            }
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -159,6 +165,7 @@ const ManageSerializedAsset = ({
     setProductCategoryID(null);
     setProductCategoryName(null);
     setSubmitting(true);
+    delete values?.productDescription;
     if (productInventoryId && isClone === false) {
       values._id = productInventoryId;
       axiosInstance()
@@ -242,14 +249,16 @@ const ManageSerializedAsset = ({
                                           <FormTypes
                                             isNew={Boolean(productInventoryId)}
                                             {...field}
-                                            disabled={productId ? true : Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                            disabled={productId ? true :
+                                              Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
-                                            options={productDescriptionOptions}
+                                            options={values['productCategory'] ?
+                                              productTypeOptions?.filter((e) => e?.productCategory === values['productCategory']) : productTypeOptions}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
@@ -257,19 +266,20 @@ const ManageSerializedAsset = ({
                                             size="small"
                                             onChange={(_, val) => {
                                               const value = val && val.optionValue ? val.optionValue : '';
-                                              const label = val && val.optionLabel ? val.optionLabel : '';
-                                              const productCategory = val && val?.productCategory ? val?.productCategory : '';
                                               setFieldValue(field.fieldName, value);
-                                              setFieldValue('productCategory', productCategory);
-                                              const productLabel = productCategory
-                                                ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionLabel
-                                                : '';
-                                              const productValue = productCategory
-                                                ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionValue
-                                                : '';
+                                              if (allFields?.some((e) => e.fieldName === 'productCategory')) {
+                                                const productCategory = val && val?.productCategory ? val?.productCategory : '';
+                                                setFieldValue('productCategory', productCategory);
+                                                const productLabel = productCategory
+                                                  ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionLabel
+                                                  : '';
+                                                const productValue = productCategory
+                                                  ? productCategoryOptions.find((obj) => obj.optionValue === productCategory).optionValue
+                                                  : '';
 
-                                              setProductCategoryID(productValue);
-                                              setProductCategoryName(productLabel);
+                                                setProductCategoryID(productValue);
+                                                setProductCategoryName(productLabel);
+                                              }
                                             }}
                                           />
                                         </Box>
@@ -284,7 +294,9 @@ const ManageSerializedAsset = ({
                                                 size="small"
                                               >
                                                 <AddIcon
-                                                  color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'}
+                                                  color={productId ? 'disabled' :
+                                                    Boolean(productInventoryId) && !isClone ? (field.disableOnEdit || field.isUneditable) ?
+                                                      'disabled' : 'primary' : field.isUneditable ? 'disabled' : 'primary'}
                                                 />
                                               </IconButton>
                                             </Tooltip>
@@ -299,7 +311,8 @@ const ManageSerializedAsset = ({
                                           <FormTypes
                                             isNew={Boolean(productInventoryId)}
                                             {...field}
-                                            disabled={productCategory ? true : Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                            disabled={productCategory ? true :
+                                              Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -329,11 +342,14 @@ const ManageSerializedAsset = ({
                                                 onClick={() => {
                                                   setOpen({ open: true, isClone: false });
                                                 }}
-                                                disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                                disabled={productCategory ? true :
+                                                  Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
                                                 size="small"
                                               >
                                                 <AddIcon
-                                                  color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'}
+                                                  color={productCategory ? 'disabled' :
+                                                    Boolean(productInventoryId) && !isClone ? (field.disableOnEdit || field.isUneditable) ?
+                                                      'disabled' : 'primary' : field.isUneditable ? 'disabled' : 'primary'}
                                                 />
                                               </IconButton>
                                             </Tooltip>
@@ -341,6 +357,29 @@ const ManageSerializedAsset = ({
                                         )}
                                       </Box>
                                     </Grid>
+                                  ) : field.fieldName === 'productDescription' ? (
+                                    <FormTypes
+                                      isNew={Boolean(productInventoryId)}
+                                      {...field}
+                                      disabled={true}
+                                      fieldData={field}
+                                      values={{
+                                        ...values,
+                                        productDescription: productTypeOptions?.find((e) => e.optionValue === values['product'])?.productDescription || ''
+                                      }}
+                                      hidelookupAddButton={true}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={'singleLine'}
+                                      options={[]}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                    />
                                   ) : field.fieldName === 'warehouse' ? (
                                     <FormTypes
                                       isNew={Boolean(productInventoryId)}
@@ -474,29 +513,31 @@ const ManageSerializedAsset = ({
                         setProductOpen({ open: false, isClone: false });
                         if (data._id) {
                           setFieldValue('product', data._id);
-                          setProductDescriptionOptions((prevState) => {
+                          setProductTypeOptions((prevState) => {
                             return [
                               ...prevState,
                               {
                                 optionValue: data._id,
                                 optionLabel: data.productName,
-                                order: productDescriptionOptions.length,
+                                order: productTypeOptions.length,
                                 default: false
                               }
                             ];
                           });
-                          setFieldValue('productCategory', data.productCategory);
-                          setProductCategoryOptions((prevState) => {
-                            return [
-                              ...prevState,
-                              {
-                                optionValue: data.productCategory,
-                                order: productDescriptionOptions.length,
-                                default: false
-                              }
-                            ];
-                          });
-                          setProductCategoryID(data.productCategory);
+                          if (allFields?.some((e) => e.fieldName === 'productCategory')) {
+                            setFieldValue('productCategory', data.productCategory);
+                            setProductCategoryOptions((prevState) => {
+                              return [
+                                ...prevState,
+                                {
+                                  optionValue: data.productCategory,
+                                  order: productTypeOptions.length,
+                                  default: false
+                                }
+                              ];
+                            });
+                            setProductCategoryID(data.productCategory);
+                          }
                         }
                       }}
                     />

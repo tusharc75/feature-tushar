@@ -374,6 +374,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               onClick={openActions}
               aria-controls="action-menu"
               endIcon={<ExpandMore />}
+              className="new-dropdown-v1"
             >
               {isMobile ? '' : 'Actions'}
             </Button>

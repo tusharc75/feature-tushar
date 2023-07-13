@@ -54,7 +54,7 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
       });
       let lastFinalInventory;
       if (sameDateData && sameDateData.length > 0) {
-        lastFinalInventory = sameDateData[0];
+        lastFinalInventory = sameDateData[sameDateData?.length - 1];
       }
 
       if (lastFinalInventory.date === d.date && !lastFinalInventory?.isFinalInventory) {

@@ -12,13 +12,13 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, generateUniqueIdOnly, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
 
-const ManageFieldJob = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
+const ManageDriverMaster = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
     const history = useHistory();
     const {
         state: { user }
@@ -38,24 +38,21 @@ const ManageFieldJob = ({ onClose, onSuccess, isClone = false, id = null, refere
     const fetchFields = async () => {
         try {
           let data;
-          const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldJob}`);
+          const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.driverMaster}`);
           data = response?.data?.data;
           let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
           const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
     
           if (id) {
             axiosInstance()
-              .get(`${routes?.fieldJob?.path}/${id}`)
+              .get(`${routes?.driverMaster?.path}/${id}`)
               .then(({ data: { data } }: any) => {
                 let fields = fieldsDataForUpdate;
                 let tempData = data;
                 if (isClone) {
                   fields = fieldsDataForCreate;
-                  const { fieldJobNumber, ...rest } = data;
-                  if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-                    rest.fieldJobNumber = `FJOB_${generateUniqueIdOnly()}`;
-                  }
-                  setCloneHeading(fieldJobNumber);
+                  const { driverName, ...rest } = data;
+                  setCloneHeading(driverName);
                   tempData = rest;
                 } 
                 setInitialData({
@@ -68,9 +65,6 @@ const ManageFieldJob = ({ onClose, onSuccess, isClone = false, id = null, refere
               });
           } else {
             const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
-            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-                tempInitialData['fieldJobNumber'] = `FJOB_${generateUniqueIdOnly()}`;
-              }
             setInitialData({
               fields: fieldsDataForCreate,
               values: tempInitialData
@@ -86,7 +80,7 @@ const ManageFieldJob = ({ onClose, onSuccess, isClone = false, id = null, refere
         if (id && !isClone) {
           values._id = id;
           axiosInstance()
-            .put(`${routes.fieldJob?.path}`, values)
+            .put(`${routes.driverMaster?.path}`, values)
             .then(({ data }: any) => {
               setSubmitting(false);
               onSuccess();
@@ -102,13 +96,13 @@ const ManageFieldJob = ({ onClose, onSuccess, isClone = false, id = null, refere
             });
         } else {
           axiosInstance()
-            .post(`${routes.fieldJob?.path}`, values)
+            .post(`${routes.driverMaster?.path}`, values)
             .then(({ data: { data, message } }: any) => {
               setLoading(false);
               if (referenceData) {
                 onSuccess(data);
               } else {
-                history.push(`${routes.fieldJobDetail.path}/${data._id}`);
+                history.push(`${routes.driverMasterDetail.path}/${data._id}`);
                 onSuccess(data);
               }
               setSubmitting(true);
@@ -153,8 +147,8 @@ const ManageFieldJob = ({ onClose, onSuccess, isClone = false, id = null, refere
                   id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.fieldJobNumber ? `(${initialData.values?.fieldJobNumber})` : ''}`
-                    : `Create ${routes?.fieldJob?.title}`
+                      : `Update ${initialData.values?.driverName ? `(${initialData.values?.driverName})` : ''}`
+                    : `Create ${routes?.driverMaster?.title}`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -226,4 +220,4 @@ const ManageFieldJob = ({ onClose, onSuccess, isClone = false, id = null, refere
     )
 }
 
-export default ManageFieldJob;
+export default ManageDriverMaster

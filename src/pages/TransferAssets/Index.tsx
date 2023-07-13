@@ -87,7 +87,7 @@ const TransferAsset = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.transferAssetDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.transferAssetDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -442,7 +442,7 @@ const TransferAsset = () => {
                   {/* <HtmlTooltip title={selectedRecords.length > 0 ? '' : 'Please select some records'}>
                     <span>
                       <Button
-                        className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                        className={`${isMobile ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                         variant={isMobile ? 'text' : 'contained'}
                         color="default"
                         size="small"

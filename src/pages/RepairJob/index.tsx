@@ -101,7 +101,7 @@ const RepairJob = () => {
     let columns = []
     let rendererNames = []
     data.forEach(o => {
-      let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.repairJobDetail.path)
+      let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.repairJobDetail.path, true)
       if (currentColumn !== null) {
         if (isOffline) {
           currentColumn.columnData["filter"] = false

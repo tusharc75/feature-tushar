@@ -7,9 +7,9 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import axiosInstance from '../../axios/axiosInstance';
 import { DataGrid } from '@material-ui/data-grid';
-import { AiOutlineImport, AiOutlineUpload, BiExport, BiImport } from 'react-icons/all';
+import { AiOutlineExport, AiOutlineImport, AiOutlineUpload, BiExport, BiImport } from 'react-icons/all';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { documentUploadMaxSize, sidebarResource } from '../../constants/helpers';
+import { documentUploadMaxSize, downloadExcel, sidebarResource } from '../../constants/helpers';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateTimeRenderer, NumberRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
@@ -53,7 +53,7 @@ const BrandBackup = () => {
   const [isImgUploading, setImgUploading] = useState(false);
   const [isRestoring, setRestoring] = useState(false);
   const [fileName, setFileName] = useState('');
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState({ loading: false, type: null });
   const [excelUploadUrl, setExcelUploadUrl] = useState(null);
   const [selectResource, setSelectResource] = useState(null);
   const fileUploadMaxSize = { ...documentUploadMaxSize };
@@ -62,6 +62,7 @@ const BrandBackup = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
+
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -156,9 +157,11 @@ const BrandBackup = () => {
   };
 
   const handleExportExcel = async () => {
+    setDownloading({ loading: true, type: 'export' });
     axiosInstance()
       .get(`/import-export/export${selectResource ? `?resource=${selectResource}` : ''}`)
       .then((data) => {
+        setDownloading({ loading: false, type: null });
         fetchAllExportHistory();
         toastConfig.setToastConfig({
           open: true,
@@ -166,8 +169,35 @@ const BrandBackup = () => {
           message: 'Data Export Initiated'
         });
       })
-      .catch((err) => {});
+      .catch((err) => {
+        setDownloading({ loading: false, type: null });
+        toastConfig.setToastConfig(err);
+      });
   };
+
+  const handleDownloadTemplate = async () => {
+    setDownloading({ loading: true, type: 'template' });
+    axiosInstance()
+      .get(`/import-export/template${selectResource ? `?resource=${selectResource}` : ''}`, {
+        responseType: 'arraybuffer',
+      })
+      .then((response) => {
+        setDownloading({ loading: false, type: null });
+        const fileName = response.headers['content-disposition'].split('filename=')[1];
+        downloadExcel(response, fileName);
+
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Exported to excel successfully.'
+        });
+      })
+      .catch((err) => {
+        setDownloading({ loading: false, type: null });
+        toastConfig.setToastConfig(err);
+      });
+  };
+
 
   const exportColumn = [
     {
@@ -197,33 +227,14 @@ const BrandBackup = () => {
   ];
   const ActionRenderer = (params) => (
     <>
-      {/* <Button
-        onClick={() => {
-          handleDownloadFile(params.row._id);
-          setFileName(params.row._id);
-        }}
-        variant="contained"
-        color="primary"
-        size="small"
-        disabled={params.row.status !== 'Complete'}
-      >
-        {downloading && fileName === params.row.fileName ? (
-          <>
-            <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
-            Downloading ...{' '}
-          </>
-        ) : (
-          '  Download'
-        )}
-      </Button> */}
       <Tooltip title={params?.value === 'Complete' ? 'Download' : 'Download Not available'}>
         <IconButton
           size="small"
           color="inherit"
           onClick={() => {
             if (params?.value === 'Complete') {
-              // handleDownloadFile(params.row._id);
-              // setFileName(params.row._id);
+              setFileName(params.data._id);
+              handleDownloadFile(params.data._id);
             }
           }}
         >
@@ -264,15 +275,15 @@ const BrandBackup = () => {
   ];
 
   const handleDownloadFile = (fileId) => {
-    setDownloading(true);
+    setDownloading({ loading: true, type: 'file' });
     axiosInstance()
       .get(`/import-export/download-file/${fileId}`, {
         responseType: 'arraybuffer'
       })
       .then((data) => {
-        setDownloading(false);
+        setDownloading({ loading: false, type: null });
         let fileText = data.data;
-        const fileName = fileText.headers['content-disposition'].split('filename=')[1];
+        const fileName = data.headers['content-disposition'].split('filename=')[1];
         fileText && download(fileName, fileText);
         toastConfig.setToastConfig({
           open: true,
@@ -283,13 +294,12 @@ const BrandBackup = () => {
       .catch((error) => {
         console.error(error, 'error');
         toastConfig.setToastConfig(error);
-        setDownloading(false);
+        setDownloading({ loading: false, type: null });
       });
   };
 
-  function download(filename, arrayBuffer) {
+  function download(fileName, arrayBuffer) {
     const blob = new Blob([arrayBuffer as any]);
-
     //Check the Browser type and download the File.
     const isIE = false || !!document['documentMode'];
     if (isIE) {
@@ -392,7 +402,7 @@ const BrandBackup = () => {
                             disabled={isImgUploading || !selectResource}
                             startIcon={<AiOutlineImport />}
                           >
-                            Import Data
+                            Import from Excel
                           </Button>
                         </label>
                       </Box>
@@ -404,6 +414,20 @@ const BrandBackup = () => {
                           </Box>
                         </>
                       )}
+                    </Box>
+                    <Box>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        component="span"
+                        disabled={isImgUploading || !selectResource}
+                        startIcon={<AiOutlineExport />}
+                        onClick={() => {
+                          handleDownloadTemplate();
+                        }}
+                      >
+                        Download Template {downloading.loading && downloading.type === 'template' && <CircularProgress size={20} />}
+                      </Button>
                     </Box>
                   </Grid>
                 </Box>
@@ -432,11 +456,14 @@ const BrandBackup = () => {
                       type="button"
                       size="small"
                       color="primary"
-                      variant="contained"
+                      variant="outlined"
                       onClick={handleExportExcel}
+                      startIcon={<AiOutlineExport />}
                       disabled={selectResource == null}
                     >
-                      Export Data
+                      Export to Excel {
+                        downloading.loading && downloading.type === 'export' && <CircularProgress size={20} />
+                      }
                     </Button>
                   </Grid>
                 </Box>
