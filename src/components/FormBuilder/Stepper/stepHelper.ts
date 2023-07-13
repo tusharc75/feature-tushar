@@ -24,5 +24,9 @@ export const defaultStepper = [
   {
     resource: RESOURCE_LABEL.fieldServiceOrder,
     name: 'Invoice'
+  },
+  {
+    resource: RESOURCE_LABEL.fieldServiceOrder,
+    name: 'Field Ticket Invoice'
   }
 ];
