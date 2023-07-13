@@ -88,7 +88,7 @@ const BulkAssetCreation = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.bulkAssetCreationDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.bulkAssetCreationDetail.path, true);
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];

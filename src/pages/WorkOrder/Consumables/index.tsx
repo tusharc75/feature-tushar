@@ -77,20 +77,18 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <div className="d-flex gap-2 align-items-center">
-              <p className="text-truncate">
-              {row.original[e?.fieldName]}
-              </p>
-              <HtmlTooltip title={`${routes.product.title}`}>
+                <p className="text-truncate">
+                  {row.original[e?.fieldName]}
+                </p>
                 <IconButton
                   size="small"
                   onClick={() => {
-                   window.open(`${routes.productDetail.path}/${row.original?.productId}`)
+                    window.open(`${routes.productDetail.path}/${row.original?.productId}`)
                   }}
                 >
                   <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
-              </HtmlTooltip>
-            </div>
+              </div>
             ) : (
               <NoDataCell />
             );
@@ -117,18 +115,16 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           row?.original?.service ? (
             <div className="d-flex gap-2 align-items-center">
               <p className="text-truncate">
-              {row.original.service}
+                {row.original.service}
               </p>
-              <HtmlTooltip title={`${routes.serviceMaster.title}`}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                   window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`)
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`)
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color={'primary'} />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />

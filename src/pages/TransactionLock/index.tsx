@@ -67,7 +67,7 @@ const TransactionLock = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.transactionLock?.title, o?.fieldData, routes.transactionLockDetail.path);
+          let currentColumn = getColumnData(routes.transactionLock?.title, o?.fieldData, routes.transactionLockDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

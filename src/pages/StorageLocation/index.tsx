@@ -73,7 +73,7 @@ const StorageLocation = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.storageLocation?.title, o?.fieldData, routes.storageLocationDetail.path);
+          let currentColumn = getColumnData(routes.storageLocation?.title, o?.fieldData, routes.storageLocationDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
