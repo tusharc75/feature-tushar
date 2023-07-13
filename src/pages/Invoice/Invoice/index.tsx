@@ -11,6 +11,10 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import { startCase } from 'lodash';
 import PreviewDownload from 'src/components/PreviewDownload';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { IconButton } from '@material-ui/core';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import routes from 'src/components/Helpers/Routes';
 
 const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, statusOptions, stepFullScreen, renderedFrom }) => {
 
@@ -65,14 +69,29 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
           Header: 'Detail',
           minWidth: 300,
           width: 300,
-          Cell: ({ row }) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              {
-                <p className="text-truncate" title={row.original?.detail}>
-                  {row.original?.detail}
-                </p>
-              }
+          Cell: ({ row }) => 
+          row?.original?.type ? (
+            <div className="d-flex gap-2 align-items-center">
+              <p className="text-truncate">{row.original.detail}</p>
+              <IconButton
+                size='small'
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'serializedAsset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
             </div>
+          ) : (
+            <NoDataCell />
           )
         }
       ];
