@@ -40,8 +40,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
   const {
     state: { permissions }
   }: any = useData();
-  //["Price", "Rent", "Discount", "Charge", "Tax"]
-  const [conditionType, setConditionType] = useState(permissions.eCommercePolicy?.isRead ? ['Rent', 'Price'] : ['Rent']);
+  const [conditionType, setConditionType] = useState(['Rent', 'Price']);
   const [currency, setCurrency] = useState([detailData.currency]);
   const [unit, setUnits] = useState([]);
   const [pricingMethod, setPricingMethod] = useState([]);
@@ -99,10 +98,10 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
       }
       setHeaderLabel(
         startCase(conditionData?.materialType) +
-          ' - ' +
-          (conditionData?.materialType === 'product'
-            ? details?.productName
-            : conditionData?.materialType === 'service'
+        ' - ' +
+        (conditionData?.materialType === 'product'
+          ? details?.productName
+          : conditionData?.materialType === 'service'
             ? details?.serviceName
             : details?.packageName)
       );
@@ -113,7 +112,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
           details?.pricingMethod?.map((_pricingMethod) => {
             if (
               conditionData[
-                'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
+              'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
               ] == undefined
             )
               conditionData[
@@ -486,22 +485,22 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                 style={{ margin: 0 }}
                                                 value={
                                                   values[
-                                                    'rent_' +
-                                                      camelCase(_pricingMethod.toLowerCase()) +
-                                                      '_' +
-                                                      _currency.toLowerCase() +
-                                                      '_' +
-                                                      camelCase(_unit.toLowerCase())
+                                                  'rent_' +
+                                                  camelCase(_pricingMethod.toLowerCase()) +
+                                                  '_' +
+                                                  _currency.toLowerCase() +
+                                                  '_' +
+                                                  camelCase(_unit.toLowerCase())
                                                   ]
                                                 }
                                                 onChange={(e) => {
                                                   setFieldValue(
                                                     'rent_' +
-                                                      camelCase(_pricingMethod.toLowerCase()) +
-                                                      '_' +
-                                                      _currency.toLowerCase() +
-                                                      '_' +
-                                                      camelCase(_unit.toLowerCase()),
+                                                    camelCase(_pricingMethod.toLowerCase()) +
+                                                    '_' +
+                                                    _currency.toLowerCase() +
+                                                    '_' +
+                                                    camelCase(_unit.toLowerCase()),
                                                     parseFloat(e.target.value)
                                                   );
                                                 }}
@@ -520,40 +519,40 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                 }}
                                                 error={
                                                   touched[
-                                                    'rent_' +
-                                                      camelCase(_pricingMethod.toLowerCase()) +
-                                                      '_' +
-                                                      _currency.toLowerCase() +
-                                                      '_' +
-                                                      camelCase(_unit.toLowerCase())
+                                                  'rent_' +
+                                                  camelCase(_pricingMethod.toLowerCase()) +
+                                                  '_' +
+                                                  _currency.toLowerCase() +
+                                                  '_' +
+                                                  camelCase(_unit.toLowerCase())
                                                   ] &&
                                                   Boolean(
                                                     errors[
-                                                      'rent_' +
-                                                        camelCase(_pricingMethod.toLowerCase()) +
-                                                        '_' +
-                                                        _currency.toLowerCase() +
-                                                        '_' +
-                                                        camelCase(_unit.toLowerCase())
+                                                    'rent_' +
+                                                    camelCase(_pricingMethod.toLowerCase()) +
+                                                    '_' +
+                                                    _currency.toLowerCase() +
+                                                    '_' +
+                                                    camelCase(_unit.toLowerCase())
                                                     ]
                                                   )
                                                 }
                                                 helperText={
                                                   touched[
-                                                    'rent_' +
-                                                      camelCase(_pricingMethod.toLowerCase()) +
-                                                      '_' +
-                                                      _currency.toLowerCase() +
-                                                      '_' +
-                                                      camelCase(_unit.toLowerCase())
+                                                  'rent_' +
+                                                  camelCase(_pricingMethod.toLowerCase()) +
+                                                  '_' +
+                                                  _currency.toLowerCase() +
+                                                  '_' +
+                                                  camelCase(_unit.toLowerCase())
                                                   ] &&
                                                   errors[
-                                                    'rent_' +
-                                                      camelCase(_pricingMethod.toLowerCase()) +
-                                                      '_' +
-                                                      _currency.toLowerCase() +
-                                                      '_' +
-                                                      camelCase(_unit.toLowerCase())
+                                                  'rent_' +
+                                                  camelCase(_pricingMethod.toLowerCase()) +
+                                                  '_' +
+                                                  _currency.toLowerCase() +
+                                                  '_' +
+                                                  camelCase(_unit.toLowerCase())
                                                   ]
                                                 }
                                               />

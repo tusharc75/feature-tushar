@@ -192,7 +192,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
 
     if (type === 'add') {
       if (parseFloat(values.price) <= 0) {
-        errors['price'] = 'Please enter valid price';
+        errors['price'] = 'Please enter valid cost';
       }
     }
 
@@ -344,7 +344,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                         <TextField
                           margin="dense"
                           type="number"
-                          label="Price"
+                          label="Cost"
                           name="price"
                           required
                           fullWidth
