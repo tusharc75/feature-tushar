@@ -190,7 +190,7 @@ export default function useColumns() {
   }: any = useData();
 
 
-  const getColumnData = (title, field, detailScreenRoute = null, openInNewTab = false) => {
+  const getColumnData = (title, field, detailScreenRoute, masterPage = false) => {
 
     let data = localStorage.getItem('gridMetaData');
 
@@ -239,7 +239,7 @@ export default function useColumns() {
             disabled: true,
             field: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
             cellRenderer: permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? 'linkRenderer' : 'commonRenderer',
-            cellRendererParams: { pathName: detailScreenRoute, property: '_id', openInNewTab: openInNewTab }
+            cellRendererParams: { pathName: detailScreenRoute, property: '_id', openInNewTab: masterPage ? false : true }
           },
           rendererName: permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? 'linkRenderer' : 'commonRenderer'
         };
@@ -258,7 +258,7 @@ export default function useColumns() {
             cellRendererParams: {
               pathName: pathName,
               property: joinedFieldName + 'Id',
-              openInNewTab: openInNewTab,
+              openInNewTab: true,
               more: `rest${joinedFieldName}`
             }
           },

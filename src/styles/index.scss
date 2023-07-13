@@ -3463,6 +3463,7 @@ body {
       min-height: 45px;
       & > *:not(button) {
         flex-grow: 1;
+        max-width: 100%;
       }
     }
   }

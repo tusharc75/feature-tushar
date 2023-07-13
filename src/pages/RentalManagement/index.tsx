@@ -124,7 +124,7 @@ const RentalManagement = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.rentalManagementDetail.path);
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.rentalManagementDetail.path, true);
       if (currentColumn !== null) {
         if (isOffline) {
           currentColumn.columnData['filter'] = false;

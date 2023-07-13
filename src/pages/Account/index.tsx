@@ -148,7 +148,7 @@ export default function Account(props) {
           }
         ];
       } else {
-        let currentColumn = getColumnData(accountResource, o?.fieldData, `/${accountRoute}/detail`);
+        let currentColumn = getColumnData(accountResource, o?.fieldData, `/${accountRoute}/detail`, true);
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData];
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -825,9 +825,8 @@ export default function Account(props) {
             >
               <div
                 id="resourceOperations"
-                className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${
-                  accountClass['account_header-mobile']
-                }`}
+                className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${accountClass['account_header-mobile']
+                  }`}
                 style={isMobile && !isTablet ? { flex: 1 } : {}}
               >
                 <Grid style={{ display: 'flex', flex: 1 }}>
@@ -1092,9 +1091,8 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
-              singleApproveDisapproveAccount.accountName
-            } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
+              } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -1109,9 +1107,8 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
-              multipleApproveDisapproveAccount.selectedRecords
-            } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
+              } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,

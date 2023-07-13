@@ -85,7 +85,7 @@ export const generateColoum = (fields, column, rendererNames, editable, rendered
       }
     } else {
       if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-        let currentColumn: any = getColumnData(renderedFrom ? renderedFrom : routes.productBuilder.title, ele, routes.productBuilder.path, true);
+        let currentColumn: any = getColumnData(renderedFrom ? renderedFrom : routes.productBuilder.title, ele, routes.productBuilder.path);
         if (ele.type === 'decimal' || ele.type === 'percent' || ele.type === 'singleLine' || ele.type === 'multiLine') {
           if (!ele.isFormula && !ele.isUneditable && (ele?.isColumnEditable || editable)) {
             if (ele.type === 'decimal' || ele.type === 'percent') {
