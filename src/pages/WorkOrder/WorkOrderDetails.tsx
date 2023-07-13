@@ -6,28 +6,19 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, ASSET_STATUS } from 'src/constants/helpers';
-import Activity from 'src/components/Activity';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORK_ORDER_STATUS, ASSET_STATUS } from 'src/constants/helpers';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-// import TabPanel from 'src/components/TabPanel';
-import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
 import View from './View';
 import Consumables from './Consumables';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import { ExpandMore } from '@material-ui/icons';
-import { GrStatusInfo } from 'react-icons/gr';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { FaWpforms } from 'react-icons/fa';
 import { RiFlowChart } from 'react-icons/ri';
@@ -53,7 +44,6 @@ const WorkOrderDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [previewPdf, setPreviewPdf] = useState(false);
   const [statusOptions, setStatusOptions] = useState([]);
   const [completed, setCompleted] = useState(false);
 
@@ -174,35 +164,6 @@ const WorkOrderDetails = () => {
     }
   };
 
-  const previewWorkOrderPdf = () => {
-    setPreviewPdf(true);
-
-    axiosInstance()
-      .get(`${workOrder.api}/${id}/pdf/service`)
-      .then(({ data }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            const file = new Blob([data], { type: 'application/pdf' });
-            const fileURL = URL.createObjectURL(file);
-            const pdfWindow = window.open();
-            pdfWindow.location.href = fileURL;
-            toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-            setPreviewPdf(false);
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-            setPreviewPdf(false);
-          });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setPreviewPdf(false);
-      });
-  };
-
   const updateJobStatus = (status, assetStatus = null) => {
     const data: any = { status: status };
     if (assetStatus) {
@@ -274,16 +235,12 @@ const WorkOrderDetails = () => {
                       </Button>
                     </Fragment>
                   )}
-                <PreviewDownload resource={sidebarResource.workOrder} referenceId={id} columns={columns} />
-                {/* <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  onClick={previewWorkOrderPdf}
-                  className={'btn-outline-v1'}
-                  disabled={previewPdf}
-                >
-                  {isMobile && !isTablet ? <VisibilityIcon color="primary" /> : 'Preview'}
-                </Button> */}
+                <PreviewDownload
+                  resource={sidebarResource.workOrder}
+                  referenceId={id}
+                  columns={user?.user?.brandPolicy?.servicePrePost ? columns : columns?.filter((e) => e.accessor !== 'serviceType')}
+                  hideDetailButton={true}
+                />
                 {permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && !completed && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
