@@ -127,7 +127,7 @@ const ManageRepairOrder = ({
             initialData['customerContact'] = referenceData?.customerContact;
           }
           if (fieldsDataForCreate?.some((e) => e?.fieldName === 'type')) {
-            initialData['type'] = REPAIR_ORDER_TYPE.external;
+            initialData['type'] = REPAIR_ORDER_TYPE.internal;
           }
         }
         setInitialData({

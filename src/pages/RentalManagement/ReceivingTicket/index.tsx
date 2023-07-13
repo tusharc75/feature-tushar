@@ -516,17 +516,16 @@ const ReceivingTicket = ({
   const InventoryRenderer = (params) => (
     <div className="d-flex gap-2 align-items-center">
       <p className="text-truncate">{params.value}</p>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(
-              `${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`
-            );
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
-
+      <IconButton
+        size="small"
+        onClick={() => {
+          window.open(
+            `${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`
+          );
+        }}
+      >
+        <OpenInNewIcon fontSize="small" color="primary" />
+      </IconButton>
       {params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
         <HtmlTooltip title="This asset will be shipped from different facility">
           <IconButton size="small">
@@ -535,58 +534,50 @@ const ReceivingTicket = ({
         </HtmlTooltip>
       )}
       {params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0 && (
-        <Box ml={1}>
-          <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
-            <IconButton
-              size="small"
-              onClick={() => {
-                setShowNonSerializeAsset({
-                  open: true,
-                  data: { productName: params?.data?.productName, nonSerializeAsset: params?.data?.nonSerializeAsset }
-                });
-              }}
-            >
-              <InfoIcon fontSize="small" color={'primary'} />
-            </IconButton>
-          </HtmlTooltip>
-        </Box>
-      )}
-      {params?.data?.isReplaced && (
-        <Box ml={1}>
-          <HtmlTooltip
-            title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}
+        <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              setShowNonSerializeAsset({
+                open: true,
+                data: { productName: params?.data?.productName, nonSerializeAsset: params?.data?.nonSerializeAsset }
+              });
+            }}
           >
             <InfoIcon fontSize="small" color={'primary'} />
-          </HtmlTooltip>
-        </Box>
+          </IconButton>
+        </HtmlTooltip>
+      )}
+      {params?.data?.isReplaced && (
+        <HtmlTooltip
+          title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}
+        >
+          <InfoIcon fontSize="small" color={'primary'} />
+        </HtmlTooltip>
       )}
       {params?.data?.isRepairJob && (
-        <Box ml={1}>
-          <HtmlTooltip title={`${routes.repairJob.title}`}>
-            <IconButton
-              size="small"
-              onClick={() => {
-                history.push(`${routes.repairJobDetail.path}/${params?.data?.repairJob}`);
-              }}
-            >
-              <OpenInNewIcon fontSize="small" color="primary" />
-            </IconButton>
-            </HtmlTooltip>
-        </Box>
+        <HtmlTooltip title={`${routes.repairJob.title}`}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.repairJobDetail.path}/${params?.data?.repairJob}`)
+            }}
+          >
+            <OpenInNewIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
       )}
       {params?.data?.isRepairOrder && (
-        <Box ml={1}>
-            <HtmlTooltip title={`${routes.repairOrder.title}`}>
-            <IconButton
-              size="small"
-              onClick={() => {
-                history.push(`${routes.repairOrderDetail.path}/${params?.data?.repairOrder}`);
-              }}
-            >
-              <OpenInNewIcon fontSize="small" color="primary" />
-            </IconButton>
-            </HtmlTooltip>
-        </Box>
+        <HtmlTooltip title={`${routes.repairOrder.title}`}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.repairOrderDetail.path}/${params?.data?.repairOrder}`)
+            }}
+          >
+            <OpenInNewIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
       )}
     </div>
   );
@@ -594,14 +585,14 @@ const ReceivingTicket = ({
   const ProductNameRenderer = (params) => (
     <div className="d-flex gap-2 align-items-center">
       <p className="text-truncate">{params?.value}</p>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(`${routes.productDetail.path}/${params.data?.productId}`);
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
+      <IconButton
+        size="small"
+        onClick={() => {
+          window.open(`${routes.productDetail.path}/${params.data?.productId}`);
+        }}
+      >
+        <OpenInNewIcon fontSize="small" color="primary" />
+      </IconButton>
     </div>
   );
 
@@ -611,14 +602,14 @@ const ReceivingTicket = ({
     params?.value ? (
       <div className="d-flex gap-2 align-items-center">
         <p className="text-truncate">{params?.value}</p>
-          <IconButton
-            size="small"
-            onClick={() => {
-              window.open(`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`);
-            }}
-          >
-            <OpenInNewIcon fontSize="small" color="primary" />
-          </IconButton>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.warehouseDetail.path}/${params?.data?.warehouse?.optionValue}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
       </div>
     ) : (
       <NoDataCell />
@@ -628,14 +619,14 @@ const ReceivingTicket = ({
     params?.value ? (
       <div className="d-flex gap-2 align-items-center">
         <p className="text-truncate">{params?.value}</p>
-          <IconButton
-            size="small"
-            onClick={() => {
-              window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`);
-            }}
-          >
-            <OpenInNewIcon fontSize="small" color="primary" />
-          </IconButton>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
       </div>
     ) : (
       <NoDataCell />
@@ -645,14 +636,14 @@ const ReceivingTicket = ({
     params?.value ? (
       <div className="d-flex gap-2 align-items-center">
         <p className="text-truncate">{params?.value}</p>
-          <IconButton
-            size="small"
-            onClick={() => {
-              window.open(`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`);
-            }}
-          >
-            <OpenInNewIcon fontSize="small" color="primary" />
-          </IconButton>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
       </div>
     ) : (
       <NoDataCell />
@@ -661,7 +652,7 @@ const ReceivingTicket = ({
   const ReturnTicketRenderer = (params) =>
     params?.value ? (
       <div className="d-flex gap-2 align-items-center">
-      <p className="text-truncate">{params?.value}</p>
+        <p className="text-truncate">{params?.value}</p>
         <IconButton
           size="small"
           onClick={() => {
@@ -670,7 +661,7 @@ const ReceivingTicket = ({
         >
           <OpenInNewIcon fontSize="small" color="primary" />
         </IconButton>
-    </div>
+      </div>
     ) : (
       <NoDataCell />
     );
@@ -964,11 +955,7 @@ const ReceivingTicket = ({
             type: 'success',
             message: `Receiving Successfully`
           });
-          if (
-            receivingTicketId?.length &&
-            selectedRecords?.filter((e) => e.type === 'Asset')?.length &&
-            user?.user?.brandPolicy?.workOrderAutoComplete
-          ) {
+          if (receivingTicketId?.length && selectedRecords?.filter((e) => e.type === 'Asset')?.length && user?.user?.brandPolicy?.rentalRepairAutoCreate) {
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
