@@ -324,15 +324,15 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       let packages = rows.filter((e) => e.type === 'package' && e.packageDetail?.packageType !== 'Service');
 
       const childProducts = data.material.filter((e) => e.parentId !== null && e.type === 'product');
-      const parents = []
+      const parentServicePackages = []
       for (let i = 0; i < childProducts.length; i++) {
         const parent = findUltimateParent(data.material, childProducts[i].parentId);
-        if (!parents.some((e) => e._id === parent._id)) {
-          parents.push(parent);
+        if (!parentServicePackages.some((e) => e._id === parent._id)) {
+          parentServicePackages.push(parent);
         }
       }
 
-      rows = [...products, ...packages, ...parents];
+      rows = [...products, ...packages, ...parentServicePackages];
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
         parent.detail = `${parent.type === 'service'
