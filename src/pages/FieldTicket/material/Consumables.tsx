@@ -16,22 +16,31 @@ import { useData } from 'src/StateProvider/Provider';
 import { BiChevronDown } from 'react-icons/bi';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
-import { flattenArray } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import { Autocomplete } from '@material-ui/lab';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Technicians from './Technicians';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { fetch_field_ticket_material_fields } from '../helper';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { calculatePrice } from 'src/components/RentalManagment/helper';
+import MaterialQtyDialog from './MaterialQtyDialog';
 
-const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fieldTicketData }) => {
+const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fieldTicketData, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
+  const [allFields, setAllFields] = useState([]);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [serviceOption, setServiceOption] = useState(null);
-  const [selectedServiceOption, setSelectedServiceOption] = useState(null);
+  const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All' });
+  const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
+  const [isBulkEdit, setIsBulkEdit] = useState(false);
+  const [isUpdating, setUpdating] = useState(false);
 
   useEffect(() => {
     setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
@@ -43,7 +52,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       };
     })]);
     if (!services?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
-      setSelectedServiceOption(null);
+      setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
     }
   }, [services]);
 
@@ -62,6 +71,19 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   }, [columns, services, selectedServiceOption]);
 
   const fetchColumns = async () => {
+    var { fields, allFields } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
+    if (!allowedToEdit) {
+      allFields?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
+    }
+    setAllFields(JSON.parse(JSON.stringify(allFields)));
+    const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
+    }
+
     const column = [];
     const {
       data: { data }
@@ -81,15 +103,38 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
           Header: e?.fieldLabel,
           width: 200,
           primaryField: true,
-          Cell: ({ row }) => {
-            return row.original[e?.fieldName] ? (
-              <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.materialId}`} target="_blank">
-                {row.original[e?.fieldName]}
-              </a>
-            ) : (
-              <NoDataCell />
-            );
-          }
+          Cell: ({ row, rows }) => (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {!allowedToEdit ? (
+                <p>{row.original[e?.fieldName]}</p>
+              ) : (
+                <p
+                  onClick={() => {
+                    setIsConsumableEdit({
+                      open: true,
+                      data: row.original,
+                      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    });
+                    setIsBulkEdit(false);
+                  }}
+                  className="link text-truncate"
+                  title={row.original[e?.fieldName]}
+                >
+                  {row.original[e?.fieldName]}
+                </p>
+              )}
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.productDetail.path}/${row.original?.materialId}`);
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+            </div>
+          )
         });
       } else {
         column.push({
@@ -108,31 +153,28 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
         accessor: 'service',
         Header: 'Service',
         width: 200,
-        Cell: ({ row }) =>
+        Cell: ({ row }) => (
           row?.original?.service ? (
-            <p className="text-truncate" title={row?.original?.service}>
-              <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original.serviceId}`} target="_blank">
-                {row.original.service}
-              </a>
-            </p>
-          ) : (
-            <NoDataCell />
-          )
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p> {row.original?.service}</p>
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original?.serviceId}`);
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+            </div>
+          ) :
+            (
+              <NoDataCell />
+            )
+        )
       },
-      {
-        accessor: 'qty',
-        Header: 'Qty',
-        primaryField: true,
-        editable: allowedToEdit,
-        width: 150,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>,
-        Footer: (info) => {
-          const total = info.rows
-            .filter((f) => f.values.hasOwnProperty('qty') && !isNaN(f.values['qty']))
-            .reduce((sum, row) => parseInt(row.values['qty']) + sum, 0);
-          return <>{total}</>;
-        }
-      },
+      ...newColumns,
       {
         accessor: 'action',
         Header: 'Action',
@@ -182,20 +224,21 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedServiceOption?.optionValue}`;
     }
+
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
-        let rows = data?.material?.map((u, i) => {
-          let res: any = {
-            ...prepareDataForGrid(u)
-          };
-          res.srno = i + 1;
-          res.productName = u?.productDetail?.productName;
-          res.productDescription = u?.productDetail?.productDescription;
-          res.productNumber = u?.productDetail?.productNumber;
-          return res;
+        const consumables = data?.material;
+        consumables?.forEach((parent, i) => {
+          parent.srno = i + 1;
+          parent.productName = parent?.productDetail?.productName;
+          parent.productDescription = parent?.productDetail?.productDescription;
+          parent.productNumber = parent?.productDetail?.productNumber;
+          parent.qtyDisplay = parent?.qty;
+          parent.serviceId = parent?.service?.optionValue;
+          parent.service = parent?.service?.optionLabel;
         });
-        setDataRows(rows);
+        setDataRows(consumables);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -208,10 +251,46 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       const element: any = {};
       element.materialId = d._id;
       element.type = 'product';
+      element.service = selectedServiceOption?.optionValue !== "All" ? selectedServiceOption?.optionValue : null;
       element.qty = d.qty ? parseFloat(d.qty) : 1;
-
+      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+      element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
+      element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
+      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+      element.estimateJobDuration = 1;
+      if (calValues && calValues['estimateJobDuration']) {
+        element.estimateJobDuration = calValues['estimateJobDuration'];
+      }
       material.push(element);
     });
+
+    const priceData: any = await calculatePrice(fieldTicketData, material);
+    AddConsumables(material, priceData);
+  };
+
+  const AddConsumables = async (material, priceData) => {
+    const tempMaterial = [...material];
+    if (priceData) {
+      tempMaterial.forEach((element) => {
+        const rateResult = priceData?.filter(
+          (e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit
+        );
+        if (element.listPrice) {
+          const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
+          element[priceFieldName] = element.listPrice;
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          Object.assign(element, calValues);
+        } else if (rateResult.length && rateResult[0].mrp) {
+          const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
+          element[priceFieldName] = rateResult[0].mrp;
+          element['pricingCondition'] = rateResult[0].conditionId;
+          element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+          Object.assign(element, calValues);
+        }
+      });
+    }
 
     axiosInstance()
       .post(`/field-ticket/${id}/material`, { material })
@@ -248,24 +327,26 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       delete element.productDescription;
       delete element.productName;
       delete element.productNumber;
+      delete element.qtyDisplay;
+      delete element.productDetail;
       delete element.serviceId;
     });
-    // setUpdating(true);
+    setUpdating(true);
     axiosInstance()
       .put(`/field-ticket/${id}/material`, { material: rows })
       .then(() => {
         fetchData();
         if (saveAndNext) {
           const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
-          // setIsServiceEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+          setIsConsumableEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
         } else {
-          // setIsServiceEdit({ open: false, data: null, showSaveAndNext: false });
+          setIsConsumableEdit({ open: false, data: null, showSaveAndNext: false });
         }
-        // setUpdating(false);
-        // setIsBulkEdit(false);
+        setUpdating(false);
+        setIsBulkEdit(false);
       })
       .catch((error) => {
-        // setUpdating(false);
+        setUpdating(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -310,10 +391,16 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
             fullWidth
             options={serviceOption ? serviceOption : []}
             autoHighlight
-            value={selectedServiceOption ? selectedServiceOption : { optionLabel: 'All', optionValue: 'All' }}
+            value={selectedServiceOption}
             getOptionLabel={(option: any) => option?.optionLabel || ''}
             getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
-            onChange={(_, val) => setSelectedServiceOption(val)}
+            onChange={(_, val) => {
+              let value = val;
+              if (!val) {
+                value = { optionLabel: 'All', optionValue: 'All' }
+              }
+              setSelectedServiceOption(value)
+            }}
             renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
           />
         </Box>
@@ -360,6 +447,17 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
                     horizontal: 'right'
                   }}
                 >
+                  <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
+                    <MenuItem
+                      onClick={() => {
+                        setIsConsumableEdit({ open: true, data: null, showSaveAndNext: false });
+                        setIsBulkEdit(true);
+                        handleClose();
+                      }}
+                    >
+                      Bulk Edit
+                    </MenuItem>
+                  </HtmlTooltip>
                   <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
                     <MenuItem
                       disabled={isDeleting}
@@ -423,6 +521,23 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
             handleSubmit(rows);
           }}
           serialized={false}
+        />
+      )}
+
+      {isConsumableEdit.open && (
+        <MaterialQtyDialog
+          onClose={() => {
+            setIsConsumableEdit({ open: false, data: null, showSaveAndNext: false });
+            setIsBulkEdit(false);
+          }}
+          isBulkedit={isBulkEdit}
+          handleSaveData={handleSaveData}
+          fieldTicketData={fieldTicketData}
+          rowData={!isBulkEdit ? isConsumableEdit.data : selectedRecords}
+          material={dataRows}
+          selectedServices={selectedRecords}
+          loading={isUpdating}
+          showSaveAndNext={isConsumableEdit.showSaveAndNext}
         />
       )}
 
