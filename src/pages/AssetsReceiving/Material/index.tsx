@@ -14,6 +14,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -63,51 +64,72 @@ const Material = ({ fetchAssetsReceivingData, assetsReceivingData, setNextStep, 
         Header: 'Details',
         width: 250,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
+        Cell: ({ row }) => 
+        row?.original.type  ? (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <a
-              className="link text-truncate"
-              target="_blank"
-              href={`${row.original.type === 'service'
+            <p
+              className="text-truncate"
+            >
+              {row.original.detail}
+            </p>
+            <Box ml={1}>
+              <IconButton 
+               size="small"
+               onClick={() => {
+                window.open(
+                  `${row.original.type === 'service'
                 ? routes.serviceMasterDetail.path
                 : row.original.type === 'product'
                   ? routes.productDetail.path
                   : row.original.type === 'serializedAsset'
                     ? routes.serializedAssetDetail.path
                     : routes.packagesDetail.path
-                }/${row.original.materialId}`} rel="noreferrer"
-            >
-              {row.original.detail}
-            </a>
+                }/${row.original.materialId}`
+                )
+               }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
             <Box ml={1} className="d-flex align-items-center">
               <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
               </span>
             </Box>
           </div>
+        ) : (
+          <NoDataCell />
         )
       },
       {
         accessor: 'productName',
         Header: 'Product',
         width: 200,
-        Cell: ({ row }) => (
-          <div className="d-flex gap-2 align-items-center">
-            <p className="text-truncate" title={row.original?.productName}>
-              {row.original?.productName ? (
-                row.original?.productId ? (
-                  <a className="link text-truncate" target="_blank" href={`${routes.productDetail.path}/${row.original?.productId}`} rel="noreferrer">
-                    {row.original?.productName}
-                  </a>
-                ) : (
-                  row.original?.productName
-                )
-              ) : (
-                <NoDataCell />
-              )}
-            </p>
-          </div>
-        )
+        Cell: ({ row }) => 
+          row?.original.productName  ? (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p
+                className="text-truncate"
+              >
+                {row.original.productName}
+              </p>
+              <Box ml={1}>
+                <IconButton 
+                 size="small"
+                 onClick={() => {
+                  window.open(
+                    `${routes.productDetail.path}/${row.original?.productId}`
+                  )
+                 }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+        
       },
       {
         accessor: 'description',

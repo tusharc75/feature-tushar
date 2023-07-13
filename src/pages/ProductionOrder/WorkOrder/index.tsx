@@ -84,9 +84,19 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         Header: 'Work Order',
         Cell: ({ row }) =>
           row.original.workOrder ? (
-            <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original.workOrder?.optionValue}`} target="_blank">
+            <div className="d-flex gap-2 align-items-center">
+              <p className="text-truncate">
               {row.original.workOrder?.optionLabel}
-            </a>
+              </p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.workOrderDetail.path}/${row.original.workOrder?.optionValue}`)
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </div>
           ) : (
             <NoDataCell />
           )

@@ -32,7 +32,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AddExistingMaterialDialog from '../AddExistingMaterialDialog';
 import ConditionDialog from './ConditionDialog';
 import { camelCase, startCase } from 'lodash';
-import InfoIcon from '@material-ui/icons/Info';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { ExpandMore } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import styles from '../../Leads/Header.module.scss';
@@ -161,10 +161,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       >
         {params.data.detail}
       </p>
-      <HtmlTooltip title="Details">
+      <Box ml={1}>
         <IconButton
           size="small"
-          aria-label="Details"
           onClick={() => {
             window.open(
               `${
@@ -177,9 +176,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             );
           }}
         >
-          <InfoIcon fontSize="small" />
+          <OpenInNewIcon fontSize="small"  color="primary"/>
         </IconButton>
-      </HtmlTooltip>
+      </Box>
     </Fragment>
   );
 
