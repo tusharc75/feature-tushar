@@ -258,6 +258,14 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     setNextStep(true);
   };
 
+  function findUltimateParent(array, childId) {
+    const child = array.find(item => item._id === childId);
+    if (!child || child.parentId === null) {
+      return child;
+    }
+    return findUltimateParent(array, child.parentId);
+  }
+
   const fetchData = async () => {
     setNextStep(false);
     try {
@@ -315,14 +323,23 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       let products = rows.filter((e) => e.type === 'product' && !e?.isConsumbale);
       let packages = rows.filter((e) => e.type === 'package' && e.packageDetail?.packageType !== 'Service');
 
-      rows = [...products, ...packages];
+      const childProducts = data.material.filter((e) => e.parentId !== null && e.type === 'product');
+      const parents = []
+      for (let i = 0; i < childProducts.length; i++) {
+        const parent = findUltimateParent(data.material, childProducts[i].parentId);
+        if (!parents.some((e) => e._id === parent._id)) {
+          parents.push(parent);
+        }
+      }
+
+      rows = [...products, ...packages, ...parents];
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
         parent.detail = `${parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === 'product'
-              ? parent?.productDetail?.productName
-              : parent?.packageDetail?.packageName
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === 'service'
