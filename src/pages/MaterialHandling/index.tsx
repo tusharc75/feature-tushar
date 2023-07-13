@@ -225,7 +225,7 @@ const MaterialHandling = () => {
               <Grid item xs={12} md={8} lg={selectedOptionWorkOrder ? 12 : 9}>
                 {selectedWorkOrder && (
                   <Box className="container-with-border " p={3}>
-                    <Request workOrder={selectedWorkOrder?._id} />
+                    <Request workOrder={selectedWorkOrder?._id} referenceType={selectedWorkOrder?.referenceType}/>
                   </Box>
                 )}
               </Grid>

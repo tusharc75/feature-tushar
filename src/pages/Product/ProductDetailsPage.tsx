@@ -617,7 +617,7 @@ const ProductDetailsPage = () => {
                                                           background: ['New', 'Available'].indexOf(i?.status) >= 0 ? '#b9ffce' : '#ffb4b4'
                                                         }}
                                                         onClick={() => {
-                                                          history.push({ pathname: `${routes.serializedAssetDetail.path}/${i._id}` });
+                                                          window.open(`${routes.serializedAssetDetail.path}/${i._id}`)
                                                         }}
                                                       />
                                                     )
