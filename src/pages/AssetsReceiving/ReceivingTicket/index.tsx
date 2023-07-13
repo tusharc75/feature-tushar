@@ -74,71 +74,71 @@ const ReceivingTicket = ({
         Header: 'Details',
         width: 250,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => 
-        row?.original.type  ? (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p
-              className="text-truncate"
-            >
-              {row.original.detail}
-            </p>
-            <Box ml={1}>
-              <IconButton 
-               size="small"
-               onClick={() => {
-                window.open(
-                  `${row.original.type === 'service'
-                ? routes.serviceMasterDetail.path
-                : row.original.type === 'product'
-                  ? routes.productDetail.path
-                  : row.original.type === 'serializedAsset'
-                    ? routes.serializedAssetDetail.path
-                    : routes.packagesDetail.path
-                }/${row.original.materialId}`
-                )
-               }}
+        Cell: ({ row }) =>
+          row?.original.type ? (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p
+                className="text-truncate"
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
-            <Box ml={1} className="d-flex align-items-center">
-              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-              </span>
-            </Box>
-          </div>
-        ) : (
-          <NoDataCell />
-        )
+                {row.original.detail}
+              </p>
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(
+                      `${row.original.type === 'service'
+                        ? routes.serviceMasterDetail.path
+                        : row.original.type === 'product'
+                          ? routes.productDetail.path
+                          : row.original.type === 'serializedAsset'
+                            ? routes.serializedAssetDetail.path
+                            : routes.packagesDetail.path
+                      }/${row.original.materialId}`
+                    )
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+              <Box ml={1} className="d-flex align-items-center">
+                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+                </span>
+              </Box>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'productName',
         Header: 'Product',
         width: 200,
-        Cell: ({ row }) => 
-        row?.original.productName  ? (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p
-              className="text-truncate"
-            >
-              {row.original.productName}
-            </p>
-            <Box ml={1}>
-              <IconButton 
-               size="small"
-               onClick={() => {
-                window.open(
-                  `${routes.productDetail.path}/${row.original?.productId}`
-                )
-               }}
+        Cell: ({ row }) =>
+          row?.original.productName ? (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p
+                className="text-truncate"
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
-          </div>
-        ) : (
-          <NoDataCell />
-        )
+                {row.original.productName}
+              </p>
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(
+                      `${routes.productDetail.path}/${row.original?.productId}`
+                    )
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'description',
@@ -384,10 +384,7 @@ const ReceivingTicket = ({
           });
           axiosInstance().put(`${routes.assetsReceiving.path}/${assetsReceivingData._id}/process-status`, { status: ASSETS_RECEIVING_STATUS.complete })
           updateNextStep()
-          if (
-            receivingTicketId?.length &&
-            selectedProducts?.filter((e) => e.type === 'serializedAsset')?.length
-          ) {
+          if (receivingTicketId?.length && selectedProducts?.filter((e) => e.type === 'serializedAsset')?.length) {
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
