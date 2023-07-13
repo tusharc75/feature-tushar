@@ -125,7 +125,7 @@ export default function Contact(props) {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      let currentColumn = getColumnData(contactResource, o?.fieldData, `/${contactRoute}/detail`);
+      let currentColumn = getColumnData(contactResource, o?.fieldData, `/${contactRoute}/detail`, true);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

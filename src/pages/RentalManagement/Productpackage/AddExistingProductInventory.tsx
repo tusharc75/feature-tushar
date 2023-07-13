@@ -187,8 +187,7 @@ const AddExistingProductInventory = ({
           let currentColumn = getColumnData(
             renderedFrom,
             o?.fieldData,
-            type === 'product' ? routes.productDetail.path : routes.packagesDetail.path,
-            true
+            type === 'product' ? routes.productDetail.path : routes.packagesDetail.path
           );
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];

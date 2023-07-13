@@ -148,7 +148,7 @@ const Product = () => {
         let rendererNames = [];
         data.forEach((o) => {
           if (!ignoreField.includes(o?.fieldData.fieldName)) {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path, true);
             if (currentColumn !== null) {
               columns = [...columns, currentColumn?.columnData];
               if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
