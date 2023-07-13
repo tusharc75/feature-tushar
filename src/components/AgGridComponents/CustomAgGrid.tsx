@@ -516,7 +516,6 @@ export default function CustomAgGrid({
                   // suppressAutoSize: true,
                   // headerCheckboxSelection: true,
                   // checkboxSelection: true,
-                   flex: 1,
                   floatingFilterComponentParams: { suppressFilterButton: true }
                 }}
                 onSortChanged={() => {

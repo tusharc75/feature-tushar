@@ -80,7 +80,7 @@ const WellNumber = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.wellNumber?.title, o?.fieldData, routes.wellNumberDetail.path);
+          let currentColumn = getColumnData(routes.wellNumber?.title, o?.fieldData, routes.wellNumberDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

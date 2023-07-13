@@ -110,7 +110,7 @@ const Entity: FC = () => {
         let columns = []
         let rendererNames = []
         data.forEach(o => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.entityDetail.path)
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.entityDetail.path, true)
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData]

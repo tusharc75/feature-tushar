@@ -146,7 +146,7 @@ const ProductCategory = () => {
                 { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
               ];
             } else {
-              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productCategory.path);
+              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productCategory.path, true);
 
               if (currentColumn !== null) {
                 columns = [...columns, currentColumn?.columnData];
