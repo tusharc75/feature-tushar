@@ -13,7 +13,8 @@ import {
   CustomDialogTransition,
   setFieldsInAscendingOrder,
   generateUniqueIdOnly,
-  DELIVERY_TICKET_STATUS
+  DELIVERY_TICKET_STATUS,
+  convertDateInDateTime
 } from './../../constants/helpers';
 import {
   getObjKeysWithValues,
@@ -91,7 +92,12 @@ const ManageDeliveryTicket = ({
 
   const findValidationDate = async () => {
     const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: productInventory?.map((e) => e._id), last: 1 })
-    setCreateDateMin(data?.date ? new Date(data?.date) : new Date())
+    var lastDate: any = new Date();
+    if (data?.date) {
+      lastDate = new Date(data?.date);
+      lastDate.setHours(0, 0, 0);
+    }
+    setCreateDateMin(lastDate)
   }
 
   useEffect(() => {
@@ -509,13 +515,15 @@ const ManageDeliveryTicket = ({
 
   function validate(values) {
     const errors = {};
-    let startDate = moment(values?.pickUpDate);
-    let endDate = moment(values?.deliveryDate);
-    if (endDate.diff(startDate, 'days') < 0) {
-      errors['pickUpDate'] = 'Please enter valid pick-Up  date';
-    }
-    if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
-      errors['createDate'] = `Please select valid date`;
+    if (initialData?.fields?.some(field => field?.fieldName === "createDate") && productInventory?.length) {
+      let startDate = moment(values?.pickUpDate);
+      let endDate = moment(values?.deliveryDate);
+      if (endDate.diff(startDate, 'days') < 0) {
+        errors['pickUpDate'] = 'Please enter valid pick-Up date';
+      }
+      if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
+        errors['createDate'] = `Please select valid date`;
+      }
     }
     return errors;
   }
@@ -683,7 +691,8 @@ const ManageDeliveryTicket = ({
                                         type={field.type}
                                         options={field.option}
                                         setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
+                                          var newDate = convertDateInDateTime(value);
+                                          setFieldValue(name, newDate);
                                         }}
                                         required={field.required}
                                         fullWidth
