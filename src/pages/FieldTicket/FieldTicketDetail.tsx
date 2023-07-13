@@ -24,6 +24,7 @@ import Steps from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Material from './material';
 import { camelCase } from 'lodash';
+import Invoice from './Invoice';
 
 const FieldTicketDetail = () => {
   const { id } = useParams();
@@ -211,6 +212,9 @@ const FieldTicketDetail = () => {
             )}
             {currentStep === 1 && (
               <AddCost fieldTicketData={fieldTicketData} id={id} />
+            )}
+            {currentStep === 2 && (
+              <Invoice/>
             )}
           </ContentFullScreen>
         </TabPanel>

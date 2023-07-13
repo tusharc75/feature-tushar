@@ -21,7 +21,6 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { useHistory } from 'react-router-dom';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import AttachmentIcon from '@material-ui/icons/Attachment';
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import RepeatIcon from '@material-ui/icons/Repeat';
@@ -258,6 +257,24 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     setNextStep(true);
   };
 
+  const checkProductInside = (item, material) => {
+    if (item?.type === 'product') {
+      return true;
+    }
+    const child = material?.filter(e => e.parentId === item?._id);
+    if (child?.some(e => e?.type === 'product')) {
+      return true;
+    }
+    if (child?.length) {
+      for (var ele in child) {
+        return checkProductInside(child[ele], material)
+      }
+    }
+    else {
+      return false
+    }
+  }
+
   const fetchData = async () => {
     setNextStep(false);
     try {
@@ -310,19 +327,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         }
       }
 
-      let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== 'service');
+      const material = data.material;
+      let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
 
-      let products = rows.filter((e) => e.type === 'product' && !e?.isConsumbale);
-      let packages = rows.filter((e) => e.type === 'package' && e.packageDetail?.packageType !== 'Service');
-
-      rows = [...products, ...packages];
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
         parent.detail = `${parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === 'product'
-              ? parent?.productDetail?.productName
-              : parent?.packageDetail?.packageName
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === 'service'

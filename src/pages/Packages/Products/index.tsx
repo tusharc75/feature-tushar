@@ -17,6 +17,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { Link } from 'react-router-dom';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { flattenArray } from 'src/constants/columns';
 
@@ -122,19 +123,26 @@ const ProductsTable = ({ packageId, packageData }) => {
         Header: 'Details',
         width: 200,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
-          <div>
-            {row.original.type === 'product' ? (
-              <Link className="link text-truncate" to={`${routes.productDetail.path}/${row.original._id}`}>
-                {row.original.detail}
-              </Link>
-            ) : (
-              <Link className="link text-truncate" to={`${routes.serializedAssetDetail.path}/${row.original._id}`}>
-                {row.original.detail}
-              </Link>
-            )}
-          </div>
-        )
+        Cell: ({ row }) =>
+          row?.original?.type ? (
+            <div className="d-flex gap-2 align-items-center">
+              <p className="text-truncate">{row.original.detail}</p>
+              <IconButton
+                size='small'
+                onClick={() => {
+                  if (row?.original?.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original._id}`);
+                  } else {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`)
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'description',
