@@ -726,21 +726,27 @@ const LoadingTicket = ({
   const handleChangeStatusInUse = (status, prevStatus, date) => {
     setOpenDateDialog((prev) => ({ ...prev, loading: true }));
     const assets = selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id);
-    axiosInstance()
-      .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse-standby`, { assets, status: status, prevStatus: prevStatus, date: date })
-      .then(({ data }) => {
-        fetchRecords();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+    if (assets?.length) {
+      axiosInstance()
+        .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse-standby`, { assets, status: status, prevStatus: prevStatus, date: date })
+        .then(({ data }) => {
+          fetchRecords();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setOpenDateDialog({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setOpenDateDialog((prev) => ({ ...prev, loading: false }));
         });
-        setOpenDateDialog({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setOpenDateDialog((prev) => ({ ...prev, loading: false }));
-      });
+    }
+    else {
+      fetchRecords();
+      setOpenDateDialog({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
+    }
   };
 
   const handleChangeDate = (date) => {
