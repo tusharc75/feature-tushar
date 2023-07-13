@@ -21,7 +21,6 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { useHistory } from 'react-router-dom';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import AttachmentIcon from '@material-ui/icons/Attachment';
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import RepeatIcon from '@material-ui/icons/Repeat';
@@ -258,12 +257,22 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     setNextStep(true);
   };
 
-  function findUltimateParent(array, childId) {
-    const child = array.find(item => item._id === childId);
-    if (!child || child.parentId === null) {
-      return child;
+  const checkProductInside = (item, material) => {
+    if (item?.type === 'product') {
+      return true;
     }
-    return findUltimateParent(array, child.parentId);
+    const child = material?.filter(e => e.parentId === item?._id);
+    if (child?.some(e => e?.type === 'product')) {
+      return true;
+    }
+    if (child?.length) {
+      for (var ele in child) {
+        return checkProductInside(child[ele], material)
+      }
+    }
+    else {
+      return false
+    }
   }
 
   const fetchData = async () => {
@@ -318,21 +327,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         }
       }
 
-      let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== 'service');
+      const material = data.material;
+      let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
 
-      let products = rows.filter((e) => e.type === 'product' && !e?.isConsumbale);
-      let packages = rows.filter((e) => e.type === 'package' && e.packageDetail?.packageType !== 'Service');
-
-      const childProducts = data.material.filter((e) => e.parentId !== null && e.type === 'product');
-      const parentServicePackages = []
-      for (let i = 0; i < childProducts.length; i++) {
-        const parent = findUltimateParent(data.material, childProducts[i].parentId);
-        if (!parentServicePackages.some((e) => e._id === parent._id)) {
-          parentServicePackages.push(parent);
-        }
-      }
-
-      rows = [...products, ...packages, ...parentServicePackages];
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
         parent.detail = `${parent.type === 'service'
