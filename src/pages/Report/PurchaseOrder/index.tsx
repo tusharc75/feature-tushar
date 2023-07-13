@@ -422,7 +422,7 @@ const Report = () => {
               }
             }
           },
-          { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
+          { field: 'price', headerName: 'Cost', show: true, filter: false, cellRenderer: 'commonRenderer' },
           { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
           { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
           ...(user?.user?.brandPolicy?.storageLocation

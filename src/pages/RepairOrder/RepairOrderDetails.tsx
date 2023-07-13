@@ -152,7 +152,7 @@ const RepairOrderDetails = () => {
           steps = steps?.filter((e) => !['Loading Ticket']?.includes(e.name));
         }
         if (!user?.user?.brandPolicy?.repairOrderPrice && !data?.addQuotationStep) {
-          steps = steps?.filter((e) => !['Quotation', 'Post Work Service', 'Invoice']?.includes(e.name));
+          steps = steps?.filter((e) => !['Quotation', 'Execute', 'Invoice']?.includes(e.name));
         }
         if (!data?.addQuotationStep) {
           steps = steps?.map((e) => {
@@ -501,7 +501,7 @@ const RepairOrderDetails = () => {
                 allowedToDelete={allowedToDelete}
               />
             )}
-            {(stepNames[currentStep] === 'Work Order' || stepNames[currentStep] === 'Post Work Service') && repairOrderData && (
+            {(stepNames[currentStep] === 'Work Order' || stepNames[currentStep] === 'Execute') && repairOrderData && (
               <WorkOrder
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
