@@ -64,7 +64,6 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
       Cell: ({ row }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <p
-            className="link text-truncate"
             title={row.original.fieldServiceOrder}
           >
             {row.original.fieldServiceOrder}
@@ -90,7 +89,6 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
         row.original['fieldTicketNumber'] ? (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p
-              className="link text-truncate"
               title={row.original.fieldTicketNumber}
             >
               {row.original.fieldTicketNumber}
@@ -117,7 +115,6 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
         row.original.serviceName && row.original.serviceId ? (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p
-              className="link text-truncate"
               title={row.original.serviceName}
             >
               {row.original.serviceName}
@@ -154,12 +151,31 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
       width: 250,
       Cell: ({ row }) =>
         row.original['customerAccount'] ? (
-          <Link className="link text-truncate" to={`${routes.customerAccountDetail.path}/${row.original.customerAccountId}`}>
-            {row.original['customerAccount']}
-          </Link>
-        ) : (
-          <NoDataCell />
-        )
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p
+              title={row.original['customerAccount']}
+            >
+              {row.original['customerAccount']}
+            </p>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.customerAccountDetail.path}/${row.original.customerAccountId}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (<NoDataCell />)
+      // row.original['customerAccount'] ? (
+      //   <Link className="link text-truncate" to={`${routes.customerAccountDetail.path}/${row.original.customerAccountId}`}>
+      //     {row.original['customerAccount']}
+      //   </Link>
+      // ) : (
+      //   <NoDataCell />
+      // )
     },
     {
       accessor: 'estimateStartDate',
