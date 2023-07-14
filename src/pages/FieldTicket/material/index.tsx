@@ -166,10 +166,12 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       parent.type = parent.type;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
     });
-    if (data.filter((_rows) => _rows.isValid === false).length > 0) {
-      setNextStep(false);
-    } else {
-      setNextStep(true);
+    if (data?.length) {
+      if (data.filter((_rows) => _rows.isValid === false).length > 0) {
+        setNextStep(false);
+      } else {
+        setNextStep(true);
+      }
     }
     setRowsData(data);
     setSelectedServices([]);
