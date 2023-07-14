@@ -9,7 +9,7 @@ import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, fieldTicket } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -157,7 +157,6 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
 
         let additionalCost: any = [];
 
-        
         const response = await axiosInstance().get(`/field-ticket/${id}/material`);
         const material = response?.data?.data?.material;
 
@@ -310,9 +309,14 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
         });
         setUpdating(true);
         axiosInstance()
+<<<<<<< HEAD
             .post(`/field-ticket/${id}/invoice`, {
                 material: rowsApplied.filter((d) => d.type !== 'additionalCost'),
                 additionalCost: rowsApplied.filter((d) => d.type === 'additionalCost')
+=======
+            .post(`${fieldTicket.api}/${id}/invoice`, {
+                material: selectedRecords,
+>>>>>>> 24500a8b69a48138f0efd82626e77dc102ece5cc
             })
             .then(() => {
                 setUpdating(false);

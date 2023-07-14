@@ -137,7 +137,6 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
     }
     return color;
   };
-  console.log('services', services)
   return (
     <>
       {services?.map((service) => {
