@@ -16,13 +16,12 @@ import routes from '../../components/Helpers/Routes';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
-import { gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
-import { useLocation } from 'react-router-dom';
 import { MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -34,7 +33,6 @@ const Address = () => {
   const renderedFrom = camelCase(routes?.address.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  const location = useLocation();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -212,7 +210,7 @@ const Address = () => {
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = selectedRecords.map((m) => m._id);
+      ids = getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id);
     }
     axiosInstance()
       .put(`/address/remove`, { ids: ids })
@@ -220,7 +218,6 @@ const Address = () => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        // setSelectedCategory([])
         setAnchorEl(null);
       })
       .catch((error) => {
@@ -256,8 +253,8 @@ const Address = () => {
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
+            ids={getLocalStorageArrayData(localStorageSelectedRecords)?.length ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchData();
@@ -307,34 +304,37 @@ const Address = () => {
                   )}
 
                   {permissions?.address?.isDelete && (
-                    <>
-                      {' '}
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        disabled={selectedRecords.length ? false : true}
-                        aria-controls="action-menu"
-                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                        endIcon={<ExpandMore />}
+                    <><Button
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      disabled={getLocalStorageArrayData(localStorageSelectedRecords)?.length ? false : true}
+                      aria-controls="action-menu"
+                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
+                      endIcon={<ExpandMore />}
+                    >
+                      {isMobile && !isTablet ? '' : 'Actions'}
+                    </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
                       >
-                        {isMobile && !isTablet ? '' : 'Actions'}
-                        <Menu
-                          anchorEl={anchorEl}
-                          keepMounted
-                          getContentAnchorEl={null}
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left'
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            setShowDeleteConfirmBox(true)
                           }}
-                          id="action-menu"
-                          open={Boolean(anchorEl)}
-                          onClose={closeActions}
-                        >
-                          <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                        </Menu>{' '}
-                      </Button>
+                        >Delete</MenuItem>
+                      </Menu>
                     </>
                   )}
                 </Grid>
@@ -354,7 +354,7 @@ const Address = () => {
                 history.push(`${routes.addressDetail.path}/${data._id}`);
               }}
               dataRows={dataRows}
-              selectedRecords={selectedRecords}
+              selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
               dispatch={dispatch}
               onEdit={(data) => {
                 history.push(`${routes.addressDetail.path}/${data._id}?openEdit=true`);
