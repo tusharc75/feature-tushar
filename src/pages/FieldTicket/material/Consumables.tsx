@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { prepareDataForGrid } from 'src/constants/helpers';
+import { fieldTicket, prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem, Tab, Tabs, TextField } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -220,7 +220,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
 
   const fetchData = async () => {
     setDataRows(null);
-    let api = `/field-ticket/${id}/material?type=product`;
+    let api = `${fieldTicket.api}/${id}/material?type=product`;
     if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedServiceOption?.optionValue}`;
     }
@@ -293,7 +293,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     }
 
     axiosInstance()
-      .post(`/field-ticket/${id}/material`, { material })
+      .post(`${fieldTicket.api}/${id}/material`, { material })
       .then(() => {
         setConsumablesDialog(false);
         fetchData();
@@ -306,7 +306,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   const handleDelete = async (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`/field-ticket/${id}/material/delete`, { ids: rows })
+      .put(`${fieldTicket.api}/${id}/material/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
         fetchData();
@@ -333,7 +333,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     });
     setUpdating(true);
     axiosInstance()
-      .put(`/field-ticket/${id}/material`, { material: rows })
+      .put(`${fieldTicket.api}/${id}/material`, { material: rows })
       .then(() => {
         fetchData();
         if (saveAndNext) {
