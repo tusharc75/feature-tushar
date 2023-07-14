@@ -309,14 +309,9 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
         });
         setUpdating(true);
         axiosInstance()
-<<<<<<< HEAD
             .post(`/field-ticket/${id}/invoice`, {
                 material: rowsApplied.filter((d) => d.type !== 'additionalCost'),
                 additionalCost: rowsApplied.filter((d) => d.type === 'additionalCost')
-=======
-            .post(`${fieldTicket.api}/${id}/invoice`, {
-                material: selectedRecords,
->>>>>>> 24500a8b69a48138f0efd82626e77dc102ece5cc
             })
             .then(() => {
                 setUpdating(false);
