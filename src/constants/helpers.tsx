@@ -559,6 +559,11 @@ export const fieldServiceOrder = {
   api: '/field-service-order'
 };
 
+export const fieldTicket = {
+  resource: 'Field Ticket',
+  api: '/field-ticket'
+}
+
 export const employeeMaster = {
   resource: 'employeeMaster',
   api: '/employee-master'
@@ -2428,6 +2433,13 @@ export const ASSETS_RECEIVING_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   complete: 'Complete'
+}
+
+export const MATERIAL_TYPE = {
+  product: 'product',
+  service: 'service',
+  package: 'package',
+  serializedAsset: 'serializedAsset'
 }
 
 export const convertMsToTime = (milliseconds: any) => {

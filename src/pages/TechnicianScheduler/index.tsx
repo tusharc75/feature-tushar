@@ -7,7 +7,7 @@ import ServiceOrder from './ServiceOrder';
 
 function TechnicianScheduler() {
 
-  const [filter, setFilter] = useState({ view: 'Technician View', resource: '', fieldServiceOrder: '' });
+  const [filter, setFilter] = useState({ view: 'Technician View', resource: '', fieldTicket: '' });
 
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, data: null });
   const [refresh, setRefresh] = useState(false);
