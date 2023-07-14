@@ -2430,6 +2430,13 @@ export const ASSETS_RECEIVING_STATUS = {
   complete: 'Complete'
 }
 
+export const MATERIAL_TYPE = {
+  product: 'product',
+  service: 'service',
+  package: 'package',
+  serializedAsset: 'serializedAsset'
+}
+
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
     num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
