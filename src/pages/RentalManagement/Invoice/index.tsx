@@ -118,7 +118,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
                         } else if (row.original.type === 'product') {
                           window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                         } else if (row.original.type === 'asset') {
-                          window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                          window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
                         } else {
                           window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                         }
@@ -237,7 +237,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
         description: parent?.description || '',
         actualStartDate: _inventory.startDate,
         actualEndDate: _inventory.endDate,
-        type: 'Asset',
+        type: 'asset',
         qty: 1
       });
     });
