@@ -169,13 +169,6 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
             </Box>
           </div>
         ) : (<NoDataCell />)
-      // row.original['customerAccount'] ? (
-      //   <Link className="link text-truncate" to={`${routes.customerAccountDetail.path}/${row.original.customerAccountId}`}>
-      //     {row.original['customerAccount']}
-      //   </Link>
-      // ) : (
-      //   <NoDataCell />
-      // )
     },
     {
       accessor: 'estimateStartDate',
