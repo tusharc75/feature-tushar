@@ -136,7 +136,6 @@ const ProgressiveBilling = ({
     await axiosInstance()
       .get(`${invoice.api}${queryString}`)
       .then(({ data: { data, count } }) => {
-        console.log('data', data)
         let rows = data.map((u, idx) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['isLatestInvoice'] = idx === 0 ? true : false;
