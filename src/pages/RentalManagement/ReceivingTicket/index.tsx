@@ -1313,6 +1313,7 @@ const ReceivingTicket = ({
                     ![
                       ASSET_STATUS.inUse,
                       ASSET_STATUS.standBy,
+                      ASSET_STATUS.standByNotChargeable,
                       ASSET_STATUS.scrap,
                       ASSET_STATUS.needRepair,
                       ASSET_STATUS.needRecert,
@@ -1358,6 +1359,7 @@ const ReceivingTicket = ({
                     ![
                       ASSET_STATUS.inUse,
                       ASSET_STATUS.standBy,
+                      ASSET_STATUS.standByNotChargeable,
                       ASSET_STATUS.reserved,
                       ASSET_STATUS.scrap,
                       ASSET_STATUS.needRepair,
