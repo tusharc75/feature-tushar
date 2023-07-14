@@ -21,6 +21,9 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import EditIcon from '@material-ui/icons/Edit';
 import { startCase } from 'lodash';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import styles from '../../Leads/Header.module.scss';
+
 
 
 const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, onSuccess, onClose }) => {
@@ -33,7 +36,11 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
     const [rowsData, setRowsData] = useState(null);
     const [selectedRecords, setSelectedRecords] = useState([]);
     const [isUpdating, setUpdating] = useState(false);
-
+    const [allFields, setAllFields] = useState([]);
+    const [material, setMaterial] = useState([]);
+    const [orginalMaterial, setOrginalMaterial] = useState([]);
+    const [appliedDate, setAppliedDate] = useState(false);
+    const [rowsApplied, setRowsApplied] = useState([]);
 
     useEffect(() => {
         fetchFields();
@@ -54,6 +61,7 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
         if (qtyIndex > -1) {
             newColumns[qtyIndex].accessor = 'qtyDisplay';
         }
+        setAllFields(JSON.parse(JSON.stringify(allFields)));
         let column: any = [
             {
                 accessor: 'srno',
@@ -87,22 +95,24 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                 Cell: ({ row }) => (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <p> {row.original.detail}</p>
-                        <Box ml={1}>
-                            <IconButton
-                                size="small"
-                                onClick={() => {
-                                    if (row?.original?.type === 'product' || row?.original?.type === 'service') {
-                                        let path = routes.serviceMasterDetail.path;
-                                        if (row?.original?.type === 'product') {
-                                            path = routes.productDetail.path;
+                        {row.original['type'] !== 'additionalCost' && (
+                            <Box ml={1}>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => {
+                                        if (row?.original?.type === 'product' || row?.original?.type === 'service') {
+                                            let path = routes.serviceMasterDetail.path;
+                                            if (row?.original?.type === 'product') {
+                                                path = routes.productDetail.path;
+                                            }
+                                            window.open(`${path}/${row.original.materialId}`);
                                         }
-                                        window.open(`${path}/${row.original.materialId}`);
-                                    }
-                                }}
-                            >
-                                <OpenInNewIcon fontSize="small" color="primary" />
-                            </IconButton>
-                        </Box>
+                                    }}
+                                >
+                                    <OpenInNewIcon fontSize="small" color="primary" />
+                                </IconButton>
+                            </Box>
+                        )}
                     </div>
                 )
             },
@@ -143,18 +153,24 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
     };
 
     const fetchData = async () => {
+        let data = [];
+
+        let additionalCost: any = [];
+
         const response = await axiosInstance().get(`/field-ticket/${id}/material`);
-        const data = response?.data?.data?.material;
-        data.forEach((parent, i) => {
-            console.log('invoiceData', invoiceData, parent?._id)
-            invoiceData?.forEach(invoice => {
-                invoice?.material?.forEach(_m => {
-                    if (_m?._id === parent?._id) {
-                        parent.hideSelection = true;
-                        parent.isAppliedInvoice = true;
-                    }
-                })
-            });
+        const material = response?.data?.data?.material;
+
+        const invoiceResponse = await axiosInstance().get(`/field-ticket/${id}/invoice/material-end-date-qty`);
+        additionalCost = invoiceResponse?.data?.data?.additionalCost;
+
+        const responseAdditionalCostData = await axiosInstance().get(`/field-ticket/${id}/cost`);
+        let additionalCostData = responseAdditionalCostData?.data?.data || [];
+
+        if (additionalCost?.length > 0) {
+            additionalCostData = additionalCostData.filter((d) => !additionalCost?.some((obj) => obj._id === d._id));
+        }
+
+        material?.forEach((parent, i) => {
             parent.srno = i + 1;
             parent.detail =
                 parent?.type === 'service' ?
@@ -174,17 +190,115 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                         '- - -'
             parent.qtyDisplay = parent.qty;
             parent.type = parent.type;
-            parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
-            if (!parent.isValid) {
-                parent.hideSelection = true;
-            }
         });
+
+        if (additionalCostData?.length > 0) {
+            additionalCostData.forEach((element, i) => {
+                element.srno = material?.length + i + 1;
+                element.type = 'additionalCost';
+                element.qtyDisplay = element.qty;
+                element.detail = '';
+                element.materialId = element?._id;
+            });
+        }
+        data = [...material, ...additionalCostData]
+
+        if (invoiceData) {
+            data = data?.map((e) => {
+                let materialData: any = { ...e };
+
+                let pMethod = materialData?.pricingMethod?.split(',') || [];
+                pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
+                if (!['Per Day', 'Per Week', 'Per Month'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
+                    let tempTotalPrevQty = invoiceData
+                        ?.map((obj) => {
+                            let tempQty = obj.material?.find((ele) => ele._id === materialData._id)?.qty;
+                            if (tempQty) return tempQty;
+                        })
+                        .filter((d) => d);
+
+                    tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
+                    let values = { qty: materialData.qty - tempTotalPrevQty };
+                    const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
+
+                    materialData = { ...materialData, ...calValues };
+                }
+
+                return materialData;
+            })
+                .filter((d) => d.qty > 0);
+        }
+
         setRowsData(data);
+        setMaterial(data);
+        setOrginalMaterial(data);
         setSelectedRecords([]);
     }
 
+    const handleApplyDate = async () => {
+        let tempValues: any = {};
+
+        const invoiceResponse = await axiosInstance().get(`/field-ticket/${id}/invoice/material-end-date-qty`);
+        const invoicedProducts = invoiceResponse?.data?.data?.material;
+
+        let rows: any = [];
+        selectedRecords.forEach((element) => {
+            if (element.type === 'additionalCost') {
+                element.isAppliedBill = true;
+                rows.push(element);
+            } else {
+                element.invalidDate = false;
+
+                const product = invoicedProducts?.material?.find((p) => p._id === element._id);
+
+                const productStartDateTime = new Date(new Date(element.estimateStartDate).toLocaleDateString()).getTime();
+                const productEndtDateTime = new Date(new Date(element.estimateEndDate).toLocaleDateString()).getTime();
+
+                if (productEndtDateTime < productStartDateTime) {
+                    element.invalidDate = true;
+                } else if (product) {
+                    element.invalidDate = false;
+                }
+
+                let priceFieldName = Object.keys(element).find((d) => d.includes('price_'));
+
+                let calValues: any;
+                let values = JSON.parse(JSON.stringify(tempValues));
+                if (element.pricingMethod === 'Per Week') {
+                    values['pricingMethod'] = 'Per Day';
+                    if (priceFieldName) {
+                        values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 7;
+                    }
+                    calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+                    calValues['pricingMethod'] = 'Per Week';
+                } else if (element.pricingMethod === 'Per Month') {
+                    values['pricingMethod'] = 'Per Day';
+                    if (priceFieldName) {
+                        values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 30;
+                    }
+                    calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+                    calValues['pricingMethod'] = 'Per Month';
+                } else {
+                    calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+                }
+                element.isAppliedBill = true;
+                rows.push({ ...element, ...calValues });
+            }
+        });
+
+        let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
+
+        setMaterial(tempRows);
+        setRowsData(tempRows);
+        setRowsApplied((prevState) => {
+            let prevRowsApplied = prevState.filter((obj) => !rows.map((d) => d._id).includes(obj._id));
+            return [...prevRowsApplied, ...rows];
+        });
+        setAppliedDate(true);
+    };
+
     const handleCreateInvoice = () => {
-        selectedRecords?.forEach((element) => {
+        rowsApplied?.forEach((element) => {
             delete element?.srno;
             delete element?.detail;
             delete element?.qtyDisplay;
@@ -193,11 +307,11 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
             delete element?.service;
             delete element?.description;
         });
-        console.log('selectedRecords', selectedRecords)
         setUpdating(true);
         axiosInstance()
             .post(`/field-ticket/${id}/invoice`, {
-                material: selectedRecords,
+                material: rowsApplied.filter((d) => d.type !== 'additionalCost'),
+                additionalCost: rowsApplied.filter((d) => d.type === 'additionalCost')
             })
             .then(() => {
                 setUpdating(false);
@@ -215,6 +329,38 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                 <CustomDialogHeader title={`Create Invoice `} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
                 <CustomDialogContent>
                     <>
+                        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+
+                            <Box style={{ display: 'flex', gap: '5px' }}>
+                                <HtmlTooltip
+                                    title={
+                                        !Boolean(
+                                            selectedRecords && selectedRecords.length && (selectedRecords.every((d) => d.type === 'additionalCost'))
+                                        )
+                                            ? 'Please select product to apply'
+                                            : ''
+                                    }
+                                >
+                                    <span>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            disabled={
+                                                !Boolean(
+                                                    selectedRecords &&
+                                                    selectedRecords.length)
+                                            }
+                                            size="small"
+                                            onClick={() => {
+                                                handleApplyDate();
+                                            }}
+                                        >
+                                            Apply
+                                        </Button>
+                                    </span>
+                                </HtmlTooltip>
+                            </Box>
+                        </Box>
                         {columns && rowsData ? (
                             <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
                                 <CustomReactTable
@@ -222,7 +368,7 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                                     columns={columns}
                                     data={rowsData}
                                     setWholeRowsCellColor={(rowData) => {
-                                        if (!rowData?.isValid) return 'error';
+                                        if (rowData?.invalidDate) return 'error';
                                         if (rowData?.isAppliedInvoice) return 'isAppliedBill';
                                     }}
                                     onSelect={setSelectedRecords}
@@ -254,9 +400,11 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                     </Button>
                     <HtmlTooltip
                         title={
-                            !selectedRecords?.length
-                                ? 'Please select items '
-                                : ''
+                            !appliedDate
+                                ? 'Please select items and apply'
+                                : rowsApplied?.some((d) => d.invalidDate === true)
+                                    ? 'Please select an appropriate date !'
+                                    : 'Create Invoice'
                         }
                     >
                         <span>
@@ -265,7 +413,7 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                                 variant="contained"
                                 color="primary"
                                 size="small"
-                                disabled={isUpdating || selectedRecords?.length ? false : true}
+                                disabled={isUpdating || !appliedDate || rowsApplied.some((d) => d.invalidDate === true)}
                                 onClick={() => {
                                     handleCreateInvoice();
                                 }}
