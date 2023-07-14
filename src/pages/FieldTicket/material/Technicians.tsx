@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { prepareDataForGrid } from 'src/constants/helpers';
+import { fieldTicket, prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem, Tab, Tabs, TextField, Tooltip } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -129,7 +129,7 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
 
     const fetchData = async () => {
         setDataRows(null);
-        let api = `/field-ticket/technician?fieldTicketId=${id}`;
+        let api = `${fieldTicket.api}/technician?fieldTicketId=${id}`;
         if (selectedService && selectedService?.optionValue !== 'All') {
             api = `${api}&serviceId=${selectedService?.optionValue}&uniqueId=${selectedService?._id}`
         }
@@ -174,7 +174,7 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
     const handleDelete = async (rows) => {
         setIsDeleting(true);
         axiosInstance()
-            .put(`/field-ticket/technician`, { ids: rows })
+            .put(`${fieldTicket.api}/technician`, { ids: rows })
             .then(() => {
                 setIsDeleting(false);
                 fetchData();
@@ -214,7 +214,7 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
         });
 
         axiosInstance()
-            .post(`/field-ticket/technician`, { technician })
+            .post(`${fieldTicket.api}/technician`, { technician })
             .then(() => {
                 setTechnicianDialog(false);
                 fetchData();
