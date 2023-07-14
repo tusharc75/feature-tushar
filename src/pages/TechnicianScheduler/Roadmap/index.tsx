@@ -93,7 +93,6 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
   };
 
   const handleSelect = (event, data, type) => {
-    console.log(data)
     if (type === 'map') {
       setSelected(data?._id);
     } else if (selectedRecords?.length === 1) {

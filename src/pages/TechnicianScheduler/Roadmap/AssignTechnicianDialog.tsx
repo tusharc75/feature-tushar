@@ -11,13 +11,12 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
   const toastConfig = useContext(CustomToastContext);
 
   const handleAssign = () => {
-    console.log('assignData', selectedServiceOrder, technicianData)
     const data = selectedServiceOrder?.map((ele) => {
       return {
         uniqueId: ele?.service?.uniqueId,
-        service: ele?.service?.materialId,
+        service: ele?.serviceId,
         technician: technicianData?._id,
-        fieldTicket: ele?._id,
+        fieldTicket: ele._id,
         status: "Assigned",
         estimateStartDate: ele?.service?.estimateStartDate,
         estimateEndDate: ele?.service?.estimateEndDate

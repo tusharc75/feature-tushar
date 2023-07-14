@@ -19,6 +19,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { calculatePrice } from 'src/components/RentalManagment/helper';
 import Consumables from './Consumables';
+import { fieldTicket } from 'src/constants/helpers';
 
 const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -153,7 +154,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
   };
 
   const fetchMaterial = async () => {
-    const response = await axiosInstance().get(`/field-ticket/${id}/material?type=service`);
+    const response = await axiosInstance().get(`${fieldTicket.api}/${id}/material?type=service`);
     const data = response?.data?.data?.material;
 
     data.forEach((parent, i) => {
@@ -242,7 +243,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
     }
 
     axiosInstance()
-      .post(`/field-ticket/${id}/material`, { material: tempMaterial })
+      .post(`${fieldTicket.api}/${id}/material`, { material: tempMaterial })
       .then(() => {
         setAddExistingServiceDialog(false);
         fetchMaterial();
@@ -255,7 +256,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`/field-ticket/${id}/material/delete`, { ids: rows })
+      .put(`${fieldTicket.api}/${id}/material/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
         fetchMaterial();
@@ -279,7 +280,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
     });
     setUpdating(true);
     axiosInstance()
-      .put(`/field-ticket/${id}/material`, { material: rows })
+      .put(`${fieldTicket.api}/${id}/material`, { material: rows })
       .then(() => {
         fetchMaterial();
         if (saveAndNext) {
