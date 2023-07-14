@@ -9,7 +9,7 @@ import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, fieldTicket } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -143,7 +143,7 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
     };
 
     const fetchData = async () => {
-        const response = await axiosInstance().get(`/field-ticket/${id}/material`);
+        const response = await axiosInstance().get(`${fieldTicket.api}/${id}/material`);
         const data = response?.data?.data?.material;
         data.forEach((parent, i) => {
             console.log('invoiceData', invoiceData, parent?._id)
@@ -196,7 +196,7 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
         console.log('selectedRecords', selectedRecords)
         setUpdating(true);
         axiosInstance()
-            .post(`/field-ticket/${id}/invoice`, {
+            .post(`${fieldTicket.api}/${id}/invoice`, {
                 material: selectedRecords,
             })
             .then(() => {
