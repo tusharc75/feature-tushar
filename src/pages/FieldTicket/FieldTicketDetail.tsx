@@ -214,7 +214,7 @@ const FieldTicketDetail = () => {
               <AddCost fieldTicketData={fieldTicketData} id={id} />
             )}
             {currentStep === 2 && (
-              <Invoice/>
+              <Invoice id={id} fieldTicketData={fieldTicketData} renderedFrom={renderedFrom} />
             )}
           </ContentFullScreen>
         </TabPanel>
