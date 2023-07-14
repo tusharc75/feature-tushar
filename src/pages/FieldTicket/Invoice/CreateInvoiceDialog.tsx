@@ -157,6 +157,7 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
 
         let additionalCost: any = [];
 
+        
         const response = await axiosInstance().get(`/field-ticket/${id}/material`);
         const material = response?.data?.data?.material;
 
