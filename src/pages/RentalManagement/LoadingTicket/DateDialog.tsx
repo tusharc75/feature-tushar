@@ -21,7 +21,12 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
   const findValidationDate = async () => {
     const last = type === 'changeStatus' ? 1 : 2
     const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets, last })
-    setMinDate(new Date(data?.date))
+    var lastDate: any = new Date();
+    if (data?.date) {
+      lastDate = new Date(data?.date);
+      lastDate.setHours(0, 0, 0);
+    }
+    setMinDate(lastDate)
   }
 
 
