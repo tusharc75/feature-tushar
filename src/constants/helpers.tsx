@@ -559,6 +559,11 @@ export const fieldServiceOrder = {
   api: '/field-service-order'
 };
 
+export const fieldTicket = {
+  resource: 'Field Ticket',
+  api: '/field-ticket'
+}
+
 export const employeeMaster = {
   resource: 'employeeMaster',
   api: '/employee-master'

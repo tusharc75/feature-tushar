@@ -37,7 +37,7 @@ import ServiceOrderViews from './RoadMapViews';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
 import FieldTicket from './FieldTicket';
-import ProgressiveBilling from './ProgressiveBilling';
+import ProgressiveBilling from './Invoice';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
