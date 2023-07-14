@@ -146,7 +146,6 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
         const response = await axiosInstance().get(`/field-ticket/${id}/material`);
         const data = response?.data?.data?.material;
         data.forEach((parent, i) => {
-            console.log('invoiceData', invoiceData, parent?._id)
             invoiceData?.forEach(invoice => {
                 invoice?.material?.forEach(_m => {
                     if (_m?._id === parent?._id) {
@@ -193,7 +192,6 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
             delete element?.service;
             delete element?.description;
         });
-        console.log('selectedRecords', selectedRecords)
         setUpdating(true);
         axiosInstance()
             .post(`/field-ticket/${id}/invoice`, {
