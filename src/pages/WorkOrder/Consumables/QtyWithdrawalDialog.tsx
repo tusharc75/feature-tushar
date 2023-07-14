@@ -7,7 +7,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { CustomDialogTransition, workOrder } from 'src/constants/helpers';
+import { CustomDialogTransition, RESOURCE_LABEL, workOrder } from 'src/constants/helpers';
 
 function QtyWithdrawalDialog({ workOrderId, onClose, data, onSuccess }) {
 
@@ -28,12 +28,16 @@ function QtyWithdrawalDialog({ workOrderId, onClose, data, onSuccess }) {
 
     const handleSubmit = (values) => {
         setLoading(true)
-        const postData: any = [{
-            uniqueId: data.uniqueId,
-            _id: data._id,
-            qty: parseInt(values?.qty)
-        }];
-        axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/withdrawal-request`, postData)
+        const postData: any = {
+            referenceType:RESOURCE_LABEL.workOrder,
+            referenceId:workOrderId,
+            requests:[{
+                uniqueId: data.uniqueId,
+                _id: data._id,
+                qty: parseInt(values?.qty)
+            }]
+        };
+        axiosInstance().put(`material-handling/withdrawal-request`, postData)
             .then(({ data }) => {
                 setLoading(false)
                 onSuccess();

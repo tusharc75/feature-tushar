@@ -67,7 +67,6 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [headerLabel, setHeaderLabel] = useState('');
 
-  //["Price", "Rent", "Discount", "Charge", "Tax"]
   const [conditionType, setConditionType] = useState(['Rent', 'Price']);
   const [currency, setCurrency] = useState([detailData.currency]);
   const [unit, setUnits] = useState([]);

@@ -139,7 +139,7 @@ export const repairOrderSteps: stepInterface[] = [
   { name: 'Add Assets', title: 'Add', icon: 'add' },
   { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
-  { name: 'Post Work Service', title: 'Post Work', icon: 'postWork' },
+  { name: 'Execute', title: 'Execute', icon: 'postWork' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'dispatch' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
@@ -157,7 +157,8 @@ export const serviceOrderSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Products', icon: 'assign' },
   { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
   { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
-  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
+  { name: 'Invoice', title: 'Invoice', icon: 'invoice' },
+  { name: 'Field Ticket Invoice', title: 'Invoice', icon: 'invoice' },
 ];
 
 export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed'];
