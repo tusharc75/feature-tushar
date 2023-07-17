@@ -10,7 +10,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { repairOrder, REPAIR_ORDER_TYPE, workOrder, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { Delete, ExpandMore, Check } from '@material-ui/icons';
+import { Delete, ExpandMore, CheckCircleOutline } from '@material-ui/icons';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
@@ -302,6 +302,7 @@ const WorkOrder = ({
                 </IconButton>
               </>
             ) : null}
+            <HtmlTooltip title="Auto Complete WorkOrder">
             <IconButton
               size="small"
               aria-label="Details"
@@ -310,11 +311,12 @@ const WorkOrder = ({
                 setCompleteConfirmBox(true);
               }}
               disabled={
-                row?.original?.serviceStatus === "Completed"
+                row?.original?.type !== "serializedAsset" ? true : row?.original?.workOrder?.status === WORKORDER_SERVICE_STATUS.completed ? true : false
               }
             >
-              <Check fontSize="small" />
+              <CheckCircleOutline fontSize="small" />
             </IconButton>
+            </HtmlTooltip>
           </>
         );
       }
@@ -692,6 +694,19 @@ const WorkOrder = ({
               </MenuItem>
               <MenuItem
                 onClick={() => {
+                  setAutoCompleteData(selectedAssets);
+                  setCompleteConfirmBox(true);
+                  closeActions();
+                }}
+                disabled={
+                  selectedProducts.some(product => product.type !== 'serializedAsset') ||
+                  selectedProducts.some(product => product?.workOrder?.status === 'completed')
+                }
+              >
+                Auto Complete WorkOrder
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
                   setDeleteData(selectedServices?.length ? selectedServices : selectedAssets);
                   setShowConfirmBox(true);
                   closeActions();
@@ -715,15 +730,6 @@ const WorkOrder = ({
                 }
               >
                 Delete
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setAutoCompleteData(selectedAssets);
-                  setCompleteConfirmBox(true);
-                  closeActions();
-                }}
-              >
-                AutoComplete
               </MenuItem>
             </Menu>
           </Box>
