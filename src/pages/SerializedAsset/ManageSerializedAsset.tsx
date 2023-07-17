@@ -87,7 +87,7 @@ const ManageSerializedAsset = ({
                 const { _id, createdBy, updatedBy, assetNumber, mtrAttached, mtrAttachedBy, mtrAttachedDate, ...rest } = data;
                 setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
-                oldValues.status = ASSET_STATUS.new;
+                oldValues.status = fieldsDataForUpdate?.find((e) => e.fieldName === 'status')?.defaultValue || ASSET_STATUS.new;
                 oldValues.assetNumber = fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || '';
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),

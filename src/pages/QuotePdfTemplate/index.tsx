@@ -23,6 +23,7 @@ import { MdAdd, MdSort, MdFilterList, FaSuitcase } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
+import { gridFilterParser } from 'src/constants/useColumns';
 
 let quotePdfTemplateTimeout;
 
@@ -52,8 +53,8 @@ const QuotePdfTemplate: FC = () => {
   const columns = [
     { field: 'name', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }
+    { field: 'createdBy', headerName: 'Created By', show: true,  filter: false, cellRenderer: 'createdByRenderer' },
+    { field: 'updatedBy', headerName: 'Updated By', show: true, filter: false, cellRenderer: 'updatedByRenderer' }
   ];
 
   if (columnState) {
@@ -224,23 +225,26 @@ const QuotePdfTemplate: FC = () => {
       });
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
+    if (isExport) {
+      deepFilter = `?`;
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
