@@ -517,17 +517,26 @@ const ManageSerializedAsset = ({
                             return [
                               ...prevState,
                               {
-                                optionValue: data?._id,
-                                optionLabel: data?.productName,
+                                optionValue: data._id,
+                                optionLabel: data.productName,
                                 order: productTypeOptions.length,
-                                default: false,
-                                productCategory: data?.productCategory
+                                default: false
                               }
                             ];
                           });
                           if (allFields?.some((e) => e.fieldName === 'productCategory')) {
-                            setFieldValue('productCategory', data?.productCategory);
-                            setProductCategoryID(data?.productCategory);
+                            setFieldValue('productCategory', data.productCategory);
+                            setProductCategoryOptions((prevState) => {
+                              return [
+                                ...prevState,
+                                {
+                                  optionValue: data.productCategory,
+                                  order: productTypeOptions.length,
+                                  default: false
+                                }
+                              ];
+                            });
+                            setProductCategoryID(data.productCategory);
                           }
                         }
                       }}
