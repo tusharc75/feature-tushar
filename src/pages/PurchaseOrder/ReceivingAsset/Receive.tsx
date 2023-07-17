@@ -6,7 +6,14 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { convertDateInDateTime, convertDateTimToDate, dateFormatForInputControl, productInventory, purchaseOrder, sidebarResource } from '../../../constants/helpers';
+import {
+  convertDateInDateTime,
+  convertDateTimToDate,
+  dateFormatForInputControl,
+  productInventory,
+  purchaseOrder,
+  sidebarResource
+} from '../../../constants/helpers';
 import { Formik, Form, FieldArray } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -16,10 +23,11 @@ import moment from 'moment';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrderData }) => {
-
   const [fullScreen, setFullScreen] = useState(true);
 
-  const { state: { user, selectedEntity } }: any = useData();
+  const {
+    state: { user, selectedEntity }
+  }: any = useData();
 
   const [warehouseOptions, setwareHouseOptions] = useState(null);
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
@@ -54,7 +62,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
 
   const handleSubmit = (values) => {
     setIsSubmitting(true);
-    const data: any = []
+    const data: any = [];
     values?.seriaizedAsset?.forEach((element) => {
       if (parseInt(element?.inventoryQuantity)) {
         data.push({
@@ -72,7 +80,8 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
       }
     });
     if (data?.length) {
-      axiosInstance().post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`, { products: data, receiveDate: values?.receiveDate })
+      axiosInstance()
+        .post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`, { products: data, receiveDate: values?.receiveDate })
         .then(({ data }) => {
           setIsSubmitting(false);
           toastConfig.setToastConfig({
@@ -86,8 +95,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
           toastConfig.setToastConfig(error);
           setIsSubmitting(false);
         });
-    }
-    else {
+    } else {
       setIsSubmitting(false);
       onSuccess();
     }
@@ -98,7 +106,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
         if (data[sidebarResource.storageLocation]) {
-          const storageLocationOption = data[sidebarResource.storageLocation]?.filter(e => e?.warehouse === defaultWareHouse?.optionValue);
+          const storageLocationOption = data[sidebarResource.storageLocation]?.filter((e) => e?.warehouse === defaultWareHouse?.optionValue);
           setStorageLocationOptions(storageLocationOption);
         }
       });
@@ -108,7 +116,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
     if (user?.user?.brandPolicy?.storageLocation && defaultWareHouse) {
       getStorageLocation();
     }
-  }, [defaultWareHouse])
+  }, [defaultWareHouse]);
 
   const validate = (values) => {
     let errors: any = {};
@@ -145,21 +153,21 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
   const validateDate = (values) => {
     let errors: any = {};
 
-    if (moment(values["receiveDate"]).isBefore(convertDateTimToDate(purchaseOrderData?.purchaseOrderDate))) {
+    if (moment(values['receiveDate']).isBefore(convertDateTimToDate(purchaseOrderData?.purchaseOrderDate))) {
       errors['receiveDate'] = `Date entered prior to the purchase order date`;
     }
 
     if (lockDate) {
-      if (!moment(values["receiveDate"]).isSameOrAfter(moment(lockDate))) {
+      if (!moment(values['receiveDate']).isSameOrAfter(moment(lockDate))) {
         errors['receiveDate'] = `Date entered prior to the locked date`;
       }
     }
 
-    if (moment(values["receiveDate"]).isAfter(moment())) {
+    if (moment(values['receiveDate']).isAfter(moment())) {
       errors['receiveDate'] = `Please select valid date`;
     }
     return errors;
-  }
+  };
 
   const handleExportField = (data: any) => {
     const qty = parseInt(data?.inventoryQuantity) || 0;
@@ -243,7 +251,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({ values, setFieldValue, errors }) => (
             <>
@@ -251,276 +259,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                 {values.seriaizedAsset && values.seriaizedAsset.length && warehouseOptions ? (
                   <Box p={2}>
                     <Form>
-                      <Grid direction="row" justify="space-evenly" alignItems="center">
-                        <Grid item md={12}>
-                          <Box>
-                            <FieldArray
-                              name="seriaizedAsset"
-                              render={(arrayHelpers) => (
-                                <div>
-                                  {values.seriaizedAsset.map((data, index) => (
-                                    <Box key={index} border={'1px solid #dddddd'} borderRadius={4} mb={2} p={2} pt={2}>
-                                      <Grid container spacing={2} alignItems="center">
-                                        <Grid item xs={12} md={1}>
-                                          <Chip color="primary" label={index + 1} />
-                                        </Grid>
-                                        <Grid item xs={12} md={11}>
-                                          <Grid container spacing={2} alignItems="center">
-                                            <Grid item xs={12} md={3}>
-                                              <Autocomplete
-                                                size="small"
-                                                value={data.product}
-                                                options={productList}
-                                                disabled
-                                                getOptionLabel={(option: any) => (option ? option : '')}
-                                                onChange={(_, newValue) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.seriaizedAsset[index],
-                                                    ['product']: newValue
-                                                  });
-                                                }}
-                                                renderInput={(params) => <TextField {...params} variant="outlined" name="product" label="Product" />}
-                                              />
-                                            </Grid>
-                                            <Grid item xs={12} md={3}>
-                                              <Autocomplete
-                                                size="small"
-                                                value={data.warehouse}
-                                                options={warehouseOptions}
-                                                getOptionLabel={(option: any) => option ? option?.optionLabel : ''}
-                                                disabled
-                                                onChange={(_, newValue) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.seriaizedAsset[index],
-                                                    ['warehouse']: newValue
-                                                  });
-                                                }}
-                                                renderInput={(params) => (
-                                                  <TextField
-                                                    {...params}
-                                                    variant="outlined"
-                                                    name="warehouse"
-                                                    label="Plant"
-                                                    error={validate([data]).warehouse}
-                                                    helperText={validate([data]).warehouse ? 'Plant is required' : ''}
-                                                    required
-                                                  />
-                                                )}
-                                              />
-                                            </Grid>
-                                            {user?.user?.brandPolicy?.storageLocation &&
-                                              <Grid item xs={12} md={3}>
-                                                <Autocomplete
-                                                  size="small"
-                                                  value={data?.storageLocation}
-                                                  options={storageLocationOptions}
-                                                  getOptionLabel={(option: any) => option ? option.optionLabel : ''}
-                                                  onChange={(_, newValue) => {
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.seriaizedAsset[index],
-                                                      ['storageLocation']: newValue
-                                                    });
-                                                  }}
-                                                  renderInput={(params) => (
-                                                    <TextField
-                                                      {...params}
-                                                      variant="outlined"
-                                                      name="storageLocation"
-                                                      label="Storage Location"
-                                                      error={validate([data]).storageLocation}
-                                                      helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
-                                                      required
-                                                    />
-                                                  )}
-                                                />
-                                              </Grid>
-                                            }
-                                            <Grid item xs={12} md={3}>
-                                              <span>
-                                                <b>PO Quantity: </b>
-                                                {data?.row?.qty}
-                                              </span>
-                                              <br />
-                                              <span>
-                                                <b>Recieved: </b>
-                                                {data?.row?.actualReceived || 0}
-                                              </span>
-                                              <br />
-                                              <span>
-                                                <b>Rejected: </b>
-                                                {data?.row?.rejectQuantity || 0}
-                                              </span>
-                                            </Grid>
-                                          </Grid>
-                                          <Box mt={1}>
-                                            <Grid container spacing={2} alignItems="center">
-                                              <Grid item xs={12} md={4}>
-                                                <TextField
-                                                  fullWidth
-                                                  label="Inventory Quantity"
-                                                  variant="outlined"
-                                                  type="number"
-                                                  size="small"
-                                                  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                                  name="inventoryQuantity"
-                                                  placeholder="Inventory Quantity"
-                                                  value={data.inventoryQuantity}
-                                                  onChange={(e) => {
-                                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.seriaizedAsset[index],
-                                                      ['inventoryQuantity']: value
-                                                    });
-                                                  }}
-                                                  error={validate([data])?.inventoryQuantity}
-                                                  helperText={
-                                                    validate([data]).inventoryQuantity ? 'Receiving quantity is more than actual quantity' : ''
-                                                  }
-                                                />
-                                              </Grid>
-                                              {/* {data?.serializedProduct &&
-                                                                                                <Grid item xs={12} md={4}>
-                                                                                                    <Field
-                                                                                                        fullWidth
-                                                                                                        label='Asset Creation Quantity'
-                                                                                                        variant="outlined"
-                                                                                                        type="number"
-                                                                                                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                                                                                        size="small"
-                                                                                                        component={TextField}
-                                                                                                        name="assetQuantity"
-                                                                                                        placeholder="Asset Creation Quantity"
-                                                                                                        value={data.assetQuantity}
-                                                                                                        onChange={(e) => {
-                                                                                                            const value = e.target.value.replace(/[^0-9]/g, '');
-                                                                                                            arrayHelpers.replace(index, {
-                                                                                                                ...values.seriaizedAsset[index],
-                                                                                                                ["assetQuantity"]: value,
-                                                                                                            })
-                                                                                                        }}
-                                                                                                        error={validate([data])?.assetQuantity}
-                                                                                                        helperText={validate([data]).assetQuantity ? "Receiving quantity is more than actual quantity" : ""}
-                                                                                                    />
-                                                                                                </Grid>
-                                                                                            } */}
-                                            </Grid>
-                                          </Box>
-                                          {data?.serializedProduct && (
-                                            <Box mt={1}>
-                                              <Grid container spacing={2} alignItems="center">
-                                                <Grid item xs={12} md={8}>
-                                                  <Autocomplete
-                                                    options={[]}
-                                                    size="small"
-                                                    freeSolo={true}
-                                                    multiple={true}
-                                                    disableCloseOnSelect
-                                                    value={data.serialNumber}
-                                                    onChange={(_, val) => {
-                                                      arrayHelpers.replace(index, {
-                                                        ...values.seriaizedAsset[index],
-                                                        ['serialNumber']: val
-                                                      });
-                                                    }}
-                                                    getOptionSelected={(item, current) => item === current}
-                                                    getOptionLabel={(option) => option}
-                                                    renderInput={(props) => (
-                                                      <TextField
-                                                        {...props}
-                                                        placeholder={`Serial Number`}
-                                                        variant="outlined"
-                                                        name="serialNumber"
-                                                        label={'Serial Number'}
-                                                        error={validate([data])?.serialNumber}
-                                                        helperText={
-                                                          validate([data]).serialNumber ? 'Serial numbers should be less then inventory quantity' : ''
-                                                        }
-                                                      />
-                                                    )}
-                                                  />
-                                                </Grid>
-                                                <Grid item xs={12} md={4}>
-                                                  <Box my={1} display="flex" justifyContent="flex-end">
-                                                    <Box mr={2}>
-                                                      <Typography
-                                                        className="link cursor-pointer"
-                                                        style={{ color: 'var(--primary)' }}
-                                                        onClick={() => handleExportField(data)}
-                                                      >
-                                                        Export
-                                                      </Typography>
-                                                    </Box>
-                                                    <Box mr={1}>
-                                                      <input
-                                                        accept="json"
-                                                        style={{ display: 'none' }}
-                                                        onChange={handleImport(arrayHelpers, index, values)}
-                                                        id={`import-file-${index}`}
-                                                        multiple={false}
-                                                        type="file"
-                                                      />
-                                                      <label htmlFor={`import-file-${index}`}>
-                                                        <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
-                                                          Import
-                                                        </Typography>
-                                                      </label>
-                                                    </Box>
-                                                  </Box>
-                                                </Grid>
-                                              </Grid>
-                                            </Box>
-                                          )}
-                                          <Box mt={2}>
-                                            <Grid container spacing={2} alignItems="center">
-                                              <Grid item xs={12} md={6}>
-                                                <TextField
-                                                  fullWidth
-                                                  label="Supplier Part Number"
-                                                  variant="outlined"
-                                                  type="text"
-                                                  size="small"
-                                                  name="supplierPartNumber"
-                                                  placeholder="Supplier Part Number"
-                                                  value={data.supplierPartNumber}
-                                                  onChange={(e) => {
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.seriaizedAsset[index],
-                                                      ['supplierPartNumber']: e.target.value
-                                                    });
-                                                  }}
-                                                />
-                                              </Grid>
-                                              <Grid item xs={12} md={6}>
-                                                <TextField
-                                                  fullWidth
-                                                  label="Comment"
-                                                  variant="outlined"
-                                                  type="text"
-                                                  size="small"
-                                                  name="comment"
-                                                  placeholder="Comment"
-                                                  value={data.comment}
-                                                  onChange={(e) => {
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.seriaizedAsset[index],
-                                                      ['comment']: e.target.value
-                                                    });
-                                                  }}
-                                                />
-                                              </Grid>
-                                            </Grid>
-                                          </Box>
-                                        </Grid>
-                                      </Grid>
-                                    </Box>
-                                  ))}
-                                </div>
-                              )}
-                            />
-                          </Box>
-                        </Grid>
-                      </Grid>
-                      <Box pt={2}>
+                      <div className="datepicker mb-[14px]">
                         <KeyboardDatePicker
                           label="Received Date"
                           variant="inline"
@@ -545,11 +284,216 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                             setFieldValue('receiveDate', convertDateInDateTime(value));
                           }}
                           error={validateDate(values)?.receiveDate}
-                          helperText={
-                            validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''
-                          }
+                          helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
                         />
-                      </Box>
+                      </div>
+
+                      <FieldArray
+                        name="seriaizedAsset"
+                        render={(arrayHelpers) => (
+                          <div className="grid gap-[15px] sm:gap-[18px]">
+                            {values.seriaizedAsset.map((data, index) => (
+                              <div
+                                className="border border-[var(--common-border-color)] rounded-[6px] pt-[17px] px-[23px] pb-[21px] grid sm:grid-cols-[24px,1fr] md:gap-[29px] gap-[15px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
+                                key={index}
+                              >
+                                <div className="bg-[var(--new\_theme\_color)] w-[24px] h-[24px] rounded-[6px] flex items-center justify-center">
+                                  <p className="text-white text-[13px] font-[700] leading-none">{index + 1}</p>
+                                </div>
+                                <div>
+                                  <div className="flex border-b border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]">
+                                    <span>
+                                      <b>PO Quantity: </b>
+                                      {data?.row?.qty}
+                                    </span>
+                                    <span>
+                                      <b>Recieved: </b>
+                                      {data?.row?.actualReceived || 0}
+                                    </span>
+                                    <span>
+                                      <b>Rejected: </b>
+                                      {data?.row?.rejectQuantity || 0}
+                                    </span>
+                                  </div>
+
+                                  {/* FIELDS */}
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
+                                    <Autocomplete
+                                      size="small"
+                                      value={data.product}
+                                      options={productList}
+                                      disabled
+                                      getOptionLabel={(option: any) => (option ? option : '')}
+                                      onChange={(_, newValue) => {
+                                        arrayHelpers.replace(index, {
+                                          ...values.seriaizedAsset[index],
+                                          ['product']: newValue
+                                        });
+                                      }}
+                                      renderInput={(params) => <TextField {...params} variant="outlined" name="product" label="Product" />}
+                                    />
+                                    <Autocomplete
+                                      size="small"
+                                      value={data.warehouse}
+                                      options={warehouseOptions}
+                                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                                      disabled
+                                      onChange={(_, newValue) => {
+                                        arrayHelpers.replace(index, {
+                                          ...values.seriaizedAsset[index],
+                                          ['warehouse']: newValue
+                                        });
+                                      }}
+                                      renderInput={(params) => (
+                                        <TextField
+                                          {...params}
+                                          variant="outlined"
+                                          name="warehouse"
+                                          label="Plant"
+                                          error={validate([data]).warehouse}
+                                          helperText={validate([data]).warehouse ? 'Plant is required' : ''}
+                                          required
+                                        />
+                                      )}
+                                    />
+                                    {user?.user?.brandPolicy?.storageLocation && (
+                                      <Autocomplete
+                                        size="small"
+                                        value={data?.storageLocation}
+                                        options={storageLocationOptions}
+                                        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                        onChange={(_, newValue) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values.seriaizedAsset[index],
+                                            ['storageLocation']: newValue
+                                          });
+                                        }}
+                                        renderInput={(params) => (
+                                          <TextField
+                                            {...params}
+                                            variant="outlined"
+                                            name="storageLocation"
+                                            label="Storage Location"
+                                            error={validate([data]).storageLocation}
+                                            helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
+                                            required
+                                          />
+                                        )}
+                                      />
+                                    )}
+                                    <TextField
+                                      fullWidth
+                                      label="Inventory Quantity"
+                                      variant="outlined"
+                                      type="number"
+                                      size="small"
+                                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                      name="inventoryQuantity"
+                                      placeholder="Inventory Quantity"
+                                      value={data.inventoryQuantity}
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(/[^0-9]/g, '');
+                                        arrayHelpers.replace(index, {
+                                          ...values.seriaizedAsset[index],
+                                          ['inventoryQuantity']: value
+                                        });
+                                      }}
+                                      error={validate([data])?.inventoryQuantity}
+                                      helperText={validate([data]).inventoryQuantity ? 'Receiving quantity is more than actual quantity' : ''}
+                                    />
+                                    {data?.serializedProduct && (
+                                      <div className="flex gap-2 items-center">
+                                        <Autocomplete
+                                          options={[]}
+                                          size="small"
+                                          fullWidth={true}
+                                          freeSolo={true}
+                                          multiple={true}
+                                          disableCloseOnSelect
+                                          value={data.serialNumber}
+                                          onChange={(_, val) => {
+                                            arrayHelpers.replace(index, {
+                                              ...values.seriaizedAsset[index],
+                                              ['serialNumber']: val
+                                            });
+                                          }}
+                                          getOptionSelected={(item, current) => item === current}
+                                          getOptionLabel={(option) => option}
+                                          renderInput={(props) => (
+                                            <TextField
+                                              {...props}
+                                              placeholder={`Serial Number`}
+                                              variant="outlined"
+                                              name="serialNumber"
+                                              label={'Serial Number'}
+                                              error={validate([data])?.serialNumber}
+                                              helperText={
+                                                validate([data]).serialNumber ? 'Serial numbers should be less then inventory quantity' : ''
+                                              }
+                                            />
+                                          )}
+                                        />
+                                        <Typography
+                                          className="link cursor-pointer"
+                                          style={{ color: 'var(--primary)' }}
+                                          onClick={() => handleExportField(data)}
+                                        >
+                                          Export
+                                        </Typography>
+                                        <input
+                                          accept="json"
+                                          style={{ display: 'none' }}
+                                          onChange={handleImport(arrayHelpers, index, values)}
+                                          id={`import-file-${index}`}
+                                          multiple={false}
+                                          type="file"
+                                        />
+                                        <label htmlFor={`import-file-${index}`}>
+                                          <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
+                                            Import
+                                          </Typography>
+                                        </label>
+                                      </div>
+                                    )}
+                                    <TextField
+                                      fullWidth
+                                      label="Supplier Part Number"
+                                      variant="outlined"
+                                      type="text"
+                                      size="small"
+                                      name="supplierPartNumber"
+                                      placeholder="Supplier Part Number"
+                                      value={data.supplierPartNumber}
+                                      onChange={(e) => {
+                                        arrayHelpers.replace(index, {
+                                          ...values.seriaizedAsset[index],
+                                          ['supplierPartNumber']: e.target.value
+                                        });
+                                      }}
+                                    />
+                                    <TextField
+                                      fullWidth
+                                      label="Comment"
+                                      variant="outlined"
+                                      type="text"
+                                      size="small"
+                                      name="comment"
+                                      placeholder="Comment"
+                                      value={data.comment}
+                                      onChange={(e) => {
+                                        arrayHelpers.replace(index, {
+                                          ...values.seriaizedAsset[index],
+                                          ['comment']: e.target.value
+                                        });
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      />
                     </Form>
                   </Box>
                 ) : (
