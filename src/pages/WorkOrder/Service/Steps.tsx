@@ -712,10 +712,10 @@ const Steps = ({
                           label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
                         />
                       </Box>
-                      <Box>
-                        <Typography className={classes.heading} style={{ fontWeight: '600' }}>
+                      <Box className="max-w-full">
+                        <p className={`${classes.heading}`} style={{ fontWeight: '600' }}>
                           {step.stepName}
-                        </Typography>
+                        </p>
                       </Box>
                     </Box>
                     <Box style={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset', flexWrap: 'wrap' }}>
@@ -901,7 +901,7 @@ const Steps = ({
                     <IconButton
                       size="small"
                       color="primary"
-                      aria-label="delete"
+                      aria-label="menu"
                       disabled={!allowedToEdit}
                       onClick={(event) => {
                         handleOpenMenu(event);
