@@ -714,7 +714,7 @@ function Dropdown({
                           let tempNewOption = {
                             default: true,
                             email: data?.email,
-                            optionLabel: data?.concatedName,
+                            optionLabel: data?.concatedName || data?.firstName + " " + data?.middleName + " " + data?.lastName,
                             optionValue: data?._id,
                             parentAccount: data?.accountName,
                             order: option.length,
