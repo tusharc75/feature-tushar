@@ -113,19 +113,15 @@ const StepFieldsDialog = ({
   const [height, setHeight] = React.useState(0);
   const [isVisible, setIsVisible] = React.useState(true);
   const [isAddField, setIsAddField] = React.useState(false);
-  const [sectionName, setSectionName] = React.useState('');
+  const [sectionName, setSectionName] = React.useState("");
 
   const steps = selectedService?.steps || [];
 
   const RenderStepData = () => {
-    const [time, setTime] = React.useState(
-      user?.brandPolicy?.workOrderTimer
-        ? convertMsToTime(
-            stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-              ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
-              : stepData?.duration || 0
-          )
-        : 0
+    const [time, setTime] = React.useState(user?.brandPolicy?.workOrderTimer ? convertMsToTime(
+      stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+        ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
+        : stepData?.duration || 0) : 0
     );
 
     React.useEffect(() => {
@@ -152,7 +148,7 @@ const StepFieldsDialog = ({
 
     return (
       <div className={classes.sectionContainer}>
-        <h6 className={`${classes.sectionHead} `} onClick={() => setIsVisible((prev) => !prev)}>
+        <h6 className={classes.sectionHead} onClick={() => setIsVisible((prev) => !prev)}>
           <span style={{ transform: isVisible ? 'rotate(180deg)' : 'rotate(0)' }}>
             <MdKeyboardArrowDown />
           </span>
@@ -226,15 +222,16 @@ const StepFieldsDialog = ({
   };
 
   const handleOpenAddField = (event, name) => {
-    event.stopPropagation();
-    setSectionName(name);
-    setIsAddField(true);
-  };
+    event.stopPropagation()
+    setSectionName(name)
+    setIsAddField(true)
+  }
 
   const handleCloseAddField = () => {
-    setSectionName('');
-    setIsAddField(false);
-  };
+    setSectionName("")
+    setIsAddField(false)
+
+  }
 
   const handleAddField = (field: any) => {
     field.sectionName = sectionName;
@@ -247,19 +244,20 @@ const StepFieldsDialog = ({
           message: data.message
         });
         handleCloseAddField();
-        handleClose();
+        handleClose()
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        handleClose();
+        handleClose()
       });
-  };
+  }
+
 
   return (
     <>
       <div className={`${styles.sidebarContainer} ${styles.active}`}>
         <div className={styles.headersection}>
-          <Typography variant="h6" color="inherit" className="truncate max-w-[calc(100%-40px)]" title={step?.stepName} style={{ fontSize: '1rem' }}>
+          <Typography variant="h6" color="inherit" style={{ fontSize: '1rem' }}>
             {step?.stepName}
           </Typography>
           <div className={styles.headerControls}>
@@ -296,13 +294,8 @@ const StepFieldsDialog = ({
                                   <FaDiceOne size={16} color={'inherit'} style={{ marginRight: '5px', float: 'left' }} />
                                   <h2>{form?.name}</h2>
                                 </div>
-                                <IconButton
-                                  style={{ padding: '0px', marginTop: '-5px' }}
-                                  color="primary"
-                                  size="small"
-                                  onClick={(e) => handleOpenAddField(e, form.name)}
-                                >
-                                  <ControlPointIcon style={{ paddingTop: '2px', color: 'white' }} />
+                                <IconButton style={{ padding: "0px", marginTop: "-5px" }} color="primary" size="small" onClick={(e) => handleOpenAddField(e, form.name)} >
+                                  <ControlPointIcon style={{ paddingTop: "2px", color: "white" }} />
                                 </IconButton>
                               </div>
                               <Box marginY={2}>
@@ -408,11 +401,10 @@ const StepFieldsDialog = ({
                         Close
                       </Button>
                       <Box ml={1} />
-                      {allowedToEdit && (
+                      {allowedToEdit &&
                         <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
                           Edit
-                        </Button>
-                      )}
+                        </Button>}
                     </>
                   ) : (
                     <>
@@ -458,9 +450,8 @@ const StepFieldsDialog = ({
         />
       )}
 
-      {isAddField && (
-        <AddField refrence="formAdd" fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={fieldData.fields} />
-      )}
+      {isAddField && <AddField refrence="formAdd" fieldData={null} handleClose={handleCloseAddField} handleAddField={handleAddField} fields={fieldData.fields} />}
+
     </>
   );
 };
