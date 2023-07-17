@@ -259,7 +259,7 @@ const BOMTable = () => {
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="default"
                     size="small"
-                    className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_new_submit_btn}`}
+                    className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_new_submit_btn} new-dropdown-v1`}
                     onClick={openActions}
                     disabled={selectedRecords.length ? false : true}
                     aria-controls="action-menu"

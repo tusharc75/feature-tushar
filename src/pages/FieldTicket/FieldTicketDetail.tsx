@@ -24,7 +24,7 @@ import Steps from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Material from './material';
 import { camelCase } from 'lodash';
-import Consumables from './Consumables';
+import Invoice from './Invoice';
 
 const FieldTicketDetail = () => {
   const { id } = useParams();
@@ -179,17 +179,6 @@ const FieldTicketDetail = () => {
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
           />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
-              </div>
-            }
-            value={2}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-2"
-          />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -224,14 +213,10 @@ const FieldTicketDetail = () => {
             {currentStep === 1 && (
               <AddCost fieldTicketData={fieldTicketData} id={id} />
             )}
+            {currentStep === 2 && (
+              <Invoice id={id} fieldTicketData={fieldTicketData} renderedFrom={renderedFrom} />
+            )}
           </ContentFullScreen>
-        </TabPanel>
-        <TabPanel value={tabValue} index={2}>
-          <Consumables
-            allowedToEdit={allowedToEdit}
-            id={id}
-            fieldTicketData={fieldTicketData}
-          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

@@ -16,6 +16,7 @@ import {
   Menu
 } from '@material-ui/core';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
+import Add from '@material-ui/icons/Add';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -31,7 +32,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AddExistingMaterialDialog from '../AddExistingMaterialDialog';
 import ConditionDialog from './ConditionDialog';
 import { camelCase, startCase } from 'lodash';
-import InfoIcon from '@material-ui/icons/Info';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { ExpandMore } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import styles from '../../Leads/Header.module.scss';
@@ -53,6 +54,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const [showDialog, setShowDialog] = useState({ open: false, isBulkedit: false });
   const [conditionData, setConditionData] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const localStorageSelectedRecords = `${renderFrom}_selected`;
@@ -159,10 +161,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       >
         {params.data.detail}
       </p>
-      <HtmlTooltip title="Details">
+      <Box ml={1}>
         <IconButton
           size="small"
-          aria-label="Details"
           onClick={() => {
             window.open(
               `${
@@ -175,9 +176,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             );
           }}
         >
-          <InfoIcon fontSize="small" />
+          <OpenInNewIcon fontSize="small"  color="primary"/>
         </IconButton>
-      </HtmlTooltip>
+      </Box>
     </Fragment>
   );
 
@@ -318,44 +319,61 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       type="file"
     />
   );
+  const openAddActions = (event) => {
+    setAddAnchorEl(event.currentTarget);
+  };
+
+  const closeAddActions = () => {
+    setAddAnchorEl(null);
+  };
 
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1} mt={2}>
-        <Box display="flex" alignItems="center">
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => {
-              setAddMaterialDialog({ open: true, materialType: 'product' });
-            }}
-          >
-            {`Add ${routes.product.title}`}
+        <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+          <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
+            {'Add'}
+            <ExpandMore fontSize="small" />
           </Button>
-          <Box mx={1} />
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => {
-              setAddMaterialDialog({ open: true, materialType: 'package' });
+          <Menu
+            anchorEl={addAnchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
             }}
+            id="add-menu"
+            open={Boolean(addAnchorEl)}
+            onClose={closeAddActions}
           >
-            {`Add ${routes.packages.title}`}
-          </Button>
-          <Box mx={1} />
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => {
-              setAddMaterialDialog({ open: true, materialType: 'service' });
-            }}
-          >
-            {`Add ${routes.serviceMaster.title}`}
-          </Button>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddMaterialDialog({ open: true, materialType: 'product' });
+              }}
+            >
+              Add Products
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddMaterialDialog({ open: true, materialType: 'package' });
+              }}
+            >
+              Add Packages
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddMaterialDialog({ open: true, materialType: 'service' });
+              }}
+            >
+              Add Services
+            </MenuItem>
+          </Menu>
         </Box>
+       
         <Box display="flex">
           <Button
             variant={isMobile && !isTablet ? 'text' : 'outlined'}

@@ -18,7 +18,9 @@ import {
   formatAmountWithCurrency,
   invoice,
   pricingCondition,
-  rentalManagement
+  rentalManagement,
+  MATERIAL_TYPE,
+  ASSET_STATUS
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -65,7 +67,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
   useEffect(() => {
     if (columns) {
-      fetchProductInventory();
+      fetchData();
     }
   }, [columns, proRata]);
 
@@ -102,12 +104,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail?.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail?.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -135,7 +137,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === 'product') {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'asset') {
+                  } else if (row.original.type === 'serializedAsset') {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -286,7 +288,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     setColumns(coloum);
   };
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     let data: any = {};
     let invoicedProducts: any = [];
     let additionalCost: any = [];
@@ -336,7 +338,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         data?.inventory
           ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
           ?.forEach((ele: any) => {
-            ele.type = 'asset';
+            ele.type = 'serializedAsset';
             ele.qty = 1;
             ele._id = ele?.inventoryDetail?._id;
             ele.materialId = ele?.inventoryDetail?._id;
@@ -367,7 +369,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
               ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
               ?.forEach((ele: any) => {
                 ele.parentId = element?._id;
-                ele.type = 'asset';
+                ele.type = 'serializedAsset';
                 ele.qty = 1;
                 ele._id = ele?.inventoryDetail?._id;
                 ele.materialId = ele?.inventoryDetail?._id;
@@ -445,25 +447,25 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'asset'
-          ? parent?.inventoryDetail?.assetNumber
-          : parent.type === 'additionalCost'
-          ? parent?.costType
-          : parent.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'serializedAsset'
+              ? parent?.inventoryDetail?.assetNumber
+              : parent.type === 'additionalCost'
+                ? parent?.costType
+                : parent.packageDetail?.packageName;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription || ''
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'asset'
-          ? parent?.description || ''
-          : '';
+            ? parent?.serviceDetail?.serviceDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent?.description || ''
+                : '';
       parent.qtyDisplay = parent.qty;
       parent.isEditable =
-        ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'asset' || parent.type === 'additionalCost'
+        ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'serializedAsset' || parent.type === 'additionalCost'
           ? false
           : true;
       parent.subRows = generateNestedData(material, parent);
@@ -480,20 +482,20 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === 'asset'
-          ? _subRow?.inventoryDetail?.assetNumber
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow?.inventoryDetail?.assetNumber
+              : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription || ''
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : _subRow.type === 'asset'
-          ? _subRow?.description || ''
-          : '';
+            ? _subRow?.serviceDetail?.serviceDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow.type === 'serializedAsset'
+                ? _subRow?.description || ''
+                : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -501,8 +503,40 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     return subRows;
   };
 
+
+  const getParentIds = (_id, material, parentIds) => {
+    const parent = material?.find((e) => e._id === _id);
+    if (parent) {
+      parentIds.push(parent._id);
+      getParentIds(parent.parentId, material, parentIds)
+    }
+    else {
+      return false;
+    }
+  }
+
   const handleApplyDate = async () => {
     let tempValues: any = { actualEndDate: endDate };
+
+    var inUseStandByDays = []
+    if (user?.user?.brandPolicy?.assetDeliveredStatus) {
+      const assetList: any = [];
+      selectedProducts?.forEach((e) => {
+        if (e.type === MATERIAL_TYPE.serializedAsset) {
+          assetList.push({ asset: e._id, startDate: moment(e.actualStartDate)?.format('MM/DD/YYYY'), endDate: moment(endDate)?.format('MM/DD/YYYY') })
+        }
+      })
+      const inUseStandByDaysResponce = await axiosInstance().put(`/rental-management/${rentalManagementData?._id}/progressive-billing/date-range-status-count`, assetList);
+      inUseStandByDays = inUseStandByDaysResponce?.data?.data;
+
+      inUseStandByDays?.forEach((e) => {
+        const asset = selectedProducts?.find((ele) => ele._id === e.asset);
+        const parentIds = [];
+        getParentIds(asset?.parentId, selectedProducts, parentIds)
+        parentIds.push(asset?._id)
+        e.parentIds = parentIds;
+      })
+    }
 
     const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
@@ -545,6 +579,17 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
         let calValues: any;
         let values = JSON.parse(JSON.stringify(tempValues));
+
+
+        if (inUseStandByDays?.length) {
+          const daysFound = inUseStandByDays?.find((e) => e.parentIds?.includes(element._id))
+          if (daysFound) {
+            values['inUseDays'] = daysFound[ASSET_STATUS.inUse] || 0;
+            values['standByDays'] = daysFound[ASSET_STATUS.standBy] || 0;
+            values['standByDaysNotChargeable'] = daysFound[ASSET_STATUS.standByNotChargeable] || 0;
+          }
+        }
+
         if (element.pricingMethod === 'Per Week') {
           if (proRata) {
             values['pricingMethod'] = 'Per Day';
@@ -707,8 +752,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                               disabled={
                                 !Boolean(
                                   selectedProducts &&
-                                    selectedProducts.length &&
-                                    (endDate || selectedProducts.every((d) => d.type === 'additionalCost'))
+                                  selectedProducts.length &&
+                                  (endDate || selectedProducts.every((d) => d.type === 'additionalCost'))
                                 )
                               }
                               size="small"
@@ -782,8 +827,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
               !appliedDate
                 ? 'Please select items and apply end date'
                 : rowsApplied?.some((d) => d.invalidDate === true)
-                ? 'Please select an appropriate date !'
-                : 'Create Bill'
+                  ? 'Please select an appropriate date !'
+                  : 'Create Bill'
             }
           >
             <span>

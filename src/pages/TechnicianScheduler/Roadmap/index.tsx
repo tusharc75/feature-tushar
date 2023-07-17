@@ -28,13 +28,13 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
   }, [filter.view, refresh]);
 
   useEffect(() => {
-    filter.fieldServiceOrder !== '' && fetchServiceOrders(filter.fieldServiceOrder);
-  }, [filter.fieldServiceOrder]);
+    filter.fieldTicket !== '' && fetchServiceOrders(filter.fieldTicket);
+  }, [filter.fieldTicket]);
 
   const fetchServiceOrders = async (orderId) => {
     setLoadingRoadmap(true);
     await axiosInstance()
-      .get(`/technician-scheduler/field-service-order?serviceOrders=${orderId}`)
+      .get(`/technician-scheduler/service-order?serviceOrders=${orderId}`)
       .then(({ data }) => {
         setActivity(data?.data);
         setTreeList(data?.data);
@@ -134,8 +134,8 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
                   activity={
                     selectedRecords?.length === 1
                       ? activity.filter(
-                          (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
-                        )
+                        (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
+                      )
                       : activity
                   }
                   treeList={treeList}
@@ -164,8 +164,8 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
                     activity={
                       selectedRecords?.length === 1
                         ? activity.filter(
-                            (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
-                          )
+                          (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
+                        )
                         : activity
                     }
                     expanded={expanded}

@@ -113,7 +113,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId }) =
             />
           </Grid>
           <Grid item xs={12}>
-            <Button variant="contained" color="primary" size="small" onClick={handleSubmit}>
+            <Button disabled={comment === ''} variant="contained" color="primary" size="small" onClick={handleSubmit}>
               Add
             </Button>
           </Grid>

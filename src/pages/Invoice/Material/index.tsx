@@ -75,7 +75,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${row.original?.type === 'serializedAsset' ? 'Asset' : startCase(row.original?.type)} `}</p>
+            <p>{`${startCase(row.original?.type)} `}</p>
           </div>
         )
       },
@@ -209,18 +209,18 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'package'
-          ? parent.packageDetail?.packageName
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.serviceDetail?.serviceName;
+            ? parent.packageDetail?.packageName
+            : parent.type === 'serializedAsset'
+              ? parent.serializedAssetDetail?.assetNumber
+              : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent.type === 'serializedAsset'
-          ? parent?.description
-          : parent?.serviceDetail?.serviceDescription;
+            ? parent?.packageDetail?.packageDescription
+            : parent.type === 'serializedAsset'
+              ? parent?.description
+              : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.assetQty = assignedAssets.filter((i) => i.parentId === parent._id).length;
@@ -243,18 +243,18 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.serviceDetail?.serviceName;
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow.serializedAssetDetail.assetNumber
+              : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow.type === 'serializedAsset'
-          ? parent.description
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow.type === 'serializedAsset'
+              ? parent.description
+              : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -484,6 +484,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
                 disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
                 onClick={openActions}
                 endIcon={<KeyboardArrowDown fontSize="small" />}
+                className="new-dropdown-v1"
               >
                 Actions
               </Button>

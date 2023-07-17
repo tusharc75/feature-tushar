@@ -98,7 +98,7 @@ export default function CalendarList(props) {
                 name={name}
                 startDate={startDate}
                 endDate={endDate}
-                services={item.serviceOrders}
+                services={item?.fieldTicket || []}
                 handleSelect={handleSelect}
                 totalDay={totalDay}
                 calendarType={calendarType}
@@ -137,7 +137,6 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
     }
     return color;
   };
-
   return (
     <>
       {services?.map((service) => {
@@ -153,14 +152,15 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
             <Tooltip
               title={
                 <>
-                  <p>{service?.fieldServiceOrder?.fieldServiceOrderNumber}</p>
+                  <p>{service?.fieldTicket[0]?.fieldTicketNumber
+                  }</p>
                 </>
               }
               placement="top"
             >
               <div>
-                <Typography variant="h6" className={styles.servicesText} title={service?.serviceDetail?.optionLabel}>
-                  <span>{service?.serviceDetail?.optionLabel}</span>
+                <Typography variant="h6" className={styles.servicesText} title={service?.serviceDetail?.serviceName}>
+                  <span>{service?.serviceDetail?.serviceName}</span>
                 </Typography>
                 <span className={`${styles.chip} ${styles[priority]}`}>
                   <Typography component={'span'}>{priority}</Typography>

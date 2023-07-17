@@ -1,4 +1,4 @@
-import { Box, Grid, makeStyles, Paper, TextField } from '@material-ui/core';
+import { Box, Grid, IconButton, makeStyles, Paper, TextField } from '@material-ui/core';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -10,6 +10,8 @@ import { dateTimeFormat } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import { Link } from 'react-router-dom';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+
 
 function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selectedRecords, setSelectedRecords }) {
   const toastConfig = useContext(CustomToastContext);
@@ -25,10 +27,11 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
       .then(({ data: { data } }) => {
         const rows: any = [];
         data?.forEach((ele, index) => {
-          const obj: any = {};
+          const obj: any = { ...ele };
           obj.index = index + 1;
           obj._id = ele._id;
-          obj.fieldServiceOrderNumber = ele?.fieldServiceOrderNumber;
+          obj.fieldServiceOrder = ele?.fieldServiceOrder?.optionLabel;
+          obj.fieldServiceOrderId = ele?.fieldServiceOrder?.optionValue;
           obj.serviceName = ele?.service?.serviceName;
           obj.serviceId = ele?.service?._id;
           obj.competencyType = ele?.service?.competencyType?.optionLabel;
@@ -59,9 +62,49 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
       Header: 'Field Service Order',
       width: 200,
       Cell: ({ row }) => (
-        <Link className="link text-truncate" to={`${routes.fieldServiceOrderDetail.path}/${row.original._id}`}>
-          {row.original.fieldServiceOrderNumber}
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <p
+            title={row.original.fieldServiceOrder}
+          >
+            {row.original.fieldServiceOrder}
+          </p>
+          <Box ml={1}>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.fieldServiceOrderId}`);
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color="primary" />
+            </IconButton>
+          </Box>
+        </div>
+      )
+    },
+    {
+      accessor: 'fieldTicketNumber',
+      Header: 'Field Ticket',
+      width: 200,
+      Cell: ({ row }) => (
+        row.original['fieldTicketNumber'] ? (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p
+              title={row.original.fieldTicketNumber}
+            >
+              {row.original.fieldTicketNumber}
+            </p>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.fieldTicketDetail.path}/${row.original._id}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (<NoDataCell />)
       )
     },
     {
@@ -69,9 +112,25 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
       Header: 'Service Name',
       width: 250,
       Cell: ({ row }) => (
-        <Link className="link text-truncate" to={`${routes.serviceMasterDetail.path}/${row.original.serviceId}`}>
-          {row.original.serviceName}
-        </Link>
+        row.original.serviceName && row.original.serviceId ? (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p
+              title={row.original.serviceName}
+            >
+              {row.original.serviceName}
+            </p>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (<NoDataCell />)
       )
     },
     {
@@ -92,12 +151,24 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
       width: 250,
       Cell: ({ row }) =>
         row.original['customerAccount'] ? (
-          <Link className="link text-truncate" to={`${routes.customerAccountDetail.path}/${row.original.customerAccountId}`}>
-            {row.original['customerAccount']}
-          </Link>
-        ) : (
-          <NoDataCell />
-        )
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p
+              title={row.original['customerAccount']}
+            >
+              {row.original['customerAccount']}
+            </p>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.customerAccountDetail.path}/${row.original.customerAccountId}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (<NoDataCell />)
     },
     {
       accessor: 'estimateStartDate',

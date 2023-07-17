@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Box } from '@material-ui/core';
+import { Box, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -10,6 +10,7 @@ import { startCase } from 'lodash';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import routes from 'src/components/Helpers/Routes';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -50,7 +51,27 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
         accessor: 'detail',
         Header: 'Detail',
         width: 200,
-        Cell: ({ row }) => <p title={row.original?.detail}>{row.original?.detail}</p>
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+          {<p title={row.original?.detail}>{row.original?.detail}</p>}
+          <Box ml={1}>
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === 'service') {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'product') {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color="primary" />
+            </IconButton>
+          </Box>
+        </div>
+        )
       },
       {
         accessor: 'description',

@@ -39,10 +39,12 @@ const CreateProductCategory = (props) => {
           axiosInstance()
             .get(`/product-category/` + productCategoryId)
             .then(({ data: { data } }) => {
-              let tempOptionArray = fieldsDataForUpdate.find((d) => d.fieldName === 'parentCategory').option;
+              let tempOptionArray = fieldsDataForUpdate.find((d) => d.fieldName === 'parentCategory')?.option;
+              if(tempOptionArray){
               fieldsDataForUpdate.find((d) => d.fieldName === 'parentCategory').option = tempOptionArray.filter(
                 (data) => data.optionValue !== productCategoryId
               );
+              }
               const { name, ...rest } = data;
               setCloneHeading(name);
               if (isClone) {

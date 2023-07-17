@@ -80,7 +80,7 @@ const ProductAuction = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.productAuction?.title, o?.fieldData, routes.productAuctionDetail.path);
+          let currentColumn = getColumnData(routes.productAuction?.title, o?.fieldData, routes.productAuctionDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

@@ -96,15 +96,7 @@ const RentalManagementDetailsPage = () => {
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
 
-  const [rentalSteps, setRentalSteps] = useState(
-    user?.user?.brandPolicy?.rentalQuotation
-      ? rentalManagementSteps
-      : rentalManagementSteps?.filter((e) => !['Quotation', 'Add Services'].includes(e.name))
-  );
-
-  const rentalStepsNames = React.useMemo(() => {
-    return rentalSteps.map((item) => item.name);
-  }, [rentalSteps]);
+  const [rentalSteps, setRentalSteps] = useState([]);
 
   const [versionNotClonned, setVersionNotClonned] = useState(false);
   const [reOpening, setReOpening] = useState(false);
@@ -172,7 +164,7 @@ const RentalManagementDetailsPage = () => {
   };
 
   const fetchQuotationData = (versionNumber = null, createIfNotExits = false) => {
-    if (user?.user?.brandPolicy?.rentalQuotation) {
+    if ((rentalManagementData && rentalManagementData?.addQuotationStep) || user?.user?.brandPolicy?.rentalQuotation) {
       axiosInstance()
         .get(
           createIfNotExits
@@ -219,13 +211,13 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
       fetchQuotationData();
-      updateProcessStatus(rentalStepsNames[currentStep]);
+      updateProcessStatus(rentalSteps[currentStep]?.name);
     }
   }, [currentStep]);
 
@@ -238,7 +230,13 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-      setCurrentStep(getIndex(data?.processStatus, rentalSteps));
+      var steps = (user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep) ? rentalManagementSteps :
+        rentalManagementSteps?.filter((e) => !['Quotation'].includes(e.name))
+      if (!user?.user?.brandPolicy?.rentalService) {
+        steps = steps?.filter((e) => !['Add Services'].includes(e.name))
+      }
+      setRentalSteps(steps)
+      setCurrentStep(getIndex(data?.processStatus, steps));
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -336,8 +334,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+        .then(({ data }) => { })
+        .catch((error) => { });
     }
   };
 
@@ -346,8 +344,8 @@ const RentalManagementDetailsPage = () => {
       .patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: status })
       .then(({ data: { data } }) => {
         if (status === 'Invoiced' || status === 'Closed') {
-          updateProcessStatus(rentalStepsNames[rentalStepsNames?.length - 1]);
-          setCurrentStep(rentalStepsNames?.length - 1);
+          updateProcessStatus(rentalSteps[rentalSteps?.length - 1]?.name);
+          setCurrentStep(rentalSteps?.length - 1);
         }
         fetchRentalManagementData();
         toastConfig.setToastConfig({
@@ -438,7 +436,7 @@ const RentalManagementDetailsPage = () => {
                   >
                     {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
                   </Button>
-                  {['Add Products', 'Add Services', 'Add-on'].includes(rentalStepsNames[currentStep]) && versionNotClonned && (
+                  {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) && versionNotClonned && (
                     <Button
                       disabled={!versionNotClonned}
                       className="buttonStyleBigScreen"
@@ -522,7 +520,7 @@ const RentalManagementDetailsPage = () => {
                     !(
                       [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                         quotationData?.versions[currentVersion]?.status
-                      ) && ['Add Products', 'Add Services', 'Add-on'].includes(rentalStepsNames[currentStep])
+                      ) && ['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name)
                     ) && (
                       <Fragment>
                         <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
@@ -624,7 +622,7 @@ const RentalManagementDetailsPage = () => {
                 if (
                   (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ||
                     quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer) &&
-                  rentalStepsNames[currentStep] === 'Quotation'
+                  rentalSteps[currentStep]?.name === 'Quotation'
                 ) {
                   setShowCancelConfirmBox({ open: true, isQuote: true });
                 } else {
@@ -637,8 +635,8 @@ const RentalManagementDetailsPage = () => {
               isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
               setStepFullScreen={() => setStepFullScreen(true)}
             />
-            <ContentFullScreen title={rentalStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-              {rentalStepsNames[currentStep] === 'Add Products' && rentalManagementData && (
+            <ContentFullScreen title={rentalSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+              {rentalSteps[currentStep]?.name === 'Add Products' && rentalManagementData && (
                 <Productpackage
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
@@ -656,7 +654,7 @@ const RentalManagementDetailsPage = () => {
                   }
                 />
               )}
-              {rentalStepsNames[currentStep] === 'Add Services' && rentalManagementData && (
+              {rentalSteps[currentStep]?.name === 'Add Services' && rentalManagementData && (
                 <Services
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
@@ -674,7 +672,7 @@ const RentalManagementDetailsPage = () => {
                   }
                 />
               )}
-              {/* {rentalStepsNames[currentStep] === 'Add Consumables' && rentalManagementData && (
+              {/* {rentalSteps[currentStep]?.name === 'Add Consumables' && rentalManagementData && (
                       <Consumables
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -684,7 +682,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )} */}
-              {rentalStepsNames[currentStep] === 'Add-on' && rentalManagementData && (
+              {rentalSteps[currentStep]?.name === 'Add-on' && rentalManagementData && (
                 <AdditionalCost
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
@@ -702,7 +700,7 @@ const RentalManagementDetailsPage = () => {
                   }
                 />
               )}
-              {rentalStepsNames[currentStep] === 'Quotation' && rentalManagementData && (
+              {rentalSteps[currentStep]?.name === 'Quotation' && rentalManagementData && (
                 <Quotation
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
@@ -716,7 +714,7 @@ const RentalManagementDetailsPage = () => {
                   setCurrentVersion={setCurrentVersion}
                 />
               )}
-              {rentalStepsNames[currentStep] === 'Serialized Asset' && rentalManagementData && (
+              {rentalSteps[currentStep]?.name === 'Serialized Asset' && rentalManagementData && (
                 <SerializedAsset
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
@@ -725,7 +723,7 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                 />
               )}
-              {rentalStepsNames[currentStep] === 'Loading Ticket' && rentalManagementData && (
+              {rentalSteps[currentStep]?.name === 'Loading Ticket' && rentalManagementData && (
                 <LoadingTicket
                   fetchRentalData={fetchRentalManagementData}
                   rentalManagementData={rentalManagementData}
@@ -738,7 +736,7 @@ const RentalManagementDetailsPage = () => {
                   checkProgressiveBilling={checkProgressiveBilling}
                 />
               )}
-              {rentalStepsNames[currentStep] === 'Receiving Ticket' && rentalManagementData && (
+              {rentalSteps[currentStep]?.name === 'Receiving Ticket' && rentalManagementData && (
                 <ReceivingTicket
                   fetchRentalData={fetchRentalManagementData}
                   rentalManagementData={rentalManagementData}
@@ -750,17 +748,14 @@ const RentalManagementDetailsPage = () => {
                   allowUpdateStatus={allowUpdateStatus}
                 />
               )}
-              {rentalStepsNames[currentStep] === 'Final Slip' && rentalManagementData && (
+              {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (
                 <Invoice
                   rentalManagementData={rentalManagementData}
-                  setNextStep={setNextStep}
-                  fetchRentalData={fetchRentalManagementData}
                   updateJobStatus={updateJobStatus}
                   statusOptions={statusOptions}
-                  renderedFrom={`${renderedFrom}_grid-5`}
-                  currencySymbol={currencySymbol}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
+                  renderedFrom={`${renderedFrom}_grid-5`}
                 />
               )}
             </ContentFullScreen>

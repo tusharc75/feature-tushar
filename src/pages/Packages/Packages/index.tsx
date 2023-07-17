@@ -116,8 +116,7 @@ const PackagesTable = ({ packageId, packageData }) => {
           fetchData();
         })
         .catch((err) => setToastConfig(err));
-    }
-    else {
+    } else {
       fetchData();
     }
   };
@@ -195,6 +194,7 @@ const PackagesTable = ({ packageId, packageData }) => {
                 size="small"
                 onClick={handleClick}
                 endIcon={<ArrowDropDownIcon />}
+                className="new-dropdown-v1"
               >
                 {'Actions'}
               </Button>
@@ -252,9 +252,9 @@ const PackagesTable = ({ packageId, packageData }) => {
           dataRows={dataRows}
           selectedRecords={[]}
           dispatch={dispatch}
-          onEdit={(data) => { }}
+          onEdit={(data) => {}}
           extraParamsToCheckDelete={true}
-          onDelete={(data) => { }}
+          onDelete={(data) => {}}
           rowCount={rowCount}
           page={page}
           loading={loading}
@@ -270,7 +270,7 @@ const PackagesTable = ({ packageId, packageData }) => {
             setShowProductAssignDialog(true);
           }}
           showClone={true}
-          onClone={(data) => { }}
+          onClone={(data) => {}}
           renderedFrom={renderedFrom}
         />
       ) : Object.keys(frameWorkComponent).length > 0 ? (

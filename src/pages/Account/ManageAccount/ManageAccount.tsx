@@ -231,7 +231,7 @@ export default function ManageAccount(props) {
                                         />
                                       ) : field.fieldName === 'billingAddress' ? (
                                         <Grid key={field.fieldName} item className="hellow">
-                                          <Box display={'flex'} alignItems={'center'}>
+                                          <Box display={'flex'}>
                                             <Box style={{ flexGrow: 1 }}>
                                               <FormTypes
                                                 isNew={isNew}

@@ -47,7 +47,7 @@ export default function CustomDialogComponent({ title, onClose, handleAddLeadTim
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes?.leadTimeMaster?.title, o?.fieldData, routes?.leadTimeMasterDetail?.path, true);
+          let currentColumn = getColumnData(routes?.leadTimeMaster?.title, o?.fieldData, routes?.leadTimeMasterDetail?.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

@@ -21,7 +21,6 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { useHistory } from 'react-router-dom';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import AttachmentIcon from '@material-ui/icons/Attachment';
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import RepeatIcon from '@material-ui/icons/Repeat';
@@ -123,31 +122,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
             <p className="text-truncate" title={row.original.detail}>
-              {!isOffline ? (
-                row.original?.type === 'service' ? (
-                  <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original.materialId}`} target="_blank">
-                    {row.original.detail}
-                  </a>
-                ) : row.original?.type === 'product' ? (
-                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.materialId}`} target="_blank">
-                    {row.original.detail}
-                  </a>
-                ) : row.original?.type === 'package' ? (
-                  <a className="link text-truncate" href={`${routes.packagesDetail.path}/${row.original.materialId}`} target="_blank">
-                    {row.original.detail}
-                  </a>
-                ) : row.original?.type === 'asset' && !row.original?.isNonSerializeAsset ? (
-                  <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original.inventory}`} target="_blank">
-                    {row.original.detail}
-                  </a>
-                ) : (
-                  row.original.detail
-                )
-              ) : (
-                row.original.detail
-              )}
+              {row.original.detail}
             </p>
-            {row.original.isPurchaseOrder && (
+            {!isOffline && row.original.isPurchaseOrder ? (
               <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton
                   size="small"
@@ -160,6 +137,23 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
+            ) : (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
             )}
 
             {row.original.isBulkAssetCreation && (
@@ -253,16 +247,35 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       {
         accessor: 'assets',
         Header: 'Qty Assigned',
+        disableFilters: false,
         Cell: ({ row }) => getAssetAssignedValues(row)
       }
     ];
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
-    fetchProductInventory();
+    fetchData();
     setNextStep(true);
   };
 
-  const fetchProductInventory = async () => {
+  const checkProductInside = (item, material) => {
+    if (item?.type === 'product') {
+      return true;
+    }
+    const child = material?.filter(e => e.parentId === item?._id);
+    if (child?.some(e => e?.type === 'product')) {
+      return true;
+    }
+    if (child?.length) {
+      for (var ele in child) {
+        return checkProductInside(child[ele], material)
+      }
+    }
+    else {
+      return false
+    }
+  }
+
+  const fetchData = async () => {
     setNextStep(false);
     try {
       var data: any = [];
@@ -314,7 +327,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         }
       }
 
-      let rows = data.material.filter((e) => e.parentId === null);
+      const material = data.material;
+      let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
+
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
         parent.detail = `${parent.type === 'service'
@@ -586,7 +601,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         .post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data })
         .then(({ data }) => {
           setAddSerializedAssetDialog({ open: false });
-          fetchProductInventory();
+          fetchData();
           setSelectedRecords([]);
           setAssetAssignedProduct([]);
           setAdding(false);
@@ -614,7 +629,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         setDeleting(false);
         setDeleteData(null);
         setShowConfirmBox(false);
-        fetchProductInventory();
+        fetchData();
       } else {
         deleteData?.forEach((e) => {
           delete e.assetNumber;
@@ -624,7 +639,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           .put(`${rentalManagement.api}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
           .then(() => {
             setDeleting(false);
-            fetchProductInventory();
+            fetchData();
             setDeleteData(null);
             setShowConfirmBox(false);
             setNextStep(true);
@@ -757,7 +772,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 {`Assign ${routes.serializedAsset.title}`}
               </Button>
               {!isOffline && (
-                <Button variant="outlined" color="default" size="small" onClick={openActions} aria-controls="action-menu" endIcon={<ExpandMore />}>
+                <Button
+                  variant="outlined"
+                  color="default"
+                  className="new-dropdown-v1"
+                  size="small"
+                  onClick={openActions}
+                  disabled={selectedRecords?.length ? false : true}
+                  aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
+                >
                   Actions
                 </Button>
               )}
@@ -968,7 +992,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           filterByPlant={rentalManagementData?.warehouse?.optionValue}
           handleSuccess={() => {
             setAddSerializedAssetDialog({ open: false });
-            fetchProductInventory();
+            fetchData();
             setSelectedRecords([]);
             setAssetAssignedProduct([]);
             setAdding(false);
@@ -980,7 +1004,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           closeDialog={() => {
             setAddNonSerializedAssetDialog(false);
             setSelectedRecords([]);
-            fetchProductInventory();
+            fetchData();
           }}
           products={isOffline ? [...assetAssignedProduct, ...nonSerializedAssetProduct] : nonSerializedAssetProduct}
           warehouse={rentalManagementData?.warehouse?.optionValue}
@@ -1007,7 +1031,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           onSuccess={() => {
             setOrderDialog({ open: false, products: [], type: '' });
             setSelectedRecords([]);
-            fetchProductInventory();
+            fetchData();
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -1034,7 +1058,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           onSuccess={() => {
             setOrderDialog({ open: false, products: [], type: '' });
             setSelectedRecords([]);
-            fetchProductInventory();
+            fetchData();
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -1066,7 +1090,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           onSuccess={() => {
             setOrderDialog({ open: false, products: [], type: '' });
             setSelectedRecords([]);
-            fetchProductInventory();
+            fetchData();
             toastConfig.setToastConfig({
               open: true,
               type: 'success',

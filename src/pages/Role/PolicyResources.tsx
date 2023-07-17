@@ -2,6 +2,7 @@ import { Box, Checkbox, FormControlLabel, IconButton, Table, TableBody, TableCel
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons'
 import { camelCase } from 'lodash'
 import React from 'react'
+import routes from 'src/components/Helpers/Routes'
 
 const PolicyResources = (
     {
@@ -46,7 +47,7 @@ const PolicyResources = (
                         <TableRow>
                             <TableCell style={{ minWidth: 300 }}>
                                 <Box display='flex' justifyContent={'flex-start'} alignItems={'center'}>
-                                    <Typography className="tableMainHeader">{resource}</Typography>
+                                    <Typography className="tableMainHeader">{routes[camelCase(resource)]?.title || resource}</Typography>
                                     {fieldOfPolicyResources.length > 0 && <Box ml={1}>
                                         <IconButton
                                             size="small"

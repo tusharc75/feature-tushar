@@ -114,11 +114,13 @@ const SerializedAsset = () => {
   ]);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/product-category?sortBy=name&orderBy=asc`)
-      .then(({ data: { data } }) => {
-        setProductCategoryList(data);
-      });
+    if (permissions?.productCategory?.isRead) {
+      axiosInstance()
+        .get(`/product-category?sortBy=name&orderBy=asc`)
+        .then(({ data: { data } }) => {
+          setProductCategoryList(data);
+        });
+    }
   }, []);
 
   useEffect(() => {
@@ -156,7 +158,7 @@ const SerializedAsset = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -532,35 +534,36 @@ const SerializedAsset = () => {
                 </Fragment>
               ) : (
                 <Fragment>
-                  <Autocomplete
-                    style={{ width: '250px' }}
-                    options={productCategoryList}
-                    getOptionLabel={(option: any) => (option ? option.name : '')}
-                    getOptionSelected={(option: any, val) => option._id === val}
-                    value={
-                      productCategoryList.filter((data) => data._id === productCategory).length
-                        ? productCategoryList.filter((data) => data._id === productCategory)[0]
-                        : ''
-                    }
-                    onChange={(e, val) => {
-                      setProductCategory(val && val._id ? val._id : '');
-                    }}
-                    renderInput={(params) =>
-                      isMobile && !isTablet ? (
-                        <TextField
-                          {...params}
-                          margin="dense"
-                          name="productCategory"
-                          placeholder="Product Category"
-                          variant="standard"
-                          fullWidth
-                          className={isMobile ? 'serchBox' : ''}
-                        />
-                      ) : (
-                        <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
-                      )
-                    }
-                  />
+                  {permissions?.productCategory?.isRead &&
+                    <Autocomplete
+                      style={{ width: '250px' }}
+                      options={productCategoryList}
+                      getOptionLabel={(option: any) => (option ? option.name : '')}
+                      getOptionSelected={(option: any, val) => option._id === val}
+                      value={
+                        productCategoryList.filter((data) => data._id === productCategory).length
+                          ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                          : ''
+                      }
+                      onChange={(e, val) => {
+                        setProductCategory(val && val._id ? val._id : '');
+                      }}
+                      renderInput={(params) =>
+                        isMobile && !isTablet ? (
+                          <TextField
+                            {...params}
+                            margin="dense"
+                            name="productCategory"
+                            placeholder="Product Category"
+                            variant="standard"
+                            fullWidth
+                            className={isMobile ? 'serchBox' : ''}
+                          />
+                        ) : (
+                          <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+                        )
+                      }
+                    />}
                   {productCategory && (
                     <Autocomplete
                       style={{ width: '250px' }}
@@ -921,9 +924,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

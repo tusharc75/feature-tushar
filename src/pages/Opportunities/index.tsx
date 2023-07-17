@@ -129,7 +129,7 @@ const Opportunities = () => {
         }]
       }
       else {
-        let currentColumn = getColumnData(opportunityResource, o?.fieldData, routes.opportunityDetail.path)
+        let currentColumn = getColumnData(opportunityResource, o?.fieldData, routes.opportunityDetail.path, true)
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData]
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

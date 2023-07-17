@@ -21,8 +21,6 @@ import { CommonRenderer, DateRenderer } from 'src/components/AgGridComponents/Cu
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { AiFillFilePdf } from 'react-icons/ai';
-import { IoMdDownload } from 'react-icons/io';
 import { uniq, map, groupBy } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
@@ -30,6 +28,7 @@ import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAsset
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 interface LoadingGridProps {
   permissions: any;
@@ -128,9 +127,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         disabled: true,
         cellRenderer: 'assetRenderer',
         cellStyle: (params) => {
-          if (
-            [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)
-          ) {
+          if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
             return { backgroundColor: COLOUR_MASTER.lostAssets.background };
           }
           if (params?.data?.isReplaced) {
@@ -141,7 +138,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       },
       { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
       { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-      { field: 'productDescription', headerName: 'Product Type', show: true, cellRenderer: 'productRenderer' },
+      { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productRenderer' },
+      { field: 'productDescription', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
       { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
       { field: 'loadingTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
     ];
@@ -158,7 +156,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       const result = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`);
       let assetData = result?.data?.data?.assets?.map((d: any) => ({
         ...d,
-        productDescription: d?.product?.optionLabel ?? '',
+        productName: d?.product?.optionLabel || '',
+        productDescription: d?.productDescription?.optionLabel || '',
         productId: d?.product?.optionValue ?? '',
         isChecked: false
       }));
@@ -185,7 +184,12 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         });
       }
       setExistingAssets(assetData);
-      dispatch({ type: 'initialize', data: assetData, count: assetData.length });
+      dispatch({
+        type: 'initialize',
+        data: assetData,
+        count: assetData.length,
+        selectedRecords: assetData.filter((f) => f.isChecked === true)
+      });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
@@ -349,43 +353,14 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   return (
     <Fragment>
       <Box display="flex" flexDirection={'row'} justifyContent={'flex-end'} mx={1} my={1}>
-        <Box>
-          {permissions?.transferAsset?.isRead && !isMobile && !isMobile && (
-            <Button
-              variant={'outlined'}
-              color="primary"
-              type="button"
-              size="small"
-              startIcon={<AiFillFilePdf />}
-              disabled={fileDownloading}
-              onClick={() => {
-                handleViewPdf(false);
-              }}
-            >
-              {fileDownloading ? 'Please wait...' : 'Preview'}
-            </Button>
-          )}
-          <Box component="span" mx={1} />
-          {permissions?.transferAsset?.isRead && (
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
-              type="button"
-              size="small"
-              style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
-              startIcon={isMobile ? '' : <IoMdDownload />}
-              disabled={fileDownloading}
-              onClick={() => {
-                handleViewPdf(true);
-              }}
-            >
-              {isMobile && !isTablet ? <IoMdDownload size={20} /> : fileDownloading ? 'Please wait...' : 'Download'}
-            </Button>
-          )}
-          <Box component="span" mx={1} />
-        </Box>
+        <PreviewDownload
+          resource={sidebarResource.transferAsset}
+          referenceId={transferAssetId}
+          columns={columns?.filter((e) => ['assetNumber', 'productName', 'productDescription', 'status']?.includes(e.field))}
+          hideDetailButton={true}
+        />
         {allowedToEdit && !isTransferEnded && (
-          <Box>
+          <Box pl={1}>
             {permissions?.transferAsset?.isUpdate && (
               <Fragment>
                 <Button
@@ -396,6 +371,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   aria-controls="action-menu"
                   disabled={selectedRecords.length === 0}
                   endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>
@@ -463,7 +439,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                       !canReceive ||
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                        selectedRecords.length
+                      selectedRecords.length
                     }
                     onClick={() => {
                       setShowConfirmBoxReceive(true);
@@ -477,7 +453,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     disabled={
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                        selectedRecords.length
+                      selectedRecords.length
                     }
                     onClick={() => {
                       const products = [];
@@ -502,9 +478,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   </MenuItem>
 
                   {permissions?.transferAsset?.isUpdate &&
-                  selectedRecords.length &&
-                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                    ?.length === selectedRecords?.length ? (
+                    selectedRecords.length &&
+                    selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                      ?.length === selectedRecords?.length ? (
                     <MenuItem
                       onClick={() => {
                         setShowConfirmBox(true);
@@ -538,7 +514,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                 // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
               }}
               extraParamsToCheckDelete={true}
-              onDelete={(data) => {}}
+              onDelete={(data) => { }}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -557,7 +533,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={(data) => {}}
+              onClone={(data) => { }}
               renderedFrom={renderedFrom}
             />
           ) : (

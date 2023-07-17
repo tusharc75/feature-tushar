@@ -4,24 +4,26 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { fieldServiceOrder } from 'src/constants/helpers';
+import { fieldServiceOrder, fieldTicket } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleClose, handleSucess }) {
   const toastConfig = useContext(CustomToastContext);
 
   const handleAssign = () => {
-    const data: any = [
-      {
-        uniqueId: selectedServiceOrder[0]?.service?.uniqueId,
-        service: selectedServiceOrder[0]?.service?.materialId,
+    const data = selectedServiceOrder?.map((ele) => {
+      return {
+        uniqueId: ele?.service?.uniqueId,
+        service: ele?.serviceId,
         technician: technicianData?._id,
-        estimateStartDate: selectedServiceOrder[0]?.service?.estimateStartDate,
-        estimateEndDate: selectedServiceOrder[0]?.service?.estimateEndDate
+        fieldTicket: ele._id,
+        status: "Assigned",
+        estimateStartDate: ele?.service?.estimateStartDate,
+        estimateEndDate: ele?.service?.estimateEndDate
       }
-    ];
+    })
     axiosInstance()
-      .post(`${fieldServiceOrder.api}/${selectedServiceOrder[0]._id}/technician`, data)
+      .post(`${fieldTicket.api}/technician`, { technician: data })
       .then(() => {
         handleSucess();
       })
@@ -37,7 +39,7 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         <Box p={2}>
           <Typography variant="body1" color="textPrimary">
             Do You want to assign {technicianData?.firstName || ''} {technicianData?.lastName || ''} to{' '}
-            {`${selectedServiceOrder[0]?.service?.serviceName} (${selectedServiceOrder[0]?.fieldServiceOrderNumber})`}?{' '}
+            {`${selectedServiceOrder[0]?.service?.serviceName} (${selectedServiceOrder[0]?.fieldTicketNumber})`}?{' '}
           </Typography>
         </Box>
       </CustomDialogContent>

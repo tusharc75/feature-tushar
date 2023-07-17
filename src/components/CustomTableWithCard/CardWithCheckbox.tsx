@@ -1,8 +1,11 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import styles from './index.module.scss';
 
 import type { CardInterface } from './';
-import { Checkbox, Typography, Grid } from '@material-ui/core';
+import { Checkbox, IconButton, Grid } from '@material-ui/core';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import { useCollapse } from 'src/hooks';
 
 interface CardWithCheckboxProps extends CardInterface {
   row: any;
@@ -18,8 +21,12 @@ const CardWithCheckbox: FC<CardWithCheckboxProps> = ({
   checkBox,
   bodyColumns,
   headerColumns,
+  collapsible = false,
   ...props
 }) => {
+  const [collapsed, setCollapsed] = React.useState(collapsible);
+  const containerRef = useCollapse({ collapsed, minHeight: 'auto', childClassName: styles.bodyColumn });
+
   return (
     <div
       {...props}
@@ -69,22 +76,35 @@ const CardWithCheckbox: FC<CardWithCheckboxProps> = ({
             })}
           </div>
         </div>
-        <Grid container spacing={3} className={styles.cardBody}>
-          {bodyColumns.map((bodyCol, index) => {
-            const { style, minWidth, width, render, ...rest } = bodyCol;
-            return (
-              <Grid
-                item
-                key={index}
-                {...rest}
-                className={`${styles.bodyColumn} ${rest.className || ''}`}
-                style={{ ...style, minWidth: minWidth !== undefined ? minWidth : 'auto', width: width !== undefined ? width : 'auto' }}
-              >
-                {render(row)}
-              </Grid>
-            );
-          })}
-        </Grid>
+        <div ref={containerRef} className={`${styles.collapsible} `}>
+          <Grid container spacing={3} className={styles.cardBody}>
+            {bodyColumns.map((bodyCol, index) => {
+              const { style, minWidth, width, render, ...rest } = bodyCol;
+              return (
+                <Grid
+                  item
+                  key={index}
+                  {...rest}
+                  className={`${styles.bodyColumn} ${rest.className || ''}`}
+                  style={{ ...style, minWidth: minWidth !== undefined ? minWidth : 'auto', width: width !== undefined ? width : 'auto' }}
+                >
+                  {render(row)}
+                </Grid>
+              );
+            })}
+          </Grid>
+          {collapsible && (
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCollapsed((prev) => !prev);
+              }}
+            >
+              {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+            </IconButton>
+          )}
+        </div>
       </div>
     </div>
   );

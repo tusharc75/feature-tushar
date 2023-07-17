@@ -117,11 +117,11 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
           product.length > 1
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: [] }))
             : product?.map((e) => ({
-                product: e._id,
-                qty: parseInt(values.qty),
-                price: parseFloat(values.price),
-                serialNumber: values['serialNumbers']
-              })),
+              product: e._id,
+              qty: parseInt(values.qty),
+              price: parseFloat(values.price),
+              serialNumber: values['serialNumbers']
+            })),
         warehouse: warehouse,
         storageLocation: values.storageLocation,
         receiveDate: values.customDate,
@@ -180,17 +180,19 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
 
     if (type === 'remove') {
       if (product?.length === 1) {
-        var validateQty = currentInventory;
-        let maxQty = availableQtyOnRemoveDate !== null ? Math.min(validateQty, availableQtyOnRemoveDate) : validateQty;
-        if (parseInt(values.qty) > maxQty) {
-          errors['qty'] = 'Insufficient Quantity !';
+        if (!user?.user?.brandPolicy?.allowNegativeInventory) {
+          var validateQty = currentInventory;
+          let maxQty = availableQtyOnRemoveDate !== null ? Math.min(validateQty, availableQtyOnRemoveDate) : validateQty;
+          if (parseInt(values.qty) > maxQty) {
+            errors['qty'] = 'Insufficient Quantity !';
+          }
         }
       }
     }
 
     if (type === 'add') {
       if (parseFloat(values.price) <= 0) {
-        errors['price'] = 'Please enter valid price';
+        errors['price'] = 'Please enter valid cost';
       }
     }
 
@@ -316,7 +318,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                     <List style={{ padding: 0 }}>
                       <ListItem key={product[0]?._id}>
                         {product?.length === 1 ? (
-                          <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${currentInventory}`} />
+                          <ListItemText primary={product[0]?.productName} secondary={!user?.user?.brandPolicy?.hideInventoryCount && `Inventory : ${currentInventory}`} />
                         ) : (
                           <ListItemText primary={`${product?.length} Products`} />
                         )}
@@ -342,7 +344,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                         <TextField
                           margin="dense"
                           type="number"
-                          label="Price"
+                          label="Cost"
                           name="price"
                           required
                           fullWidth
@@ -410,21 +412,23 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                         onChange={(value) => {
                           var newDate = convertDateInDateTime(value);
                           setFieldValue('customDate', newDate);
-                          if (type === 'remove' && product.length === 1) {
-                            var date = moment(newDate);
-                            if (date.isValid()) {
-                              var api = `${productInventory.api}/inventory-at-date?date=${newDate}&warehouse=${warehouse}&product=${product[0]._id}`;
-                              if (values['storageLocation']) {
-                                api = api + `&storageLocation=${values['storageLocation']}`;
+                          if (!user?.user?.brandPolicy?.allowNegativeInventory) {
+                            if (type === 'remove' && product.length === 1) {
+                              var date = moment(newDate);
+                              if (date.isValid()) {
+                                var api = `${productInventory.api}/inventory-at-date?date=${newDate}&warehouse=${warehouse}&product=${product[0]._id}`;
+                                if (values['storageLocation']) {
+                                  api = api + `&storageLocation=${values['storageLocation']}`;
+                                }
+                                axiosInstance()
+                                  .get(api)
+                                  .then(({ data: { data } }) => {
+                                    setAvailableQtyOnRemoveDate(data);
+                                  })
+                                  .catch((err) => {
+                                    toastConfig.setToastConfig(err);
+                                  });
                               }
-                              axiosInstance()
-                                .get(api)
-                                .then(({ data: { data } }) => {
-                                  setAvailableQtyOnRemoveDate(data);
-                                })
-                                .catch((err) => {
-                                  toastConfig.setToastConfig(err);
-                                });
                             }
                           }
                         }}

@@ -146,7 +146,7 @@ const Leads = () => {
     let columns = [];
     let rendererNames = [];
     data?.forEach((o) => {
-      let currentColumn = getColumnData(leadResource, o?.fieldData, routes.leadDetail.path);
+      let currentColumn = getColumnData(leadResource, o?.fieldData, routes.leadDetail.path, true);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

@@ -27,7 +27,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 
-const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) => {
+const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isRedirectToDetailPage = true, referenceData = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -79,6 +79,11 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
         }
       } else {
         let initialData = getObjKeys('', fieldsDataForCreate);
+        if (referenceData) {
+          if (referenceData?.packageType && fieldsDataForCreate?.find((e) => e.fieldName === 'packageType')) {
+            initialData['packageType'] = referenceData?.packageType
+          }
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
@@ -112,7 +117,9 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
       axiosInstance()
         .post(`${packages.api}`, values)
         .then(({ data: { data, message } }) => {
-          history.push(`${routes.packagesDetail.path}/${data._id}`);
+          if (isRedirectToDetailPage) {
+            history.push(`${routes.packagesDetail.path}/${data._id}`);
+          }
           setSubmitting(false);
           onSuccess(data);
           toastConfig.setToastConfig({

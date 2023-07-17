@@ -100,7 +100,7 @@ const AssignProductDialog = ({
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path, true);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -297,7 +297,7 @@ const AssignProductDialog = ({
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={productsDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader
-        title={`Assign ${routes.product.title}`}
+        title={`Add ${routes.product.title}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleCloseDialog}

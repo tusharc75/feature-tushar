@@ -36,7 +36,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const [conditionData, setConditionData] = useState(null);
 
   const [showDialogOld, setShowDialogOld] = useState({ open: false, isBulkedit: false });
-  const { getColumnData } = useColumns();
 
   useEffect(() => {
     fetchCondition();

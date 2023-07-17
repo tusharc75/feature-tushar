@@ -25,6 +25,9 @@ import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { ExpandMore } from '@material-ui/icons';
+import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
+import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 
 const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -48,6 +51,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -99,12 +103,12 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -155,7 +159,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
               </Box>
             }
             {!isOffline && (
-              <>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -163,7 +166,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                       window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                     } else if (row.original.type === 'product') {
                       window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'asset') {
+                    } else if (row.original.type === 'serializedAsset') {
                       window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                     } else {
                       window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -172,7 +175,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                 >
                   <OpenInNewIcon fontSize="small" color="primary" />
                 </IconButton>
-              </>
             )}
           </div>
         )
@@ -257,16 +259,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent?.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent?.packageDetail?.packageName;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
@@ -299,16 +301,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -336,7 +338,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       const element: any = {};
       element.materialId = d._id;
       element.detail = d?.serviceName || d?.packageName || '';
-      element.type = addExistingProductDialog.type;
+      element.type = d?.type || addExistingProductDialog.type;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : d.unit ? d.unit : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -478,37 +480,72 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
     handleSaveData(rows);
   };
 
+  const openAddActions = (event) => {
+    setAddAnchorEl(event.currentTarget);
+  };
+
+  const closeAddActions = () => {
+    setAddAnchorEl(null);
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            {permissions?.serviceMaster?.isRead && (
-              <Button
-                color="primary"
-                size="small"
-                disabled={isOffline}
-                variant={'contained'}
+            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
+              {'Add'}
+              <ExpandMore fontSize="small" />
+            </Button>
+            <Menu
+              anchorEl={addAnchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="add-menu"
+              open={Boolean(addAnchorEl)}
+              onClose={closeAddActions}
+            >
+              {permissions?.serviceMaster?.isRead && (
+                <MenuItem
+                  onClick={() => {
+                    closeAddActions()
+                    setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
+                  }}
+                >
+                  Add Services
+                </MenuItem>
+              )}
+              {permissions?.packages?.isRead && (
+                <MenuItem
+                  onClick={() => {
+                    closeAddActions()
+                    setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+                  }}
+                >
+                  {`Add Service Packages`}
+                </MenuItem>
+              )}
+              <MenuItem
                 onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
+                  closeAddActions();
+                  setAddExistingProductDialog({ open: true, type: 'newService', parentId: null });
                 }}
               >
-                {isMobile && !isTablet ? 'Service' : `Add Services`}
-              </Button>
-            )}
-            {permissions?.packages?.isRead && (
-              <Button
-                color="primary"
-                size="small"
-                variant={'contained'}
-                disabled={isOffline}
+                Add New Service
+              </MenuItem>
+              <MenuItem
                 onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+                  closeAddActions();
+                  setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
                 }}
               >
-                {isMobile && !isTablet ? 'Package' : `Add Service ${routes.packages.title}`}
-              </Button>
-            )}
+                {`Add New Service Package`}
+              </MenuItem>
+            </Menu>
           </Box>
           <Box display="flex" ml={1}>
             <Button
@@ -518,6 +555,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
               onClick={handleClick}
               disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
               endIcon={<BiChevronDown />}
+              className="new-dropdown-v1"
             >
               Actions
             </Button>
@@ -598,7 +636,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           packageType="service"
-          ids={rowsData.filter((d) => d.type === 'pacakge').map((d) => d?.materialId)}
+          ids={[]}
         />
       )}
       {isProductEdit.open && (
@@ -627,7 +665,40 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
-          ids={rowsData.filter((d) => d.type === 'service').map((d) => d?.materialId)}
+          ids={[]}
+        />
+      )}
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
+        <ManagePackageDialog
+          isClone={false}
+          referenceData={{ packageType: 'Service' }}
+          open={addExistingProductDialog.open}
+          packageId={null}
+          onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+          onSuccess={(data) => {
+            data.type = 'package'
+            data.unitMain = data?.unit;
+            data.pricingMethodMain = data?.pricingMethod;
+            handleAdd([data]);
+            setAddExistingProductDialog({ open: false, type: '', parentId: null });
+          }}
+          isRedirectToDetailPage={false}
+        />
+      )}
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'newService' && (
+        <ManageServiceMaster
+          isClone={false}
+          serviceMasterId={null}
+          onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+          onSuccess={(data) => {
+            const row = data?.data
+            row.type = 'service'
+            row.unitMain = row?.unit;
+            row.pricingMethodMain = row?.pricingMethod;
+            handleAdd([row]);
+            setAddExistingProductDialog({ open: false, type: '', parentId: null });
+          }}
+          isRedirectToDetailPage={false}
         />
       )}
     </Fragment>

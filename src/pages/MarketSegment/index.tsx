@@ -103,7 +103,7 @@ const MarketSegment = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.marketSegmentDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.marketSegmentDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -375,7 +375,7 @@ const MarketSegment = () => {
                   )}
                   {permissions?.marketSegment.isDelete && (
                     <Button
-                      className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_submit_btn}`}
+                      className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_submit_btn} new-dropdown-v1`}
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
                       color="default"
                       size="small"

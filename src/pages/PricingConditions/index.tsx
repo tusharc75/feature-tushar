@@ -73,7 +73,7 @@ const PricingConditions = () => {
           if (o?.fieldData?.fieldName === 'conditionName') {
             o.fieldData.primaryField = true;
           }
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${pricingCondition.route}/detail`);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${pricingCondition.route}/detail`, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

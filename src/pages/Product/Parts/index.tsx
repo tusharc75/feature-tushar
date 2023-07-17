@@ -209,6 +209,7 @@ function Parts({ id }) {
               aria-controls="action-menu"
               style={{ marginLeft: '0.6rem' }}
               endIcon={<ExpandMore />}
+              className="new-dropdown-v1"
             >
               {isMobile && !isTablet ? '' : 'Actions'}
             </Button>

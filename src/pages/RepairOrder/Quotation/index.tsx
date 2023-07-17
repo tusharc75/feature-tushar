@@ -7,7 +7,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { quotation, pricingCondition, repairOrder, QUOTATION_STATUS, REPAIR_ORDER_STATUS } from '../../../constants/helpers';
+import { quotation, pricingCondition, repairOrder, QUOTATION_STATUS, REPAIR_ORDER_STATUS, sidebarResource } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
@@ -23,6 +23,7 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SendEmail from 'src/pages/Quotation/SendEmail';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const Quotation = ({
   repairOrderData,
@@ -71,17 +72,14 @@ const Quotation = ({
   }, [repairOrderData]);
 
   useEffect(() => {
-    if (
-      invoiceStep &&
-      ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)
-    ) {
+    if (invoiceStep && ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)) {
       updateOrderStatus(REPAIR_ORDER_STATUS.readyToInvoice);
     }
   }, [invoiceStep]);
 
   useEffect(() => {
     if (quotationData?.versions[currentVersion] && quotationData?.versions[currentVersion]?._id) {
-      fetchProductInventory();
+      fetchData();
     }
   }, [currentVersion]);
 
@@ -89,7 +87,7 @@ const Quotation = ({
     setNextStep(false);
     setColumns(null);
 
-    const quotationResponse = await axiosInstance().get(`${repairOrder.api}/${repairOrderData?._id}/check-create/quotation`);
+    const quotationResponse = await axiosInstance().get(`${repairOrder.api}/${repairOrderData?._id}/check-create/quotation?approval=${repairOrderData?.addQuotationStep ? 1 : 0}`);
     const quotationInfo: any = quotationResponse?.data?.data;
 
     setQuotationData(quotationInfo);
@@ -98,7 +96,12 @@ const Quotation = ({
     setCurrentVersion(tempCurrentVersion);
     setQuotationVersionData({ quotationId: quotationInfo?._id, ...quotationInfo?.versions[tempCurrentVersion] });
 
-    setNextStep(quotationInfo?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false);
+    if (repairOrderData?.addQuotationStep) {
+      setNextStep(quotationInfo?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false);
+    }
+    else {
+      setNextStep(true);
+    }
 
     var data = await fetch_quotation_product_fields(quotationInfo?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
@@ -138,9 +141,9 @@ const Quotation = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+            {([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
               quotationInfo?.versions[tempCurrentVersion]?.status
-            ) ? (
+            ) || invoiceStep) ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
@@ -180,20 +183,24 @@ const Quotation = ({
         width: 200,
         primaryField: true,
         Cell: ({ row }) => (
-          <div className="d-flex gap-2 align-items-center">
-            <p className="text-truncate" title={row.original?.productName}>
-              {row.original?.productName ? (
-                row.original?.productId ? (
-                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
-                    {row.original?.productName}
-                  </a>
-                ) : (
-                  row.original?.productName
-                )
-              ) : (
-                <NoDataCell />
-              )}
-            </p>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {row.original?.productName ?
+              <>
+                <p className="text-truncate" title={row.original?.productName}>{row.original?.productName}</p>
+                <Box pl={1}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row.original.productId}`);
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </Box>
+              </>
+              :
+              <NoDataCell />
+            }
           </div>
         )
       },
@@ -214,23 +221,11 @@ const Quotation = ({
       newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
     column = [...column, ...newColumns];
-    column.push({
-      accessor: 'action',
-      Header: '',
-      minWidth: 50,
-      width: 50,
-      sticky: 'right',
-      disableFilters: true,
-      canDrag: false,
-      Cell: ({ row }) => {
-        return <></>;
-      }
-    });
     setColumns(column);
     setAllColumn(column.map((d) => d.Header));
   };
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     var data: any = [];
     const response = await axiosInstance().get(
       `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
@@ -253,20 +248,20 @@ const Quotation = ({
         parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName;
+            ? parent.productDetail?.productName
+            : parent.type === 'service'
+              ? parent.serviceDetail?.serviceName
+              : parent.packageDetail?.packageName;
       parent.description =
         parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.product?.productDescription
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.serviceDetail?.serviceDescription || ''
+            : parent.type === 'product'
+              ? parent?.productDetail?.productDescription || ''
+              : parent.type === 'package'
+                ? parent?.packageDetail?.packageDescription || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
@@ -289,23 +284,22 @@ const Quotation = ({
 
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
@@ -355,7 +349,7 @@ const Quotation = ({
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
-        fetchProductInventory();
+        fetchData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -369,7 +363,7 @@ const Quotation = ({
       .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
-        fetchProductInventory();
+        fetchData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -493,153 +487,162 @@ const Quotation = ({
 
   return (
     <Fragment>
-      <Box
-        display="flex"
-        m={1}
-        my={1}
-        className={`flex-wrap`}
-        style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
-      >
-        <Box display="flex">
-          <SendEmail
-            versionData={quotationData?.versions[currentVersion]}
-            quotationData={quotationData}
-            allowedToEdit={invoiceStep ? !allowedToEdit : allowedToEdit}
-            versionId={quotationData?.versions[currentVersion]?._id}
+      {invoiceStep ?
+        <Box p={2} >
+          <PreviewDownload
+            resource={sidebarResource.repairOrder}
+            referenceId={repairOrderData?._id}
             columns={columns}
-            allColumn={allColumn}
-            setShowAllVersionStatus={setShowAllVersionStatus}
-            setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
-            currentVersion={currentVersion}
             isSendEmail={true}
-            hideSummary={true}
-            hideVersions={invoiceStep}
           />
         </Box>
-        {!isMobileScreen && !invoiceStep && (
-          <Box display="flex">
-            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                <FcClock size={25} />
-                <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-              </div>
-            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                <FcOk size={25} />
-                <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-              </div>
-            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                <FcCancel size={25} />
-                <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-              </div>
-            ) : null}
-          </Box>
-        )}
-        {allowedToEdit && (
-          <Box display={'flex'} gridGap={8}>
-            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-            quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
-              <Button
-                disabled={material
-                  .filter((e) => e.parentId === null)
-                  .some(
-                    (d) =>
-                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
-                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
-                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
-                  )}
-                onClick={handleSendToCustomer}
-                variant="contained"
-                size="small"
-                color="primary"
-              >
-                Process Quote
-              </Button>
-            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-              <Button
-                onClick={() => {
-                  setCustomerAcceptable(true);
+        : <Box display="flex" m={1} my={1} className={`flex-wrap`}
+          style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
+        >
+          {repairOrderData?.addQuotationStep ? <Box display="flex">
+            <SendEmail
+              versionData={quotationData?.versions[currentVersion]}
+              quotationData={quotationData}
+              allowedToEdit={allowedToEdit}
+              versionId={quotationData?.versions[currentVersion]?._id}
+              columns={columns}
+              allColumn={allColumn}
+              setShowAllVersionStatus={setShowAllVersionStatus}
+              setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
+              currentVersion={currentVersion}
+              isSendEmail={true}
+              hideSummary={true}
+              hideVersions={false}
+            />
+          </Box> : <div />}
+          {!isMobileScreen && repairOrderData?.addQuotationStep && (
+            <Box display="flex">
+              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                  <FcClock size={25} />
+                  <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+                </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                  <FcOk size={25} />
+                  <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+                </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                  <FcCancel size={25} />
+                  <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+                </div>
+              ) : null}
+            </Box>
+          )}
+          {allowedToEdit && (
+            <Box display={'flex'} gridGap={8}>
+              {repairOrderData?.addQuotationStep && (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                <Button
+                  disabled={material
+                    .filter((e) => e.parentId === null)
+                    .some(
+                      (d) =>
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+                    )}
+                  onClick={handleSendToCustomer}
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                >
+                  Process Quote
+                </Button>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                <Button
+                  onClick={() => {
+                    setCustomerAcceptable(true);
+                  }}
+                  variant="contained"
+                  size="small"
+                  className="mx-1"
+                  color="primary"
+                >
+                  Accept / Reject
+                </Button>
+              ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(quotationData?.versions[currentVersion]?.status) ? (
+                <Button
+                  onClick={() => {
+                    cloneVersion();
+                  }}
+                  variant="contained"
+                  size="small"
+                  className="mx-1"
+                  color="primary"
+                >
+                  Create New Version
+                </Button>
+              ) : null)}
+              {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationData?.versions[currentVersion]?.status
+              ) && (
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedProducts.length === 0}
+                    endIcon={<ExpandMore />}
+                    className="new-dropdown-v1"
+                  >
+                    Actions
+                  </Button>
+                )}
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
                 }}
-                variant="contained"
-                size="small"
-                className="mx-1"
-                color="primary"
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
               >
-                Accept / Reject
-              </Button>
-            ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(quotationData?.versions[currentVersion]?.status) ? (
-              <Button
-                onClick={() => {
-                  cloneVersion();
-                }}
-                variant="contained"
-                size="small"
-                className="mx-1"
-                color="primary"
-              >
-                Create New Version
-              </Button>
-            ) : null}
-            {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-              quotationData?.versions[currentVersion]?.status
-            ) && (
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedProducts.length === 0}
-                endIcon={<ExpandMore />}
-              >
-                Actions
-              </Button>
-            )}
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setIsProductEdit({ open: true, isBulkedit: true });
-                }}
-              >
-                Bulk Edit
-              </MenuItem>
-            </Menu>
-          </Box>
-        )}
-        {isMobileScreen && (
-          <Box display="flex" style={{ margin: '0 auto' }}>
-            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                <FcClock size={25} />
-                <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-              </div>
-            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                <FcOk size={25} />
-                <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-              </div>
-            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                <FcCancel size={25} />
-                <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-              </div>
-            ) : null}
-          </Box>
-        )}
-      </Box>
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    setIsProductEdit({ open: true, isBulkedit: true });
+                  }}
+                >
+                  Bulk Edit
+                </MenuItem>
+              </Menu>
+            </Box>
+          )}
+          {isMobileScreen && (
+            <Box display="flex" style={{ margin: '0 auto' }}>
+              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                  <FcClock size={25} />
+                  <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+                </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                  <FcOk size={25} />
+                  <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+                </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                  <FcCancel size={25} />
+                  <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+                </div>
+              ) : null}
+            </Box>
+          )}
+        </Box>
+      }
+
+
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -710,7 +713,7 @@ const Quotation = ({
           }}
           handleSucess={() => {
             setLeadTimeDialog({ open: false, data: null });
-            fetchProductInventory();
+            fetchData();
           }}
         />
       )}

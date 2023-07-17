@@ -37,6 +37,7 @@ import ServiceOrderViews from './RoadMapViews';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
 import FieldTicket from './FieldTicket';
+import ProgressiveBilling from './Invoice';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -146,7 +147,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const getServiceOrderFields = async () => {
@@ -164,7 +165,7 @@ const ServiceOrderDetailsPage = () => {
       if (policy.stepper?.length) {
         setSteps(serviceOrderSteps?.filter((step) => policy?.stepper?.includes(step?.name)));
       } else {
-        setSteps(serviceOrderSteps);
+        setSteps(serviceOrderSteps?.filter((step) => step?.name !== 'Field Ticket Invoice'));
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -399,6 +400,16 @@ const ServiceOrderDetailsPage = () => {
                 fromInvoice={true}
                 updateStatus={updateStatus}
                 statusOptions={statusOptions}
+              />
+            )}
+            {steps[currentStep]?.name === serviceOrderSteps[6]?.name && serviceOrderData && (
+              <ProgressiveBilling
+                fieldServiceOrderData={serviceOrderData}
+                setNextStep={setNextStep}
+                currencySymbol={currencySymbol}
+                renderedFrom={`${renderedFrom}_grid-6`}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={true}
               />
             )}
           </ContentFullScreen>

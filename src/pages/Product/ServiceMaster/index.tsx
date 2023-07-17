@@ -24,6 +24,8 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { flattenArray } from 'src/constants/columns';
 import AssignStepDialog from './AssignStepDialog/Index';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+
 
 interface Props {
   renderedFrom: string;
@@ -99,19 +101,26 @@ const ServiceMaster = (props: Props) => {
         Header: 'Detail',
         minWidth: 200,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
-          <Link
-            className="link"
-            title={row.original?.detail}
-            to={
-              row.original?.type !== 'Product'
-                ? `${routes.serviceMasterDetail.path}/${row.original?.serviceId}`
-                : `${routes.productDetail.path}/${row.original?.product}`
-            }
-          >
-            {row.original?.detail || <NoDataCell />}
-          </Link>
-        )
+        Cell: ({ row }) => 
+          row?.original?.type ? (
+            <div className="d-flex gap-2 align-items-center">
+              <p className="text-truncate">{row.original.detail}</p>
+              <IconButton
+                size='small'
+                onClick={() => {
+                  if (row?.original?.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original?.product}`);
+                  } else {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original?.serviceId}`)
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'description',
@@ -460,6 +469,7 @@ const ServiceMaster = (props: Props) => {
               aria-controls="action-menu"
               style={{ marginLeft: '0.6rem' }}
               endIcon={<ExpandMore />}
+              className="new-dropdown-v1"
             >
               {isMobile && !isTablet ? '' : 'Actions'}
             </Button>

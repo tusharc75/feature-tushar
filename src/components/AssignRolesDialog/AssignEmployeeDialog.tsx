@@ -84,7 +84,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.employeeMasterDetail.path, true);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.employeeMasterDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -147,7 +147,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
 
     const updatedFilters = [];
     if (selectedCompetency?.length > 0) {
-      updatedFilters.push(...selectedCompetency.map((i) => ({ field: 'competencyType', term: i.optionLabel })));
+      updatedFilters.push(...selectedCompetency.map((i) => ({ field: 'competencyType', term: i?.optionLabel })));
     }
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {

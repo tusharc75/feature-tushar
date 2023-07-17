@@ -22,7 +22,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { sidebarResource, workOrder } from 'src/constants/helpers';
+import { RESOURCE_LABEL, sidebarResource, workOrder } from 'src/constants/helpers';
 
 const useClasses = makeStyles(() => ({
   tableContainer: {
@@ -95,7 +95,10 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
   };
 
   const handleRequest = (values) => {
-    const data: any = {};
+    const data: any = {
+      referenceType:RESOURCE_LABEL.workOrder,
+      referenceId:workOrderId
+    };
     const products: any = [];
     values?.products?.forEach((e) => {
       if (parseInt(e?.consumedQty)) {
@@ -110,7 +113,7 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
     data.products = products;
     if (products?.length) {
       setIsSubmitting(true);
-      axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/request`, data)
+      axiosInstance().put(`material-handling/request`, data)
         .then(({ data }) => {
           onSuccess();
           setIsSubmitting(false);
@@ -136,10 +139,12 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
             errors.storageLocation = 'Storage Location is required';
           }
         }
-        let tempProduct = selectedRecords.find((u) => u._id === d._id);
-        let qty = tempProduct.qty - ((tempProduct?.consumedQty || 0) + (tempProduct?.requestedQty || 0));
-        if (tempProduct && d.consumedQty > qty) {
-          errors.consumedQty = `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.`;
+        if (!consumeRequest) {
+          let tempProduct = selectedRecords.find((u) => u._id === d._id);
+          let qty = tempProduct.qty - ((tempProduct?.consumedQty || 0) + (tempProduct?.requestedQty || 0));
+          if (tempProduct && d.consumedQty > qty) {
+            errors.consumedQty = `Consume Qty is limited to Qty.`;
+          }
         }
       });
     }

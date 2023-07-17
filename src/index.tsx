@@ -5,6 +5,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { Provider } from './StateProvider/Provider';
 import { FastProvider, useStore } from './StateProvider/fastContext';
 import { CustomToastProvider } from './StateProvider/CustomToastContext/CustomToastContext';
+import { NewAddressOptionListProvider } from './StateProvider/AddressProvider';
 import { MsalProvider } from '@azure/msal-react';
 import AzureInstance from './AzureInstance';
 import { init } from '@sentry/react';
@@ -52,7 +53,9 @@ ReactDOM.render(
                 <MsalProvider instance={AzureInstance}>
                   <GlobalChatProvider>
                     <CustomOfflineProvider>
-                      <App />
+                      <NewAddressOptionListProvider>
+                        <App />
+                      </NewAddressOptionListProvider>
                     </CustomOfflineProvider>
                   </GlobalChatProvider>
                 </MsalProvider>

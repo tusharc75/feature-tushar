@@ -6,7 +6,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, fieldTicket, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -98,7 +98,7 @@ const AddCost = ({ id, fieldTicketData }) => {
 
   const fetchCostData = () => {
     axiosInstance()
-      .get(`/field-ticket/${id}/cost`)
+      .get(`${fieldTicket.api}/${id}/cost`)
       .then(({ data: { data } }) => {
         let rows = [];
         if (data) {
@@ -173,6 +173,7 @@ const AddCost = ({ id, fieldTicketData }) => {
             onClick={openActions}
             aria-controls="action-menu"
             endIcon={<ExpandMore />}
+            className="new-dropdown-v1"
           >
             {'Actions'}
           </Button>

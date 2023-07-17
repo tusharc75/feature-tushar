@@ -25,7 +25,7 @@ import CostDialog from './CostDialog';
 import ServiceDialog from './ServiceDialog';
 import AddIcon from '@material-ui/icons/Add';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { map, uniq } from 'lodash';
+import { map, startCase, uniq } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
@@ -658,6 +658,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 onClick={openActions}
                 disabled={selectedProducts?.filter((e) => !e.hideSelection)?.length ? false : true}
                 aria-controls="action-menu"
+                className="new-dropdown-v1"
               >
                 {'Actions'}
                 <ExpandMore fontSize="small" />

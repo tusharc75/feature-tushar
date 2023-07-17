@@ -95,6 +95,14 @@ function GridFilter({
           })
           modifiedColumn = modifiedColumn?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e.fieldName))
         }
+        if (resource === sidebarResource.serializedAsset) {
+          const currentOwner: any = modifiedColumn?.find((e) => e.fieldName === 'currentOwner')
+          if (currentOwner) {
+            currentOwner.lookup = true
+            currentOwner.option = [...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.customerAccount)?.option || []),
+            ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.supplierAccount)?.option || [])]
+          }
+        }
         setColoums(modifiedColumn);
       })
       .catch((err) => {
@@ -188,7 +196,7 @@ function GridFilter({
         continue;
       }
 
-      if (['singleLine', 'multiLine', 'email', 'mobileNumber']?.includes(col.type) && formValues[fieldName]) {
+      if (['singleLine', 'multiLine', 'email', 'mobileNumber', 'currency']?.includes(col.type) && formValues[fieldName]) {
         filterModel[fieldName] = {
           filterType: 'text',
           type: 'contains',
@@ -197,33 +205,31 @@ function GridFilter({
       }
       else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
         const options = coloums?.find((item) => item.fieldName == fieldName)?.option || []
-        if (col.type === 'multiSelect' && formValues[fieldName]?.length === 0) {
-          return
+        if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
+          filterModel[fieldName] = {
+            filterType: 'text',
+            operator: 'OR',
+            condition1: {
+              filterType: 'text',
+              type: 'contains',
+              filter: options?.filter((e) => formValues[fieldName]?.includes(e?.optionValue))
+            },
+            condition2: {
+              filterType: 'text',
+              type: 'contains',
+              filter: 'dummy'
+            }
+          };
         }
-        filterModel[fieldName] = {
-          filterType: 'text',
-          operator: 'OR',
-          condition1: {
-            filterType: 'text',
-            type: 'contains',
-            filter: options?.filter((e) => formValues[fieldName]?.includes(e?.optionValue))
-          },
-          condition2: {
-            filterType: 'text',
-            type: 'contains',
-            filter: 'dummy'
-          }
-        };
       }
       else if (['multiSelect', 'dropDown'].includes(col.type) && formValues[fieldName]) {
-        if (col.type === 'multiSelect' && formValues[fieldName]?.length === 0) {
-          return
+        if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
+          filterModel[fieldName] = {
+            filterType: 'text',
+            type: 'contains',
+            filter: formValues[fieldName],
+          };
         }
-        filterModel[fieldName] = {
-          filterType: 'text',
-          type: 'contains',
-          filter: formValues[fieldName],
-        };
       }
       else if (['dateTime', 'date'].includes(col.type)) {
         const from = `from_${fieldName}`;
@@ -378,7 +384,6 @@ function GridFilter({
                               name={`from_${field.fieldName}`}
                               label={`From ${field.fieldLabel}`}
                               value={formValues[`from_${field.fieldName}`] ? formValues[`from_${field.fieldName}`] : null}
-                              maxDate={new Date()}
                               onChange={(date: any) => {
                                 setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
                                 handleSelectFilter(`from_${field.fieldName}`, date);
@@ -400,7 +405,6 @@ function GridFilter({
                               name={`to_${field.fieldName}`}
                               label={`To ${field.fieldLabel}`}
                               value={formValues[`to_${field.fieldName}`] ? formValues[`to_${field.fieldName}`] : null}
-                              maxDate={new Date()}
                               onChange={(date: any) => {
                                 setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
                                 handleSelectFilter(`to_${field.fieldName}`, date);
@@ -410,7 +414,7 @@ function GridFilter({
                                 shrink: true
                               }}
                               minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] :
-                                formValues[`to_${field.fieldName}`] ? formValues[`to_${field.fieldName}`] : new Date()}
+                                formValues[`from_${field.fieldName}`] ? formValues[`from_${field.fieldName}`] : new Date()}
                             />
                           </Grid>
                         </Fragment>

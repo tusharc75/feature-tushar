@@ -6,31 +6,24 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, ASSET_STATUS } from 'src/constants/helpers';
-import Activity from 'src/components/Activity';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORK_ORDER_STATUS, ASSET_STATUS } from 'src/constants/helpers';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import TabPanel from 'src/components/TabPanel';
-import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
 import View from './View';
 import Consumables from './Consumables';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import { ExpandMore } from '@material-ui/icons';
-import { GrStatusInfo } from 'react-icons/gr';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { FaWpforms } from 'react-icons/fa';
 import { RiFlowChart } from 'react-icons/ri';
+import PreviewDownload from 'src/components/PreviewDownload';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -51,11 +44,18 @@ const WorkOrderDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [previewPdf, setPreviewPdf] = useState(false);
   const [statusOptions, setStatusOptions] = useState([]);
   const [completed, setCompleted] = useState(false);
 
   const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
+
+  const columns = [
+    { accessor: 'serviceName', Header: 'Service' },
+    { accessor: 'serviceType', Header: 'Service Type' },
+    { accessor: 'assignedTechnician', Header: 'Assigned Technician' },
+    { accessor: 'status', Header: 'Status' },
+    { accessor: 'serviceStatus', Header: 'Result' }
+  ];
 
   useEffect(() => {
     return history.listen((location) => {
@@ -164,35 +164,6 @@ const WorkOrderDetails = () => {
     }
   };
 
-  const previewWorkOrderPdf = () => {
-    setPreviewPdf(true);
-
-    axiosInstance()
-      .get(`${workOrder.api}/${id}/pdf/service`)
-      .then(({ data }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            const file = new Blob([data], { type: 'application/pdf' });
-            const fileURL = URL.createObjectURL(file);
-            const pdfWindow = window.open();
-            pdfWindow.location.href = fileURL;
-            toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-            setPreviewPdf(false);
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-            setPreviewPdf(false);
-          });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setPreviewPdf(false);
-      });
-  };
-
   const updateJobStatus = (status, assetStatus = null) => {
     const data: any = { status: status };
     if (assetStatus) {
@@ -264,15 +235,12 @@ const WorkOrderDetails = () => {
                       </Button>
                     </Fragment>
                   )}
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  onClick={previewWorkOrderPdf}
-                  className={'btn-outline-v1'}
-                  disabled={previewPdf}
-                >
-                  {isMobile && !isTablet ? <VisibilityIcon color="primary" /> : 'Preview'}
-                </Button>
+                <PreviewDownload
+                  resource={sidebarResource.workOrder}
+                  referenceId={id}
+                  columns={user?.user?.brandPolicy?.servicePrePost ? columns : columns?.filter((e) => e.accessor !== 'serviceType')}
+                  hideDetailButton={true}
+                />
                 {permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && !completed && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -295,54 +263,20 @@ const WorkOrderDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Services
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
-              </div>
-            }
-            {...a11yProps(2)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-              </div>
-            }
-            {...a11yProps(2)}
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab index={0} {...a11yProps(0)}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab index={1} {...a11yProps(1)}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Services
+          </CustomTab>
+          <CustomTab index={2} className={'tabLayout'} {...a11yProps(2)}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
+          </CustomTab>
+          <CustomTab index={3} className={'tabLayout'} {...a11yProps(3)}>
+            <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+          </CustomTab>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {workOrderData && workOrderFields.length ? (

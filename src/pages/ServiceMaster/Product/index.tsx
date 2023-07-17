@@ -18,6 +18,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 function Product({ id }) {
   const renderedFrom = `${camelCase(routes?.serviceMaster.title)}_product`;
@@ -79,7 +80,6 @@ function Product({ id }) {
       }
     ];
     const productResult = await axiosInstance().get('/field?resource=Product');
-
     productResult?.data?.data
       ?.filter((e) =>
         ['productName', 'productNumber', 'productDescription', 'productCategory', 'serializedProduct'].includes(e?.fieldData?.fieldName)
@@ -106,6 +106,28 @@ function Product({ id }) {
                 <p>{row.original?.productDetail[field?.fieldData?.fieldName] ? 'Yes' : 'No' || <NoDataCell />}</p>
               </div>
             )
+          });
+        } else if (field?.fieldData?.fieldName === 'productName') {
+          column.push({
+            accessor: field?.fieldData?.fieldName,
+            Header: field?.fieldData?.fieldLabel,
+            width: 100,
+            Cell: ({ row }) =>
+              row?.original?.productName ? (
+                <div className="d-flex gap-2 align-items-center">
+                  <p className="text-truncate">{row.original.productName}</p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row.original.product}`);
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
           });
         } else {
           column.push({
@@ -229,6 +251,7 @@ function Product({ id }) {
                   aria-controls="action-menu"
                   disabled={selectedRecords.length === 0}
                   endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
                 >
                   Actions
                 </Button>

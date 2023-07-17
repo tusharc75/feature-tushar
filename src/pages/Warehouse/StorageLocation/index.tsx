@@ -199,7 +199,6 @@ const StorageLocation = ({ warehouse }) => {
     setAnchorActionEl(null);
   };
 
-
   return (
     <Fragment>
       <Box p={1} pb={2}>
@@ -226,6 +225,7 @@ const StorageLocation = ({ warehouse }) => {
                 aria-controls="action-menu"
                 disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
               >
                 Actions
               </Button>

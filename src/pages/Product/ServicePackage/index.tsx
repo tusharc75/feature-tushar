@@ -141,7 +141,6 @@ const ServicePackage = ({ renderedFrom, productId }) => {
     return deepFilter;
   };
 
-
   const ActionsRenderer = (params) => (
     <>
       {permissions?.product?.isUpdate &&
@@ -276,6 +275,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
                 aria-controls="action-menu"
                 style={{ marginLeft: '0.6rem' }}
                 endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
               >
                 {isMobile && !isTablet ? '' : 'Actions'}
               </Button>
