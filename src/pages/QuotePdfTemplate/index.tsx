@@ -53,8 +53,8 @@ const QuotePdfTemplate: FC = () => {
   const columns = [
     { field: 'name', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }
+    { field: 'createdBy', headerName: 'Created By', show: true,  filter: false, cellRenderer: 'createdByRenderer' },
+    { field: 'updatedBy', headerName: 'Updated By', show: true, filter: false, cellRenderer: 'updatedByRenderer' }
   ];
 
   if (columnState) {
