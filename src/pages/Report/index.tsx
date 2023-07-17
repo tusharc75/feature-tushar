@@ -4,7 +4,7 @@ import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
 import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
-import { MdDescription, MdChevronLeft, MdFilterList } from 'react-icons/md';
+import { MdDescription, MdChevronLeft } from 'react-icons/md';
 import styles from '../Leads/Header.module.scss';
 import routes from './../../components/Helpers/Routes';
 import axiosInstance from '../../axios/axiosInstance';
@@ -21,14 +21,9 @@ import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from './ReportFilters';
 
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import DialogContent from '@material-ui/core/DialogContent';
-import Dialog from '@material-ui/core/Dialog';
-
 let cancelTokenSource = null;
 
 const Report = () => {
-  const history = useHistory();
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
   const initialRender = React.useRef(true);
@@ -250,6 +245,7 @@ const Report = () => {
       });
   };
 
+
   // Create and return query for filters
   const getFilter = (isExport = false) => {
     let filterQuery = `page=${page}&`;
@@ -287,7 +283,8 @@ const Report = () => {
               field: key,
               term: selectedData[key].value ? 'Yes' : 'No'
             });
-          } else {
+          }
+          else {
             deepFilter.push({
               field: key,
               term: selectedData[key].value?.map((d: any) => d.optionValue)
@@ -430,9 +427,9 @@ const Report = () => {
                             setShowGrid(false);
                             dispatch({ type: 'onlyFilter', filters: {} });
                           }}
-                          startIcon={<MdFilterList />}
+                          startIcon={<MdChevronLeft />}
                         >
-                          Show Filters
+                          Go Back
                         </Button>
                       </Box>
                     )}
@@ -442,123 +439,98 @@ const Report = () => {
                 </Grid>
               </Grid>
             </div>
-            {!showGrid && (
-              <Dialog
-                open={true}
-                maxWidth="md"
-                fullWidth
-                onClose={(e, reason) => {
-                  if (reason !== 'backdropClick') {
-                    history.push(routes.reports.path);
-                    setShowGrid(true);
-                    dispatch({ type: 'onlyFilter', filters: {} });
-                  }
-                }}
-              >
-                <CustomDialogHeader
-                  title={`Set Filters`}
-                  onClose={() => {
-                    history.push(routes.reports.path);
-                    setShowGrid(true);
-                    dispatch({ type: 'onlyFilter', filters: {} });
-                  }}
-                />
-                <DialogContent>
-                  <div className="p-4 min-h-[600px]">
-                    <ReportFilters
-                      resourceColumns={resourceColumns}
-                      betweenDate={betweenDate}
-                      setBetweenDate={setBetweenDate}
-                      resource={sidebarResource[resourceCamelCase]}
-                      setSelectedData={setSelectedData}
+            {!showGrid ? (
+              <ReportFilters
+                resourceColumns={resourceColumns}
+                betweenDate={betweenDate}
+                setBetweenDate={setBetweenDate}
+                resource={sidebarResource[resourceCamelCase]}
+                setSelectedData={setSelectedData}
+                loading={loading}
+                fetchReportData={fetchResourceData}
+                filterOptions={filterOptions}
+                setFilterOptions={setFilterOptions}
+                selectedResources={selectedResources}
+                setSelectedResources={setSelectedResources}
+                resourceOptions={resourceOptions}
+                setResourceOptions={setResourceOptions}
+                formValues={formValues}
+                setFormValues={setFormValues}
+                loadingColumns={loadingColumns}
+                setSelectedReportView={setSelectedReportView}
+                selectedReportView={selectedReportView}
+                reportList={reportList}
+                setReportList={setReportList}
+                statusPeriod={statusPeriod}
+                setStatusPeriod={setStatusPeriod}
+                statusPeriodDate={statusPeriodDate}
+                setStatusPeriodDate={setStatusPeriodDate}
+                statusTimeFrame={statusTimeFrame}
+                setStatusTimeFrame={setStatusTimeFrame}
+                selectedData={selectedData}
+              />
+            ) : (
+              <div>
+                {Object.keys(frameWorkComponent).length > 0 && columns ? (
+                  isSmall ? (
+                    <CustomSwipableList
+                      allowSelection={false}
+                      allowSwipe={false}
+                      permissions={permissions[resourceCamelCase]}
+                      primaryField={columns?.find((d) => d.primaryField)}
+                      onClick={(data) => {
+                        // history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
+                      }}
+                      selectedRecords={[]}
+                      dataRows={dataRows}
+                      dispatch={dispatch}
+                      onEdit={() => { }}
+                      extraParamsToCheckDelete={false}
+                      rowCount={rowCount}
+                      page={page}
                       loading={loading}
-                      fetchReportData={fetchResourceData}
-                      filterOptions={filterOptions}
-                      setFilterOptions={setFilterOptions}
-                      selectedResources={selectedResources}
-                      setSelectedResources={setSelectedResources}
-                      resourceOptions={resourceOptions}
-                      setResourceOptions={setResourceOptions}
-                      formValues={formValues}
-                      setFormValues={setFormValues}
-                      loadingColumns={loadingColumns}
+                      chips={columns
+                        .filter((col) => col.hasOwnProperty('cellRendererParams'))
+                        .map((col) => ({
+                          field: col.field,
+                          label: col.headerName
+                        }))}
+                      additionalDetails={[]}
+                      owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                      onCreate={false}
+                      showClone={false}
+                      onDelete={(data) => { }}
+                      onClone={(data) => { }}
+                      renderedFrom={routes.transferAsset?.title}
+                    />
+                  ) : (
+                    <CustomAgGrid
                       setSelectedReportView={setSelectedReportView}
                       selectedReportView={selectedReportView}
-                      reportList={reportList}
-                      setReportList={setReportList}
-                      statusPeriod={statusPeriod}
-                      setStatusPeriod={setStatusPeriod}
-                      statusPeriodDate={statusPeriodDate}
-                      setStatusPeriodDate={setStatusPeriodDate}
-                      statusTimeFrame={statusTimeFrame}
-                      setStatusTimeFrame={setStatusTimeFrame}
-                      selectedData={selectedData}
+                      reportSave={true}
+                      columns={columns}
+                      dataRows={dataRows}
+                      frameworkComponents={frameWorkComponent}
+                      setGridApi={setGridApi}
+                      dispatch={dispatch}
+                      rowCount={rowCount}
+                      limit={limit}
+                      pageSizes={pageSizes}
+                      page={page}
+                      actionWidth={100}
+                      loading={loading}
+                      renderedFrom={renderedFrom}
+                      allowSelection={false}
+                      allowAction={false}
+                      refreshGrid={fetchResourceData}
+                      showOnlyShowFilteredRecordSwitch={false}
                     />
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
-
-            <div>
-              {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                isSmall ? (
-                  <CustomSwipableList
-                    allowSelection={false}
-                    allowSwipe={false}
-                    permissions={permissions[resourceCamelCase]}
-                    primaryField={columns?.find((d) => d.primaryField)}
-                    onClick={(data) => {
-                      // history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
-                    }}
-                    selectedRecords={[]}
-                    dataRows={dataRows}
-                    dispatch={dispatch}
-                    onEdit={() => {}}
-                    extraParamsToCheckDelete={false}
-                    rowCount={rowCount}
-                    page={page}
-                    loading={loading}
-                    chips={columns
-                      .filter((col) => col.hasOwnProperty('cellRendererParams'))
-                      .map((col) => ({
-                        field: col.field,
-                        label: col.headerName
-                      }))}
-                    additionalDetails={[]}
-                    owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                    onCreate={false}
-                    showClone={false}
-                    onDelete={(data) => {}}
-                    onClone={(data) => {}}
-                    renderedFrom={routes.transferAsset?.title}
-                  />
+                  )
                 ) : (
-                  <CustomAgGrid
-                    setSelectedReportView={setSelectedReportView}
-                    selectedReportView={selectedReportView}
-                    reportSave={true}
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={100}
-                    loading={loading}
-                    renderedFrom={renderedFrom}
-                    allowSelection={false}
-                    allowAction={false}
-                    refreshGrid={fetchResourceData}
-                    showOnlyShowFilteredRecordSwitch={false}
-                  />
-                )
-              ) : (
-                <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
-              )}
-            </div>
+                  <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
+                )}
+              </div>
+            )}
           </>
         </CustomContainer>
       </div>

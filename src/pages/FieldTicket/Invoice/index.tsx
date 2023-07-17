@@ -11,7 +11,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CreateInvoiceDialog from "./CreateInvoiceDialog";
 import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from "src/constants/helpers";
 import { useData } from 'src/StateProvider/Provider';
-import ViewBillingDialog from "./ViewBillingDialog";
 
 
 
@@ -26,7 +25,6 @@ const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
     const [frameworkComponent, setFrameworkComponent] = useState({});
     const [createInvoiceDialog, setCreateInvoiceDialog] = useState(false);
     const [invoiceData, setInvoiceData] = useState(null);
-    const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
 
 
     const {
@@ -88,7 +86,7 @@ const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
         <span
             className="link"
             onClick={() => {
-                setViewBillDialog({ open: true, invoiceData: params.data });
+                // setViewBillDialog({ open: true, invoiceData: params.data });
             }}
         >
             <CustomRenderCell value={params?.value} />
@@ -220,20 +218,6 @@ const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
                     }}
                     onClose={() => {
                         setCreateInvoiceDialog(false);
-                    }}
-                />
-            )}
-            {viewBillDialog.open && (
-                <ViewBillingDialog
-                    fieldTicketData={fieldTicketData}
-                    invoiceData={viewBillDialog?.invoiceData}
-                    estimateStartDate={null}
-                    onClose={() => {
-                        setViewBillDialog({ open: false, invoiceData: null });
-                    }}
-                    onSuccess={() => {
-                        setViewBillDialog({ open: false, invoiceData: null });
-                        fetchInvoice();
                     }}
                 />
             )}

@@ -147,13 +147,13 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, value: any, reason) => {
-                      if (setFieldValue) {
-                        setFieldValue(
-                          name,
-                          value.map((val) => val.optionValue)
-                        );
+                        if (setFieldValue) {
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
+                        }
                       }
-                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -185,26 +185,26 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, val) => {
-                      if (setFieldValue) {
-                        handleChange(name, val && val.optionValue ? val.optionValue : '');
-                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                        fieldChange?.forEach((val: any) => {
-                          setFieldValue(val.fieldName, val.value);
-                        });
-                        const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                        if (filterFields?.length) {
-                          filterFields?.forEach((ele: any) => {
-                            if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
-                              if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
-                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
-                              } else {
-                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
-                              }
-                            }
+                        if (setFieldValue) {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
                           });
+                          const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                          if (filterFields?.length) {
+                            filterFields?.forEach((ele: any) => {
+                              if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
+                                if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
+                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+                                } else {
+                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
+                                }
+                              }
+                            });
+                          }
                         }
                       }
-                    }
                 }
                 selectOnFocus
                 clearOnBlur
@@ -761,12 +761,7 @@ function Dropdown({
                           addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
                           setNewAddressOptionList([...newAddressOptionList, tempNewOption]);
-                          if (type === 'multiSelect') {
-                            handleChange(name, tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []);
-                          } else {
-                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
-                          }
-
+                          handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                         }
                       }}
                     />
