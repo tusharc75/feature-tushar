@@ -10,7 +10,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { repairOrder, REPAIR_ORDER_TYPE, workOrder, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { Delete, ExpandMore } from '@material-ui/icons';
+import { Delete, ExpandMore, Check } from '@material-ui/icons';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
@@ -45,8 +45,11 @@ const WorkOrder = ({
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
+  const [autoCompleteData, setAutoCompleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
+  const [isCompleting, setCompleting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [completeConfirmBox, setCompleteConfirmBox] = useState(false);
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false });
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
@@ -163,13 +166,11 @@ const WorkOrder = ({
         Cell: ({ row }) =>
           row.original['workOrder'] ? (
             <div className="d-flex gap-2 align-items-center">
-              <p className="text-truncate">
-                {row.original['workOrderNumber']}
-              </p>
+              <p className="text-truncate">{row.original['workOrderNumber']}</p>
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`)
+                  window.open(`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`);
                 }}
               >
                 <OpenInNewIcon fontSize="small" color={'primary'} />
@@ -183,8 +184,8 @@ const WorkOrder = ({
         accessor: 'productName',
         Header: 'Product',
         width: 200,
-        Cell: ({ row }) => (
-          row.original.productName ?
+        Cell: ({ row }) =>
+          row.original.productName ? (
             <div className="d-flex gap-2 align-items-center">
               <p className="text-truncate" title={row.original?.productName}>
                 {row.original.productName}
@@ -192,14 +193,13 @@ const WorkOrder = ({
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes.productDetail.path}/${row.original?.productId}`)
+                  window.open(`${routes.productDetail.path}/${row.original?.productId}`);
                 }}
-              >
-
-              </IconButton>
+              ></IconButton>
             </div>
-            : <NoDataCell />
-        )
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'description',
@@ -256,50 +256,67 @@ const WorkOrder = ({
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => {
-        return row?.original?.type === 'service' || row?.original?.type === 'package' ? (
+        return (
           <>
+            {row?.original?.type === 'service' || row?.original?.type === 'package' ? (
+              <>
+                <IconButton
+                  disabled={
+                    row?.original?.type === 'package' && row?.original?.subRows?.length === 0
+                      ? false
+                      : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
+                      ? false
+                      : true
+                  }
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setDeleteData([row.original]);
+                    setShowConfirmBox(true);
+                  }}
+                >
+                  <Delete
+                    fontSize="small"
+                    color={
+                      row?.original?.type === 'package' && row?.original?.subRows?.length === 0
+                        ? 'error'
+                        : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
+                        ? 'error'
+                        : 'disabled'
+                    }
+                  />
+                </IconButton>
+              </>
+            ) : row?.original?.type === 'serializedAsset' ? (
+              <>
+                <IconButton
+                  disabled={row.original?.subRows?.length === 0 ? false : true}
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setDeleteData([row.original]);
+                    setShowConfirmBox(true);
+                  }}
+                >
+                  <Delete fontSize="small" color={row.original?.subRows?.length === 0 ? 'error' : 'disabled'} />
+                </IconButton>
+              </>
+            ) : null}
             <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                setAutoCompleteData([row.original]);
+                setCompleteConfirmBox(true);
+              }}
               disabled={
-                row?.original?.type === 'package' && row?.original?.subRows?.length === 0
-                  ? false
-                  : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
-                    ? false
-                    : true
+                row?.original?.serviceStatus === "Completed"
               }
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                setDeleteData([row.original]);
-                setShowConfirmBox(true);
-              }}
             >
-              <Delete
-                fontSize="small"
-                color={
-                  row?.original?.type === 'package' && row?.original?.subRows?.length === 0
-                    ? 'error'
-                    : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
-                      ? 'error'
-                      : 'disabled'
-                }
-              />
+              <Check fontSize="small" />
             </IconButton>
           </>
-        ) : row?.original?.type === 'serializedAsset' ? (
-          <>
-            <IconButton
-              disabled={row.original?.subRows?.length === 0 ? false : true}
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                setDeleteData([row.original]);
-                setShowConfirmBox(true);
-              }}
-            >
-              <Delete fontSize="small" color={row.original?.subRows?.length === 0 ? 'error' : 'disabled'} />
-            </IconButton>
-          </>
-        ) : null;
+        );
       }
     });
     setColumns(coloum);
@@ -368,6 +385,35 @@ const WorkOrder = ({
     }
   };
 
+  const handleAutoComplete = () => {
+    let ids = [];
+    if (autoCompleteData && autoCompleteData.length > 0) {
+      autoCompleteData.forEach((d) => {
+        ids.push(d?.workOrder?._id);
+      });
+    }
+    setCompleting(true);
+    axiosInstance()
+        .put(`${repairOrder.api}/${repairOrderData._id}/work-order/auto-complete`, {
+          workOrders: ids
+        })
+        .then(({data}) => {
+          setCompleting(false);
+          setCompleteConfirmBox(false);
+          fetchData();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
+          });
+        })
+        .catch((err) => {
+          setCompleteConfirmBox(false);
+          setCompleting(false);
+          toastConfig.setToastConfig(err);
+        });
+  };
+
   const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
@@ -380,35 +426,37 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'serializedAsset'
-            ? parent?.serializedAsset?.assetNumber
-            : parent?.packageDetail?.packageName
-        }`;
+          ? parent?.serializedAsset?.assetNumber
+          : parent?.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
-                ? parent?.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === 'service'
-        ? parent.serviceDetail?.status
-        : parent.type === 'product'
+      parent.status = `${
+        parent.type === 'service'
+          ? parent.serviceDetail?.status
+          : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-        }`;
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
@@ -452,18 +500,18 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow?.serializedAsset?.assetNumber
-              : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow?.serializedAsset?.assetNumber
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -651,22 +699,31 @@ const WorkOrder = ({
                 disabled={
                   selectedProducts?.filter((e) => e.type === 'service').length
                     ? selectedServices?.filter(
-                      (d) =>
-                        d.type === 'service' &&
-                        d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
-                        d.status === WORKORDER_SERVICE_STATUS.pending
-                    )?.length === selectedServices?.length
+                        (d) =>
+                          d.type === 'service' &&
+                          d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
+                          d.status === WORKORDER_SERVICE_STATUS.pending
+                      )?.length === selectedServices?.length
                       ? false
                       : true
                     : selectedAssets?.length
-                      ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
-                        selectedAssets?.length
-                        ? false
-                        : true
+                    ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
+                      selectedAssets?.length
+                      ? false
                       : true
+                    : true
                 }
               >
                 Delete
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setAutoCompleteData(selectedAssets);
+                  setCompleteConfirmBox(true);
+                  closeActions();
+                }}
+              >
+                AutoComplete
               </MenuItem>
             </Menu>
           </Box>
@@ -740,6 +797,17 @@ const WorkOrder = ({
                 setShowConfirmBox(false);
               }}
               onOk={handleDelete}
+            />
+          )}
+          {completeConfirmBox && (
+            <ConfirmationDialog
+              open={completeConfirmBox}
+              okBtnLoading={isCompleting}
+              message={`Are you sure you want to Autocomplete this item(s)`}
+              onClose={() => {
+                setCompleteConfirmBox(false);
+              }}
+              onOk={handleAutoComplete}
             />
           )}
           {arrangeView && (
