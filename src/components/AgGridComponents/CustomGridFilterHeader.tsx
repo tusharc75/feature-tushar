@@ -52,8 +52,6 @@ const CustomGridFilterHeader = (props) => {
     currentGridApi.onFilterChanged();
     let formValues = { ...currentFomValue };
     delete formValues[name];
-    delete formValues[`from_${name}`];
-    delete formValues[`to_${name}`];
     setCurrentFomValue(formValues);
     setChipData((prev) => prev.filter((item) => item.name !== name));
   };
@@ -166,8 +164,8 @@ const DisplyaFilters = (props) => {
             element.filter.from && element.filter.to
               ? `${element.filter.from ? element.filter.from : null} - ${element.filter.to ? element.filter.to : null}`
               : element.filter.from || element.filter.to
-                ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
-                : null;
+              ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
+              : null;
           const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: dateValue, name: keys[i] };
           filterData.push(data);
         } else if (element.operator && element.condition1) {
