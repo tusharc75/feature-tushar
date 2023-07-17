@@ -659,7 +659,11 @@ const Steps = ({
           {serviceDetails?.steps?.length > 0 && referencType !== 'workOrderTechnician' && (
             <Box>
               <Grid container justifyContent="flex-end" alignItems="flex-end">
-                <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                <Button variant="outlined" color="primary" size="small"
+                  disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                    selectedService?.status
+                  )}
+                  onClick={() => setArrangeView(true)}>
                   <GrDrag fontSize="small" color="primary" className="mr-1" />
                   Arrange
                 </Button>
@@ -708,10 +712,10 @@ const Steps = ({
                           label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
                         />
                       </Box>
-                      <Box className="max-w-full">
-                        <p className={`${classes.heading}`} style={{ fontWeight: '600' }}>
+                      <Box>
+                        <Typography className={classes.heading} style={{ fontWeight: '600' }}>
                           {step.stepName}
-                        </p>
+                        </Typography>
                       </Box>
                     </Box>
                     <Box style={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset', flexWrap: 'wrap' }}>
@@ -757,8 +761,8 @@ const Steps = ({
                                 {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
                                   ? 'Resume'
                                   : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                                  ? 'Pause'
-                                  : 'Restart'}
+                                    ? 'Pause'
+                                    : 'Restart'}
                               </Button>
                             ))}
                           {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
@@ -827,9 +831,9 @@ const Steps = ({
                             )
                           ) : null}
                           {stepData?.status &&
-                          ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                          ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                          (isMeTechnician || !isAnyTechnician) ? (
+                            ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                            ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                            (isMeTechnician || !isAnyTechnician) ? (
                             [
                               WORKORDER_SERVICE_STEP_STATUS.passed,
                               WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -897,7 +901,7 @@ const Steps = ({
                     <IconButton
                       size="small"
                       color="primary"
-                      aria-label="menu"
+                      aria-label="delete"
                       disabled={!allowedToEdit}
                       onClick={(event) => {
                         handleOpenMenu(event);
@@ -1066,20 +1070,18 @@ const Steps = ({
             open={true}
             message={
               addServiceConfirmation.type === 'skipServices'
-                ? `As per the logic applied on this step, service${
-                    addServiceConfirmation?.services?.length > 1 ? 's' : ''
-                  }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been skipped. Do you want to Skip ? `
+                ? `As per the logic applied on this step, service${addServiceConfirmation?.services?.length > 1 ? 's' : ''
+                }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been skipped. Do you want to Skip ? `
                 : addServiceConfirmation.type === 'returnToStepOnFail'
-                ? `As per the logic applied on this step, we need to return to step ${
-                    addServiceConfirmation.step?.stepName || ''
+                  ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
                   }. Do you want to continue ?`
-                : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                ? ` Step fail requires Quote Revision. Do you confirm on this?`
-                : addServiceConfirmation.type === 'jumpStep'
-                ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                    ?.map((e) => e.serviceName)
-                    ?.toString()} has been added. Do you want to Add ? `
+                  : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
+                    ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                    : addServiceConfirmation.type === 'jumpStep'
+                      ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                      : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                        ?.map((e) => e.serviceName)
+                        ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
@@ -1123,7 +1125,7 @@ const Steps = ({
             handleClose={() => {
               setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
             }}
-            handleSuccess={() => {}}
+            handleSuccess={() => { }}
           />
         )}
         {consumablesDialog.open && (
@@ -1232,13 +1234,13 @@ export const RenderPassFailChip = ({ status, className = '', ...others }) => {
         background: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
           ? '#e1fce3'
           : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-          ? '#D3D3D3'
-          : '#FAD9D4',
+            ? '#D3D3D3'
+            : '#FAD9D4',
         color: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
           ? '#048e0a'
           : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-          ? 'inherit'
-          : '#D13925'
+            ? 'inherit'
+            : '#D13925'
       }}
     />
   );
