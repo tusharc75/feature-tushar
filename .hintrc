@@ -31,7 +31,6 @@
       {
         "image-alt": "off"
       }
-    ],
-    "typescript-config/strict": "off"
+    ]
   }
 }

@@ -4,7 +4,7 @@ import { Grid, useTheme, useMediaQuery, Button, Box, Tooltip, IconButton } from 
 import { camelCase, capitalize, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
-import { MdDescription, MdFilterList } from 'react-icons/md';
+import { MdDescription, MdChevronLeft } from 'react-icons/md';
 import styles from 'src/pages/Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -34,10 +34,6 @@ import AverageCostHistory from '../AverageCostHistory';
 import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { useAppTheme } from 'src/constants/AppConfig';
-
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import DialogContent from '@material-ui/core/DialogContent';
-import Dialog from '@material-ui/core/Dialog';
 
 let cancelTokenSource = null;
 
@@ -941,9 +937,9 @@ const Report = () => {
                             setShowGrid(false);
                             dispatch({ type: 'onlyFilter', filters: {} });
                           }}
-                          startIcon={<MdFilterList />}
+                          startIcon={<MdChevronLeft />}
                         >
-                          Show Filters
+                          Go Back
                         </Button>
                       </Box>
                     )}
@@ -953,90 +949,65 @@ const Report = () => {
                 </Grid>
               </Grid>
             </div>
-            {!showGrid && (
-              <Dialog
-                open={true}
-                maxWidth="md"
-                fullWidth
-                onClose={(e, reason) => {
-                  if (reason !== 'backdropClick') {
-                    history.push(routes.reports.path);
-                    setShowGrid(true);
-                    dispatch({ type: 'onlyFilter', filters: {} });
-                  }
-                }}
-              >
-                <CustomDialogHeader
-                  title={`Set Filters`}
-                  onClose={() => {
-                    history.push(routes.reports.path);
-                    setShowGrid(true);
-                    dispatch({ type: 'onlyFilter', filters: {} });
-                  }}
-                />
-                <div className="p-4 min-h-[600px]">
-                  <DialogContent>
-                    <ReportFilters
-                      resourceColumns={resourceColumns}
-                      betweenDate={betweenDate}
-                      setBetweenDate={setBetweenDate}
-                      resource={'Purchase Order Type'}
-                      setSelectedData={setSelectedData}
-                      loading={loading}
-                      fetchReportData={fetchResourceData}
-                      filterOptions={filterOptions}
-                      setFilterOptions={setFilterOptions}
-                      selectedResources={selectedResources}
-                      setSelectedResources={setSelectedResources}
-                      resourceOptions={resourceOptions}
-                      setResourceOptions={setResourceOptions}
-                      formValues={formValues}
-                      setFormValues={setFormValues}
-                      loadingColumns={loadingColumns}
-                      setSelectedReportView={setSelectedReportView}
-                      selectedReportView={selectedReportView}
-                      reportList={reportList}
-                      setReportList={setReportList}
-                      statusPeriod={statusPeriod}
-                      setStatusPeriod={setStatusPeriod}
-                      statusPeriodDate={statusPeriodDate}
-                      setStatusPeriodDate={setStatusPeriodDate}
-                      statusTimeFrame={statusTimeFrame}
-                      setStatusTimeFrame={setStatusTimeFrame}
-                      selectedData={selectedData}
-                    />
-                  </DialogContent>
-                </div>
-              </Dialog>
+            {!showGrid ? (
+              <ReportFilters
+                resourceColumns={resourceColumns}
+                betweenDate={betweenDate}
+                setBetweenDate={setBetweenDate}
+                resource={'Purchase Order Type'}
+                setSelectedData={setSelectedData}
+                loading={loading}
+                fetchReportData={fetchResourceData}
+                filterOptions={filterOptions}
+                setFilterOptions={setFilterOptions}
+                selectedResources={selectedResources}
+                setSelectedResources={setSelectedResources}
+                resourceOptions={resourceOptions}
+                setResourceOptions={setResourceOptions}
+                formValues={formValues}
+                setFormValues={setFormValues}
+                loadingColumns={loadingColumns}
+                setSelectedReportView={setSelectedReportView}
+                selectedReportView={selectedReportView}
+                reportList={reportList}
+                setReportList={setReportList}
+                statusPeriod={statusPeriod}
+                setStatusPeriod={setStatusPeriod}
+                statusPeriodDate={statusPeriodDate}
+                setStatusPeriodDate={setStatusPeriodDate}
+                statusTimeFrame={statusTimeFrame}
+                setStatusTimeFrame={setStatusTimeFrame}
+                selectedData={selectedData}
+              />
+            ) : (
+              <div>
+                {Object.keys(frameWorkComponent).length > 0 && columns ? (
+                  <CustomAgGrid
+                    setSelectedReportView={setSelectedReportView}
+                    selectedReportView={selectedReportView}
+                    reportSave={true}
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameWorkComponent}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    actionWidth={100}
+                    loading={loading}
+                    renderedFrom={renderedFrom}
+                    allowSelection={false}
+                    allowAction={resourceCamelCase === 'inventoryEvaluation'}
+                    refreshGrid={fetchResourceData}
+                    showOnlyShowFilteredRecordSwitch={false}
+                  />
+                ) : (
+                  <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
+                )}
+              </div>
             )}
-
-            <div>
-              {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                <CustomAgGrid
-                  setSelectedReportView={setSelectedReportView}
-                  selectedReportView={selectedReportView}
-                  reportSave={true}
-                  columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameWorkComponent}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  actionWidth={100}
-                  loading={loading}
-                  renderedFrom={renderedFrom}
-                  allowSelection={false}
-                  allowAction={resourceCamelCase === 'inventoryEvaluation'}
-                  refreshGrid={fetchResourceData}
-                  showOnlyShowFilteredRecordSwitch={false}
-                />
-              ) : (
-                <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
-              )}
-            </div>
           </>
         </CustomContainer>
       </div>

@@ -16,6 +16,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import Product from './Product';
@@ -30,7 +31,6 @@ import PurchaseOrderViews from './RoadMapViews';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import Invoice from './Invoice';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const PurchaseOrderDetailsPage = () => {
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
@@ -166,8 +166,8 @@ const PurchaseOrderDetailsPage = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const updateStatus = (status) => {
@@ -225,7 +225,11 @@ const PurchaseOrderDetailsPage = () => {
               !purchaseOrderData?.deleted &&
               [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
                 <Fragment>
-                  <Button variant={'contained'} className={'btn-outline-v1'} onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}>
+                  <Button
+                    variant={'contained'}
+                    className={'btn-outline-v1'}
+                    onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}
+                  >
                     Close
                   </Button>
                   {/* <Button
@@ -303,26 +307,60 @@ const PurchaseOrderDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} {...a11yProps(0)}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
-          </CustomTab>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            {...a11yProps(0)}
+          />
           {purchaseOrderData?.deleted ? null : (
-            <CustomTab index={1} {...a11yProps(1)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-            </CustomTab>
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                </div>
+              }
+              {...a11yProps(1)}
+            />
           )}
           {purchaseOrderData?.deleted ? null : (
-            <CustomTab index={3} {...a11yProps(3)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Invoice
-            </CustomTab>
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Invoice
+                </div>
+              }
+              {...a11yProps(3)}
+            />
           )}
           {purchaseOrderData?.deleted ? null : (
-            <CustomTab className={'tabLayout'} index={2} {...a11yProps(2)}>
-              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-            </CustomTab>
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                </div>
+              }
+              {...a11yProps(2)}
+            />
           )}
-        </CustomTabs>
+        </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loadingPurchaseOrder || !purchaseOrderFields.length ? (
