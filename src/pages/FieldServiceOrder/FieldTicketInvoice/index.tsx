@@ -13,20 +13,10 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import ViewBillingDialog from 'src/pages/Invoice/ViewInvoice/ViewBillingDialog';
+import ViewInvoice from 'src/pages/Invoice/ViewInvoice';
 
 
-const Invoice = ({
-  fieldServiceOrderData,
-  currencySymbol,
-  setNextStep,
-  renderedFrom,
-  stepFullScreen,
-  allowedToEdit,
-  fromInvoice = false,
-  statusOptions = [],
-  updateStatus = null
-}) => {
+const FieldTicketInvoice = ({fieldServiceOrderData, renderedFrom}) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -193,9 +183,6 @@ const Invoice = ({
           finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
           return finalObject;
         });
-        // if (data?.length) {
-        //   setInvoiceData(data);
-        // }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -338,7 +325,7 @@ const Invoice = ({
         )}
       </Grid>
       {viewBillDialog.open && (
-        <ViewBillingDialog
+        <ViewInvoice
           pageData={null}
           invoiceData={viewBillDialog?.invoiceData}
           estimateStartDate={null}
@@ -377,4 +364,5 @@ const Invoice = ({
     </>
   );
 };
-export default Invoice;
+
+export default FieldTicketInvoice;

@@ -390,9 +390,9 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                                 </Grid>
                             </Box>
                             {columns && rowsData ? (
-                                <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
+                                <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} p={1}>
                                     <CustomReactTable
-                                        height={'calc(100vh - 285px)'}
+                                        height={'calc(100vh - 200px)'}
                                         columns={columns}
                                         data={rowsData}
                                         setWholeRowsCellColor={(rowData) => {
@@ -405,7 +405,6 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                                         uniqueKey="_id"
                                         renderedFrom="field_ticket_create_invoice"
                                         isClientSideGrid={true}
-                                    // hideExpander={true}
                                     />
                                 </Box>
                             ) : (

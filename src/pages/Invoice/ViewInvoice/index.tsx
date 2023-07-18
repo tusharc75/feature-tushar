@@ -23,7 +23,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
 
-const ViewBillingDialog = ({ pageData = null, invoiceData, estimateStartDate, onClose, onSuccess }) => {
+const ViewInvoice = ({ pageData = null, invoiceData, estimateStartDate, onClose, onSuccess }) => {
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -252,26 +252,6 @@ const ViewBillingDialog = ({ pageData = null, invoiceData, estimateStartDate, on
     setAnchorEl(null);
   };
 
-  const handleSaveData = async (rows: any) => {
-    const data = {
-      invoiceId: invoiceData?._id,
-      materialId: rows[0]?.materialId,
-      qty: rows[0]?.qty
-    };
-    setIsLoadingUpdate(true);
-    axiosInstance()
-      .put(`${rentalManagement.api}/${pageData._id}/progressive-billing/update-qty`, data)
-      .then((res) => {
-        setIsLoadingUpdate(false);
-        setIsProductEdit({ open: false, rowData: null });
-        fetchData();
-        onSuccess();
-      })
-      .catch((error) => {
-        setIsLoadingUpdate(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
 
   const handleDeleteData = async (rows) => {
     const data = {
@@ -305,6 +285,7 @@ const ViewBillingDialog = ({ pageData = null, invoiceData, estimateStartDate, on
                 />
               }
               <Box display="flex" alignItems="center">
+                {pageData && 
                 <Button
                   variant="outlined"
                   color="default"
@@ -316,7 +297,7 @@ const ViewBillingDialog = ({ pageData = null, invoiceData, estimateStartDate, on
                   className="new-dropdown-v1"
                 >
                   Actions
-                </Button>
+                </Button>}
                 <Menu
                   id="action-menu"
                   anchorEl={anchorEl}
@@ -355,7 +336,7 @@ const ViewBillingDialog = ({ pageData = null, invoiceData, estimateStartDate, on
             {columns && rowsData ? (
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
                 <CustomReactTable
-                  height={'calc(100vh - 285px)'}
+                  height={'calc(100vh - 200px)'}
                   columns={columns}
                   data={rowsData}
                   onSelect={setSelectedProducts}
@@ -363,7 +344,7 @@ const ViewBillingDialog = ({ pageData = null, invoiceData, estimateStartDate, on
                   uniqueKey="_id"
                   hideSelection={!pageData ? true : false}
                   hideAction={!pageData ? true : false}
-                  renderedFrom="rental_management_view_billing"
+                  renderedFrom="view_billing"
                   isClientSideGrid={true}
                 />
               </Box>
@@ -406,4 +387,4 @@ const ViewBillingDialog = ({ pageData = null, invoiceData, estimateStartDate, on
   );
 };
 
-export default ViewBillingDialog;
+export default ViewInvoice;
