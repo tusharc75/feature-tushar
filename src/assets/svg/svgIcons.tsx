@@ -362,7 +362,7 @@ export const FailIcon: React.FC<svgInterfaceWithSize> = ({ width = 24, height = 
   );
 };
 
-export const MoonIcon: React.FC<svgInterfaceWithSize> = ({ width = 18, height = 19, size = 19, ...other }) => {
+export const MoonIcon: React.FC<svgInterfaceWithSize> = ({ width = 20, height = 20, size = 20, ...other }) => {
   return (
     <svg {...other} xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 18 19">
       <path
@@ -375,7 +375,7 @@ export const MoonIcon: React.FC<svgInterfaceWithSize> = ({ width = 18, height = 
   );
 };
 
-export const SunIcon: React.FC<svgInterfaceWithSize> = ({ width = 20, height = 20, size = 20, ...other }) => {
+export const SunIcon: React.FC<svgInterfaceWithSize> = ({ width = 24, height = 24, size = 24, ...other }) => {
   return (
     <svg {...other} xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 19 20">
       <path

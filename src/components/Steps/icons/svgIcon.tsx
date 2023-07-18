@@ -476,3 +476,15 @@ export const Process: React.FC<svgInterface> = ({ colors, ...others }) => {
     </svg>
   );
 };
+
+export const AssetIcon: React.FC<svgInterface> = ({ colors, ...others }) => {
+  const hash = getHash();
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 20 20">
+      <path
+        fill="#fff"
+        d="M12.885 3.912h-.817a2.721 2.721 0 00-5.25 0h-.815a3.014 3.014 0 00-3.01 3.011v8.89a3.014 3.014 0 003.01 3.01h6.882a3.014 3.014 0 003.011-3.01v-8.89a3.014 3.014 0 00-3.01-3.011zm-3.44-.717a.717.717 0 110 1.434.717.717 0 010-1.434zm3.231 7.226l-3.481 3.482a.717.717 0 01-1.012 0l-1.97-1.962a.717.717 0 111.015-1.012l1.46 1.46 2.973-2.983a.718.718 0 011.015 1.015z"
+      ></path>
+    </svg>
+  );
+};

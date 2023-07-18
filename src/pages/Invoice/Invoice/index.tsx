@@ -69,30 +69,30 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
           Header: 'Detail',
           minWidth: 300,
           width: 300,
-          Cell: ({ row }) => 
-          row?.original?.type ? (
-            <div className="d-flex gap-2 align-items-center">
-              <p className="text-truncate">{row.original.detail}</p>
-              <IconButton
-                size='small'
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'serializedAsset') {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
+          Cell: ({ row }) =>
+            row?.original?.type ? (
+              <div className="d-flex gap-2 align-items-center">
+                <p className="text-truncate">{row.original.detail}</p>
+                <IconButton
+                  size='small'
+                  onClick={() => {
+                    if (row.original.type === 'service') {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'product') {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'serializedAsset') {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
         }
       ];
       coloum = [...coloum, ...newColumns];
@@ -108,7 +108,7 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
     data = response?.data?.data;
 
-    const rows = data.material.filter((e) => e.parentId === null);
+    const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =

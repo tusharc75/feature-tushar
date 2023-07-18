@@ -1,22 +1,22 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, fieldServiceOrder } from 'src/constants/helpers';
 import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-// import CreateBillingDialog from './CreateBillingDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-// import ViewBillingDialog from './ViewBillingDialog';
-import { camelCase } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Delete, ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import ViewBillingDialog from 'src/pages/Invoice/ViewInvoice/ViewBillingDialog';
 
-const ProgressiveBilling = ({
+
+const Invoice = ({
   fieldServiceOrderData,
   currencySymbol,
   setNextStep,
@@ -42,6 +42,12 @@ const ProgressiveBilling = ({
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
+  const [selectedInvoices, setSelectedInvoices] = useState(null);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [isConsolidating, setConsolidating] = useState(false);
+
 
   useEffect(() => {
     fetchGridColumns();
@@ -54,11 +60,26 @@ const ProgressiveBilling = ({
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.invoiceDetail.path);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
+      if (o?.fieldData?.fieldName === 'invoiceNumber') {
+        columns = [
+          ...columns,
+          {
+            ...o?.fieldData,
+            pivotIndex: 0,
+            field: o?.fieldData?.fieldName,
+            headerName: o?.fieldData?.fieldLabel,
+            show: true,
+            disabled: true,
+            cellRenderer: 'invoiceMaterialRenderer'
+          }
+        ];
+      } else {
+        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.invoiceDetail.path);
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData];
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName);
+          }
         }
       }
 
@@ -67,7 +88,7 @@ const ProgressiveBilling = ({
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
-      // invoiceMaterialRenderer: InvoiceMaterialRenderer,
+      invoiceMaterialRenderer: InvoiceMaterialRenderer,
       actionsRenderer: ActionsRenderer
     };
     setFrameworkComponent({ ...tempFrameworkComponent });
@@ -77,6 +98,29 @@ const ProgressiveBilling = ({
     });
     setColumns([...columns]);
   };
+
+  const InvoiceMaterialRenderer = (params) => (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <span
+        className="link"
+        onClick={() => {
+          setViewBillDialog({ open: true, invoiceData: params.data });
+        }}
+      >
+        <CustomRenderCell value={params?.value} />
+      </span>
+      <Box ml={1}>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.invoiceDetail.path}/${params?.data?._id}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Box>
+    </div>
+  );
 
   const ActionsRenderer = (params) => (
     <>
@@ -90,17 +134,23 @@ const ProgressiveBilling = ({
               setIsConformDialogVisible(true);
             }}
           >
-            <DeleteIcon color="error" />
+            <Delete color="error" />
           </IconButton>
         </HtmlTooltip>
       )}
     </>
   );
 
+  const openActions = (event) => {
+    setAnchorActionEl(event.currentTarget);
+  };
+  const closeActions = () => {
+    setAnchorActionEl(null);
+  };
+
   useEffect(() => {
     fetchBilling();
   }, [page, limit, filters, sorting]);
-
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&fieldServiceOrder=${fieldServiceOrderData?._id}`;
@@ -189,9 +239,77 @@ const ProgressiveBilling = ({
     }
   };
 
+  const handleConsolidate = async () => {
+    setConsolidating(true);
+    let ids = [];
+    selectedInvoices.forEach((e) => {
+      ids.push(e._id);
+    });
+    if (ids.length > 0) {
+      axiosInstance()
+        .put(`${fieldServiceOrder.api}/${fieldServiceOrderData?._id}/invoice/consolidate`, {
+          invoices: ids
+        })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setShowConfirmBox(false);
+          setConsolidating(false);
+          fetchBilling();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setShowConfirmBox(false);
+          setConsolidating(false);
+        });
+    } else {
+      setShowConfirmBox(false);
+      setConsolidating(false);
+      fetchBilling();
+    }
+  };
+
   return (
     <>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
+        <Box display="flex" alignItems="center" justifyContent={'flex-end'} mr={1}>
+          <Button
+            variant="outlined"
+            color="default"
+            size="small"
+            disabled={selectedRecords.length >= 2 ? false : true}
+            onClick={openActions}
+            aria-controls="action-menu"
+            endIcon={<ExpandMore />}
+            className="new-dropdown-v1"
+          >
+            Actions
+          </Button>
+          <Menu
+            anchorEl={anchorActionEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="action-menu"
+            open={Boolean(anchorActionEl)}
+            onClose={closeActions}
+          >
+            <MenuItem
+              onClick={() => {
+                setShowConfirmBox(true);
+                closeActions();
+              }}
+            >
+              Consolidate
+            </MenuItem>
+          </Menu>
+        </Box>
         {columns?.length ? (
           <CustomAgGrid
             columns={columns}
@@ -206,7 +324,10 @@ const ProgressiveBilling = ({
             actionWidth={100}
             loading={loading}
             renderedFrom={renderedFrom}
-            allowSelection={false}
+            allowSelection={true}
+            onSelection={(data) => {
+              setSelectedInvoices(data);
+            }}
             allowAction={true}
             isClientSideGrid={true}
           />
@@ -216,6 +337,20 @@ const ProgressiveBilling = ({
           </Box>
         )}
       </Grid>
+      {viewBillDialog.open && (
+        <ViewBillingDialog
+          pageData={null}
+          invoiceData={viewBillDialog?.invoiceData}
+          estimateStartDate={null}
+          onClose={() => {
+            setViewBillDialog({ open: false, invoiceData: null });
+          }}
+          onSuccess={() => {
+            setViewBillDialog({ open: false, invoiceData: null });
+            fetchBilling();
+          }}
+        />
+      )}
       {isConfirmDialogVisible ? (
         <ConfirmationDialog
           open={isConfirmDialogVisible}
@@ -228,7 +363,18 @@ const ProgressiveBilling = ({
           onOk={handleDeleteInvoice}
         />
       ) : null}
+      {showConfirmBox && (
+        <ConfirmationDialog
+          okBtnLoading={isConsolidating}
+          open={showConfirmBox}
+          message={`Are you sure you want to consolidate selected invoices?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleConsolidate}
+        />
+      )}
     </>
   );
 };
-export default ProgressiveBilling;
+export default Invoice;

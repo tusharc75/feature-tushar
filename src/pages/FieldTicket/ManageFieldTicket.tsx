@@ -99,7 +99,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
             });
           }
         }
-        fetchServiceSteps(tempData?.service?.optionValue);
+        tempData?.service && fetchServiceSteps(tempData?.service?.optionValue);
         setCompleteSteps(tempData?.steps || []);
         setInitialData({
           fields: fields,

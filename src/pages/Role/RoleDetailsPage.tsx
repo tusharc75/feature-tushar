@@ -503,9 +503,9 @@ const RoleDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Grid container spacing={1}>
+        <Grid container spacing={3}>
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Box display="flex" marginTop={2} marginBottom={2} gridGap={10} px={1}>
+            <div className="grid md:grid-cols-2 grid-cols-1 mb-4 gap-4">
               <TextField
                 disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                 required
@@ -526,8 +526,8 @@ const RoleDetailsPage = () => {
                 value={values.description}
                 onChange={(e) => setValues({ ...values, description: e.target.value.trimStart() })}
               />
-            </Box>
-            <Paper>
+            </div>
+            <div>
               {loading ? (
                 <div className="d-flex align-items-center justify-content-center" style={{ minHeight: 200, height: '70vh' }}>
                   <Loader style={{ height: '100%' }} text="Loading..." />
@@ -537,7 +537,7 @@ const RoleDetailsPage = () => {
                 resource.length && (
                   <>
                     <RoleEngine
-                      style={{ height: '70vh' }}
+                      style={{ height: '603px', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
                       field={field}
                       resource={resource}
                       setField={setField}
@@ -609,7 +609,7 @@ const RoleDetailsPage = () => {
                   </>
                 )
               )}
-            </Paper>
+            </div>
             <Box marginY={2} />
             {/* {roleData && roleData.type === 2 && (
                 <div>
@@ -697,7 +697,7 @@ const RoleDetailsPage = () => {
               )} */}
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Box mt={2} className="single-form-v1 ">
+            <Box className="single-form-v1 ">
               <Box className="form-head-v1">
                 <Typography component={'h3'}>Assigned Users ({roleUsers.length || 0})</Typography>
 

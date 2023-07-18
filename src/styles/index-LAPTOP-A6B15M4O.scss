@@ -1031,7 +1031,7 @@ body::-webkit-scrollbar-thumb {
 
   & thead {
     & tr {
-      border-bottom: 1px solid #e4e4e4;
+      border-bottom: 1px solid var(--common-border-color);
 
       & th {
         padding: 0px 15px !important;

@@ -259,6 +259,15 @@ const ManageServiceOrderDialog = ({
                                         options={field.option}
                                         setFieldValue={(name, value) => {
                                           setFieldValue(name, value);
+                                          if (field.fieldName === 'customerAccount') {
+                                            const customerAccount = field.option.find((d) => d.optionValue === value);
+                                            const collaborator = [...customerAccount.fieldServiceManager || [], ...customerAccount?.lead || []];
+                                            if (collaborator?.length) {
+                                              setFieldValue('collaborator', collaborator)
+                                            } else {
+                                              setFieldValue('collaborator', [])
+                                            }
+                                          }
                                         }}
                                         required={field.required}
                                         fullWidth

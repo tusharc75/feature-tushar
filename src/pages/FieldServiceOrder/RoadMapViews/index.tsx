@@ -123,9 +123,8 @@ function ServiceOrderViews({ serviceData }) {
             label: (
               <HtmlTooltip arrow placement="top" title={`Technician`}>
                 <div>
-                  <Typography variant="body2">{`${technician?.technician?.firstName ?? technician?.technician?.firstName} ${
-                    technician?.technician?.lastName ?? technician?.technician?.lastName
-                  }${technician?.technician?.employeeNumber ? ` - (${technician?.technician?.employeeNumber})` : ''}`}</Typography>
+                  <Typography variant="body2">{`${technician?.technician?.firstName ?? technician?.technician?.firstName} ${technician?.technician?.lastName ?? technician?.technician?.lastName
+                    }${technician?.technician?.employeeNumber ? ` - (${technician?.technician?.employeeNumber})` : ''}`}</Typography>
                   <Typography variant="subtitle2">{technician?.technician?.status ?? technician?.status}</Typography>
                 </div>
               </HtmlTooltip>
@@ -141,47 +140,48 @@ function ServiceOrderViews({ serviceData }) {
           arrowHeadType: 'arrow'
         });
       });
-
-      xPosition += 300;
-      flow.push({
-        id: `${serviceData?._id}_Closed`,
-        type: 'output',
-        className: 'dark-node',
-        sourcePosition: 'right',
-        targetPosition: 'left',
-        data: {
-          ref_type: 'received',
-          ref_id: serviceData?._id,
-          label: (
-            <HtmlTooltip arrow placement="top" title={serviceData?.status}>
-              <div>
-                <Typography variant="body2">{serviceData?.fieldServiceOrderNumber ?? serviceData?.fieldServiceOrderNumber}</Typography>
-                <Typography variant="subtitle2">{serviceData?.status ?? serviceData?.status}</Typography>
-              </div>
-            </HtmlTooltip>
-          )
-        },
-        position: { x: xPosition, y: 80 },
-        style: customNodeStyles.serviceOrderClosed
-      });
-      allServices?.map((service, index) => {
-        if (!availableTechnician[service?.materialId]) {
+      if (serviceData?.status === 'Closed') {
+        xPosition += 300;
+        flow.push({
+          id: `${serviceData?._id}_Closed`,
+          type: 'output',
+          className: 'dark-node',
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          data: {
+            ref_type: 'received',
+            ref_id: serviceData?._id,
+            label: (
+              <HtmlTooltip arrow placement="top" title={serviceData?.status}>
+                <div>
+                  <Typography variant="body2">{serviceData?.fieldServiceOrderNumber ?? serviceData?.fieldServiceOrderNumber}</Typography>
+                  <Typography variant="subtitle2">{serviceData?.status ?? serviceData?.status}</Typography>
+                </div>
+              </HtmlTooltip>
+            )
+          },
+          position: { x: xPosition, y: 80 },
+          style: customNodeStyles.serviceOrderClosed
+        });
+        allServices?.map((service, index) => {
+          if (!availableTechnician[service?.materialId]) {
+            flowEdge.push({
+              id: `${service?._id}__${serviceData?._id}_edge`,
+              source: `${service?._id}`,
+              target: `${serviceData?._id}_Closed`,
+              arrowHeadType: 'arrow'
+            });
+          }
+        });
+        allTechnician?.map((technician, index) => {
           flowEdge.push({
-            id: `${service?._id}__${serviceData?._id}_edge`,
-            source: `${service?._id}`,
+            id: `${technician?.technician?._id}__${serviceData?._id}_edge`,
+            source: `${technician?.technician?._id}`,
             target: `${serviceData?._id}_Closed`,
             arrowHeadType: 'arrow'
           });
-        }
-      });
-      allTechnician?.map((technician, index) => {
-        flowEdge.push({
-          id: `${technician?.technician?._id}__${serviceData?._id}_edge`,
-          source: `${technician?.technician?._id}`,
-          target: `${serviceData?._id}_Closed`,
-          arrowHeadType: 'arrow'
         });
-      });
+      }
 
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);
