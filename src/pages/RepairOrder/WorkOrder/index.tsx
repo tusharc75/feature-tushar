@@ -469,7 +469,8 @@ const WorkOrder = ({
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         parent.hideSelection = true;
         parent.serviceStatus = parent?.workOrder?.status;
-      } else {
+      }
+      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
         parent.canAutoCompleteWorkOrder = true;
       }
       parent.subRows = generateNestedData(data.material, parent);
