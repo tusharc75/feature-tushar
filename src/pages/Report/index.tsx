@@ -382,37 +382,40 @@ const Report = () => {
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
-      <div>
-        <Grid container className="headerbox">
-          <Grid item xs={10}>
-            <CustomBreadCrumbs
-              routes={[
-                { title: 'Reports', path: '/reports' },
-                { title: routes[resourceCamelCase]?.title, path: '' }
-              ]}
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <Grid container direction="row">
-              <Grid item xs={12} sm={12}>
-                <Grid container justifyContent="flex-end">
-                  {showGrid && (
-                    <div id="importExportLinks" style={{ minWidth: 80 }}>
-                      <span
-                        aria-disabled={isExporting}
+      <div className="main-container-v1">
+        <div className="headerbox-v1">
+          <Grid container>
+            <Grid item xs={10}>
+              <CustomBreadCrumbs
+                routes={[
+                  { title: 'Reports', path: '/reports' },
+                  { title: routes[resourceCamelCase]?.title, path: '' }
+                ]}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <Grid container direction="row">
+                <Grid item xs={12} sm={12}>
+                  <Grid container justifyContent="flex-end">
+                    {showGrid && (
+                      <Button
+                        size="small"
+                        className="btn-outline-v1"
+                        variant="outlined"
+                        id="importExportLinks"
+                        style={{ minWidth: 80 }}
+                        disabled={isExporting}
                         onClick={exportData}
-                        className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
-                        style={{ color: theme.palette.info.light }}
                       >
                         Export All
-                      </span>
-                    </div>
-                  )}
+                      </Button>
+                    )}
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
           </Grid>
-        </Grid>
+        </div>
         <CustomContainer>
           <>
             <div className="header-panel">
@@ -464,7 +467,7 @@ const Report = () => {
                   }}
                 />
                 <DialogContent>
-                  <div className="p-4 min-h-[600px]">
+                  <div className="p-4 pt-5 min-h-[350px]">
                     <ReportFilters
                       resourceColumns={resourceColumns}
                       betweenDate={betweenDate}

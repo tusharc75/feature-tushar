@@ -68,7 +68,9 @@ const DashboardModal: FC<ModalProps> = ({
           width: dialogProps?.maxWidth || dialogProps?.fullScreen ? '100%' : 'unset',
           background: themeColor === 'dark' ? 'var(--dark-primary)' : '#fff',
           boxShadow:
-            '0px 165px 66px rgba(142, 159, 199, 0.01), 0px 93px 56px rgba(142, 159, 199, 0.05), 0px 41px 41px rgba(142, 159, 199, 0.09), 0px 10px 23px rgba(142, 159, 199, 0.1), 0px 0px 0px rgba(142, 159, 199, 0.1)'
+            themeColor === 'dark'
+              ? '0px 10px 23px 0px rgba(142, 159, 199, 0.10), 0px 20px 50px 0px rgba(142, 159, 199, 0.08)'
+              : '0px 165px 66px rgba(142, 159, 199, 0.01), 0px 93px 56px rgba(142, 159, 199, 0.05), 0px 41px 41px rgba(142, 159, 199, 0.09), 0px 10px 23px rgba(142, 159, 199, 0.1), 0px 0px 0px rgba(142, 159, 199, 0.1)'
         }
       }}
       open={open !== undefined ? open : Boolean(modalHead)}
