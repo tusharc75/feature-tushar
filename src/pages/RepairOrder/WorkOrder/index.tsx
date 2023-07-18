@@ -302,21 +302,20 @@ const WorkOrder = ({
                 </IconButton>
               </>
             ) : null}
-            <HtmlTooltip title="Auto Complete WorkOrder">
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                setAutoCompleteData([row.original]);
-                setCompleteConfirmBox(true);
-              }}
-              disabled={
-                row?.original?.type !== "serializedAsset" ? true : row?.original?.workOrder?.status === WORKORDER_SERVICE_STATUS.completed ? true : false
-              }
-            >
-              <CheckCircleOutline fontSize="small" />
-            </IconButton>
-            </HtmlTooltip>
+            {row?.original?.canAutoCompleteWorkOrder && (
+              <HtmlTooltip title="Auto Complete Work Order">
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setAutoCompleteData([row.original]);
+                    setCompleteConfirmBox(true);
+                  }}
+                >
+                  <CheckCircleOutline fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
           </>
         );
       }
@@ -391,15 +390,16 @@ const WorkOrder = ({
     let ids = [];
     if (autoCompleteData && autoCompleteData.length > 0) {
       autoCompleteData.forEach((d) => {
-        ids.push(d?.workOrder?._id);
+        if (d?.canAutoCompleteWorkOrder) ids.push(d?.workOrder?._id);
       });
     }
     setCompleting(true);
-    axiosInstance()
+    if (ids.length) {
+      axiosInstance()
         .put(`${repairOrder.api}/${repairOrderData._id}/work-order/auto-complete`, {
           workOrders: ids
         })
-        .then(({data}) => {
+        .then(({ data }) => {
           setCompleting(false);
           setCompleteConfirmBox(false);
           fetchData();
@@ -414,6 +414,11 @@ const WorkOrder = ({
           setCompleting(false);
           toastConfig.setToastConfig(err);
         });
+    } else {
+      setCompleting(false);
+      setCompleteConfirmBox(false);
+      fetchData();
+    }
   };
 
   const fetchData = async () => {
@@ -464,6 +469,8 @@ const WorkOrder = ({
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         parent.hideSelection = true;
         parent.serviceStatus = parent?.workOrder?.status;
+      } else {
+        parent.canAutoCompleteWorkOrder = true;
       }
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -698,12 +705,9 @@ const WorkOrder = ({
                   setCompleteConfirmBox(true);
                   closeActions();
                 }}
-                disabled={
-                  selectedProducts.some(product => product.type !== 'serializedAsset') ||
-                  selectedProducts.some(product => product?.workOrder?.status === 'completed')
-                }
+                disabled={selectedProducts.some((e) => !e?.canAutoCompleteWorkOrder)}
               >
-                Auto Complete WorkOrder
+                Auto Complete Work Order
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -809,7 +813,7 @@ const WorkOrder = ({
             <ConfirmationDialog
               open={completeConfirmBox}
               okBtnLoading={isCompleting}
-              message={`Are you sure you want to Autocomplete this item(s)`}
+              message={`Are you sure you want to Auto Complete this Work Order(s)`}
               onClose={() => {
                 setCompleteConfirmBox(false);
               }}
