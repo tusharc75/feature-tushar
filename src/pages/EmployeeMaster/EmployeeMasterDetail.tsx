@@ -1,10 +1,8 @@
-import { Box, Button, Grid, Paper, Tab, Tabs } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Skeleton } from '@material-ui/lab';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
@@ -25,7 +23,6 @@ const EmployeeMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.employeeMaster]);
   const [employeeMasterData, setEmployeeMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -37,7 +34,7 @@ const EmployeeMasterDetail = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
 
   const {
-    state: { permissions, user }
+    state: { permissions }
   }: any = useData();
 
   useEffect(() => {
@@ -64,7 +61,6 @@ const EmployeeMasterDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes?.employeeMaster?.path}/${id}`);
-      setHeadingLbl(data.employeeNumber);
       setEmployeeMasterData(data);
       setCustomizedRoutes([routes.employeeMaster, { title: data?.employeeNumber }]);
       setLoading(false);

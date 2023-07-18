@@ -6,7 +6,6 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
 import { employeeMaster } from 'src/constants/helpers';
@@ -19,7 +18,7 @@ const History = ({ id }) => {
     const [gridApi, setGridApi] = useState(null);
 
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
     const NameRenderer = (params: { value: any; data: { type: string; referenceId: any } }) => (
         <>
@@ -78,8 +77,6 @@ const History = ({ id }) => {
         axiosInstance()
             .get(`${employeeMaster.api}/history/${id}`)
             .then(({ data: { data } }) => {
-                console.log(data)
-
                 data = data?.map((u, index) => ({
                     ...u,
                     _id: index + 1,
@@ -92,7 +89,6 @@ const History = ({ id }) => {
                     date: u?.startDate
 
                 }));
-                console.log(data)
                 dispatch({ type: 'initialize', data: data, count: data.length });
                 dispatch({ type: 'loading', loading: false });
             })
