@@ -4,7 +4,7 @@ interface svgInterface extends SVGProps<SVGSVGElement> {
   color?: string;
 }
 
-const StepCompleteIcon: React.FC<svgInterface> = ({ color = '#298B88', ...others }) => {
+const StepCompleteIcon: React.FC<svgInterface> = ({ color = 'var(--new_theme_color)', ...others }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="none" {...others}>
       <path

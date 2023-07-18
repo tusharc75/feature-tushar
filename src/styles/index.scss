@@ -58,6 +58,8 @@
   --accordion-expanded-summary-bg: #f1f5ff;
   --card-bg: #fff;
   --active-border-color: #f99336;
+  --form-head-bg: #f1f5ff;
+  --primary-text: #2a3042;
 }
 
 // Dark Theme
@@ -91,6 +93,8 @@
   --dark-secondary-text: #b8b8b8;
   --dark-error: hsl(0, 52%, 36%);
   --dark-active-border-color: #f99336;
+  --form-head-bg: #282845;
+  --primary-text: #fff;
 }
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
@@ -1262,7 +1266,7 @@ body::-webkit-scrollbar-thumb {
 
   & thead {
     & tr {
-      border-bottom: 1px solid #e4e4e4;
+      border-bottom: 1px solid var(--common-border-color);
 
       & th {
         padding: 0px 15px !important;
@@ -1272,14 +1276,14 @@ body::-webkit-scrollbar-thumb {
 
   & tbody {
     & tr {
-      border-bottom: 1px solid #e4e4e4;
+      border-bottom: 1px solid var(--common-border-color);
 
       & td {
         padding: 0px 15px !important;
 
         & .tableMainHeader {
           font-size: 1rem;
-          color: var(--secondary);
+          color: var(--primary-text);
           font-weight: 500;
         }
       }
@@ -2901,6 +2905,12 @@ svg.MuiSvgIcon-root {
       box-shadow: rgba(0, 0, 0, 0.06) 0px 5.44444px 27.2222px;
       border: 1px solid rgb(226, 226, 226);
     }
+
+    [data-mode='dark'] & {
+      btn-outline-v1 {
+        background: var(--dark-primary) !important;
+      }
+    }
   }
 
   .detail-container-v1 {
@@ -3092,7 +3102,7 @@ svg.MuiSvgIcon-root {
   margin-bottom: 30px;
   [data-mode='dark'] & {
     color: #fff;
-    border-bottom: 1px solid #555555;
+    border-bottom: 1px solid #2c3151;
   }
 
   @media all and (max-width: 768px) {
@@ -3205,6 +3215,15 @@ body {
       border: 1px solid #282845 !important;
       &:disabled {
         opacity: 0.6 !important;
+      }
+    }
+  }
+
+  & .headerbox-v1 {
+    [data-mode='dark'] & {
+      .btn-outline-v1 {
+        background-color: var(--dark-primary) !important;
+        color: white !important;
       }
     }
   }
@@ -3377,7 +3396,7 @@ body {
 }
 .pagination-v1 {
   [data-mode='dark'] & {
-    background-color: var(--primary) !important;
+    background-color: transparent !important;
   }
   & > div {
     padding: 30px 0 14px;

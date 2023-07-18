@@ -56,7 +56,7 @@ export const rentalManagementSteps: stepInterface[] = [
   { name: 'Add Services', title: 'Services', icon: 'add' },
   { name: 'Add-on', title: 'Add-on', icon: 'add' },
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
-  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
+  { name: 'Serialized Asset', title: 'Asset', icon: 'asset' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
   { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
@@ -91,7 +91,7 @@ export const salesOrderProcessSteps: stepInterface[] = [
 
 export const bulkAssetCreationSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' }
+  { name: 'Serialized Asset', title: 'Asset', icon: 'asset' }
 ];
 
 export const subleaseSteps: stepInterface[] = [
@@ -147,8 +147,7 @@ export const repairOrderSteps: stepInterface[] = [
 export const assetsReceivingSteps: stepInterface[] = [
   { name: 'Add Assets', title: 'Add', icon: 'add' },
   { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
-  { name: 'Complete', title: 'Complete', icon: 'end' },
-
+  { name: 'Complete', title: 'Complete', icon: 'end' }
 ];
 
 export const serviceOrderSteps: stepInterface[] = [
@@ -158,7 +157,7 @@ export const serviceOrderSteps: stepInterface[] = [
   { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
   { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' },
-  { name: 'Field Ticket Invoice', title: 'Invoice', icon: 'invoice' },
+  { name: 'Field Ticket Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
 export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed'];
@@ -335,7 +334,7 @@ export const sidebarResource = {
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
-  assetsReceiving: 'Assets Receiving',
+  assetsReceiving: 'Assets Receiving'
 };
 
 export const primaryFields = {
@@ -456,7 +455,7 @@ export const RESOURCE_LABEL = {
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
-  assetsReceiving: 'Assets Receiving',
+  assetsReceiving: 'Assets Receiving'
 };
 
 export const CHILD_RESOURCE = {
@@ -562,7 +561,7 @@ export const fieldServiceOrder = {
 export const fieldTicket = {
   resource: 'Field Ticket',
   api: '/field-ticket'
-}
+};
 
 export const employeeMaster = {
   resource: 'employeeMaster',
@@ -982,21 +981,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1865,8 +1864,8 @@ export const ASSET_STATUS = {
 
 export const ASSET_NUMBER_TYPE = {
   auto: 'Auto',
-  manual: 'Manual',
-}
+  manual: 'Manual'
+};
 
 export const INVENTORY_HISTORY_TYPE = {
   rental: 'Rental',
@@ -1892,7 +1891,7 @@ export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
   delivered: 'Delivered',
-  cancelled: 'Cancelled',
+  cancelled: 'Cancelled'
 };
 
 export const RENTAL_STATUS = {
@@ -1915,7 +1914,7 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   return: 'Return',
   consumed: 'Consumed',
   standBy: 'Stand By',
-  standByNotChargeable: 'Stand By-Not Chargeable',
+  standByNotChargeable: 'Stand By-Not Chargeable'
 } as const;
 
 export const REPAIR_JOB_STATUS = {
@@ -1944,7 +1943,7 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
   repairOrder: 'Repair Order',
-  assetsReceiving: 'Assets Receiving',
+  assetsReceiving: 'Assets Receiving'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2042,7 +2041,7 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket',
+  irtTicket: 'irtTicket'
 };
 
 export const LOG_RESOURCE = {
@@ -2351,7 +2350,7 @@ export const WORKORDER_SERVICE_STATUS = {
   inProgress: 'In-Progress',
   completed: 'Completed',
   failed: 'Failed',
-  skipped: 'Skipped',
+  skipped: 'Skipped'
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
@@ -2433,14 +2432,14 @@ export const ASSETS_RECEIVING_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   complete: 'Complete'
-}
+};
 
 export const MATERIAL_TYPE = {
   product: 'product',
   service: 'service',
   package: 'package',
   serializedAsset: 'serializedAsset'
-}
+};
 
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
