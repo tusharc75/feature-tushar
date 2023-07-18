@@ -23,12 +23,11 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
 
-const ViewBillingDialog = ({ pageData, invoiceData = null, estimateStartDate, onClose, onSuccess }) => {
+const ViewBillingDialog = ({ pageData = null, invoiceData, estimateStartDate, onClose, onSuccess }) => {
 
   const toastConfig = useContext(CustomToastContext);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [material, setMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -335,6 +334,7 @@ const ViewBillingDialog = ({ pageData, invoiceData = null, estimateStartDate, on
                   }}
                 >
                   <MenuItem
+                    disabled={!pageData ? true : false}
                     onClick={() => {
                       setAnchorEl(null);
                       const obj: any = [];
@@ -361,8 +361,8 @@ const ViewBillingDialog = ({ pageData, invoiceData = null, estimateStartDate, on
                   onSelect={setSelectedProducts}
                   childrenProperty="subRows"
                   uniqueKey="_id"
-                  hideSelection={false}
-                  hideAction={false}
+                  hideSelection={!pageData ? true : false}
+                  hideAction={!pageData ? true : false}
                   renderedFrom="rental_management_view_billing"
                   isClientSideGrid={true}
                 />

@@ -16,7 +16,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ViewBillingDialog from 'src/pages/Invoice/ViewInvoice/ViewBillingDialog';
 
 
-const ProgressiveBilling = ({
+const Invoice = ({
   fieldServiceOrderData,
   currencySymbol,
   setNextStep,
@@ -306,7 +306,7 @@ const ProgressiveBilling = ({
                 closeActions();
               }}
             >
-              Consolidate Invoices
+              Consolidate
             </MenuItem>
           </Menu>
         </Box>
@@ -377,4 +377,4 @@ const ProgressiveBilling = ({
     </>
   );
 };
-export default ProgressiveBilling;
+export default Invoice;
