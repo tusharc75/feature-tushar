@@ -28,6 +28,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
   const [lockDate, setLockDate] = useState(null);
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
 
+
   useEffect(() => {
     fetchSettingsData();
   }, []);

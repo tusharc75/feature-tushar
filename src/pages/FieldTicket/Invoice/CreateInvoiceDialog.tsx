@@ -9,7 +9,7 @@ import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, dateFormat, } from 'src/constants/helpers';
+import { CustomDialogTransition, fieldTicket,dateFormat } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -22,9 +22,6 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { startCase } from 'lodash';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
-
 
 
 
@@ -43,8 +40,6 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
     const [orginalMaterial, setOrginalMaterial] = useState([]);
     const [appliedDate, setAppliedDate] = useState(false);
     const [rowsApplied, setRowsApplied] = useState([]);
-    const [endDate, setEndDate] = useState(null);
-
 
     useEffect(() => {
         fetchFields();
@@ -130,6 +125,29 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
             }
         ];
         column = [...column, ...newColumns];
+        // column.push({
+        //     accessor: 'action',
+        //     Header: '',
+        //     minWidth: 50,
+        //     width: 50,
+        //     sticky: 'right',
+        //     disableFilters: true,
+        //     canDrag: false,
+        //     Cell: ({ row }) =>
+        //         row?.original?.isEditable ? (
+        //             <IconButton
+        //                 size="small"
+        //                 aria-label="Details"
+        //                 onClick={() => {
+        //                     // setIsProductEdit({ open: true, rowData: row.original });
+        //                 }}
+        //             >
+        //                 <EditIcon color="primary" />
+        //             </IconButton>
+        //         )
+        //             :
+        //             ''
+        // });
         setColumns(column);
     };
 
@@ -137,15 +155,12 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
         let data = [];
 
         let additionalCost: any = [];
-        let invoicedProducts: any = [];
-
 
         const response = await axiosInstance().get(`/field-ticket/${id}/material`);
-        const material = response?.data?.data?.material
+        const material = response?.data?.data?.material;
 
         const invoiceResponse = await axiosInstance().get(`/field-ticket/${id}/invoice/material-end-date-qty`);
         additionalCost = invoiceResponse?.data?.data?.additionalCost;
-        invoicedProducts = invoiceResponse?.data?.data?.material;
 
         const responseAdditionalCostData = await axiosInstance().get(`/field-ticket/${id}/cost`);
         let additionalCostData = responseAdditionalCostData?.data?.data || [];
@@ -174,10 +189,6 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                         '- - -'
             parent.qtyDisplay = parent.qty;
             parent.type = parent.type;
-            if (parent?.estimateStartDate || parent?.estimateEndDate) {
-                parent['actualStartDate'] = parent?.estimateStartDate;
-                parent['actualEndDate'] = parent?.estimateEndDate;
-            }
         });
 
         if (additionalCostData?.length > 0) {
@@ -210,26 +221,8 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                     const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
 
                     materialData = { ...materialData, ...calValues };
-
-                }
-                const product = invoicedProducts?.find((p) => p._id === e._id);
-                if (product) {
-                    const estimateStartDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
-                    materialData.actualStartDate = estimateStartDate;
-                    materialData.estimateStartDate = estimateStartDate;
                 }
 
-                const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
-                if (row) {
-                    const estimateEndDate
-                        = new Date(product?.endDate
-                        )?.setDate(new Date(product?.endDate
-                        )?.getDate() + 1);
-                    materialData.actualEndDate = estimateEndDate;
-                    materialData.estimateEndDate = estimateEndDate;
-                    setEndDate(estimateEndDate
-                    );
-                }
                 return materialData;
             })
                 .filter((d) => d.qty > 0);
@@ -242,7 +235,7 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
     }
 
     const handleApplyDate = async () => {
-        let tempValues: any = { actualEndDate: endDate, estimateEndDate: endDate };
+        let tempValues: any = {};
 
         const invoiceResponse = await axiosInstance().get(`/field-ticket/${id}/invoice/material-end-date-qty`);
         const invoicedProducts = invoiceResponse?.data?.data?.material;
@@ -255,16 +248,15 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
             } else {
                 element.invalidDate = false;
 
-                const product = invoicedProducts?.find((p) => p._id === element._id);
+                const product = invoicedProducts?.material?.find((p) => p._id === element._id);
 
-                const productStartDateTime = moment(element.estimateStartDate).unix() * 1000;
-                const selectedEndDate = endDate.unix() * 1000;
-
-                if (selectedEndDate < productStartDateTime) {
+                const productStartDateTime = new Date(new Date(element.estimateStartDate).toLocaleDateString()).getTime();
+                const productEndtDateTime = new Date(new Date(element.estimateEndDate).toLocaleDateString()).getTime();
+                
+                if (productEndtDateTime < productStartDateTime) {
                     element.invalidDate = true;
                 } else if (product) {
                     element.invalidDate = false;
-
                 }
 
                 let priceFieldName = Object.keys(element).find((d) => d.includes('price_'));
@@ -336,58 +328,36 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                 <CustomDialogHeader title={`Create Invoice `} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
                 <CustomDialogContent>
                     <>
-                        <MuiPickersUtilsProvider utils={MomentUtils}>
-                            <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                                <Grid md={4} style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
-                                    <KeyboardDatePicker
-                                        autoOk
-                                        fullWidth
-                                        size="small"
-                                        variant="inline"
-                                        inputVariant="outlined"
-                                        // minDate={endDate || new Date()}
-                                        value={endDate}
-                                        name="endDate"
-                                        label="End Date"
-                                        onChange={(date: any) => {
-                                            setEndDate(date ? date : null);
-                                        }}
-                                        format={dateFormat}
-                                        InputLabelProps={{
-                                            shrink: true
-                                        }}
-                                        margin="dense"
-                                    />
-                                    <Box style={{ display: 'flex', gap: '5px' }}>
-                                        <HtmlTooltip
-                                            title={
+                        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+
+                            <Box style={{ display: 'flex', gap: '5px' }}>
+                                <HtmlTooltip
+                                    title={
+                                        !Boolean(
+                                            selectedRecords && selectedRecords.length && (selectedRecords.every((d) => d.type === 'additionalCost'))
+                                        )
+                                            ? 'Please select product to apply'
+                                            : ''
+                                    }
+                                >
+                                    <span>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            disabled={
                                                 !Boolean(
-                                                    selectedRecords && selectedRecords.length && (selectedRecords.every((d) => d.type === 'additionalCost'))
-                                                )
-                                                    ? 'Please select product to apply'
-                                                    : ''
+                                                    selectedRecords &&
+                                                    selectedRecords.length)
                                             }
+                                            size="small"
+                                            onClick={() => {
+                                                handleApplyDate();
+                                            }}
                                         >
-                                            <span>
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    disabled={
-                                                        !Boolean(
-                                                            selectedRecords &&
-                                                            selectedRecords.length)
-                                                    }
-                                                    size="small"
-                                                    onClick={() => {
-                                                        handleApplyDate();
-                                                    }}
-                                                >
-                                                    Apply
-                                                </Button>
-                                            </span>
-                                        </HtmlTooltip>
-                                    </Box>
-                                </Grid>
+                                            Apply
+                                        </Button>
+                                    </span>
+                                </HtmlTooltip>
                             </Box>
                             {columns && rowsData ? (
                                 <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} p={1}>
