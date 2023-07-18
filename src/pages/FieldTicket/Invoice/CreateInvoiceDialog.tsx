@@ -359,30 +359,30 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                                     </span>
                                 </HtmlTooltip>
                             </Box>
-                        </Box>
-                        {columns && rowsData ? (
-                            <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
-                                <CustomReactTable
-                                    height={'calc(100vh - 285px)'}
-                                    columns={columns}
-                                    data={rowsData}
-                                    setWholeRowsCellColor={(rowData) => {
-                                        if (rowData?.invalidDate) return 'error';
-                                        if (rowData?.isAppliedInvoice) return 'isAppliedBill';
-                                    }}
-                                    onSelect={setSelectedRecords}
-                                    childrenProperty="subRows"
-                                    uniqueKey="_id"
-                                    renderedFrom="field_ticket_create_invoice"
-                                    isClientSideGrid={true}
-                                    hideExpander={true}
-                                />
-                            </Box>
-                        ) : (
-                            <Box p={2} height={500}>
-                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                            </Box>
-                        )}
+                            {columns && rowsData ? (
+                                <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} p={1}>
+                                    <CustomReactTable
+                                        height={'calc(100vh - 200px)'}
+                                        columns={columns}
+                                        data={rowsData}
+                                        setWholeRowsCellColor={(rowData) => {
+                                            if (rowData?.invalidDate) return 'error';
+                                            if (rowData?.isAppliedBill) return 'isAppliedBill';
+                                            return ''
+                                        }}
+                                        onSelect={setSelectedRecords}
+                                        childrenProperty="subRows"
+                                        uniqueKey="_id"
+                                        renderedFrom="field_ticket_create_invoice"
+                                        isClientSideGrid={true}
+                                    />
+                                </Box>
+                            ) : (
+                                <Box p={2} height={500}>
+                                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                                </Box>
+                            )}
+                        </MuiPickersUtilsProvider>
                     </>
                 </CustomDialogContent>
                 <CustomDialogFooter>
