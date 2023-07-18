@@ -140,7 +140,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     const workOrderDetail = workOrderDetailResponce?.data?.data;
 
     if (workOrderDetail.type === 'Repair Order' && workOrderDetail?.repairOrder) {
-      if (workOrderDetail?.repairOrder?.addQuotationStep && workOrderDetail?.quotation) {
+      if (workOrderDetail?.repairOrder?.addQuotationStep) {
         isQuotation = true;
         if (workOrderDetail?.quotation?.version) {
           quotation = {
