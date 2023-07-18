@@ -142,7 +142,7 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
 
 
         const response = await axiosInstance().get(`/field-ticket/${id}/material`);
-        const material = response?.data?.data?.material?.filter((d) => d?.type === 'service')
+        const material = response?.data?.data?.material
 
         const invoiceResponse = await axiosInstance().get(`/field-ticket/${id}/invoice/material-end-date-qty`);
         additionalCost = invoiceResponse?.data?.data?.additionalCost;
@@ -258,8 +258,8 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
 
                 const product = invoicedProducts?.find((p) => p._id === element._id);
 
-                const productStartDateTime = new Date(new Date(element.estimateStartDate).toLocaleDateString()).getTime();
-                const selectedEndDate = new Date(endDate?.format('MM/DD/YYYY')).getTime();
+                const productStartDateTime = moment(element.estimateStartDate).unix() * 1000;
+                const selectedEndDate = endDate.unix() * 1000;
 
                 if (selectedEndDate < productStartDateTime) {
                     element.invalidDate = true;
@@ -398,14 +398,15 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                                         data={rowsData}
                                         setWholeRowsCellColor={(rowData) => {
                                             if (rowData?.invalidDate) return 'error';
-                                            if (rowData?.isAppliedInvoice) return 'isAppliedBill';
+                                            if (rowData?.isAppliedBill) return 'isAppliedBill';
+                                            return ''
                                         }}
                                         onSelect={setSelectedRecords}
                                         childrenProperty="subRows"
                                         uniqueKey="_id"
                                         renderedFrom="field_ticket_create_invoice"
                                         isClientSideGrid={true}
-                                        hideExpander={true}
+                                    // hideExpander={true}
                                     />
                                 </Box>
                             ) : (
