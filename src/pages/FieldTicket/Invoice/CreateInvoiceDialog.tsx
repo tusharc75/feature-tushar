@@ -1,15 +1,15 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext, } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Checkbox, Chip, CircularProgress, Dialog, FormControlLabel, FormGroup, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@material-ui/core';
 import { useData } from 'src/StateProvider/Provider';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, fieldTicket } from 'src/constants/helpers';
+import { CustomDialogTransition, fieldTicket,dateFormat } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -19,7 +19,6 @@ import { fetch_field_ticket_material_fields } from '../helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import EditIcon from '@material-ui/icons/Edit';
 import { startCase } from 'lodash';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
@@ -253,7 +252,7 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
 
                 const productStartDateTime = new Date(new Date(element.estimateStartDate).toLocaleDateString()).getTime();
                 const productEndtDateTime = new Date(new Date(element.estimateEndDate).toLocaleDateString()).getTime();
-
+                
                 if (productEndtDateTime < productStartDateTime) {
                     element.invalidDate = true;
                 } else if (product) {

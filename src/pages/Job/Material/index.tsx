@@ -239,7 +239,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center">
-          <Button variant="outlined" size="small" onClick={() => setAddDialog({ open: true, type: 'asset' })} startIcon={<AddIcon />} color="primary">
+          <Button variant="outlined" size="small" onClick={() => setAddDialog({ open: true, type: 'serializedAsset' })} startIcon={<AddIcon />} color="primary">
             Add
           </Button>
         </Box>
@@ -343,14 +343,14 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
           showSaveAndNext={materialEdit.showSaveAndNext}
         />
       )}
-      {addDialog.open && addDialog.type === 'asset' && (
+      {addDialog.open && addDialog.type === 'serializedAsset' && (
         <AssignSerializedAssetDialog
           reference={'job'}
           handleClose={() => {
             setAddDialog({ open: false, type: '' });
           }}
           ids={flattenArray(rowsData)
-            ?.filter((e) => e.type === 'asset')
+            ?.filter((e) => e.type === 'serializedAsset')
             ?.map((e) => e.materialId)}
           handleSucess={(rows) => {
             handleAdd(rows);
