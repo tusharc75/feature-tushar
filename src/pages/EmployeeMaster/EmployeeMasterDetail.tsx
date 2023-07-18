@@ -17,6 +17,9 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import queryString from 'query-string';
+import TabPanel from 'src/components/TabPanel';
+import History from './History';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
@@ -29,6 +32,10 @@ const EmployeeMasterDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const parsed = queryString.parse(history.location.search);
+  const { tab }: any = parsed;
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
+
   const {
     state: { permissions, user }
   }: any = useData();
@@ -95,6 +102,22 @@ const EmployeeMasterDetail = () => {
   const closeUpdateDialog = () => {
     setOpenUpdateDialog(false);
   };
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+    history.push(`?tab=${newValue}`);
+    if (newValue === 0) {
+      fetchData();
+    }
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -103,32 +126,68 @@ const EmployeeMasterDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.employeeMaster?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                    className={'btn-outline-v1'}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
+            <>
+              {permissions?.employeeMaster?.isUpdate && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  size="small"
+                  onClick={handleOpenUpdateDialog}
+                  className={'btn-outline-v1'}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
 
-                {permissions?.employeeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
-              <ActivityButton referenceId={employeeMasterData?._id} resource={ACTIVITY_RESOURCE.employeeMaster} />
+              {permissions?.employeeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            </>
+            <ActivityButton referenceId={employeeMasterData?._id} resource={ACTIVITY_RESOURCE.employeeMaster} />
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        {loading || !fields?.length ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
-          </Grid>
-        ) : (
-          <DetailsPage data={employeeMasterData} fields={fields} />
-        )}
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                Details
+              </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                History
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={employeeMasterData} fields={fields} />
+          )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <History id={id} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
