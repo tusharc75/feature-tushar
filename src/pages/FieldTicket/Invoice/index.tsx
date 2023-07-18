@@ -11,8 +11,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CreateInvoiceDialog from "./CreateInvoiceDialog";
 import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from "src/constants/helpers";
 import { useData } from 'src/StateProvider/Provider';
-import ViewBillingDialog from "./ViewBillingDialog";
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import ViewInvoice from "src/pages/Invoice/ViewInvoice";
 
 const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
 
@@ -235,8 +235,8 @@ const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
                 />
             )}
             {viewBillDialog.open && (
-                <ViewBillingDialog
-                    fieldTicketData={fieldTicketData}
+                <ViewInvoice
+                    pageData={fieldTicketData}
                     invoiceData={viewBillDialog?.invoiceData}
                     estimateStartDate={null}
                     onClose={() => {

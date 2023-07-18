@@ -37,7 +37,7 @@ import ServiceOrderViews from './RoadMapViews';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
 import FieldTicket from './FieldTicket';
-import ProgressiveBilling from './Invoice';
+import FieldTicketInvoice from './FieldTicketInvoice';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -403,13 +403,9 @@ const ServiceOrderDetailsPage = () => {
               />
             )}
             {steps[currentStep]?.name === serviceOrderSteps[6]?.name && serviceOrderData && (
-              <ProgressiveBilling
-                fieldServiceOrderData={serviceOrderData}
-                setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
+              <FieldTicketInvoice
+                fieldServiceOrderData={serviceOrderData}            
                 renderedFrom={`${renderedFrom}_grid-6`}
-                stepFullScreen={stepFullScreen}
-                allowedToEdit={true}
               />
             )}
           </ContentFullScreen>
