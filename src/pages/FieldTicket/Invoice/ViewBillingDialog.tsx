@@ -252,26 +252,6 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
     setAnchorEl(null);
   };
 
-  const handleSaveData = async (rows: any) => {
-    const data = {
-      invoiceId: invoiceData?._id,
-      materialId: rows[0]?.materialId,
-      qty: rows[0]?.qty
-    };
-    setIsLoadingUpdate(true);
-    axiosInstance()
-      .put(`${fieldTicket.api}/${fieldTicketData._id}/progressive-billing/update-qty`, data)
-      .then((res) => {
-        setIsLoadingUpdate(false);
-        setIsProductEdit({ open: false, rowData: null });
-        fetchData();
-        onSuccess();
-      })
-      .catch((error) => {
-        setIsLoadingUpdate(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
 
   const handleDeleteData = async (rows) => {
     const data = {
@@ -279,7 +259,7 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
       materialIds: rows?.map((e) => e.materialId) || []
     };
     axiosInstance()
-      .put(`${fieldTicket.api}/${fieldTicketData._id}/progressive-billing/remove`, data)
+      .put(`${fieldTicket.api}/${fieldTicketData._id}/invoice/remove`, data)
       .then((res) => {
         fetchData();
         setViewBillDialogConfirm({ open: false, rows: [] });
