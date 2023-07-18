@@ -19,7 +19,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import PreviewDownload from 'src/components/PreviewDownload';
 
-const AddCost = ({ id, fieldTicketData }) => {
+const AddCost = ({ id, fieldTicketData, setNextStep }) => {
   const renderedFrom = camelCase(routes?.fieldTicket.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -107,6 +107,7 @@ const AddCost = ({ id, fieldTicketData }) => {
           });
         }
         setRowsData(rows);
+        setNextStep(true);
         setSelectedRecords([]);
       })
       .catch((err) => {

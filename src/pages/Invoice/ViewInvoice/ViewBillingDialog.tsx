@@ -1,28 +1,29 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, fieldTicket, invoice, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Delete, ExpandMore } from '@material-ui/icons';
+import { Add, Delete, Edit, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { startCase } from 'lodash';
+import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
 
-const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, onClose, onSuccess }) => {
+const ViewBillingDialog = ({ pageData, invoiceData = null, estimateStartDate, onClose, onSuccess }) => {
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -137,7 +138,7 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
         }
       ];
       column = [...column, ...newColumns];
-      column.push({
+      pageData && column.push({
         accessor: 'action',
         Header: 'Action',
         minWidth: 100,
@@ -252,6 +253,26 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
     setAnchorEl(null);
   };
 
+  const handleSaveData = async (rows: any) => {
+    const data = {
+      invoiceId: invoiceData?._id,
+      materialId: rows[0]?.materialId,
+      qty: rows[0]?.qty
+    };
+    setIsLoadingUpdate(true);
+    axiosInstance()
+      .put(`${rentalManagement.api}/${pageData._id}/progressive-billing/update-qty`, data)
+      .then((res) => {
+        setIsLoadingUpdate(false);
+        setIsProductEdit({ open: false, rowData: null });
+        fetchData();
+        onSuccess();
+      })
+      .catch((error) => {
+        setIsLoadingUpdate(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const handleDeleteData = async (rows) => {
     const data = {
@@ -259,7 +280,7 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
       materialIds: rows?.map((e) => e.materialId) || []
     };
     axiosInstance()
-      .put(`${fieldTicket.api}/${fieldTicketData._id}/invoice/remove`, data)
+      .put(`${rentalManagement.api}/${pageData._id}/progressive-billing/remove`, data)
       .then((res) => {
         fetchData();
         setViewBillDialogConfirm({ open: false, rows: [] });

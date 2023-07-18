@@ -1,15 +1,15 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext, } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Checkbox, Chip, CircularProgress, Dialog, FormControlLabel, FormGroup, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@material-ui/core';
 import { useData } from 'src/StateProvider/Provider';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, dateFormat, fieldTicket } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat, } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -19,7 +19,6 @@ import { fetch_field_ticket_material_fields } from '../helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import EditIcon from '@material-ui/icons/Edit';
 import { startCase } from 'lodash';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
@@ -142,7 +141,7 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
 
 
         const response = await axiosInstance().get(`/field-ticket/${id}/material`);
-        const material = response?.data?.data?.material?.filter((d) => d?.type === 'service')
+        const material = response?.data?.data?.material
 
         const invoiceResponse = await axiosInstance().get(`/field-ticket/${id}/invoice/material-end-date-qty`);
         additionalCost = invoiceResponse?.data?.data?.additionalCost;
@@ -258,8 +257,8 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
 
                 const product = invoicedProducts?.find((p) => p._id === element._id);
 
-                const productStartDateTime = new Date(new Date(element.estimateStartDate).toLocaleDateString()).getTime();
-                const selectedEndDate = new Date(endDate?.format('MM/DD/YYYY')).getTime();
+                const productStartDateTime = moment(element.estimateStartDate).unix() * 1000;
+                const selectedEndDate = endDate.unix() * 1000;
 
                 if (selectedEndDate < productStartDateTime) {
                     element.invalidDate = true;
@@ -398,14 +397,15 @@ const CreateInvoiceDialog = ({ id, fieldTicketData, renderedFrom, invoiceData, o
                                         data={rowsData}
                                         setWholeRowsCellColor={(rowData) => {
                                             if (rowData?.invalidDate) return 'error';
-                                            if (rowData?.isAppliedInvoice) return 'isAppliedBill';
+                                            if (rowData?.isAppliedBill) return 'isAppliedBill';
+                                            return ''
                                         }}
                                         onSelect={setSelectedRecords}
                                         childrenProperty="subRows"
                                         uniqueKey="_id"
                                         renderedFrom="field_ticket_create_invoice"
                                         isClientSideGrid={true}
-                                        hideExpander={true}
+                                    // hideExpander={true}
                                     />
                                 </Box>
                             ) : (
