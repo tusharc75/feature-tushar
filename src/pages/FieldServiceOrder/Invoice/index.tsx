@@ -8,13 +8,13 @@ import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from '
 import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-// import CreateBillingDialog from './CreateBillingDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-// import ViewBillingDialog from './ViewBillingDialog';
-import { camelCase } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import ViewBillingDialog from 'src/pages/Invoice/ViewInvoice/ViewBillingDialog';
+
 
 const ProgressiveBilling = ({
   fieldServiceOrderData,
@@ -42,6 +42,7 @@ const ProgressiveBilling = ({
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
 
   useEffect(() => {
     fetchGridColumns();
@@ -54,11 +55,26 @@ const ProgressiveBilling = ({
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.invoiceDetail.path);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
+      if (o?.fieldData?.fieldName === 'invoiceNumber') {
+        columns = [
+          ...columns,
+          {
+            ...o?.fieldData,
+            pivotIndex: 0,
+            field: o?.fieldData?.fieldName,
+            headerName: o?.fieldData?.fieldLabel,
+            show: true,
+            disabled: true,
+            cellRenderer: 'invoiceMaterialRenderer'
+          }
+        ];
+      } else {
+        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.invoiceDetail.path);
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData];
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName);
+          }
         }
       }
 
@@ -67,7 +83,7 @@ const ProgressiveBilling = ({
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
-      // invoiceMaterialRenderer: InvoiceMaterialRenderer,
+      invoiceMaterialRenderer: InvoiceMaterialRenderer,
       actionsRenderer: ActionsRenderer
     };
     setFrameworkComponent({ ...tempFrameworkComponent });
@@ -77,6 +93,29 @@ const ProgressiveBilling = ({
     });
     setColumns([...columns]);
   };
+
+  const InvoiceMaterialRenderer = (params) => (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <span
+        className="link"
+        onClick={() => {
+          setViewBillDialog({ open: true, invoiceData: params.data });
+        }}
+      >
+        <CustomRenderCell value={params?.value} />
+      </span>
+      <Box ml={1}>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.invoiceDetail.path}/${params?.data?._id}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Box>
+    </div>
+  );
 
   const ActionsRenderer = (params) => (
     <>
@@ -216,6 +255,20 @@ const ProgressiveBilling = ({
           </Box>
         )}
       </Grid>
+      {viewBillDialog.open && (
+        <ViewBillingDialog
+          pageData={null}
+          invoiceData={viewBillDialog?.invoiceData}
+          estimateStartDate={null}
+          onClose={() => {
+            setViewBillDialog({ open: false, invoiceData: null });
+          }}
+          onSuccess={() => {
+            setViewBillDialog({ open: false, invoiceData: null });
+            fetchBilling();
+          }}
+        />
+      )}
       {isConfirmDialogVisible ? (
         <ConfirmationDialog
           open={isConfirmDialogVisible}

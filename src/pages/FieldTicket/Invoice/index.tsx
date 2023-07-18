@@ -12,8 +12,7 @@ import CreateInvoiceDialog from "./CreateInvoiceDialog";
 import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from "src/constants/helpers";
 import { useData } from 'src/StateProvider/Provider';
 import ViewBillingDialog from "./ViewBillingDialog";
-
-
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
 
@@ -85,14 +84,26 @@ const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
     };
 
     const InvoiceMaterialRenderer = (params) => (
-        <span
-            className="link"
-            onClick={() => {
-                setViewBillDialog({ open: true, invoiceData: params.data });
-            }}
-        >
-            <CustomRenderCell value={params?.value} />
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+            <span
+                className="link"
+                onClick={() => {
+                    setViewBillDialog({ open: true, invoiceData: params.data });
+                }}
+            >
+                <CustomRenderCell value={params?.value} />
+            </span>
+            <Box ml={1}>
+                <IconButton
+                    size="small"
+                    onClick={() => {
+                        window.open(`${routes.invoiceDetail.path}/${params?.data?._id}`);
+                    }}
+                >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+            </Box>
+        </div>
     );
 
     const ActionsRenderer = (params) => (
@@ -150,7 +161,7 @@ const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
             .then(({ data: { data, count } }) => {
                 let rows = data.map((u, idx) => {
                     let finalObject = prepareDataForGrid(u, user);
-                    // finalObject['isLatestInvoice'] = idx === 0 ? true : false;
+                    finalObject['isLatestInvoice'] = idx === 0 ? true : false;
                     finalObject['isChecked'] = false;
                     finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
                     return finalObject;
