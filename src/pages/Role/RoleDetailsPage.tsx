@@ -62,7 +62,7 @@ const RoleDetailsPage = () => {
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
   const [roleUsers, setRoleUsers] = useState([]);
-  const [isEdit, setIsEdit] = useState(false)
+  const [isEdit, setIsEdit] = useState(false);
   const [values, setValues] = useState({
     name: '',
     description: ''
@@ -269,7 +269,11 @@ const RoleDetailsPage = () => {
         SetPolicyFieldCheckBox((prevState) => ({ ...prevState, ...copyOfResourcePolicy }));
         handlePolicyResourceCheckBox(copyOfResourcePolicy);
       }
-      setResourceOption(data?.resource?.map((obj) => { return { optionLabel: obj?.resourceLabel, optionValue: obj?.name } }) || []);
+      setResourceOption(
+        data?.resource?.map((obj) => {
+          return { optionLabel: obj?.resourceLabel, optionValue: obj?.name };
+        }) || []
+      );
       setDefaultResourceName(data?.defaultResource || '');
       setSuperAdminAccess(data?.superAdminAccess || false);
       setCanAssignByAnyuser(data?.canAssignByAnyuser || false);
@@ -346,7 +350,7 @@ const RoleDetailsPage = () => {
         });
 
         setUpdating(false);
-        setIsEdit(false)
+        setIsEdit(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -472,7 +476,13 @@ const RoleDetailsPage = () => {
                   </Button>
                 )}
                 {permissions?.role.isUpdate && isEdit && (
-                  <Button disabled={isUpdating || checkError() || !isEdit} variant="contained" color="primary" size="medium" onClick={handleUpdateRole}>
+                  <Button
+                    disabled={isUpdating || checkError() || !isEdit}
+                    variant="contained"
+                    color="primary"
+                    size="medium"
+                    onClick={handleUpdateRole}
+                  >
                     {isUpdating ? <CircularProgress size={22} /> : 'Update'}
                   </Button>
                 )}
@@ -546,17 +556,23 @@ const RoleDetailsPage = () => {
                         setOpen={setOpen}
                         permissions={permissions}
                         isEdit={isEdit}
-
                       />
                     )}
                     {dashBoardOption?.length > 0 && (
-                      <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} isEdit={isEdit} />
+                      <DashboardResources
+                        dashboardList={dashBoardOption}
+                        dashboardName={dashboardName}
+                        setDashboardName={setDashboardName}
+                        isEdit={isEdit}
+                      />
                     )}
                     <DefaultResources
                       resourceList={resourceOption}
                       resourceName={defaultResourceName}
-                      setResourceName={setDefaultResourceName} isEdit={isEdit} />
-                    {!isEditDeleteDisable &&
+                      setResourceName={setDefaultResourceName}
+                      isEdit={isEdit}
+                    />
+                    {!isEditDeleteDisable && (
                       <Box p={1}>
                         <FormControlLabel
                           control={
@@ -573,7 +589,7 @@ const RoleDetailsPage = () => {
                           label="Can Assign By Anyuser"
                         />
                       </Box>
-                    }
+                    )}
                     <Box p={1} pb={2}>
                       <FormControlLabel
                         control={
@@ -737,7 +753,7 @@ const RoleDetailsPage = () => {
                                 })
                               }
                             >
-                              View All &#8599;
+                              View All
                             </Button>
                           </>
                         )}
@@ -787,10 +803,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-                : entityDeleteRec
-                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-                  : ''
+              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+              : entityDeleteRec
+              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+              : ''
           }
           onClose={() => {
             setShowConfirmBox(false);
