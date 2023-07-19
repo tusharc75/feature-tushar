@@ -259,35 +259,6 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                 {values.seriaizedAsset && values.seriaizedAsset.length && warehouseOptions ? (
                   <Box p={2}>
                     <Form>
-                      <div className="datepicker mb-[14px]">
-                        <KeyboardDatePicker
-                          label="Received Date"
-                          variant="inline"
-                          inputVariant="outlined"
-                          required
-                          autoOk
-                          size="small"
-                          margin="dense"
-                          name="receiveDate"
-                          placeholder="Receive Date"
-                          value={values.receiveDate}
-                          format={dateFormatForInputControl}
-                          minDate={
-                            lockDate
-                              ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
-                                ? lockDate
-                                : purchaseOrderData?.purchaseOrderDate
-                              : purchaseOrderData?.purchaseOrderDate
-                          }
-                          maxDate={new Date()}
-                          onChange={(value) => {
-                            setFieldValue('receiveDate', convertDateInDateTime(value));
-                          }}
-                          error={validateDate(values)?.receiveDate}
-                          helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
-                        />
-                      </div>
-
                       <FieldArray
                         name="seriaizedAsset"
                         render={(arrayHelpers) => (
@@ -498,6 +469,34 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                           </div>
                         )}
                       />
+                      <div className="datepicker mt-[14px]">
+                        <KeyboardDatePicker
+                          label="Received Date"
+                          variant="inline"
+                          inputVariant="outlined"
+                          required
+                          autoOk
+                          size="small"
+                          margin="dense"
+                          name="receiveDate"
+                          placeholder="Receive Date"
+                          value={values.receiveDate}
+                          format={dateFormatForInputControl}
+                          minDate={
+                            lockDate
+                              ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                                ? lockDate
+                                : purchaseOrderData?.purchaseOrderDate
+                              : purchaseOrderData?.purchaseOrderDate
+                          }
+                          maxDate={new Date()}
+                          onChange={(value) => {
+                            setFieldValue('receiveDate', convertDateInDateTime(value));
+                          }}
+                          error={validateDate(values)?.receiveDate}
+                          helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
+                        />
+                      </div>
                     </Form>
                   </Box>
                 ) : (
