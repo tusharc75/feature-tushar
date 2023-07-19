@@ -694,7 +694,7 @@ const FormTypes = (props) => {
     }
   };
 
-  return (!fieldData['isShowFieldDependentOn'] || (fieldData['isShowFieldDependentOn'] && values[fieldData['showFieldDependentOn']])) ? type === 'singleLine' ? (
+  return (!fieldData || !fieldData['isShowFieldDependentOn'] || (fieldData['isShowFieldDependentOn'] && values[fieldData['showFieldDependentOn']])) ? type === 'singleLine' ? (
     <InfoLabel
       info={tooltipMessage}
       isTooltip={isTooltip}
