@@ -433,6 +433,7 @@ function GridFilter({
                             required={false}
                             fullWidth
                             size="small"
+                            fieldData={field}
                           />
                         </Grid>
                       )}
