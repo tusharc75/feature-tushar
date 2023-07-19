@@ -21,6 +21,7 @@ const AzureLogin = () => {
       (async () => {
         try {
           const graphToken = await getAzureAcessToken(instance);
+          console.log(graphToken)
           const res = await axiosInstance().post('/user/login/azure', {
             'graph-token': graphToken
           });

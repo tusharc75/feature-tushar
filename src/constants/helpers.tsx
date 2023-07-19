@@ -151,13 +151,13 @@ export const assetsReceivingSteps: stepInterface[] = [
 ];
 
 export const serviceOrderSteps: stepInterface[] = [
-  { name: 'Field Ticket', title: 'Field Ticket', icon: 'receivingTicket' },
+  { name: 'Field Ticket', title: 'Field Tickets', icon: 'receivingTicket' },
   { name: 'Add Services', title: 'Add', icon: 'add' },
   { name: 'Add Products', title: 'Products', icon: 'assign' },
   { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
   { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' },
-  { name: 'Field Ticket Invoice', title: 'Invoice', icon: 'invoice' }
+  { name: 'Field Ticket Invoice', title: 'Invoices', icon: 'invoice' }
 ];
 
 export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed'];
