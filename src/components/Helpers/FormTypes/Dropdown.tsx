@@ -1,8 +1,7 @@
-import { Box, Chip, Grid, IconButton, TextField, CircularProgress } from '@material-ui/core';
-import debounce from 'lodash/debounce';
+import { Box, Chip, Grid, IconButton, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import ManageWarehouse from 'src/pages/Warehouse/ManageWarehouse';
 import {
@@ -26,7 +25,6 @@ import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 import { camelCase, has, isEmpty } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
-import axiosInstance from 'src/axios/axiosInstance';
 
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
   const lookupDependentOn = fieldData?.lookupDependentOn;
@@ -35,7 +33,7 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
   if (!lookupDependentOn || isEmpty(lookupDependentOn)) {
     let oData = options;
     if (fieldData?.fieldName === 'owner') {
-      const optionDatas = options?.filter((option: any) => ![...values['collaborator'] || []]?.includes(option?.optionValue)) || [];
+      const optionDatas = options?.filter((option: any) => ![...values['collaborator']]?.includes(option?.optionValue)) || [];
       oData = optionDatas || [];
     } else if (fieldData?.fieldName === 'collaborator') {
       const optionDatas = options?.filter((option: any) => option?.optionValue !== values['owner']) || [];
@@ -113,56 +111,55 @@ function Dropdown({
   const {
     state: { permissions }
   }: any = useData();
-  const [lookupDialog, setLookupDialog] = useState(false);
-  const [extraOptions, setExtraOptions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const [lookupDialog, setLookupDialog] = React.useState(false);
   const { newAddressOptionList, setNewAddressOptionList } = React.useContext(NewAddressOptionList);
+  // const [extraOptions, setExtraOptions] = useState([]);
+  // const [loading, setLoading] = useState(false);
+  // const [inputValue, setInputValue] = useState('');
 
-  const fetchOptions = React.useCallback(debounce(async (searchKey: string = '') => {
-    try {
-      const lookupResource = fieldData?.lookupResource;
-      let query = `sa-field/options?resource=${lookupResource}&limit=10&search=${searchKey}`;
-      if(fieldData?.lookupDependentOn) {
-        const key = fieldData?.lookupDependentOn;
-        const val = values[fieldData?.lookupDependentOn];
+  // const fetchOptions = React.useCallback(debounce(async (searchKey: string = '') => {
+  //   try {
+  //     const lookupResourceName = fieldData?.lookupResource || lookupResource;
+  //     let query = `sa-field/options?resource=${lookupResourceName}&limit=10&search=${searchKey}`;
+  //     if(fieldData?.lookupDependentOn) {
+  //       const key = fieldData?.lookupDependentOn;
+  //       const val = values[fieldData?.lookupDependentOn];
 
-        if(val !== undefined && val!=='') {
-          query += `&lookupDependentOn=${key}&lookupDependentOnValue=${val}`;
-          if(fieldData.lookupDependentOnField !== undefined && fieldData.lookupDependentOnField !== '') {
-            query += `&lookupDependentOnField=${fieldData.lookupDependentOnField}`;
-          }
-        } else {
-          setExtraOptions([]);
-          setLoading(false);
-          return;
-        }
-      }
-      const response = await axiosInstance().get(query);
-      const currentSelection = values[name] ? [...extraOptions].filter((data: any) => values[name].includes(data.optionValue)) : [];
-      const newOptions = [...response.data.data];
+  //       if(val !== undefined && val!=='') {
+  //         query += `&lookupDependentOn=${key}&lookupDependentOnValue=${val}`;
+  //         if(fieldData.lookupDependentOnField !== undefined && fieldData.lookupDependentOnField !== '') {
+  //           query += `&lookupDependentOnField=${fieldData.lookupDependentOnField}`;
+  //         }
+  //       } else {
+  //         setExtraOptions([]);
+  //         setLoading(false);
+  //         return;
+  //       }
+  //     }
+  //     const response = await axiosInstance().get(query);
+  //     const currentSelection = values[name] ? [...extraOptions].filter((data: any) => values[name].includes(data.optionValue)) : [];
+  //     const newOptions = [...response.data.data];
 
-      currentSelection.forEach(selectedOption => {
-        const alreadyIncluded = newOptions.some(option => option.optionValue === selectedOption.optionValue);
-        if (!alreadyIncluded) {
-          newOptions.push(selectedOption);
-        }
-      });
+  //     currentSelection.forEach(selectedOption => {
+  //       const alreadyIncluded = newOptions.some(option => option.optionValue === selectedOption.optionValue);
+  //       if (!alreadyIncluded) {
+  //         newOptions.push(selectedOption);
+  //       }
+  //     });
 
-      setExtraOptions(newOptions);
-    } catch (error) {
-      console.error(error);
-    }
-    setLoading(false);
-  }, 1000), [fieldData?.lookupResource, fieldData?.lookupDependentOn, values]);
+  //     setExtraOptions(newOptions);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  //   setLoading(false);
+  // }, 1000), [fieldData?.lookupResource, fieldData?.lookupDependentOn, values]);
 
-
-  const handleInputChangeMulti = (event, value, reason) => {
-    if (reason === 'input') {
-      setInputValue(event.target.value);
-      fetchOptions(event.target.value);
-    }
-  };
+  // const handleInputChangeMulti = (event, value, reason) => {
+  //   if (reason === 'input') {
+  //     setInputValue(event.target.value);
+  //     fetchOptions(event.target.value);
+  //   }
+  // };
 
   return (
     <Box key={fieldData?.lookupResource}>
@@ -175,131 +172,132 @@ function Dropdown({
             warningMessage={fieldData?.warningTooltipMessage}
             doNotShowInfoTooltip={fieldData?.doNotShowInfoTooltip}
           >
-            {fieldData?.lookupResource === sidebarResource.serializedAsset? (type === 'multiSelect' ? (
-              <Autocomplete
-                {...rest}
-                multiple
-                disableCloseOnSelect={true}
-                onOpen={() => {
-                  setLoading(true);
-                  fetchOptions('');
-                }}
-                onInputChange={handleInputChangeMulti}
-                inputValue={inputValue}
-                options={extraOptions}
-                loading={loading}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                value={values[name] ? [...extraOptions].filter((data: any) => values[name].includes(data.optionValue)) : []}
-                getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
-                ChipProps={{
-                  style: {
-                    maxWidth: 330
-                  }
-                }}
-                onChange={
-                  onChange
-                    ? onChange
-                    : (e, value: any, reason) => {
-                      if (setFieldValue) {
-                        setFieldValue(
-                          name,
-                          value.map((val) => val.optionValue)
-                        );
-                      }
-                      setInputValue('');
+            {/* {fieldData?.lookupResource === sidebarResource.serializedAsset ? (
+              type === 'multiSelect' ? (
+                <Autocomplete
+                  {...rest}
+                  multiple
+                  disableCloseOnSelect={true}
+                  onOpen={() => {
+                    setLoading(true);
+                    fetchOptions('');
+                  }}
+                  onInputChange={handleInputChangeMulti}
+                  inputValue={inputValue}
+                  options={extraOptions}
+                  loading={loading}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  value={values[name] ? [...extraOptions].filter((data: any) => values[name].includes(data.optionValue)) : []}
+                  getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                  ChipProps={{
+                    style: {
+                      maxWidth: 330
                     }
-                }
-                onClose={() => setInputValue('')}
-                forcePopupIcon={true}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="outlined"
-                    label={getLabel(label)}
-                    name={name}
-                    error={touched[name] && Boolean(errors[name])}
-                    helperText={touched[name] && errors[name]}
-                    required={required}
-                    style={{ whiteSpace: 'nowrap' }}
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <React.Fragment>
-                          {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                          {params.InputProps.endAdornment}
-                        </React.Fragment>
-                      )
-                    }}
-                  />
-                )}
-              />
-            ) : (
-              <Autocomplete
-                {...rest}
-                onOpen={() => {
-                  setLoading(true);
-                  fetchOptions('');
-                }}
-                onInputChange={(event, value) => fetchOptions(value)}
-                disabled={fieldData?.isUneditable || rest?.disabled}
-                options={extraOptions}
-                loading={loading}
-                getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={[...extraOptions].find((data: any) => data.optionValue === values[name]) || ''}
-                onChange={
-                  onChange
-                    ? onChange
-                    : (e, val) => {
-                      if (setFieldValue) {
-                        handleChange(name, val && val.optionValue ? val.optionValue : '');
-                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                        fieldChange?.forEach((val: any) => {
-                          setFieldValue(val.fieldName, val.value);
-                        });
-                        const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                        if (filterFields?.length) {
-                          filterFields?.forEach((ele: any) => {
-                            if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
-                              if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
-                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
-                              } else {
-                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
-                              }
-                            }
-                          });
+                  }}
+                  onChange={
+                    onChange
+                      ? onChange
+                      : (e, value: any, reason) => {
+                          if (setFieldValue) {
+                            setFieldValue(
+                              name,
+                              value.map((val) => val.optionValue)
+                            );
+                          }
+                          setInputValue('');
                         }
-                      }
-                    }
-                }
-                selectOnFocus
-                clearOnBlur
-                handleHomeEndKeys
-                forcePopupIcon={true}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    name={name}
-                    label={getLabel(label)}
-                    variant="outlined"
-                    style={{ outline: '1px solid white' }}
-                    error={touched[name] && Boolean(errors[name])}
-                    helperText={touched[name] && errors[name]}
-                    required={required}
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <React.Fragment>
-                          {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                          {params.InputProps.endAdornment}
-                        </React.Fragment>
-                      )
-                    }}
-                  />
-                )}
-              />
-            ))
-            :(type === 'multiSelect' ? (
+                  }
+                  onClose={() => setInputValue('')}
+                  forcePopupIcon={true}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="outlined"
+                      label={getLabel(label)}
+                      name={name}
+                      error={touched[name] && Boolean(errors[name])}
+                      helperText={touched[name] && errors[name]}
+                      required={required}
+                      style={{ whiteSpace: 'nowrap' }}
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <React.Fragment>
+                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                          </React.Fragment>
+                        )
+                      }}
+                    />
+                  )}
+                />
+              ) : (
+                <Autocomplete
+                  {...rest}
+                  onOpen={() => {
+                    setLoading(true);
+                    fetchOptions('');
+                  }}
+                  onInputChange={(event, value) => fetchOptions(value)}
+                  disabled={fieldData?.isUneditable || rest?.disabled}
+                  options={extraOptions}
+                  loading={loading}
+                  getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={[...extraOptions].find((data: any) => data.optionValue === values[name]) || ''}
+                  onChange={
+                    onChange
+                      ? onChange
+                      : (e, val) => {
+                          if (setFieldValue) {
+                            handleChange(name, val && val.optionValue ? val.optionValue : '');
+                            const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                            fieldChange?.forEach((val: any) => {
+                              setFieldValue(val.fieldName, val.value);
+                            });
+                            const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                            if (filterFields?.length) {
+                              filterFields?.forEach((ele: any) => {
+                                if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
+                                  if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
+                                    setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+                                  } else {
+                                    setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
+                                  }
+                                }
+                              });
+                            }
+                          }
+                        }
+                  }
+                  selectOnFocus
+                  clearOnBlur
+                  handleHomeEndKeys
+                  forcePopupIcon={true}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      name={name}
+                      label={getLabel(label)}
+                      variant="outlined"
+                      style={{ outline: '1px solid white' }}
+                      error={touched[name] && Boolean(errors[name])}
+                      helperText={touched[name] && errors[name]}
+                      required={required}
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <React.Fragment>
+                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                          </React.Fragment>
+                        )
+                      }}
+                    />
+                  )}
+                />
+              ) */}
+            { type === 'multiSelect' ? (
               <Autocomplete
                 {...rest}
                 multiple
@@ -321,13 +319,13 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, value: any, reason) => {
-                      if (setFieldValue) {
-                        setFieldValue(
-                          name,
-                          value.map((val) => val.optionValue)
-                        );
+                        if (setFieldValue) {
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
+                        }
                       }
-                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -359,26 +357,26 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, val) => {
-                      if (setFieldValue) {
-                        handleChange(name, val && val.optionValue ? val.optionValue : '');
-                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                        fieldChange?.forEach((val: any) => {
-                          setFieldValue(val.fieldName, val.value);
-                        });
-                        const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                        if (filterFields?.length) {
-                          filterFields?.forEach((ele: any) => {
-                            if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
-                              if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
-                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
-                              } else {
-                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
-                              }
-                            }
+                        if (setFieldValue) {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
                           });
+                          const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                          if (filterFields?.length) {
+                            filterFields?.forEach((ele: any) => {
+                              if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
+                                if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
+                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+                                } else {
+                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
+                                }
+                              }
+                            });
+                          }
                         }
                       }
-                    }
                 }
                 selectOnFocus
                 clearOnBlur
@@ -397,7 +395,7 @@ function Dropdown({
                   />
                 )}
               />
-            ))}
+            )}
           </InfoLabel>
         </Grid>
         {rest?.hidelookupAddButton ? null : fieldData?.addBulkOptions ? (
@@ -888,7 +886,7 @@ function Dropdown({
                           let tempNewOption = {
                             default: true,
                             email: data?.email,
-                            optionLabel: data?.concatedName || data?.firstName + " " + data?.middleName + " " + data?.lastName,
+                            optionLabel: data?.concatedName || data?.firstName + ' ' + data?.middleName + ' ' + data?.lastName,
                             optionValue: data?._id,
                             parentAccount: data?.accountName,
                             order: option.length,
@@ -936,11 +934,13 @@ function Dropdown({
                           setOptionsList([tempNewOption, ...option]);
                           setNewAddressOptionList([...newAddressOptionList, tempNewOption]);
                           if (type === 'multiSelect') {
-                            handleChange(name, tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []);
+                            handleChange(
+                              name,
+                              tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                            );
                           } else {
                             handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                           }
-
                         }
                       }}
                     />
