@@ -109,24 +109,28 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
     let resultValues: any = {}
     resultValues[name] = value;
     try {
+        var newValue = value;
+        if (fieldData?.type === 'currencyAmount') {
+            newValue = parseFloat(value)
+        }
         loop_count = 0;
         if (fieldData.type !== 'currencyAmount' && (fieldData.type === 'converter' || fieldData.isConverter === true)) {
-            resultValues = handleConverter(fieldData, fields, values, fieldData.fieldName, unit, value, resultValues);
+            resultValues = handleConverter(fieldData, fields, values, fieldData.fieldName, unit, newValue, resultValues);
 
         } else if (fieldData.type === 'currencyAmount' && (fieldData.type === 'converter' || fieldData.isConverter === true)) {
-            resultValues = handleCurrencyConverter(fieldData, fields, values, fieldData.fieldName, currency, unit, value, resultValues);
+            resultValues = handleCurrencyConverter(fieldData, fields, values, fieldData.fieldName, currency, unit, newValue, resultValues);
         }
         else if (fieldData.type === 'currencyAmount') {
-            resultValues = handleCurrency(fieldData, fields, values, fieldData.fieldName, currency, value, resultValues);
+            resultValues = handleCurrency(fieldData, fields, values, fieldData.fieldName, currency, newValue, resultValues);
         }
         if (fieldData && fieldData.isMulitFormula) {
             resultValues = handleMulitFormula(fieldData, fields, values, resultValues);
         }
         if (fieldData.type === "vlookupDropdown" || fieldData.isVlookup) {
-            resultValues = handleVlookup(fieldData, fields, values, name, value, resultValues);
+            resultValues = handleVlookup(fieldData, fields, values, name, newValue, resultValues);
         }
-        resultValues = handleFormula(fieldData, fields, values, name, value, resultValues, true);
-        resultValues = handleCheckVlookupReverse(fieldData, fields, values, name, value, resultValues);
+        resultValues = handleFormula(fieldData, fields, values, name, newValue, resultValues, true);
+        resultValues = handleCheckVlookupReverse(fieldData, fields, values, name, newValue, resultValues);
         if (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') {
             fields && fields.filter((_f: any) => (_f.type === "dropDown" || _f.type === 'multiSelect') && _f.isDependentDropdown && _f.dropdowDependentOn === fieldData.fieldName).forEach((_r: any) => {
                 if (fieldData.type === 'dropDown') {
