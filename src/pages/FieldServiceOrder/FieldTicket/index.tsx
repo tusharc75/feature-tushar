@@ -290,7 +290,8 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom }) => {
             estimateEndDate: serviceOrderData?.estimateEndDate || '',
             customerAccount: serviceOrderData?.customerAccount?.optionValue || '',
             billingAddress: serviceOrderData?.billingAddress?.optionValue || '',
-            shippingAddress: serviceOrderData?.shippingAddress?.optionValue || ''
+            shippingAddress: serviceOrderData?.shippingAddress?.optionValue || '',
+            collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || [],
           }}
           onSuccess={() => {
             setOpenDialog({ open: false, id: null });
