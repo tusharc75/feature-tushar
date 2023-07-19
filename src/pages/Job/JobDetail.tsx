@@ -20,7 +20,7 @@ import ManageJobDialog from './ManageJobDialog';
 import Material from './Material';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { ACTIVITY_RESOURCE, jobProcessSteps } from 'src/constants/helpers';
-import Fleet from './Fleet';
+import Dispatch from './Dispatch';
 import Invoice from './Invoice';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
@@ -232,7 +232,7 @@ const JobDetail = () => {
               />
             )}
 
-            {currentStep === 1 && jobData && <Fleet renderedFrom={`${renderedFrom}_grid-1`} jobData={jobData} setNextStep={setNextStep} />}
+            {currentStep === 1 && jobData && <Dispatch renderedFrom={`${renderedFrom}_grid-1`} jobData={jobData} setNextStep={setNextStep} />}
           </ContentFullScreen>
         </TabPanel>
         <TabPanel value={tabValue} index={2}>

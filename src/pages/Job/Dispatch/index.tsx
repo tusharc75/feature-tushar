@@ -13,7 +13,7 @@ import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const Fleet = ({ jobData, renderedFrom, setNextStep }) => {
+const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
@@ -238,4 +238,4 @@ const Fleet = ({ jobData, renderedFrom, setNextStep }) => {
   );
 };
 
-export default Fleet;
+export default Dispatch;

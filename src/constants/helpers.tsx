@@ -79,7 +79,7 @@ export const productionOrderSteps: stepInterface[] = [
 
 export const jobProcessSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Fleet', title: 'Fleet', icon: 'ticket' }
+  { name: 'Dispatch', title: 'Dispatch', icon: 'dispatch' },
 ];
 
 export const salesOrderProcessSteps: stepInterface[] = [
