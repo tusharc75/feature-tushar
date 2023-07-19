@@ -1467,23 +1467,39 @@ const FormTypes = (props) => {
                                 _currency,
                                 e.target.value === ''
                                   ? 0
-                                  : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
-                                    ? e.target.value.replace(/,/g, '')
-                                    : parseFloat(e.target.value.replace(/,/g, ''))
+                                  : e.target.value.replace(/,/g, '')
                               );
                             } else {
                               handleChange(
                                 name + '_' + _currency.toLowerCase(),
                                 e.target.value === ''
                                   ? 0
-                                  : e?.target?.value?.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
-                                    ? e.target.value.replace(/,/g, '')
-                                    : parseFloat((parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces)))
+                                  : e.target.value.replace(/,/g, '')
                               );
                             }
                           }
                         }
                     }
+                    onBlur={(e) => {
+                      if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                        if (fieldData.displayCurrency.length > 1) {
+                          handleCurrencyChange(
+                            name,
+                            _currency,
+                            e.target.value === ''
+                              ? 0
+                              : parseFloat((parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces)))
+                          );
+                        } else {
+                          handleChange(
+                            name + '_' + _currency.toLowerCase(),
+                            e.target.value === ''
+                              ? 0
+                              : parseFloat((parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces)))
+                          );
+                        }
+                      }
+                    }}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
