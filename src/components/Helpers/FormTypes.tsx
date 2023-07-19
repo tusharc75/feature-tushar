@@ -694,7 +694,8 @@ const FormTypes = (props) => {
     }
   };
 
-  return (!fieldData?.isShowFieldDependentOn || (fieldData?.isShowFieldDependentOn
+
+  return (!fieldData || !fieldData?.isShowFieldDependentOn || (fieldData?.isShowFieldDependentOn
     && fieldData?.showFieldDependentOn && values[fieldData?.showFieldDependentOn])) ?
     type === 'singleLine' ? (
       <InfoLabel
