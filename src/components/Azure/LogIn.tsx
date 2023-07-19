@@ -13,6 +13,7 @@ const LogIn = () => {
     try {
       await instance.loginPopup();
     } catch (e) {
+      console.log(e)
     }
   };
   return (
