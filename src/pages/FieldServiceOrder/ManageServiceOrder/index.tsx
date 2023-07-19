@@ -67,7 +67,7 @@ const ManageServiceOrderDialog = ({
     try {
       let fieldData;
       const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
-      fieldData = response?.data?.data;
+      fieldData = response?.data?.data?.filter((e) => e?.fieldData?.fieldName !== 'rentalJob');
 
       var statusOptions = [];
       fieldData?.forEach((e: any) => {
