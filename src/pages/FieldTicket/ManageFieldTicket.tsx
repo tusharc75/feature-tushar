@@ -150,6 +150,9 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
             if (referenceData?.service && fieldsDataForCreate?.some((e) => e.fieldName === 'service')) {
               tempInitialData['service'] = referenceData?.service;
             }
+            if (referenceData?.collaborator && fieldsDataForCreate?.some((e) => e.fieldName === 'collaborator')) {
+              tempInitialData['collaborator'] = referenceData?.collaborator;
+            }
           }
         }
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
