@@ -694,295 +694,297 @@ const FormTypes = (props) => {
     }
   };
 
-  return (!fieldData['isShowFieldDependentOn'] || (fieldData['isShowFieldDependentOn'] && values[fieldData['showFieldDependentOn']])) ? type === 'singleLine' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        disabled={fieldData?.isUneditable || rest?.disabled}
-        variant="outlined"
-        type="text"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
-      />
-    </InfoLabel>
-  ) : type === 'name' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="text"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={(e) => {
-          const regex = /^[a-zA-Z ]+$/i;
-          if (e.target.value === '' || regex.test(e.target.value.trim())) {
-            setFieldValue(name, e.target.value.trim());
-          }
-        }}
-      />
-    </InfoLabel>
-  ) : type === 'multiLine' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="text"
-        multiline
-        label={getLabel(label)}
-        name={name}
-        required={required}
-        rows={3}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trimStart())}
-      />
-    </InfoLabel>
-  ) : type === 'number' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        label={getLabel(label)}
-        name={name}
-        required={required}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        ref={inputNumberRef}
-        onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
-        InputProps={{
-          inputComponent: CustomFormat as any,
-          inputProps: {
-            allowNegative: false,
-            onValueChange: (values) => {
-              handleChange(name, values.value);
-            },
-            selectedCurrencyCode: selectedCurrencyCode
-          },
-          startAdornment: startAdornment
-        }}
-      />
-    </InfoLabel>
-  ) : type === 'percent' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        type="number"
-        variant="outlined"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        InputProps={{
-          endAdornment: '%',
-          inputProps: { min: 0 },
-          readOnly: fieldData && fieldData.isUneditable ? true : false
-        }}
-        ref={inputNumberRef}
-        onChange={
-          onChange
-            ? onChange
-            : (e) => {
-              handleChange(name, e.target.value ? parseFloat(e.target.value) : 0);
+  return (!fieldData?.isShowFieldDependentOn || (fieldData?.isShowFieldDependentOn
+    && fieldData?.showFieldDependentOn && values[fieldData?.showFieldDependentOn])) ? 
+    type === 'singleLine' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          disabled={fieldData?.isUneditable || rest?.disabled}
+          variant="outlined"
+          type="text"
+          label={getLabel(label)}
+          required={required}
+          name={name}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
+        />
+      </InfoLabel>
+    ) : type === 'name' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          type="text"
+          label={getLabel(label)}
+          required={required}
+          name={name}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={(e) => {
+            const regex = /^[a-zA-Z ]+$/i;
+            if (e.target.value === '' || regex.test(e.target.value.trim())) {
+              setFieldValue(name, e.target.value.trim());
             }
-        }
-      />
-    </InfoLabel>
-  ) : type === 'email' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="email"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}
-      />
-    </InfoLabel>
-  ) : type === 'password' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="password"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}
-      />
-    </InfoLabel>
-  ) : type === 'mobileNumber' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <MuiPhoneInput
-        {...rest}
-        defaultCountry={'us'}
-        disableAreaCodes
-        countryCodeEditable
-        variant="outlined"
-        required={required}
-        label={getLabel(label)}
-        name={name}
-        value={values[name]}
-        onChange={
-          onChange
-            ? onChange
-            : (val) => {
-              if (val === '+') {
-                setFieldValue(name, '');
-              } else {
-                setFieldValue(name, val);
+          }}
+        />
+      </InfoLabel>
+    ) : type === 'multiLine' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          type="text"
+          multiline
+          label={getLabel(label)}
+          name={name}
+          required={required}
+          rows={3}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trimStart())}
+        />
+      </InfoLabel>
+    ) : type === 'number' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          label={getLabel(label)}
+          name={name}
+          required={required}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          ref={inputNumberRef}
+          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
+          InputProps={{
+            inputComponent: CustomFormat as any,
+            inputProps: {
+              allowNegative: false,
+              onValueChange: (values) => {
+                handleChange(name, values.value);
+              },
+              selectedCurrencyCode: selectedCurrencyCode
+            },
+            startAdornment: startAdornment
+          }}
+        />
+      </InfoLabel>
+    ) : type === 'percent' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          type="number"
+          variant="outlined"
+          label={getLabel(label)}
+          required={required}
+          name={name}
+          value={values[name]}
+          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          InputProps={{
+            endAdornment: '%',
+            inputProps: { min: 0 },
+            readOnly: fieldData && fieldData.isUneditable ? true : false
+          }}
+          ref={inputNumberRef}
+          onChange={
+            onChange
+              ? onChange
+              : (e) => {
+                handleChange(name, e.target.value ? parseFloat(e.target.value) : 0);
+              }
+          }
+        />
+      </InfoLabel>
+    ) : type === 'email' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          type="email"
+          label={getLabel(label)}
+          required={required}
+          name={name}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}
+        />
+      </InfoLabel>
+    ) : type === 'password' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          type="password"
+          label={getLabel(label)}
+          required={required}
+          name={name}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}
+        />
+      </InfoLabel>
+    ) : type === 'mobileNumber' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <MuiPhoneInput
+          {...rest}
+          defaultCountry={'us'}
+          disableAreaCodes
+          countryCodeEditable
+          variant="outlined"
+          required={required}
+          label={getLabel(label)}
+          name={name}
+          value={values[name]}
+          onChange={
+            onChange
+              ? onChange
+              : (val) => {
+                if (val === '+') {
+                  setFieldValue(name, '');
+                } else {
+                  setFieldValue(name, val);
+                }
+              }
+          }
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+        />
+      </InfoLabel>
+    ) : type === 'freeStyleMultiSelect' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        doNotShowInfoTooltip={doNotShowInfoTooltip}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <Autocomplete
+          {...rest}
+          multiple
+          disableCloseOnSelect={true}
+          freeSolo
+          options={[]}
+          ChipProps={{
+            style: {
+              maxWidth: 330
+            }
+          }}
+          renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="outlined"
+              margin="dense"
+              label={getLabel(label)}
+              name={name}
+              error={touched[name] && Boolean(errors[name])}
+              helperText={touched[name] && errors[name]}
+              required={required}
+            />
+          )}
+          value={values[name]}
+          onBlur={(e: any) => {
+            if (e.target.value && e.target.value.trim() !== '') {
+              setFieldValue(name, [...values[name], e.target.value]);
+            }
+          }}
+          onChange={(e, value: any) => {
+            let valuesToInsert = [];
+            for (var val of value) {
+              if (val && val.trim() !== '') {
+                valuesToInsert.push(val);
               }
             }
-        }
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-      />
-    </InfoLabel>
-  ) : type === 'freeStyleMultiSelect' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      doNotShowInfoTooltip={doNotShowInfoTooltip}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <Autocomplete
-        {...rest}
-        multiple
-        disableCloseOnSelect={true}
-        freeSolo
-        options={[]}
-        ChipProps={{
-          style: {
-            maxWidth: 330
-          }
-        }}
-        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            margin="dense"
-            label={getLabel(label)}
-            name={name}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            required={required}
-          />
-        )}
-        value={values[name]}
-        onBlur={(e: any) => {
-          if (e.target.value && e.target.value.trim() !== '') {
-            setFieldValue(name, [...values[name], e.target.value]);
-          }
-        }}
-        onChange={(e, value: any) => {
-          let valuesToInsert = [];
-          for (var val of value) {
-            if (val && val.trim() !== '') {
-              valuesToInsert.push(val);
-            }
-          }
-          setFieldValue(name, valuesToInsert);
-        }}
-      />
-    </InfoLabel>
-  ) : (type === 'dropDown' || type === 'multiSelect') && (lookup || fieldData?.lookup) ? (
-    <>
-      <Dropdown
-        InfoLabel={InfoLabel}
-        fieldData={fieldData}
-        rest={rest}
-        option={option}
-        values={values}
-        type={type}
-        onChange={onChange}
-        label={label}
-        name={name}
-        addFieldOption={addFieldOption}
-        setOptionsList={(data) => {
-          setOptionsList(data);
-          const tempallFields = [...allFields];
-          tempallFields?.forEach((e) => {
-            if (e.fieldName === name) {
-              e.option = data;
-            }
-          });
-          setAllFields(tempallFields);
-        }}
-        handleChange={handleChange}
-        getLabel={getLabel}
-        touched={touched}
-        errors={errors}
-        required={required}
-        setFieldValue={setFieldValue}
-        fields={allFields}
-      />
-    </>
-  ) : type === 'dropDown' ||
-    type === 'lookup' ||
-    (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse) ||
-    (type === 'formula' && fieldData && fieldData.isDropdown) ? (
+            setFieldValue(name, valuesToInsert);
+          }}
+        />
+      </InfoLabel>
+    ) : (type === 'dropDown' || type === 'multiSelect') && (lookup || fieldData?.lookup) ? (
+      <>
+        <Dropdown
+          InfoLabel={InfoLabel}
+          fieldData={fieldData}
+          rest={rest}
+          option={option}
+          values={values}
+          type={type}
+          onChange={onChange}
+          label={label}
+          name={name}
+          addFieldOption={addFieldOption}
+          setOptionsList={(data) => {
+            setOptionsList(data);
+            const tempallFields = [...allFields];
+            tempallFields?.forEach((e) => {
+              if (e.fieldName === name) {
+                e.option = data;
+              }
+            });
+            setAllFields(tempallFields);
+          }}
+          handleChange={handleChange}
+          getLabel={getLabel}
+          touched={touched}
+          errors={errors}
+          required={required}
+          setFieldValue={setFieldValue}
+          fields={allFields}
+        />
+      </>
+    ) : type === 'dropDown' ||
+      type === 'lookup' ||
+      (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse) ||
+      (type === 'formula' && fieldData && fieldData.isDropdown) ? (
     <>
       <InfoLabel
         info={tooltipMessage}
