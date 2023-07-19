@@ -4,7 +4,6 @@ import Box from '@material-ui/core/Box';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
 export const ShowFieldDependentOn = ({ name, values, setFieldValue, fields, _id }) => {
-    console.log(values, 'values')
     const [options, setOptions] = useState([]);
     useEffect(() => {
         const checkboxFields = fields.filter((field) => field?.type === 'checkBox')?.map((field) => ({
