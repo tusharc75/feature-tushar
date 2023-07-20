@@ -1217,6 +1217,9 @@ body::-webkit-scrollbar-thumb {
 
   .MuiStepIcon-active {
     color: #378280 !important;
+    [data-mode='dark'] & {
+      color: white !important;
+    }
   }
 
   .MuiStepLabel-active {
