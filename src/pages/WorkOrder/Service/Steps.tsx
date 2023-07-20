@@ -11,12 +11,12 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS
 } from 'src/constants/helpers';
-import { Box, IconButton, Grid, Typography, Chip, Menu, MenuItem, ClickAwayListener, useMediaQuery } from '@material-ui/core';
+import { Box, IconButton, Grid, Typography, Chip, Menu, MenuItem, ClickAwayListener, useMediaQuery, Checkbox } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual, set } from 'lodash';
 import StepFieldsDialog from './StepFieldsDialog';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import CompleteDialog from './CompleteDialog';
@@ -31,6 +31,31 @@ import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Comments from './Comments';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+
+interface StepInterface {
+  _id: string;
+  stepName: string;
+  order: number;
+  leadDay: number;
+  costPrice: number;
+  listPrice: number;
+  isPassFail: boolean;
+  isPassAddon: boolean;
+  passAddon: any[];
+  isFailAddon: boolean;
+  failAddon: any[];
+  isJumpStepPass: boolean;
+  jumpStepsPass: any[];
+  isJumpStepFail: boolean;
+  jumpStepsFail: any[];
+  isQuoteRevisionOnFail: boolean;
+  returnToServiceOnFail: string;
+  isReturnToServiceOnFail: boolean;
+  isReturnToStepOnFail: boolean;
+  returnToStepOnFail: string;
+  customStep: boolean;
+  isAllowToPerform: boolean;
+}
 
 const TimerComponent = ({ stepData, updateTime = true }) => {
   const [time, setTime] = useState(null);
@@ -101,16 +126,14 @@ const useStyles = makeStyles((theme: Theme) =>
       boxShadow: 'none !important'
     },
     accordionHeading: {
-      padding: '16px',
+      padding: '16px 16px 16px 7px',
       ['@media (min-width:768px)']: {
-        padding: '16px 20px'
+        padding: '16px 20px 16px 7px'
       },
       ['@media (min-width:1024px)']: {
-        padding: '16px 40px'
+        padding: '16px 40px 16px 7px'
       },
-      ['@media (min-width:1150px)']: {
-        padding: '16px 40px'
-      },
+
       '& > div': {
         alignItems: 'center',
         justifyContent: 'space-between'
@@ -166,7 +189,11 @@ const useStyles = makeStyles((theme: Theme) =>
       paddingInline: '5px',
       fontWeight: 500
     },
-    mainContainer: {}
+    mainContainer: {
+      ['@media (max-width:768px)']: {
+        marginBottom: '70px'
+      }
+    }
   })
 );
 
@@ -209,11 +236,13 @@ const Steps = ({
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
   const selectedServiceRef = React.useRef(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, loading: false, steps: [] });
+  const [selectedSteps, setSelectedSteps] = useState<string[]>([]);
 
   useEffect(() => {
     if ((!selectedServiceRef.current || selectedServiceRef.current !== selectedService._id) && selectedService._id) {
       selectedServiceRef.current = selectedService._id;
       setServiceDetails(null);
+      setSelectedSteps([]);
     }
     fetchServiceData();
   }, [selectedService]);
@@ -628,16 +657,53 @@ const Steps = ({
     setSelectedStep(null);
   };
 
+  const isSingleChecked = (step: StepInterface): boolean => {
+    return selectedSteps.find((e) => e === step._id) ? true : false;
+  };
+  const isAllChecked = (): boolean => {
+    return selectedSteps.length === serviceDetails?.steps?.length ? true : false;
+  };
+
+  const checkSingle = (step: StepInterface): void => {
+    const isPresent = isSingleChecked(step);
+    if (isPresent) {
+      setSelectedSteps(selectedSteps.filter((e) => e !== step._id));
+    } else {
+      setSelectedSteps([...selectedSteps, step._id]);
+    }
+  };
+  const checkAll = (): void => {
+    if (isAllChecked()) {
+      setSelectedSteps([]);
+    } else {
+      setSelectedSteps(serviceDetails?.steps?.map((e) => e._id));
+    }
+  };
+
   return serviceDetails ? (
     serviceDetails?.steps?.length ? (
       <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }}>
-        <Box
-          p={2}
-          className="d-flex flex-wrap align-center"
-          height={serviceDetails?.steps?.length ? 'auto' : 500}
-          style={{ gap: '16px', justifyContent: 'flex-end' }}
-        >
-          <Box textAlign="center">
+        <div className="flex justify-between items-center gap-[8px] p-[8px] flex-wrap">
+          <div className="flex items-center gap-[15px]  flex-wrap">
+            <label htmlFor="select-all" className="cursor-pointer">
+              <Checkbox id="select-all" color="primary" checked={isAllChecked()} onChange={() => checkAll()} />
+              <span className="font-medium select-none">Select All</span>
+            </label>
+            {selectedSteps.length ? (
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                className={``}
+                disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                  selectedService?.status
+                )}
+              >
+                Complete ({isAllChecked() ? 'All' : selectedSteps.length})
+              </Button>
+            ) : null}
+          </div>
+          <div className={`d-flex flex-wrap align-center justify-end gap-[8px] ml-auto ${serviceDetails?.steps?.length ? 'h-auto' : 'h-[500]'}`}>
             {referencType !== 'workOrderTechnician' && (
               <Button
                 variant="outlined"
@@ -655,22 +721,22 @@ const Steps = ({
                 Add Steps
               </Button>
             )}
-          </Box>
-          {serviceDetails?.steps?.length > 0 && referencType !== 'workOrderTechnician' && (
-            <Box>
-              <Grid container justifyContent="flex-end" alignItems="flex-end">
-                <Button variant="outlined" color="primary" size="small"
-                  disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                    selectedService?.status
-                  )}
-                  onClick={() => setArrangeView(true)}>
-                  <GrDrag fontSize="small" color="primary" className="mr-1" />
-                  Arrange
-                </Button>
-              </Grid>
-            </Box>
-          )}
-        </Box>
+            {serviceDetails?.steps?.length > 0 && referencType !== 'workOrderTechnician' && (
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                  selectedService?.status
+                )}
+                onClick={() => setArrangeView(true)}
+              >
+                <GrDrag fontSize="small" color="primary" className="mr-1" />
+                Arrange
+              </Button>
+            )}
+          </div>
+        </div>
         <div className={classes.root}>
           {serviceDetails?.steps?.map((step, index) => {
             const { stepData, isStepValid } = getFields(step);
@@ -689,20 +755,23 @@ const Steps = ({
                 borderColor={'var(--common-border-color)'}
                 style={{
                   cursor: !stepData?.status ? 'default' : 'pointer',
-                  transition: 'background .5s ease',
+                  transition: 'all .5s ease',
                   backgroundColor: selectedStep?._id === step._id && fieldDialog ? '#ecfdf7' : ''
                 }}
                 className={`${classes.accordionHeading}  ${classes.white}`}
               >
                 <Box sx={{ display: 'flex', flexWrap: 'wrap' }} gridGap={'8px'}>
+                  <Checkbox id="select-step" color="primary" checked={isSingleChecked(step)} onChange={() => checkSingle(step)} />
                   <Box
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       flexWrap: 'wrap',
-                      flexBasis: 'calc(100% - 105px)'
+
+                      flexBasis: 'calc(100% - 155px)'
                     }}
+                    className="mr-auto"
                     gridGap={'8px'}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center' }} gridGap={'8px'}>
@@ -761,8 +830,8 @@ const Steps = ({
                                 {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
                                   ? 'Resume'
                                   : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                                    ? 'Pause'
-                                    : 'Restart'}
+                                  ? 'Pause'
+                                  : 'Restart'}
                               </Button>
                             ))}
                           {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
@@ -831,9 +900,9 @@ const Steps = ({
                             )
                           ) : null}
                           {stepData?.status &&
-                            ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                            ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                            (isMeTechnician || !isAnyTechnician) ? (
+                          ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                          ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                          (isMeTechnician || !isAnyTechnician) ? (
                             [
                               WORKORDER_SERVICE_STEP_STATUS.passed,
                               WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -1070,18 +1139,20 @@ const Steps = ({
             open={true}
             message={
               addServiceConfirmation.type === 'skipServices'
-                ? `As per the logic applied on this step, service${addServiceConfirmation?.services?.length > 1 ? 's' : ''
-                }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been skipped. Do you want to Skip ? `
+                ? `As per the logic applied on this step, service${
+                    addServiceConfirmation?.services?.length > 1 ? 's' : ''
+                  }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been skipped. Do you want to Skip ? `
                 : addServiceConfirmation.type === 'returnToStepOnFail'
-                  ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
+                ? `As per the logic applied on this step, we need to return to step ${
+                    addServiceConfirmation.step?.stepName || ''
                   }. Do you want to continue ?`
-                  : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                    ? ` Step fail requires Quote Revision. Do you confirm on this?`
-                    : addServiceConfirmation.type === 'jumpStep'
-                      ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                      : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                        ?.map((e) => e.serviceName)
-                        ?.toString()} has been added. Do you want to Add ? `
+                : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
+                ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                : addServiceConfirmation.type === 'jumpStep'
+                ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                    ?.map((e) => e.serviceName)
+                    ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
@@ -1125,7 +1196,7 @@ const Steps = ({
             handleClose={() => {
               setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
             }}
-            handleSuccess={() => { }}
+            handleSuccess={() => {}}
           />
         )}
         {consumablesDialog.open && (
@@ -1234,13 +1305,13 @@ export const RenderPassFailChip = ({ status, className = '', ...others }) => {
         background: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
           ? '#e1fce3'
           : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-            ? '#D3D3D3'
-            : '#FAD9D4',
+          ? '#D3D3D3'
+          : '#FAD9D4',
         color: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
           ? '#048e0a'
           : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-            ? 'inherit'
-            : '#D13925'
+          ? 'inherit'
+          : '#D13925'
       }}
     />
   );
