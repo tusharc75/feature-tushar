@@ -701,7 +701,7 @@ export default function QuoteDetail() {
                       }}
                       variant="outlined"
                       size="small"
-                      className="mx-1"
+                      className="mx-1 btn-outline-v1"
                       startIcon={<GiReceiveMoney />}
                       color="primary"
                     >
@@ -714,7 +714,7 @@ export default function QuoteDetail() {
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="primary"
                     size="small"
-                    className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+                    className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} btn-outline-v1`}
                     onClick={() => {
                       setShowAllVersionStatus(true);
                     }}
@@ -733,7 +733,7 @@ export default function QuoteDetail() {
                         }}
                         variant="outlined"
                         size="small"
-                        className="mx-1"
+                        className="mx-1 btn-outline-v1"
                         startIcon={<ThumbUpIcon />}
                         color="primary"
                       >
