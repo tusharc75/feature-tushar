@@ -26,83 +26,8 @@ import { customerAccount, customerContact, supplierAccount, supplierContact } fr
 import { MoreVert } from '@material-ui/icons';
 import ManageContactDialog from '../Contact/ManageContact';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
+import DisplayData from 'src/components/CardDisplayData';
 
-// function DisplayData({ key, label, value, icon, showCopyToText = false }) {
-//   return (
-//     <div style={{ flexGrow: 1 }}>
-//       <List>
-//         <ListItem key={key}>
-//           <ListItemAvatar>{icon}</ListItemAvatar>
-//           <ListItemText
-//             primary={
-//               <>
-//                 <Grid container>
-//                   <Grid item xs={10} md={10} sm={10} className="text-truncate">
-//                     {value ? value : '-'}{' '}
-//                   </Grid>
-//                   <Grid item xs={2} md={2} sm={2}>
-//                     {showCopyToText ? <CopyToClipboard textToCopy={value} /> : null}
-//                   </Grid>
-//                 </Grid>{' '}
-//               </>
-//             }
-//             secondary={label}
-//           />
-//         </ListItem>
-//       </List>
-//     </div>
-//   );
-// }
-function DisplayData({ key, label, value, icon, highlightsHead = false, showCopyToText = false }) {
-  return (
-    <div style={{ flexGrow: 1 }}>
-      <List style={{ padding: 0 }}>
-        <ListItem key={key} style={{ alignItems: 'flex-start', paddingInline: '0' }}>
-          <ListItemIcon style={{ minWidth: '24px', marginTop: 11 }}>{icon}</ListItemIcon>
-          <ListItemText
-            primary={
-              highlightsHead ? (
-                <span
-                  style={{
-                    background: '#EFFBF9',
-                    padding: '1px 6px',
-                    borderRadius: '4px',
-                    color: '#298B88',
-                    fontWeight: 600,
-                    display: showCopyToText ? 'inline-flex' : 'inline-block'
-                  }}
-                >
-                  <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', flexBasis: 'calc(100% - 40px)' }} title={value}>
-                    {value ? value : '-'}
-                  </span>
-                  {showCopyToText ? (
-                    <span>
-                      <CopyToClipboard textToCopy={value} />
-                    </span>
-                  ) : null}
-                </span>
-              ) : value ? (
-                <span style={{ fontSize: '15px', display: showCopyToText ? 'inline-flex' : 'unset' }}>
-                  <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', flexBasis: 'calc(100% - 40px)' }} title={value}>
-                    {value}
-                  </span>
-                  {showCopyToText ? (
-                    <span style={{ flexBasis: '10px' }}>
-                      <CopyToClipboard textToCopy={value} />
-                    </span>
-                  ) : null}
-                </span>
-              ) : (
-                '-'
-              )
-            }
-            secondary={<span style={{ fontSize: '14px' }}>{label}</span>}
-          />
-        </ListItem>
-      </List>
-    </div>
-  );
-}
 export default function OpportunityContacts({
   contacts,
   title,
@@ -151,15 +76,15 @@ export default function OpportunityContacts({
                           </Grid>
                         </Grid>
                         <Grid container>
-                          <Grid item xs={12} sm={6} md={6}>
+                          <Grid item xs={12} md={6}>
                             {<DisplayData key="2" label="Email" showCopyToText={true} icon={<AiOutlineMail size={15} />} value={obj.email || ''} />}
                           </Grid>
                           {supplierContact.contactApi === contactApi && (
-                            <Grid item xs={12} sm={6} md={6}>
+                            <Grid item xs={12} md={6}>
                               {
                                 <Link className="link" to={`/${supplierAccount.accountApi}/detail/${obj.accountName}`}>
                                   <DisplayData
-                                    key="2"
+                                    key="3"
                                     label="Supplier Account"
                                     icon={<AiOutlineUser size={15} />}
                                     value={accounts?.find((item) => item?.optionValue === obj.accountName)?.optionLabel || ''}
@@ -272,7 +197,7 @@ export default function OpportunityContacts({
           }}
           isClone={false}
           contactId={null}
-          referenceData={{ 'accountName': accountId }}
+          referenceData={{ accountName: accountId }}
         />
       )}
     </Accordion>
