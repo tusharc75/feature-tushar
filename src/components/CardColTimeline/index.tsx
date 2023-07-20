@@ -71,7 +71,7 @@ const CardColTimeline: React.FC<cardColInterface> = ({
                 } as React.CSSProperties
               }
             >
-              <div className="bg-[var(--section-bg)] px-[6px] pb-[10px] pt-[0px] rounded-[8px]">
+              <div className="bg-[var(--section-bg)] px-[6px] pb-[10px] pt-[0px] rounded-[8px] min-h-full">
                 <Typography className={styles.colTitle}>
                   <span></span>
                   {col} ({loading ? '--' : data[col].data?.length || data[col].length || 0})
