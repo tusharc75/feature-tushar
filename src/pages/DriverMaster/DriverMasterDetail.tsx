@@ -157,6 +157,7 @@ const DriverMasterDetail = () => {
                   size="small"
                   onClick={handleClick}
                   endIcon={<ArrowDropDownIcon />}
+                  className="btn-outline-v1"
                 >
                   {'Change Status'}
                 </Button>
