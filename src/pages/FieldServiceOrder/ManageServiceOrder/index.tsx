@@ -83,6 +83,7 @@ const ManageServiceOrderDialog = ({
           let data;
           const response: any = await axiosInstance().get(`${fieldServiceOrder.api}/` + serviceOrderId);
           data = response?.data?.data;
+          data['numberofWells'] = data?.wellNumber?.length
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, fieldServiceOrderNumber, updatedBy, ...rest } = data;
             rest['status'] = 'New';
@@ -266,6 +267,13 @@ const ManageServiceOrderDialog = ({
                                               setFieldValue('collaborator', collaborator)
                                             } else {
                                               setFieldValue('collaborator', [])
+                                            }
+                                          }
+                                          if (name === 'wellNumber') {
+                                            if (value) {
+                                              setFieldValue('numberofWells', value?.length);
+                                            } else {
+                                              setFieldValue('numberofWells', 0);
                                             }
                                           }
                                         }}
