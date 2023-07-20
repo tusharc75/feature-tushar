@@ -37,6 +37,9 @@
   & .MuiStepLabel-label {
     color: #378280 !important;
     font-size: 12px;
+    [data-mode='dark'] & {
+      color: white !important;
+    }
   }
 }
 .MuiStepLabel-label.MuiStepLabel-completed {
