@@ -53,6 +53,7 @@ const CardColTimeline: React.FC<cardColInterface> = ({
               md={md}
               lg={lg}
               xl={xl}
+              spacing={2}
               className={styles.singleCol}
               style={
                 {
@@ -70,23 +71,25 @@ const CardColTimeline: React.FC<cardColInterface> = ({
                 } as React.CSSProperties
               }
             >
-              <Typography className={styles.colTitle}>
-                <span></span>
-                {col} ({loading ? '--' : data[col].data?.length || data[col].length || 0})
-              </Typography>
-              {loading ? (
-                <Box p={2} height={500}>
-                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Box>
-              ) : (
-                <RenderColumns
-                  data={data[col].data || data[col]}
-                  cardOnClick={cardOnClick}
-                  cardDataRows={cardDataRows}
-                  passFailStatus={passFailStatus}
-                  passFailAccessor={passFailAccessor}
-                />
-              )}
+              <div className="bg-[var(--section-bg)] px-[6px] pb-[10px] pt-[0px] rounded-[8px]">
+                <Typography className={styles.colTitle}>
+                  <span></span>
+                  {col} ({loading ? '--' : data[col].data?.length || data[col].length || 0})
+                </Typography>
+                {loading ? (
+                  <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                  </Box>
+                ) : (
+                  <RenderColumns
+                    data={data[col].data || data[col]}
+                    cardOnClick={cardOnClick}
+                    cardDataRows={cardDataRows}
+                    passFailStatus={passFailStatus}
+                    passFailAccessor={passFailAccessor}
+                  />
+                )}
+              </div>
             </Grid>
           );
         })}
