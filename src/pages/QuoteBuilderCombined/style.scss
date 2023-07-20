@@ -27,7 +27,7 @@
     font-size: 12px;
     .MuiStepIcon-root.MuiStepIcon-active {
       font-size: 18px !important;
-      color: #378280 !important;
+      color: var(--new_theme_color) !important;
     }
 
     active {
@@ -41,6 +41,9 @@
 }
 .MuiStepLabel-label.MuiStepLabel-completed {
   color: var(--secondary) !important;
+  [data-mode='dark'] & {
+    color: var(--new_theme_color) !important;
+  }
 }
 
 .MuiTab-textColorPrimary.Mui-selected {

@@ -59,7 +59,7 @@ function CustomDialogHeader({
 
   return (
     <React.Fragment>
-      <MuiDialogTitle disableTypography className={`${classes.root} dark:bg-[#282845_!important]`}>
+      <MuiDialogTitle disableTypography className={`${classes.root}`}>
         <Typography
           variant="h6"
           className={`${classes.dialogTitle} title-layout text-truncate`}
