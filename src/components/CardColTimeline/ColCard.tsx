@@ -20,17 +20,17 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
         }
       }}
     >
-      {cardDataRows.map((item) => {
+      {cardDataRows.map((item, index) => {
         if (item.type === 'title') {
           return (
-            <Typography component={'h5'} className={styles.cardTitle}>
+            <Typography key={index} component={'h5'} className={styles.cardTitle} title={data[item.accessor] || '--'}>
               {data[item.accessor] || '--'}
             </Typography>
           );
         }
         if (item.type === 'linkTitle') {
           return (
-            <Typography component={'h5'} className={styles.cardTitle}>
+            <Typography key={index} component={'h5'} className={styles.cardTitle} title={data[item.accessor] || '--'}>
               <Link className={styles.cardDetailsLink} to={() => item.link(data)}>
                 {data[item.accessor] || '--'}
               </Link>
@@ -39,7 +39,7 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
         }
         if (item.type === 'text') {
           return (
-            <Typography className={styles.cardDetails}>
+            <Typography key={index} className={styles.cardDetails} title={data[item.accessor] || '--'}>
               <span>{item.title}: </span>
               {data[item.accessor] || '--'}
             </Typography>
@@ -47,9 +47,9 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
         }
         if (item.type === 'link') {
           return (
-            <Typography className={styles.cardDetails}>
+            <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
-              <Link className={styles.cardDetailsLink} to={() => item.link(data)}>
+              <Link className={styles.cardDetailsLink} to={() => item.link(data)} title={data[item.accessor] || '--'}>
                 {data[item.accessor] || '--'}
               </Link>
             </Typography>
@@ -57,7 +57,7 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
         }
         if (item.type === 'date') {
           return (
-            <Typography className={styles.cardDetails}>
+            <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
               {data[item.accessor] ? moment(data[item.accessor]).format(dateFormat) : '--'}
             </Typography>
@@ -65,7 +65,7 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
         }
         if (item.type === 'dateTime') {
           return (
-            <Typography className={styles.cardDetails}>
+            <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
               {data[item.accessor] ? moment(data[item.accessor]).format(dateTimeFormat) : '--'}
             </Typography>
@@ -75,7 +75,7 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
           const stepTimes = getFieldsWithOtherDetails(data[item.accessor] || []);
           if (stepTimes.length > 0)
             return (
-              <Typography className={styles.cardDetails}>
+              <Typography key={index} className={styles.cardDetails}>
                 <span>{item.title}: </span>
                 <TimerComponent stepTimes={stepTimes} />
               </Typography>
