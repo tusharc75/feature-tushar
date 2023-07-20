@@ -67,7 +67,7 @@ const ManageServiceOrderDialog = ({
     try {
       let fieldData;
       const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
-      fieldData = response?.data?.data?.filter((e) => e?.fieldData?.fieldName !== 'rentalJob');
+      fieldData = response?.data?.data;
 
       var statusOptions = [];
       fieldData?.forEach((e: any) => {
@@ -83,7 +83,6 @@ const ManageServiceOrderDialog = ({
           let data;
           const response: any = await axiosInstance().get(`${fieldServiceOrder.api}/` + serviceOrderId);
           data = response?.data?.data;
-          data['numberofWells'] = data?.wellNumber?.length
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, fieldServiceOrderNumber, updatedBy, ...rest } = data;
             rest['status'] = 'New';
@@ -270,10 +269,12 @@ const ManageServiceOrderDialog = ({
                                             }
                                           }
                                           if (name === 'wellNumber') {
-                                            if (value) {
-                                              setFieldValue('numberofWells', value?.length);
-                                            } else {
-                                              setFieldValue('numberofWells', 0);
+                                            if (initialData?.fields.find((e)=>e?.fieldName === 'numberOfWells')) {
+                                              if (value) {
+                                                setFieldValue('numberOfWells', value?.length);
+                                              } else {
+                                                setFieldValue('numberOfWells', 0);
+                                              }
                                             }
                                           }
                                         }}
