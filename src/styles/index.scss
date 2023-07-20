@@ -3252,7 +3252,7 @@ body {
   .btn-outline-red-v1 {
     background: #ffffff !important;
     border: 1px solid #d65642 !important;
-    color: #d65642 !important;
+    color: #d43e3e !important;
     box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
     border-radius: 3px !important;
     padding: var(--button-v1-padding);
@@ -3273,6 +3273,7 @@ body {
     }
     [data-mode='dark'] & {
       background-color: var(--dark-primary) !important;
+      border: 0px !important;
       &:hover {
         background-color: hsl(240, 27%, 25%) !important;
       }
