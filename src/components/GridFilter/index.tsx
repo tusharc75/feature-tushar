@@ -19,15 +19,7 @@ import SaveFilterDialog from './SaveFilterDialog';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { isEmpty } from 'lodash';
 
-function GridFilter({
-  resource,
-  currentGridApi,
-  handleClose,
-  setSelectedFilter,
-  selectedFilter,
-  currentFomValue,
-  setCurrentFomValue
-}) {
+function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue }) {
   const toastConfig = useContext(CustomToastContext);
 
   const [coloums, setColoums] = useState(null);
@@ -82,25 +74,26 @@ function GridFilter({
               e.fieldLabel = 'Name';
               e.type = 'singleLine';
             }
-          })
-          modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName')
-        }
-        else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact) {
+          });
+          modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName');
+        } else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact) {
           modifiedColumn?.forEach((e) => {
             if (e.fieldName === 'firstName') {
               e.fieldName = 'concatedName';
               e.fieldLabel = 'Name';
               e.type = 'singleLine';
             }
-          })
-          modifiedColumn = modifiedColumn?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e.fieldName))
+          });
+          modifiedColumn = modifiedColumn?.filter((e) => !['lastName', 'middleName', 'salutation']?.includes(e.fieldName));
         }
         if (resource === sidebarResource.serializedAsset) {
-          const currentOwner: any = modifiedColumn?.find((e) => e.fieldName === 'currentOwner')
+          const currentOwner: any = modifiedColumn?.find((e) => e.fieldName === 'currentOwner');
           if (currentOwner) {
-            currentOwner.lookup = true
-            currentOwner.option = [...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.customerAccount)?.option || []),
-            ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.supplierAccount)?.option || [])]
+            currentOwner.lookup = true;
+            currentOwner.option = [
+              ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.customerAccount)?.option || []),
+              ...(modifiedColumn?.find((e) => e.lookupResource === sidebarResource.supplierAccount)?.option || [])
+            ];
           }
         }
         setColoums(modifiedColumn);
@@ -180,7 +173,6 @@ function GridFilter({
     }
   };
 
-
   const createFilterModel = () => {
     const filterModel = {};
     const colNames = Object.keys(formValues);
@@ -202,9 +194,8 @@ function GridFilter({
           type: 'contains',
           filter: formValues[fieldName]
         };
-      }
-      else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
-        const options = coloums?.find((item) => item.fieldName == fieldName)?.option || []
+      } else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
+        const options = coloums?.find((item) => item.fieldName == fieldName)?.option || [];
         if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
           filterModel[fieldName] = {
             filterType: 'text',
@@ -221,17 +212,15 @@ function GridFilter({
             }
           };
         }
-      }
-      else if (['multiSelect', 'dropDown'].includes(col.type) && formValues[fieldName]) {
+      } else if (['multiSelect', 'dropDown'].includes(col.type) && formValues[fieldName]) {
         if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
           filterModel[fieldName] = {
             filterType: 'text',
             type: 'contains',
-            filter: formValues[fieldName],
+            filter: formValues[fieldName]
           };
         }
-      }
-      else if (['dateTime', 'date'].includes(col.type)) {
+      } else if (['dateTime', 'date'].includes(col.type)) {
         const from = `from_${fieldName}`;
         const to = `to_${fieldName}`;
 
@@ -248,8 +237,7 @@ function GridFilter({
             }
           };
         }
-      }
-      else if (col.type === 'checkBox') {
+      } else if (col.type === 'checkBox') {
         if (formValues[fieldName] === true || formValues[fieldName] === false) {
           filterModel[fieldName] = {
             filterType: 'text',
@@ -413,8 +401,13 @@ function GridFilter({
                               InputLabelProps={{
                                 shrink: true
                               }}
-                              minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] :
-                                formValues[`from_${field.fieldName}`] ? formValues[`from_${field.fieldName}`] : new Date()}
+                              minDate={
+                                betweenDate && betweenDate[`from_${field.fieldName}`]
+                                  ? betweenDate[`from_${field.fieldName}`]
+                                  : formValues[`from_${field.fieldName}`]
+                                  ? formValues[`from_${field.fieldName}`]
+                                  : new Date()
+                              }
                             />
                           </Grid>
                         </Fragment>
@@ -455,7 +448,8 @@ function GridFilter({
             disabled={isEmpty(formValues) ? true : false}
             size="small"
             color="primary"
-            variant="contained"
+            // variant="outlined"
+            className="new-dropdown-v1"
           >
             {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
           </Button>

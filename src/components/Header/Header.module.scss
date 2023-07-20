@@ -156,6 +156,9 @@
         right: 23px;
         height: 1px;
         bottom: 0;
+        [data-mode='dark'] & {
+          background-color: #3c3c4b;
+        }
       }
     }
     .list_header {
@@ -169,8 +172,8 @@
       z-index: 1;
       font-size: 14px;
       [data-mode='dark'] & {
-        background-color: #282845;
-        color: white;
+        background-color: var(--dark-primary);
+        color: #9c9b9e;
       }
     }
     .heaaderResults {

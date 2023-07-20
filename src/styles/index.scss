@@ -60,6 +60,10 @@
   --active-border-color: #f99336;
   --form-head-bg: #f1f5ff;
   --primary-text: #2a3042;
+
+  --flow-inActive: #ebebeb;
+  --flow-currentStep: #fff;
+  --flow-active: #c8e9ce;
 }
 
 // Dark Theme
@@ -95,6 +99,10 @@
   --dark-active-border-color: #f99336;
   --form-head-bg: #282845;
   --primary-text: #fff;
+
+  --flow-inActive: #525269cc;
+  --flow-currentStep: var(--dark-primary);
+  --flow-active: var(--dark-primary);
 }
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
@@ -1451,6 +1459,9 @@ body::-webkit-scrollbar-thumb {
   .MuiStepLabel-iconContainer {
     color: var(--secondary) !important;
     opacity: 1 !important;
+    [data-mode='dark'] & {
+      color: var(--new_theme_color) !important;
+    }
   }
 
   .MuiStepLabel-completed {
@@ -1459,10 +1470,16 @@ body::-webkit-scrollbar-thumb {
 
   .MuiStepIcon-active {
     color: #378280 !important;
+    [data-mode='dark'] & {
+      color: rgb(190, 190, 190) !important;
+    }
   }
 
   .MuiStepLabel-active {
     color: #378280 !important;
+    [data-mode='dark'] & {
+      color: white !important;
+    }
   }
 }
 
@@ -2780,7 +2797,7 @@ svg.MuiSvgIcon-root {
   [data-mode='dark'] & {
     color: #fff;
     background-color: var(--dark-primary);
-    border: 1px solid var(--common-border-color) !important;
+    border: 0px solid var(--common-border-color) !important;
   }
 
   &:last-of-type {
@@ -3133,7 +3150,7 @@ svg.MuiSvgIcon-root {
     [data-mode='dark'] & {
       background-color: #282845;
       color: #fff;
-      border: 1px solid #555555 !important;
+      border: 1px solid #4c4b73 !important;
     }
 
     &:first-of-type {
@@ -3234,8 +3251,8 @@ body {
 
   .btn-outline-red-v1 {
     background: #ffffff !important;
-    border: 1px solid #f44336 !important;
-    color: #f44336 !important;
+    border: 1px solid #d65642 !important;
+    color: #d43e3e !important;
     box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
     border-radius: 3px !important;
     padding: var(--button-v1-padding);
@@ -3255,7 +3272,8 @@ body {
       background-color: rgba(0, 0, 0, 0.04) !important;
     }
     [data-mode='dark'] & {
-      background-color: var(--dark-secondary) !important;
+      background-color: var(--dark-primary) !important;
+      border: 0px !important;
       &:hover {
         background-color: hsl(240, 27%, 25%) !important;
       }

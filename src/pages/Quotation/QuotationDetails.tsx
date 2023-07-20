@@ -217,7 +217,6 @@ const QuotationDetails = () => {
         }
       }
 
-
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -322,7 +321,7 @@ const QuotationDetails = () => {
                     }}
                     variant="outlined"
                     size="small"
-                    className="mx-1"
+                    className="mx-1 btn-outline-v1"
                     startIcon={<GiReceiveMoney />}
                     color="primary"
                   >
@@ -334,7 +333,7 @@ const QuotationDetails = () => {
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="primary"
                     size="small"
-                    className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+                    className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} btn-outline-v1`}
                     onClick={() => {
                       setShowAllVersionStatus(true);
                     }}
@@ -347,6 +346,7 @@ const QuotationDetails = () => {
 
                 {allowedToEdit && (
                   <Button
+                    className="btn-outline-v1"
                     variant="outlined"
                     color="default"
                     size="small"
@@ -526,8 +526,9 @@ const QuotationDetails = () => {
               <ShowDoaData status={quotationData.versions[currentVersion].status} doaData={DOAData} />
             </Box>
           )}
-          {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.versions[currentVersion]?.status)
-            &&
+          {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
+            quotationData?.versions[currentVersion]?.status
+          ) && (
             <Box
               style={{
                 marginLeft: 'auto',
@@ -537,7 +538,7 @@ const QuotationDetails = () => {
             >
               <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
             </Box>
-          }
+          )}
           <div>
             <Steps
               isNextStep={false}
@@ -545,15 +546,17 @@ const QuotationDetails = () => {
               steps={stepList}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
-              isStepEnded={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.versions[currentVersion]?.status)}
+              isStepEnded={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
+                quotationData?.versions[currentVersion]?.status
+              )}
               setStepFullScreen={() => setStepFullScreen(true)}
               isPrevStep={prevStep}
               updateStatus={updateProcessStatus}
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
-                    setCustomerAcceptable(true);
-                  }
+                      setCustomerAcceptable(true);
+                    }
                   : null
               }
             />
