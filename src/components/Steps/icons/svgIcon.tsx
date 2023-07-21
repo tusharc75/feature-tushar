@@ -1,5 +1,6 @@
 import React, { SVGProps } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { BsCheckLg } from 'react-icons/bs';
 
 interface svgInterface extends SVGProps<SVGSVGElement> {
   colors?: [string, string];
@@ -588,4 +589,7 @@ export const QualifiedIcon: React.FC<svgInterface> = ({ colors, ...others }) => 
       ></path>
     </svg>
   );
+};
+export const ClosedIcon: React.FC<svgInterface> = ({ colors, ...others }) => {
+  return <BsCheckLg {...others} />;
 };
