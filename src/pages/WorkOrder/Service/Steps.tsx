@@ -57,6 +57,25 @@ interface StepInterface {
   isAllowToPerform: boolean;
 }
 
+export interface StepDataInterface {
+  _id: string;
+  uniqueId: string;
+  serviceId: string;
+  stepId: string;
+  status: string;
+  startDate: Date;
+  startedBy: EdBy;
+  duration: number;
+  endDate: Date;
+  endedBy: EdBy;
+  passFailStatus: string;
+}
+
+export interface EdBy {
+  optionValue: string;
+  optionLabel: string;
+}
+
 const TimerComponent = ({ stepData, updateTime = true }) => {
   const [time, setTime] = useState(null);
   useEffect(() => {
@@ -266,6 +285,29 @@ const Steps = ({
     } finally {
       setShowDeleteConfirmBox({ open: false, loading: false, steps: [] });
       fetchServiceData();
+    }
+  };
+
+  const completeAll = async () => {
+    const payload = {
+      stepids: selectedSteps,
+      uniqueId: selectedService?.uniqueId,
+      serviceId: selectedService?._id
+    };
+    const api = `/work-order/${workOrderId}/multiple-step-complete`;
+    try {
+      const response = await axiosInstance().put(api, payload);
+      toastConfig.setToastConfig({
+        open: true,
+        message: response.data.message,
+        severity: 'success'
+      });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    } finally {
+      await fetchService();
+      await fetchServiceData();
+      setSelectedSteps([]);
     }
   };
 
@@ -665,6 +707,8 @@ const Steps = ({
   };
 
   const checkSingle = (step: StepInterface): void => {
+    // const stepData = getStepData(step);
+    // if (stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.completed) return;
     const isPresent = isSingleChecked(step);
     if (isPresent) {
       setSelectedSteps(selectedSteps.filter((e) => e !== step._id));
@@ -672,6 +716,7 @@ const Steps = ({
       setSelectedSteps([...selectedSteps, step._id]);
     }
   };
+
   const checkAll = (): void => {
     if (isAllChecked()) {
       setSelectedSteps([]);
@@ -679,6 +724,15 @@ const Steps = ({
       setSelectedSteps(serviceDetails?.steps?.map((e) => e._id));
     }
   };
+
+  // const getStepData = (step: StepInterface): StepDataInterface | null => {
+  //   let stepData = null;
+  //   let tempServiceData = stepSubmitedData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
+  //   if (tempServiceData) {
+  //     stepData = tempServiceData;
+  //   }
+  //   return stepData;
+  // };
 
   return serviceDetails ? (
     serviceDetails?.steps?.length ? (
@@ -698,6 +752,7 @@ const Steps = ({
                 disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
                   selectedService?.status
                 )}
+                onClick={completeAll}
               >
                 Complete ({isAllChecked() ? 'All' : selectedSteps.length})
               </Button>
