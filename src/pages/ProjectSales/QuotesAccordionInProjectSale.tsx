@@ -150,19 +150,19 @@ export default function QuotesAccordionInProjectSale({
   const quoteNameWithRedirect = (obj) =>
     hasAccessToEntity(obj.entity) ? (
       obj.entity === selectedEntity ? (
-        <Link className="link" to={`${routes.quoteBuilder.path}/detail/${obj._id}`}>
+        <p className="link text-truncate" onClick={() => window.open(`${routes.quoteBuilder.path}/detail/${obj._id}`)}>
           <Typography className="detailName">{obj.quoteName}</Typography>
-        </Link>
+        </p>
       ) : (
-        <Link
-          className="link"
+        <p
+          className="link text-truncate"
           onClick={() => {
             handleEntityChange(obj.entity);
-            history.push(`${routes.quoteBuilder.path}/detail/${obj._id}`);
+            window.open(`${routes.quoteBuilder.path}/detail/${obj._id}`);
           }}
         >
           <Typography className="detailName">{obj.quoteName}</Typography>
-        </Link>
+        </p>
       )
     ) : (
       <span className="d-flex gap-2 align-items-center">

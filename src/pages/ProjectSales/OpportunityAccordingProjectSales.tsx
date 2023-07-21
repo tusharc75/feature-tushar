@@ -209,19 +209,19 @@ export default function OpportunityAccordianProjectSales({
                                 <Grid item xs={7} sm={8}>
                                   {hasAccessToEntity(obj.entity) ? (
                                     obj.entity === selectedEntity ? (
-                                      <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
+                                      <p className="link text-truncate" onClick={() => window.open(`${routes.opportunityDetail.path}/${obj._id}`)}>
                                         <Typography className="detailName">{obj?.opportunityName}</Typography>
-                                      </Link>
+                                      </p>
                                     ) : (
-                                      <Link
-                                        className="link"
+                                      <p
+                                        className="link text-truncate"
                                         onClick={() => {
                                           handleEntityChange(obj.entity);
-                                          history.push(`${routes.opportunityDetail.path}/${obj._id}`);
+                                          window.open(`${routes.opportunityDetail.path}/${obj._id}`);
                                         }}
                                       >
                                         <Typography className="detailName">{obj?.opportunityName}</Typography>
-                                      </Link>
+                                      </p>
                                     )
                                   ) : (
                                     <span className="d-flex gap-2 align-items-center">

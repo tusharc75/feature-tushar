@@ -138,9 +138,9 @@ const CycleCountDetermination = () => {
 
   const NameRenderer = (params) => {
     return (
-      <Link className="link text-truncate" to={`${routes.productCategoryDetail.path}/${params.data._id}`}>
+      <p className="link text-truncate" title={params.value} onClick={() => window.open(`${routes.productCategoryDetail.path}/${params.data._id}`)}>
         {params.value}
-      </Link>
+      </p>
     );
   };
 

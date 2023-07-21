@@ -45,10 +45,9 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
                       <ListItemText
                         primary={
                           <Typography className={`${classes.title} ""`}>
-                            <Link className="link" to={`/user/detail/${obj._id}`}>
+                            <p className="link text-truncate" onClick={() => window.open(`/user/detail/${obj._id}`)}>
                               {`${obj.firstName} ${obj.lastName}` || ''}
-                            </Link>
-
+                            </p>
                             {managerId === obj._id && (
                               <>
                                 <Box mr={1} title="Project" />
