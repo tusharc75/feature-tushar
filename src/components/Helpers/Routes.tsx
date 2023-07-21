@@ -167,7 +167,7 @@ const routes = {
         : RESOURCE_LABEL.termsAndConditions,
     path: '/terms-and-conditions'
   },
-  termsAndConditionsDetails: {
+  termsAndConditionsDetail: {
     title:
       storedRoutes && storedRoutes.termsAndConditions && storedRoutes.termsAndConditions.title
         ? storedRoutes.termsAndConditions?.title
