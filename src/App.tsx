@@ -585,7 +585,7 @@ function App() {
             <PrivateRoute exact path={routes.termsAndConditions.path}>
               <TermsAndConditions />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.termsAndConditionsDetails.path}/:id`}>
+            <PrivateRoute exact path={`${routes.termsAndConditionsDetail.path}/:id`}>
               <TermsAndConditionDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.priceTemplate.path}>
