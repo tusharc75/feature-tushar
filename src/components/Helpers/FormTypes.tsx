@@ -694,323 +694,326 @@ const FormTypes = (props) => {
     }
   };
 
-  return type === 'singleLine' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        disabled={fieldData?.isUneditable || rest?.disabled}
-        variant="outlined"
-        type="text"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
-      />
-    </InfoLabel>
-  ) : type === 'name' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="text"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={(e) => {
-          const regex = /^[a-zA-Z ]+$/i;
-          if (e.target.value === '' || regex.test(e.target.value.trim())) {
-            setFieldValue(name, e.target.value.trim());
-          }
-        }}
-      />
-    </InfoLabel>
-  ) : type === 'multiLine' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="text"
-        multiline
-        label={getLabel(label)}
-        name={name}
-        required={required}
-        rows={3}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trimStart())}
-      />
-    </InfoLabel>
-  ) : type === 'number' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        label={getLabel(label)}
-        name={name}
-        required={required}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        ref={inputNumberRef}
-        onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
-        InputProps={{
-          inputComponent: CustomFormat as any,
-          inputProps: {
-            allowNegative: false,
-            onValueChange: (values) => {
-              handleChange(name, values.value);
+
+  return (!fieldData || !fieldData?.isShowFieldDependentOn || (fieldData?.isShowFieldDependentOn
+    && fieldData?.showFieldDependentOn && values[fieldData?.showFieldDependentOn])) ?
+    type === 'singleLine' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          disabled={fieldData?.isUneditable || rest?.disabled}
+          variant="outlined"
+          type="text"
+          label={getLabel(label)}
+          required={required}
+          name={name}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
+        />
+      </InfoLabel>
+    ) : type === 'name' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          type="text"
+          label={getLabel(label)}
+          required={required}
+          name={name}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={(e) => {
+            const regex = /^[a-zA-Z ]+$/i;
+            if (e.target.value === '' || regex.test(e.target.value.trim())) {
+              setFieldValue(name, e.target.value.trim());
+            }
+          }}
+        />
+      </InfoLabel>
+    ) : type === 'multiLine' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          type="text"
+          multiline
+          label={getLabel(label)}
+          name={name}
+          required={required}
+          rows={3}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trimStart())}
+        />
+      </InfoLabel>
+    ) : type === 'number' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          label={getLabel(label)}
+          name={name}
+          required={required}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          ref={inputNumberRef}
+          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
+          InputProps={{
+            inputComponent: CustomFormat as any,
+            inputProps: {
+              allowNegative: false,
+              onValueChange: (values) => {
+                handleChange(name, values.value);
+              },
+              selectedCurrencyCode: selectedCurrencyCode
             },
-            selectedCurrencyCode: selectedCurrencyCode
-          },
-          startAdornment: startAdornment
-        }}
-      />
-    </InfoLabel>
-  ) : type === 'percent' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        type="number"
-        variant="outlined"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        InputProps={{
-          endAdornment: '%',
-          inputProps: { min: 0 },
-          readOnly: fieldData && fieldData.isUneditable ? true : false
-        }}
-        ref={inputNumberRef}
-        onChange={
-          onChange
-            ? onChange
-            : (e) => {
+            startAdornment: startAdornment
+          }}
+        />
+      </InfoLabel>
+    ) : type === 'percent' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          type="number"
+          variant="outlined"
+          label={getLabel(label)}
+          required={required}
+          name={name}
+          value={values[name]}
+          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          InputProps={{
+            endAdornment: '%',
+            inputProps: { min: 0 },
+            readOnly: fieldData && fieldData.isUneditable ? true : false
+          }}
+          ref={inputNumberRef}
+          onChange={
+            onChange
+              ? onChange
+              : (e) => {
                 handleChange(name, e.target.value ? parseFloat(e.target.value) : 0);
               }
-        }
-      />
-    </InfoLabel>
-  ) : type === 'email' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="email"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}
-      />
-    </InfoLabel>
-  ) : type === 'password' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="password"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}
-      />
-    </InfoLabel>
-  ) : type === 'mobileNumber' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <MuiPhoneInput
-        {...rest}
-        defaultCountry={'us'}
-        disableAreaCodes
-        countryCodeEditable
-        variant="outlined"
-        required={required}
-        label={getLabel(label)}
-        name={name}
-        value={values[name]}
-        onChange={
-          onChange
-            ? onChange
-            : (val) => {
+          }
+        />
+      </InfoLabel>
+    ) : type === 'email' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          type="email"
+          label={getLabel(label)}
+          required={required}
+          name={name}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}
+        />
+      </InfoLabel>
+    ) : type === 'password' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          type="password"
+          label={getLabel(label)}
+          required={required}
+          name={name}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}
+        />
+      </InfoLabel>
+    ) : type === 'mobileNumber' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <MuiPhoneInput
+          {...rest}
+          defaultCountry={'us'}
+          disableAreaCodes
+          countryCodeEditable
+          variant="outlined"
+          required={required}
+          label={getLabel(label)}
+          name={name}
+          value={values[name]}
+          onChange={
+            onChange
+              ? onChange
+              : (val) => {
                 if (val === '+') {
                   setFieldValue(name, '');
                 } else {
                   setFieldValue(name, val);
                 }
               }
-        }
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-      />
-    </InfoLabel>
-  ) : type === 'freeStyleMultiSelect' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      doNotShowInfoTooltip={doNotShowInfoTooltip}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <Autocomplete
-        {...rest}
-        multiple
-        disableCloseOnSelect={true}
-        freeSolo
-        options={[]}
-        ChipProps={{
-          style: {
-            maxWidth: 330
           }
-        }}
-        renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            margin="dense"
-            label={getLabel(label)}
-            name={name}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            required={required}
-          />
-        )}
-        value={values[name]}
-        onBlur={(e: any) => {
-          if (e.target.value && e.target.value.trim() !== '') {
-            setFieldValue(name, [...values[name], e.target.value]);
-          }
-        }}
-        onChange={(e, value: any) => {
-          let valuesToInsert = [];
-          for (var val of value) {
-            if (val && val.trim() !== '') {
-              valuesToInsert.push(val);
-            }
-          }
-          setFieldValue(name, valuesToInsert);
-        }}
-      />
-    </InfoLabel>
-  ) : (type === 'dropDown' || type === 'multiSelect') && (lookup || fieldData?.lookup) ? (
-    <>
-      <Dropdown
-        InfoLabel={InfoLabel}
-        fieldData={fieldData}
-        rest={rest}
-        option={option}
-        values={values}
-        type={type}
-        onChange={onChange}
-        label={label}
-        name={name}
-        addFieldOption={addFieldOption}
-        setOptionsList={(data) => {
-          setOptionsList(data);
-          const tempallFields = [...allFields];
-          tempallFields?.forEach((e) => {
-            if (e.fieldName === name) {
-              e.option = data;
-            }
-          });
-          setAllFields(tempallFields);
-        }}
-        handleChange={handleChange}
-        getLabel={getLabel}
-        touched={touched}
-        errors={errors}
-        required={required}
-        setFieldValue={setFieldValue}
-        fields={allFields}
-      />
-    </>
-  ) : type === 'dropDown' ||
-    type === 'lookup' ||
-    (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse) ||
-    (type === 'formula' && fieldData && fieldData.isDropdown) ? (
-    <>
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+        />
+      </InfoLabel>
+    ) : type === 'freeStyleMultiSelect' ? (
       <InfoLabel
         info={tooltipMessage}
+        doNotShowInfoTooltip={doNotShowInfoTooltip}
         isTooltip={isTooltip}
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-        doNotShowInfoTooltip={doNotShowInfoTooltip}
       >
-        <Grid container spacing={1}>
-          <Grid item style={{ flexGrow: 1 }}>
-            <Autocomplete
-              {...rest}
-              disabled={fieldData?.isUneditable || rest?.disabled}
-              options={
-                fieldData && fieldData?.isDependentDropdown
-                  ? option.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn])
-                  : option.filter((f) => f.optionLabel)
+        <Autocomplete
+          {...rest}
+          multiple
+          disableCloseOnSelect={true}
+          freeSolo
+          options={[]}
+          ChipProps={{
+            style: {
+              maxWidth: 330
+            }
+          }}
+          renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="outlined"
+              margin="dense"
+              label={getLabel(label)}
+              name={name}
+              error={touched[name] && Boolean(errors[name])}
+              helperText={touched[name] && errors[name]}
+              required={required}
+            />
+          )}
+          value={values[name]}
+          onBlur={(e: any) => {
+            if (e.target.value && e.target.value.trim() !== '') {
+              setFieldValue(name, [...values[name], e.target.value]);
+            }
+          }}
+          onChange={(e, value: any) => {
+            let valuesToInsert = [];
+            for (var val of value) {
+              if (val && val.trim() !== '') {
+                valuesToInsert.push(val);
               }
-              freeSolo={type === 'dropDown' && !lookup}
-              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-              getOptionSelected={(option: any, val) => option.optionValue === val}
-              value={
-                option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
+            }
+            setFieldValue(name, valuesToInsert);
+          }}
+        />
+      </InfoLabel>
+    ) : (type === 'dropDown' || type === 'multiSelect') && (lookup || fieldData?.lookup) ? (
+      <>
+        <Dropdown
+          InfoLabel={InfoLabel}
+          fieldData={fieldData}
+          rest={rest}
+          option={option}
+          values={values}
+          type={type}
+          onChange={onChange}
+          label={label}
+          name={name}
+          addFieldOption={addFieldOption}
+          setOptionsList={(data) => {
+            setOptionsList(data);
+            const tempallFields = [...allFields];
+            tempallFields?.forEach((e) => {
+              if (e.fieldName === name) {
+                e.option = data;
               }
-              onChange={
-                onChange
-                  ? onChange
-                  : (e, val) => {
+            });
+            setAllFields(tempallFields);
+          }}
+          handleChange={handleChange}
+          getLabel={getLabel}
+          touched={touched}
+          errors={errors}
+          required={required}
+          setFieldValue={setFieldValue}
+          fields={allFields}
+        />
+      </>
+    ) : type === 'dropDown' ||
+      type === 'lookup' ||
+      (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse) ||
+      (type === 'formula' && fieldData && fieldData.isDropdown) ? (
+      <>
+        <InfoLabel
+          info={tooltipMessage}
+          isTooltip={isTooltip}
+          warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+          warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+          doNotShowInfoTooltip={doNotShowInfoTooltip}
+        >
+          <Grid container spacing={1}>
+            <Grid item style={{ flexGrow: 1 }}>
+              <Autocomplete
+                {...rest}
+                disabled={fieldData?.isUneditable || rest?.disabled}
+                options={
+                  fieldData && fieldData?.isDependentDropdown
+                    ? option.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn])
+                    : option.filter((f) => f.optionLabel)
+                }
+                freeSolo={type === 'dropDown' && !lookup}
+                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                getOptionSelected={(option: any, val) => option.optionValue === val}
+                value={
+                  option.filter((data) => data.optionValue === values[name]).length ? option.filter((data) => data.optionValue === values[name])[0] : ''
+                }
+                onChange={
+                  onChange
+                    ? onChange
+                    : (e, val) => {
                       if (setFieldValue) {
                         if (!lookup) {
                           if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
@@ -1070,126 +1073,126 @@ const FormTypes = (props) => {
                         }
                       }
                     }
-              }
-              filterOptions={(options, params) => {
-                const filtered = filter(options, params);
-
-                if (
-                  params.inputValue !== '' &&
-                  !option.find((o) => o?.optionValue.includes(params.inputValue)) &&
-                  !lookup &&
-                  (addAdditionalOption || fieldData?.addAdditionalOption)
-                ) {
-                  filtered.push({
-                    order: option.length,
-                    default: false,
-                    optionLabel: `Add "${params.inputValue}"`,
-                    optionValue: params.inputValue
-                  });
                 }
+                filterOptions={(options, params) => {
+                  const filtered = filter(options, params);
 
-                return filtered;
-              }}
-              selectOnFocus
-              clearOnBlur
-              handleHomeEndKeys
-              forcePopupIcon={true}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  name={name}
-                  label={getLabel(label)}
-                  variant="outlined"
-                  style={{ outline: '1px solid white' }}
-                  error={touched[name] && Boolean(errors[name])}
-                  helperText={touched[name] && errors[name]}
-                  required={required}
-                />
-              )}
-            />
+                  if (
+                    params.inputValue !== '' &&
+                    !option.find((o) => o?.optionValue.includes(params.inputValue)) &&
+                    !lookup &&
+                    (addAdditionalOption || fieldData?.addAdditionalOption)
+                  ) {
+                    filtered.push({
+                      order: option.length,
+                      default: false,
+                      optionLabel: `Add "${params.inputValue}"`,
+                      optionValue: params.inputValue
+                    });
+                  }
+
+                  return filtered;
+                }}
+                selectOnFocus
+                clearOnBlur
+                handleHomeEndKeys
+                forcePopupIcon={true}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    name={name}
+                    label={getLabel(label)}
+                    variant="outlined"
+                    style={{ outline: '1px solid white' }}
+                    error={touched[name] && Boolean(errors[name])}
+                    helperText={touched[name] && errors[name]}
+                    required={required}
+                  />
+                )}
+              />
+            </Grid>
+
+            {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
+              <div style={{ marginTop: '7px' }}>
+                <Tooltip title={`Add ${fieldData.fieldLabel}`}>
+                  <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
+                    <AddCircleIcon />
+                  </IconButton>
+                </Tooltip>
+
+                {optionSaveDialog && (
+                  <AddOptionDialog
+                    values={values}
+                    handleChange={handleChange}
+                    name={name}
+                    label={label}
+                    addFieldOption={addFieldOption}
+                    options={option}
+                    setOptions={setOptionsList}
+                    setOpen={setOptionSaveDialog}
+                  />
+                )}
+              </div>
+            )}
           </Grid>
-
-          {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-            <div style={{ marginTop: '7px' }}>
-              <Tooltip title={`Add ${fieldData.fieldLabel}`}>
-                <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
-                  <AddCircleIcon />
-                </IconButton>
-              </Tooltip>
-
-              {optionSaveDialog && (
-                <AddOptionDialog
-                  values={values}
-                  handleChange={handleChange}
-                  name={name}
-                  label={label}
-                  addFieldOption={addFieldOption}
-                  options={option}
-                  setOptions={setOptionsList}
-                  setOpen={setOptionSaveDialog}
-                />
-              )}
-            </div>
-          )}
-        </Grid>
+        </InfoLabel>
+      </>
+    ) : type === 'vlookupDropdown' && fieldData && !fieldData.isvlookupReverse ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          type="text"
+          label={getLabel(label)}
+          required={required}
+          name={name}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
+        />
       </InfoLabel>
-    </>
-  ) : type === 'vlookupDropdown' && fieldData && !fieldData.isvlookupReverse ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="text"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
-      />
-    </InfoLabel>
-  ) : type === 'converter' || (type === 'decimal' && fieldData && fieldData.isConverter) ? (
-    fieldData.displayUnits &&
-    Array.isArray(fieldData.displayUnits) &&
-    fieldData.displayUnits.map((_unit, i) => (
-      <Grid key={_unit} item xs={12} sm={6} md={6}>
-        <Box display="flex">
-          <Box flexGrow={1}>
-            <InfoLabel
-              info={tooltipMessage}
-              isTooltip={isTooltip}
-              warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-              warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-            >
-              {fieldData.isDropdown ? (
-                <Autocomplete
-                  {...rest}
-                  options={optionConverter(
-                    option,
-                    fieldData.units,
-                    fieldData.unitoption,
-                    fieldData.dropdownOnConverter,
-                    _unit,
-                    fieldData.decimalPlaces
-                  )}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
-                  value={
-                    optionConverter(
+    ) : type === 'converter' || (type === 'decimal' && fieldData && fieldData.isConverter) ? (
+      fieldData.displayUnits &&
+      Array.isArray(fieldData.displayUnits) &&
+      fieldData.displayUnits.map((_unit, i) => (
+        <Grid key={_unit} item xs={12} sm={6} md={6}>
+          <Box display="flex">
+            <Box flexGrow={1}>
+              <InfoLabel
+                info={tooltipMessage}
+                isTooltip={isTooltip}
+                warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+                warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+              >
+                {fieldData.isDropdown ? (
+                  <Autocomplete
+                    {...rest}
+                    options={optionConverter(
                       option,
                       fieldData.units,
                       fieldData.unitoption,
                       fieldData.dropdownOnConverter,
                       _unit,
                       fieldData.decimalPlaces
-                    ).filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString()).length
-                      ? optionConverter(
+                    )}
+                    getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                    getOptionSelected={(option: any, val) => option.optionValue === val}
+                    value={
+                      optionConverter(
+                        option,
+                        fieldData.units,
+                        fieldData.unitoption,
+                        fieldData.dropdownOnConverter,
+                        _unit,
+                        fieldData.decimalPlaces
+                      ).filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString()).length
+                        ? optionConverter(
                           option,
                           fieldData.units,
                           fieldData.unitoption,
@@ -1197,97 +1200,238 @@ const FormTypes = (props) => {
                           _unit,
                           fieldData.decimalPlaces
                         ).filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString())[0]
-                      : ''
-                  }
-                  onChange={onChange ? onChange : (e, val) => handleConverterChange(name, _unit, val && parseFloat(val.optionValue))}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      name={name + '_' + _unit.toLowerCase()}
-                      label={label + ' ' + _unit}
-                      variant="outlined"
-                      error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
-                      helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
-                      required={required}
-                    />
+                        : ''
+                    }
+                    onChange={onChange ? onChange : (e, val) => handleConverterChange(name, _unit, val && parseFloat(val.optionValue))}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        name={name + '_' + _unit.toLowerCase()}
+                        label={label + ' ' + _unit}
+                        variant="outlined"
+                        error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
+                        helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
+                        required={required}
+                      />
+                    )}
+                  />
+                ) : (
+                  <TextField
+                    {...rest}
+                    variant="outlined"
+                    type="number"
+                    label={label + ' ' + _unit}
+                    name={name + '_' + _unit.toLowerCase()}
+                    required={required}
+                    value={values[name + '_' + _unit.toLowerCase()]}
+                    error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
+                    helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
+                    ref={inputNumberRef}
+                    onChange={
+                      onChange
+                        ? onChange
+                        : (e) => handleConverterChange(name, _unit, e.target.value === '' ? '' : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))
+                    }
+                    InputProps={{
+                      inputProps: { min: 0 },
+                      readOnly: fieldData && fieldData.isUneditable ? true : false
+                    }}
+                  />
+                )}
+              </InfoLabel>
+            </Box>
+            {i === 0 && fieldData.displayUnits.length !== fieldData.units.length && (
+              <Box>
+                <HtmlTooltip title="Add Converter" className="formActionButton">
+                  <IconButton
+                    onClick={() => {
+                      setIsExtraDispayType(true);
+                    }}
+                    color="primary"
+                    size="small"
+                  >
+                    <SwapHorizIcon />
+                  </IconButton>
+                </HtmlTooltip>
+                {(fieldData.leval === 'product-custom' ||
+                  fieldData.leval === 'product-builder-custom' ||
+                  fieldData.leval === 'price-builder-custom') && (
+                    <HtmlTooltip title="Remove">
+                      <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                        <HighlightOffIcon color="error" />
+                      </IconButton>
+                    </HtmlTooltip>
                   )}
-                />
-              ) : (
-                <TextField
-                  {...rest}
-                  variant="outlined"
-                  type="number"
-                  label={label + ' ' + _unit}
-                  name={name + '_' + _unit.toLowerCase()}
-                  required={required}
-                  value={values[name + '_' + _unit.toLowerCase()]}
-                  error={touched[name + '_' + _unit.toLowerCase()] && Boolean(errors[name + '_' + _unit.toLowerCase()])}
-                  helperText={touched[name + '_' + _unit.toLowerCase()] && errors[name + '_' + _unit.toLowerCase()]}
-                  ref={inputNumberRef}
-                  onChange={
-                    onChange
-                      ? onChange
-                      : (e) => handleConverterChange(name, _unit, e.target.value === '' ? '' : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))
-                  }
-                  InputProps={{
-                    inputProps: { min: 0 },
-                    readOnly: fieldData && fieldData.isUneditable ? true : false
-                  }}
-                />
-              )}
-            </InfoLabel>
-          </Box>
-          {i === 0 && fieldData.displayUnits.length !== fieldData.units.length && (
-            <Box>
-              <HtmlTooltip title="Add Converter" className="formActionButton">
-                <IconButton
-                  onClick={() => {
-                    setIsExtraDispayType(true);
-                  }}
-                  color="primary"
-                  size="small"
-                >
-                  <SwapHorizIcon />
-                </IconButton>
-              </HtmlTooltip>
-              {(fieldData.leval === 'product-custom' ||
-                fieldData.leval === 'product-builder-custom' ||
-                fieldData.leval === 'price-builder-custom') && (
-                <HtmlTooltip title="Remove">
-                  <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                {isExtraDispayType && (
+                  <AddDisplayTypeDialog
+                    handleAddDisplayType={handleAddDisplayType}
+                    displayType="converter"
+                    fieldData={fieldData}
+                    handleClose={() => setIsExtraDispayType(false)}
+                  />
+                )}
+              </Box>
+            )}
+            {fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit) && (
+              <Box>
+                <HtmlTooltip title="Remove" className="formActionButton">
+                  <IconButton onClick={() => handleRemoveDisplayType('converter', fieldData, _unit)} color="primary" size="small">
                     <HighlightOffIcon color="error" />
                   </IconButton>
                 </HtmlTooltip>
-              )}
-              {isExtraDispayType && (
-                <AddDisplayTypeDialog
-                  handleAddDisplayType={handleAddDisplayType}
-                  displayType="converter"
-                  fieldData={fieldData}
-                  handleClose={() => setIsExtraDispayType(false)}
-                />
-              )}
-            </Box>
-          )}
-          {fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit) && (
-            <Box>
-              <HtmlTooltip title="Remove" className="formActionButton">
-                <IconButton onClick={() => handleRemoveDisplayType('converter', fieldData, _unit)} color="primary" size="small">
-                  <HighlightOffIcon color="error" />
-                </IconButton>
-              </HtmlTooltip>
-            </Box>
-          )}
-        </Box>
-      </Grid>
-    ))
-  ) : type === 'currencyAmount' ? (
-    fieldData.displayCurrency &&
-    Array.isArray(fieldData.displayCurrency) &&
-    fieldData.displayCurrency.map((_currency, i) =>
-      fieldData.isConverter && fieldData.displayUnits.length ? (
-        fieldData.displayUnits.map((_unit, j) => (
-          <Grid key={_unit} item xs={12} sm={6} md={6}>
+              </Box>
+            )}
+          </Box>
+        </Grid>
+      ))
+    ) : type === 'currencyAmount' ? (
+      fieldData.displayCurrency &&
+      Array.isArray(fieldData.displayCurrency) &&
+      fieldData.displayCurrency.map((_currency, i) =>
+        fieldData.isConverter && fieldData.displayUnits.length ? (
+          fieldData.displayUnits.map((_unit, j) => (
+            <Grid key={_unit} item xs={12} sm={6} md={6}>
+              <Box display="flex">
+                <Box flexGrow={1}>
+                  <InfoLabel
+                    info={tooltipMessage}
+                    doNotShowInfoTooltip={doNotShowInfoTooltip}
+                    isTooltip={isTooltip}
+                    warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+                    warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+                  >
+                    <TextField
+                      {...rest}
+                      variant="outlined"
+                      //type="number"
+                      label={label + ' ' + _currency + '/' + _unit}
+                      name={name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()}
+                      required={required}
+                      value={
+                        values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
+                          ? values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()].toLocaleString(undefined, { maximumFractionDigits: fieldData?.decimalPlaces })
+                          : values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
+                      }
+                      error={
+                        touched[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] &&
+                        Boolean(errors[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()])
+                      }
+                      helperText={
+                        touched[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] &&
+                        errors[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
+                      }
+                      ref={inputNumberRef}
+                      onChange={
+                        onChange
+                          ? onChange
+                          : (e) => {
+                            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                              handleCurrencyChangeWithConverterChange(
+                                name,
+                                _currency,
+                                _unit,
+                                e.target.value === ''
+                                  ? 0
+                                  : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
+                                    ? e.target.value.replace(/,/g, '')
+                                    : parseFloat(e.target.value.replace(/,/g, ''))
+                              );
+                            }
+                          }
+                      }
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            {result(
+                              find(getUniqueCurrencies(), function (obj) {
+                                return obj.currencyCode === _currency;
+                              }),
+                              'symbolNative'
+                            )}
+                          </InputAdornment>
+                        ),
+                        inputProps: { min: 0, max: 9999999999 },
+                        readOnly: fieldData && fieldData.isUneditable ? true : false
+                      }}
+                    />
+                  </InfoLabel>
+                </Box>
+                {i === 0 && j === 0 && (
+                  <Box>
+                    <HtmlTooltip title="Add Currency" className="formActionButton">
+                      <IconButton
+                        onClick={() => {
+                          setIsExtraDispayType(true);
+                          setDisplayType('currency');
+                        }}
+                        color="primary"
+                        size="small"
+                      >
+                        <CreditCardIcon />
+                      </IconButton>
+                    </HtmlTooltip>
+                    {(fieldData.leval === 'product-custom' ||
+                      fieldData.leval === 'product-builder-custom' ||
+                      fieldData.leval === 'price-builder-custom') && (
+                        <HtmlTooltip title="Remove">
+                          <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                            <HighlightOffIcon color="error" />
+                          </IconButton>
+                        </HtmlTooltip>
+                      )}
+                    {fieldData.displayUnits.length !== fieldData.units.length && (
+                      <HtmlTooltip title="Add Converter" className="formActionButton">
+                        <IconButton
+                          onClick={() => {
+                            setIsExtraDispayType(true);
+                            setDisplayType('converter');
+                          }}
+                          color="primary"
+                          size="small"
+                        >
+                          <SwapHorizIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                    )}
+                    {isExtraDispayType && (
+                      <AddDisplayTypeDialog
+                        handleAddDisplayType={handleAddDisplayType}
+                        displayType={displayType}
+                        fieldData={fieldData}
+                        handleClose={() => {
+                          setIsExtraDispayType(false);
+                          setDisplayType(null);
+                        }}
+                      />
+                    )}
+                  </Box>
+                )}
+                {i === 0 && fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit) && (
+                  <Box>
+                    <HtmlTooltip title="Remove" className="formActionButton">
+                      <IconButton onClick={() => handleRemoveDisplayType('converter', fieldData, _unit)} color="primary" size="small">
+                        <HighlightOffIcon color="error" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </Box>
+                )}
+                {j === 0 &&
+                  fieldData.fieldChanges &&
+                  fieldData.fieldChanges.displayCurrency &&
+                  fieldData.fieldChanges.displayCurrency.includes(_currency) && (
+                    <Box>
+                      <HtmlTooltip title="Remove" className="formActionButton">
+                        <IconButton onClick={() => handleRemoveDisplayType('currency', fieldData, _currency)} color="primary" size="small">
+                          <HighlightOffIcon color="error" />
+                        </IconButton>
+                      </HtmlTooltip>
+                    </Box>
+                  )}
+              </Box>
+            </Grid>
+          ))
+        ) : (
+          <Grid key={_currency} item xs={12} sm={6} md={6}>
             <Box display="flex">
               <Box flexGrow={1}>
                 <InfoLabel
@@ -1301,41 +1445,61 @@ const FormTypes = (props) => {
                     {...rest}
                     variant="outlined"
                     //type="number"
-                    label={label + ' ' + _currency + '/' + _unit}
-                    name={name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()}
+                    label={label + ' ' + _currency}
+                    name={name + '_' + _currency.toLowerCase()}
                     required={required}
                     value={
-                      values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
-                        ? values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()].toLocaleString()
-                        : values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
+                      values[name + '_' + _currency.toLowerCase()]
+                        ? values[name + '_' + _currency.toLowerCase()].toLocaleString(undefined, { maximumFractionDigits: fieldData?.decimalPlaces })
+                        : values[name + '_' + _currency.toLowerCase()]
                     }
-                    error={
-                      touched[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] &&
-                      Boolean(errors[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()])
-                    }
-                    helperText={
-                      touched[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] &&
-                      errors[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
-                    }
+                    error={touched[name + '_' + _currency.toLowerCase()] && Boolean(errors[name + '_' + _currency.toLowerCase()])}
+                    helperText={touched[name + '_' + _currency.toLowerCase()] && errors[name + '_' + _currency.toLowerCase()]}
                     ref={inputNumberRef}
                     onChange={
                       onChange
                         ? onChange
                         : (e) => {
-                            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                              handleCurrencyChangeWithConverterChange(
+                          if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                            if (fieldData.displayCurrency.length > 1) {
+                              handleCurrencyChange(
                                 name,
                                 _currency,
-                                _unit,
                                 e.target.value === ''
                                   ? 0
-                                  : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
-                                  ? e.target.value.replace(/,/g, '')
-                                  : parseFloat(e.target.value.replace(/,/g, ''))
+                                  : e.target.value.replace(/,/g, '')
+                              );
+                            } else {
+                              handleChange(
+                                name + '_' + _currency.toLowerCase(),
+                                e.target.value === ''
+                                  ? 0
+                                  : e.target.value.replace(/,/g, '')
                               );
                             }
                           }
+                        }
                     }
+                    onBlur={(e) => {
+                      if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                        if (fieldData.displayCurrency.length > 1) {
+                          handleCurrencyChange(
+                            name,
+                            _currency,
+                            e.target.value === ''
+                              ? 0
+                              : parseFloat((parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces)))
+                          );
+                        } else {
+                          handleChange(
+                            name + '_' + _currency.toLowerCase(),
+                            e.target.value === ''
+                              ? 0
+                              : parseFloat((parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces)))
+                          );
+                        }
+                      }
+                    }}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -1347,318 +1511,173 @@ const FormTypes = (props) => {
                           )}
                         </InputAdornment>
                       ),
-                      inputProps: { min: 0, max: 9999999999 },
+                      inputProps: { min: 0 },
                       readOnly: fieldData && fieldData.isUneditable ? true : false
                     }}
                   />
                 </InfoLabel>
               </Box>
-              {i === 0 && j === 0 && (
+              {i === 0 && (
                 <Box>
-                  <HtmlTooltip title="Add Currency" className="formActionButton">
-                    <IconButton
-                      onClick={() => {
-                        setIsExtraDispayType(true);
-                        setDisplayType('currency');
-                      }}
-                      color="primary"
-                      size="small"
-                    >
-                      <CreditCardIcon />
-                    </IconButton>
-                  </HtmlTooltip>
-                  {(fieldData.leval === 'product-custom' ||
-                    fieldData.leval === 'product-builder-custom' ||
-                    fieldData.leval === 'price-builder-custom') && (
-                    <HtmlTooltip title="Remove">
-                      <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                        <HighlightOffIcon color="error" />
-                      </IconButton>
-                    </HtmlTooltip>
-                  )}
-                  {fieldData.displayUnits.length !== fieldData.units.length && (
-                    <HtmlTooltip title="Add Converter" className="formActionButton">
+                  {fieldData.hideConverter ? null : (
+                    <HtmlTooltip title="Add Currency" className="formActionButton">
                       <IconButton
                         onClick={() => {
                           setIsExtraDispayType(true);
-                          setDisplayType('converter');
                         }}
                         color="primary"
                         size="small"
                       >
-                        <SwapHorizIcon />
+                        <CreditCardIcon />
                       </IconButton>
                     </HtmlTooltip>
                   )}
+                  {(fieldData.leval === 'product-custom' ||
+                    fieldData.leval === 'product-builder-custom' ||
+                    fieldData.leval === 'price-builder-custom') && (
+                      <HtmlTooltip title="Remove">
+                        <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
+                          <HighlightOffIcon color="error" />
+                        </IconButton>
+                      </HtmlTooltip>
+                    )}
                   {isExtraDispayType && (
                     <AddDisplayTypeDialog
                       handleAddDisplayType={handleAddDisplayType}
-                      displayType={displayType}
+                      displayType="currency"
                       fieldData={fieldData}
-                      handleClose={() => {
-                        setIsExtraDispayType(false);
-                        setDisplayType(null);
-                      }}
+                      handleClose={() => setIsExtraDispayType(false)}
                     />
                   )}
                 </Box>
               )}
-              {i === 0 && fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit) && (
+              {fieldData.fieldChanges && fieldData.fieldChanges.displayCurrency && fieldData.fieldChanges.displayCurrency.includes(_currency) && (
                 <Box>
                   <HtmlTooltip title="Remove" className="formActionButton">
-                    <IconButton onClick={() => handleRemoveDisplayType('converter', fieldData, _unit)} color="primary" size="small">
+                    <IconButton onClick={() => handleRemoveDisplayType('currency', fieldData, _currency)} color="primary" size="small">
                       <HighlightOffIcon color="error" />
                     </IconButton>
                   </HtmlTooltip>
                 </Box>
               )}
-              {j === 0 &&
-                fieldData.fieldChanges &&
-                fieldData.fieldChanges.displayCurrency &&
-                fieldData.fieldChanges.displayCurrency.includes(_currency) && (
-                  <Box>
-                    <HtmlTooltip title="Remove" className="formActionButton">
-                      <IconButton onClick={() => handleRemoveDisplayType('currency', fieldData, _currency)} color="primary" size="small">
-                        <HighlightOffIcon color="error" />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </Box>
-                )}
             </Box>
           </Grid>
-        ))
-      ) : (
-        <Grid key={_currency} item xs={12} sm={6} md={6}>
-          <Box display="flex">
-            <Box flexGrow={1}>
-              <InfoLabel
-                info={tooltipMessage}
-                doNotShowInfoTooltip={doNotShowInfoTooltip}
-                isTooltip={isTooltip}
-                warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-                warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-              >
-                <TextField
-                  {...rest}
-                  variant="outlined"
-                  //type="number"
-                  label={label + ' ' + _currency}
-                  name={name + '_' + _currency.toLowerCase()}
-                  required={required}
-                  value={
-                    values[name + '_' + _currency.toLowerCase()]
-                      ? values[name + '_' + _currency.toLowerCase()].toLocaleString()
-                      : values[name + '_' + _currency.toLowerCase()]
-                  }
-                  error={touched[name + '_' + _currency.toLowerCase()] && Boolean(errors[name + '_' + _currency.toLowerCase()])}
-                  helperText={touched[name + '_' + _currency.toLowerCase()] && errors[name + '_' + _currency.toLowerCase()]}
-                  ref={inputNumberRef}
-                  onChange={
-                    onChange
-                      ? onChange
-                      : (e) => {
-                          if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                            if (fieldData.displayCurrency.length > 1) {
-                              handleCurrencyChange(
-                                name,
-                                _currency,
-                                e.target.value === ''
-                                  ? 0
-                                  : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
-                                  ? e.target.value.replace(/,/g, '')
-                                  : parseFloat(e.target.value.replace(/,/g, ''))
-                              );
-                            } else {
-                              handleChange(
-                                name + '_' + _currency.toLowerCase(),
-                                e.target.value === ''
-                                  ? 0
-                                  : e?.target?.value?.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
-                                  ? e.target.value.replace(/,/g, '')
-                                  : parseFloat(e.target.value.replace(/,/g, ''))
-                              );
-                            }
-                          }
-                        }
-                  }
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        {result(
-                          find(getUniqueCurrencies(), function (obj) {
-                            return obj.currencyCode === _currency;
-                          }),
-                          'symbolNative'
-                        )}
-                      </InputAdornment>
-                    ),
-                    inputProps: { min: 0 },
-                    readOnly: fieldData && fieldData.isUneditable ? true : false
-                  }}
-                />
-              </InfoLabel>
-            </Box>
-            {i === 0 && (
-              <Box>
-                {fieldData.hideConverter ? null : (
-                  <HtmlTooltip title="Add Currency" className="formActionButton">
-                    <IconButton
-                      onClick={() => {
-                        setIsExtraDispayType(true);
-                      }}
-                      color="primary"
-                      size="small"
-                    >
-                      <CreditCardIcon />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
-                {(fieldData.leval === 'product-custom' ||
-                  fieldData.leval === 'product-builder-custom' ||
-                  fieldData.leval === 'price-builder-custom') && (
-                  <HtmlTooltip title="Remove">
-                    <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
-                      <HighlightOffIcon color="error" />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
-                {isExtraDispayType && (
-                  <AddDisplayTypeDialog
-                    handleAddDisplayType={handleAddDisplayType}
-                    displayType="currency"
-                    fieldData={fieldData}
-                    handleClose={() => setIsExtraDispayType(false)}
-                  />
-                )}
-              </Box>
-            )}
-            {fieldData.fieldChanges && fieldData.fieldChanges.displayCurrency && fieldData.fieldChanges.displayCurrency.includes(_currency) && (
-              <Box>
-                <HtmlTooltip title="Remove" className="formActionButton">
-                  <IconButton onClick={() => handleRemoveDisplayType('currency', fieldData, _currency)} color="primary" size="small">
-                    <HighlightOffIcon color="error" />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
-            )}
-          </Box>
-        </Grid>
+        )
       )
-    )
-  ) : type === 'decimal' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="number"
-        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-        label={label}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        ref={inputNumberRef}
-        onChange={
-          onChange
-            ? onChange
-            : (e) => {
+    ) : type === 'decimal' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          type="number"
+          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+          label={label}
+          required={required}
+          name={name}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          ref={inputNumberRef}
+          onChange={
+            onChange
+              ? onChange
+              : (e) => {
                 handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
               }
-        }
-        InputProps={{
-          inputProps: { min: 0 },
-          readOnly: fieldData && fieldData.isUneditable ? true : false
-        }}
-      />
-      {rest?.isMinMaxValue && (
-        <Typography
-          variant="caption"
-          style={{
-            marginLeft: '4px'
+          }
+          InputProps={{
+            inputProps: { min: 0 },
+            readOnly: fieldData && fieldData.isUneditable ? true : false
           }}
-          color={values[name] > rest?.maxValue || values[name] < rest?.minValue ? 'error' : 'secondary'}
-        >
-          {values[name] > rest?.maxValue || values[name] < rest?.minValue
-            ? `Step is considered successful if the value is between ${rest?.minValue} and ${rest?.maxValue}`
-            : `Valid value`}
-        </Typography>
-      )}
-    </InfoLabel>
-  ) : type === 'formula' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        disabled={fieldData?.isUneditable || rest?.disabled}
-        variant="outlined"
-        type={fieldData.returnType === 'decimal' ? 'number' : 'text'}
-        label={getLabel(label)}
-        name={name}
-        required={required}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={
-          onChange
-            ? onChange
-            : (e) => {
+        />
+        {rest?.isMinMaxValue && (
+          <Typography
+            variant="caption"
+            style={{
+              marginLeft: '4px'
+            }}
+            color={values[name] > rest?.maxValue || values[name] < rest?.minValue ? 'error' : 'secondary'}
+          >
+            {values[name] > rest?.maxValue || values[name] < rest?.minValue
+              ? `Step is considered successful if the value is between ${rest?.minValue} and ${rest?.maxValue}`
+              : `Valid value`}
+          </Typography>
+        )}
+      </InfoLabel>
+    ) : type === 'formula' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          disabled={fieldData?.isUneditable || rest?.disabled}
+          variant="outlined"
+          type={fieldData.returnType === 'decimal' ? 'number' : 'text'}
+          label={getLabel(label)}
+          name={name}
+          required={required}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={
+            onChange
+              ? onChange
+              : (e) => {
                 if (fieldData.returnType === 'decimal') {
                   handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
                 } else {
                   handleChange(name, e.target.value);
                 }
               }
-        }
-        InputProps={{
-          inputProps: { min: 0 },
-          readOnly: fieldData && fieldData.isUneditable ? true : false
-        }}
-      />
-    </InfoLabel>
-  ) : type === 'currency' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <Autocomplete
-        {...rest}
-        fullWidth
-        value={
-          currencyData.filter((data) => data.currencyCode === values[name]).length
-            ? currencyData.filter((data) => data.currencyCode === values[name])[0]
-            : ''
-        }
-        options={currencyData}
-        getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
-        getOptionSelected={(option: any, val) => option.currencyCode === val}
-        onChange={onChange ? onChange : (e, val) => setFieldValue(name, val && val.currencyCode ? val.currencyCode : '')}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            name={name}
-            label={getLabel(label)}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            required={required}
-          />
-        )}
-        renderOption={(option) => {
-          const { currencyCode, currencyName, symbolNative } = option;
-          return `${currencyCode} - ${currencyName} - (${symbolNative})`;
-        }}
+          }
+          InputProps={{
+            inputProps: { min: 0 },
+            readOnly: fieldData && fieldData.isUneditable ? true : false
+          }}
+        />
+      </InfoLabel>
+    ) : type === 'currency' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <Autocomplete
+          {...rest}
+          fullWidth
+          value={
+            currencyData.filter((data) => data.currencyCode === values[name]).length
+              ? currencyData.filter((data) => data.currencyCode === values[name])[0]
+              : ''
+          }
+          options={currencyData}
+          getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
+          getOptionSelected={(option: any, val) => option.currencyCode === val}
+          onChange={onChange ? onChange : (e, val) => setFieldValue(name, val && val.currencyCode ? val.currencyCode : '')}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="outlined"
+              name={name}
+              label={getLabel(label)}
+              error={touched[name] && Boolean(errors[name])}
+              helperText={touched[name] && errors[name]}
+              required={required}
+            />
+          )}
+          renderOption={(option) => {
+            const { currencyCode, currencyName, symbolNative } = option;
+            return `${currencyCode} - ${currencyName} - (${symbolNative})`;
+          }}
         // renderOption={(option) => {
         //   const { currencyCode, name, countryCode, symbolNative } = option;
         //   return (
@@ -1681,41 +1700,41 @@ const FormTypes = (props) => {
         //     </Grid>
         //   );
         // }}
-      />
-    </InfoLabel>
-  ) : type === 'multiSelect' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      doNotShowInfoTooltip={doNotShowInfoTooltip}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <Grid container spacing={1}>
-        <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
-          <Autocomplete
-            {...rest}
-            multiple
-            freeSolo={!lookup}
-            disableCloseOnSelect={true}
-            ChipProps={{
-              style: {
-                maxWidth: 330
-              }
-            }}
-            options={
-              fieldData && fieldData?.isDependentDropdown
-                ? option.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn])
-                : //  Some times for resource dropdown we are not getting optionLabel, and multi-select breaks
+        />
+      </InfoLabel>
+    ) : type === 'multiSelect' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        doNotShowInfoTooltip={doNotShowInfoTooltip}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <Grid container spacing={1}>
+          <Grid item xs={!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) ? 10 : 12}>
+            <Autocomplete
+              {...rest}
+              multiple
+              freeSolo={!lookup}
+              disableCloseOnSelect={true}
+              ChipProps={{
+                style: {
+                  maxWidth: 330
+                }
+              }}
+              options={
+                fieldData && fieldData?.isDependentDropdown
+                  ? option.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn])
+                  : //  Some times for resource dropdown we are not getting optionLabel, and multi-select breaks
                   option.filter((f) => f.optionLabel)
-            }
-            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-            value={values[name] ? option.filter((data: any) => values[name].includes(data.optionValue)) : []}
-            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
-            onChange={
-              onChange
-                ? onChange
-                : (e, value: any, reason) => {
+              }
+              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+              value={values[name] ? option.filter((data: any) => values[name].includes(data.optionValue)) : []}
+              getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+              onChange={
+                onChange
+                  ? onChange
+                  : (e, value: any, reason) => {
                     if (setFieldValue) {
                       if (!lookup) {
                         if (reason === 'clear') {
@@ -1783,351 +1802,246 @@ const FormTypes = (props) => {
                       }
                     }
                   }
-            }
-            filterOptions={(options, params) => {
-              const filtered = filter(options, params);
-
-              if (
-                params.inputValue !== '' &&
-                !option.find((o) => o?.optionValue.includes(params.inputValue)) &&
-                !lookup &&
-                (addAdditionalOption || fieldData?.addAdditionalOption)
-              ) {
-                filtered.push({
-                  order: option.length,
-                  default: false,
-                  optionLabel: `Add "${params.inputValue}"`,
-                  optionValue: params.inputValue
-                });
               }
+              filterOptions={(options, params) => {
+                const filtered = filter(options, params);
 
-              return filtered;
-            }}
-            forcePopupIcon={true}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant="outlined"
-                label={getLabel(label)}
-                name={name}
-                error={touched[name] && Boolean(errors[name])}
-                helperText={touched[name] && errors[name]}
-                required={required}
-                style={{ whiteSpace: 'nowrap' }}
-              />
-            )}
-          />
-        </Grid>
-        {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
-          <Grid item xs={2}>
-            <Box style={{ marginTop: '7px' }}>
-              <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
-                <AddCircleIcon />
-              </IconButton>
-              {optionSaveDialog && (
-                <AddOptionDialog
-                  values={values}
-                  handleChange={handleChange}
+                if (
+                  params.inputValue !== '' &&
+                  !option.find((o) => o?.optionValue.includes(params.inputValue)) &&
+                  !lookup &&
+                  (addAdditionalOption || fieldData?.addAdditionalOption)
+                ) {
+                  filtered.push({
+                    order: option.length,
+                    default: false,
+                    optionLabel: `Add "${params.inputValue}"`,
+                    optionValue: params.inputValue
+                  });
+                }
+
+                return filtered;
+              }}
+              forcePopupIcon={true}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="outlined"
+                  label={getLabel(label)}
                   name={name}
-                  label={label}
-                  addFieldOption={addFieldOption}
-                  options={option}
-                  setOptions={setOptionsList}
-                  setOpen={setOptionSaveDialog}
-                  isMultiple={Boolean(type === 'multiSelect')}
+                  error={touched[name] && Boolean(errors[name])}
+                  helperText={touched[name] && errors[name]}
+                  required={required}
+                  style={{ whiteSpace: 'nowrap' }}
                 />
               )}
-            </Box>
+            />
           </Grid>
-        )}
-      </Grid>
-    </InfoLabel>
-  ) : type === 'switch' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <FormControlLabel
-        control={
-          values[name] ? (
-            <RedSwitch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)} />
-          ) : (
-            <GreenSwitch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)} />
-          )
-        }
-        label={getLabel(label)}
-      />
-    </InfoLabel>
-  ) : type === 'checkBox' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <FormControlLabel
-        control={
-          <Checkbox
-            {...rest}
-            required={required}
+          {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
+            <Grid item xs={2}>
+              <Box style={{ marginTop: '7px' }}>
+                <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
+                  <AddCircleIcon />
+                </IconButton>
+                {optionSaveDialog && (
+                  <AddOptionDialog
+                    values={values}
+                    handleChange={handleChange}
+                    name={name}
+                    label={label}
+                    addFieldOption={addFieldOption}
+                    options={option}
+                    setOptions={setOptionsList}
+                    setOpen={setOptionSaveDialog}
+                    isMultiple={Boolean(type === 'multiSelect')}
+                  />
+                )}
+              </Box>
+            </Grid>
+          )}
+        </Grid>
+      </InfoLabel>
+    ) : type === 'switch' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <FormControlLabel
+          control={
+            values[name] ? (
+              <RedSwitch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)} />
+            ) : (
+              <GreenSwitch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)} />
+            )
+          }
+          label={getLabel(label)}
+        />
+      </InfoLabel>
+    ) : type === 'checkBox' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <FormControlLabel
+          control={
+            <Checkbox
+              {...rest}
+              required={required}
+              name={name}
+              checked={values[name]}
+              onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)}
+              color="secondary"
+            />
+          }
+          label={label}
+        />
+      </InfoLabel>
+    ) : type === 'radio' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <FormControl component="fieldset" required={required}>
+          <FormLabel component="legend">{label}</FormLabel>
+          <RadioGroup
+            row={rest?.row}
+            aria-label="gender"
             name={name}
-            checked={values[name]}
-            onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)}
-            color="secondary"
-          />
-        }
-        label={label}
-      />
-    </InfoLabel>
-  ) : type === 'radio' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <FormControl component="fieldset" required={required}>
-        <FormLabel component="legend">{label}</FormLabel>
-        <RadioGroup
-          row={rest?.row}
-          aria-label="gender"
-          name={name}
+            value={values[name]}
+            onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}
+          >
+            {options.map((opt) => (
+              <FormControlLabel key={opt.order} value={opt.optionLabel} disabled={rest?.disabled} control={<Radio />} label={opt.optionLabel} />
+            ))}
+          </RadioGroup>
+        </FormControl>
+      </InfoLabel>
+    ) : type === 'location' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <Autocomplete
+          {...rest}
+          getOptionLabel={(option: any) => (typeof option === 'string' ? option : option.description)}
+          filterOptions={(x) => x}
+          options={optionsList}
+          autoComplete
+          includeInputInList
+          filterSelectedOptions
           value={values[name]}
-          onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}
-        >
-          {options.map((opt) => (
-            <FormControlLabel key={opt.order} value={opt.optionLabel} disabled={rest?.disabled} control={<Radio />} label={opt.optionLabel} />
-          ))}
-        </RadioGroup>
-      </FormControl>
-    </InfoLabel>
-  ) : type === 'location' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <Autocomplete
-        {...rest}
-        getOptionLabel={(option: any) => (typeof option === 'string' ? option : option.description)}
-        filterOptions={(x) => x}
-        options={optionsList}
-        autoComplete
-        includeInputInList
-        filterSelectedOptions
-        value={values[name]}
-        onChange={
-          onChange
-            ? onChange
-            : (event, newValue) => {
+          onChange={
+            onChange
+              ? onChange
+              : (event, newValue) => {
                 setOptions(newValue ? [newValue, ...optionsList] : optionsList);
                 setValue(newValue);
               }
-        }
-        onInputChange={(event, newInputValue) => {
-          setFieldValue(name, newInputValue);
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            name={name}
-            label={getLabel(label)}
-            error={touched[name] && Boolean(errors[name])}
-            helperText={touched[name] && errors[name]}
-            required={required}
-          />
-        )}
-        renderOption={(option: any) => {
-          const matches = option.structured_formatting.main_text_matched_substrings || [];
-          const parts = parse(
-            option.structured_formatting.main_text,
-            matches?.map((match) => [match.offset, match.offset + match.length])
-          );
-
-          return (
-            <Grid container alignItems="center">
-              <Grid item>
-                <LocationOnIcon
-                  style={{
-                    color: theme.palette.text.secondary,
-                    marginRight: theme.spacing(2)
-                  }}
-                />
-              </Grid>
-              <Grid item xs>
-                {parts?.map((part, index) => (
-                  <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
-                    {part.text}
-                  </span>
-                ))}
-
-                <Typography variant="body2" color="textSecondary">
-                  {option.structured_formatting.secondary_text}
-                </Typography>
-              </Grid>
-            </Grid>
-          );
-        }}
-      />
-    </InfoLabel>
-  ) : type === 'imageUpload' ? (
-    <Fragment>
-      <Typography color="textSecondary">{label}</Typography>
-      <Box display="flex" flexDirection="row" mt={1}>
-        <Box position="relative">
-          <Avatar src={values[name]} style={{ width: 70, height: 70 }} alt="org_logo" />
-          <Box display="flex" justifyContent="center" alignItems="center" position="absolute" top="0" right="0" width="100%" height="100%">
-            {isImgUploading && (
-              <>
-                <CircularProgress variant="determinate" value={imageUploadProgress} />
-                <Box top={0} left={0} bottom={0} right={0} position="absolute" display="flex" alignItems="center" justifyContent="center">
-                  <Typography variant="caption" component="div" color="textSecondary">{`${imageUploadProgress}%`}</Typography>
-                </Box>
-              </>
-            )}
-          </Box>
-        </Box>
-        <Box>
-          <label htmlFor={name}>
-            <IconButton title="Add picture" color="primary" size="small" aria-label="upload picture" component="span">
-              <AddCircleIcon />
-              <input
-                onClick={(e: any) => (e.target.value = null)}
-                disabled={isImgUploading}
-                id={name}
-                name={name}
-                onChange={handleUploadImage}
-                accept="image/x-png,image/gif,image/jpeg"
-                style={{
-                  opacity: '0',
-                  position: 'absolute',
-                  zIndex: -1
-                }}
-                type="file"
-              />
-            </IconButton>
-          </label>
-
-          <IconButton
-            disabled={Boolean(!values[name])}
-            title="Remove picture"
-            className={Boolean(!values[name]) ? '' : 'errorColor'}
-            size="small"
-            aria-label="delete picture"
-            component="span"
-            onClick={() => setFieldValue(name, '')}
-          >
-            <DeleteIcon />
-          </IconButton>
-          {isTooltip && Boolean(tooltipMessage) && (
-            <IconButton size="small">
-              <HtmlTooltip title={tooltipMessage}>
-                <InfoIcon color="disabled" />
-              </HtmlTooltip>
-            </IconButton>
+          }
+          onInputChange={(event, newInputValue) => {
+            setFieldValue(name, newInputValue);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="outlined"
+              name={name}
+              label={getLabel(label)}
+              error={touched[name] && Boolean(errors[name])}
+              helperText={touched[name] && errors[name]}
+              required={required}
+            />
           )}
-          <Box flex="1">
-            <Typography
-              variant="body2"
-              className="text-truncate"
-              style={{
-                marginLeft: '4px',
-                display: touched[name] && Boolean(errors[name]) ? '' : 'none'
-              }}
-              color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}
-            >
-              {touched[name] && Boolean(errors[name]) ? errors[name] : null}
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
-    </Fragment>
-  ) : type === 'fileUpload' ? (
-    <Fragment>
-      <Box display="flex" alignItems="center">
-        {/* <Typography color="textSecondary">{label}</Typography> */}
-        {isTooltip && Boolean(tooltipMessage) && (
-          <IconButton size="small">
-            <HtmlTooltip title={tooltipMessage}>
-              <InfoIcon color="disabled" />
-            </HtmlTooltip>
-          </IconButton>
-        )}
-        <Box mr={1} />
-        <input
-          disabled={isFileUploading || !canEdit}
-          id={name}
-          name={name}
-          onChange={handleUploadFile}
-          style={{ display: 'none' }}
-          onClick={(e: any) => (e.target.value = null)}
-          type="file"
-          accept={accept || documentUploadSupportExtensions}
-          multiple={isMultipleUpload}
-        />
-        <label htmlFor={name}>
-          <Button
-            disabled={isFileUploading || !canEdit}
-            variant="contained"
-            color="primary"
-            size="small"
-            component="span"
-            startIcon={isFileUploading && <CircularProgress size={15} />}
-          >
-            {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
-          </Button>
-        </label>
-        {showErrorMessage ? (
-          <>
-            <Box ml={1} />
-            <Box flex="1" className="text-truncate">
-              <Typography variant="body2" className="text-truncate" color={'error'}>
-                {touched[name] && Boolean(errors[name]) ? errors[name] || 'No file choosen' : null}
-              </Typography>
-            </Box>
-          </>
-        ) : null}
-        {doNotShowUploadedFile ? null : (
-          <>
-            <Box ml={1} />
+          renderOption={(option: any) => {
+            const matches = option.structured_formatting.main_text_matched_substrings || [];
+            const parts = parse(
+              option.structured_formatting.main_text,
+              matches?.map((match) => [match.offset, match.offset + match.length])
+            );
 
-            <Box flex="1" className="text-truncate">
-              <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
-                {isFileUploading
-                  ? `Uploading... ${fileUploadProgress}%`
-                  : values[name]
-                  ? values[name]
-                  : touched[name] && Boolean(errors[name])
-                  ? errors[name]
-                  : 'No file choosen'}
-              </Typography>
+            return (
+              <Grid container alignItems="center">
+                <Grid item>
+                  <LocationOnIcon
+                    style={{
+                      color: theme.palette.text.secondary,
+                      marginRight: theme.spacing(2)
+                    }}
+                  />
+                </Grid>
+                <Grid item xs>
+                  {parts?.map((part, index) => (
+                    <span key={index} style={{ fontWeight: part.highlight ? 700 : 400 }}>
+                      {part.text}
+                    </span>
+                  ))}
+
+                  <Typography variant="body2" color="textSecondary">
+                    {option.structured_formatting.secondary_text}
+                  </Typography>
+                </Grid>
+              </Grid>
+            );
+          }}
+        />
+      </InfoLabel>
+    ) : type === 'imageUpload' ? (
+      <Fragment>
+        <Typography color="textSecondary">{label}</Typography>
+        <Box display="flex" flexDirection="row" mt={1}>
+          <Box position="relative">
+            <Avatar src={values[name]} style={{ width: 70, height: 70 }} alt="org_logo" />
+            <Box display="flex" justifyContent="center" alignItems="center" position="absolute" top="0" right="0" width="100%" height="100%">
+              {isImgUploading && (
+                <>
+                  <CircularProgress variant="determinate" value={imageUploadProgress} />
+                  <Box top={0} left={0} bottom={0} right={0} position="absolute" display="flex" alignItems="center" justifyContent="center">
+                    <Typography variant="caption" component="div" color="textSecondary">{`${imageUploadProgress}%`}</Typography>
+                  </Box>
+                </>
+              )}
             </Box>
-            {values[name] ? (
-              <IconButton
-                disabled={Boolean(!values[name])}
-                title="Remove File"
-                size="small"
-                aria-label="delete picture"
-                component="span"
-                onClick={() => setFieldValue(name, '')}
-              >
-                <DeleteIcon color="error" />
+          </Box>
+          <Box>
+            <label htmlFor={name}>
+              <IconButton title="Add picture" color="primary" size="small" aria-label="upload picture" component="span">
+                <AddCircleIcon />
+                <input
+                  onClick={(e: any) => (e.target.value = null)}
+                  disabled={isImgUploading}
+                  id={name}
+                  name={name}
+                  onChange={handleUploadImage}
+                  accept="image/x-png,image/gif,image/jpeg"
+                  style={{
+                    opacity: '0',
+                    position: 'absolute',
+                    zIndex: -1
+                  }}
+                  type="file"
+                />
               </IconButton>
-            ) : null}
-          </>
-        )}
-      </Box>
-    </Fragment>
-  ) : type === 'multiFileUpload' ? (
-    <Fragment>
-      <Box display="flex" alignItems="center">
-        <Grid container spacing={1} alignItems="center">
-          <Grid item xs={12} sm={12} md={12}>
-            {/* <Typography color="textSecondary">{label}</Typography> */}
+            </label>
+
+            <IconButton
+              disabled={Boolean(!values[name])}
+              title="Remove picture"
+              className={Boolean(!values[name]) ? '' : 'errorColor'}
+              size="small"
+              aria-label="delete picture"
+              component="span"
+              onClick={() => setFieldValue(name, '')}
+            >
+              <DeleteIcon />
+            </IconButton>
             {isTooltip && Boolean(tooltipMessage) && (
               <IconButton size="small">
                 <HtmlTooltip title={tooltipMessage}>
@@ -2135,93 +2049,80 @@ const FormTypes = (props) => {
                 </HtmlTooltip>
               </IconButton>
             )}
-            <Box mr={1} />
-            <input
-              disabled={isFileUploading || !canEdit}
-              id={name}
-              name={name}
-              onChange={(e) => handleUploadFile(e, true)}
-              style={{ display: 'none' }}
-              onClick={(e: any) => (e.target.value = null)}
-              type="file"
-              accept={accept || documentUploadSupportExtensions}
-              multiple={true}
-            />
-            <label htmlFor={name}>
-              <Button
-                disabled={isFileUploading || !canEdit}
-                variant="contained"
-                color="primary"
-                size="small"
-                component="span"
-                startIcon={isFileUploading && <CircularProgress size={15} />}
+            <Box flex="1">
+              <Typography
+                variant="body2"
+                className="text-truncate"
+                style={{
+                  marginLeft: '4px',
+                  display: touched[name] && Boolean(errors[name]) ? '' : 'none'
+                }}
+                color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}
               >
-                {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
-              </Button>
-            </label>
-            {showErrorMessage ? (
-              <>
-                <Box ml={1} />
-                <Box flex="1" className="text-truncate">
-                  <Typography variant="body2" className="text-truncate" color={'error'}>
-                    {touched[name] && Boolean(errors[name]) ? errors[name] || 'No file choosen' : null}
-                  </Typography>
-                </Box>
-              </>
-            ) : null}
-          </Grid>
-          {doNotShowUploadedFile ? null : values[name] ? (
-            <>
-              {values[name].map((item, i) => (
-                <>
-                  <Grid item xs={10} sm={10} md={10}>
-                    <Box ml={1} />
-                    <Box flex="1" className="text-truncate">
-                      <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
-                        {item?.fileName}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={2} sm={2} md={2}>
-                    <IconButton
-                      disabled={Boolean(!values[name])}
-                      title="Remove File"
-                      size="small"
-                      aria-label="delete picture"
-                      component="span"
-                      onClick={() => {
-                        setFieldValue(
-                          name,
-                          values[name].filter((d) => d.fileName !== item.fileName)
-                        );
-                      }}
-                    >
-                      <DeleteIcon color="error" />
-                    </IconButton>
-                  </Grid>
-                </>
-              ))}
-
-              {isFileUploading && (
-                <Grid item xs={10} sm={10} md={10}>
-                  <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
-                    {`Uploading... ${fileUploadProgress}%`}
-                  </Typography>
-                </Grid>
-              )}
-            </>
-          ) : (
+                {touched[name] && Boolean(errors[name]) ? errors[name] : null}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Fragment>
+    ) : type === 'fileUpload' ? (
+      <Fragment>
+        <Box display="flex" alignItems="center">
+          {/* <Typography color="textSecondary">{label}</Typography> */}
+          {isTooltip && Boolean(tooltipMessage) && (
+            <IconButton size="small">
+              <HtmlTooltip title={tooltipMessage}>
+                <InfoIcon color="disabled" />
+              </HtmlTooltip>
+            </IconButton>
+          )}
+          <Box mr={1} />
+          <input
+            disabled={isFileUploading || !canEdit}
+            id={name}
+            name={name}
+            onChange={handleUploadFile}
+            style={{ display: 'none' }}
+            onClick={(e: any) => (e.target.value = null)}
+            type="file"
+            accept={accept || documentUploadSupportExtensions}
+            multiple={isMultipleUpload}
+          />
+          <label htmlFor={name}>
+            <Button
+              disabled={isFileUploading || !canEdit}
+              variant="contained"
+              color="primary"
+              size="small"
+              component="span"
+              startIcon={isFileUploading && <CircularProgress size={15} />}
+            >
+              {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
+            </Button>
+          </label>
+          {showErrorMessage ? (
             <>
               <Box ml={1} />
+              <Box flex="1" className="text-truncate">
+                <Typography variant="body2" className="text-truncate" color={'error'}>
+                  {touched[name] && Boolean(errors[name]) ? errors[name] || 'No file choosen' : null}
+                </Typography>
+              </Box>
+            </>
+          ) : null}
+          {doNotShowUploadedFile ? null : (
+            <>
+              <Box ml={1} />
+
               <Box flex="1" className="text-truncate">
                 <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
                   {isFileUploading
                     ? `Uploading... ${fileUploadProgress}%`
                     : values[name]
-                    ? values[name]
-                    : touched[name] && Boolean(errors[name])
-                    ? errors[name]
-                    : 'No file choosen'}
+                      ? values[name]
+                      : touched[name] && Boolean(errors[name])
+                        ? errors[name]
+                        : 'No file choosen'}
                 </Typography>
               </Box>
               {values[name] ? (
@@ -2238,157 +2139,275 @@ const FormTypes = (props) => {
               ) : null}
             </>
           )}
-        </Grid>
-      </Box>
-    </Fragment>
-  ) : type === 'url' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <TextField
-        {...rest}
-        variant="outlined"
-        type="url"
-        label={getLabel(label)}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={touched[name] && Boolean(errors[name])}
-        helperText={touched[name] && errors[name]}
-        onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trim())}
-      />
-    </InfoLabel>
-  ) : type === 'date' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <MuiPickersUtilsProvider utils={DateUtils}>
-        <KeyboardDatePicker
-          {...rest}
-          disabled={fieldData?.isUneditable || rest?.disabled}
-          clearable
-          autoOk
-          required={required}
-          variant="inline"
-          inputVariant="outlined"
-          value={values[name]}
-          name={name}
-          label={getLabel(label)}
-          onChange={onChange ? onChange : (date) => handleChange(name, date ? date : '')}
-          // onChange={(date) => setFieldValue(name, date ? date : "")}
-          error={customError[name] || (touched[name] && Boolean(errors[name]))}
-          helperText={customError[name] || (touched[name] && errors[name])}
-          format={dateFormatForInputControl}
-          InputLabelProps={{
-            shrink: true
-          }}
-        />
-      </MuiPickersUtilsProvider>
-    </InfoLabel>
-  ) : type === 'dateTime' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <MuiPickersUtilsProvider utils={DateUtils}>
-        <KeyboardDateTimePicker
-          {...rest}
-          autoOk
-          clearable
-          required={required}
-          variant="inline"
-          inputVariant="outlined"
-          ampm={false}
-          value={values[name]}
-          name={name}
-          label={getLabel(label)}
-          onChange={(date) => handleChange(name, date)}
-          onError={console.error}
-          disablePast
-          format={dateFormatForInputControl + ' HH:mm'}
-          error={touched[name] && Boolean(errors[name])}
-          helperText={touched[name] && errors[name]}
-          InputLabelProps={{
-            shrink: true
-          }}
-        />
-      </MuiPickersUtilsProvider>
-    </InfoLabel>
-  ) : type === 'year' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <MuiPickersUtilsProvider utils={DateUtils}>
-        <DatePicker
-          {...rest}
-          autoOk
-          clearable
-          required={required}
-          variant="inline"
-          inputVariant="outlined"
-          value={values[name] || new Date()}
-          name={name}
-          label={getLabel(label)}
-          views={['year']}
-          onChange={(date) => setFieldValue(name, date)}
-          error={touched[name] && Boolean(errors[name])}
-          helperText={touched[name] && errors[name]}
-          InputLabelProps={{
-            shrink: true
-          }}
-        />
-      </MuiPickersUtilsProvider>
-    </InfoLabel>
-  ) : type === 'colorPicker' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <Box display="flex" alignItems="center">
-        <Typography color="textSecondary">{label}</Typography>
-        <Box ml={2} display="flex" alignContent="center">
-          <input type="color" name={name} value={values[name]} onChange={(e) => setFieldValue(name, e.target.value)} />
         </Box>
-      </Box>
-      {touched[name] && Boolean(errors[name]) && (
-        <Typography variant="caption" color="error">
-          {errors[name]}
-        </Typography>
-      )}
-    </InfoLabel>
-  ) : type === 'multiImageUpload' ? (
-    <InfoLabel
-      info={tooltipMessage}
-      isTooltip={isTooltip}
-      warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
-      warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
-    >
-      <Typography color="textSecondary">{label}</Typography>
-      <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple type="file" onChange={readImageFile} />
-      <label htmlFor="multiple-images-button">
-        <Button disabled={readingImage} variant="contained" color="primary" component="span">
-          Upload
-        </Button>
-      </label>
-      <Box mt={1}>
-        <Typography color="textSecondary">{values[name]?.length > 0 ? 'Images Preview' : 'No Images'}</Typography>
-        <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
-          <ImageList style={{ flexWrap: 'nowrap', transform: 'translateZ(0)' }}>
-            {values[name]
-              ? values[name].map((item, i) => (
+      </Fragment>
+    ) : type === 'multiFileUpload' ? (
+      <Fragment>
+        <Box display="flex" alignItems="center">
+          <Grid container spacing={1} alignItems="center">
+            <Grid item xs={12} sm={12} md={12}>
+              {/* <Typography color="textSecondary">{label}</Typography> */}
+              {isTooltip && Boolean(tooltipMessage) && (
+                <IconButton size="small">
+                  <HtmlTooltip title={tooltipMessage}>
+                    <InfoIcon color="disabled" />
+                  </HtmlTooltip>
+                </IconButton>
+              )}
+              <Box mr={1} />
+              <input
+                disabled={isFileUploading || !canEdit}
+                id={name}
+                name={name}
+                onChange={(e) => handleUploadFile(e, true)}
+                style={{ display: 'none' }}
+                onClick={(e: any) => (e.target.value = null)}
+                type="file"
+                accept={accept || documentUploadSupportExtensions}
+                multiple={true}
+              />
+              <label htmlFor={name}>
+                <Button
+                  disabled={isFileUploading || !canEdit}
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  component="span"
+                  startIcon={isFileUploading && <CircularProgress size={15} />}
+                >
+                  {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
+                </Button>
+              </label>
+              {showErrorMessage ? (
+                <>
+                  <Box ml={1} />
+                  <Box flex="1" className="text-truncate">
+                    <Typography variant="body2" className="text-truncate" color={'error'}>
+                      {touched[name] && Boolean(errors[name]) ? errors[name] || 'No file choosen' : null}
+                    </Typography>
+                  </Box>
+                </>
+              ) : null}
+            </Grid>
+            {doNotShowUploadedFile ? null : values[name] ? (
+              <>
+                {values[name].map((item, i) => (
+                  <>
+                    <Grid item xs={10} sm={10} md={10}>
+                      <Box ml={1} />
+                      <Box flex="1" className="text-truncate">
+                        <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
+                          {item?.fileName}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={2} sm={2} md={2}>
+                      <IconButton
+                        disabled={Boolean(!values[name])}
+                        title="Remove File"
+                        size="small"
+                        aria-label="delete picture"
+                        component="span"
+                        onClick={() => {
+                          setFieldValue(
+                            name,
+                            values[name].filter((d) => d.fileName !== item.fileName)
+                          );
+                        }}
+                      >
+                        <DeleteIcon color="error" />
+                      </IconButton>
+                    </Grid>
+                  </>
+                ))}
+
+                {isFileUploading && (
+                  <Grid item xs={10} sm={10} md={10}>
+                    <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
+                      {`Uploading... ${fileUploadProgress}%`}
+                    </Typography>
+                  </Grid>
+                )}
+              </>
+            ) : (
+              <>
+                <Box ml={1} />
+                <Box flex="1" className="text-truncate">
+                  <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
+                    {isFileUploading
+                      ? `Uploading... ${fileUploadProgress}%`
+                      : values[name]
+                        ? values[name]
+                        : touched[name] && Boolean(errors[name])
+                          ? errors[name]
+                          : 'No file choosen'}
+                  </Typography>
+                </Box>
+                {values[name] ? (
+                  <IconButton
+                    disabled={Boolean(!values[name])}
+                    title="Remove File"
+                    size="small"
+                    aria-label="delete picture"
+                    component="span"
+                    onClick={() => setFieldValue(name, '')}
+                  >
+                    <DeleteIcon color="error" />
+                  </IconButton>
+                ) : null}
+              </>
+            )}
+          </Grid>
+        </Box>
+      </Fragment>
+    ) : type === 'url' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          type="url"
+          label={getLabel(label)}
+          required={required}
+          name={name}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trim())}
+        />
+      </InfoLabel>
+    ) : type === 'date' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <MuiPickersUtilsProvider utils={DateUtils}>
+          <KeyboardDatePicker
+            {...rest}
+            disabled={fieldData?.isUneditable || rest?.disabled}
+            clearable
+            autoOk
+            required={required}
+            variant="inline"
+            inputVariant="outlined"
+            value={values[name]}
+            name={name}
+            label={getLabel(label)}
+            onChange={onChange ? onChange : (date) => handleChange(name, date ? date : '')}
+            // onChange={(date) => setFieldValue(name, date ? date : "")}
+            error={customError[name] || (touched[name] && Boolean(errors[name]))}
+            helperText={customError[name] || (touched[name] && errors[name])}
+            format={dateFormatForInputControl}
+            InputLabelProps={{
+              shrink: true
+            }}
+          />
+        </MuiPickersUtilsProvider>
+      </InfoLabel>
+    ) : type === 'dateTime' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <MuiPickersUtilsProvider utils={DateUtils}>
+          <KeyboardDateTimePicker
+            {...rest}
+            autoOk
+            clearable
+            required={required}
+            variant="inline"
+            inputVariant="outlined"
+            ampm={false}
+            value={values[name]}
+            name={name}
+            label={getLabel(label)}
+            onChange={(date) => handleChange(name, date)}
+            onError={console.error}
+            disablePast
+            format={dateFormatForInputControl + ' HH:mm'}
+            error={touched[name] && Boolean(errors[name])}
+            helperText={touched[name] && errors[name]}
+            InputLabelProps={{
+              shrink: true
+            }}
+          />
+        </MuiPickersUtilsProvider>
+      </InfoLabel>
+    ) : type === 'year' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <MuiPickersUtilsProvider utils={DateUtils}>
+          <DatePicker
+            {...rest}
+            autoOk
+            clearable
+            required={required}
+            variant="inline"
+            inputVariant="outlined"
+            value={values[name] || new Date()}
+            name={name}
+            label={getLabel(label)}
+            views={['year']}
+            onChange={(date) => setFieldValue(name, date)}
+            error={touched[name] && Boolean(errors[name])}
+            helperText={touched[name] && errors[name]}
+            InputLabelProps={{
+              shrink: true
+            }}
+          />
+        </MuiPickersUtilsProvider>
+      </InfoLabel>
+    ) : type === 'colorPicker' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <Box display="flex" alignItems="center">
+          <Typography color="textSecondary">{label}</Typography>
+          <Box ml={2} display="flex" alignContent="center">
+            <input type="color" name={name} value={values[name]} onChange={(e) => setFieldValue(name, e.target.value)} />
+          </Box>
+        </Box>
+        {touched[name] && Boolean(errors[name]) && (
+          <Typography variant="caption" color="error">
+            {errors[name]}
+          </Typography>
+        )}
+      </InfoLabel>
+    ) : type === 'multiImageUpload' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <Typography color="textSecondary">{label}</Typography>
+        <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple type="file" onChange={readImageFile} />
+        <label htmlFor="multiple-images-button">
+          <Button disabled={readingImage} variant="contained" color="primary" component="span">
+            Upload
+          </Button>
+        </label>
+        <Box mt={1}>
+          <Typography color="textSecondary">{values[name]?.length > 0 ? 'Images Preview' : 'No Images'}</Typography>
+          <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
+            <ImageList style={{ flexWrap: 'nowrap', transform: 'translateZ(0)' }}>
+              {values[name]
+                ? values[name].map((item, i) => (
                   <ImageListItem style={{ height: '100px', width: '33.3%' }} key={item}>
                     <img src={item} alt={`demo ${i + 1}`} />
                     <ImageListItemBar
@@ -2401,55 +2420,55 @@ const FormTypes = (props) => {
                     />
                   </ImageListItem>
                 ))
-              : null}
-          </ImageList>
+                : null}
+            </ImageList>
+          </Box>
         </Box>
-      </Box>
-      <Dialog
-        fullWidth
-        maxWidth="md"
-        open={Boolean(image) || isImgUploading}
-        onClose={() => {
-          if (!isImgUploading) {
-            setImage('');
-          }
-        }}
-      >
-        <CustomDialogHeader
-          showRequiredLabel={false}
+        <Dialog
+          fullWidth
+          maxWidth="md"
+          open={Boolean(image) || isImgUploading}
           onClose={() => {
             if (!isImgUploading) {
               setImage('');
             }
           }}
-          title="Edit Image"
-        />
-        <CustomDialogContent>
-          <ImageCropTool
-            image={image}
-            setImage={setImage}
-            getImageUrl={getImageUrl}
-            isImgUploading={isImgUploading}
-            imageUploadProgress={imageUploadProgress}
-            imageFileName={imageFileName}
+        >
+          <CustomDialogHeader
+            showRequiredLabel={false}
+            onClose={() => {
+              if (!isImgUploading) {
+                setImage('');
+              }
+            }}
+            title="Edit Image"
           />
-        </CustomDialogContent>
-      </Dialog>
-    </InfoLabel>
-  ) : type === 'richTextEditor' ? (
-    <RichTextEditor name={name} label={label} setFieldValue={setFieldValue} value={values[name]} />
-  ) : type === 'signature' ? (
-    <Signature
-      label={label}
-      values={values}
-      name={name}
-      touched={touched}
-      errors={errors}
-      isTooltip={isTooltip}
-      tooltipMessage={tooltipMessage}
-      setFieldValue={setFieldValue}
-    />
-  ) : null;
+          <CustomDialogContent>
+            <ImageCropTool
+              image={image}
+              setImage={setImage}
+              getImageUrl={getImageUrl}
+              isImgUploading={isImgUploading}
+              imageUploadProgress={imageUploadProgress}
+              imageFileName={imageFileName}
+            />
+          </CustomDialogContent>
+        </Dialog>
+      </InfoLabel>
+    ) : type === 'richTextEditor' ? (
+      <RichTextEditor name={name} label={label} setFieldValue={setFieldValue} value={values[name]} />
+    ) : type === 'signature' ? (
+      <Signature
+        label={label}
+        values={values}
+        name={name}
+        touched={touched}
+        errors={errors}
+        isTooltip={isTooltip}
+        tooltipMessage={tooltipMessage}
+        setFieldValue={setFieldValue}
+      />
+    ) : null : null;
 };
 
 export default FormTypes;

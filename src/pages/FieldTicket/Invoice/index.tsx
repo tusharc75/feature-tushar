@@ -11,8 +11,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CreateInvoiceDialog from "./CreateInvoiceDialog";
 import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from "src/constants/helpers";
 import { useData } from 'src/StateProvider/Provider';
-
-
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import ViewInvoice from "src/pages/Invoice/ViewInvoice";
 
 const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
 
@@ -25,6 +25,7 @@ const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
     const [frameworkComponent, setFrameworkComponent] = useState({});
     const [createInvoiceDialog, setCreateInvoiceDialog] = useState(false);
     const [invoiceData, setInvoiceData] = useState(null);
+    const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
 
 
     const {
@@ -83,14 +84,26 @@ const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
     };
 
     const InvoiceMaterialRenderer = (params) => (
-        <span
-            className="link"
-            onClick={() => {
-                // setViewBillDialog({ open: true, invoiceData: params.data });
-            }}
-        >
-            <CustomRenderCell value={params?.value} />
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+            <span
+                className="link"
+                onClick={() => {
+                    setViewBillDialog({ open: true, invoiceData: params.data });
+                }}
+            >
+                <CustomRenderCell value={params?.value} />
+            </span>
+            <Box ml={1}>
+                <IconButton
+                    size="small"
+                    onClick={() => {
+                        window.open(`${routes.invoiceDetail.path}/${params?.data?._id}`);
+                    }}
+                >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+            </Box>
+        </div>
     );
 
     const ActionsRenderer = (params) => (
@@ -148,7 +161,7 @@ const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
             .then(({ data: { data, count } }) => {
                 let rows = data.map((u, idx) => {
                     let finalObject = prepareDataForGrid(u, user);
-                    // finalObject['isLatestInvoice'] = idx === 0 ? true : false;
+                    finalObject['isLatestInvoice'] = idx === 0 ? true : false;
                     finalObject['isChecked'] = false;
                     finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
                     return finalObject;
@@ -218,6 +231,20 @@ const Invoice = ({ id, fieldTicketData, renderedFrom }) => {
                     }}
                     onClose={() => {
                         setCreateInvoiceDialog(false);
+                    }}
+                />
+            )}
+            {viewBillDialog.open && (
+                <ViewInvoice
+                    pageData={fieldTicketData}
+                    invoiceData={viewBillDialog?.invoiceData}
+                    estimateStartDate={null}
+                    onClose={() => {
+                        setViewBillDialog({ open: false, invoiceData: null });
+                    }}
+                    onSuccess={() => {
+                        setViewBillDialog({ open: false, invoiceData: null });
+                        fetchInvoice();
                     }}
                 />
             )}

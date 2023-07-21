@@ -4,6 +4,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import WorkIcon from '@material-ui/icons/Work';
 import Gauges from '../../components/Gauges';
+import MetricsWithIcon from 'src/components/MetricsWithIcon';
 
 const useStyles = makeStyles((theme) => ({
   fleetBox: {
@@ -82,7 +83,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     flexWrap: 'wrap',
-    margin: '-10px -10px 0 0',
     justifyContent: 'center'
   },
   singleGauge: {
@@ -167,8 +167,8 @@ const FleetDispatchBox = ({ data, id, index, moveCard, cardType, handleDispatch 
     <div ref={ref} key={index}>
       {cardType === 'fleet' ? (
         <Box className={classes.fleetBox} style={{ opacity }}>
-          <Grid container>
-            <Grid item xs={12} md={6} lg={7}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
               <Box className={classes.contentContainer}>
                 <Box sx={{ flexBasis: '20px' }}>
                   <LocalShippingIcon className={`${classes.truckIcon} ${classes.icon}`} />
@@ -181,11 +181,11 @@ const FleetDispatchBox = ({ data, id, index, moveCard, cardType, handleDispatch 
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={12} md={6} lg={5}>
-              <Box className={classes.gaugeContainer}>
-                <Gauges className={classes.singleGauge} max={200} value={data?.temperature} lebel="TEMP" suffix={<> °F</>} />
-                <Gauges className={classes.singleGauge} max={1000} value={data?.pressure} lebel="PRESSURE" suffix={<> PSI</>} />
-                <Gauges className={classes.singleGauge} max={1000} value={data?.volume} lebel="VOLUME" suffix={<> MMcf</>} />
+            <Grid item xs={12}>
+              <Box className={`${classes.gaugeContainer} gap-4`}>
+                <MetricsWithIcon type="temperature" suffixText={<> °F</>} value={data?.temperature || 30} />
+                <MetricsWithIcon type="pressure" suffixText={<> PSI</>} value={data?.pressure || 30} />
+                <MetricsWithIcon type="volume" suffixText={<> MMcf</>} value={data?.volume || 30} />
               </Box>
             </Grid>
           </Grid>

@@ -134,6 +134,16 @@ const AssetHistory = ({ id }) => {
           >
             {params.value}
           </Link>
+        ) : params.data?.type === 'Job' ? (
+          <Link
+            className="link"
+            title={params.value}
+            to={`${routes.jobDetail.path}/${params.data.referenceId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {params.value}
+          </Link>
         ) : (
           params.value
         )

@@ -131,6 +131,11 @@ const AssignSerializedAssetDialog = ({
   const getQueryString = () => {
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
+
+    if(reference === 'job'){
+      deepFilter += '&job=1'
+    }
+
     if (reference === 'repairOrder') {
       deepFilter = `${deepFilter}&entityWise=0`;
       deepFilter += '&repairOrder=1';

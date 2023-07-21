@@ -13,8 +13,9 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
 const RenderColumns: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, passFailStatus, passFailAccessor }) => {
   return (
     <div>
-      {data.map((colData) => (
+      {data.map((colData, index) => (
         <ColCard
+          key={index}
           data={colData}
           cardOnClick={cardOnClick}
           cardDataRows={cardDataRows}

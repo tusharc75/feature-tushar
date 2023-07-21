@@ -1,10 +1,8 @@
-import { Box, Button, Grid, Paper, Tab, Tabs } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Skeleton } from '@material-ui/lab';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
@@ -17,20 +15,26 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import queryString from 'query-string';
+import TabPanel from 'src/components/TabPanel';
+import History from './History';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.employeeMaster]);
   const [employeeMasterData, setEmployeeMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const parsed = queryString.parse(history.location.search);
+  const { tab }: any = parsed;
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
+
   const {
-    state: { permissions, user }
+    state: { permissions }
   }: any = useData();
 
   useEffect(() => {
@@ -57,7 +61,6 @@ const EmployeeMasterDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes?.employeeMaster?.path}/${id}`);
-      setHeadingLbl(data.employeeNumber);
       setEmployeeMasterData(data);
       setCustomizedRoutes([routes.employeeMaster, { title: data?.employeeNumber }]);
       setLoading(false);
@@ -95,6 +98,22 @@ const EmployeeMasterDetail = () => {
   const closeUpdateDialog = () => {
     setOpenUpdateDialog(false);
   };
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+    history.push(`?tab=${newValue}`);
+    if (newValue === 0) {
+      fetchData();
+    }
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -103,32 +122,68 @@ const EmployeeMasterDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.employeeMaster?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                    className={'btn-outline-v1'}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
+            <>
+              {permissions?.employeeMaster?.isUpdate && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  size="small"
+                  onClick={handleOpenUpdateDialog}
+                  className={'btn-outline-v1'}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
 
-                {permissions?.employeeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
-              <ActivityButton referenceId={employeeMasterData?._id} resource={ACTIVITY_RESOURCE.employeeMaster} />
+              {permissions?.employeeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            </>
+            <ActivityButton referenceId={employeeMasterData?._id} resource={ACTIVITY_RESOURCE.employeeMaster} />
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        {loading || !fields?.length ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
-          </Grid>
-        ) : (
-          <DetailsPage data={employeeMasterData} fields={fields} />
-        )}
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                Details
+              </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                History
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+        </Tabs>
+        <TabPanel value={tabValue} index={0}>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={employeeMasterData} fields={fields} />
+          )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <History id={id} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

@@ -176,7 +176,8 @@ const WorkOrder = () => {
           </IconButton>
         </Tooltip>
       )} */}
-      {params?.data?.canDelete && !params?.data?.deleted && (
+
+      {params?.data?.canDelete && !params?.data?.deleted ? (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -187,6 +188,12 @@ const WorkOrder = () => {
             }}
           >
             <DeleteIcon color="error" />
+          </IconButton>
+        </HtmlTooltip>
+      ) : (
+        <HtmlTooltip className="cursor-stop" title={`You do not have permission to delete `}>
+          <IconButton aria-label="Delete" size='small'>
+            <DeleteIcon />
           </IconButton>
         </HtmlTooltip>
       )}
