@@ -12,7 +12,7 @@ const STEP_GAP = 15;
 
 const Steps = ({
   nextStep,
-  isNextStep,
+  isNextStep = false,
   steps,
   currentStep,
   setCurrentStep,
@@ -20,6 +20,7 @@ const Steps = ({
   setStepFullScreen = null,
   updateStatus = null,
   isPrevStep = true,
+  isNextStepEnabled = true,
   handleNext = null,
   handlePrev = null,
   className = '',
@@ -77,8 +78,8 @@ const Steps = ({
   };
 
   const isNextButtonDisabled = React.useMemo(() => {
-    if (showExtraStep) return currentStep === steps.length || (currentStep === 0 && isNextStep) || !nextStep;
-    return currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep;
+    if (showExtraStep) return currentStep === steps.length || (currentStep === 0 && isNextStep) || !nextStep || !isNextStepEnabled;
+    return currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || !isNextStepEnabled;
   }, [currentStep, steps.length, showExtraStep, nextStep, isNextStep]);
 
   return (
