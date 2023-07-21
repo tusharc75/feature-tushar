@@ -521,8 +521,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                                                                     isTooltip={field.isTooltip}
                                                                                     tooltipMessage={field.tooltipMessage}
                                                                                     size="small"
-                                                                                    minDate={fieldTicketData?.estimateStartDate}
-                                                                                    maxDate={fieldTicketData?.estimateEndDate}
+                                                                                    // minDate={fieldTicketData?.estimateStartDate}
+                                                                                    // maxDate={fieldTicketData?.estimateEndDate}
                                                                                 />
                                                                             </Box>
                                                                         </Box>

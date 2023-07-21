@@ -67,7 +67,7 @@ const ManageServiceOrderDialog = ({
     try {
       let fieldData;
       const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
-      fieldData = response?.data?.data?.filter((e) => e?.fieldData?.fieldName !== 'rentalJob');
+      fieldData = response?.data?.data;
 
       var statusOptions = [];
       fieldData?.forEach((e: any) => {
@@ -266,6 +266,15 @@ const ManageServiceOrderDialog = ({
                                               setFieldValue('collaborator', collaborator)
                                             } else {
                                               setFieldValue('collaborator', [])
+                                            }
+                                          }
+                                          if (name === 'wellNumber') {
+                                            if (initialData?.fields.find((e)=>e?.fieldName === 'numberOfWells')) {
+                                              if (value) {
+                                                setFieldValue('numberOfWells', value?.length);
+                                              } else {
+                                                setFieldValue('numberOfWells', 0);
+                                              }
                                             }
                                           }
                                         }}
