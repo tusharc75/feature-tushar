@@ -163,7 +163,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       },
       {
         accessor: 'action',
-        Header: 'Action',
+        Header: 'Actions',
         width: 150,
         minWidth: 150,
         sticky: 'right',

@@ -139,7 +139,7 @@ const ViewInvoice = ({ pageData = null, invoiceData, estimateStartDate, onClose,
       column = [...column, ...newColumns];
       pageData && column.push({
         accessor: 'action',
-        Header: 'Action',
+        Header: 'Actions',
         minWidth: 100,
         width: 100,
         sticky: 'right',

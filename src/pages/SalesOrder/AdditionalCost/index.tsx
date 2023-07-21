@@ -70,7 +70,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
     column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
-      Header: 'Action',
+      Header: 'Actions',
       minWidth: 100,
       width: 150,
       sticky: 'right',

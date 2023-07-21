@@ -61,7 +61,7 @@ const AddCost = ({ id, fieldTicketData, setNextStep }) => {
         columns = [...columns, ...newColumns];
         columns.push({
           accessor: 'action',
-          Header: 'Action',
+          Header: 'Actions',
           minWidth: 100,
           width: 100,
           sticky: 'right',

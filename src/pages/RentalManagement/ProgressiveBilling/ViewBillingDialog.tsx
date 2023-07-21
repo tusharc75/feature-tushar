@@ -141,7 +141,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
       column = [...column, ...newColumns];
       column.push({
         accessor: 'action',
-        Header: 'Action',
+        Header: 'Actions',
         minWidth: 100,
         width: 100,
         sticky: 'right',

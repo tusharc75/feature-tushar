@@ -176,7 +176,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
-      Header: '',
+      Header: 'Actions',
       minWidth: 100,
       width: 100,
       sticky: 'right',

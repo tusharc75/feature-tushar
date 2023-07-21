@@ -79,7 +79,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
     column.push({
       accessor: 'action',
-      Header: '',
+      Header: 'Actions',
       minWidth: 50,
       width: 50,
       sticky: 'right',
