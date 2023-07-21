@@ -160,7 +160,7 @@ const Steps = ({
                         } as React.CSSProperties
                       }
                     >
-                      <Icon colors={['#fff', '#ffff']} />
+                      <Icon colors={['#fff', '#ffff']} style={{ color: '#fff' }} />
                     </Box>
                     <Typography className={styles.label}>{step.title}</Typography>
                     {!isStepEnded && setStepFullScreen && currentStep === i && (

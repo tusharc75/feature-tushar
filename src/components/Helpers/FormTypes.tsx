@@ -564,7 +564,7 @@ const FormTypes = (props) => {
       setValues({ ...values, ...result });
     } else {
       for (var x in result) {
-        setFieldValue([x], result[x]);
+        setFieldValue(x, result[x]);
       }
     }
     //setFieldValue(name, value);
