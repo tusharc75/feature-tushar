@@ -1,133 +1,90 @@
-import React from "react";
-import CustomSteps from "./CustomSteps/CustomSteps";
-import CustomMobileStepperOpportunities from "./CustomMobileStepperOpportunities";
-import { Button, Typography } from "@material-ui/core";
-import {
-  IoIosArrowDroprightCircle,
-  IoIosArrowDropleftCircle,
-} from "react-icons/io";
-import { isMobile, isTablet } from 'react-device-detect';
-import { AiOutlineLeft } from "react-icons/ai";
-import { BsChevronRight } from "react-icons/bs";
+import React, { useState, useEffect } from 'react';
+import Steps from 'src/components/Steps';
+
+import { stepIconInterface, StepIconType } from 'src/components/Steps/icons';
+interface StepInterface extends stepIconInterface {
+  text: string;
+  canCompleteManually: boolean;
+  name: string;
+  title: string;
+}
+
+interface InputStepInterface {
+  text: string;
+  canCompleteManually: boolean;
+}
+
+const getStepData = (steps: InputStepInterface[]): StepInterface[] => {
+  const data = steps?.map((item) => ({
+    text: item.text,
+    canCompleteManually: item.canCompleteManually,
+    name: item.text,
+    title: item.text,
+    icon: getIcon(item.text)
+  }));
+  return data;
+};
+
+const getIcon = (name: string): StepIconType => {
+  switch (true) {
+    case name === 'New':
+      return 'add';
+    case name === 'Prospecting':
+      return 'prospecting';
+    case name === 'Proposal':
+      return 'proposal';
+    case name === 'Negotiating':
+      return 'negotiating';
+    case name === 'Closed':
+      return 'endIcon';
+    case name === 'Unqualified':
+      return 'unqualified';
+    case name === 'Qualified':
+      return 'qualified';
+    default:
+      return 'add';
+  }
+};
+
 export default function ProcessFlow(props) {
-  const {
-    steps,
-    activeStep,
-    isProcessing,
-    handleMarkAsCompleted,
-    hideBackButton = false,
-    disableBackNext = false,
-  } = props;
+  const { steps, activeStep, isProcessing, handleMarkAsCompleted, hideBackButton = false, disableBackNext = false } = props;
+  const [stateSteps, setStateSteps] = useState(getStepData(steps));
 
+  useEffect(() => {
+    setStateSteps(getStepData(steps));
+  }, [steps]);
 
+  console.log(steps);
+
+  const [currentStep, setCurrentStep] = useState(activeStep);
+
+  useEffect(() => {
+    setCurrentStep(activeStep + 1);
+  }, [activeStep]);
+
+  const handleNext = () => {
+    handleMarkAsCompleted();
+  };
+  const handleBack = () => {
+    handleMarkAsCompleted({ isSetBackStep: true });
+  };
 
   return (
     <>
-      {steps.length > 0 && (
-        isMobile && !isTablet ? <CustomMobileStepperOpportunities stepName={((activeStep + 1) + "/" + steps.length) + " " + steps[activeStep]?.text} nextButton={(
-          isProcessing ? (
-            <Button
-              variant="outlined"
-              color="primary"
-              disabled={true}
-              onClick={() => { }}
-            >
-              Processing...
-            </Button>
-          ) : (
-            <Button
-              variant={"text"}
-              color="primary"
-              size="small"
-              className="mr-1 MobileStep-next-back-button"
-              disabled={
-                !steps[activeStep + 1]?.canCompleteManually ||
-                  isProcessing
-                  ? true
-                  : false
-
-              }
-              onClick={handleMarkAsCompleted}
-              endIcon={<BsChevronRight />}
-            >
-
-              {activeStep === steps.length - 2 ? "Finish" : "Next"}
-            </Button>
-          )
-        )} backButton={
-          <Button
-            variant={"text"}
-            color="primary"
-            className="ml-1 MobileStep-next-back-button"
-            onClick={() =>
-              handleMarkAsCompleted({ isSetBackStep: true })
-            }
-            disabled={activeStep === 0 ? true : false}
-            size="small"
-            startIcon={<AiOutlineLeft />}
-          >
-            {activeStep === 0 ? "" : "Back"}
-          </Button>
-        } /> :
-
-
-          <div
-            className="stepper-box"
-            style={{ paddingBottom: activeStep < steps.length - 1 ? "" : "10px" }}
-          >
-            <div className="mainview">
-
-              <CustomSteps steps={steps} active={activeStep} />
-            </div>
-            {disableBackNext ? null : (
-              <div className="actionview">
-                <div className="d-flex justify-content-space-between ">
-                  <Button
-                    variant={isMobile ? "text" : "contained"}
-                    color="primary"
-                    className="mr-1"
-                    onClick={() =>
-                      handleMarkAsCompleted({ isSetBackStep: true })
-                    }
-                    disabled={isProcessing || activeStep === 0}
-                    size="small"
-                    startIcon={<IoIosArrowDropleftCircle />}
-                  >
-                    {isMobile ? "" : "Back"}
-                  </Button>
-                  {isProcessing ? (
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      disabled={true}
-                      onClick={() => { }}
-                    >
-                      Processing...
-                    </Button>
-                  ) : (
-                    <Button
-                      variant={isMobile ? "text" : "contained"}
-                      color="primary"
-                      size="small"
-                      disabled={
-                        !steps[activeStep + 1]?.canCompleteManually ||
-                          isProcessing
-                          ? true
-                          : false
-                      }
-                      onClick={handleMarkAsCompleted}
-                      endIcon={<IoIosArrowDroprightCircle />}
-                    >
-
-                      {activeStep === steps.length - 2 ? isMobile ? "" : "Finish" : isMobile ? "" : "Next"}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-      )}
+      <div className="my-4">
+        <Steps
+          currentStep={currentStep}
+          isNextStep={steps[activeStep + 1]?.canCompleteManually || isProcessing ? false : true || !disableBackNext}
+          isPrevStep={activeStep === 0 ? false : true || !disableBackNext}
+          isStepEnded={currentStep === steps.length + 1}
+          nextStep={steps[activeStep + 1]?.text}
+          setCurrentStep={setCurrentStep}
+          steps={stateSteps}
+          showExtraStep={true}
+          handleNext={handleNext}
+          handlePrev={handleBack}
+        />
+      </div>
     </>
   );
 }

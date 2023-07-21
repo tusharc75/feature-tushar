@@ -41,6 +41,14 @@ import { MdDelete, MdEdit } from 'react-icons/md';
 import { BiEdit } from 'react-icons/bi';
 
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { stepIconInterface, StepIconType } from 'src/components/Steps/icons';
+
+interface StepInterface extends stepIconInterface {
+  text: string;
+  canCompleteManually: boolean;
+  name: string;
+  title: string;
+}
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -90,6 +98,29 @@ function OpportunityDetailsPage() {
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
   const [, setShowAtLast] = useState(false);
   const [, setAdditionalFieldName] = useState('');
+
+  const getIcon = (name: string): StepIconType => {
+    switch (true) {
+      case name === 'New':
+        return 'add';
+        break;
+      case name === 'Prospecting':
+        return 'prospecting';
+        break;
+      case name === 'Proposal':
+        return 'proposal';
+        break;
+      case name === 'Negotiating':
+        return 'negotiating';
+        break;
+      case name === 'Closed':
+        return 'endIcon';
+        break;
+      default:
+        return 'add';
+        break;
+    }
+  };
 
   const handleOpenUpdateDialog = () => {
     if (activeStep === steps.length - 1) {
@@ -357,10 +388,13 @@ function OpportunityDetailsPage() {
 
             setAdditionalFieldName(processSteps.fieldData.additionalInfoSection);
 
-            const allProcessSteps = processSteps.fieldData.option.map((m) => {
+            const allProcessSteps: StepInterface[] = processSteps.fieldData.option.map((m) => {
               return {
                 text: m.optionLabel,
-                canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some((s) => s === m.optionValue.toLowerCase())
+                canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some((s) => s === m.optionValue.toLowerCase()),
+                name: m.optionLabel,
+                title: m.optionLabel,
+                icon: getIcon(m.optionLabel)
               };
             });
 

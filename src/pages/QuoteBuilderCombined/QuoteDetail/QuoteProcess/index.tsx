@@ -66,6 +66,15 @@ import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import CustomDialogFooter from '../../../../components/CustomDialog/CustomDialogFooter';
 import CustomButton from '../../../../components/Helpers/CustomButton';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+// import Steps from 'src/components/Steps';
+import { stepIconInterface } from 'src/components/Steps/icons';
+
+interface StepInterface extends stepIconInterface {
+  key: string;
+  label: string;
+  name: string;
+  title: string;
+}
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -121,52 +130,85 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const DOASteps = [
+const DOASteps: StepInterface[] = [
   {
     key: 'New',
-    label: 'Product Builder'
+    label: 'Product Builder',
+    name: 'New',
+    title: 'Build',
+    icon: 'add'
   },
   {
     key: 'Price Builder',
-    label: 'Price Builder'
+    label: 'Price Builder',
+    name: 'Price Builder',
+    title: 'Price',
+    icon: 'priceBuilder'
   },
   {
     key: 'Quote Builder',
-    label: 'Quote Builder'
+    label: 'Quote Builder',
+    name: 'Quote Builder',
+    title: 'Quote',
+    icon: 'quoteBuilder'
   },
   {
     key: 'DOA Process',
-    label: 'DOA Process'
+    label: 'DOA Process',
+    name: 'DOA Process',
+    title: 'DOA Process',
+    icon: 'doa'
   },
   {
     key: 'Send To Customer',
-    label: 'Send To Customer'
+    label: 'Send To Customer',
+    name: 'Send To Customer',
+    title: 'Send',
+    icon: 'sendToCustomer'
   },
   {
     key: 'End',
-    label: 'End'
+    label: 'End',
+    name: 'End',
+    title: 'Close',
+    icon: 'endIcon'
   }
 ];
-const OtherSteps = [
+const OtherSteps: StepInterface[] = [
   {
     key: 'New',
-    label: 'Product Builder'
+    label: 'Product Builder',
+    name: 'New',
+    title: 'Build',
+    icon: 'add'
   },
   {
     key: 'Price Builder',
-    label: 'Price Builder'
+    label: 'Price Builder',
+    name: 'Price Builder',
+    title: 'Price',
+    icon: 'priceBuilder'
   },
   {
     key: 'Quote Builder',
-    label: 'Quote Builder'
+    label: 'Quote Builder',
+    name: 'Quote Builder',
+    title: 'Quote',
+    icon: 'quoteBuilder'
   },
   {
     key: 'Send To Customer',
-    label: 'Send To Customer'
+    label: 'Send To Customer',
+    name: 'Send To Customer',
+    title: 'Send',
+    icon: 'sendToCustomer'
   },
   {
     key: 'End',
-    label: 'End'
+    label: 'End',
+    name: 'End',
+    title: 'Close',
+    icon: 'endIcon'
   }
 ];
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
