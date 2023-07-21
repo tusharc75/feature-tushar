@@ -90,12 +90,12 @@ export default function AssignedEntities({
                   title={obj?.entityName ?? ""}
                   className="text-capitalize"
                 >
-                  <Link
+                  <p
                     className="link"
-                    to={`/entity/detail/${obj._id}`}
+                    onClick={() => window.open(`/entity/detail/${obj._id}`)}
                   >
                     {obj?.entityName ?? ""}
-                  </Link>
+                  </p>
                 </Typography>
                 <DisplayData
                   label="Address"

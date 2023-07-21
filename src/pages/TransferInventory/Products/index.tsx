@@ -217,9 +217,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   };
 
   const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`/product/detail/${params.data.product}`}>
+    <p className="link text-truncate" title={params.value} onClick={() => window.open(`/product/detail/${params.data.product}`)}>
       {params.value}
-    </Link>
+    </p>
   );
 
   const SerialNumberRenderer = (params) =>

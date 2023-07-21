@@ -146,13 +146,13 @@ const ResourceLogs = () => {
 
   const ResourceRenderer = (params) => (
     <Fragment>
-      <Link
+      <p
         className="link text-truncate"
         title={params?.value?.optionLabel}
-        to={`${routes[`${params?.data?.key}Detail`]?.path}/${params?.value?.optionValue}`}
+        onClick={() => window.open(`${routes[`${params?.data?.key}Detail`]?.path}/${params?.value?.optionValue}`)}
       >
         {params?.value?.optionLabel}
-      </Link>
+      </p>
     </Fragment>
   );
 

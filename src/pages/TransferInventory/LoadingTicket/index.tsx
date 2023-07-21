@@ -99,38 +99,38 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
 
   const TicketRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
+      <p className="link text-truncate" title={params.value} onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`)}>
         {params.value}
-      </Link>
+      </p>
     ) : (
       <NoDataCell />
     );
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`}>
+      <p className="link text-truncate" title={params.value} onClick={() => window.open(`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`)}>
         {params.value}
-      </Link>
+      </p>
     ) : (
       <NoDataCell />
     );
 
   const InventoryRenderer = (params) => (
     <Fragment>
-      <Link
+      <p
         className="link text-truncate"
         title={params.value}
-        to={`${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`}
+        onClick={() => window.open(`${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`)}
       >
         {params.value}
-      </Link>
+      </p>
     </Fragment>
   );
 
   const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
+    <p className="link text-truncate" title={params.value} onClick={() => window.open(`${routes.productDetail.path}/${params.data?.productId}`)}>
       {params.value}
-    </Link>
+    </p>
   );
 
   const fetchProducts = async () => {

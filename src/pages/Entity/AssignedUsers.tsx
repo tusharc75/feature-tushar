@@ -42,9 +42,9 @@ const AssignedUsers = (props) => {
                     <ListItemText
                       primary={
                         <Typography>
-                          <Link className="link" to={`/user/detail/${obj._id}`}>
+                          <p className="link"  onClick={() => window.open(`/user/detail/${obj._id}`)}>
                             {`${obj.firstName} ${obj.lastName}` || ''}
-                          </Link>
+                          </p>
                         </Typography>
                       }
                       secondary={obj.email}
