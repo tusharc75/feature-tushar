@@ -259,17 +259,17 @@ const ManageServiceOrderDialog = ({
                                         options={field.option}
                                         setFieldValue={(name, value) => {
                                           setFieldValue(name, value);
-                                          if (field.fieldName === 'customerAccount') {
+                                          if (name === 'customerAccount') {
                                             const customerAccount = field.option.find((d) => d.optionValue === value);
                                             const collaborator = [...customerAccount.fieldServiceManager || [], ...customerAccount?.lead || []];
                                             if (collaborator?.length) {
-                                              setFieldValue('collaborator', collaborator)
+                                              setFieldValue('collaborator', collaborator?.filter((e) => e !== values['owner']))
                                             } else {
                                               setFieldValue('collaborator', [])
                                             }
                                           }
                                           if (name === 'wellNumber') {
-                                            if (initialData?.fields.find((e)=>e?.fieldName === 'numberOfWells')) {
+                                            if (initialData?.fields.find((e) => e?.fieldName === 'numberOfWells')) {
                                               if (value) {
                                                 setFieldValue('numberOfWells', value?.length);
                                               } else {
