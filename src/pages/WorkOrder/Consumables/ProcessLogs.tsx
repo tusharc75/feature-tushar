@@ -80,7 +80,7 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
     ];
     column.push({
       accessor: 'action',
-      Header: 'Action',
+      Header: 'Actions',
       minWidth: 80,
       width: 80,
       sticky: 'right',

@@ -249,7 +249,7 @@ const WorkOrder = ({
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
-      Header: 'Action',
+      Header: 'Actions',
       minWidth: 70,
       width: 70,
       sticky: 'right',
