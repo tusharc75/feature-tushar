@@ -140,14 +140,14 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                 <Box display="flex" alignItems="center">
                 </Box>
                 <Box display="flex">
-                    <PreviewDownload resource={sidebarResource.fieldTicket} referenceId={id} columns={columns} />
+                    <PreviewDownload resource={sidebarResource.fieldTicket} referenceId={id} columns={columns} isSendEmail />
 
                 </Box>
             </Box>
             {columns && rowsData ? (
                 <Box zIndex={5} width={'100%'}>
                     <CustomReactTable
-                        height={stepFullScreen ? 'calc(100vh - 440px)' : '278px'}
+                        height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                         columns={columns}
                         data={rowsData}
                         onSelect={() => { }}
