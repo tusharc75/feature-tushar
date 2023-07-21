@@ -163,7 +163,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const duplicates = dataWithNumber.filter((v1, i, a) => a.findIndex((v2) => v1['Asset Number'] === v2['Asset Number']) !== i);
+    const duplicates = dataWithNumber.filter((v1, i, a) => a.findIndex((v2) => v1['Asset Number'].trim() === v2['Asset Number'].trim()) !== i);
     if (duplicates.length) {
       setToastConfig({
         open: true,
