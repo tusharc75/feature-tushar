@@ -224,6 +224,7 @@ import TrailerMaster from './pages/TrailerMaster';
 import TrailerMasterDetail from './pages/TrailerMaster/TrailerMasterDetail';
 import AssetsReceiving from './pages/AssetsReceiving';
 import AssetsReceivingDetail from './pages/AssetsReceiving/AssetsReceivingDetail';
+import FieldTicketInvoice from './pages/FieldTicketInvoice';
 
 var notificationInterval: any = null;
 
@@ -922,6 +923,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldTicketDetail.path}/:id`}>
               <FieldTicketDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldTicketInvoice.path}`}>
+              <FieldTicketInvoice />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldServiceTechnician.path}`}>
               <FieldServiceTechnician />

@@ -881,6 +881,10 @@ const routes = {
     title: storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title ? storedRoutes.fieldTicket?.title : RESOURCE_LABEL.fieldTicket,
     path: '/field-ticket/detail'
   },
+  fieldTicketInvoice: {
+    title: storedRoutes && storedRoutes.fieldTicketInvoice && storedRoutes.fieldTicketInvoice.title ? storedRoutes.fieldTicketInvoice?.title : RESOURCE_LABEL.fieldTicketInvoice,
+    path: '/field-ticket-invoice'
+  },
   fieldServiceTechnician: {
     title:
       storedRoutes && storedRoutes.fieldServiceTechnician && storedRoutes.fieldServiceTechnician.title

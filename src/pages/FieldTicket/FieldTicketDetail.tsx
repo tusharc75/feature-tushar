@@ -24,7 +24,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Material from './material';
 import { camelCase, set } from 'lodash';
-import Invoice from './Invoice';
+import Submit from './Submit';
 
 const FieldTicketDetail = () => {
   const { id } = useParams();
@@ -228,7 +228,7 @@ const FieldTicketDetail = () => {
               <AddCost fieldTicketData={fieldTicketData} id={id} setNextStep={setNextStep} />
             )}
             {currentStep === 2 && (
-              <Invoice id={id} fieldTicketData={fieldTicketData} renderedFrom={renderedFrom} />
+              <Submit />
             )}
           </ContentFullScreen>
         </TabPanel>
