@@ -56,7 +56,7 @@ export const rentalManagementSteps: stepInterface[] = [
   { name: 'Add Services', title: 'Services', icon: 'add' },
   { name: 'Add-on', title: 'Add-on', icon: 'add' },
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
-  { name: 'Serialized Asset', title: 'Asset', icon: 'asset' },
+  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
   { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
@@ -79,7 +79,7 @@ export const productionOrderSteps: stepInterface[] = [
 
 export const jobProcessSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Dispatch', title: 'Dispatch', icon: 'dispatch' },
+  { name: 'Dispatch', title: 'Dispatch', icon: 'dispatch' }
 ];
 
 export const salesOrderProcessSteps: stepInterface[] = [
@@ -91,7 +91,7 @@ export const salesOrderProcessSteps: stepInterface[] = [
 
 export const bulkAssetCreationSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Serialized Asset', title: 'Asset', icon: 'asset' }
+  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' }
 ];
 
 export const subleaseSteps: stepInterface[] = [
@@ -981,21 +981,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1388,10 +1388,6 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   if (Number.isInteger(amount)) {
     options['maximumFractionDigits'] = 0;
   }
-
-
-
-
 
   //  For example I am formatting this value - 9876543210 then
   //  shortFormatAmount will be like this - 9.9 billion
