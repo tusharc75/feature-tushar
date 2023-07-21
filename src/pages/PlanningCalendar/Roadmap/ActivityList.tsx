@@ -32,12 +32,13 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ActivityList(props) {
   const [theme] = useAppTheme();
+  // const [colorState, setColorState] = useState([])
 
   const types = useMemo(
     () => [
-      { _id: '1', name: 'Planned', color: theme === 'light' ? 'hsl(46, 95%, 92%)' : 'hsla(46, 95%, 62%, .5)' },
-      { _id: '2', name: 'In-Use', color: theme === 'light' ? 'hsl(342, 100%, 97%)' : 'hsla(342, 100%, 67%, .5)' },
-      { _id: '3', name: 'Available', color: theme === 'light' ? 'hsl(206, 100%, 97%)' : 'hsla(206, 100%, 67%, .5)' }
+      { _id: '1', name: 'Planned', color: theme === 'light' ? 'hsl(46, 95%, 92%)' : '#dda900' },
+      { _id: '2', name: 'In-Use', color: theme === 'light' ? 'hsl(342, 100%, 97%)' : '#cd3865' },
+      { _id: '3', name: 'Available', color: theme === 'light' ? 'hsl(206, 100%, 97%)' : '#176fb2' }
     ],
     [theme]
   );
