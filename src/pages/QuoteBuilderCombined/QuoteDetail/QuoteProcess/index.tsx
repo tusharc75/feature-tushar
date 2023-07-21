@@ -1272,7 +1272,7 @@ export default function QuoteProcess(props) {
         />
       </div>
 
-      <div className={`pt-1 subDetailModule `}>
+      <div className={`pt-[12px] subDetailModule `}>
         <ContentFullScreen
           title={DOASteps.find((d) => d?.key === ProcessStatus).label || ''}
           fullScreen={stepFullScreen}

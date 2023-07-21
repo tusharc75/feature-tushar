@@ -62,7 +62,7 @@ const RoleDetailsPage = () => {
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
   const [roleUsers, setRoleUsers] = useState([]);
-  const [isEdit, setIsEdit] = useState(false)
+  const [isEdit, setIsEdit] = useState(false);
   const [values, setValues] = useState({
     name: '',
     description: ''
@@ -269,7 +269,11 @@ const RoleDetailsPage = () => {
         SetPolicyFieldCheckBox((prevState) => ({ ...prevState, ...copyOfResourcePolicy }));
         handlePolicyResourceCheckBox(copyOfResourcePolicy);
       }
-      setResourceOption(data?.resource?.map((obj) => { return { optionLabel: obj?.resourceLabel, optionValue: obj?.name } }) || []);
+      setResourceOption(
+        data?.resource?.map((obj) => {
+          return { optionLabel: obj?.resourceLabel, optionValue: obj?.name };
+        }) || []
+      );
       setDefaultResourceName(data?.defaultResource || '');
       setSuperAdminAccess(data?.superAdminAccess || false);
       setCanAssignByAnyuser(data?.canAssignByAnyuser || false);
@@ -346,7 +350,7 @@ const RoleDetailsPage = () => {
         });
 
         setUpdating(false);
-        setIsEdit(false)
+        setIsEdit(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -472,7 +476,13 @@ const RoleDetailsPage = () => {
                   </Button>
                 )}
                 {permissions?.role.isUpdate && isEdit && (
-                  <Button disabled={isUpdating || checkError() || !isEdit} variant="contained" color="primary" size="medium" onClick={handleUpdateRole}>
+                  <Button
+                    disabled={isUpdating || checkError() || !isEdit}
+                    variant="contained"
+                    color="primary"
+                    size="medium"
+                    onClick={handleUpdateRole}
+                  >
                     {isUpdating ? <CircularProgress size={22} /> : 'Update'}
                   </Button>
                 )}
@@ -493,9 +503,9 @@ const RoleDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Grid container spacing={1}>
+        <Grid container spacing={3}>
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <Box display="flex" marginTop={2} marginBottom={2} gridGap={10} px={1}>
+            <div className="grid md:grid-cols-2 grid-cols-1 mb-4 gap-4">
               <TextField
                 disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
                 required
@@ -516,8 +526,8 @@ const RoleDetailsPage = () => {
                 value={values.description}
                 onChange={(e) => setValues({ ...values, description: e.target.value.trimStart() })}
               />
-            </Box>
-            <Paper>
+            </div>
+            <div>
               {loading ? (
                 <div className="d-flex align-items-center justify-content-center" style={{ minHeight: 200, height: '70vh' }}>
                   <Loader style={{ height: '100%' }} text="Loading..." />
@@ -527,7 +537,7 @@ const RoleDetailsPage = () => {
                 resource.length && (
                   <>
                     <RoleEngine
-                      style={{ height: '70vh' }}
+                      style={{ height: '603px', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
                       field={field}
                       resource={resource}
                       setField={setField}
@@ -546,17 +556,23 @@ const RoleDetailsPage = () => {
                         setOpen={setOpen}
                         permissions={permissions}
                         isEdit={isEdit}
-
                       />
                     )}
                     {dashBoardOption?.length > 0 && (
-                      <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} isEdit={isEdit} />
+                      <DashboardResources
+                        dashboardList={dashBoardOption}
+                        dashboardName={dashboardName}
+                        setDashboardName={setDashboardName}
+                        isEdit={isEdit}
+                      />
                     )}
                     <DefaultResources
                       resourceList={resourceOption}
                       resourceName={defaultResourceName}
-                      setResourceName={setDefaultResourceName} isEdit={isEdit} />
-                    {!isEditDeleteDisable &&
+                      setResourceName={setDefaultResourceName}
+                      isEdit={isEdit}
+                    />
+                    {!isEditDeleteDisable && (
                       <Box p={1}>
                         <FormControlLabel
                           control={
@@ -573,7 +589,7 @@ const RoleDetailsPage = () => {
                           label="Can Assign By Anyuser"
                         />
                       </Box>
-                    }
+                    )}
                     <Box p={1} pb={2}>
                       <FormControlLabel
                         control={
@@ -593,7 +609,7 @@ const RoleDetailsPage = () => {
                   </>
                 )
               )}
-            </Paper>
+            </div>
             <Box marginY={2} />
             {/* {roleData && roleData.type === 2 && (
                 <div>
@@ -681,7 +697,7 @@ const RoleDetailsPage = () => {
               )} */}
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Box mt={2} className="single-form-v1 ">
+            <Box className="single-form-v1 ">
               <Box className="form-head-v1">
                 <Typography component={'h3'}>Assigned Users ({roleUsers.length || 0})</Typography>
 
@@ -737,7 +753,7 @@ const RoleDetailsPage = () => {
                                 })
                               }
                             >
-                              View All &#8599;
+                              View All
                             </Button>
                           </>
                         )}
@@ -787,10 +803,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-                : entityDeleteRec
-                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-                  : ''
+              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+              : entityDeleteRec
+              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+              : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

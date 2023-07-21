@@ -521,8 +521,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                                                                     isTooltip={field.isTooltip}
                                                                                     tooltipMessage={field.tooltipMessage}
                                                                                     size="small"
-                                                                                    minDate={fieldTicketData?.estimateStartDate}
-                                                                                    maxDate={fieldTicketData?.estimateEndDate}
+                                                                                    // minDate={fieldTicketData?.estimateStartDate}
+                                                                                    // maxDate={fieldTicketData?.estimateEndDate}
                                                                                 />
                                                                             </Box>
                                                                         </Box>
@@ -566,6 +566,38 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                                                             </Box>
                                                                         </Box>
                                                                     </Grid>
+                                                                ) : (field.fieldName === 'numberOfWells') ? (
+                                                                    <>
+                                                                        {
+                                                                            values?.byWellNumber &&
+                                                                            <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                                <Box display="flex">
+                                                                                    <Box flexGrow={1}>
+                                                                                        <FormTypes
+                                                                                            {...field}
+                                                                                            fields={initialData.fields}
+                                                                                            fieldData={field}
+                                                                                            values={values}
+                                                                                            errors={errors}
+                                                                                            touched={touched}
+                                                                                            label={field.fieldLabel}
+                                                                                            name={field.fieldName}
+                                                                                            type={field.type}
+                                                                                            options={field.option}
+                                                                                            setFieldValue={(name, value) => {
+                                                                                                setFieldValue(name, value);
+                                                                                            }}
+                                                                                            required={field.required}
+                                                                                            fullWidth
+                                                                                            isTooltip={field.isTooltip}
+                                                                                            tooltipMessage={field.tooltipMessage}
+                                                                                            size="small"
+                                                                                        />
+                                                                                    </Box>
+                                                                                </Box>
+                                                                            </Grid>
+                                                                        }
+                                                                    </>
                                                                 ) : (
                                                                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                         <Box display="flex">
@@ -582,6 +614,13 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                                                                     type={field.type}
                                                                                     options={field.option}
                                                                                     setFieldValue={(name, value) => {
+                                                                                        if (name === 'byWellNumber') {
+                                                                                            if (value) {
+                                                                                                setFieldValue('numberOfWells', fieldTicketData?.wellNumber?.length);
+                                                                                            } else {
+                                                                                                setFieldValue('numberOfWells', 0);
+                                                                                            }
+                                                                                        }
                                                                                         setFieldValue(name, value);
                                                                                     }}
                                                                                     required={field.required}

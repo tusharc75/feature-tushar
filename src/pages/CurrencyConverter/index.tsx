@@ -211,7 +211,7 @@ const CurrencyConverter = () => {
             <Grid
               container
               style={{
-                background: 'var(--dark-secondary, rgb(241, 245, 255))',
+                background: 'var(--dark-primary, rgb(241, 245, 255))',
                 border: '1px solid var(--common-border-color)',
                 padding: '10px 10px'
               }}

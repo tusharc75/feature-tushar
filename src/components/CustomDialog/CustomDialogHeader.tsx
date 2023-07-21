@@ -11,6 +11,7 @@ const useStyles = makeStyles((theme) => ({
     margin: 0,
     padding: theme.spacing(1.5, 1.5, 1.5, 2),
     display: 'flex'
+    // background: '#282845'
 
     // borderBottom: `1px solid #daf5ff`
   },
@@ -58,7 +59,7 @@ function CustomDialogHeader({
 
   return (
     <React.Fragment>
-      <MuiDialogTitle disableTypography className={classes.root}>
+      <MuiDialogTitle disableTypography className={`${classes.root}`}>
         <Typography
           variant="h6"
           className={`${classes.dialogTitle} title-layout text-truncate`}

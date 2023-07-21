@@ -99,7 +99,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
             });
           }
         }
-        fetchServiceSteps(tempData?.service?.optionValue);
+        tempData?.service && fetchServiceSteps(tempData?.service?.optionValue);
         setCompleteSteps(tempData?.steps || []);
         setInitialData({
           fields: fields,
@@ -149,6 +149,9 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
             }
             if (referenceData?.service && fieldsDataForCreate?.some((e) => e.fieldName === 'service')) {
               tempInitialData['service'] = referenceData?.service;
+            }
+            if (referenceData?.collaborator && fieldsDataForCreate?.some((e) => e.fieldName === 'collaborator')) {
+              tempInitialData['collaborator'] = referenceData?.collaborator;
             }
           }
         }

@@ -3,8 +3,7 @@ import { Grid, Paper, Box, Button, Typography, IconButton, useMediaQuery } from 
 import { Skeleton } from '@material-ui/lab';
 import { ControlPoint, PhotoCamera } from '@material-ui/icons';
 import { useParams, useHistory } from 'react-router-dom';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
+
 import TeamUsers from './TeamUsers';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
@@ -37,28 +36,7 @@ import { MdDelete, MdEdit } from 'react-icons/md';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-      {children}
-    </div>
-  );
-}
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -325,11 +303,6 @@ const ProjectSalesDetails = () => {
             {!projectSalesData ? (
               <Box padding={1}>
                 <Skeleton variant="text" width="150px" height="30px" />
-                <Box display="flex">
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  <Box marginX={1} />
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                </Box>
               </Box>
             ) : (
               <>
@@ -364,30 +337,31 @@ const ProjectSalesDetails = () => {
           </Grid>
         ) : (
           <>
-            <Tabs
-              className="new-tab-container-v1"
+            <CustomTabs
               value={currentTabIndex}
               onChange={(index, newValue) => {
                 setCurrentTabIndex(newValue);
               }}
-              textColor="primary"
-              TabIndicatorProps={{
-                style: {
-                  display: 'none'
-                }
-              }}
             >
-              <Tab label={<div className="tab-font">Header</div>} className="tabLayout" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-              <Tab label={<div className="tab-font">OM-Neurons</div>} className="tabLayout" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
-              <Tab className={'tabLayout'} label={<div className="tab-font">Project Team</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
-              <Tab className={'tabLayout'} label="Customer Account" aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
-            </Tabs>
-            {currentTabIndex === 0 && (
+              <CustomTab index={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0">
+                Header
+              </CustomTab>
+              <CustomTab index={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1">
+                OM-Neurons
+              </CustomTab>
+              <CustomTab index={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
+                Project Team
+              </CustomTab>
+              <CustomTab index={3} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
+                Customer Account
+              </CustomTab>
+            </CustomTabs>
+            <TabPanel value={currentTabIndex} index={0}>
               <Box>
                 <DetailsPage data={copyOfProjectSalesData} fields={fiteredFieldToShow} />
               </Box>
-            )}
-            {currentTabIndex === 1 && (
+            </TabPanel>
+            <TabPanel value={currentTabIndex} index={1}>
               <Box>
                 <CustomNodalStructure
                   id={id}
@@ -402,8 +376,8 @@ const ProjectSalesDetails = () => {
                   }}
                 />
               </Box>
-            )}
-            {currentTabIndex === 2 && (
+            </TabPanel>
+            <TabPanel value={currentTabIndex} index={2}>
               <Box className="form-v1">
                 <Box className="single-form-v1">
                   <Box className="form-head-v1">
@@ -443,8 +417,9 @@ const ProjectSalesDetails = () => {
                   </Box>
                 </Box>
               </Box>
-            )}
-            {currentTabIndex === 3 && (
+            </TabPanel>
+
+            <TabPanel value={currentTabIndex} index={3}>
               <Box>
                 <CustomerAccounts
                   isTeamMember={isTeamMember}
@@ -466,7 +441,7 @@ const ProjectSalesDetails = () => {
                   users={teamUsers}
                 />
               </Box>
-            )}
+            </TabPanel>
           </>
         )}
         <TabPanel value={tabValue} index={1}>

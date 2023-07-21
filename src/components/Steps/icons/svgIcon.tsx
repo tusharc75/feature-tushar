@@ -241,47 +241,11 @@ export const Ticket: React.FC<svgInterface> = ({ colors, ...others }) => {
 export const ReceiveProduct: React.FC<svgInterface> = ({ colors, ...others }) => {
   const hash = getHash();
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" {...others} viewBox="0 0 35 32" fill="none">
-      <path d="M28.3322 8.3336V23.8687H3.75V8.3336L16.0414 0.566406L28.3322 8.3336Z" fill={`url(#${hash})`} />
-      <path d="M28.3328 8.3336V23.8687H16.042V0.566406L28.3328 8.3336Z" fill={`url(#${hash}1)`} />
-      <path d="M0.578125 8.33395L3.75038 0.566406H16.0417L12.8694 8.33395H0.578125Z" fill={`url(#${hash}2)`} />
-      <path d="M31.5055 8.33395L28.3332 0.566406H16.042L19.2143 8.33395H31.5055Z" fill={`url(#${hash}3)`} />
-      <path d="M7.70117 17.3594H9.68516V19.449H7.70117V17.3594Z" fill={`url(#${hash}4)`} />
+    <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" fill="none" viewBox="0 0 512 512">
       <path
-        d="M34.4383 24.0849C34.4383 28.3053 31.1898 31.7267 27.1829 31.7267C23.1752 31.7267 19.9268 28.3053 19.9268 24.0849C19.9268 19.8638 23.1752 16.4424 27.1829 16.4424C31.1898 16.4424 34.4383 19.8638 34.4383 24.0849Z"
-        fill={colors ? '#01B763' : 'currentcolor'}
-      />
-      <path
-        d="M34.438 24.0849C34.438 28.3053 31.1896 31.7267 27.1826 31.7267V16.4424C31.1896 16.4424 34.438 19.8638 34.438 24.0849Z"
-        fill={colors ? '#01B763' : 'currentcolor'}
-      />
-      <path
-        d="M30.9798 22.8475L27.1831 26.8463L26.5251 27.5394L23.3857 24.2329L24.7891 22.7555L26.5251 24.5839L27.1831 23.8909L29.5764 21.3701L30.9798 22.8475Z"
-        fill="#F3FDFF"
-      />
-      <path d="M30.9793 22.8475L27.1826 26.8463V23.8909L29.576 21.3701L30.9793 22.8475Z" fill="#D7F3F7" />
-      <defs>
-        <linearGradient id={hash} x1="7.39892" y1="0.566406" x2="27.0467" y2="24.9064" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
-        </linearGradient>
-        <linearGradient id={`${hash}1`} x1="17.8664" y1="0.566406" x2="35.8621" y2="11.7127" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? '#5B7FFE' : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? '#2A1DC2' : 'currentcolor'} />
-        </linearGradient>
-        <linearGradient id={`${hash}2`} x1="2.8735" y1="0.566406" x2="7.71889" y2="11.894" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? '#AABDFF' : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? '#8A83E0' : 'currentcolor'} />
-        </linearGradient>
-        <linearGradient id={`${hash}3`} x1="18.3374" y1="0.566406" x2="23.1828" y2="11.894" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? '#AABDFF' : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? '#8A83E0' : 'currentcolor'} />
-        </linearGradient>
-        <linearGradient id={`${hash}4`} x1="7.99567" y1="17.3594" x2="9.78753" y2="19.3572" gradientUnits="userSpaceOnUse">
-          <stop stop-color={colors ? colors[0] : 'currentcolor'} />
-          <stop offset="1" stop-color={colors ? colors[1] : 'currentcolor'} />
-        </linearGradient>
-      </defs>
+        fill="currentcolor"
+        d="M465.316 230.07l-30.01-30.003c-7.122-7.123-12.959-21.197-12.959-31.291v-42.432c0-20.185-16.489-36.674-36.669-36.685h-42.451c-10.081 0-24.173-5.847-31.296-12.964l-30.004-30.003c-14.256-14.256-37.599-14.256-51.855 0l-30.004 30.025c-7.129 7.122-21.236 12.953-31.297 12.953h-42.433c-20.158 0-36.67 16.489-36.67 36.674v42.433c0 10.054-5.835 24.173-12.958 31.291L46.7 230.071c-14.267 14.256-14.267 37.598 0 51.877l30.01 30.003c7.127 7.122 12.959 21.236 12.959 31.29v42.434c0 20.163 16.511 36.674 36.669 36.674h42.434c10.082 0 24.173 5.835 31.297 12.953l30.004 30.014c14.256 14.245 37.599 14.245 51.855 0l30.004-30.014c7.129-7.122 21.215-12.953 31.296-12.953h42.451c20.18 0 36.67-16.511 36.67-36.674v-42.434c0-10.097 5.84-24.172 12.958-31.29l30.01-30.003c14.244-14.279 14.244-37.622-.001-51.878zM226.893 338.504l-80.902-80.911 25.928-25.922 54.98 54.979 113.178-113.148 25.921 25.922-139.105 139.08z"
+      ></path>
     </svg>
   );
 };
@@ -473,6 +437,18 @@ export const Process: React.FC<svgInterface> = ({ colors, ...others }) => {
           <rect width="512" height="512" fill="white" />
         </clipPath>
       </defs>
+    </svg>
+  );
+};
+
+export const AssetIcon: React.FC<svgInterface> = ({ colors, ...others }) => {
+  const hash = getHash();
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 20 20">
+      <path
+        fill="#fff"
+        d="M12.885 3.912h-.817a2.721 2.721 0 00-5.25 0h-.815a3.014 3.014 0 00-3.01 3.011v8.89a3.014 3.014 0 003.01 3.01h6.882a3.014 3.014 0 003.011-3.01v-8.89a3.014 3.014 0 00-3.01-3.011zm-3.44-.717a.717.717 0 110 1.434.717.717 0 010-1.434zm3.231 7.226l-3.481 3.482a.717.717 0 01-1.012 0l-1.97-1.962a.717.717 0 111.015-1.012l1.46 1.46 2.973-2.983a.718.718 0 011.015 1.015z"
+      ></path>
     </svg>
   );
 };
