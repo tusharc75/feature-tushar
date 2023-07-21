@@ -285,19 +285,19 @@ const ViewInvoice = ({ pageData = null, invoiceData, estimateStartDate, onClose,
                 />
               }
               <Box display="flex" alignItems="center">
-                {pageData && 
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={handleClick}
-                  aria-controls="action-menu"
-                  disabled={selectedProducts?.length ? false : true}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>}
+                {pageData &&
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={handleClick}
+                    aria-controls="action-menu"
+                    disabled={selectedProducts?.length ? false : true}
+                    endIcon={<ExpandMore />}
+                    className="new-dropdown-v1"
+                  >
+                    Actions
+                  </Button>}
                 <Menu
                   id="action-menu"
                   anchorEl={anchorEl}
@@ -346,6 +346,7 @@ const ViewInvoice = ({ pageData = null, invoiceData, estimateStartDate, onClose,
                   hideAction={!pageData ? true : false}
                   renderedFrom="view_billing"
                   isClientSideGrid={true}
+                  hideExpander={true}
                 />
               </Box>
             ) : (

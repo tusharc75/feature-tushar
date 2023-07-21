@@ -228,7 +228,14 @@ const FieldTicketDetail = () => {
               <AddCost fieldTicketData={fieldTicketData} id={id} setNextStep={setNextStep} />
             )}
             {currentStep === 2 && (
-              <Submit />
+              <Submit
+                stepFullScreen={stepFullScreen}
+                fieldTicketData={fieldTicketData}
+                id={id}
+                renderedFrom={`${renderedFrom}_grid-1`}
+                allowedToEdit={allowedToEdit}
+                setNextStep={setNextStep}
+              />
             )}
           </ContentFullScreen>
         </TabPanel>
