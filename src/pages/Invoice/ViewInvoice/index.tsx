@@ -23,12 +23,11 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
 
-const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, onClose, onSuccess }) => {
+const ViewInvoice = ({ pageData = null, invoiceData, estimateStartDate, onClose, onSuccess }) => {
 
   const toastConfig = useContext(CustomToastContext);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [material, setMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -138,9 +137,9 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
         }
       ];
       column = [...column, ...newColumns];
-      column.push({
+      pageData && column.push({
         accessor: 'action',
-        Header: 'Action',
+        Header: 'Actions',
         minWidth: 100,
         width: 100,
         sticky: 'right',
@@ -148,20 +147,6 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
         canDrag: false,
         Cell: ({ row }) => (
           <Grid container spacing={1}>
-            {row.original.isEditable && row.original.qty > 1 && (
-              <>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setIsProductEdit({ open: true, rowData: row.original });
-                  }}
-                >
-                  <EditIcon color="primary" />
-                </IconButton>
-                <Box ml={1} />
-              </>
-            )}
             <IconButton
               disabled={!invoiceData?.isLatestInvoice}
               size="small"
@@ -213,7 +198,6 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
               : parent.type === 'serializedAsset'
                 ? parent.serializedAssetDetail?.product?.productDescription || ''
                 : '';
-      parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -254,7 +238,6 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
               : _subRow.type === 'serializedAsset'
                 ? _subRow.serializedAssetDetail?.product?.productDescription || ''
                 : '';
-      _subRow.isEditable = false;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -269,26 +252,6 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
     setAnchorEl(null);
   };
 
-  const handleSaveData = async (rows: any) => {
-    const data = {
-      invoiceId: invoiceData?._id,
-      materialId: rows[0]?.materialId,
-      qty: rows[0]?.qty
-    };
-    setIsLoadingUpdate(true);
-    axiosInstance()
-      .put(`${rentalManagement.api}/${fieldTicketData._id}/progressive-billing/update-qty`, data)
-      .then((res) => {
-        setIsLoadingUpdate(false);
-        setIsProductEdit({ open: false, rowData: null });
-        fetchData();
-        onSuccess();
-      })
-      .catch((error) => {
-        setIsLoadingUpdate(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
 
   const handleDeleteData = async (rows) => {
     const data = {
@@ -296,7 +259,7 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
       materialIds: rows?.map((e) => e.materialId) || []
     };
     axiosInstance()
-      .put(`${rentalManagement.api}/${fieldTicketData._id}/progressive-billing/remove`, data)
+      .put(`${rentalManagement.api}/${pageData._id}/progressive-billing/remove`, data)
       .then((res) => {
         fetchData();
         setViewBillDialogConfirm({ open: false, rows: [] });
@@ -322,18 +285,19 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
                 />
               }
               <Box display="flex" alignItems="center">
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={handleClick}
-                  aria-controls="action-menu"
-                  disabled={selectedProducts?.length ? false : true}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
+                {pageData &&
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={handleClick}
+                    aria-controls="action-menu"
+                    disabled={selectedProducts?.length ? false : true}
+                    endIcon={<ExpandMore />}
+                    className="new-dropdown-v1"
+                  >
+                    Actions
+                  </Button>}
                 <Menu
                   id="action-menu"
                   anchorEl={anchorEl}
@@ -351,6 +315,7 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
                   }}
                 >
                   <MenuItem
+                    disabled={!pageData ? true : false}
                     onClick={() => {
                       setAnchorEl(null);
                       const obj: any = [];
@@ -371,16 +336,17 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
             {columns && rowsData ? (
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
                 <CustomReactTable
-                  height={'calc(100vh - 285px)'}
+                  height={'calc(100vh - 200px)'}
                   columns={columns}
                   data={rowsData}
                   onSelect={setSelectedProducts}
                   childrenProperty="subRows"
                   uniqueKey="_id"
-                  hideSelection={false}
-                  hideAction={false}
-                  renderedFrom="rental_management_view_billing"
+                  hideSelection={!pageData ? true : false}
+                  hideAction={!pageData ? true : false}
+                  renderedFrom="view_billing"
                   isClientSideGrid={true}
+                  hideExpander={true}
                 />
               </Box>
             ) : (
@@ -422,4 +388,4 @@ const ViewBillingDialog = ({ fieldTicketData, invoiceData, estimateStartDate, on
   );
 };
 
-export default ViewBillingDialog;
+export default ViewInvoice;

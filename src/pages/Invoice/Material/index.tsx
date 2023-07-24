@@ -168,7 +168,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
-      Header: 'Action',
+      Header: 'Actions',
       minWidth: 100,
       width: 100,
       sticky: 'right',
@@ -200,7 +200,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
     let assignedAssets = [];
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
     data = response?.data?.data;
-    let rows = data.material.filter((e) => e.parentId === null);
+    let rows = data.material.filter((e) => !e.parentId);
     assignedAssets = data.material.filter((e) => e.type === 'serializedAsset' && e.parentId);
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     rows.forEach((parent, i) => {

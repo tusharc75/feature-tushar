@@ -15,9 +15,12 @@ const getAzureAcessToken = async (msalInstance) => {
     try{
       authResult  = await msalInstance.acquireTokenSilent(request);
     }catch(e){
-      authResult = await msalInstance.acquireTokenPopup(request)
+      try{
+        authResult = await msalInstance.acquireTokenPopup(request)
+      }
+      catch(e){
+      }
     }
-
     return authResult.accessToken
 };
 

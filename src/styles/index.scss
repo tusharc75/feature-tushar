@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap'); // Poppins
 
-@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -59,6 +58,12 @@
   --accordion-expanded-summary-bg: #f1f5ff;
   --card-bg: #fff;
   --active-border-color: #f99336;
+  --form-head-bg: #f1f5ff;
+  --primary-text: #2a3042;
+
+  --flow-inActive: #ebebeb;
+  --flow-currentStep: #fff;
+  --flow-active: #c8e9ce;
 }
 
 // Dark Theme
@@ -90,8 +95,17 @@
   --card-body: var(--dark-secondary);
   --dark-primary-text: #fff;
   --dark-secondary-text: #b8b8b8;
-  --dark-error: hsl(0, 52%, 36%);
+  --dark-error: hsl(358.89deg 62.92% 40.17%);
+  --dark-yellow: hsl(41.65deg 100% 44.31%);
+  --dark-gray: hsl(0deg 0% 14.49% / 70%);
+  --dark-green: hsl(132.04deg 80.8% 31.18%);
   --dark-active-border-color: #f99336;
+  --form-head-bg: #282845;
+  --primary-text: #fff;
+
+  --flow-inActive: #525269cc;
+  --flow-currentStep: var(--dark-primary);
+  --flow-active: var(--dark-primary);
 }
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
@@ -1263,7 +1277,7 @@ body::-webkit-scrollbar-thumb {
 
   & thead {
     & tr {
-      border-bottom: 1px solid #e4e4e4;
+      border-bottom: 1px solid var(--common-border-color);
 
       & th {
         padding: 0px 15px !important;
@@ -1273,14 +1287,14 @@ body::-webkit-scrollbar-thumb {
 
   & tbody {
     & tr {
-      border-bottom: 1px solid #e4e4e4;
+      border-bottom: 1px solid var(--common-border-color);
 
       & td {
         padding: 0px 15px !important;
 
         & .tableMainHeader {
           font-size: 1rem;
-          color: var(--secondary);
+          color: var(--primary-text);
           font-weight: 500;
         }
       }
@@ -1448,6 +1462,9 @@ body::-webkit-scrollbar-thumb {
   .MuiStepLabel-iconContainer {
     color: var(--secondary) !important;
     opacity: 1 !important;
+    [data-mode='dark'] & {
+      color: var(--new_theme_color) !important;
+    }
   }
 
   .MuiStepLabel-completed {
@@ -1456,10 +1473,16 @@ body::-webkit-scrollbar-thumb {
 
   .MuiStepIcon-active {
     color: #378280 !important;
+    [data-mode='dark'] & {
+      color: rgb(190, 190, 190) !important;
+    }
   }
 
   .MuiStepLabel-active {
     color: #378280 !important;
+    [data-mode='dark'] & {
+      color: white !important;
+    }
   }
 }
 
@@ -1595,44 +1618,26 @@ body::-webkit-scrollbar-thumb {
 
 .red-data-row {
   background-color: var(--dark-error, #ffcccb) !important;
-  [data-mode='dark'] & {
-    background-color: hsl(1 100% 65% / 1) !important;
-  }
 }
 
 .scrap-data-row {
-  background-color: #ffe4c0 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(34, 100%, 48%) !important;
-  }
+  background-color: var(--dark-yellow, #ffe4c0) !important;
 }
 
 .light-red-data-row {
-  background-color: #feb1b1 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(0, 97%, 45%) !important;
-  }
+  background-color: var(--dark-error, #feb1b1) !important;
 }
 
 .light-yellow-data-row {
-  background-color: #fae498 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(47, 91%, 39%) !important;
-  }
+  background-color: var(--dark-yellow, #fae498) !important;
 }
 
 .light-grey-data-row {
-  background-color: #d3d3d3 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(0, 0%, 53%) !important;
-  }
+  background-color: var(--dark-gray, #d3d3d3) !important;
 }
 
 .light-green-data-row {
-  background-color: #acf1c8 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(144, 71%, 31%) !important;
-  }
+  background-color: var(--dark-green, #acf1c8) !important;
 }
 
 .a_divider_inner {
@@ -2777,7 +2782,7 @@ svg.MuiSvgIcon-root {
   [data-mode='dark'] & {
     color: #fff;
     background-color: var(--dark-primary);
-    border: 1px solid var(--common-border-color) !important;
+    border: 0px solid var(--common-border-color) !important;
   }
 
   &:last-of-type {
@@ -2901,6 +2906,12 @@ svg.MuiSvgIcon-root {
       background: white;
       box-shadow: rgba(0, 0, 0, 0.06) 0px 5.44444px 27.2222px;
       border: 1px solid rgb(226, 226, 226);
+    }
+
+    [data-mode='dark'] & {
+      btn-outline-v1 {
+        background: var(--dark-primary) !important;
+      }
     }
   }
 
@@ -3093,7 +3104,7 @@ svg.MuiSvgIcon-root {
   margin-bottom: 30px;
   [data-mode='dark'] & {
     color: #fff;
-    border-bottom: 1px solid #555555;
+    border-bottom: 1px solid #2c3151;
   }
 
   @media all and (max-width: 768px) {
@@ -3124,7 +3135,7 @@ svg.MuiSvgIcon-root {
     [data-mode='dark'] & {
       background-color: #282845;
       color: #fff;
-      border: 1px solid #555555 !important;
+      border: 1px solid #4c4b73 !important;
     }
 
     &:first-of-type {
@@ -3209,6 +3220,15 @@ body {
       }
     }
   }
+
+  & .headerbox-v1 {
+    [data-mode='dark'] & {
+      .btn-outline-v1 {
+        background-color: var(--dark-primary) !important;
+        color: white !important;
+      }
+    }
+  }
   .btn-primary-v1 {
     padding: var(--button-v1-padding);
     border: 1px solid #0f9fa9 !important;
@@ -3216,8 +3236,8 @@ body {
 
   .btn-outline-red-v1 {
     background: #ffffff !important;
-    border: 1px solid #f44336 !important;
-    color: #f44336 !important;
+    border: 1px solid #d65642 !important;
+    color: #d43e3e !important;
     box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
     border-radius: 3px !important;
     padding: var(--button-v1-padding);
@@ -3237,7 +3257,8 @@ body {
       background-color: rgba(0, 0, 0, 0.04) !important;
     }
     [data-mode='dark'] & {
-      background-color: var(--dark-secondary) !important;
+      background-color: var(--dark-primary) !important;
+      border: 0px !important;
       &:hover {
         background-color: hsl(240, 27%, 25%) !important;
       }
@@ -3378,7 +3399,7 @@ body {
 }
 .pagination-v1 {
   [data-mode='dark'] & {
-    background-color: var(--primary) !important;
+    background-color: transparent !important;
   }
   & > div {
     padding: 30px 0 14px;

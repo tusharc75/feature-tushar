@@ -23,7 +23,9 @@
     font-size: 15px;
     font-weight: 600;
     line-height: 1.57;
-    margin-bottom: 5px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--common-border-color);
   }
   .cardDetails {
     font-size: 13px;
@@ -32,6 +34,10 @@
     display: grid;
     grid-template-columns: 13ch 1fr;
     gap: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
     span {
       font-weight: 600;
     }
@@ -44,20 +50,6 @@
 }
 .singleCol {
   position: relative;
-  &::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background-color: var(--dark-mode-border-color, #e7e7e7);
-  }
-  &:last-of-type {
-    &::after {
-      content: unset;
-    }
-  }
 }
 .colTitle {
   position: sticky;
@@ -68,20 +60,23 @@
   background-color: var(--section-bg);
   padding: 14px 13px;
   z-index: 5;
-  margin-inline: -11px !important;
+  margin-left: -6px !important;
+  margin-right: -6px !important;
+  border-radius: 8px 8px 0 0;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
 
-  span {
-    width: 20px;
-    height: 20px;
-    display: block;
-    border-radius: 100vmax;
-    background-color: var(--bg, red);
-  }
+  // span {
+  //   width: 20px;
+  //   height: 20px;
+  //   display: block;
+  //   border-radius: 100vmax;
+  //   background-color: var(--bg, red);
+  // }
 }
 
 .container {
   --section-bg: var(--dark-secondary, #f1f5ff);
-  background: var(--section-bg);
   padding: 0 0px 24px;
   height: calc(100vh - 28vh);
   overflow: auto;
@@ -104,6 +99,9 @@
 }
 .cardDetailsLink {
   color: var(--link);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   &:hover {
     text-decoration: underline;
   }

@@ -14,17 +14,17 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { ACTIVITY_RESOURCE, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
 import TabPanel from '../../components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
 import AddCost from './AddCost';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
-import Steps from 'src/components/Steps';
+import Steps, { getIndex } from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Material from './material';
-import { camelCase } from 'lodash';
-import Invoice from './Invoice';
+import { camelCase, set } from 'lodash';
+import Submit from './Submit';
 
 const FieldTicketDetail = () => {
   const { id } = useParams();
@@ -82,6 +82,7 @@ const FieldTicketDetail = () => {
         data = response?.data?.data;
       }
       setFieldTicketData(data);
+      setCurrentStep(getIndex(data?.processStatus, fieldTicketSteps));
       let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
@@ -125,6 +126,19 @@ const FieldTicketDetail = () => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+  };
+  useEffect(() => {
+    if (currentStep !== null && currentStep >= 0) {
+      updateProcessStatus(fieldTicketSteps[currentStep]?.name);
+    }
+  }, [currentStep]);
+
+
+  const updateProcessStatus = async (processStatus) => {
+    axiosInstance()
+      .put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus })
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   return (
@@ -211,10 +225,17 @@ const FieldTicketDetail = () => {
               />
             )}
             {currentStep === 1 && (
-              <AddCost fieldTicketData={fieldTicketData} id={id} />
+              <AddCost fieldTicketData={fieldTicketData} id={id} setNextStep={setNextStep} />
             )}
             {currentStep === 2 && (
-              <Invoice id={id} fieldTicketData={fieldTicketData} renderedFrom={renderedFrom} />
+              <Submit
+                stepFullScreen={stepFullScreen}
+                fieldTicketData={fieldTicketData}
+                id={id}
+                renderedFrom={`${renderedFrom}_grid-1`}
+                allowedToEdit={allowedToEdit}
+                setNextStep={setNextStep}
+              />
             )}
           </ContentFullScreen>
         </TabPanel>

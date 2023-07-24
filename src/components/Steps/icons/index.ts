@@ -20,91 +20,122 @@ import {
   StartSublease,
   ReceivingTicket,
   ManualEntry,
-  Process
+  Process,
+  AssetIcon,
+  SendToCustomerIcon,
+  EndIcon,
+  QuoteBuilderIcon,
+  PriceBuilderIcon,
+  ProductBuilderIcon,
+  NegoTiatingIcon,
+  ProposalIcon,
+  ProspectingIcon,
+  UnqualifiedIcon,
+  QualifiedIcon,
+  ClosedIcon
 } from './svgIcon';
 import StepCompleteIcon from './StepCompleteIcon';
+export type StepIconType =
+  | 'add'
+  | 'assign'
+  | 'dispatch'
+  | 'invoice'
+  | 'postWork'
+  | 'quote'
+  | 'repairOrder'
+  | 'serializedAssets'
+  | 'workOrder'
+  | 'ticket'
+  | 'receiveProduct'
+  | 'consumable'
+  | 'doa'
+  | 'approval'
+  | 'end'
+  | 'startSublease'
+  | 'receivingTicket'
+  | 'manualEntry'
+  | 'process'
+  | 'asset'
+  | 'sendToCustomer'
+  | 'endIcon'
+  | 'quoteBuilder'
+  | 'priceBuilder'
+  | 'productBuilder'
+  | 'negotiating'
+  | 'proposal'
+  | 'prospecting'
+  | 'unqualified'
+  | 'qualified'
+  | 'closed';
+
 export interface stepIconInterface {
-  icon:
-    | 'add'
-    | 'assign'
-    | 'dispatch'
-    | 'invoice'
-    | 'postWork'
-    | 'quote'
-    | 'repairOrder'
-    | 'serializedAssets'
-    | 'workOrder'
-    | 'ticket'
-    | 'receiveProduct'
-    | 'consumable'
-    | 'doa'
-    | 'approval'
-    | 'end'
-    | 'startSublease'
-    | 'receivingTicket'
-    | 'manualEntry'
-    | 'process';
+  icon: StepIconType;
 }
 
 export const getIcon = (name: string) => {
   switch (true) {
     case name === 'add':
       return Add;
-      break;
     case name === 'assign':
       return Assign;
-      break;
     case name === 'dispatch':
       return Dispatch;
-      break;
     case name === 'invoice':
       return Invoice;
-      break;
     case name === 'postWork':
       return PostWork;
-      break;
     case name === 'quote':
       return Quote;
-      break;
     case name === 'repairOrder':
       return RepairOrder;
-      break;
     case name === 'serializedAssets':
       return SerializedAsset;
-      break;
     case name === 'workOrder':
       return WorkOrder;
-      break;
     case name === 'ticket':
       return Ticket;
-      break;
     case name === 'receiveProduct':
       return ReceiveProduct;
-      break;
     case name === 'consumable':
       return Consumable;
-      break;
     case name === 'doa':
       return DOA;
-      break;
     case name === 'approval':
       return Approval;
-      break;
     case name === 'end':
       return End;
-      break;
     case name === 'startSublease':
       return StartSublease;
-      break;
     case name === 'receivingTicket':
       return ReceivingTicket;
-      break;
     case name === 'manualEntry':
       return ManualEntry;
-      break;
     case name === 'process':
       return Process;
-      break;
+    case name === 'asset':
+      return AssetIcon;
+    case name === 'sendToCustomer':
+      return SendToCustomerIcon;
+    case name === 'endIcon':
+      return EndIcon;
+    case name === 'quoteBuilder':
+      return QuoteBuilderIcon;
+    case name === 'priceBuilder':
+      return PriceBuilderIcon;
+    case name === 'productBuilder':
+      return ProductBuilderIcon;
+    case name === 'negotiating':
+      return NegoTiatingIcon;
+    case name === 'proposal':
+      return ProposalIcon;
+    case name === 'prospecting':
+      return ProspectingIcon;
+    case name === 'unqualified':
+      return UnqualifiedIcon;
+    case name === 'qualified':
+      return QualifiedIcon;
+    case name === 'closed':
+      return ClosedIcon;
     default:
       return SerializedAsset;
   }

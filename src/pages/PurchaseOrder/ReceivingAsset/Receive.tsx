@@ -259,59 +259,34 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                 {values.seriaizedAsset && values.seriaizedAsset.length && warehouseOptions ? (
                   <Box p={2}>
                     <Form>
-                      <div className="datepicker mb-[14px]">
-                        <KeyboardDatePicker
-                          label="Received Date"
-                          variant="inline"
-                          inputVariant="outlined"
-                          required
-                          autoOk
-                          size="small"
-                          margin="dense"
-                          name="receiveDate"
-                          placeholder="Receive Date"
-                          value={values.receiveDate}
-                          format={dateFormatForInputControl}
-                          minDate={
-                            lockDate
-                              ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
-                                ? lockDate
-                                : purchaseOrderData?.purchaseOrderDate
-                              : purchaseOrderData?.purchaseOrderDate
-                          }
-                          maxDate={new Date()}
-                          onChange={(value) => {
-                            setFieldValue('receiveDate', convertDateInDateTime(value));
-                          }}
-                          error={validateDate(values)?.receiveDate}
-                          helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
-                        />
-                      </div>
-
                       <FieldArray
                         name="seriaizedAsset"
                         render={(arrayHelpers) => (
                           <div className="grid gap-[15px] sm:gap-[18px]">
                             {values.seriaizedAsset.map((data, index) => (
                               <div
-                                className="border border-[var(--common-border-color)] rounded-[6px] pt-[17px] px-[23px] pb-[21px] grid sm:grid-cols-[24px,1fr] md:gap-[29px] gap-[15px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
+                                style={{ border: '1.5px solid var(--common-border-color)' }}
+                                className="rounded-[6px] pt-[17px] px-[23px] pb-[21px] grid sm:grid-cols-[24px,1fr] md:gap-[29px] gap-[15px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
                                 key={index}
                               >
                                 <div className="bg-[var(--new\_theme\_color)] w-[24px] h-[24px] rounded-[6px] flex items-center justify-center">
                                   <p className="text-white text-[13px] font-[700] leading-none">{index + 1}</p>
                                 </div>
                                 <div>
-                                  <div className="flex border-b border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]">
+                                  <div
+                                    style={{ borderBottom: '1px solid var(--common-border-color)' }}
+                                    className="flex border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
+                                  >
                                     <span>
-                                      <b>PO Quantity: </b>
+                                      <span className="text-[var(--primary-text)] font-semibold">PO Quantity: </span>
                                       {data?.row?.qty}
                                     </span>
                                     <span>
-                                      <b>Recieved: </b>
+                                      <span className="text-[var(--primary-text)] font-semibold">Recieved: </span>
                                       {data?.row?.actualReceived || 0}
                                     </span>
                                     <span>
-                                      <b>Rejected: </b>
+                                      <span className="text-[var(--primary-text)] font-semibold">Rejected: </span>
                                       {data?.row?.rejectQuantity || 0}
                                     </span>
                                   </div>
@@ -494,10 +469,38 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                           </div>
                         )}
                       />
+                      <div className="datepicker mt-[14px]">
+                        <KeyboardDatePicker
+                          label="Received Date"
+                          variant="inline"
+                          inputVariant="outlined"
+                          required
+                          autoOk
+                          size="small"
+                          margin="dense"
+                          name="receiveDate"
+                          placeholder="Receive Date"
+                          value={values.receiveDate}
+                          format={dateFormatForInputControl}
+                          minDate={
+                            lockDate
+                              ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                                ? lockDate
+                                : purchaseOrderData?.purchaseOrderDate
+                              : purchaseOrderData?.purchaseOrderDate
+                          }
+                          maxDate={new Date()}
+                          onChange={(value) => {
+                            setFieldValue('receiveDate', convertDateInDateTime(value));
+                          }}
+                          error={validateDate(values)?.receiveDate}
+                          helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
+                        />
+                      </div>
                     </Form>
                   </Box>
                 ) : (
-                  <Box p={2} height={300} bgcolor="white">
+                  <Box p={2} height={300}>
                     <CommonSkeleton lenArray={[...Array(6).keys()]} />
                   </Box>
                 )}

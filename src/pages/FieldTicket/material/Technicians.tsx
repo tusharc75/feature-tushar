@@ -99,7 +99,7 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
             },
             {
                 accessor: 'action',
-                Header: 'Action',
+                Header: 'Actions',
                 minWidth: 50,
                 width: 50,
                 sticky: 'right',
@@ -205,7 +205,7 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
             element.fieldTicket = id;
             element.technician = d?._id;
             element.uniqueId = selectedService?._id;
-            element.service = selectedService?.optionValue;
+            element.service = selectedService?.optionValue !== "All" ? selectedService?.optionValue : null;
             element.status = 'Assigned';
             element.estimateStartDate = fieldTicketData?.estimateStartDate || new Date()
             element.estimateEndDate = fieldTicketData?.estimateEndDate || new Date()
@@ -230,13 +230,13 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                 {allowedToEdit && (
                     <Box display="flex" justifyContent="space-between" mb={2}>
                         <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-                            <Tooltip title={(!selectedService || selectedService?.optionValue === 'All') ? 'Please Select Service' : ''}>
-                                <span>
-                                    <Button variant="outlined" color="primary" size="small" disabled={!selectedService || selectedService?.optionValue === 'All'} onClick={() => setTechnicianDialog(true)}>
-                                        Add
-                                    </Button>
-                                </span>
-                            </Tooltip>
+                            {/* <Tooltip title={(!selectedService || selectedService?.optionValue === 'All') ? 'Please Select Service' : ''}>
+                                <span> */}
+                            <Button variant="outlined" color="primary" size="small" onClick={() => setTechnicianDialog(true)}>
+                                Add
+                            </Button>
+                            {/* </span>
+                            </Tooltip> */}
                         </Box>
                         <Box display="flex" ml={1}>
                             <Button

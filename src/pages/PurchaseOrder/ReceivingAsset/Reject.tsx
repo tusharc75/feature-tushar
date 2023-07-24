@@ -9,14 +9,20 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { Formik, Form, FieldArray } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { convertDateInDateTime, convertDateTimToDate, dateFormatForInputControl, productInventory, purchaseOrder, sidebarResource } from '../../../constants/helpers';
+import {
+  convertDateInDateTime,
+  convertDateTimToDate,
+  dateFormatForInputControl,
+  productInventory,
+  purchaseOrder,
+  sidebarResource
+} from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrderData }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -36,7 +42,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
     if (user?.user?.brandPolicy?.storageLocation) {
       getStorageLocation();
     }
-  }, [])
+  }, []);
 
   const fetchSettingsData = () => {
     axiosInstance()
@@ -56,7 +62,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
         if (data[sidebarResource.storageLocation]) {
-          setStorageLocationOptions(data[sidebarResource.storageLocation]?.filter(e => e.warehouse === purchaseOrderData?.warehouse?.optionValue));
+          setStorageLocationOptions(data[sidebarResource.storageLocation]?.filter((e) => e.warehouse === purchaseOrderData?.warehouse?.optionValue));
         }
       });
   };
@@ -74,7 +80,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
           comment: element?.comment === '' ? 'Rejected' : element?.comment,
           supplierPartNumber: element?.supplierPartNumber,
           serialNumber: [],
-          storageLocation: user?.user?.brandPolicy?.storageLocation ? element?.storageLocation?.optionValue : null,
+          storageLocation: user?.user?.brandPolicy?.storageLocation ? element?.storageLocation?.optionValue : null
         });
       }
     });
@@ -120,20 +126,20 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
   const validateDate = (values) => {
     let errors: any = {};
 
-    if (moment(values["rejectDate"]).isBefore(convertDateTimToDate(purchaseOrderData?.purchaseOrderDate))) {
+    if (moment(values['rejectDate']).isBefore(convertDateTimToDate(purchaseOrderData?.purchaseOrderDate))) {
       errors['rejectDate'] = `Date entered prior to the purchase order date`;
     }
 
     if (lockDate) {
-      if (!moment(values["rejectDate"]).isSameOrAfter(moment(lockDate))) {
+      if (!moment(values['rejectDate']).isSameOrAfter(moment(lockDate))) {
         errors['rejectDate'] = `Date entered prior to the locked date`;
       }
     }
-    if (moment(values["rejectDate"]).isAfter(moment())) {
+    if (moment(values['rejectDate']).isAfter(moment())) {
       errors['rejectDate'] = `Please select valid date`;
     }
     return errors;
-  }
+  };
 
   return (
     <Dialog
@@ -172,7 +178,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({ values, setFieldValue, errors }) => (
             <>
@@ -180,154 +186,139 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                 {values.products && values.products.length ? (
                   <Box p={2}>
                     <Form>
-                      <Grid direction="row" justify="space-evenly" alignItems="center">
-                        <Grid item md={12}>
-                          <Box>
-                            <FieldArray
-                              name="products"
-                              render={(arrayHelpers) => (
-                                <div>
-                                  {values.products.map((data, index) => (
-                                    <Box key={index} border={'1px solid #dddddd'} borderRadius={4} mb={2} p={2} pt={2}>
-                                      <Grid container spacing={2} alignItems="center">
-                                        <Grid item xs={12} md={1}>
-                                          <Chip color="primary" label={index + 1} />
-                                        </Grid>
-                                        <Grid item xs={12} md={11}>
-                                          <Grid container spacing={2} alignItems="center">
-                                            <Grid item xs={12} md={3}>
-                                              <Autocomplete
-                                                size="small"
-                                                value={data.product}
-                                                options={productList}
-                                                disabled
-                                                getOptionLabel={(option: any) => (option ? option : '')}
-                                                onChange={(_, newValue) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.products[index],
-                                                    ['product']: newValue
-                                                  });
-                                                }}
-                                                renderInput={(params) => <TextField {...params} variant="outlined" name="product" label="Product" />}
-                                              />
-                                            </Grid>
-                                            {user?.user?.brandPolicy?.storageLocation &&
-                                              <Grid item xs={12} md={3}>
-                                                <Autocomplete
-                                                  size="small"
-                                                  value={data?.storageLocation}
-                                                  options={storageLocationOptions}
-                                                  getOptionLabel={(option: any) => option ? option.optionLabel : ''}
-                                                  onChange={(_, newValue) => {
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.products[index],
-                                                      ['storageLocation']: newValue
-                                                    });
-                                                  }}
-                                                  renderInput={(params) => (
-                                                    <TextField
-                                                      {...params}
-                                                      variant="outlined"
-                                                      name="storageLocation"
-                                                      label="Storage Location"
-                                                      error={validate([data]).storageLocation}
-                                                      helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
-                                                      required
-                                                    />
-                                                  )}
-                                                />
-                                              </Grid>
-                                            }
-                                            <Grid item xs={12} md={3}>
-                                              <span>
-                                                <b>PO Quantity: </b>
-                                                {data?.row?.qty}
-                                              </span>
-                                              <br />
-                                              <span>
-                                                <b>Received: </b>
-                                                {data?.row?.actualReceived || 0}
-                                              </span>
-                                              <br />
-                                              <span>
-                                                <b>Rejected: </b>
-                                                {data?.row?.rejectQuantity || 0}
-                                              </span>
-                                            </Grid>
-                                          </Grid>
-                                          <Box mt={1}>
-                                            <Grid container spacing={2} alignItems="center">
-                                              <Grid item xs={12} md={3}>
-                                                <TextField
-                                                  fullWidth
-                                                  label="Reject Quantity"
-                                                  variant="outlined"
-                                                  type="number"
-                                                  size="small"
-                                                  name="rejectQuantity"
-                                                  placeholder="Reject Quantity"
-                                                  value={data.rejectQuantity}
-                                                  onChange={(e) => {
-                                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.products[index],
-                                                      ['rejectQuantity']: value
-                                                    });
-                                                  }}
-                                                  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                                  error={validate([data])?.rejectQuantity}
-                                                  helperText={validate([data]).rejectQuantity ? 'Reject quantity is more than quantity' : ''}
-                                                />
-                                              </Grid>
-                                              <Grid item xs={12} md={3}>
-                                                <TextField
-                                                  fullWidth
-                                                  label="Supplier Part Number"
-                                                  variant="outlined"
-                                                  type="text"
-                                                  size="small"
-                                                  name="supplierPartNumber"
-                                                  placeholder="Supplier Part Number"
-                                                  value={data.supplierPartNumber}
-                                                  onChange={(e) => {
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.products[index],
-                                                      ['supplierPartNumber']: e.target.value
-                                                    });
-                                                  }}
-                                                />
-                                              </Grid>
-                                              <Grid item xs={12} md={3}>
-                                                <TextField
-                                                  fullWidth
-                                                  label="Comment"
-                                                  variant="outlined"
-                                                  type="text"
-                                                  size="small"
-                                                  name="comment"
-                                                  placeholder="Comment"
-                                                  value={data.comment}
-                                                  onChange={(e) => {
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.products[index],
-                                                      ['comment']: e.target.value
-                                                    });
-                                                  }}
-                                                />
-                                              </Grid>
-                                            </Grid>
-                                          </Box>
-                                        </Grid>
-                                      </Grid>
-                                    </Box>
-                                  ))}
+                      <FieldArray
+                        name="products"
+                        render={(arrayHelpers) => (
+                          <div>
+                            <div className="grid gap-[15px] sm:gap-[18px]">
+                              {values.products.map((data, index) => (
+                                <div
+                                  style={{ border: '1.5px solid var(--common-border-color)' }}
+                                  className="rounded-[6px] pt-[17px] px-[23px] pb-[21px] grid sm:grid-cols-[24px,1fr] md:gap-[29px] gap-[15px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
+                                  key={index}
+                                >
+                                  <div className="bg-[var(--new\_theme\_color)] w-[24px] h-[24px] rounded-[6px] flex items-center justify-center">
+                                    <p className="text-white text-[13px] font-[700] leading-none">{index + 1}</p>
+                                  </div>
+                                  <div>
+                                    <div
+                                      style={{ borderBottom: '1px solid var(--common-border-color)' }}
+                                      className="flex border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
+                                    >
+                                      <span>
+                                        <span className="text-[var(--primary-text)] font-semibold">PO Quantity: </span>
+                                        {data?.row?.qty}
+                                      </span>
+                                      <span>
+                                        <span className="text-[var(--primary-text)] font-semibold">Recieved: </span>
+                                        {data?.row?.actualReceived || 0}
+                                      </span>
+                                      <span>
+                                        <span className="text-[var(--primary-text)] font-semibold">Rejected: </span>
+                                        {data?.row?.rejectQuantity || 0}
+                                      </span>
+                                    </div>
+                                    {/* FIELDS */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
+                                      <Autocomplete
+                                        size="small"
+                                        value={data.product}
+                                        options={productList}
+                                        disabled
+                                        getOptionLabel={(option: any) => (option ? option : '')}
+                                        onChange={(_, newValue) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values.products[index],
+                                            ['product']: newValue
+                                          });
+                                        }}
+                                        renderInput={(params) => <TextField {...params} variant="outlined" name="product" label="Product" />}
+                                      />
+                                      <Autocomplete
+                                        size="small"
+                                        value={data?.storageLocation}
+                                        options={storageLocationOptions}
+                                        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                        onChange={(_, newValue) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values.products[index],
+                                            ['storageLocation']: newValue
+                                          });
+                                        }}
+                                        renderInput={(params) => (
+                                          <TextField
+                                            {...params}
+                                            variant="outlined"
+                                            name="storageLocation"
+                                            label="Storage Location"
+                                            error={validate([data]).storageLocation}
+                                            helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
+                                            required
+                                          />
+                                        )}
+                                      />
+                                      <TextField
+                                        fullWidth
+                                        label="Reject Quantity"
+                                        variant="outlined"
+                                        type="number"
+                                        size="small"
+                                        name="rejectQuantity"
+                                        placeholder="Reject Quantity"
+                                        value={data.rejectQuantity}
+                                        onChange={(e) => {
+                                          const value = e.target.value.replace(/[^0-9]/g, '');
+                                          arrayHelpers.replace(index, {
+                                            ...values.products[index],
+                                            ['rejectQuantity']: value
+                                          });
+                                        }}
+                                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                        error={validate([data])?.rejectQuantity}
+                                        helperText={validate([data]).rejectQuantity ? 'Reject quantity is more than quantity' : ''}
+                                      />
+                                      <TextField
+                                        fullWidth
+                                        label="Supplier Part Number"
+                                        variant="outlined"
+                                        type="text"
+                                        size="small"
+                                        name="supplierPartNumber"
+                                        placeholder="Supplier Part Number"
+                                        value={data.supplierPartNumber}
+                                        onChange={(e) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values.products[index],
+                                            ['supplierPartNumber']: e.target.value
+                                          });
+                                        }}
+                                      />
+                                      <TextField
+                                        fullWidth
+                                        label="Comment"
+                                        variant="outlined"
+                                        type="text"
+                                        size="small"
+                                        name="comment"
+                                        placeholder="Comment"
+                                        value={data.comment}
+                                        onChange={(e) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values.products[index],
+                                            ['comment']: e.target.value
+                                          });
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
                                 </div>
-                              )}
-                            />
-                          </Box>
-                        </Grid>
-                      </Grid>
-                      <Box pt={2}>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      />
+
+                      <div className="datepicker mt-[14px]">
                         <KeyboardDatePicker
                           label="Reject Date"
                           variant="inline"
@@ -351,11 +342,9 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                             setFieldValue('rejectDate', convertDateInDateTime(value));
                           }}
                           error={validateDate(values)?.rejectDate}
-                          helperText={
-                            validateDate(values)?.rejectDate ? validateDate(values)?.rejectDate : ''
-                          }
+                          helperText={validateDate(values)?.rejectDate ? validateDate(values)?.rejectDate : ''}
                         />
-                      </Box>
+                      </div>
                     </Form>
                   </Box>
                 ) : (
@@ -370,7 +359,11 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                 </Button>
                 <Button
                   onClick={() => {
-                    if (!validate(values.products).rejectQuantity && !validate(values.products).storageLocation && !validateDate(values)?.rejectDate) {
+                    if (
+                      !validate(values.products).rejectQuantity &&
+                      !validate(values.products).storageLocation &&
+                      !validateDate(values)?.rejectDate
+                    ) {
                       handleReject(values.products, values.rejectDate);
                     }
                   }}

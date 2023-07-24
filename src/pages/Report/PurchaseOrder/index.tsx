@@ -604,35 +604,35 @@ const Report = () => {
   const ReferenceRenderer = (params) =>
     params?.value ? (
       params.data.referenceType === 'Purchase Order' ? (
-        <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Transfer Inventory' ? (
-        <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`} target="_blank" >
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Transfer Asset' ? (
-        <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`} target="_blank" >
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Sales Order' ? (
-        <Link className="link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`} target="_blank" >
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Bulk Asset Creation' ? (
-        <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`} target="_blank" >
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Serialized Asset' ? (
-        <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Rental Job' ? (
-        <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Work Order' ? (
-        <Link className="link" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : (
@@ -647,25 +647,25 @@ const Report = () => {
   const CreditDebitTypeRenderer = (params: any) => <span>{capitalize(params?.value)}</span>;
 
   const PurchaseOrderRenderer = (params: any) => (
-    <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.purchaseOrderId}`}>
+    <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.purchaseOrderId}`} target="_blank" >
       {params.value}
     </Link>
   );
 
   const ProductRenderer = (params: any) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
+    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`} target="_blank" >
       {params.value}
     </Link>
   );
 
   const PlantRenderer = (params: any) => (
-    <Link className="link" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`}>
+    <Link className="link" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`} target="_blank" >
       {params.value}
     </Link>
   );
 
   const SupplierRenderer = (params: any) => (
-    <Link className="link" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`}>
+    <Link className="link" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`} target="_blank" >
       {params.value}
     </Link>
   );

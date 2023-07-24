@@ -145,7 +145,7 @@ function Product({ id }) {
 
     column.push({
       accessor: 'action',
-      Header: 'Action',
+      Header: 'Actions',
       width: 50,
       sticky: 'right',
       disableFilters: true,

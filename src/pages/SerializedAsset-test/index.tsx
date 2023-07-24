@@ -143,7 +143,7 @@ const SerializedAssetTest = () => {
   const ActionsRenderer = [
     {
       accessor: 'action',
-      Header: '',
+      Header: 'Actions',
       minWidth: 100,
       width: 100,
       sticky: 'right',

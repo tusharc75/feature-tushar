@@ -49,13 +49,13 @@ const TrailerMasterDetail = () => {
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
         if (data.data && data.data.length) {
-            data.data.some((o) => {
-              if (o?.fieldData?.fieldName === 'status') {
-                setStatusOptions([...o.fieldData.option]);
-                return true;
-              }
-            });
-          }
+          data.data.some((o) => {
+            if (o?.fieldData?.fieldName === 'status') {
+              setStatusOptions([...o.fieldData.option]);
+              return true;
+            }
+          });
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -139,7 +139,6 @@ const TrailerMasterDetail = () => {
     }
   };
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -148,12 +147,13 @@ const TrailerMasterDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-          {permissions?.trailerMaster?.isUpdate && (
+            {permissions?.trailerMaster?.isUpdate && (
               <Button
                 variant={'outlined'}
                 color="primary"
                 aria-controls="simple-menu"
                 aria-haspopup="true"
+                className="btn-outline-v1"
                 size="small"
                 onClick={handleClick}
                 endIcon={<ArrowDropDownIcon />}

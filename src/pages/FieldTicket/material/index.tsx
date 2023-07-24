@@ -125,7 +125,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
     column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
-      Header: 'Action',
+      Header: 'Actions',
       minWidth: 50,
       width: 50,
       sticky: 'right',

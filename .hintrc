@@ -32,6 +32,12 @@
         "image-alt": "off"
       }
     ],
-    "typescript-config/strict": "off"
+    "typescript-config/strict": "off",
+    "axe/aria": [
+      "default",
+      {
+        "aria-valid-attr-value": "off"
+      }
+    ]
   }
 }

@@ -167,7 +167,7 @@ const routes = {
         : RESOURCE_LABEL.termsAndConditions,
     path: '/terms-and-conditions'
   },
-  termsAndConditionsDetails: {
+  termsAndConditionsDetail: {
     title:
       storedRoutes && storedRoutes.termsAndConditions && storedRoutes.termsAndConditions.title
         ? storedRoutes.termsAndConditions?.title
@@ -880,6 +880,10 @@ const routes = {
   fieldTicketDetail: {
     title: storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title ? storedRoutes.fieldTicket?.title : RESOURCE_LABEL.fieldTicket,
     path: '/field-ticket/detail'
+  },
+  fieldTicketInvoice: {
+    title: storedRoutes && storedRoutes.fieldTicketInvoice && storedRoutes.fieldTicketInvoice.title ? storedRoutes.fieldTicketInvoice?.title : RESOURCE_LABEL.fieldTicketInvoice,
+    path: '/field-ticket-invoice'
   },
   fieldServiceTechnician: {
     title:

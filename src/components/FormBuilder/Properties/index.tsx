@@ -36,6 +36,7 @@ import { MinMax } from '../AddField/minMax';
 import { getLookupResource } from '../helper';
 import FieldDependent from './FieldDependent';
 import LookUpDisplay from './LookUpDisplay';
+import { ShowFieldDependentOn } from '../AddField/showFieldDependentOn';
 
 const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
@@ -222,6 +223,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isMulitFormula = values.isMulitFormula;
             ele.isUneditable = values.isUneditable;
             ele.isVlookup = values.isVlookup;
+            ele.isShowFieldDependentOn = values.isShowFieldDependentOn;
+            if (values.isShowFieldDependentOn) {
+              ele.showFieldDependentOn = values.showFieldDependentOn;
+            }
             ele.hiddenField = values.hiddenField;
             ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
             ele.additionalInfoSection = values.additionalInfoSection;
@@ -806,6 +811,36 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       }}
                       touched={touched}
                       errors={errors}
+                      _id={fieldData._id}
+                    />
+                  )}
+                  {(values['type'] === 'currencyAmount' ||
+                    values['type'] === 'decimal' ||
+                    values['type'] === 'percent' ||
+                    values['type'] === 'converter') && (
+                      <>
+                        <br></br>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name="isShowFieldDependentOn"
+                              checked={values['isShowFieldDependentOn']}
+                              onChange={(e) => {
+                                setFieldValue('isShowFieldDependentOn', e.target.checked);
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label="Show Field Dependent On"
+                        />
+                      </>
+                    )}
+                  {(values['isShowFieldDependentOn']) && (
+                    <ShowFieldDependentOn
+                      values={values}
+                      name={'showFieldDependentOn'}
+                      setFieldValue={setFieldValue}
+                      fields={fields}
                       _id={fieldData._id}
                     />
                   )}

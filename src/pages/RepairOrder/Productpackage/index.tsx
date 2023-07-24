@@ -171,7 +171,7 @@ const Productpackage = ({
     ];
     coloum.push({
       accessor: 'action',
-      Header: '',
+      Header: 'Actions',
       minWidth: 70,
       width: 70,
       sticky: 'right',
@@ -583,7 +583,7 @@ const Productpackage = ({
             customerAccount: repairOrderData?.type === REPAIR_ORDER_TYPE.external ? repairOrderData?.customerAccount?.optionValue : null,
             warehouse: repairOrderData?.warehouse?.optionValue
           }}
-          isAssigning={false}
+          isAssigning={isAddingProducts}
           handleSucess={handleAdd}
         />
       )}

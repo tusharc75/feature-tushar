@@ -180,7 +180,7 @@ const ProductsTable = ({ packageId, packageData }) => {
     ];
     coloum.push({
       accessor: 'action',
-      Header: '',
+      Header: 'Actions',
       minWidth: 50,
       width: 50,
       sticky: 'right',

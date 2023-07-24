@@ -177,7 +177,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
-      Header: 'Action',
+      Header: 'Actions',
       minWidth: 100,
       width: 100,
       sticky: 'right',

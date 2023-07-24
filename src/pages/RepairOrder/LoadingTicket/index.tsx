@@ -28,9 +28,11 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
+  const [theme] = useAppTheme();
   const history = useHistory();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
@@ -276,6 +278,15 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
     }
   };
 
+  const getRowStyle = (params) => {
+    if (params?.data?.status === ASSET_STATUS.scrap) {
+      return {
+        'background-color': 'var(--dark-gray, #d3d3d3)'
+      };
+    }
+    return null;
+  };
+
   return (
     <>
       <Box display="flex" justifyContent="flex-end" pt={1}>
@@ -368,7 +379,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -388,6 +399,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
               allowSelection={allowedToEdit}
               renderedFrom={renderedFrom}
               refreshGrid={fetchRecords}
+              customGridOptions={{ getRowStyle: getRowStyle }}
             />
           )
         ) : (

@@ -256,7 +256,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       });
     coloum.push({
       accessor: 'action',
-      Header: '',
+      Header: 'Actions',
       minWidth: 50,
       width: 50,
       sticky: 'right',

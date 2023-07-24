@@ -99,7 +99,11 @@
 
 .MuiDialog-container {
   .MuiDialogTitle-root {
-    background: var(--primary-light);
+    background: #1c1c31;
+
+    [data-mode='dark'] & {
+      background: #1a1a26;
+    }
 
     & h6 {
       color: white;
@@ -114,7 +118,7 @@
   .MuiDialogActions-root {
     background: #ebebeb;
     [data-mode='dark'] & {
-      background: #282845;
+      background: #1a1a26;
     }
   }
 }

@@ -65,7 +65,7 @@ export const rentalManagementSteps: stepInterface[] = [
 export const fieldTicketSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Add-on', title: 'Add-on', icon: 'add' },
-  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
+  { name: 'Submit', title: 'Submit', icon: 'end' },
 ];
 
 export const demandOrderSteps = ['Add Products'];
@@ -79,7 +79,7 @@ export const productionOrderSteps: stepInterface[] = [
 
 export const jobProcessSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Fleet', title: 'Fleet', icon: 'ticket' }
+  { name: 'Dispatch', title: 'Dispatch', icon: 'dispatch' }
 ];
 
 export const salesOrderProcessSteps: stepInterface[] = [
@@ -147,18 +147,17 @@ export const repairOrderSteps: stepInterface[] = [
 export const assetsReceivingSteps: stepInterface[] = [
   { name: 'Add Assets', title: 'Add', icon: 'add' },
   { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
-  { name: 'Complete', title: 'Complete', icon: 'end' },
-
+  { name: 'Complete', title: 'Complete', icon: 'end' }
 ];
 
 export const serviceOrderSteps: stepInterface[] = [
-  { name: 'Field Ticket', title: 'Field Ticket', icon: 'receivingTicket' },
+  { name: 'Field Ticket', title: 'Field Tickets', icon: 'receivingTicket' },
   { name: 'Add Services', title: 'Add', icon: 'add' },
   { name: 'Add Products', title: 'Products', icon: 'assign' },
   { name: 'Assign Technician', title: 'Technician', icon: 'assign' },
   { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' },
-  { name: 'Field Ticket Invoice', title: 'Invoice', icon: 'invoice' },
+  { name: 'Field Ticket Invoice', title: 'Invoices', icon: 'invoice' }
 ];
 
 export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed'];
@@ -335,7 +334,7 @@ export const sidebarResource = {
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
-  assetsReceiving: 'Assets Receiving',
+  assetsReceiving: 'Assets Receiving'
 };
 
 export const primaryFields = {
@@ -441,6 +440,7 @@ export const RESOURCE_LABEL = {
   purchaseRequisition: 'Purchase Requisition',
   planning: 'Planning',
   fieldTicket: 'Field Ticket',
+  fieldTicketInvoice: 'Field Ticket Invoice',
   fieldServiceTechnician: `Field Service Technician`,
   fleetDispatch: `Fleet Dispatch`,
   resourceLogs: `Resource Logs`,
@@ -456,7 +456,7 @@ export const RESOURCE_LABEL = {
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
-  assetsReceiving: 'Assets Receiving',
+  assetsReceiving: 'Assets Receiving'
 };
 
 export const CHILD_RESOURCE = {
@@ -562,7 +562,7 @@ export const fieldServiceOrder = {
 export const fieldTicket = {
   resource: 'Field Ticket',
   api: '/field-ticket'
-}
+};
 
 export const employeeMaster = {
   resource: 'employeeMaster',
@@ -1407,7 +1407,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
       currencyDisplay: 'code',
       ...options
     }).format(amount),
-    amountWithouCurrencyCode: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`).format(amount)
+    amountWithouCurrencyCode: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, { maximumFractionDigits: 4 }).format(amount)
   };
 };
 
@@ -1865,8 +1865,8 @@ export const ASSET_STATUS = {
 
 export const ASSET_NUMBER_TYPE = {
   auto: 'Auto',
-  manual: 'Manual',
-}
+  manual: 'Manual'
+};
 
 export const INVENTORY_HISTORY_TYPE = {
   rental: 'Rental',
@@ -1892,7 +1892,7 @@ export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
   delivered: 'Delivered',
-  cancelled: 'Cancelled',
+  cancelled: 'Cancelled'
 };
 
 export const RENTAL_STATUS = {
@@ -1915,7 +1915,7 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   return: 'Return',
   consumed: 'Consumed',
   standBy: 'Stand By',
-  standByNotChargeable: 'Stand By-Not Chargeable',
+  standByNotChargeable: 'Stand By-Not Chargeable'
 } as const;
 
 export const REPAIR_JOB_STATUS = {
@@ -1944,7 +1944,7 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
   repairOrder: 'Repair Order',
-  assetsReceiving: 'Assets Receiving',
+  assetsReceiving: 'Assets Receiving'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2042,7 +2042,7 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket',
+  irtTicket: 'irtTicket'
 };
 
 export const LOG_RESOURCE = {
@@ -2351,7 +2351,7 @@ export const WORKORDER_SERVICE_STATUS = {
   inProgress: 'In-Progress',
   completed: 'Completed',
   failed: 'Failed',
-  skipped: 'Skipped',
+  skipped: 'Skipped'
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
@@ -2433,14 +2433,14 @@ export const ASSETS_RECEIVING_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   complete: 'Complete'
-}
+};
 
 export const MATERIAL_TYPE = {
   product: 'product',
   service: 'service',
   package: 'package',
   serializedAsset: 'serializedAsset'
-}
+};
 
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
