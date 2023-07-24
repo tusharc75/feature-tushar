@@ -25,6 +25,7 @@ import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 import { camelCase, has, isEmpty } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
+import axiosInstance from 'src/axios/axiosInstance';
 
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
   const lookupDependentOn = fieldData?.lookupDependentOn;
@@ -113,6 +114,19 @@ function Dropdown({
   }: any = useData();
   const [lookupDialog, setLookupDialog] = React.useState(false);
   const { newAddressOptionList, setNewAddressOptionList } = React.useContext(NewAddressOptionList);
+
+  const addDataInLookupDependentOn = async (_id: null) => {
+    if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOnField && _id) {
+      const data = {
+        lookupDependentOn: fieldData?.lookupDependentOn,
+        [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] || '',
+        lookupDependentOnField: fieldData?.lookupDependentOnField,
+        [fieldData?.lookupDependentOnField]: _id
+      }
+      axiosInstance().put('/field/add-field-lookup', data)
+    }
+  }
+
   // const [extraOptions, setExtraOptions] = useState([]);
   // const [loading, setLoading] = useState(false);
   // const [inputValue, setInputValue] = useState('');
@@ -297,7 +311,7 @@ function Dropdown({
                   )}
                 />
               ) */}
-            { type === 'multiSelect' ? (
+            {type === 'multiSelect' ? (
               <Autocomplete
                 {...rest}
                 multiple
@@ -319,13 +333,13 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, value: any, reason) => {
-                        if (setFieldValue) {
-                          setFieldValue(
-                            name,
-                            value.map((val) => val.optionValue)
-                          );
-                        }
+                      if (setFieldValue) {
+                        setFieldValue(
+                          name,
+                          value.map((val) => val.optionValue)
+                        );
                       }
+                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -357,26 +371,26 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, val) => {
-                        if (setFieldValue) {
-                          handleChange(name, val && val.optionValue ? val.optionValue : '');
-                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                          fieldChange?.forEach((val: any) => {
-                            setFieldValue(val.fieldName, val.value);
-                          });
-                          const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                          if (filterFields?.length) {
-                            filterFields?.forEach((ele: any) => {
-                              if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
-                                if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
-                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
-                                } else {
-                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
-                                }
+                      if (setFieldValue) {
+                        handleChange(name, val && val.optionValue ? val.optionValue : '');
+                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                        fieldChange?.forEach((val: any) => {
+                          setFieldValue(val.fieldName, val.value);
+                        });
+                        const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                        if (filterFields?.length) {
+                          filterFields?.forEach((ele: any) => {
+                            if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
+                              if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
+                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+                              } else {
+                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
                               }
-                            });
-                          }
+                            }
+                          });
                         }
                       }
+                    }
                 }
                 selectOnFocus
                 clearOnBlur
@@ -931,6 +945,7 @@ function Dropdown({
                             })
                           };
                           addFieldOption(tempNewOption);
+                          addDataInLookupDependentOn(data?._id)
                           setOptionsList([tempNewOption, ...option]);
                           setNewAddressOptionList([...newAddressOptionList, tempNewOption]);
                           if (type === 'multiSelect') {
