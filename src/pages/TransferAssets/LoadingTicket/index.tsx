@@ -231,7 +231,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const TicketRenderer = (params) =>
     params.value ? (
       <p title={params.value} className="link cursor-pointer" onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`)}>
-      {params.value}
+        {params.value}
       </p>
     ) : (
       <NoDataCell />
@@ -240,7 +240,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const ProductRenderer = (params) =>
     params.value ? (
       <p className="link cursor-pointer" title={params.value} onClick={() => window.open(`${routes.productDetail.path}/${params.data.productId}`)}>
-      {params.value}
+        {params.value}
       </p>
     ) : (
       <NoDataCell />
@@ -403,6 +403,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                       if (transferAssetData?.transferType === 'Internal') {
                         data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
                         data['deliveryTo'] = transferAssetData?.transfertoPlant?.optionValue;
+                        data['deliveryToLabel'] = transferAssetData?.transfertoPlant?.optionLabel;
                         data['deliveryToAddress'] = transferAssetData?.plantShipTo?.optionValue;
                         data['status'] = DELIVERY_TICKET_STATUS.indTransit;
                       } else if (transferAssetData?.transferType === 'External Customer') {
