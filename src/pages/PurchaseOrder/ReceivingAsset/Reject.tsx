@@ -178,7 +178,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({ values, setFieldValue, errors }) => (
             <>
@@ -218,7 +218,6 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                         {data?.row?.rejectQuantity || 0}
                                       </span>
                                     </div>
-                                    {/* FIELDS */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
                                       <Autocomplete
                                         size="small"
@@ -234,29 +233,31 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                         }}
                                         renderInput={(params) => <TextField {...params} variant="outlined" name="product" label="Product" />}
                                       />
-                                      <Autocomplete
-                                        size="small"
-                                        value={data?.storageLocation}
-                                        options={storageLocationOptions}
-                                        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                                        onChange={(_, newValue) => {
-                                          arrayHelpers.replace(index, {
-                                            ...values.products[index],
-                                            ['storageLocation']: newValue
-                                          });
-                                        }}
-                                        renderInput={(params) => (
-                                          <TextField
-                                            {...params}
-                                            variant="outlined"
-                                            name="storageLocation"
-                                            label="Storage Location"
-                                            error={validate([data]).storageLocation}
-                                            helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
-                                            required
-                                          />
-                                        )}
-                                      />
+                                      {user?.user?.brandPolicy?.storageLocation &&
+                                        <Autocomplete
+                                          size="small"
+                                          value={data?.storageLocation}
+                                          options={storageLocationOptions}
+                                          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                          onChange={(_, newValue) => {
+                                            arrayHelpers.replace(index, {
+                                              ...values.products[index],
+                                              ['storageLocation']: newValue
+                                            });
+                                          }}
+                                          renderInput={(params) => (
+                                            <TextField
+                                              {...params}
+                                              variant="outlined"
+                                              name="storageLocation"
+                                              label="Storage Location"
+                                              error={validate([data]).storageLocation}
+                                              helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
+                                              required
+                                            />
+                                          )}
+                                        />
+                                      }
                                       <TextField
                                         fullWidth
                                         label="Reject Quantity"
