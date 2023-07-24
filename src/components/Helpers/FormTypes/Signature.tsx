@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Typography, Box, CircularProgress, Button, IconButton, Dialog } from '@material-ui/core';
 import { AddCircle, Delete, Info } from '@material-ui/icons';
 import SignaturePad from 'react-signature-canvas';
@@ -10,17 +10,105 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
+//camera library being used
+import Webcam from 'react-webcam';
+
+
+//handling camera side
+const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
+
+  const webcamRef = React.useRef(null)
+  const capture = () => {
+    const pictureSrc = webcamRef.current.getScreenshot()
+    setPicture(pictureSrc)
+  }
+
+  return (
+    <div>
+      <Button
+        size="small"
+        variant="contained"
+        color="primary"
+        onClick={() => setUsePad(!usePad)}
+        style={{ float: "right", margin: '10px' }}
+      >
+        Close Camera
+      </Button>
+      <div>
+        {picture == '' ? (
+          <Webcam
+            audio={false}
+            height={400}
+            ref={webcamRef}
+            width={500}
+            minScreenshotWidth={500}
+            screenshotFormat="image/jpeg"
+          // videoConstraints={videoConstraints}
+          />
+        ) : (
+          <img src={picture} />
+        )}
+      </div>
+      <div style={{
+        alignItems: "center",
+        marginTop: '3px'
+      }}>
+        {picture != '' ? (
+          <Button
+            onClick={(e) => {
+              e.preventDefault()
+              setPicture('')
+            }}
+            size="small"
+            variant="contained"
+            color="primary"
+          >
+            Retake
+          </Button>
+        ) : (
+          <Button
+            onClick={(e) => {
+              e.preventDefault()
+              capture()
+            }}
+            size="small"
+            variant="contained"
+            color="primary"
+          >
+            Capture
+          </Button>
+        )}
+      </div>
+    </div>
+  )
+
+}
+
 const SignatureDialog = ({ onSave, open, close }) => {
+
   const signCanvas: any = React.useRef(null);
   const { setToastConfig } = React.useContext(CustomToastContext);
+
+  const [picture, setPicture] = useState('')
+
+
+  const [usePad, setUsePad] = useState(true);
+
 
   return (
     <Dialog open={open} onClose={close}>
       <CustomDialogHeader title="Singature Pad" onClose={close} />
       <CustomDialogContent>
-        <SignaturePad ref={signCanvas} canvasProps={{ minWidth: 500, width: 500, height: 400 }} />
+        {usePad ? (
+          <SignaturePad ref={signCanvas} canvasProps={{ minWidth: 500, width: 500, height: 400 }} />
+        ) : (
+          <UseCamera setUsePad={setUsePad} usePad={usePad} setPicture={setPicture} picture={picture} />
+        )}
       </CustomDialogContent>
       <CustomDialogFooter>
+        <Button variant="contained" size="small" color="primary" onClick={() => setUsePad(!usePad)}>
+          {usePad ? 'Use Camera' : 'Use Sign Pad'}
+        </Button>
         <Button variant="contained" size="small" color="primary" onClick={close}>
           Close
         </Button>
@@ -29,12 +117,25 @@ const SignatureDialog = ({ onSave, open, close }) => {
           size="small"
           color="primary"
           onClick={() => {
-            if (!signCanvas.current?.isEmpty()) {
-              const dataURL = signCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
-              onSave(dataURL);
+
+            //check if user is in camera mode or pad mode
+            if (usePad) {
+
+              if (!signCanvas.current?.isEmpty()) {
+                const dataURL = signCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
+                onSave(dataURL);
+              } else {
+                setToastConfig({ open: true, type: 'warning', message: 'Signature cannot be empty!' });
+              }
+
             } else {
-              setToastConfig({ open: true, type: 'warning', message: 'Signature cannot be empty!' });
+              if (picture != '') {
+                onSave(picture)
+              } else {
+                setToastConfig({ open: true, type: 'warning', message: 'Signature cannot be empty (no picture clicked)!' });
+              }
             }
+
           }}
         >
           Save
