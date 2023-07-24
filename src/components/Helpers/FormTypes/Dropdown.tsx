@@ -119,9 +119,10 @@ function Dropdown({
     if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOnField && _id) {
       const data = {
         lookupDependentOn: fieldData?.lookupDependentOn,
-        [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] || '',
+        lookupDependentOnValue: values[fieldData?.lookupDependentOn] || '',
         lookupDependentOnField: fieldData?.lookupDependentOnField,
-        [fieldData?.lookupDependentOnField]: _id
+        lookupDependentOnFieldValue: _id,
+        lookupResource: fieldData?.lookupResource
       }
       axiosInstance().put('/field/add-field-lookup', data)
     }
@@ -944,7 +945,6 @@ function Dropdown({
                               [fieldData.lookupDependentOn]: values[fieldData?.lookupDependentOn] || ''
                             })
                           };
-                          addFieldOption(tempNewOption);
                           addDataInLookupDependentOn(data?._id)
                           setOptionsList([tempNewOption, ...option]);
                           setNewAddressOptionList([...newAddressOptionList, tempNewOption]);
