@@ -63,6 +63,35 @@ const MergeRecordsDialog = ({ ids, onClose, resource, onSuccess }) => {
       });
   };
 
+  const uploadData = (event) => {
+    if (event.target.files && event.target.files.length) {
+      toastConfig.setToastConfig({
+        hideDuration: null,
+        open: true,
+        type: 'info',
+        message: `Uploading, Please wait...`
+      });
+      const file = event.target.files[0];
+
+      let formData = new FormData();
+      formData.append('file', file);
+
+      axiosInstance()
+        .post(`merge/import`, formData)
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          onClose();
+          onSuccess();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
   return (
     <Dialog
       maxWidth="sm"
@@ -103,6 +132,24 @@ const MergeRecordsDialog = ({ ids, onClose, resource, onSuccess }) => {
             </Box>
           </CustomDialogContent>
           <CustomDialogFooter>
+            <Button size="small" color="primary">
+              <input
+                onClick={(e: any) => (e.target.value = null)}
+                id="importFromExcel"
+                name="importFromExcel"
+                onChange={uploadData}
+                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                style={{
+                  opacity: '0',
+                  position: 'absolute',
+                  zIndex: -1
+                }}
+                type="file"
+              />
+              <label htmlFor="importFromExcel" className="cursor-pointer">
+                <span>Import from Excel</span>
+              </label>
+            </Button>
             <Button size="small" color="primary" onClick={onClose}>
               Cancel
             </Button>
