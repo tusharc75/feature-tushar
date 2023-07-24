@@ -38,7 +38,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
         {picture == '' ? (
           <Webcam
             audio={false}
-            height={500}
+            height={400}
             ref={webcamRef}
             width={500}
             minScreenshotWidth={500}
@@ -51,7 +51,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
       </div>
       <div style={{
         alignItems: "center",
-        marginTop: '10px'
+        marginTop: '3px'
       }}>
         {picture != '' ? (
           <Button
