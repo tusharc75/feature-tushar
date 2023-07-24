@@ -95,7 +95,10 @@
   --card-body: var(--dark-secondary);
   --dark-primary-text: #fff;
   --dark-secondary-text: #b8b8b8;
-  --dark-error: hsl(0, 52%, 36%);
+  --dark-error: hsl(358.89deg 62.92% 40.17%);
+  --dark-yellow: hsl(41.65deg 100% 44.31%);
+  --dark-gray: hsl(0deg 0% 14.49% / 70%);
+  --dark-green: hsl(132.04deg 80.8% 31.18%);
   --dark-active-border-color: #f99336;
   --form-head-bg: #282845;
   --primary-text: #fff;
@@ -1615,44 +1618,26 @@ body::-webkit-scrollbar-thumb {
 
 .red-data-row {
   background-color: var(--dark-error, #ffcccb) !important;
-  [data-mode='dark'] & {
-    background-color: hsl(1 100% 65% / 1) !important;
-  }
 }
 
 .scrap-data-row {
-  background-color: #ffe4c0 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(34, 100%, 48%) !important;
-  }
+  background-color: var(--dark-yellow, #ffe4c0) !important;
 }
 
 .light-red-data-row {
-  background-color: #feb1b1 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(0, 97%, 45%) !important;
-  }
+  background-color: var(--dark-error, #feb1b1) !important;
 }
 
 .light-yellow-data-row {
-  background-color: #fae498 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(47, 91%, 39%) !important;
-  }
+  background-color: var(--dark-yellow, #fae498) !important;
 }
 
 .light-grey-data-row {
-  background-color: #d3d3d3 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(0, 0%, 53%) !important;
-  }
+  background-color: var(--dark-gray, #d3d3d3) !important;
 }
 
 .light-green-data-row {
-  background-color: #acf1c8 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(144, 71%, 31%) !important;
-  }
+  background-color: var(--dark-green, #acf1c8) !important;
 }
 
 .a_divider_inner {

@@ -171,7 +171,7 @@ const DOASteps: StepInterface[] = [
     label: 'End',
     name: 'End',
     title: 'Close',
-    icon: 'endIcon'
+    icon: 'closed'
   }
 ];
 const OtherSteps: StepInterface[] = [
@@ -208,7 +208,7 @@ const OtherSteps: StepInterface[] = [
     label: 'End',
     name: 'End',
     title: 'Close',
-    icon: 'endIcon'
+    icon: 'closed'
   }
 ];
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
@@ -1355,9 +1355,116 @@ export default function QuoteProcess(props) {
                     </Tooltip>
                   </span>
                 ) : null}
+              </Grid>
+              <div className="flex items-center justify-between flex-wrap w-full mx-3 gap-[8px]">
+                {ProcessStatus !== 'New' && ProcessStatus !== 'Price Builder' ? (
+                  <span className="d-flex align-items-center justify-content-end">
+                    <Tooltip title="View">
+                      <Button
+                        onClick={() => {
+                          handleViewPdf(true, false);
+                        }}
+                        variant="outlined"
+                        disabled={viewDownloadLoading || updatingVersion}
+                        size="small"
+                        className="mr-1 setIconForMobile"
+                        startIcon={isMobile && !isTablet ? '' : <AiOutlineEye />}
+                        color="primary"
+                      >
+                        {isMobile && !isTablet ? <AiOutlineEye size={20} /> : ''}
+                        {isMobile && !isTablet ? '' : 'View'}
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="Download">
+                      <Button
+                        disabled={viewDownloadLoading || updatingVersion}
+                        onClick={() => {
+                          handleViewPdf(false, true);
+                          exportToCSV();
+                        }}
+                        variant="outlined"
+                        size="small"
+                        className="mr-1 setIconForMobile"
+                        startIcon={isMobile && !isTablet ? '' : <FiDownloadCloud />}
+                        color="primary"
+                      >
+                        {isMobile && !isTablet ? <FiDownloadCloud size={20} /> : ''}
+                        {isMobile && !isTablet ? '' : 'Download'}
+                      </Button>
+                    </Tooltip>
+                    {permissions[qbResource]?.isUpdate &&
+                      (user?.user?._id === quoteData?.owner?.optionValue ||
+                        quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
+                        <Tooltip title="Edit Quote PDF Template">
+                          <Button
+                            onClick={() => {
+                              quoteData?.pDFTemplate.optionValue &&
+                                history.push(
+                                  `/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`
+                                );
+                            }}
+                            variant="outlined"
+                            size="small"
+                            className="mr-1"
+                            startIcon={isMobile && !isTablet ? '' : <AiFillEdit />}
+                            color="primary"
+                          >
+                            {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
+                            {isMobile && !isTablet ? '' : 'Quote Template'}
+                          </Button>
+                        </Tooltip>
+                      )}
+                    <Tooltip title="AI Suggestion">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="primary"
+                        className="mr-1"
+                        startIcon={<GiVintageRobot />}
+                        onClick={() => {
+                          setShowAiDialog(true);
+                        }}
+                      >
+                        {isMobile && !isTablet ? '' : 'AI Suggestion'}
+                      </Button>
+                    </Tooltip>
+                    {ProcessStatus === 'Quote Builder' && (
+                      <Tooltip title="PDF Columns">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<AiOutlineFilePdf />}
+                          color="primary"
+                          className="mr-1"
+                          onClick={() => {
+                            setShowPDFArrangeColumns(true);
+                          }}
+                        >
+                          {isMobile && !isTablet ? '' : 'PDF Columns'}
+                        </Button>
+                      </Tooltip>
+                    )}
+                    {ProcessStatus === 'Quote Builder' && (
+                      <Tooltip title="Excel Columns">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          className="mr-1"
+                          startIcon={<AiOutlineFileExcel />}
+                          color="primary"
+                          onClick={() => {
+                            setShowExcelArrangeColumns(true);
+                          }}
+                        >
+                          {isMobile && !isTablet ? '' : 'Excel Columns'}
+                        </Button>
+                      </Tooltip>
+                    )}
+                  </span>
+                ) : null}
                 {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
                 (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
-                  <div className={`d-flex align-items-center justify-content-end doaAction ${isMobile ? 'actio-pos-quote' : ''}`}>
+                  <div className={`flex items-center ml-auto ${isMobile ? 'actio-pos-quote' : ''}`}>
                     {!ifQuoteApproved.approved && (
                       <Button
                         onClick={() => {
@@ -1391,112 +1498,7 @@ export default function QuoteProcess(props) {
                     </span>
                   </div>
                 ) : null}
-              </Grid>
-              {ProcessStatus !== 'New' && ProcessStatus !== 'Price Builder' ? (
-                <span className="d-flex align-items-center justify-content-end ml-3">
-                  <Tooltip title="View">
-                    <Button
-                      onClick={() => {
-                        handleViewPdf(true, false);
-                      }}
-                      variant="outlined"
-                      disabled={viewDownloadLoading || updatingVersion}
-                      size="small"
-                      className="mr-1 setIconForMobile"
-                      startIcon={isMobile && !isTablet ? '' : <AiOutlineEye />}
-                      color="primary"
-                    >
-                      {isMobile && !isTablet ? <AiOutlineEye size={20} /> : ''}
-                      {isMobile && !isTablet ? '' : 'View'}
-                    </Button>
-                  </Tooltip>
-                  <Tooltip title="Download">
-                    <Button
-                      disabled={viewDownloadLoading || updatingVersion}
-                      onClick={() => {
-                        handleViewPdf(false, true);
-                        exportToCSV();
-                      }}
-                      variant="outlined"
-                      size="small"
-                      className="mr-1 setIconForMobile"
-                      startIcon={isMobile && !isTablet ? '' : <FiDownloadCloud />}
-                      color="primary"
-                    >
-                      {isMobile && !isTablet ? <FiDownloadCloud size={20} /> : ''}
-                      {isMobile && !isTablet ? '' : 'Download'}
-                    </Button>
-                  </Tooltip>
-                  {permissions[qbResource]?.isUpdate &&
-                    (user?.user?._id === quoteData?.owner?.optionValue ||
-                      quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
-                      <Tooltip title="Edit Quote PDF Template">
-                        <Button
-                          onClick={() => {
-                            quoteData?.pDFTemplate.optionValue &&
-                              history.push(
-                                `/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`
-                              );
-                          }}
-                          variant="outlined"
-                          size="small"
-                          className="mr-1"
-                          startIcon={isMobile && !isTablet ? '' : <AiFillEdit />}
-                          color="primary"
-                        >
-                          {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
-                          {isMobile && !isTablet ? '' : 'Quote Template'}
-                        </Button>
-                      </Tooltip>
-                    )}
-                  <Tooltip title="AI Suggestion">
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      color="primary"
-                      className="mr-1"
-                      startIcon={<GiVintageRobot />}
-                      onClick={() => {
-                        setShowAiDialog(true);
-                      }}
-                    >
-                      {isMobile && !isTablet ? '' : 'AI Suggestion'}
-                    </Button>
-                  </Tooltip>
-                  {ProcessStatus === 'Quote Builder' && (
-                    <Tooltip title="PDF Columns">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<AiOutlineFilePdf />}
-                        color="primary"
-                        className="mr-1"
-                        onClick={() => {
-                          setShowPDFArrangeColumns(true);
-                        }}
-                      >
-                        {isMobile && !isTablet ? '' : 'PDF Columns'}
-                      </Button>
-                    </Tooltip>
-                  )}
-                  {ProcessStatus === 'Quote Builder' && (
-                    <Tooltip title="Excel Columns">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        className="mr-1"
-                        startIcon={<AiOutlineFileExcel />}
-                        color="primary"
-                        onClick={() => {
-                          setShowExcelArrangeColumns(true);
-                        }}
-                      >
-                        {isMobile && !isTablet ? '' : 'Excel Columns'}
-                      </Button>
-                    </Tooltip>
-                  )}
-                </span>
-              ) : null}
+              </div>
               <Grid item xs={12} sm={12} md={12} className="mt-1">
                 {quoteData && !loading && productBuilderId ? (
                   // ProcessStatus === "Quote Builder" &&

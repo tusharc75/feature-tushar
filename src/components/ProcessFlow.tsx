@@ -36,7 +36,7 @@ const getIcon = (name: string): StepIconType => {
     case name === 'Negotiating':
       return 'negotiating';
     case name === 'Closed':
-      return 'endIcon';
+      return 'closed';
     case name === 'Unqualified':
       return 'unqualified';
     case name === 'Qualified':
@@ -53,8 +53,6 @@ export default function ProcessFlow(props) {
   useEffect(() => {
     setStateSteps(getStepData(steps));
   }, [steps]);
-
-  console.log(steps);
 
   const [currentStep, setCurrentStep] = useState(activeStep);
 

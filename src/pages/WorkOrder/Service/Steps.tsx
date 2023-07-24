@@ -11,7 +11,19 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS
 } from 'src/constants/helpers';
-import { Box, IconButton, Grid, Typography, Chip, Menu, MenuItem, ClickAwayListener, useMediaQuery, Checkbox } from '@material-ui/core';
+import {
+  Box,
+  IconButton,
+  Grid,
+  Typography,
+  Chip,
+  Menu,
+  MenuItem,
+  ClickAwayListener,
+  useMediaQuery,
+  Checkbox,
+  CircularProgress
+} from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -239,6 +251,7 @@ const Steps = ({
   const [assignSteps, setAssignSteps] = useState(false);
   const [commentsDialog, setCommentsDialog] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
+  const isCheckboxDataRefreshed = useRef(false);
 
   const {
     state: {
@@ -256,12 +269,14 @@ const Steps = ({
   const selectedServiceRef = React.useRef(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, loading: false, steps: [] });
   const [selectedSteps, setSelectedSteps] = useState<string[]>([]);
+  const [isCompleteAllLoading, setIsCompleteAllLoading] = useState(false);
 
   useEffect(() => {
     if ((!selectedServiceRef.current || selectedServiceRef.current !== selectedService._id) && selectedService._id) {
       selectedServiceRef.current = selectedService._id;
       setServiceDetails(null);
       setSelectedSteps([]);
+      isCheckboxDataRefreshed.current = !isCheckboxDataRefreshed.current;
     }
     fetchServiceData();
   }, [selectedService]);
@@ -285,10 +300,12 @@ const Steps = ({
     } finally {
       setShowDeleteConfirmBox({ open: false, loading: false, steps: [] });
       fetchServiceData();
+      isCheckboxDataRefreshed.current = !isCheckboxDataRefreshed.current;
     }
   };
 
   const completeAll = async () => {
+    setIsCompleteAllLoading(true);
     const payload = {
       stepids: selectedSteps,
       uniqueId: selectedService?.uniqueId,
@@ -308,6 +325,8 @@ const Steps = ({
       await fetchService();
       await fetchServiceData();
       setSelectedSteps([]);
+      setIsCompleteAllLoading(false);
+      isCheckboxDataRefreshed.current = !isCheckboxDataRefreshed.current;
     }
   };
 
@@ -391,6 +410,9 @@ const Steps = ({
         if (openCompleteDialog) {
           setOpenCompleteDialog(false);
         }
+      })
+      .finally(() => {
+        isCheckboxDataRefreshed.current = !isCheckboxDataRefreshed.current;
       });
   };
 
@@ -408,6 +430,9 @@ const Steps = ({
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        isCheckboxDataRefreshed.current = !isCheckboxDataRefreshed.current;
       });
   };
 
@@ -426,6 +451,9 @@ const Steps = ({
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+      })
+      .finally(() => {
+        isCheckboxDataRefreshed.current = !isCheckboxDataRefreshed.current;
       });
   };
 
@@ -443,6 +471,9 @@ const Steps = ({
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+      })
+      .finally(() => {
+        isCheckboxDataRefreshed.current = !isCheckboxDataRefreshed.current;
       });
   };
 
@@ -516,6 +547,9 @@ const Steps = ({
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        isCheckboxDataRefreshed.current = !isCheckboxDataRefreshed.current;
       });
   };
 
@@ -685,6 +719,9 @@ const Steps = ({
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        isCheckboxDataRefreshed.current = !isCheckboxDataRefreshed.current;
       });
   };
 
@@ -703,12 +740,28 @@ const Steps = ({
     return selectedSteps.find((e) => e === step._id) ? true : false;
   };
   const isAllChecked = (): boolean => {
-    return selectedSteps.length === serviceDetails?.steps?.length ? true : false;
+    return selectedSteps.length === serviceDetails?.steps?.filter((e) => checkValidStep(e)).length && selectedSteps.length > 0 ? true : false;
+  };
+
+  const checkValidStep = (step: StepInterface): boolean => {
+    const { isStepValid, stepData }: { stepData: StepDataInterface | null; isStepValid: boolean } = getFields(step);
+    let isAnyTechnician = selectedService?.assignedUsers?.length ? true : false;
+    let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
+    const checkList = [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped];
+
+    const isNotValid =
+      !step.isAllowToPerform ||
+      !allowedToEdit ||
+      !isStepValid ||
+      (!isMeTechnician && isAnyTechnician) ||
+      step?.isPassFail ||
+      checkList.includes(selectedService?.status) ||
+      checkList.includes(stepData?.status);
+    return !isNotValid;
   };
 
   const checkSingle = (step: StepInterface): void => {
-    // const stepData = getStepData(step);
-    // if (stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.completed) return;
+    if (!checkValidStep(step)) return;
     const isPresent = isSingleChecked(step);
     if (isPresent) {
       setSelectedSteps(selectedSteps.filter((e) => e !== step._id));
@@ -718,29 +771,26 @@ const Steps = ({
   };
 
   const checkAll = (): void => {
+    if (!allowedToEdit) return;
     if (isAllChecked()) {
       setSelectedSteps([]);
     } else {
-      setSelectedSteps(serviceDetails?.steps?.map((e) => e._id));
+      const stepsToSelect = serviceDetails?.steps?.filter((e) => checkValidStep(e)).map((i) => i._id);
+      setSelectedSteps(stepsToSelect);
     }
   };
 
-  // const getStepData = (step: StepInterface): StepDataInterface | null => {
-  //   let stepData = null;
-  //   let tempServiceData = stepSubmitedData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
-  //   if (tempServiceData) {
-  //     stepData = tempServiceData;
-  //   }
-  //   return stepData;
-  // };
+  const isSelectAllCheckboxDisabled = React.useMemo(() => {
+    return serviceDetails?.steps?.filter((e) => checkValidStep(e)).map((i) => i._id).length === 0;
+  }, [selectedServiceRef.current, serviceDetails?._id, !isCheckboxDataRefreshed.current]);
 
   return serviceDetails ? (
     serviceDetails?.steps?.length ? (
       <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }}>
         <div className="flex justify-between items-center gap-[8px] p-[8px] flex-wrap">
           <div className="flex items-center gap-[15px]  flex-wrap">
-            <label htmlFor="select-all" className="cursor-pointer">
-              <Checkbox id="select-all" color="primary" checked={isAllChecked()} onChange={() => checkAll()} />
+            <label htmlFor="select-all" className={`${isSelectAllCheckboxDisabled ? 'cursor-not-allowed opacity-0' : 'cursor-pointer'}`}>
+              <Checkbox id="select-all" color="primary" disabled={isSelectAllCheckboxDisabled} checked={isAllChecked()} onChange={() => checkAll()} />
               <span className="font-medium select-none">Select All</span>
             </label>
             {selectedSteps.length ? (
@@ -749,12 +799,17 @@ const Steps = ({
                 color="primary"
                 size="small"
                 className={``}
-                disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                  selectedService?.status
-                )}
+                disabled={
+                  [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                    selectedService?.status
+                  ) ||
+                  !allowedToEdit ||
+                  isCompleteAllLoading
+                }
                 onClick={completeAll}
               >
-                Complete ({isAllChecked() ? 'All' : selectedSteps.length})
+                Complete
+                {isCompleteAllLoading ? <CircularProgress size={20} className="ml-[8px]" /> : `(${isAllChecked() ? 'All' : selectedSteps.length})`}
               </Button>
             ) : null}
           </div>
@@ -803,6 +858,17 @@ const Steps = ({
             if (referencType === 'workOrderTechnician') {
               isMeTechnician = true;
             }
+            const isCheckboxDisabled =
+              !step.isAllowToPerform ||
+              !allowedToEdit ||
+              !isStepValid ||
+              (!isMeTechnician && isAnyTechnician) ||
+              step?.isPassFail ||
+              [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                selectedService?.status
+              ) ||
+              [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(stepData?.status);
+
             return (
               <Box
                 key={`${step._id}_${selectedService?.uniqueId}}`}
@@ -816,7 +882,14 @@ const Steps = ({
                 className={`${classes.accordionHeading}  ${classes.white}`}
               >
                 <Box sx={{ display: 'flex', flexWrap: 'wrap' }} gridGap={'8px'}>
-                  <Checkbox id="select-step" color="primary" checked={isSingleChecked(step)} onChange={() => checkSingle(step)} />
+                  <Checkbox
+                    id="select-step"
+                    color="primary"
+                    disabled={isCheckboxDisabled}
+                    className={`${isCheckboxDisabled ? 'opacity-0' : ''}`}
+                    checked={isSingleChecked(step)}
+                    onChange={() => checkSingle(step)}
+                  />
                   <Box
                     style={{
                       display: 'flex',
