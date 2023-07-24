@@ -279,14 +279,13 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
   };
 
   const getRowStyle = (params) => {
-    if(params?.data?.status === ASSET_STATUS.scrap ) {
-        return {
-         'background-color': theme === 'dark' ? '#DFA67B' : '#FFF8E1'
-        }
+    if (params?.data?.status === ASSET_STATUS.scrap) {
+      return {
+        'background-color': 'var(--dark-gray, #d3d3d3)'
+      };
     }
     return null;
   };
-
 
   return (
     <>
@@ -380,7 +379,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (

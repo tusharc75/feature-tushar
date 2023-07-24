@@ -211,7 +211,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -230,12 +230,14 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-      var steps = (user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep) ? rentalManagementSteps :
-        rentalManagementSteps?.filter((e) => !['Quotation'].includes(e.name))
+      var steps =
+        user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep
+          ? rentalManagementSteps
+          : rentalManagementSteps?.filter((e) => !['Quotation'].includes(e.name));
       if (!user?.user?.brandPolicy?.rentalService) {
-        steps = steps?.filter((e) => !['Add Services'].includes(e.name))
+        steps = steps?.filter((e) => !['Add Services'].includes(e.name));
       }
-      setRentalSteps(steps)
+      setRentalSteps(steps);
       setCurrentStep(getIndex(data?.processStatus, steps));
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
@@ -334,8 +336,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 

@@ -288,15 +288,15 @@ const AddSerializedAsset = ({
   const getRowStyleScheduled = (params) => {
     if (params?.data?.reserved) {
       return {
-        'background-color': theme === 'dark' ? 'hsl(4, 63%, 8%)' : '#FAEAE9'
+        'background-color': 'var(--dark-gray, #FAEAE9)'
       };
     } else if ([ASSET_STATUS.available, ASSET_STATUS.new]?.includes(params?.data?.status)) {
       return {
-        'background-color': theme === 'dark' ? 'hsl(120, 67%, 8%)' : '#DBF8DB'
+        'background-color': 'var(--dark-green, #DBF8DB)'
       };
     } else if ([ASSET_STATUS.inUse]?.includes(params?.data?.status)) {
       return {
-        'background-color': theme === 'dark' ? '	hsl(40, 100%, 8%)' : '#FFD580'
+        'background-color': 'var(--dark-yellow, #FFD580)'
       };
     }
     return null;

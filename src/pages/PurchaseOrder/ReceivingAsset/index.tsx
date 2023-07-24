@@ -254,7 +254,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       ...[
         {
           accessor: 'action',
-          Header: '',
+          Header: 'Actions',
           minWidth: 130,
           width: 130,
           sticky: 'right',

@@ -207,7 +207,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     columns = [...columns, ...newColumns];
     columns.push({
       accessor: 'action',
-      Header: '',
+      Header: 'Actions',
       width: permissions?.irtTicket?.isCreate ? 150 : 100,
       sticky: 'right',
       disableFilters: true,

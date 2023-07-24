@@ -99,7 +99,7 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
             },
             {
                 accessor: 'action',
-                Header: 'Action',
+                Header: 'Actions',
                 minWidth: 50,
                 width: 50,
                 sticky: 'right',
