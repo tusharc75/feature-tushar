@@ -139,9 +139,12 @@ const CustomReport = () => {
 
   React.useEffect(() => {
     if (showGrid && resource) {
+      if (gridApi && dataRows?.length == 0) {
+        setTimeout(() => { gridApi.sizeColumnsToFit(); }, 300);
+      }
       fetchResourceData();
     }
-  }, [resource, page, sorting, search, limit, filters, pageSizes, selectedEntity, customReportData]);
+  }, [resource, page, sorting, search, limit, filters, pageSizes, selectedEntity, customReportData, gridApi]);
 
   React.useEffect(() => {
     if (!selectedData) return;
