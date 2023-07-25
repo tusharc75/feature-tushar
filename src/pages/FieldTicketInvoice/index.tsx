@@ -1,8 +1,7 @@
-import { Box, Grid, IconButton, Tooltip } from '@material-ui/core';
-import { Fragment, useEffect, useReducer, useState } from 'react';
+import { Box, Grid, IconButton, Tooltip, Typography } from '@material-ui/core';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
@@ -12,31 +11,72 @@ import CustomAgGrid, { intialState, reducer } from '../../components/AgGridCompo
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
+    dateFormat,
     gridLoadingTimeout,
     prepareDataForGrid,
     sidebarResource
 } from 'src/constants/helpers';
-import { useHistory } from 'react-router-dom';
-import styles from '../Leads/Header.module.scss';
-import queryString from 'query-string';
-import { insertUpdate, objectStore } from 'src/constants/indexdbhelper';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import EventNoteIcon from '@material-ui/icons/EventNote';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import CreateInvoiceDialog from './ManageInvoice/CreateInvoiceDialog';
 import ViewInvoice from '../Invoice/ViewInvoice';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import moment from 'moment';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+
+
+const style = {
+    date: {
+        fontSize: 13,
+        fontWeight: 400,
+        display: 'flex',
+        gap: 5,
+        alignItems: 'center'
+    },
+    title: {
+        '& p': {
+            fontSize: 14,
+            fontWeight: 600,
+            lineHeight: '20px',
+            '& span': {
+                fontSize: 13
+            }
+        }
+    },
+    titleText: {
+        fontSize: 14,
+        fontWeight: 600,
+        lineHeight: '20px',
+        marginBottom: 7
+    },
+    subTitleText: {
+        fontSize: 13,
+        fontWeight: 400
+    },
+    borderBottom: {
+        borderBottom: '1px solid var(--common-border-color)'
+    },
+    serviceItem: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingBottom: '5px',
+        '&:last-of-type': {
+            paddingBottom: 0
+        },
+        gap: '10px',
+        '& p ': {
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px'
+        }
+    }
+};
 
 const FieldTicketInvoice = () => {
-    const FieldTicketType = [
-        {
-            key: `Pending ${routes.fieldTicket.title}`,
-            value: 1
-        },
-        {
-            key: `Invoiced ${routes.fieldTicket.title}`,
-            value: 2
-        }
-    ];
+
+    const toastConfig = useContext(CustomToastContext);
 
     const renderedFrom = camelCase(routes?.fieldTicket.title);
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -47,19 +87,34 @@ const FieldTicketInvoice = () => {
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
         state;
-    const history = useHistory();
-    const { type }: any = queryString.parse(history.location.search);
-    const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
     const [frameWorkComponent, setFrameWorkComponent] = useState({});
     const [columns, setColumns] = useState([]);
+    const [fieldServiceOrder, setFieldServiceOrder] = useState(null);
+    const [selectedFieldServiceOrder, setSelectedFieldServiceOrder] = useState(null);
     const [gridApi, setGridApi] = useState(null);
     const { getColumnData } = useColumns();
     const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null })
     const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null })
 
+
+    const fetchFieldServiceOrderData = async () => {
+        setFieldServiceOrder(null);
+        axiosInstance()
+            .get(`${routes?.fieldTicketInvoice.path}/field-service-order`)
+            .then(({ data: { data } }) => {
+                setFieldServiceOrder(data?.data);
+                const isAvailable = data?.data.find((d) => d._id === selectedFieldServiceOrder?._id);
+                const index = data?.data.findIndex((d) => d._id === selectedFieldServiceOrder?._id);
+                if (data?.data?.length) {
+                    isAvailable ? setSelectedFieldServiceOrder(data?.data[index]) : setSelectedFieldServiceOrder(data?.data[0]);
+                }
+            })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+    };
+
     const fetchGridColumns = async () => {
-
-
         const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
         let data = response?.data?.data;
         let columns = [];
@@ -127,8 +182,8 @@ const FieldTicketInvoice = () => {
     const getQueryString = (isExport = false) => {
         let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
-        if (selectedType) {
-            deepFilter = deepFilter + `&type=${selectedType || 1}`;
+        if (selectedFieldServiceOrder) {
+            deepFilter = deepFilter + `&fieldServiceOrderId=${selectedFieldServiceOrder?._id}`;
         }
 
         if (selectedEntity) {
@@ -161,9 +216,9 @@ const FieldTicketInvoice = () => {
         return deepFilter;
     };
 
-    const handleSearch = (e) => {
-        dispatch({ type: 'search', search: e.target.value });
-    };
+    // const handleSearch = (e) => {
+    //     dispatch({ type: 'search', search: e.target.value });
+    // };
 
     const ActionsRenderer = (params) => (
         <Fragment>
@@ -192,113 +247,134 @@ const FieldTicketInvoice = () => {
         </Fragment>
     );
 
-    const onTypeChange = (event, type) => {
-        const value = FieldTicketType.find((d) => d.key === type).value;
-        setSelectedType(value);
-        history.push(`?type=${value}`);
-    };
-
     useEffect(() => {
+        fetchFieldServiceOrderData();
         fetchGridColumns();
     }, []);
 
     useEffect(() => {
         fetchFieldTicketData();
-    }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
+    }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedFieldServiceOrder]);
 
     return (
-        <Fragment>
-            <Grid container className="headerbox">
-                <Grid item md={4} sm={11} xs={10}>
+        <Box className="main-container-v1">
+            <Box className="headerbox-v1">
+                <Box className="nav-v1">
                     <CustomBreadCrumbs routes={[{ title: routes.fieldTicketInvoice.title }]} />
-                </Grid>
-            </Grid>
-            <CustomContainer>
-                <div className="header-panel">
-                    <Grid container className={styles.filter_side_container}>
-                        <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-                            <ToggleButtonGroup
-                                size="small"
-                                className="align-items-center gap-1 layout-for-mobile "
-                                value={FieldTicketType[selectedType - 1].key}
-                                exclusive
-                                onChange={onTypeChange}
-                            >
-                                {FieldTicketType.map((k, index) => {
-                                    return (
-                                        <ToggleButton value={k.key} key={index}>
-                                            {k.key}
-                                        </ToggleButton>
-                                    );
-                                })}
-                            </ToggleButtonGroup>
+                </Box>
+            </Box>
+            <Box className={`detail-container-v1`}>
+                {
+                    fieldServiceOrder ? (
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={12} md={4} xl={3}>
+                                <Box p={2} className="container-with-border">
+                                    {fieldServiceOrder?.map((data, index) => {
+                                        return (
+                                            <Box
+                                                mb={2}
+                                                key={index}
+                                                onClick={() => {
+                                                    setSelectedFieldServiceOrder(data);
+                                                }}
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    border: selectedFieldServiceOrder === data ? '2px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
+                                                    borderRadius: '8px'
+                                                }}
+                                                sx={{ position: 'relative' }}
+                                            >
+                                                <Box p={3}>
+                                                    <Box sx={{ ...style.serviceItem, ...style.title }}>
+                                                        <Typography>{data?.fieldServiceOrderNumber}</Typography>
+                                                    </Box>
+                                                    <Box style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', ...style.borderBottom }}>
+                                                        <Box sx={{ ...style.title, textAlign: 'unset' }}>
+                                                            <Typography component={'span'} style={{ ...style.date, marginBottom: '8px', marginTop: '5px' }}>
+                                                                <EventNoteIcon style={{ fontSize: '15px' }} />
+                                                                {moment(data?.technicianAssign?.estimateStartDate).format(dateFormat)} -{' '}
+                                                                {moment(data?.technicianAssign?.estimateEndDate).format(dateFormat)}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
+
+                                                    <Box mt={1}>
+                                                        <Typography style={style.titleText}>
+                                                            Customer: <span style={style.subTitleText}>{data?.customerAccount?.optionLabel}</span>
+                                                        </Typography>
+                                                        <Typography style={{ ...style.titleText, marginBottom: 0 }}>
+                                                            Location: <span style={style.subTitleText}>{data?.shippingAddress?.optionLabel}</span>
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+                                            </Box>
+                                        );
+                                    })}
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={8} xl={9}>
+                                <Box p={2} className="container-with-border">
+                                    {Object.keys(frameWorkComponent).length > 0 ? (
+                                        isMobile && !isTablet ? (
+                                            <CustomSwipableList
+                                                allowSelection={true}
+                                                allowSwipe={true}
+                                                permissions={permissions.fieldticketInvoice}
+                                                primaryField={columns?.find((d) => d.primaryField)}
+                                                onClick={(data) => { }}
+                                                dataRows={dataRows}
+                                                selectedRecords={selectedRecords}
+                                                dispatch={dispatch}
+                                                onEdit={(data) => {
+                                                }}
+                                                extraParamsToCheckDelete={true}
+                                                onDelete={(data) => {
+                                                }}
+                                                rowCount={rowCount}
+                                                page={page}
+                                                loading={loading}
+                                                additionalDetails={[]}
+                                                owerCollaboratorInitialsOrImages=""
+                                                onCreate={false}
+                                                showClone={true}
+                                                onClone={(data) => {
+                                                }}
+                                                chips={[]}
+                                                renderedFrom={renderedFrom}
+                                            />
+                                        ) : (
+                                            <CustomAgGrid
+                                                columns={columns}
+                                                dataRows={dataRows}
+                                                frameworkComponents={frameWorkComponent}
+                                                setGridApi={setGridApi}
+                                                dispatch={dispatch}
+                                                rowCount={rowCount}
+                                                limit={limit}
+                                                pageSizes={pageSizes}
+                                                page={page}
+                                                allowAction={true}
+                                                loading={loading}
+                                                renderedFrom={renderedFrom}
+                                                refreshGrid={fetchFieldTicketData}
+                                                showOnlyShowFilteredRecordSwitch={true}
+                                                showFilters={true}
+                                                resource={sidebarResource.fieldTicket}
+                                            />
+                                        )
+                                    ) : null}
+                                </Box>
+                            </Grid>
                         </Grid>
-                        <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
-                            <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                                <Grid>
-                                    <SearchBox
-                                        onChange={handleSearch}
-                                        className={styles.search_box_input}
-                                        width={isMobile ? '200px' : '242px'}
-                                        style={isMobile ? { flex: 1 } : {}}
-                                        size="small"
-                                        value={search}
-                                    />
-                                </Grid>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </div>
-                {Object.keys(frameWorkComponent).length > 0 ? (
-                    isMobile && !isTablet ? (
-                        <CustomSwipableList
-                            allowSelection={true}
-                            allowSwipe={true}
-                            permissions={permissions.fieldticketInvoice}
-                            primaryField={columns?.find((d) => d.primaryField)}
-                            onClick={(data) => { }}
-                            dataRows={dataRows}
-                            selectedRecords={selectedRecords}
-                            dispatch={dispatch}
-                            onEdit={(data) => {
-                            }}
-                            extraParamsToCheckDelete={true}
-                            onDelete={(data) => {
-                            }}
-                            rowCount={rowCount}
-                            page={page}
-                            loading={loading}
-                            additionalDetails={[]}
-                            owerCollaboratorInitialsOrImages=""
-                            onCreate={false}
-                            showClone={true}
-                            onClone={(data) => {
-                            }}
-                            chips={[]}
-                            renderedFrom={renderedFrom}
-                        />
-                    ) : (
-                        <CustomAgGrid
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameWorkComponent}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            allowAction={true}
-                            loading={loading}
-                            renderedFrom={renderedFrom}
-                            refreshGrid={fetchFieldTicketData}
-                            showOnlyShowFilteredRecordSwitch={true}
-                            showFilters={true}
-                            resource={sidebarResource.fieldTicket}
-                        />
                     )
-                ) : null}
-            </CustomContainer>
+                        :
+                        (
+                            <Box p={2} height={500}>
+                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                            </Box>
+                        )
+                }
+            </Box>
             {
                 createInvoiceDialog.open && <CreateInvoiceDialog
                     fieldTicketData={createInvoiceDialog.data}
@@ -322,7 +398,7 @@ const FieldTicketInvoice = () => {
                     }}
                 />
             )}
-        </Fragment>
+        </Box>
     );
 };
 
