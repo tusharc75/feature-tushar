@@ -104,6 +104,9 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     axiosInstance()
       .get(`${type === 'product' ? product.api : packages.api}${queryString}`)
       .then(({ data: { data, count } }) => {
+        if(type === 'product') {
+          data = data.filter((i) => i.serializedProduct === true);
+        }
         setMaterialList(JSON.parse(JSON.stringify(data)));
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
