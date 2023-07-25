@@ -24,7 +24,8 @@ import ViewInvoice from '../Invoice/ViewInvoice';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import moment from 'moment';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const style = {
     date: {
@@ -96,7 +97,6 @@ const FieldTicketInvoice = () => {
     const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null })
     const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null })
 
-
     const fetchFieldServiceOrderData = async () => {
         setFieldServiceOrder(null);
         axiosInstance()
@@ -120,7 +120,7 @@ const FieldTicketInvoice = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicketDetail.path, true);
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicketDetail.path);
             if (currentColumn !== null) {
                 columns = [...columns, currentColumn?.columnData];
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -223,7 +223,7 @@ const FieldTicketInvoice = () => {
     const ActionsRenderer = (params) => (
         <Fragment>
             {!params.data.invoice ? (
-                <Tooltip title="Create Invoice">
+                <HtmlTooltip title="Create Invoice">
                     <IconButton
                         size="small"
                         onClick={() => {
@@ -232,9 +232,9 @@ const FieldTicketInvoice = () => {
                     >
                         <NoteAddIcon fontSize="small" color="primary" />
                     </IconButton>
-                </Tooltip>
+                </HtmlTooltip>
             ) : (
-                <Tooltip title="View Invoice">
+                <HtmlTooltip title="View Invoice">
                     <IconButton size="small"
                         onClick={() => {
                             setViewInvoiceDialog({ open: true, data: params.data })
@@ -242,9 +242,10 @@ const FieldTicketInvoice = () => {
                     >
                         <VisibilityIcon fontSize="small" color="primary" />
                     </IconButton>
-                </Tooltip>
-            )}
-        </Fragment>
+                </HtmlTooltip>
+            )
+            }
+        </Fragment >
     );
 
     useEffect(() => {
@@ -268,48 +269,66 @@ const FieldTicketInvoice = () => {
                     fieldServiceOrder ? (
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={12} md={4} xl={3}>
-                                <Box p={2} className="container-with-border">
-                                    {fieldServiceOrder?.map((data, index) => {
-                                        return (
-                                            <Box
-                                                mb={2}
-                                                key={index}
-                                                onClick={() => {
-                                                    setSelectedFieldServiceOrder(data);
-                                                }}
-                                                style={{
-                                                    cursor: 'pointer',
-                                                    border: selectedFieldServiceOrder === data ? '2px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
-                                                    borderRadius: '8px'
-                                                }}
-                                                sx={{ position: 'relative' }}
-                                            >
-                                                <Box p={3}>
-                                                    <Box sx={{ ...style.serviceItem, ...style.title }}>
-                                                        <Typography>{data?.fieldServiceOrderNumber}</Typography>
-                                                    </Box>
-                                                    <Box style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', ...style.borderBottom }}>
-                                                        <Box sx={{ ...style.title, textAlign: 'unset' }}>
-                                                            <Typography component={'span'} style={{ ...style.date, marginBottom: '8px', marginTop: '5px' }}>
-                                                                <EventNoteIcon style={{ fontSize: '15px' }} />
-                                                                {moment(data?.technicianAssign?.estimateStartDate).format(dateFormat)} -{' '}
-                                                                {moment(data?.technicianAssign?.estimateEndDate).format(dateFormat)}
+                                <Box p={2} className='container-with-border'>
+                                    <Box className="hide-scrollbar" style={{ height: 'calc(100vh - 100px)', overflowY: "auto" }}>
+                                        {fieldServiceOrder?.map((data, index) => {
+                                            return (
+                                                <Box
+                                                    mb={2}
+                                                    key={index}
+                                                    onClick={() => {
+                                                        setSelectedFieldServiceOrder(data);
+                                                    }}
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                        border: selectedFieldServiceOrder === data ? '2px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
+                                                        borderRadius: '8px'
+                                                    }}
+                                                    sx={{ position: 'relative' }}
+                                                >
+                                                    <Box p={3}>
+                                                        <Box sx={{ ...style.serviceItem, ...style.title }}>
+                                                            <Box style={{ display: 'flex' }}>
+                                                                <Typography>{data?.fieldServiceOrderNumber}</Typography>
+                                                                {
+                                                                    permissions?.fieldServiceOrder?.isRead &&
+                                                                    <Box ml={1}>
+                                                                        <IconButton
+                                                                            size="small"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
+                                                                            }}
+                                                                        >
+                                                                            <OpenInNewIcon fontSize="small" color="primary" />
+                                                                        </IconButton>
+                                                                    </Box>
+                                                                }
+                                                            </Box>
+                                                        </Box>
+                                                        <Box style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', ...style.borderBottom }}>
+                                                            <Box sx={{ ...style.title, textAlign: 'unset' }}>
+                                                                <Typography component={'span'} style={{ ...style.date, marginBottom: '8px', marginTop: '5px' }}>
+                                                                    <EventNoteIcon style={{ fontSize: '15px' }} />
+                                                                    {moment(data?.technicianAssign?.estimateStartDate).format(dateFormat)} -{' '}
+                                                                    {moment(data?.technicianAssign?.estimateEndDate).format(dateFormat)}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Box>
+
+                                                        <Box mt={1}>
+                                                            <Typography style={style.titleText}>
+                                                                Customer: <span style={style.subTitleText}>{data?.customerAccount?.optionLabel}</span>
+                                                            </Typography>
+                                                            <Typography style={{ ...style.titleText, marginBottom: 0 }}>
+                                                                Location: <span style={style.subTitleText}>{data?.shippingAddress?.optionLabel}</span>
                                                             </Typography>
                                                         </Box>
                                                     </Box>
-
-                                                    <Box mt={1}>
-                                                        <Typography style={style.titleText}>
-                                                            Customer: <span style={style.subTitleText}>{data?.customerAccount?.optionLabel}</span>
-                                                        </Typography>
-                                                        <Typography style={{ ...style.titleText, marginBottom: 0 }}>
-                                                            Location: <span style={style.subTitleText}>{data?.shippingAddress?.optionLabel}</span>
-                                                        </Typography>
-                                                    </Box>
                                                 </Box>
-                                            </Box>
-                                        );
-                                    })}
+                                            );
+                                        })}
+                                    </Box>
                                 </Box>
                             </Grid>
                             <Grid item xs={12} sm={12} md={8} xl={9}>
@@ -317,7 +336,7 @@ const FieldTicketInvoice = () => {
                                     {Object.keys(frameWorkComponent).length > 0 ? (
                                         isMobile && !isTablet ? (
                                             <CustomSwipableList
-                                                allowSelection={true}
+                                                allowSelection={false}
                                                 allowSwipe={true}
                                                 permissions={permissions.fieldticketInvoice}
                                                 primaryField={columns?.find((d) => d.primaryField)}
@@ -357,9 +376,10 @@ const FieldTicketInvoice = () => {
                                                 loading={loading}
                                                 renderedFrom={renderedFrom}
                                                 refreshGrid={fetchFieldTicketData}
-                                                showOnlyShowFilteredRecordSwitch={true}
-                                                showFilters={true}
+                                                showOnlyShowFilteredRecordSwitch={false}
+                                                showFilters={false}
                                                 resource={sidebarResource.fieldTicket}
+                                                allowSelection={false}
                                             />
                                         )
                                     ) : null}
@@ -375,16 +395,14 @@ const FieldTicketInvoice = () => {
                         )
                 }
             </Box>
-            {
-                createInvoiceDialog.open && <CreateInvoiceDialog
-                    fieldTicketData={createInvoiceDialog.data}
-                    onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
-                    onSuccess={() => {
-                        setCreateInvoiceDialog({ open: false, data: null });
-                        fetchFieldTicketData();
-                    }}
-                />
-            }
+            {createInvoiceDialog.open && <CreateInvoiceDialog
+                fieldTicketData={createInvoiceDialog.data}
+                onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
+                onSuccess={() => {
+                    setCreateInvoiceDialog({ open: false, data: null });
+                    fetchFieldTicketData();
+                }}
+            />}
             {viewInvoiceDialog.open && (
                 <ViewInvoice
                     pageData={null}
