@@ -3742,6 +3742,11 @@ body {
   overflow: hidden;
   min-height: 100%;
 }
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 .new-table-font {
   font-size: 14px !important;
   * {
