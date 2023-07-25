@@ -24,6 +24,7 @@ import { Logo, LoginImage } from 'src/assets/authenticationAssets';
 import AuthSlider from './AuthSlider';
 
 import styles from './index.module.scss';
+import { backendApi } from 'src/config';
 
 const Login = () => {
   const notification = useContext(CustomNotificationCountContext);
@@ -273,6 +274,24 @@ const Login = () => {
                           </Button>
                         )}
                       </AuthenticatedTemplate>
+                    </Box>
+                    <Box marginY={2}>
+                    <Button
+                        disabled={isSubmitting}
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        type="button"
+                        className={styles.submitButton}
+                        onClick={
+                          () => {
+                            window.location.href = backendApi +'/user/login/sso'
+                          }
+                        }
+                        startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
+                      >
+                       SSO Sign In
+                      </Button>
                     </Box>
                   </Form>
                 )}
