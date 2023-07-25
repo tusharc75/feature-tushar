@@ -20,7 +20,6 @@ function SSOLoginButton() {
             })
             setChecking(false)
         } catch (e) {
-            console.log(e)
             setChecking(false)
             setTextFieldError({ error: true, msg: "Brand Not Found" })
         }

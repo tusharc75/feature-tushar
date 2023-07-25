@@ -86,6 +86,27 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
     }
   }
 
+  if (values[fieldData?.fieldName]) {
+    if (Array.isArray(values[fieldData?.fieldName])) {
+      values[fieldData?.fieldName]?.forEach((ele) => {
+        if (!optionsToShow?.find((e) => e.optionValue === ele)) {
+          const newAdd = options?.find((e) => e.optionValue === ele)
+          if (newAdd) {
+            optionsToShow.push(newAdd)
+          }
+        }
+      })
+    }
+    else {
+      if (!optionsToShow?.find((e) => e.optionValue === values[fieldData?.fieldName])) {
+        const newAdd = options?.find((e) => e.optionValue === values[fieldData?.fieldName])
+        if (newAdd) {
+          optionsToShow.push(newAdd)
+        }
+      }
+    }
+  }
+
   return optionsToShow;
 }
 
