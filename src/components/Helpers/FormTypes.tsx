@@ -962,7 +962,6 @@ const FormTypes = (props) => {
           onChange={onChange}
           label={label}
           name={name}
-          addFieldOption={addFieldOption}
           setOptionsList={(data) => {
             setOptionsList(data);
             const tempallFields = [...allFields];
