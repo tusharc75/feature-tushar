@@ -475,7 +475,7 @@ const ReportFilters = (props: FiltersProps) => {
                     <Grid item xs={12} sm={6}>
                       <KeyboardDatePicker
                         autoOk
-                        disabled={field.timeFrame !== 'custom'}
+                        disabled={statusTimeFrame !== 'custom'}
                         fullWidth
                         size="small"
                         variant="inline"
@@ -498,7 +498,7 @@ const ReportFilters = (props: FiltersProps) => {
                       <KeyboardDatePicker
                         autoOk
                         fullWidth
-                        disabled={field.timeFrame !== 'custom'}
+                        disabled={statusTimeFrame !== 'custom'}
                         size="small"
                         variant="inline"
                         inputVariant="outlined"
