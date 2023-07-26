@@ -104,16 +104,9 @@ const FieldTicketInvoice = () => {
 
     useEffect(() => {
         axiosInstance()
-            .get('/sa-formbuilder/lookup?lookupResource=Customer Account')
+            .get('/sa-formbuilder/lookup?lookupResource=Customer Account,Warehouse')
             .then(({ data: { data } }) => {
                 setCustomerAccountOption(data['Customer Account']);
-            });
-    }, []);
-
-    useEffect(() => {
-        axiosInstance()
-            .get('/sa-formbuilder/lookup?lookupResource=Warehouse')
-            .then(({ data: { data } }) => {
                 setWarehouseOption(data['Warehouse']);
             });
     }, []);
