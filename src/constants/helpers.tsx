@@ -486,7 +486,8 @@ export const CHILD_RESOURCE = {
   jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
-  productionOrderDetail: 'Production Order Detail'
+  productionOrderDetail: 'Production Order Detail',
+  invoiceCost: 'Invoice Cost',
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -2515,4 +2516,9 @@ export const getNestedlookupDependentOn = (fields, fieldName) => {
   };
   checkNested(fields, fieldName, result);
   return result;
+};
+
+export const FIELD_TICKET_STATUS = {
+  new: 'New',
+  submitted: 'Submitted',
 };

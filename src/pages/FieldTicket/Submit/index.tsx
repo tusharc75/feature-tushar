@@ -1,4 +1,4 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -9,18 +9,20 @@ import { generateCustomTableColumns } from 'src/constants/columns';
 import routes from 'src/components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_field_ticket_material_fields } from '../helper';
-import { fieldTicket, sidebarResource } from 'src/constants/helpers';
+import { FIELD_TICKET_STATUS, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { startCase } from 'lodash';
+import { set, startCase } from 'lodash';
+import ManageSubmit from './ManageSubmit';
 
-const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit }) => {
+const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, fetchData }) => {
 
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState([]);
+    const [submitDialog, setSubmitDialog] = useState(false);
 
     useEffect(() => {
         fetchFields();
-        fetchData();
+        fetchGridData();
     }, [id]);
 
     const fetchFields = async () => {
@@ -95,7 +97,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
         setColumns(column);
     };
 
-    const fetchData = async () => {
+    const fetchGridData = async () => {
 
         const materialResponse = await axiosInstance().get(`${fieldTicket.api}/${id}/material`);
         const costResponse = await axiosInstance().get(`${fieldTicket.api}/${id}/cost`)
@@ -129,6 +131,16 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                     <PreviewDownload resource={sidebarResource.fieldTicket} referenceId={id} columns={columns} isSendEmail />
                 </Box>
                 <Box display="flex">
+                    {fieldTicketData.status === FIELD_TICKET_STATUS.new && <Button
+                        variant="contained"
+                        color="primary"
+                        size='small'
+                        onClick={() => {
+                            setSubmitDialog(true);
+                        }}
+                    >
+                        Submit
+                    </Button>}
                 </Box>
             </Box>
             {columns && rowsData ? (
@@ -152,6 +164,18 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                     <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
                 </Box>
             )}
+            {
+                submitDialog && <ManageSubmit
+                    fieldTicketData={fieldTicketData}
+                    onClose={() => {
+                        setSubmitDialog(false);
+                    }}
+                    onSuccess={() => {
+                        setSubmitDialog(false);
+                        fetchData();
+                    }}
+                />
+            }
         </>
     );
 };

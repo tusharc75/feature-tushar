@@ -1,76 +1,88 @@
-import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
-import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import axiosInstance from '../../../axios/axiosInstance';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../../constants/helpers';
-import { Formik, Form } from 'formik';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomButton from '../../../components/Helpers/CustomButton';
-import { FaDiceOne } from 'react-icons/fa';
-import FormTypes from '../../../components/Helpers/FormTypes';
-import { uniq, map, orderBy, isEqual } from 'lodash';
-import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
+import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
+import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Form, Formik } from 'formik';
+import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { isEqual } from 'lodash';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import InputField from 'src/components/Helpers/InputField';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
-interface AdditionalCostDialogProps {
-  onClose: VoidFunction | any;
-  currency: string;
-  handleAddCost: VoidFunction | any;
-  handleUpdateCost: VoidFunction | any;
-  costData?: object | any;
-}
-
-const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData }) => {
-  const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [fields, setFields] = useState([]);
+const AdditionalCostDialog = ({ costData, onClose, onSuccess, invoiceData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [loading, setLoading] = useState(false);
+  const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const ref = useRef(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/field/child?resource=${CHILD_RESOURCE.salesOrderCost}`)
-      .then(({ data: { data } }) => {
-        const poFields = CURReplaceByCurrencySingle(data, currency);
-        if (costData) {
-          setInitialData({
-            fields: poFields,
-            values: getObjKeysWithValues(costData, poFields)
-          });
-        } else {
-          setInitialData({
-            fields: poFields,
-            values: getObjKeys('', poFields)
-          });
-        }
-        EvaluteproductFields(poFields);
-      });
+    fetchFields();
   }, []);
 
-  const EvaluteproductFields = (fields) => {
-    const sections = uniq(map(fields, 'sectionName'));
-    const customData = sections.map((name) => {
-      let sectionFields = fields.filter((field) => field.sectionName === name);
-      sectionFields = orderBy(sectionFields, 'order', 'asc');
-      return { name, sectionFields };
-    });
-    setFields(customData);
+  const fetchFields = async () => {
+    setInitialData({ fields: [], values: {} });
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.invoiceCost}`);
+    var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, invoiceData?.currency || 'USD');
+    if (costData) {
+      setInitialData({
+        fields: data,
+        values: getObjKeysWithValues(costData, data)
+      });
+    } else {
+      setInitialData({
+        fields: data,
+        values: getObjKeys('', data)
+      });
+    }
   };
 
   const handleSubmit = (values) => {
-    if (!costData) {
-      let returnData = [];
-      returnData = [{ ...values }];
-      handleAddCost(returnData);
+    setSubmitting(true);
+    if (costData) {
+      axiosInstance()
+        .put(`${routes.invoice?.path}/${invoiceData?._id}/additional-cost`, [{ ...values, _id: costData._id }])
+        .then(({ data }) => {
+          setLoading(false);
+          onSuccess(data.data);
+          setSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setLoading(false);
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
     } else {
-      let returnData = [];
-      returnData = [{ ...values, _id: costData._id }];
-      handleUpdateCost(returnData);
+      axiosInstance()
+        .post(`${routes.invoice?.path}/${invoiceData?._id}/additional-cost`, [values])
+        .then(({ data }) => {
+          setLoading(false);
+          onSuccess(data.data);
+          setSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setLoading(false);
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
     }
   };
 
@@ -82,131 +94,68 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
       aria-labelledby="customized-dialog-title"
       open={true}
       fullWidth
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true);
+        }
+      }}
     >
-      {initialData && initialData.fields.length ? (
-        <Formik
-          innerRef={ref}
-          enableReinitialize={true}
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          validateOnMount
-          onSubmit={handleSubmit}
-        >
-          {({ values, errors, touched, setFieldValue, submitForm }) => (
+      {initialData.fields.length ? (
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
+          {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={costData ? 'Edit' : 'Add'}
                 onClose={() => {
-                  if (!isEqual(ref?.current?.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
-                    onClose();
-                  }
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
                 }}
+                title={costData ? `Edit Manual Entry` : `Add Manual Entry`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
                 }}
                 showManimizeMaximize={true}
-              ></CustomDialogHeader>
+              />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {fields &&
-                    fields.map((section, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content detail-product-box'}>
-                          <div className={'product-form-layout'}>
-                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                            <h2 className={`${'form-label-style'} ${'form-label-product'}`}>{section.name}</h2>
-                          </div>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {section.sectionFields &&
-                              section.sectionFields.map((field) =>
-                                field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter ? (
-                                  <FormTypes
-                                    fields={initialData.fields}
-                                    fieldData={{ ...field, hideConverter: true }}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field.isTooltip}
-                                    tooltipMessage={field.tooltipMessage}
-                                    size="small"
-                                  />
-                                ) : (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    <Box display="flex">
-                                      <Box flexGrow={1}>
-                                        <FormTypes
-                                          {...field}
-                                          fields={initialData.fields}
-                                          fieldData={field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field.isTooltip}
-                                          tooltipMessage={field.tooltipMessage}
-                                          size="small"
-                                        />
-                                      </Box>
-                                    </Box>
-                                  </Grid>
-                                )
-                              )}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button
                   size="small"
                   color="primary"
+                  disabled={submitting}
                   onClick={() => {
-                    if (!isEqual(ref.current.values, initialData.values)) {
-                      setShowConfirmDialog(true);
-                    } else {
-                      onClose();
-                    }
+                    if (isEqual(initialData.values, values)) onClose();
+                    else setShowConfirmDialog(true);
                   }}
                 >
-                  {'Close'}
+                  Cancel
                 </Button>
-                <CustomButton
-                  loading={loading}
-                  disabled={isEqual(ref?.current?.values, initialData.values)}
+                <Button
+                  disabled={loading || submitting}
                   variant="contained"
                   color="primary"
+                  size="small"
                   type="submit"
                   onClick={submitForm}
+                  endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
-                  {' '}
                   Save
-                </CustomButton>
+                </Button>
               </CustomDialogFooter>
               {showConfirmDialog ? (
-                <ConfirmCancelDialog
+                <ConfirmationCancelDialog
+                  close={() => setShowConfirmDialog(false)}
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
