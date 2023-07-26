@@ -31,7 +31,7 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
         if (item.type === 'linkTitle') {
           return (
             <Typography key={index} component={'h5'} className={styles.cardTitle} title={data[item.accessor] || '--'}>
-              <Link className={styles.cardDetailsLink} to={() => item.link(data)}>
+              <Link target='_blank' className={styles.cardDetailsLink} to={() => item.link(data)}>
                 {data[item.accessor] || '--'}
               </Link>
             </Typography>
