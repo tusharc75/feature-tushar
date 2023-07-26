@@ -11,11 +11,17 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { fieldTicket, sidebarResource } from 'src/constants/helpers';
 import PreviewDownload from 'src/components/PreviewDownload';
+import { startCase } from 'lodash';
 
-const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, setNextStep }) => {
-    setNextStep(false);
+const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit }) => {
+
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState([]);
+
+    useEffect(() => {
+        fetchFields();
+        fetchData();
+    }, [id]);
 
     const fetchFields = async () => {
         setColumns(null);
@@ -26,20 +32,26 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
             });
         }
         const newColumns = generateCustomTableColumns(data, fieldTicketData?.currency, renderedFrom);
-        let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-        if (qtyIndex > -1) {
-            newColumns[qtyIndex].accessor = 'qtyDisplay';
-        }
         let column: any = [
             {
-                accessor: 'srno',
+                accessor: 'index',
                 Header: 'Index',
                 width: 70,
                 sticky: isMobile ? 'none' : 'left',
-                Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+                Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
                 Footer: () => {
                     return <>Total</>;
                 }
+            },
+            {
+                accessor: 'type',
+                Header: 'Type',
+                sticky: isMobile ? 'none' : 'left',
+                Cell: ({ row }) => (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <p>{`${startCase(row.original?.type)} `}</p>
+                    </div>
+                )
             },
             {
                 accessor: 'detail',
@@ -82,66 +94,46 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                 Cell: ({ row }) => {
                     return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
                 }
-            },
-            {
-                accessor: 'competencyType',
-                Header: 'Competency Type',
-                width: 250,
-                Cell: ({ row }) => (row.original['competencyType'] ? <p>{row.original?.competencyType}</p> : <NoDataCell />)
-            },
-            {
-                accessor: 'competencies',
-                Header: 'Competencies',
-                width: 250,
-                Cell: ({ row }) => (row.original['competencies'] ? <p>{row.original?.competencies}</p> : <NoDataCell />)
-            },
+            }
         ];
         column = [...column, ...newColumns];
         setColumns(column);
     };
 
-    const fetchMaterial = async () => {
-        const response = await axiosInstance().get(`${fieldTicket.api}/${id}/material`);
-        const costs = await axiosInstance()
-            .get(`${fieldTicket.api}/${id}/cost`)
-        const data = response?.data?.data?.material;
+    const fetchData = async () => {
 
-        data?.forEach((parent, i) => {
-            parent.srno = i + 1;
-            parent.detail = `${parent?.serviceDetail?.serviceName || parent?.productDetail?.productName || ''}`;
-            parent.description = `${parent?.serviceDetail?.serviceDescription || ''}`;
-            parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
-            parent.qtyDisplay = parent.qty;
+        const materialResponse = await axiosInstance().get(`${fieldTicket.api}/${id}/material`);
+        const costResponse = await axiosInstance().get(`${fieldTicket.api}/${id}/cost`)
+
+        const material = materialResponse?.data?.data?.material;
+        const costs = costResponse?.data?.data || [];
+
+        material?.forEach((parent, i) => {
+            parent.index = i + 1;
+            parent.detail = parent?.productDetail?.productName || parent?.serviceDetail?.serviceName || '';
+            parent.description = parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || '';
+            parent.qty = parent.qty;
             parent.type = parent.type;
         });
-        const costData = costs?.data?.data?.map((e, i) => {
-            e.srno = i + 1 + data.length;
-            e.detail = e.costType || "";
-            e.type = 'additionalCost';
-            return e;
-        })
-        setRowsData([...data, ...costData]);
+
+        costs?.forEach((ele, i) => {
+            ele.index = (i + 1) + material?.length;
+            ele.detail = ele.description || "";
+            ele.description = ele.description || "";
+            ele.type = 'manualEntry';
+        });
+
+        setRowsData([...material, ...costs]);
     };
-
-    useEffect(() => {
-        fetchFields();
-    }, [id]);
-
-    useEffect(() => {
-        if (columns) {
-            fetchMaterial();
-        }
-    }, [columns]);
 
 
     return (
         <>
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
+                    <PreviewDownload resource={sidebarResource.fieldTicket} referenceId={id} columns={columns} isSendEmail />
                 </Box>
                 <Box display="flex">
-                    <PreviewDownload resource={sidebarResource.fieldTicket} referenceId={id} columns={columns} isSendEmail />
-
                 </Box>
             </Box>
             {columns && rowsData ? (
@@ -161,11 +153,10 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                     />
                 </Box>
             ) : (
-                <Box p={2} height={stepFullScreen ? 500 : 278}>
+                <Box p={2} height={500}>
                     <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
                 </Box>
             )}
-
         </>
     );
 };

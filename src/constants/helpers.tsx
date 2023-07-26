@@ -64,7 +64,7 @@ export const rentalManagementSteps: stepInterface[] = [
 
 export const fieldTicketSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Add-on', title: 'Add-on', icon: 'add' },
+  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
   { name: 'Submit', title: 'Submit', icon: 'end' },
 ];
 

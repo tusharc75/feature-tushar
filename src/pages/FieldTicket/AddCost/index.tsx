@@ -17,10 +17,9 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import PreviewDownload from 'src/components/PreviewDownload';
 
-const AddCost = ({ id, fieldTicketData, setNextStep }) => {
-  const renderedFrom = camelCase(routes?.fieldTicket.title);
+const AddCost = ({ id, fieldTicketData, setNextStep, renderedFrom }) => {
+
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -160,12 +159,10 @@ const AddCost = ({ id, fieldTicketData, setNextStep }) => {
             onClick={() => setAddDialog({ open: true, data: null })}
             aria-controls="add-menu"
           >
-            {'Add Cost'}
+            {'Add Manual Entry'}
           </Button>
         </Box>
         <Box display="flex">
-          <PreviewDownload resource={sidebarResource.fieldTicket} referenceId={id} columns={columns} />
-          <Box mr={1} />
           <Button
             disabled={selectedRecords.length ? false : true}
             variant={'outlined'}
@@ -194,9 +191,8 @@ const AddCost = ({ id, fieldTicketData, setNextStep }) => {
               disabled={!(selectedRecords?.length > 0 && selectedRecords?.length)}
               onClick={() => {
                 closeActions();
-                // eslint-disable-next-line no-lone-blocks
-                {
-                  selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                if (selectedRecords.length === 1) {
+                  setDeleteRecord(selectedRecords[0]);
                 }
                 setShowDeleteConfirmBox(true);
               }}
