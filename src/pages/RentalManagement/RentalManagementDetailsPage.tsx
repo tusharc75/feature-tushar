@@ -124,6 +124,9 @@ const RentalManagementDetailsPage = () => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+    if (newValue === 0) {
+      fetchRentalManagementData();
+    }
     history.push(`?tab=${newValue}`);
   };
 
@@ -211,7 +214,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -336,8 +339,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+        .then(({ data }) => { })
+        .catch((error) => { });
     }
   };
 
