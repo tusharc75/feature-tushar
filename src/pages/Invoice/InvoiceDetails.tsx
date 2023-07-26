@@ -327,14 +327,10 @@ const InvoiceDetails = () => {
               />
             )}
             {currentStep === 1 && invoiceData && (
-              <Invoice
+              <AdditionalCost
                 invoiceData={invoiceData}
                 setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
-                updateJobStatus={updateJobStatus}
-                stepFullScreen={stepFullScreen}
-                statusOptions={statusOptions}
-                renderedFrom={`${renderedFrom}_grid-5`}
+                renderedFrom={`${renderedFrom}_grid-2`}
               />
             )}
             {currentStep === 2 && invoiceData && (
