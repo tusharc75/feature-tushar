@@ -486,7 +486,8 @@ export const CHILD_RESOURCE = {
   jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
-  productionOrderDetail: 'Production Order Detail'
+  productionOrderDetail: 'Production Order Detail',
+  invoiceCost: 'Invoice Cost',
 };
 
 export const sidebarResourceObjectFromValues = () => {

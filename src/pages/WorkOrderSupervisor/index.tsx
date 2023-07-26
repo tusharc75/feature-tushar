@@ -4,7 +4,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import { Autocomplete } from '@material-ui/lab';
 import { FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
-import { workOrderSupervisor } from '../../constants/helpers';
+import { WORKORDER_SERVICE_STATUS, workOrderSupervisor } from '../../constants/helpers';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -39,10 +39,12 @@ const WorkOrderSupervisor = () => {
   });
 
   useEffect(() => {
-    let timeout = setTimeout(fetchData, 600);
-    return () => {
-      clearTimeout(timeout);
-    };
+    if (selectedUser) {
+      let timeout = setTimeout(fetchData, 600);
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
   }, [selectedUser, selectedWorkOrder, selectedRepairOrder, selectedService, timeFrame, globalFilters.from, globalFilters.to]);
 
   React.useEffect(() => {
@@ -84,6 +86,9 @@ const WorkOrderSupervisor = () => {
         setWorkOrderOption(data['Work Order']);
         setRepairOrderOption(data['Repair Order']);
         setServiceMasterOption(data['Service Master']);
+        if (data['User']?.length) {
+          setSelectedUser(data['User'][0]?.optionValue)
+        }
       });
   }, []);
 
@@ -94,34 +99,14 @@ const WorkOrderSupervisor = () => {
       let data;
       let response = await axiosInstance().get(`${workOrderSupervisor.api}${queryString}`);
       data = response?.data?.data;
-      const completed = [];
-      const pending = [];
-      const inProgress = [];
-      data = data?.forEach((u) => {
-        let finalObject = prepareDataForGrid(u);
-        finalObject['user'] = u?.assignedUsers[0]?.optionLabel;
-        finalObject['workOrder'] = u?.workOrderDetail?.workOrderNumber;
-        finalObject['serviceName'] = u?.service?.optionLabel;
-        finalObject['assignedUser'] = u?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
-        finalObject['dueDate'] = u?.expectedCompletionDate;
-        finalObject['workOrderId'] = u?.workOrderDetail?._id;
-        if (u.status === 'Pending') {
-          pending.push(finalObject);
-        }
-        if (u.status === 'Completed') {
-          completed.push(finalObject);
-        }
-        if (u.status === 'In-Progress') {
-          inProgress.push(finalObject);
-        }
-        return {
-          ...finalObject
-        };
-      });
+      data?.forEach((ele) => {
+        ele['serviceName'] = ele?.service?.optionLabel;
+        ele['assignedUser'] = ele?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
+      })
       setServiceData({
-        Pending: { data: pending, color: '#F8A300' },
-        'In-Progress': { data: inProgress, color: '#F16A9A' },
-        Completed: { data: completed, color: '#31AC1D' }
+        Pending: { data: data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.pending), color: '#F8A300' },
+        'In-Progress': { data: data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.inProgress), color: '#F16A9A' },
+        Completed: { data: data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.completed), color: '#31AC1D' }
       });
       setLoading(false);
     } catch (error) {
@@ -151,10 +136,10 @@ const WorkOrderSupervisor = () => {
   };
 
   const cardDataRows: datarowInterface[] = [
-    { accessor: 'workOrder', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?.workOrderId}` },
+    { accessor: 'workOrderNumber', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?._id}` },
     { accessor: 'serviceName', title: 'Service Name', type: 'text' },
     { accessor: 'assignedUser', title: 'Technician', type: 'text' },
-    { accessor: 'dueDate', title: 'Due Date', type: 'date' }
+    { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' }
   ];
 
   return (
@@ -183,6 +168,7 @@ const WorkOrderSupervisor = () => {
                 onChange={(e, val) => {
                   setSelectedUser(val && val.optionValue ? val.optionValue : '');
                 }}
+                disableClearable
                 renderInput={(params) => (
                   <TextField {...params} margin="dense" name="user" placeholder="Technician" label="Technician" variant="outlined" fullWidth />
                 )}
