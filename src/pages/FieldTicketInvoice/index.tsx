@@ -8,7 +8,6 @@ import { camelCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
     dateFormat,
@@ -19,7 +18,7 @@ import {
 import EventNoteIcon from '@material-ui/icons/EventNote';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import CreateInvoiceDialog from './ManageInvoice/CreateInvoiceDialog';
+import CreateInvoiceDialog from './CreateInvoiceDialog';
 import ViewInvoice from '../Invoice/ViewInvoice';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import moment from 'moment';
@@ -216,10 +215,6 @@ const FieldTicketInvoice = () => {
         return deepFilter;
     };
 
-    // const handleSearch = (e) => {
-    //     dispatch({ type: 'search', search: e.target.value });
-    // };
-
     const ActionsRenderer = (params) => (
         <Fragment>
             {!params.data.invoice ? (
@@ -265,147 +260,113 @@ const FieldTicketInvoice = () => {
                 </Box>
             </Box>
             <Box className={`detail-container-v1`}>
-                {
-                    fieldServiceOrder ? (
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sm={12} md={4} xl={3}>
-                                <Box p={2} className='container-with-border'>
-                                    <Box className="hide-scrollbar" style={{ height: 'calc(100vh - 100px)', overflowY: "auto" }}>
-                                        {fieldServiceOrder?.map((data, index) => {
-                                            return (
-                                                <Box
-                                                    mb={2}
-                                                    key={index}
-                                                    onClick={() => {
-                                                        setSelectedFieldServiceOrder(data);
-                                                    }}
-                                                    style={{
-                                                        cursor: 'pointer',
-                                                        border: selectedFieldServiceOrder === data ? '2px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
-                                                        borderRadius: '8px'
-                                                    }}
-                                                    sx={{ position: 'relative' }}
-                                                >
-                                                    <Box p={3}>
-                                                        <Box sx={{ ...style.serviceItem, ...style.title }}>
-                                                            <Box style={{ display: 'flex' }}>
-                                                                <Typography>{data?.fieldServiceOrderNumber}</Typography>
-                                                                {
-                                                                    permissions?.fieldServiceOrder?.isRead &&
-                                                                    <Box ml={1}>
-                                                                        <IconButton
-                                                                            size="small"
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
-                                                                            }}
-                                                                        >
-                                                                            <OpenInNewIcon fontSize="small" color="primary" />
-                                                                        </IconButton>
-                                                                    </Box>
-                                                                }
-                                                            </Box>
+                {fieldServiceOrder ? (
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={12} md={4} xl={3}>
+                            <Box p={2} className='container-with-border'>
+                                <Box className="hide-scrollbar" style={{ height: 'calc(100vh - 100px)', overflowY: "auto" }}>
+                                    {fieldServiceOrder?.map((data, index) => {
+                                        return (
+                                            <Box
+                                                mb={2}
+                                                key={index}
+                                                onClick={() => {
+                                                    setSelectedFieldServiceOrder(data);
+                                                }}
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    border: selectedFieldServiceOrder === data ? '2px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
+                                                    borderRadius: '8px'
+                                                }}
+                                                sx={{ position: 'relative' }}
+                                            >
+                                                <Box p={3}>
+                                                    <Box sx={{ ...style.serviceItem, ...style.title }}>
+                                                        <Box style={{ display: 'flex' }}>
+                                                            <Typography>{data?.fieldServiceOrderNumber}</Typography>
+                                                            {
+                                                                permissions?.fieldServiceOrder?.isRead &&
+                                                                <Box ml={1}>
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
+                                                                        }}
+                                                                    >
+                                                                        <OpenInNewIcon fontSize="small" color="primary" />
+                                                                    </IconButton>
+                                                                </Box>
+                                                            }
                                                         </Box>
-                                                        <Box style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', ...style.borderBottom }}>
-                                                            <Box sx={{ ...style.title, textAlign: 'unset' }}>
-                                                                <Typography component={'span'} style={{ ...style.date, marginBottom: '8px', marginTop: '5px' }}>
-                                                                    <EventNoteIcon style={{ fontSize: '15px' }} />
-                                                                    {moment(data?.technicianAssign?.estimateStartDate).format(dateFormat)} -{' '}
-                                                                    {moment(data?.technicianAssign?.estimateEndDate).format(dateFormat)}
-                                                                </Typography>
-                                                            </Box>
-                                                        </Box>
-
-                                                        <Box mt={1}>
-                                                            <Typography style={style.titleText}>
-                                                                Customer: <span style={style.subTitleText}>{data?.customerAccount?.optionLabel}</span>
-                                                            </Typography>
-                                                            <Typography style={{ ...style.titleText, marginBottom: 0 }}>
-                                                                Location: <span style={style.subTitleText}>{data?.shippingAddress?.optionLabel}</span>
+                                                    </Box>
+                                                    <Box style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', ...style.borderBottom }}>
+                                                        <Box sx={{ ...style.title, textAlign: 'unset' }}>
+                                                            <Typography component={'span'} style={{ ...style.date, marginBottom: '8px', marginTop: '5px' }}>
+                                                                <EventNoteIcon style={{ fontSize: '15px' }} />
+                                                                {moment(data?.technicianAssign?.estimateStartDate).format(dateFormat)} -{' '}
+                                                                {moment(data?.technicianAssign?.estimateEndDate).format(dateFormat)}
                                                             </Typography>
                                                         </Box>
                                                     </Box>
+
+                                                    <Box mt={1}>
+                                                        <Typography style={style.titleText}>
+                                                            Customer: <span style={style.subTitleText}>{data?.customerAccount?.optionLabel}</span>
+                                                        </Typography>
+                                                        <Typography style={{ ...style.titleText, marginBottom: 0 }}>
+                                                            Location: <span style={style.subTitleText}>{data?.shippingAddress?.optionLabel}</span>
+                                                        </Typography>
+                                                    </Box>
                                                 </Box>
-                                            );
-                                        })}
-                                    </Box>
+                                            </Box>
+                                        );
+                                    })}
                                 </Box>
-                            </Grid>
-                            <Grid item xs={12} sm={12} md={8} xl={9}>
-                                <Box p={2} className="container-with-border">
-                                    {Object.keys(frameWorkComponent).length > 0 ? (
-                                        isMobile && !isTablet ? (
-                                            <CustomSwipableList
-                                                allowSelection={false}
-                                                allowSwipe={true}
-                                                permissions={permissions.fieldticketInvoice}
-                                                primaryField={columns?.find((d) => d.primaryField)}
-                                                onClick={(data) => { }}
-                                                dataRows={dataRows}
-                                                selectedRecords={selectedRecords}
-                                                dispatch={dispatch}
-                                                onEdit={(data) => {
-                                                }}
-                                                extraParamsToCheckDelete={true}
-                                                onDelete={(data) => {
-                                                }}
-                                                rowCount={rowCount}
-                                                page={page}
-                                                loading={loading}
-                                                additionalDetails={[]}
-                                                owerCollaboratorInitialsOrImages=""
-                                                onCreate={false}
-                                                showClone={true}
-                                                onClone={(data) => {
-                                                }}
-                                                chips={[]}
-                                                renderedFrom={renderedFrom}
-                                            />
-                                        ) : (
-                                            <CustomAgGrid
-                                                columns={columns}
-                                                dataRows={dataRows}
-                                                frameworkComponents={frameWorkComponent}
-                                                setGridApi={setGridApi}
-                                                dispatch={dispatch}
-                                                rowCount={rowCount}
-                                                limit={limit}
-                                                pageSizes={pageSizes}
-                                                page={page}
-                                                allowAction={true}
-                                                loading={loading}
-                                                renderedFrom={renderedFrom}
-                                                refreshGrid={fetchFieldTicketData}
-                                                showOnlyShowFilteredRecordSwitch={false}
-                                                showFilters={false}
-                                                resource={sidebarResource.fieldTicket}
-                                                allowSelection={false}
-                                            />
-                                        )
-                                    ) : null}
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    )
-                        :
-                        (
-                            <Box p={2} height={500}>
-                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
                             </Box>
-                        )
-                }
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={8} xl={9}>
+                            <Box p={2} className="container-with-border">
+                                {Object.keys(frameWorkComponent).length > 0 ? (
+                                    <CustomAgGrid
+                                        columns={columns}
+                                        dataRows={dataRows}
+                                        frameworkComponents={frameWorkComponent}
+                                        setGridApi={setGridApi}
+                                        dispatch={dispatch}
+                                        rowCount={rowCount}
+                                        limit={limit}
+                                        pageSizes={pageSizes}
+                                        page={page}
+                                        allowAction={true}
+                                        loading={loading}
+                                        renderedFrom={renderedFrom}
+                                        refreshGrid={fetchFieldTicketData}
+                                        showOnlyShowFilteredRecordSwitch={false}
+                                        showFilters={false}
+                                        actionWidth={80}
+                                        resource={sidebarResource.fieldTicket}
+                                        allowSelection={false}
+                                    />
+                                ) : null}
+                            </Box>
+                        </Grid>
+                    </Grid>
+                ) : <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>}
             </Box>
-            {createInvoiceDialog.open && <CreateInvoiceDialog
-                fieldTicketData={createInvoiceDialog.data}
-                onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
-                onSuccess={() => {
-                    setCreateInvoiceDialog({ open: false, data: null });
-                    fetchFieldTicketData();
-                }}
-            />}
+            {createInvoiceDialog.open &&
+                <CreateInvoiceDialog
+                    fieldTicketData={createInvoiceDialog.data}
+                    onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
+                    onSuccess={() => {
+                        setCreateInvoiceDialog({ open: false, data: null });
+                        fetchFieldTicketData();
+                    }}
+                />}
             {viewInvoiceDialog.open && (
                 <ViewInvoice
-                    pageData={null}
                     invoiceData={{ ...viewInvoiceDialog.data, invoiceNumber: viewInvoiceDialog?.data?.invoice, _id: viewInvoiceDialog?.data?.invoiceId }}
                     estimateStartDate={null}
                     onClose={() => {

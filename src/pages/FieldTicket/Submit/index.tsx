@@ -61,29 +61,24 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                 sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row, rows }) => (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {!allowedToEdit ? (
-                            <p> {row.original.detail}</p>
-                        ) : (
-                            <p
-                                title={row.original.detail}
-                            >
-                                {row.original.detail}
-                            </p>
-                        )}
-                        {['product', 'service'].includes(row.original.type) && <Box ml={1}>
-                            <IconButton
-                                size="small"
-                                onClick={() => {
-                                    if (row.original.type === 'service') {
-                                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                                    } else if (row.original.type === 'product') {
-                                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                                    }
-                                }}
-                            >
-                                <OpenInNewIcon fontSize="small" color="primary" />
-                            </IconButton>
-                        </Box>}
+                        <p title={row.original.detail}  >
+                            {row.original.detail}
+                        </p>
+                        {['product', 'service'].includes(row.original.type) &&
+                            <Box ml={1}>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => {
+                                        if (row.original.type === 'service') {
+                                            window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                                        } else if (row.original.type === 'product') {
+                                            window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                                        }
+                                    }}
+                                >
+                                    <OpenInNewIcon fontSize="small" color="primary" />
+                                </IconButton>
+                            </Box>}
                     </div>
                 )
             },
