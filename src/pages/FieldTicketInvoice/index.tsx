@@ -1,14 +1,11 @@
-import { Box, Grid, IconButton, Tooltip, Typography } from '@material-ui/core';
+import { Box, Grid, IconButton, TextField, Tooltip, Typography } from '@material-ui/core';
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
     dateFormat,
@@ -19,13 +16,14 @@ import {
 import EventNoteIcon from '@material-ui/icons/EventNote';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import CreateInvoiceDialog from './ManageInvoice/CreateInvoiceDialog';
+import CreateInvoiceDialog from './CreateInvoiceDialog';
 import ViewInvoice from '../Invoice/ViewInvoice';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import moment from 'moment';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Autocomplete } from '@material-ui/lab';
 
 const style = {
     date: {
@@ -97,22 +95,63 @@ const FieldTicketInvoice = () => {
     const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null })
     const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null })
 
+    const [fieldServiceOrderOption, setFieldServiceOrderOption] = useState([])
+    const [selectedFieldServiceOrderOption, setSelectedFieldServiceOrderOption] = useState(null)
+    const [customerAccountOption, setCustomerAccountOption] = useState([])
+    const [selectedCustomerAccount, setSelectedCustomerAccount] = useState(null)
+    const [warehouseOption, setWarehouseOption] = useState([])
+    const [selectedWarehouse, setSelectedWarehouse] = useState(null)
+
+    useEffect(() => {
+        axiosInstance()
+            .get('/sa-formbuilder/lookup?lookupResource=Customer Account')
+            .then(({ data: { data } }) => {
+                setCustomerAccountOption(data['Customer Account']);
+            });
+    }, []);
+
+    useEffect(() => {
+        axiosInstance()
+            .get('/sa-formbuilder/lookup?lookupResource=Warehouse')
+            .then(({ data: { data } }) => {
+                setWarehouseOption(data['Warehouse']);
+            });
+    }, []);
+
     const fetchFieldServiceOrderData = async () => {
         setFieldServiceOrder(null);
+        setSelectedFieldServiceOrderOption(null)
+
+        let api = `${routes?.fieldTicketInvoice.path}/field-service-order`;
+        const deepFilter: any = [];
+        if (selectedCustomerAccount) {
+            deepFilter.push({ field: 'customerAccount', term: selectedCustomerAccount.optionLabel });
+        }
+        if (selectedWarehouse) {
+            deepFilter.push({ field: 'warehouse', term: selectedWarehouse.optionLabel });
+        }
+        if (deepFilter?.length) {
+            api = `${api}?deepFilter=${JSON.stringify(deepFilter)}&filterType=and`;
+        }
         axiosInstance()
-            .get(`${routes?.fieldTicketInvoice.path}/field-service-order`)
+            .get(api)
             .then(({ data: { data } }) => {
-                setFieldServiceOrder(data?.data);
-                const isAvailable = data?.data.find((d) => d._id === selectedFieldServiceOrder?._id);
-                const index = data?.data.findIndex((d) => d._id === selectedFieldServiceOrder?._id);
-                if (data?.data?.length) {
-                    isAvailable ? setSelectedFieldServiceOrder(data?.data[index]) : setSelectedFieldServiceOrder(data?.data[0]);
+                setFieldServiceOrder(data);
+                const isAvailable = data.find((d) => d._id === selectedFieldServiceOrder?._id);
+                const index = data.findIndex((d) => d._id === selectedFieldServiceOrder?._id);
+                if (data?.length) {
+                    isAvailable ? setSelectedFieldServiceOrder(data[index]) : setSelectedFieldServiceOrder(data[0]);
+                    setFieldServiceOrderOption(data?.map(d => ({ optionLabel: d?.fieldServiceOrderNumber, optionValue: d?._id })))
                 }
             })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
             });
     };
+
+    useEffect(() => {
+        fetchFieldServiceOrderData();
+    }, [selectedCustomerAccount, selectedWarehouse])
 
     const fetchGridColumns = async () => {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
@@ -216,10 +255,6 @@ const FieldTicketInvoice = () => {
         return deepFilter;
     };
 
-    // const handleSearch = (e) => {
-    //     dispatch({ type: 'search', search: e.target.value });
-    // };
-
     const ActionsRenderer = (params) => (
         <Fragment>
             {!params.data.invoice ? (
@@ -249,7 +284,6 @@ const FieldTicketInvoice = () => {
     );
 
     useEffect(() => {
-        fetchFieldServiceOrderData();
         fetchGridColumns();
     }, []);
 
@@ -265,147 +299,186 @@ const FieldTicketInvoice = () => {
                 </Box>
             </Box>
             <Box className={`detail-container-v1`}>
-                {
-                    fieldServiceOrder ? (
+                <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6} md={3}>
+                        <Autocomplete
+                            options={fieldServiceOrderOption}
+                            fullWidth
+                            getOptionLabel={(option: any) => option.optionLabel ?? ''}
+                            getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                            value={
+                                fieldServiceOrderOption.filter((data) => data.optionValue === selectedFieldServiceOrderOption?.optionValue).length
+                                    ? fieldServiceOrderOption.filter((data) => data.optionValue === selectedFieldServiceOrderOption?.optionValue)[0]
+                                    : ''
+                            }
+                            onChange={(e, val) => {
+                                setSelectedFieldServiceOrderOption(val);
+                                if (val) {
+                                    setSelectedFieldServiceOrder(fieldServiceOrder?.find((e) => e._id === val?.optionValue));
+                                } else {
+                                    if (fieldServiceOrder?.length) {
+                                        setSelectedFieldServiceOrder(fieldServiceOrder[0]);
+                                    }
+                                }
+                            }}
+                            size="small"
+                            renderInput={(params) => <TextField {...params} label={routes.fieldServiceOrder.title} variant="outlined" />}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                        <Autocomplete
+                            options={customerAccountOption}
+                            fullWidth
+                            getOptionLabel={(option: any) => option.optionLabel ?? ''}
+                            getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                            value={
+                                customerAccountOption.filter((data) => data.optionValue === selectedCustomerAccount?.optionValue).length
+                                    ? customerAccountOption.filter((data) => data.optionValue === selectedCustomerAccount?.optionValue)[0]
+                                    : ''
+                            }
+                            onChange={(e, val) => {
+                                setSelectedFieldServiceOrder(null)
+                                setSelectedCustomerAccount(val)
+                            }}
+                            size="small"
+                            renderInput={(params) => <TextField {...params} label={routes.customerAccount.title} variant="outlined" />}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                        <Autocomplete
+                            options={warehouseOption}
+                            fullWidth
+                            getOptionLabel={(option: any) => option.optionLabel ?? ''}
+                            getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                            value={
+                                warehouseOption.filter((data) => data.optionValue === selectedWarehouse?.optionValue).length
+                                    ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse?.optionValue)[0]
+                                    : ''
+                            }
+                            onChange={(e, val) => {
+                                setSelectedFieldServiceOrder(null)
+                                setSelectedWarehouse(val)
+                            }}
+                            size="small"
+                            renderInput={(params) => <TextField {...params} label={routes.warehouse.title} variant="outlined" />}
+                        />
+                    </Grid>
+                </Grid>
+                {fieldServiceOrder ? (
+                    fieldServiceOrder?.length ? (
                         <Grid container spacing={2}>
-                            <Grid item xs={12} sm={12} md={4} xl={3}>
-                                <Box p={2} className='container-with-border'>
-                                    <Box className="hide-scrollbar" style={{ height: 'calc(100vh - 100px)', overflowY: "auto" }}>
-                                        {fieldServiceOrder?.map((data, index) => {
-                                            return (
-                                                <Box
-                                                    mb={2}
-                                                    key={index}
-                                                    onClick={() => {
-                                                        setSelectedFieldServiceOrder(data);
-                                                    }}
-                                                    style={{
-                                                        cursor: 'pointer',
-                                                        border: selectedFieldServiceOrder === data ? '2px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
-                                                        borderRadius: '8px'
-                                                    }}
-                                                    sx={{ position: 'relative' }}
-                                                >
-                                                    <Box p={3}>
-                                                        <Box sx={{ ...style.serviceItem, ...style.title }}>
-                                                            <Box style={{ display: 'flex' }}>
-                                                                <Typography>{data?.fieldServiceOrderNumber}</Typography>
-                                                                {
-                                                                    permissions?.fieldServiceOrder?.isRead &&
-                                                                    <Box ml={1}>
-                                                                        <IconButton
-                                                                            size="small"
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
-                                                                            }}
-                                                                        >
-                                                                            <OpenInNewIcon fontSize="small" color="primary" />
-                                                                        </IconButton>
-                                                                    </Box>
-                                                                }
+                            {!selectedFieldServiceOrderOption &&
+                                <Grid item xs={12} sm={12} md={4} xl={3} lg={4}>
+                                    <Box p={2} className='container-with-border'>
+                                        <Box className="hide-scrollbar" style={{ height: 'calc(100vh - 100px)', overflowY: "auto" }}>
+                                            {fieldServiceOrder?.map((data, index) => {
+                                                return (
+                                                    <Box
+                                                        mb={2}
+                                                        key={index}
+                                                        onClick={() => {
+                                                            setSelectedFieldServiceOrder(data);
+                                                        }}
+                                                        style={{
+                                                            cursor: 'pointer',
+                                                            border: selectedFieldServiceOrder === data ? '2px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
+                                                            borderRadius: '8px'
+                                                        }}
+                                                        sx={{ position: 'relative' }}
+                                                    >
+                                                        <Box p={3}>
+                                                            <Box sx={{ ...style.serviceItem, ...style.title }}>
+                                                                <Box style={{ display: 'flex' }}>
+                                                                    <Typography>{data?.fieldServiceOrderNumber}</Typography>
+                                                                    {
+                                                                        permissions?.fieldServiceOrder?.isRead &&
+                                                                        <Box ml={1}>
+                                                                            <IconButton
+                                                                                size="small"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
+                                                                                }}
+                                                                            >
+                                                                                <OpenInNewIcon fontSize="small" color="primary" />
+                                                                            </IconButton>
+                                                                        </Box>
+                                                                    }
+                                                                </Box>
                                                             </Box>
-                                                        </Box>
-                                                        <Box style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', ...style.borderBottom }}>
-                                                            <Box sx={{ ...style.title, textAlign: 'unset' }}>
-                                                                <Typography component={'span'} style={{ ...style.date, marginBottom: '8px', marginTop: '5px' }}>
-                                                                    <EventNoteIcon style={{ fontSize: '15px' }} />
-                                                                    {moment(data?.technicianAssign?.estimateStartDate).format(dateFormat)} -{' '}
-                                                                    {moment(data?.technicianAssign?.estimateEndDate).format(dateFormat)}
+                                                            <Box style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', ...style.borderBottom }}>
+                                                                <Box sx={{ ...style.title, textAlign: 'unset' }}>
+                                                                    <Typography component={'span'} style={{ ...style.date, marginBottom: '8px', marginTop: '5px' }}>
+                                                                        <EventNoteIcon style={{ fontSize: '15px' }} />
+                                                                        {moment(data?.technicianAssign?.estimateStartDate).format(dateFormat)} -{' '}
+                                                                        {moment(data?.technicianAssign?.estimateEndDate).format(dateFormat)}
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Box>
+
+                                                            <Box mt={1}>
+                                                                <Typography style={style.titleText}>
+                                                                    Customer: <span style={style.subTitleText}>{data?.customerAccount?.optionLabel}</span>
+                                                                </Typography>
+                                                                <Typography style={{ ...style.titleText, marginBottom: 0 }}>
+                                                                    Location: <span style={style.subTitleText}>{data?.shippingAddress?.optionLabel}</span>
                                                                 </Typography>
                                                             </Box>
                                                         </Box>
-
-                                                        <Box mt={1}>
-                                                            <Typography style={style.titleText}>
-                                                                Customer: <span style={style.subTitleText}>{data?.customerAccount?.optionLabel}</span>
-                                                            </Typography>
-                                                            <Typography style={{ ...style.titleText, marginBottom: 0 }}>
-                                                                Location: <span style={style.subTitleText}>{data?.shippingAddress?.optionLabel}</span>
-                                                            </Typography>
-                                                        </Box>
                                                     </Box>
-                                                </Box>
-                                            );
-                                        })}
+                                                );
+                                            })}
+                                        </Box>
                                     </Box>
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12} sm={12} md={8} xl={9}>
+                                </Grid>
+                            }
+                            <Grid item xs={12} sm={12} md={selectedFieldServiceOrderOption ? 12 : 8} xl={selectedFieldServiceOrderOption ? 12 : 9} lg={selectedFieldServiceOrderOption ? 12 : 8}>
                                 <Box p={2} className="container-with-border">
                                     {Object.keys(frameWorkComponent).length > 0 ? (
-                                        isMobile && !isTablet ? (
-                                            <CustomSwipableList
-                                                allowSelection={false}
-                                                allowSwipe={true}
-                                                permissions={permissions.fieldticketInvoice}
-                                                primaryField={columns?.find((d) => d.primaryField)}
-                                                onClick={(data) => { }}
-                                                dataRows={dataRows}
-                                                selectedRecords={selectedRecords}
-                                                dispatch={dispatch}
-                                                onEdit={(data) => {
-                                                }}
-                                                extraParamsToCheckDelete={true}
-                                                onDelete={(data) => {
-                                                }}
-                                                rowCount={rowCount}
-                                                page={page}
-                                                loading={loading}
-                                                additionalDetails={[]}
-                                                owerCollaboratorInitialsOrImages=""
-                                                onCreate={false}
-                                                showClone={true}
-                                                onClone={(data) => {
-                                                }}
-                                                chips={[]}
-                                                renderedFrom={renderedFrom}
-                                            />
-                                        ) : (
-                                            <CustomAgGrid
-                                                columns={columns}
-                                                dataRows={dataRows}
-                                                frameworkComponents={frameWorkComponent}
-                                                setGridApi={setGridApi}
-                                                dispatch={dispatch}
-                                                rowCount={rowCount}
-                                                limit={limit}
-                                                pageSizes={pageSizes}
-                                                page={page}
-                                                allowAction={true}
-                                                loading={loading}
-                                                renderedFrom={renderedFrom}
-                                                refreshGrid={fetchFieldTicketData}
-                                                showOnlyShowFilteredRecordSwitch={false}
-                                                showFilters={false}
-                                                resource={sidebarResource.fieldTicket}
-                                                allowSelection={false}
-                                            />
-                                        )
+                                        <CustomAgGrid
+                                            columns={columns}
+                                            dataRows={dataRows}
+                                            frameworkComponents={frameWorkComponent}
+                                            setGridApi={setGridApi}
+                                            dispatch={dispatch}
+                                            rowCount={rowCount}
+                                            limit={limit}
+                                            pageSizes={pageSizes}
+                                            page={page}
+                                            allowAction={true}
+                                            loading={loading}
+                                            renderedFrom={renderedFrom}
+                                            refreshGrid={fetchFieldTicketData}
+                                            showOnlyShowFilteredRecordSwitch={false}
+                                            showFilters={false}
+                                            actionWidth={80}
+                                            resource={sidebarResource.fieldTicket}
+                                            allowSelection={false}
+                                        />
                                     ) : null}
                                 </Box>
                             </Grid>
                         </Grid>
+                    ) : (
+                        <Box style={{ minHeight: 'calc(100vh - 349px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <Typography>No Request Pending !</Typography>
+                        </Box>
                     )
-                        :
-                        (
-                            <Box p={2} height={500}>
-                                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                            </Box>
-                        )
-                }
+                ) : <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>}
             </Box>
-            {createInvoiceDialog.open && <CreateInvoiceDialog
-                fieldTicketData={createInvoiceDialog.data}
-                onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
-                onSuccess={() => {
-                    setCreateInvoiceDialog({ open: false, data: null });
-                    fetchFieldTicketData();
-                }}
-            />}
+            {createInvoiceDialog.open &&
+                <CreateInvoiceDialog
+                    fieldTicketData={createInvoiceDialog.data}
+                    onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
+                    onSuccess={() => {
+                        setCreateInvoiceDialog({ open: false, data: null });
+                        fetchFieldTicketData();
+                    }}
+                />}
             {viewInvoiceDialog.open && (
                 <ViewInvoice
-                    pageData={null}
                     invoiceData={{ ...viewInvoiceDialog.data, invoiceNumber: viewInvoiceDialog?.data?.invoice, _id: viewInvoiceDialog?.data?.invoiceId }}
                     estimateStartDate={null}
                     onClose={() => {

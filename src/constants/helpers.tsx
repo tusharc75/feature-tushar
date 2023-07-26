@@ -64,7 +64,7 @@ export const rentalManagementSteps: stepInterface[] = [
 
 export const fieldTicketSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Add-on', title: 'Add-on', icon: 'add' },
+  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
   { name: 'Submit', title: 'Submit', icon: 'end' },
 ];
 
@@ -111,6 +111,7 @@ export const quotationProcessSteps: stepInterface[] = [
 
 export const invoiceProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Manual Entry', title: 'Manual Entry', icon: 'manualEntry' },
   { name: 'Ready To Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
@@ -485,7 +486,8 @@ export const CHILD_RESOURCE = {
   jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
-  productionOrderDetail: 'Production Order Detail'
+  productionOrderDetail: 'Production Order Detail',
+  invoiceCost: 'Invoice Cost',
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -2514,4 +2516,9 @@ export const getNestedlookupDependentOn = (fields, fieldName) => {
   };
   checkNested(fields, fieldName, result);
   return result;
+};
+
+export const FIELD_TICKET_STATUS = {
+  new: 'New',
+  submitted: 'Submitted',
 };

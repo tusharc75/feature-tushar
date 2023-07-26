@@ -14,7 +14,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { ACTIVITY_RESOURCE, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
 import TabPanel from '../../components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
 import AddCost from './AddCost';
@@ -27,6 +27,7 @@ import { camelCase, set } from 'lodash';
 import Submit from './Submit';
 
 const FieldTicketDetail = () => {
+
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -210,8 +211,9 @@ const FieldTicketDetail = () => {
             steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={false}
-            setStepFullScreen={() => setStepFullScreen(true)}
+            isStepEnded={false
+              // fieldTicketData?.status === FIELD_TICKET_STATUS.submitted
+            }
           />
           <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && (
@@ -225,16 +227,20 @@ const FieldTicketDetail = () => {
               />
             )}
             {currentStep === 1 && (
-              <AddCost fieldTicketData={fieldTicketData} id={id} setNextStep={setNextStep} />
+              <AddCost
+                fieldTicketData={fieldTicketData}
+                id={id}
+                renderedFrom={`${renderedFrom}_grid-2`}
+                setNextStep={setNextStep} />
             )}
             {currentStep === 2 && (
               <Submit
                 stepFullScreen={stepFullScreen}
                 fieldTicketData={fieldTicketData}
                 id={id}
-                renderedFrom={`${renderedFrom}_grid-1`}
+                renderedFrom={`${renderedFrom}_grid-3`}
                 allowedToEdit={allowedToEdit}
-                setNextStep={setNextStep}
+                fetchData={fetchData}
               />
             )}
           </ContentFullScreen>
