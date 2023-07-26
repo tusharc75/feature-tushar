@@ -2516,3 +2516,8 @@ export const getNestedlookupDependentOn = (fields, fieldName) => {
   checkNested(fields, fieldName, result);
   return result;
 };
+
+export const FIELD_TICKET_STATUS = {
+  new: 'New',
+  submitted: 'Submitted',
+};
