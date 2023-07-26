@@ -27,6 +27,7 @@ import { camelCase, set } from 'lodash';
 import Submit from './Submit';
 
 const FieldTicketDetail = () => {
+  
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -225,16 +226,19 @@ const FieldTicketDetail = () => {
               />
             )}
             {currentStep === 1 && (
-              <AddCost fieldTicketData={fieldTicketData} id={id} setNextStep={setNextStep} />
+              <AddCost
+                fieldTicketData={fieldTicketData}
+                id={id}
+                renderedFrom={`${renderedFrom}_grid-2`}
+                setNextStep={setNextStep} />
             )}
             {currentStep === 2 && (
               <Submit
                 stepFullScreen={stepFullScreen}
                 fieldTicketData={fieldTicketData}
                 id={id}
-                renderedFrom={`${renderedFrom}_grid-1`}
+                renderedFrom={`${renderedFrom}_grid-3`}
                 allowedToEdit={allowedToEdit}
-                setNextStep={setNextStep}
               />
             )}
           </ContentFullScreen>
