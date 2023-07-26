@@ -131,7 +131,7 @@ const FieldTicket = () => {
         .then(({ data: { data, count } }) => {
           let rows = data?.map((u: any) => {
             let finalObject: any = prepareDataForGrid(u);
-            finalObject['canDelete'] = permissions?.surveys.isDelete && finalObject?.ownerId === user?.user?._id ;
+            finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && finalObject?.ownerId === user?.user?._id ;
             finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
             finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
             return {
