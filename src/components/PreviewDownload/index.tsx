@@ -23,7 +23,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
 
   const toastConfig = useContext(CustomToastContext);
 
-  const allColumn = columns?.filter((d) => !['Action'].includes(d?.Header || d?.headerName))?.map((d) => {
+  const allColumn = columns?.filter((d) => !['Actions'].includes(d?.Header || d?.headerName))?.map((d) => {
     return {
       fieldLabel: (d?.Header || d?.headerName),
       fieldName: (d?.accessor || d?.field),
