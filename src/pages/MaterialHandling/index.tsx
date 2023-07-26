@@ -41,7 +41,7 @@ const MaterialHandling = () => {
 
   useEffect(() => {
     axiosInstance()
-      .get('/sa-formbuilder/lookup?lookupResource=Warehouse')
+      .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Product Category,Product')
       .then(({ data: { data } }) => {
         const warehouses: any = [];
         if (data['Warehouse'] && data['Warehouse']?.length) {
@@ -55,21 +55,7 @@ const MaterialHandling = () => {
           });
         }
         setWarehouseOptions(warehouses);
-      });
-  }, []);
-
-  useEffect(() => {
-    axiosInstance()
-      .get('/sa-formbuilder/lookup?lookupResource=Product Category')
-      .then(({ data: { data } }) => {
         setProductCategoryOptions(data['Product Category']);
-      });
-  }, []);
-
-  useEffect(() => {
-    axiosInstance()
-      .get('/sa-formbuilder/lookup?lookupResource=Product')
-      .then(({ data: { data } }) => {
         setProductOptions(data['Product']);
       });
   }, []);
