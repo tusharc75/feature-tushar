@@ -326,7 +326,6 @@ const FieldTicketInvoice = ({fieldServiceOrderData, renderedFrom}) => {
       </Grid>
       {viewBillDialog.open && (
         <ViewInvoice
-          pageData={null}
           invoiceData={viewBillDialog?.invoiceData}
           estimateStartDate={null}
           onClose={() => {
