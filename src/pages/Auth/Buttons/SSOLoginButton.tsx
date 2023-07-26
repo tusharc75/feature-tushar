@@ -1,30 +1,30 @@
 import { Box, Button, CircularProgress, TextField } from '@material-ui/core'
 import React from 'react'
-import styles from '../index.module.scss';
 import { backendApi } from 'src/config';
 import { FiLock } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 
 function SSOLoginButton() {
+
     const [checking, setChecking] = React.useState(false)
     const [textFieldShow, setTextFieldShow] = React.useState(false)
     const [textFieldError, setTextFieldError] = React.useState({ error: false, msg: "" })
-    const [brandValue, setBrandValue] = React.useState(null)
+
+    const [name, setName] = React.useState(null)
 
     const handleBrandCheck = async () => {
-        if (brandValue === null || brandValue === "" || brandValue.length < 1) return setTextFieldError({ error: true, msg: "Please enter a brand" });
+        if (name === null || name === "" || name.length < 1) return setTextFieldError({ error: true, msg: "Please enter a brand" });
         setChecking(true)
         try {
-            await axiosInstance().get(`/brand/check/${brandValue}`).then((res) => {
-                window.location.href = backendApi + '/user/login/sso/' + brandValue
+            await axiosInstance().get(`/brand/saml-check/${name}`).then(({ data: { data } }) => {
+                window.location.href = backendApi + '/user/login/sso/' + data?.brand
             })
             setChecking(false)
         } catch (e) {
             setChecking(false)
-            setTextFieldError({ error: true, msg: "Brand Not Found" })
+            setTextFieldError({ error: true, msg: "SAML Not Found" })
         }
     }
-
 
     return (
         <>
@@ -35,10 +35,10 @@ function SSOLoginButton() {
                     size='small'
                     label="Brand"
                     name="brand"
-                    value={brandValue || ""}
+                    value={name || ""}
                     error={textFieldError.error}
                     helperText={textFieldError.msg}
-                    onChange={(e) => setBrandValue(e.target.value)}
+                    onChange={(e) => setName(e.target.value)}
                 />
                 <Box mt={1} />
             </>}
