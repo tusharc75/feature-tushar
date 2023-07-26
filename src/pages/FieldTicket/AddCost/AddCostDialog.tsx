@@ -109,7 +109,7 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={costData ? `Edit ${costData.description}` : `Add Cost`}
+                title={costData ? `Edit Manual Entry` : `Add Manual Entry`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
