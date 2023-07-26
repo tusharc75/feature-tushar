@@ -7,7 +7,6 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -22,6 +21,8 @@ import Add from '@material-ui/icons/Add';
 import { capitalize, sortBy, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -580,16 +581,28 @@ const Productpackage = ({
           loading={isUpdating}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.type !== 'serializedAsset' && (
-        <AddExistingProductInventory
-          renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
-          isAddingProducts={isAddingProducts}
-          addProductInventory={handleAdd}
-          handleProductInventoryClose={() => {
-            setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null});
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
+        <AssignProductDialog
+        reference="repairOrder"
+        serialized={true}
+        productsDialogOpen={addExistingProductDialog.open}
+        productId={null}
+        handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null})}
+        assignedProducts={[]}
+        onSuccess={(d) => {
+          handleAdd(d);
+        }}
+      />
+      )}
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
+        <AssignPackageDialog
+          referenceType="repairOrder"
+          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null})}
+          ids={[]}
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
-          type={addExistingProductDialog.type}
-          repairOrderData={repairOrderData}
+          packageType={null}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.existing === false && addExistingProductDialog.type === 'serializedAsset' && (
