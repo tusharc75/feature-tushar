@@ -30,6 +30,12 @@ const MaterialHandling = () => {
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
 
+  const [productCategoryOptions, setProductCategoryOptions] = useState([]);
+  const [selectedProductCategory, setSelectedProductCategory] = useState(null);
+
+  const [productOptions, setProductOptions] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
   const [workOrderOptions, setWorkOrderOptions] = useState([]);
   const [selectedOptionWorkOrder, setSelectedOptionWorkOrder] = useState(null);
 
@@ -53,12 +59,28 @@ const MaterialHandling = () => {
   }, []);
 
   useEffect(() => {
+    axiosInstance()
+      .get('/sa-formbuilder/lookup?lookupResource=Product Category')
+      .then(({ data: { data } }) => {
+        setProductCategoryOptions(data['Product Category']);
+      });
+  }, []);
+
+  useEffect(() => {
+    axiosInstance()
+      .get('/sa-formbuilder/lookup?lookupResource=Product')
+      .then(({ data: { data } }) => {
+        setProductOptions(data['Product']);
+      });
+  }, []);
+
+  useEffect(() => {
     if (warehouseOptions && warehouseOptions?.length) {
       fetchData();
     } else {
       setWorkOrder([]);
     }
-  }, [selectedWarehouse, warehouseOptions]);
+  }, [selectedWarehouse, warehouseOptions, selectedProductCategory, selectedProduct]);
 
   const fetchData = () => {
     setWorkOrder(null);
@@ -71,6 +93,12 @@ const MaterialHandling = () => {
       filterById.push({ field: 'warehouse', term: selectedWarehouse.optionValue });
     } else {
       filterById.push({ field: 'warehouse', term: { $in: warehouseOptions?.map((e) => e?.optionValue) } });
+    }
+    if (selectedProductCategory) {
+      filterById.push({ field: 'productCategory', term: selectedProductCategory.optionValue });
+    }
+    if (selectedProduct) {
+      filterById.push({ field: 'product', term: selectedProduct.optionValue });
     }
     api = `${api}?filterById=${JSON.stringify(filterById)}&filterType=and`;
     axiosInstance()
@@ -106,24 +134,6 @@ const MaterialHandling = () => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={3}>
               <Autocomplete
-                options={warehouseOptions}
-                fullWidth
-                getOptionLabel={(option: any) => option.optionLabel}
-                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                value={
-                  warehouseOptions.filter((data) => data.optionValue === selectedWarehouse?.optionValue).length
-                    ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse?.optionValue)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setSelectedWarehouse(val);
-                }}
-                size="small"
-                renderInput={(params) => <TextField {...params} label={routes.warehouse.title} variant="outlined" />}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Autocomplete
                 options={workOrderOptions}
                 fullWidth
                 getOptionLabel={(option: any) => option.optionLabel}
@@ -148,6 +158,60 @@ const MaterialHandling = () => {
                 }}
                 size="small"
                 renderInput={(params) => <TextField {...params} label={routes.workOrder.title} variant="outlined" />}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Autocomplete
+                options={warehouseOptions}
+                fullWidth
+                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                value={
+                  warehouseOptions.filter((data) => data.optionValue === selectedWarehouse?.optionValue).length
+                    ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse?.optionValue)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  setSelectedWarehouse(val);
+                }}
+                size="small"
+                renderInput={(params) => <TextField {...params} label={routes.warehouse.title} variant="outlined" />}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Autocomplete
+                options={productCategoryOptions}
+                fullWidth
+                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                value={
+                  productCategoryOptions.filter((data) => data.optionValue === selectedProductCategory?.optionValue).length
+                    ? productCategoryOptions.filter((data) => data.optionValue === selectedProductCategory?.optionValue)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  setSelectedProductCategory(val);
+                }}
+                size="small"
+                renderInput={(params) => <TextField {...params} label={routes.productCategory.title} variant="outlined" />}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Autocomplete
+                options={productOptions}
+                fullWidth
+                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                value={
+                  productOptions.filter((data) => data.optionValue === selectedProduct?.optionValue).length
+                    ? productOptions.filter((data) => data.optionValue === selectedProduct?.optionValue)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  setSelectedProduct(val);
+                }}
+                size="small"
+                renderInput={(params) => <TextField {...params} label={routes.product.title} variant="outlined" />}
               />
             </Grid>
           </Grid>
@@ -225,7 +289,7 @@ const MaterialHandling = () => {
               <Grid item xs={12} md={8} lg={selectedOptionWorkOrder ? 12 : 9}>
                 {selectedWorkOrder && (
                   <Box className="container-with-border " p={3}>
-                    <Request workOrder={selectedWorkOrder?._id} referenceType={selectedWorkOrder?.referenceType}/>
+                    <Request workOrder={selectedWorkOrder?._id} referenceType={selectedWorkOrder?.referenceType} />
                   </Box>
                 )}
               </Grid>
