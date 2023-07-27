@@ -432,6 +432,8 @@ const WorkOrder = ({
 
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
+      console.log(parent);
+      console.log(parent?.workOrder);
       parent.index = i + 1;
       parent.detail = `${parent.type === 'service'
           ? parent?.serviceDetail?.serviceName
@@ -468,7 +470,7 @@ const WorkOrder = ({
         parent.hideSelection = true;
         parent.serviceStatus = parent?.workOrder?.status;
       }
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
+      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new && parent?.subRows?.some(obj => obj.type === "service")) {
         parent.canAutoCompleteWorkOrder = true;
       }
       parent.subRows = generateNestedData(data.material, parent);
