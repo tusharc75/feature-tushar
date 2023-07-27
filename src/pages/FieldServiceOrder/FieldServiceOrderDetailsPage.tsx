@@ -38,6 +38,7 @@ import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
 import FieldTicket from './FieldTicket';
 import FieldTicketInvoice from './FieldTicketInvoice';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -239,6 +240,7 @@ const ServiceOrderDetailsPage = () => {
                 </Button>
               </Fragment>
             )}
+            {permissions?.fieldServiceOrder?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             {permissions?.fieldServiceOrder?.isUpdate && allowedToEdit && (
               <Fragment>
                 {[SERVICE_ORDER_STATUS.readyToInvoice, SERVICE_ORDER_STATUS.invoiced]?.includes(serviceOrderData?.status) && (

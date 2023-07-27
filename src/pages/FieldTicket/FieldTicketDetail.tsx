@@ -49,6 +49,7 @@ const FieldTicketDetail = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [nextStep, setNextStep] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -89,6 +90,7 @@ const FieldTicketDetail = () => {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);
+      setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -155,7 +157,7 @@ const FieldTicketDetail = () => {
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
-            {permissions?.fieldTicket?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            {permissions?.fieldTicket?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton referenceId={fieldTicketData?._id} resource={ACTIVITY_RESOURCE.fieldTicket} />
           </Box>
         </Box>
