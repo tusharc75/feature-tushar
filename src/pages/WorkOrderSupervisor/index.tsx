@@ -39,12 +39,12 @@ const WorkOrderSupervisor = () => {
   });
 
   useEffect(() => {
-    if (selectedUser) {
-      let timeout = setTimeout(fetchData, 600);
-      return () => {
-        clearTimeout(timeout);
-      };
-    }
+    // if (selectedUser) {
+    let timeout = setTimeout(fetchData, 600);
+    return () => {
+      clearTimeout(timeout);
+    };
+    // }
   }, [selectedUser, selectedWorkOrder, selectedRepairOrder, selectedService, timeFrame, globalFilters.from, globalFilters.to]);
 
   React.useEffect(() => {
@@ -168,7 +168,7 @@ const WorkOrderSupervisor = () => {
                 onChange={(e, val) => {
                   setSelectedUser(val && val.optionValue ? val.optionValue : '');
                 }}
-                disableClearable
+                // disableClearable
                 renderInput={(params) => (
                   <TextField {...params} margin="dense" name="user" placeholder="Technician" label="Technician" variant="outlined" fullWidth />
                 )}
@@ -288,6 +288,7 @@ const WorkOrderSupervisor = () => {
           </div>
           {serviceData ? (
             <CardColTimeline
+              cardHeight={150}
               data={serviceData}
               loading={loading}
               cardDataRows={cardDataRows}

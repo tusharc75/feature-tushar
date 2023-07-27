@@ -17,6 +17,7 @@ interface cardColInterface extends BoxProps {
   md?: boolean | GridSize;
   lg?: boolean | GridSize;
   xl?: boolean | GridSize;
+  cardHeight?: number;
 }
 
 export interface datarowInterface {
@@ -39,6 +40,7 @@ const CardColTimeline: React.FC<cardColInterface> = ({
   md = 4,
   lg = false,
   xl = false,
+  cardHeight,
   ...others
 }) => {
   return (
@@ -60,12 +62,12 @@ const CardColTimeline: React.FC<cardColInterface> = ({
                   '--bg': Boolean(data[col].color)
                     ? data[col].color
                     : col === 'Pending'
-                    ? '#F8A300'
-                    : col === 'In-Progress'
-                    ? '#F16A9A'
-                    : col === 'Completed'
-                    ? '#31AC1D'
-                    : '#7F76EB',
+                      ? '#F8A300'
+                      : col === 'In-Progress'
+                        ? '#F16A9A'
+                        : col === 'Completed'
+                          ? '#31AC1D'
+                          : '#7F76EB',
                   '--border': col === 'Completed' ? '#F1FEED' : col === 'In-Progress' ? '#FFF3FA' : '#FFFEEF',
                   '--color': col === 'Completed' ? '#31AC1D' : col === 'In-Progress' ? '#F16A9A' : '#F8A300'
                 } as React.CSSProperties
@@ -87,6 +89,7 @@ const CardColTimeline: React.FC<cardColInterface> = ({
                     cardDataRows={cardDataRows}
                     passFailStatus={passFailStatus}
                     passFailAccessor={passFailAccessor}
+                    cardHeight={cardHeight}
                   />
                 )}
               </div>
