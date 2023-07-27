@@ -432,8 +432,6 @@ const WorkOrder = ({
 
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
-      console.log(parent);
-      console.log(parent?.workOrder);
       parent.index = i + 1;
       parent.detail = `${parent.type === 'service'
           ? parent?.serviceDetail?.serviceName
