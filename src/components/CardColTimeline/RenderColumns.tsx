@@ -9,9 +9,10 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   cardDataRows: datarowInterface[];
   passFailStatus?: boolean;
   passFailAccessor?: string;
+  cardHeight?: number;
 }
 
-const RenderColumns: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, passFailStatus, passFailAccessor }) => {
+const RenderColumns: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, passFailStatus, passFailAccessor, cardHeight = 130 }) => {
   const Row = ({ index, style }) => {
     const colData = data[index];
 
@@ -34,7 +35,7 @@ const RenderColumns: React.FC<colDataInterface> = ({ data, cardOnClick, cardData
       style={{ overflowX: 'hidden' }}
       height={500}
       itemCount={data.length}
-      itemSize={130}
+      itemSize={cardHeight}
       width={'100%'}
     >
       {Row}
