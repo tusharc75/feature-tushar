@@ -39,12 +39,10 @@ const WorkOrderSupervisor = () => {
   });
 
   useEffect(() => {
-    // if (selectedUser) {
     let timeout = setTimeout(fetchData, 600);
     return () => {
       clearTimeout(timeout);
     };
-    // }
   }, [selectedUser, selectedWorkOrder, selectedRepairOrder, selectedService, timeFrame, globalFilters.from, globalFilters.to]);
 
   React.useEffect(() => {
@@ -86,9 +84,6 @@ const WorkOrderSupervisor = () => {
         setWorkOrderOption(data['Work Order']);
         setRepairOrderOption(data['Repair Order']);
         setServiceMasterOption(data['Service Master']);
-        if (data['User']?.length) {
-          setSelectedUser(data['User'][0]?.optionValue)
-        }
       });
   }, []);
 
