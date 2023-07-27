@@ -468,10 +468,10 @@ const WorkOrder = ({
         parent.hideSelection = true;
         parent.serviceStatus = parent?.workOrder?.status;
       }
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
+      parent.subRows = generateNestedData(data.material, parent);
+      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new && parent?.subRows?.some(obj => obj.type === "service")) {
         parent.canAutoCompleteWorkOrder = true;
       }
-      parent.subRows = generateNestedData(data.material, parent);
     });
 
     if (isPostWorkService) {
