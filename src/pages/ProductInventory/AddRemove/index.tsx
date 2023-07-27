@@ -177,8 +177,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
-    console.log(values)
-
+    
     if (values.customDate === null || !moment(values.customDate).isValid()) {
       errors['customDate'] = 'Please select valid date';
     }
