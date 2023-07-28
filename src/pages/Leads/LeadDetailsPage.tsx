@@ -392,25 +392,27 @@ const LeadDetailsPage = () => {
             className="stepper-box-layout"
           />
         </Box>
-        {loading ? (
-          <Grid container spacing={2}>
-            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
-              <Grid key={index} item sm={6} md={6}>
-                <Skeleton variant="text" width="100px" height="16px" />
-                <Box marginY={1} />
-                <Skeleton width="100%" height="50px" />
-              </Grid>
-            ))}
-          </Grid>
-        ) : !leadFields.length ? (
-          <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-            <img src={SVG('Contacts Placeholder')} alt="No Data" />
-          </Box>
-        ) : showAtLast ? (
-          <DetailsPage data={leadData} fields={leadFields} />
-        ) : (
-          <DetailsPage data={leadData} fields={filteredLeadFields} />
-        )}
+        <div className="bg-white dark:bg-[var(--dark-primary)_!important]">
+          {loading ? (
+            <Grid container spacing={2}>
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
+                <Grid key={index} item sm={6} md={6}>
+                  <Skeleton variant="text" width="100px" height="16px" />
+                  <Box marginY={1} />
+                  <Skeleton width="100%" height="50px" />
+                </Grid>
+              ))}
+            </Grid>
+          ) : !leadFields.length ? (
+            <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+              <img src={SVG('Contacts Placeholder')} alt="No Data" />
+            </Box>
+          ) : showAtLast ? (
+            <DetailsPage data={leadData} fields={leadFields} />
+          ) : (
+            <DetailsPage data={leadData} fields={filteredLeadFields} />
+          )}
+        </div>
         <Box pt={3}>
           <AccordionOfOpportunity recordsPerLine={3} opportunity={leadData?.staticData?.opportunity} />
         </Box>
