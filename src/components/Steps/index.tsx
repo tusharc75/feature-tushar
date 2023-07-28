@@ -78,7 +78,7 @@ const Steps = ({
   };
 
   const isNextButtonDisabled = React.useMemo(() => {
-    if (showExtraStep) return currentStep === steps.length || (currentStep === 0 && isNextStep) || !nextStep || !isNextStepEnabled;
+    if (showExtraStep) return currentStep === steps.length || !nextStep || !isNextStepEnabled;
     return currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || !isNextStepEnabled;
   }, [currentStep, steps.length, showExtraStep, nextStep, isNextStep]);
 
