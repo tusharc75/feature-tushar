@@ -980,12 +980,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     {values['isDefaultValue'] && (
                       <Box display="block">
                         <TextField
-                          inputRef={inputRef}
                           variant="outlined"
                           type="text"
                           label="Default Value"
-                          required={true}
-                          multiline={fieldData.type === 'multiLine'}
                           name="defaultValue"
                           rows={4}
                           fullWidth
@@ -995,9 +992,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           helperText={touched['defaultValue'] && errors['defaultValue']}
                           onChange={(e) => {
                             setFieldValue('defaultValue', e.target.value.trimStart());
-                          }}
-                          onKeyPress={(event) => {
-                            event.stopPropagation();
                           }}
                         />
                       </Box>
