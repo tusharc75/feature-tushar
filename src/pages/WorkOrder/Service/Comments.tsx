@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Chip, Dialog, Typography } from '@material-ui/core';
+import { Box, Chip, Dialog, IconButton, Typography } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -13,12 +13,15 @@ import { dateTimeFormat } from 'src/constants/helpers';
 import PersonIcon from '@material-ui/icons/Person';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState(null);
   const [comment, setComment] = useState('');
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editedComment, setEditedComment] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -60,6 +63,31 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId }) =
     setComment('');
   };
 
+  const handleEdit = (comment) => {
+    setEditingCommentId(comment?._id);
+    setEditedComment(comment?.comment);
+  };
+
+  const handleSave = () => {
+    axiosInstance()
+      .put(`${routes.workOrder.path}/${editingCommentId}/comment`, {
+        comment: editedComment
+      })
+      .then(({ data: { data } }) => {
+        fetchData();
+        setEditingCommentId(null);
+        setEditedComment('');
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleCancel = () => {
+    setEditingCommentId(null);
+    setEditedComment('');
+  };
+
   return (
     <Dialog
       fullScreen={fullScreen || isMobile || isTablet}
@@ -84,13 +112,53 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId }) =
           <Box className={styles.main}>
             {data.map((item: any) => (
               <div key={item._id}>
-                <Typography variant="subtitle1">{item.comment}</Typography>
-                <Box pt={1} display="flex">
-                  <Chip avatar={<PersonIcon />} label={item?.user?.optionLabel} />
-                  <Box ml={2}>
-                    <Typography variant="body2">{moment(item.date).format(dateTimeFormat)}</Typography>
-                  </Box>
-                </Box>
+                {editingCommentId === item._id ? (
+                  <Grid container direction="row" alignItems="center" spacing={2}>
+                    <Grid item xs={9} md={9}>
+                      <TextField
+                        fullWidth
+                        value={editedComment}
+                        onChange={(e) => setEditedComment(e.target.value)}
+                        variant="outlined"
+                        placeholder="Comment"
+                        label={'Comment'}
+                      />
+                    </Grid>
+                    <Grid item xs={3} md={3}>
+                      <Box display="flex" justifyContent="space-between">
+                        <Button variant="contained" size="small" color="primary" onClick={handleSave} disabled={!editedComment?.trim().length}>
+                          Save
+                        </Button>
+                        <Box mr={1}/>
+                        <Button variant="outlined" size="small" color="primary" onClick={handleCancel}>
+                          Cancel
+                        </Button>
+                      </Box>
+                    </Grid>
+                  </Grid> 
+                ) : (
+                  <div>
+                    <div className="flex">
+                      <Typography variant="subtitle1">{item.comment}</Typography>
+                      <Box mr={1} />
+                      <IconButton
+                        aria-label="edit"
+                        onClick={(e) => {
+                          handleEdit(item);
+                        }}
+                        size="small"
+                      >
+                        <EditIcon color="primary" fontSize="small" />
+                      </IconButton>
+                    </div>
+                    <Box pt={1} display="flex">
+                      <Chip avatar={<PersonIcon />} label={item?.user?.optionLabel} />
+                      <Box ml={2}>
+                        <Typography variant="body2">{moment(item.date).format(dateTimeFormat)}</Typography>
+                      </Box>
+                    </Box>
+                  </div>
+                )}
               </div>
             ))}
           </Box>
