@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, TextField, Tooltip, Typography } from '@material-ui/core';
+import { Box, Grid, IconButton, Typography } from '@material-ui/core';
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -23,7 +23,7 @@ import moment from 'moment';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Autocomplete } from '@material-ui/lab';
+import CustomFilter from 'src/components/Helpers/CustomFilter';
 
 const style = {
     date: {
@@ -73,6 +73,27 @@ const style = {
     }
 };
 
+const FIELD_TO_FILTER = [
+    {
+        fieldName: '_id',
+        fieldLabel: routes.fieldServiceOrder.title,
+        resource: sidebarResource.fieldServiceOrder,
+        type: 'dropDown'
+    },
+    {
+        fieldName: 'customerAccount',
+        fieldLabel: routes.customerAccount.title,
+        resource: sidebarResource.customerAccount,
+        type: 'dropDown'
+    },
+    {
+        fieldName: 'warehouse',
+        fieldLabel: routes.warehouse.title,
+        resource: sidebarResource.warehouse,
+        type: 'dropDown'
+    },
+]
+
 const FieldTicketInvoice = () => {
 
     const toastConfig = useContext(CustomToastContext);
@@ -94,37 +115,14 @@ const FieldTicketInvoice = () => {
     const { getColumnData } = useColumns();
     const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null })
     const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null })
-
-    const [fieldServiceOrderOption, setFieldServiceOrderOption] = useState([])
-    const [selectedFieldServiceOrderOption, setSelectedFieldServiceOrderOption] = useState(null)
-    const [customerAccountOption, setCustomerAccountOption] = useState([])
-    const [selectedCustomerAccount, setSelectedCustomerAccount] = useState(null)
-    const [warehouseOption, setWarehouseOption] = useState([])
-    const [selectedWarehouse, setSelectedWarehouse] = useState(null)
-
-    useEffect(() => {
-        axiosInstance()
-            .get('/sa-formbuilder/lookup?lookupResource=Customer Account,Warehouse')
-            .then(({ data: { data } }) => {
-                setCustomerAccountOption(data['Customer Account']);
-                setWarehouseOption(data['Warehouse']);
-            });
-    }, []);
+    const [filterQuery, setFilterQuery] = useState([])
 
     const fetchFieldServiceOrderData = async () => {
         setFieldServiceOrder(null);
-        setSelectedFieldServiceOrderOption(null)
 
         let api = `${routes?.fieldTicketInvoice.path}/field-service-order`;
-        const deepFilter: any = [];
-        if (selectedCustomerAccount) {
-            deepFilter.push({ field: 'customerAccount', term: selectedCustomerAccount.optionLabel });
-        }
-        if (selectedWarehouse) {
-            deepFilter.push({ field: 'warehouse', term: selectedWarehouse.optionLabel });
-        }
-        if (deepFilter?.length) {
-            api = `${api}?deepFilter=${JSON.stringify(deepFilter)}&filterType=and`;
+        if (filterQuery?.length > 0) {
+            api = `${api}?filterById=${JSON.stringify(filterQuery)}&filterType=and`;
         }
         axiosInstance()
             .get(api)
@@ -134,7 +132,6 @@ const FieldTicketInvoice = () => {
                 const index = data.findIndex((d) => d._id === selectedFieldServiceOrder?._id);
                 if (data?.length) {
                     isAvailable ? setSelectedFieldServiceOrder(data[index]) : setSelectedFieldServiceOrder(data[0]);
-                    setFieldServiceOrderOption(data?.map(d => ({ optionLabel: d?.fieldServiceOrderNumber, optionValue: d?._id })))
                 }
             })
             .catch((error) => {
@@ -144,7 +141,7 @@ const FieldTicketInvoice = () => {
 
     useEffect(() => {
         fetchFieldServiceOrderData();
-    }, [selectedCustomerAccount, selectedWarehouse])
+    }, [filterQuery])
 
     const fetchGridColumns = async () => {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
@@ -292,75 +289,11 @@ const FieldTicketInvoice = () => {
                 </Box>
             </Box>
             <Box className={`detail-container-v1`}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <Autocomplete
-                            options={fieldServiceOrderOption}
-                            fullWidth
-                            getOptionLabel={(option: any) => option.optionLabel ?? ''}
-                            getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                            value={
-                                fieldServiceOrderOption.filter((data) => data.optionValue === selectedFieldServiceOrderOption?.optionValue).length
-                                    ? fieldServiceOrderOption.filter((data) => data.optionValue === selectedFieldServiceOrderOption?.optionValue)[0]
-                                    : ''
-                            }
-                            onChange={(e, val) => {
-                                setSelectedFieldServiceOrderOption(val);
-                                if (val) {
-                                    setSelectedFieldServiceOrder(fieldServiceOrder?.find((e) => e._id === val?.optionValue));
-                                } else {
-                                    if (fieldServiceOrder?.length) {
-                                        setSelectedFieldServiceOrder(fieldServiceOrder[0]);
-                                    }
-                                }
-                            }}
-                            size="small"
-                            renderInput={(params) => <TextField {...params} label={routes.fieldServiceOrder.title} variant="outlined" />}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <Autocomplete
-                            options={customerAccountOption}
-                            fullWidth
-                            getOptionLabel={(option: any) => option.optionLabel ?? ''}
-                            getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                            value={
-                                customerAccountOption.filter((data) => data.optionValue === selectedCustomerAccount?.optionValue).length
-                                    ? customerAccountOption.filter((data) => data.optionValue === selectedCustomerAccount?.optionValue)[0]
-                                    : ''
-                            }
-                            onChange={(e, val) => {
-                                setSelectedFieldServiceOrder(null)
-                                setSelectedCustomerAccount(val)
-                            }}
-                            size="small"
-                            renderInput={(params) => <TextField {...params} label={routes.customerAccount.title} variant="outlined" />}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <Autocomplete
-                            options={warehouseOption}
-                            fullWidth
-                            getOptionLabel={(option: any) => option.optionLabel ?? ''}
-                            getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                            value={
-                                warehouseOption.filter((data) => data.optionValue === selectedWarehouse?.optionValue).length
-                                    ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse?.optionValue)[0]
-                                    : ''
-                            }
-                            onChange={(e, val) => {
-                                setSelectedFieldServiceOrder(null)
-                                setSelectedWarehouse(val)
-                            }}
-                            size="small"
-                            renderInput={(params) => <TextField {...params} label={routes.warehouse.title} variant="outlined" />}
-                        />
-                    </Grid>
-                </Grid>
+                <CustomFilter field={FIELD_TO_FILTER} setFilterQuery={setFilterQuery} />
                 {fieldServiceOrder ? (
                     fieldServiceOrder?.length ? (
                         <Grid container spacing={2}>
-                            {!selectedFieldServiceOrderOption &&
+                            {(filterQuery?.findIndex(f => f?.field === '_id') === -1) &&
                                 <Grid item xs={12} sm={12} md={4} xl={3} lg={4}>
                                     <Box p={2} className='container-with-border'>
                                         <Box className="hide-scrollbar" style={{ height: 'calc(100vh - 100px)', overflowY: "auto" }}>
@@ -425,7 +358,7 @@ const FieldTicketInvoice = () => {
                                     </Box>
                                 </Grid>
                             }
-                            <Grid item xs={12} sm={12} md={selectedFieldServiceOrderOption ? 12 : 8} xl={selectedFieldServiceOrderOption ? 12 : 9} lg={selectedFieldServiceOrderOption ? 12 : 8}>
+                            <Grid item xs={12} sm={12} md={filterQuery?.findIndex(f => f?.field === '_id') === -1 ? 8 : 12} xl={filterQuery?.findIndex(f => f?.field === '_id') === -1 ? 9 : 12} lg={filterQuery?.findIndex(f => f?.field === '_id') === -1 ? 8 : 12}>
                                 <Box p={2} className="container-with-border">
                                     {Object.keys(frameWorkComponent).length > 0 ? (
                                         <CustomAgGrid
