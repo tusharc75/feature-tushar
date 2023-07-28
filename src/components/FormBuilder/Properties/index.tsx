@@ -247,6 +247,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isDropdown = values.isDropdown || false;
             ele.isSystemGenerate = values?.isSystemGenerate || false;
             if (values.isSystemGenerate) {
+              ele.systemGeneratedAutoIncrement = values.systemGeneratedAutoIncrement;
               ele.systemGeneratedPrefix = values.systemGeneratedPrefix;
             }
             ele.isColumnEditable = values?.isColumnEditable || false;
@@ -976,6 +977,25 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       }
                       label="Default Value"
                     />
+                    {values['isDefaultValue'] && (
+                      <Box display="block">
+                        <TextField
+                          variant="outlined"
+                          type="text"
+                          label="Default Value"
+                          name="defaultValue"
+                          rows={4}
+                          fullWidth
+                          margin="dense"
+                          value={values['defaultValue']}
+                          error={touched['defaultValue'] && Boolean(errors['defaultValue'])}
+                          helperText={touched['defaultValue'] && errors['defaultValue']}
+                          onChange={(e) => {
+                            setFieldValue('defaultValue', e.target.value.trimStart());
+                          }}
+                        />
+                      </Box>
+                    )}
 
                     <FormControlLabel
                       control={
@@ -1080,23 +1100,37 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                     )}
                     {values['isSystemGenerate'] && (
-                      <Box display="block">
-                        <TextField
-                          variant="outlined"
-                          type="text"
-                          label="System Generated Prefix"
-                          name="systemGeneratedPrefix"
-                          rows={4}
-                          fullWidth
-                          margin="dense"
-                          value={values['systemGeneratedPrefix'] || ''}
-                          error={touched['systemGeneratedPrefix'] && Boolean(errors['systemGeneratedPrefix'])}
-                          helperText={touched['systemGeneratedPrefix'] && errors['systemGeneratedPrefix']}
-                          onChange={(e) => {
-                            setFieldValue('systemGeneratedPrefix', e.target.value.trimStart());
-                          }}
+                      <>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name="systemGeneratedAutoIncrement"
+                              checked={values['systemGeneratedAutoIncrement']}
+                              onChange={(e) => {
+                                setFieldValue('systemGeneratedAutoIncrement', e.target.checked);
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label="System Generated Auto Increment"
                         />
-                      </Box>
+                        <Box display="block">
+                          <TextField
+                            variant="outlined"
+                            type="text"
+                            label="System Generated Prefix"
+                            name="systemGeneratedPrefix"
+                            rows={4}
+                            fullWidth
+                            margin="dense"
+                            value={values['systemGeneratedPrefix']}
+                            error={touched['systemGeneratedPrefix'] && Boolean(errors['systemGeneratedPrefix'])}
+                            helperText={touched['systemGeneratedPrefix'] && errors['systemGeneratedPrefix']}
+                            onChange={(e) => {
+                              setFieldValue('systemGeneratedPrefix', e.target.value.trimStart());
+                            }}
+                          />
+                        </Box></>
                     )}
                     {fieldData.type === 'imageUpload' && values['isDefaultValue'] ? (
                       <FormTypes
@@ -1131,26 +1165,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         value={values['defaultValue']}
                         setFieldValue={setFieldValue}
                       />
-                    ) : values['isDefaultValue'] ? (
-                      <Box display="block">
-                        <TextField
-                          variant="outlined"
-                          type="text"
-                          label="Default Value"
-                          required={true}
-                          multiline={fieldData.type === 'multiLine'}
-                          name="defaultValue"
-                          rows={4}
-                          fullWidth
-                          margin="dense"
-                          value={values['defaultValue'] || ''}
-                          error={touched['defaultValue'] && Boolean(errors['defaultValue'])}
-                          helperText={touched['defaultValue'] && errors['defaultValue']}
-                          onChange={(e) => {
-                            setFieldValue('defaultValue', e.target.value.trimStart());
-                          }}
-                        />
-                      </Box>
                     ) : null}
                     {module !== 'price-template' && module !== 'product-template' ? (
                       <FormControlLabel
