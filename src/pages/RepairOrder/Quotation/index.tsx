@@ -226,14 +226,17 @@ const Quotation = ({
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      width: permissions?.irtTicket?.isCreate ? 150 : 100,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
       Cell: ({ row, rows }) => {
         return  (
           <>
-          {allowedToEdit && (
+          {allowedToEdit && ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              quotationInfo?.versions[tempCurrentVersion]?.status
+            ) || invoiceStep) && (
             <HtmlTooltip title="Edit">
             <IconButton
               color="primary"
