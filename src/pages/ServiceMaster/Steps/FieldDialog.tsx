@@ -29,6 +29,14 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
           field: fields?.filter((el: any) => el.sectionName === element)
         });
       });
+      if (_data?.length === 0) {
+        _data.push({
+          sectionId: parseInt((Math.random() * 100000).toString()),
+          sectionName: 'New Section 1',
+          srno: 1,
+          field: []
+        })
+      }
       setSection(_data);
     } else {
       axiosInstance()
@@ -43,6 +51,14 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
               field: data?.filter((el: any) => el.sectionName === element)
             });
           });
+          if (_data?.length === 0) {
+            _data.push({
+              sectionId: parseInt((Math.random() * 100000).toString()),
+              sectionName: 'New Section 1',
+              srno: 1,
+              field: []
+            })
+          }
           setSection(_data);
         })
         .catch((err) => {

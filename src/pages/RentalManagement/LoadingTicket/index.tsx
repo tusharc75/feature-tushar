@@ -430,8 +430,8 @@ const LoadingTicket = ({
   const ParentNameRenderer = (params) => (params.data?.parentId ? <span>{params?.data?.parentName}</span> : <NoDataCell />);
 
   const ActionRenderer = (params) =>
-    [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy
-      , RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(params?.data?.rentalAssetStatus) &&
+    user?.user?.brandPolicy?.assetDeliveredStatus &&
+      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(params?.data?.rentalAssetStatus) &&
       params?.data?.type === 'Asset' ? (
       <HtmlTooltip title={'Change Date'}>
         <span>
