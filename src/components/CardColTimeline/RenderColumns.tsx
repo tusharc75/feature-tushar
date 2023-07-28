@@ -1,6 +1,7 @@
 import React from 'react';
 import ColCard from './ColCard';
 import { datarowInterface } from './index';
+import { FixedSizeList as List, } from 'react-window';
 
 export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   data: any;
@@ -8,12 +9,15 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   cardDataRows: datarowInterface[];
   passFailStatus?: boolean;
   passFailAccessor?: string;
+  cardHeight?: number;
 }
 
-const RenderColumns: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, passFailStatus, passFailAccessor }) => {
-  return (
-    <div>
-      {data.map((colData, index) => (
+const RenderColumns: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, passFailStatus, passFailAccessor, cardHeight = 130 }) => {
+  const Row = ({ index, style }) => {
+    const colData = data[index];
+
+    return (
+      <div style={style}>
         <ColCard
           key={index}
           data={colData}
@@ -22,8 +26,20 @@ const RenderColumns: React.FC<colDataInterface> = ({ data, cardOnClick, cardData
           passFailStatus={passFailStatus}
           passFailAccessor={passFailAccessor}
         />
-      ))}
-    </div>
+      </div>
+    );
+  };
+
+  return (
+    <List
+      style={{ overflowX: 'hidden' }}
+      height={500}
+      itemCount={data.length}
+      itemSize={cardHeight}
+      width={'100%'}
+    >
+      {Row}
+    </List>
   );
 };
 
