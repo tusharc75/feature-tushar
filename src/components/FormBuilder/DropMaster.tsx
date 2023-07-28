@@ -1,9 +1,9 @@
-import React, { useCallback, useState } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import { useDrop } from 'react-dnd';
 import Box from '@material-ui/core/Box';
 import { DropSection } from './DropSection';
 import update from 'immutability-helper';
-import { Typography } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 
 export const DropMaster = ({ module, screenHeight, section, setSection, addSection,
     addDeleteField, extraFields, onAddRemoveField, isCalculativeField }) => {
@@ -35,7 +35,6 @@ export const DropMaster = ({ module, screenHeight, section, setSection, addSecti
                 section.map((data, index) => (
                     <DropSection key={data.sectionId} index={index} id={data.sectionId}
                         setSectionHoverIndex={setSectionHoverIndex} sectionHoverIndex={sectionHoverIndex}
-                        // addSection={addSection} 
                         sectionId={data.sectionId} data={data} moveSection={moveSection}
                         fieldHoverId={fieldHoverId} setFieldHoverId={setFieldHoverId}
                         section={section} setSection={setSection}
@@ -45,7 +44,25 @@ export const DropMaster = ({ module, screenHeight, section, setSection, addSecti
                         onAddRemoveField={onAddRemoveField}
                         isCalculativeField={isCalculativeField}
                     />
-                )) : <Typography variant="body2" align="center">Drag and drop your sections here</Typography>}
+                )) :
+                <Typography variant="body2" align="center">Drag and drop your sections here</Typography>
+            }
+            <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                pt={2}>
+                <Button
+                    type="button"
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                        addSection(section?.length)
+                    }}>
+                    Add Section
+                </Button>
+            </Box>
         </Box>
     </div>);
 };

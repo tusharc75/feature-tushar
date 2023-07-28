@@ -45,7 +45,6 @@ const FieldSchema = object().shape({
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField }) => {
   const [initialValues, setInitialValues] = useState({ ...fieldData });
 
-  const inputRef = useRef(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isInitialUpdated, setIsInitialUpdated] = useState({
     MultipleFormula: false,
