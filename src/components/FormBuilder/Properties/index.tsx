@@ -45,7 +45,6 @@ const FieldSchema = object().shape({
 export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField }) => {
   const [initialValues, setInitialValues] = useState({ ...fieldData });
 
-  const inputRef = useRef(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isInitialUpdated, setIsInitialUpdated] = useState({
     MultipleFormula: false,
@@ -1083,24 +1082,18 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     {values['isSystemGenerate'] && (
                       <Box display="block">
                         <TextField
-                          inputRef={inputRef}
                           variant="outlined"
                           type="text"
                           label="System Generated Prefix"
-                          required={true}
-                          multiline={fieldData.type === 'multiLine'}
                           name="systemGeneratedPrefix"
                           rows={4}
                           fullWidth
                           margin="dense"
-                          value={values['systemGeneratedPrefix']}
+                          value={values['systemGeneratedPrefix'] || ''}
                           error={touched['systemGeneratedPrefix'] && Boolean(errors['systemGeneratedPrefix'])}
                           helperText={touched['systemGeneratedPrefix'] && errors['systemGeneratedPrefix']}
                           onChange={(e) => {
                             setFieldValue('systemGeneratedPrefix', e.target.value.trimStart());
-                          }}
-                          onKeyPress={(event) => {
-                            event.stopPropagation();
                           }}
                         />
                       </Box>
@@ -1141,7 +1134,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     ) : values['isDefaultValue'] ? (
                       <Box display="block">
                         <TextField
-                          inputRef={inputRef}
                           variant="outlined"
                           type="text"
                           label="Default Value"
@@ -1151,14 +1143,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           rows={4}
                           fullWidth
                           margin="dense"
-                          value={values['defaultValue']}
+                          value={values['defaultValue'] || ''}
                           error={touched['defaultValue'] && Boolean(errors['defaultValue'])}
                           helperText={touched['defaultValue'] && errors['defaultValue']}
                           onChange={(e) => {
                             setFieldValue('defaultValue', e.target.value.trimStart());
-                          }}
-                          onKeyPress={(event) => {
-                            event.stopPropagation();
                           }}
                         />
                       </Box>
