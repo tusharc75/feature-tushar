@@ -740,8 +740,7 @@ const Steps = ({
         <div className="flex justify-between items-center gap-[8px] p-[8px] flex-wrap">
           <div className="flex items-center gap-[15px] flex-wrap pl-2">
             {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) &&
-              <label htmlFor="select-all"
-                className={`'cursor-pointer`}>
+              <label htmlFor="select-all" className={`cursor-pointer`}>
                 <Checkbox
                   id="select-all"
                   color="primary"
@@ -751,18 +750,17 @@ const Steps = ({
                 <span className="font-medium select-none">Select All</span>
               </label>
             }
-            {selectedSteps.length ? (
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={completeAllSteps}
-              >
-                Complete
-                {isCompleteAllLoading ?
-                  <CircularProgress size={20} className="ml-[8px]" /> : `(${isAllChecked() ? 'All' : selectedSteps.length})`}
-              </Button>
-            ) : null}
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              disabled={selectedSteps.length ? false : true}
+              onClick={completeAllSteps}
+            >
+              Complete
+              {isCompleteAllLoading ?
+                <CircularProgress size={20} className="ml-[8px]" /> : `(${isAllChecked() ? 'All' : selectedSteps.length})`}
+            </Button>
           </div>
           <div className={`d-flex flex-wrap align-center justify-end gap-[8px] ml-auto ${serviceDetails?.steps?.length ? 'h-auto' : 'h-[500]'}`}>
             {referencType !== 'workOrderTechnician' && (
