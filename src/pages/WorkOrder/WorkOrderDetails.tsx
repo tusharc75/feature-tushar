@@ -224,16 +224,17 @@ const WorkOrderDetails = () => {
                   allowedToEdit &&
                   workOrderData?.canComplete &&
                   workOrderData?.status !== WORK_ORDER_STATUS.completed && (
-                    <Fragment>
+                    <div className="relative isolate">
+                      <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">{/* <span></span> */}</span>
                       <Button
                         variant={'contained'}
                         size="small"
                         onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
-                        className={'btn-outline-v1'}
+                        className={'btn-outline-v1 '}
                       >
-                        Complete
+                        Close
                       </Button>
-                    </Fragment>
+                    </div>
                   )}
                 <PreviewDownload
                   resource={sidebarResource.workOrder}
