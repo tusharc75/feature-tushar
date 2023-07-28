@@ -241,9 +241,9 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           res.productName = u?.product?.optionLabel;
           res.productDescription = u?.product?.productDescription;
           res.productNumber = u?.product?.productNumber;
-          if (!consumeRequest) {
-            res.hideSelection = u?.qty - ((u?.consumedQty || 0) + (u?.requestedQty || 0)) === 0 ? true : false;
-          }
+          // if (!consumeRequest) {
+          //   res.hideSelection = u?.qty - ((u?.consumedQty || 0) + (u?.requestedQty || 0)) === 0 ? true : false;
+          // }
           return res;
         });
         setDataRows(rows);
