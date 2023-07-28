@@ -47,6 +47,8 @@ import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { PassIcon, FailIcon } from 'src/assets/svg/svgIcons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { Add, ExpandMore } from '@material-ui/icons';
+import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -111,7 +113,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [stepSubmitedData, setStepSubmitedData] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [userAssignDialog, setUserAssignDialog] = useState(false);
-  const [serviceDialog, setServiceDialog] = useState({ open: false, uniqueId: null, preWork: null });
+  const [serviceDialog, setServiceDialog] = useState({ open: false, type: '', uniqueId: null, preWork: null });
   const [arrangeView, setArrangeView] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
   const [logsDialog, setLogsDialog] = useState(false);
@@ -127,6 +129,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [quotationData, setQuotationData] = useState(null);
   const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [addServiceAnchorEl, setAddServiceAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchServiceData();
@@ -461,6 +464,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     !completed &&
     (allowedToEdit || (selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate));
 
+  const openAddServiceActions = (event) => {
+    setAddServiceAnchorEl(event.currentTarget);
+  };
+
+  const closeAddServiceActions = () => {
+    setAddServiceAnchorEl(null);
+  };
+
   return (
     <Box>
       {serviceSteps ? (
@@ -491,17 +502,47 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 >
                   {!isColapsed && (
                     <>
-                      <Box>
-                        <Button
-                          disabled={allowedToEdit && !completed ? false : true}
-                          variant="outlined"
-                          color="primary"
-                          size="small"
-                          onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}
+                      <Button
+                        variant={'outlined'}
+                        color="primary"
+                        size="small"
+                        startIcon={<Add />}
+                        onClick={openAddServiceActions}
+                        aria-controls="add-menu"
+                        disabled={allowedToEdit && !completed ? false : true}
+                      >
+                        Add
+                        <ExpandMore fontSize="small" />
+                      </Button>
+                      <Menu
+                        anchorEl={addServiceAnchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="add-menu"
+                        open={Boolean(addServiceAnchorEl)}
+                        onClose={closeAddServiceActions}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            setServiceDialog({ open: true, type: 'service', uniqueId: null, preWork: null })
+                            closeAddServiceActions()
+                          }}
                         >
                           Add Services
-                        </Button>
-                      </Box>
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            setServiceDialog({ open: true, type: 'newService', uniqueId: null, preWork: null });
+                            closeAddServiceActions()
+                          }}
+                        >
+                          Add New Services
+                        </MenuItem>
+                      </Menu>
                       {serviceSteps?.length > 0 && (
                         <Box marginX={2}>
                           <Button
@@ -1016,7 +1057,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                         color="primary"
                         disabled={!allowedToEdit}
                         size="small"
-                        onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}
+                        onClick={() => setServiceDialog({ open: true, type: 'service', uniqueId: null, preWork: null })}
                       >
                         Add Services
                       </Button>
@@ -1050,7 +1091,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               <MenuItem
                 disabled={!allowedToEdit}
                 onClick={() => {
-                  setServiceDialog({ open: true, uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
+                  setServiceDialog({ open: true, type: 'service', uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
                   setAnchorEl(null);
                 }}
               >
@@ -1174,20 +1215,32 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
         />
       )}
-      {serviceDialog.open && (
+      {serviceDialog.open && serviceDialog.type === 'service' && (
         <AssignServiceDialog
           reference="workorder"
           referenceId={workOrderId}
-          handleClose={() => setServiceDialog({ open: false, uniqueId: null, preWork: null })}
+          handleClose={() => setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null })}
           ids={[]}
           onSuccess={(data) => {
             handleAddService(
               data?.map((e) => e._id),
               serviceDialog.uniqueId
             );
-            setServiceDialog({ open: false, uniqueId: null, preWork: null });
+            setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null });
           }}
           extraStaticFilter={serviceDialog.preWork === null ? [] : [{ field: 'preWork', term: serviceDialog.preWork }]}
+        />
+      )}
+      {serviceDialog.open && serviceDialog.type === 'newService' && (
+        <ManageServiceMaster
+          isClone={false}
+          serviceMasterId={null}
+          onClose={() => setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null })}
+          onSuccess={(data) => {
+            handleAddService([data?.data?._id], serviceDialog.uniqueId);
+            setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null });
+          }}
+          isRedirectToDetailPage={false}
         />
       )}
       {arrangeView && (
