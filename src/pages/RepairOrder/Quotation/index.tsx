@@ -234,7 +234,7 @@ const Quotation = ({
       Cell: ({ row, rows }) => {
         return  (
           <>
-          {allowedToEdit && ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+          {allowedToEdit && !([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
               quotationInfo?.versions[tempCurrentVersion]?.status
             ) || invoiceStep) && (
             <HtmlTooltip title="Edit">
