@@ -45,7 +45,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
   useEffect(() => {
     fetchRecords();
     getColumn();
-  }, []);
+  }, [repairOrderData]);
 
   const fetchRecords = async () => {
     setNextStep(false);
@@ -379,7 +379,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
