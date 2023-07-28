@@ -1387,7 +1387,7 @@ const ReceivingTicket = ({
                 handelProcessTickets();
               }}
             >
-              Receive Products
+              Receive Items
             </MenuItem>
 
             <MenuItem
