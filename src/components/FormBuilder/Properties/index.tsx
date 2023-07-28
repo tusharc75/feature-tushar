@@ -247,6 +247,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
             ele.isDropdown = values.isDropdown || false;
             ele.isSystemGenerate = values?.isSystemGenerate || false;
+            if (values.isSystemGenerate) {
+              ele.systemGeneratedPrefix = values.systemGeneratedPrefix;
+            }
             ele.isColumnEditable = values?.isColumnEditable || false;
             ele.isHideColumnSum = values?.isHideColumnSum || false;
 
@@ -1076,6 +1079,31 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         }
                         label="System Generated"
                       />
+                    )}
+                    {values['isSystemGenerate'] && (
+                      <Box display="block">
+                        <TextField
+                          inputRef={inputRef}
+                          variant="outlined"
+                          type="text"
+                          label="System Generated Prefix"
+                          required={true}
+                          multiline={fieldData.type === 'multiLine'}
+                          name="systemGeneratedPrefix"
+                          rows={4}
+                          fullWidth
+                          margin="dense"
+                          value={values['systemGeneratedPrefix']}
+                          error={touched['systemGeneratedPrefix'] && Boolean(errors['systemGeneratedPrefix'])}
+                          helperText={touched['systemGeneratedPrefix'] && errors['systemGeneratedPrefix']}
+                          onChange={(e) => {
+                            setFieldValue('systemGeneratedPrefix', e.target.value.trimStart());
+                          }}
+                          onKeyPress={(event) => {
+                            event.stopPropagation();
+                          }}
+                        />
+                      </Box>
                     )}
                     {fieldData.type === 'imageUpload' && values['isDefaultValue'] ? (
                       <FormTypes
