@@ -133,7 +133,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
 
   useEffect(() => {
     fetchServiceData();
-  }, [workOrderData]);
+  }, [workOrderId]);
 
   const fetchServiceData = async () => {
     var quotation: any = null;
@@ -299,6 +299,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         } else {
           fetchServiceData();
         }
+        fetchWorkOrderData();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
