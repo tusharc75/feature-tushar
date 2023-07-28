@@ -10,7 +10,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
 import { read, utils, writeFile } from 'xlsx';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { capitalize } from 'lodash';
+import { capitalize, isEmpty } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import { convertDateInDateTime, dateFormatForInputControl, productInventory, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -177,6 +177,10 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
+    
+    if (values.customDate === null || !moment(values.customDate).isValid()) {
+      errors['customDate'] = 'Please select valid date';
+    }
 
     if (type === 'remove') {
       if (product?.length === 1) {
@@ -191,7 +195,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     }
 
     if (type === 'add') {
-      if (parseFloat(values.price) <= 0) {
+      if (parseFloat(values.price) <= 0 || values.price === "") {
         errors['price'] = 'Please enter valid cost';
       }
     }

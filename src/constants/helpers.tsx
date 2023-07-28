@@ -56,7 +56,7 @@ export const rentalManagementSteps: stepInterface[] = [
   { name: 'Add Services', title: 'Services', icon: 'add' },
   { name: 'Add-on', title: 'Add-on', icon: 'add' },
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
-  { name: 'Serialized Asset', title: 'Asset', icon: 'asset' },
+  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
   { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
@@ -64,8 +64,8 @@ export const rentalManagementSteps: stepInterface[] = [
 
 export const fieldTicketSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Add-on', title: 'Add-on', icon: 'add' },
-  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
+  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
+  { name: 'Submit', title: 'Submit', icon: 'end' },
 ];
 
 export const demandOrderSteps = ['Add Products'];
@@ -79,7 +79,7 @@ export const productionOrderSteps: stepInterface[] = [
 
 export const jobProcessSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Dispatch', title: 'Dispatch', icon: 'dispatch' },
+  { name: 'Dispatch', title: 'Dispatch', icon: 'dispatch' }
 ];
 
 export const salesOrderProcessSteps: stepInterface[] = [
@@ -91,7 +91,7 @@ export const salesOrderProcessSteps: stepInterface[] = [
 
 export const bulkAssetCreationSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Serialized Asset', title: 'Asset', icon: 'asset' }
+  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' }
 ];
 
 export const subleaseSteps: stepInterface[] = [
@@ -111,6 +111,7 @@ export const quotationProcessSteps: stepInterface[] = [
 
 export const invoiceProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Manual Entry', title: 'Manual Entry', icon: 'manualEntry' },
   { name: 'Ready To Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
@@ -440,6 +441,7 @@ export const RESOURCE_LABEL = {
   purchaseRequisition: 'Purchase Requisition',
   planning: 'Planning',
   fieldTicket: 'Field Ticket',
+  fieldTicketInvoice: 'Field Ticket Invoice',
   fieldServiceTechnician: `Field Service Technician`,
   fleetDispatch: `Fleet Dispatch`,
   resourceLogs: `Resource Logs`,
@@ -484,7 +486,8 @@ export const CHILD_RESOURCE = {
   jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
-  productionOrderDetail: 'Production Order Detail'
+  productionOrderDetail: 'Production Order Detail',
+  invoiceCost: 'Invoice Cost',
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -1388,10 +1391,6 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   if (Number.isInteger(amount)) {
     options['maximumFractionDigits'] = 0;
   }
-
-
-
-
 
   //  For example I am formatting this value - 9876543210 then
   //  shortFormatAmount will be like this - 9.9 billion
@@ -2517,4 +2516,9 @@ export const getNestedlookupDependentOn = (fields, fieldName) => {
   };
   checkNested(fields, fieldName, result);
   return result;
+};
+
+export const FIELD_TICKET_STATUS = {
+  new: 'New',
+  submitted: 'Submitted',
 };

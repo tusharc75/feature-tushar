@@ -124,6 +124,9 @@ const RentalManagementDetailsPage = () => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+    if (newValue === 0) {
+      fetchRentalManagementData();
+    }
     history.push(`?tab=${newValue}`);
   };
 
@@ -230,12 +233,14 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-      var steps = (user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep) ? rentalManagementSteps :
-        rentalManagementSteps?.filter((e) => !['Quotation'].includes(e.name))
+      var steps =
+        user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep
+          ? rentalManagementSteps
+          : rentalManagementSteps?.filter((e) => !['Quotation'].includes(e.name));
       if (!user?.user?.brandPolicy?.rentalService) {
-        steps = steps?.filter((e) => !['Add Services'].includes(e.name))
+        steps = steps?.filter((e) => !['Add Services'].includes(e.name));
       }
-      setRentalSteps(steps)
+      setRentalSteps(steps);
       setCurrentStep(getIndex(data?.processStatus, steps));
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);

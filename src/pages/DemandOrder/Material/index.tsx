@@ -151,7 +151,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
-      Header: 'Action',
+      Header: 'Actions',
       minWidth: 100,
       width: 100,
       sticky: 'right',

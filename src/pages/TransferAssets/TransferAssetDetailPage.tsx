@@ -61,6 +61,7 @@ const TransferAssetDetailPage = () => {
   const [locationKeys, setLocationKeys] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
+
   const [stepNames, setStepNames] = useState([]);
   const [stepList, setStepList] = useState([]);
 
@@ -177,8 +178,8 @@ const TransferAssetDetailPage = () => {
           data?.transferType === 'Internal'
             ? data?.transfertoPlant?.entity
             : data?.transferType === 'External Customer'
-            ? data?.transfertoCustomer?.entity
-            : data?.transfertoSupplier?.entity;
+              ? data?.transfertoCustomer?.entity
+              : data?.transfertoSupplier?.entity;
 
         if (warehouseEntity?.length) {
           const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;
@@ -314,7 +315,7 @@ const TransferAssetDetailPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.transferAsset?.isUpdate && !isTransferEnded && (
+            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>

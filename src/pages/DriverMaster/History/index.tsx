@@ -21,9 +21,9 @@ const History = ({ id, status }) => {
   const NameRenderer = (params) => (
     <>
       {params?.value ? (
-        <Link className="link" title={params.value?.optionLabel} to={`${routes.truckMasterDetail.path}/${params.value?.optionValue}`}>
+        <p className="link text-truncate" title={params.value?.optionLabel} onClick={() => window.open(`${routes.driverMasterDetail.path}/${params.value?.optionValue}`)}>
           {params?.value?.optionLabel}
-        </Link>
+        </p>
       ) : (
         <NoDataCell />
       )}

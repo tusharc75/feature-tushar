@@ -11,12 +11,24 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS
 } from 'src/constants/helpers';
-import { Box, IconButton, Grid, Typography, Chip, Menu, MenuItem, ClickAwayListener, useMediaQuery } from '@material-ui/core';
+import {
+  Box,
+  IconButton,
+  Grid,
+  Typography,
+  Chip,
+  Menu,
+  MenuItem,
+  ClickAwayListener,
+  useMediaQuery,
+  Checkbox,
+  CircularProgress
+} from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual, set } from 'lodash';
 import StepFieldsDialog from './StepFieldsDialog';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import CompleteDialog from './CompleteDialog';
@@ -31,6 +43,50 @@ import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Comments from './Comments';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+
+interface StepInterface {
+  _id: string;
+  stepName: string;
+  order: number;
+  leadDay: number;
+  costPrice: number;
+  listPrice: number;
+  isPassFail: boolean;
+  isPassAddon: boolean;
+  passAddon: any[];
+  isFailAddon: boolean;
+  failAddon: any[];
+  isJumpStepPass: boolean;
+  jumpStepsPass: any[];
+  isJumpStepFail: boolean;
+  jumpStepsFail: any[];
+  isQuoteRevisionOnFail: boolean;
+  returnToServiceOnFail: string;
+  isReturnToServiceOnFail: boolean;
+  isReturnToStepOnFail: boolean;
+  returnToStepOnFail: string;
+  customStep: boolean;
+  isAllowToPerform: boolean;
+}
+
+export interface StepDataInterface {
+  _id: string;
+  uniqueId: string;
+  serviceId: string;
+  stepId: string;
+  status: string;
+  startDate: Date;
+  startedBy: EdBy;
+  duration: number;
+  endDate: Date;
+  endedBy: EdBy;
+  passFailStatus: string;
+}
+
+export interface EdBy {
+  optionValue: string;
+  optionLabel: string;
+}
 
 const TimerComponent = ({ stepData, updateTime = true }) => {
   const [time, setTime] = useState(null);
@@ -101,16 +157,14 @@ const useStyles = makeStyles((theme: Theme) =>
       boxShadow: 'none !important'
     },
     accordionHeading: {
-      padding: '16px',
+      padding: '16px 16px 16px 16px',
       ['@media (min-width:768px)']: {
-        padding: '16px 20px'
+        padding: '16px 20px 16px 16px'
       },
       ['@media (min-width:1024px)']: {
-        padding: '16px 40px'
+        padding: '16px 40px 16px 16px'
       },
-      ['@media (min-width:1150px)']: {
-        padding: '16px 40px'
-      },
+
       '& > div': {
         alignItems: 'center',
         justifyContent: 'space-between'
@@ -166,7 +220,11 @@ const useStyles = makeStyles((theme: Theme) =>
       paddingInline: '5px',
       fontWeight: 500
     },
-    mainContainer: {}
+    mainContainer: {
+      ['@media (max-width:768px)']: {
+        marginBottom: '70px'
+      }
+    }
   })
 );
 
@@ -209,38 +267,21 @@ const Steps = ({
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
   const selectedServiceRef = React.useRef(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, loading: false, steps: [] });
+  const [selectedSteps, setSelectedSteps] = useState<string[]>([]);
+  const [isCompleteAllLoading, setIsCompleteAllLoading] = useState(false);
 
   useEffect(() => {
     if ((!selectedServiceRef.current || selectedServiceRef.current !== selectedService._id) && selectedService._id) {
       selectedServiceRef.current = selectedService._id;
       setServiceDetails(null);
+      setSelectedSteps([]);
     }
     fetchServiceData();
   }, [selectedService]);
 
-  const delteSteps = async () => {
-    setShowDeleteConfirmBox((prev) => ({ ...prev, loading: true }));
-    const payload = {
-      serviceUniqueId: selectedService?.uniqueId,
-      steps: showDeleteConfirmBox.steps.map((item) => item._id)
-    };
-    const api = `/work-order/${workOrderId}/step/remove`;
-    try {
-      const response = await axiosInstance().put(api, payload);
-      toastConfig.setToastConfig({
-        open: true,
-        message: response.data.message,
-        severity: 'success'
-      });
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    } finally {
-      setShowDeleteConfirmBox({ open: false, loading: false, steps: [] });
-      fetchServiceData();
-    }
-  };
-
   const fetchServiceData = async () => {
+    setSelectedSteps([]);
+
     const serviceDetailResponse = await axiosInstance().get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`);
     var serviceDetail = serviceDetailResponse?.data?.data;
     serviceDetail.steps = serviceDetail?.steps?.sort((a, b) => a?.order - b?.order);
@@ -272,6 +313,9 @@ const Steps = ({
     } else {
       serviceDetail.steps?.forEach((ele) => {
         ele.isAllowToPerform = true;
+        ele.isAllowToCheck = stepSubmitedData?.find(
+          (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === ele?._id
+        ) ? false : true;
       });
     }
 
@@ -614,7 +658,7 @@ const Steps = ({
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-      });
+      })
   };
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -628,16 +672,97 @@ const Steps = ({
     setSelectedStep(null);
   };
 
+  const isAllChecked = (): boolean => {
+    return selectedSteps.length === serviceDetails?.steps?.filter((e) => e?.isAllowToCheck).length
+      && selectedSteps.length > 0 ? true : false;
+  };
+
+  const checkAll = (): void => {
+    if (isAllChecked()) {
+      setSelectedSteps([]);
+    } else {
+      const stepsToSelect = serviceDetails?.steps?.filter((e) => e?.isAllowToCheck).map((i) => i._id);
+      setSelectedSteps(stepsToSelect);
+    }
+  };
+
+
+  const completeAllSteps = async () => {
+    setIsCompleteAllLoading(true);
+    const payload = {
+      stepids: selectedSteps,
+      uniqueId: selectedService?.uniqueId,
+      serviceId: selectedService?._id
+    };
+    axiosInstance().put(`${workOrder.api}/${workOrderId}/multiple-step-complete`, payload)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchService();
+        fetchServiceData();
+        setSelectedSteps([]);
+        setIsCompleteAllLoading(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const deleteSteps = () => {
+    setShowDeleteConfirmBox((prev) => ({ ...prev, loading: true }));
+    const payload = {
+      serviceUniqueId: selectedService?.uniqueId,
+      steps: showDeleteConfirmBox.steps.map((item) => item._id)
+    };
+    axiosInstance().put(`${workOrder.api}/${workOrderId}/step/remove`, payload)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowDeleteConfirmBox({ open: false, loading: false, steps: [] });
+        fetchServiceData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+
   return serviceDetails ? (
     serviceDetails?.steps?.length ? (
       <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }}>
-        <Box
-          p={2}
-          className="d-flex flex-wrap align-center"
-          height={serviceDetails?.steps?.length ? 'auto' : 500}
-          style={{ gap: '16px', justifyContent: 'flex-end' }}
-        >
-          <Box textAlign="center">
+        <div className="flex justify-between items-center gap-[8px] p-[8px] flex-wrap">
+          <div className="flex items-center gap-[15px] flex-wrap pl-2">
+            {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) &&
+              <>
+                <label htmlFor="select-all" className={`cursor-pointer`}>
+                  <Checkbox
+                    id="select-all"
+                    color="primary"
+                    checked={isAllChecked()}
+                    onChange={() => checkAll()} />
+                  <span className="font-medium select-none">Select All</span>
+                </label>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  disabled={selectedSteps.length ? false : true}
+                  onClick={completeAllSteps}
+                >
+                  Complete
+                  {isCompleteAllLoading ?
+                    <CircularProgress size={20} className="ml-[8px]" /> : `(${isAllChecked() ? 'All' : selectedSteps.length})`}
+                </Button>
+              </>
+            }
+          </div>
+          <div className={`d-flex flex-wrap align-center justify-end gap-[8px] ml-auto ${serviceDetails?.steps?.length ? 'h-auto' : 'h-[500]'}`}>
             {referencType !== 'workOrderTechnician' && (
               <Button
                 variant="outlined"
@@ -655,22 +780,22 @@ const Steps = ({
                 Add Steps
               </Button>
             )}
-          </Box>
-          {serviceDetails?.steps?.length > 0 && referencType !== 'workOrderTechnician' && (
-            <Box>
-              <Grid container justifyContent="flex-end" alignItems="flex-end">
-                <Button variant="outlined" color="primary" size="small"
-                  disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                    selectedService?.status
-                  )}
-                  onClick={() => setArrangeView(true)}>
-                  <GrDrag fontSize="small" color="primary" className="mr-1" />
-                  Arrange
-                </Button>
-              </Grid>
-            </Box>
-          )}
-        </Box>
+            {serviceDetails?.steps?.length > 0 && referencType !== 'workOrderTechnician' && (
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                  selectedService?.status
+                )}
+                onClick={() => setArrangeView(true)}
+              >
+                <GrDrag fontSize="small" color="primary" className="mr-1" />
+                Arrange
+              </Button>
+            )}
+          </div>
+        </div>
         <div className={classes.root}>
           {serviceDetails?.steps?.map((step, index) => {
             const { stepData, isStepValid } = getFields(step);
@@ -689,20 +814,37 @@ const Steps = ({
                 borderColor={'var(--common-border-color)'}
                 style={{
                   cursor: !stepData?.status ? 'default' : 'pointer',
-                  transition: 'background .5s ease',
+                  transition: 'all .5s ease',
                   backgroundColor: selectedStep?._id === step._id && fieldDialog ? '#ecfdf7' : ''
                 }}
                 className={`${classes.accordionHeading}  ${classes.white}`}
               >
                 <Box sx={{ display: 'flex', flexWrap: 'wrap' }} gridGap={'8px'}>
+                  {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) &&
+                    <Checkbox
+                      name={`checkbox_${step._id}`}
+                      color={"primary"}
+                      disabled={step?.isAllowToCheck ? false : true}
+                      className={`${!step?.isAllowToCheck ? 'opacity-0' : ''}`}
+                      checked={selectedSteps.find((e) => e === step._id) ? true : false}
+                      onChange={() => {
+                        if (selectedSteps.find((e) => e === step._id)) {
+                          setSelectedSteps(selectedSteps.filter((e) => e !== step._id));
+                        } else {
+                          setSelectedSteps([...selectedSteps, step._id]);
+                        }
+                      }}
+                    />
+                  }
                   <Box
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       flexWrap: 'wrap',
-                      flexBasis: 'calc(100% - 105px)'
+                      flexBasis: 'calc(100% - 155px)'
                     }}
+                    className="mr-auto"
                     gridGap={'8px'}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center' }} gridGap={'8px'}>
@@ -1169,7 +1311,7 @@ const Steps = ({
             }}
             okBtnLoading={showDeleteConfirmBox.loading}
             onOk={() => {
-              delteSteps();
+              deleteSteps();
             }}
           />
         )}

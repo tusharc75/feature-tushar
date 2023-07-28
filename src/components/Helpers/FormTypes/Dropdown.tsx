@@ -25,6 +25,7 @@ import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 import { camelCase, has, isEmpty } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
+import axiosInstance from 'src/axios/axiosInstance';
 
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
   const lookupDependentOn = fieldData?.lookupDependentOn;
@@ -85,6 +86,27 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
     }
   }
 
+  if (values[fieldData?.fieldName]) {
+    if (Array.isArray(values[fieldData?.fieldName])) {
+      values[fieldData?.fieldName]?.forEach((ele) => {
+        if (!optionsToShow?.find((e) => e.optionValue === ele)) {
+          const newAdd = options?.find((e) => e.optionValue === ele)
+          if (newAdd) {
+            optionsToShow.push(newAdd)
+          }
+        }
+      })
+    }
+    else {
+      if (!optionsToShow?.find((e) => e.optionValue === values[fieldData?.fieldName])) {
+        const newAdd = options?.find((e) => e.optionValue === values[fieldData?.fieldName])
+        if (newAdd) {
+          optionsToShow.push(newAdd)
+        }
+      }
+    }
+  }
+
   return optionsToShow;
 }
 
@@ -98,7 +120,6 @@ function Dropdown({
   onChange,
   label,
   name,
-  addFieldOption,
   setOptionsList,
   handleChange,
   getLabel,
@@ -113,6 +134,21 @@ function Dropdown({
   }: any = useData();
   const [lookupDialog, setLookupDialog] = React.useState(false);
   const { newAddressOptionList, setNewAddressOptionList } = React.useContext(NewAddressOptionList);
+
+  const addFieldOption = async (_id: null) => {
+    if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOnField && _id) {
+      const lookupResource = fields?.find((e) => e.fieldName === fieldData?.lookupDependentOn)?.lookupResource;
+      const data = {
+        lookupDependentOn: fieldData?.lookupDependentOn,
+        lookupDependentOnValue: values[fieldData?.lookupDependentOn] || '',
+        lookupDependentOnField: fieldData?.lookupDependentOnField,
+        lookupDependentOnFieldValue: _id,
+        resource: lookupResource
+      }
+      axiosInstance().put('/field/add-field-lookup', data)
+    }
+  }
+
   // const [extraOptions, setExtraOptions] = useState([]);
   // const [loading, setLoading] = useState(false);
   // const [inputValue, setInputValue] = useState('');
@@ -297,7 +333,7 @@ function Dropdown({
                   )}
                 />
               ) */}
-            { type === 'multiSelect' ? (
+            {type === 'multiSelect' ? (
               <Autocomplete
                 {...rest}
                 multiple
@@ -319,13 +355,13 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, value: any, reason) => {
-                        if (setFieldValue) {
-                          setFieldValue(
-                            name,
-                            value.map((val) => val.optionValue)
-                          );
-                        }
+                      if (setFieldValue) {
+                        setFieldValue(
+                          name,
+                          value.map((val) => val.optionValue)
+                        );
                       }
+                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -357,26 +393,26 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, val) => {
-                        if (setFieldValue) {
-                          handleChange(name, val && val.optionValue ? val.optionValue : '');
-                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                          fieldChange?.forEach((val: any) => {
-                            setFieldValue(val.fieldName, val.value);
-                          });
-                          const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                          if (filterFields?.length) {
-                            filterFields?.forEach((ele: any) => {
-                              if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
-                                if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
-                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
-                                } else {
-                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
-                                }
+                      if (setFieldValue) {
+                        handleChange(name, val && val.optionValue ? val.optionValue : '');
+                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                        fieldChange?.forEach((val: any) => {
+                          setFieldValue(val.fieldName, val.value);
+                        });
+                        const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                        if (filterFields?.length) {
+                          filterFields?.forEach((ele: any) => {
+                            if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
+                              if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
+                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+                              } else {
+                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
                               }
-                            });
-                          }
+                            }
+                          });
                         }
                       }
+                    }
                 }
                 selectOnFocus
                 clearOnBlur
@@ -430,7 +466,6 @@ function Dropdown({
                       };
                       return tempNewOption;
                     });
-                    addFieldOption([...tempOptions]);
                     setOptionsList([...tempOptions, ...option]);
                     if (type === 'multiSelect') {
                       handleChange(name, tempOptions?.length ? [...tempOptions?.map((item: any) => item?.optionValue || ''), ...values[name]] : []);
@@ -474,7 +509,6 @@ function Dropdown({
                             order: option.length,
                             customerAccount: data?.customerAccount
                           };
-                          addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
                           if (fieldData.lookupDependentOn) {
                             if (
@@ -528,7 +562,6 @@ function Dropdown({
                             customerAccount: data?.customerAccount,
                             address: data?.address
                           };
-                          addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
                           if (fieldData.lookupDependentOn) {
                             if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
@@ -596,7 +629,6 @@ function Dropdown({
                             optionValue: data._id,
                             order: option.length
                           };
-                          addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
                           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                         }
@@ -636,7 +668,6 @@ function Dropdown({
                             order: option.length,
                             warehouse: data.warehouse
                           };
-                          addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
                           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                         }
@@ -674,7 +705,6 @@ function Dropdown({
                             optionValue: data._id,
                             order: option.length
                           };
-                          addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
                           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                         }
@@ -713,7 +743,6 @@ function Dropdown({
                             order: option.length,
                             competencyType: data.competencyType
                           };
-                          addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
                           if (fieldData.lookupDependentOn) {
                             if (data[fieldData.lookupDependentOn] === values[fieldData.lookupDependentOn]) {
@@ -764,7 +793,6 @@ function Dropdown({
                             optionValue: data._id,
                             order: option.length
                           };
-                          addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
                           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                         }
@@ -804,7 +832,6 @@ function Dropdown({
                           optionValue: data._id,
                           order: option.length
                         };
-                        addFieldOption(tempNewOption);
                         setOptionsList([tempNewOption, ...option]);
                         handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                       }
@@ -847,7 +874,6 @@ function Dropdown({
                             order: option.length,
                             [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
                           };
-                          addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
                           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                         }
@@ -892,7 +918,6 @@ function Dropdown({
                             order: option.length,
                             [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
                           };
-                          addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
                           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                         }
@@ -930,7 +955,7 @@ function Dropdown({
                               [fieldData.lookupDependentOn]: values[fieldData?.lookupDependentOn] || ''
                             })
                           };
-                          addFieldOption(tempNewOption);
+                          addFieldOption(data?._id)
                           setOptionsList([tempNewOption, ...option]);
                           setNewAddressOptionList([...newAddressOptionList, tempNewOption]);
                           if (type === 'multiSelect') {
@@ -978,7 +1003,6 @@ function Dropdown({
                               [fieldData.lookupDependentOn]: data?.parentMarketSegment || values[fieldData?.lookupDependentOn] || ''
                             })
                           };
-                          addFieldOption(tempNewOption);
                           setOptionsList([tempNewOption, ...option]);
                           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
                         }

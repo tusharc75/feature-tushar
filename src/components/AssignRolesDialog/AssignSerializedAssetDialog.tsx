@@ -101,7 +101,6 @@ const AssignSerializedAssetDialog = ({
       }
       queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterByIdType=or`;
     }
-
     axiosInstance()
       .get(`${serializedAsset.api}${queryString}`)
       .then(({ data }) => {
@@ -144,6 +143,9 @@ const AssignSerializedAssetDialog = ({
       }
       if (referenceData?.warehouse) {
         deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
+      if (referenceData.product) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: 'product', term: referenceData.product }])}&filterByIdType=or`;
       }
     }
     if (reference === 'planning') {

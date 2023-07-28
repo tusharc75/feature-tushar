@@ -213,9 +213,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const AssetRenderer = (params) =>
     params.value ? (
       <Fragment>
-        <Link className="link cursor-pointer" to={`${routes.serializedAssetDetail.path}/${params.data._id}`}>
-          <p title={params.value}>{params.value}</p>
-        </Link>
+        <p className="link cursor-pointer" title={params.value} onClick={() => window.open(`${routes.serializedAssetDetail.path}/${params.data._id}`)}>
+          {params.value}
+        </p>
         {params?.data?.isReplaced && (
           <Box ml={1}>
             <HtmlTooltip title={`Replaced Asset ${params?.data?.replaceAsset} Reason-${params?.data?.replaceReason}`}>
@@ -230,18 +230,18 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   const TicketRenderer = (params) =>
     params.value ? (
-      <Link className="link cursor-pointer" to={`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`}>
-        <p title={params.value}>{params.value}</p>
-      </Link>
+      <p title={params.value} className="link cursor-pointer" onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`)}>
+        {params.value}
+      </p>
     ) : (
       <NoDataCell />
     );
 
   const ProductRenderer = (params) =>
     params.value ? (
-      <Link className="link cursor-pointer" to={`${routes.productDetail.path}/${params.data.productId}`}>
-        <p title={params.value}>{params.value}</p>
-      </Link>
+      <p className="link cursor-pointer" title={params.value} onClick={() => window.open(`${routes.productDetail.path}/${params.data.productId}`)}>
+        {params.value}
+      </p>
     ) : (
       <NoDataCell />
     );
@@ -403,6 +403,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                       if (transferAssetData?.transferType === 'Internal') {
                         data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
                         data['deliveryTo'] = transferAssetData?.transfertoPlant?.optionValue;
+                        data['deliveryToLabel'] = transferAssetData?.transfertoPlant?.optionLabel;
                         data['deliveryToAddress'] = transferAssetData?.plantShipTo?.optionValue;
                         data['status'] = DELIVERY_TICKET_STATUS.indTransit;
                       } else if (transferAssetData?.transferType === 'External Customer') {

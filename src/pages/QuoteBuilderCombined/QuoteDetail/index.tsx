@@ -67,28 +67,7 @@ import { MdLibraryAdd } from 'react-icons/md';
 import { IoArrowDownCircleSharp } from 'react-icons/all';
 import contactClass from '../../Contact/contact.module.scss';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-      {children}
-    </div>
-  );
-}
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const useStyles = makeStyles((theme) => ({
   reasonDialog: {
@@ -886,79 +865,14 @@ export default function QuoteDetail() {
       </Box>
 
       <Box className={`detail-container-v1`}>
-        {/* {!quoteData ? (
-          <div>
-            <Skeleton variant="text" width="150px" height="40px" />
-            <Box display="flex">
-              <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-              <Box marginX={1} />
-              <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-            </Box>
-          </div>
-        ) : (
-          <DetailsPageHeader
-            heading={getHeading}
-            logo={quoteData?.leadLogo ? quoteData.leadLogo : undefined}
-            mainPoints={quoteData ? getMainPoints : ''}
-            showHeading={true}
-          ></DetailsPageHeader>
-        )} */}
-
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          {/* <Tab
-                        className={"tabLayout"}
-                      style={{
-                        background: tabValue === 0 ? "white" : "",
-                        color: tabValue === 0 ? "blue" : "#163340",
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font ">
-                          <InfoIcon className="mr-1" fontSize="inherit" /> All
-                          Version Status
-                        </div>
-                      }
-                      {...a11yProps(0)}
-                    /> */}
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Quote Versions
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-        </Tabs>
-
-        {/* <TabPanel value={tabValue} index={0}>
-                    {(quoteData && <AllVersionStatus
-                      quoteId={id}
-                      quoteData={quoteData}
-                      quotePermissions={permissions[qbResource]}
-                      fetchQuoteData={fetchQuoteData}
-                      handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
-                      handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
-                    />)}
-                  </TabPanel> */}
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab index={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+          <CustomTab index={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Quote Versions
+          </CustomTab>
+        </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
           <>

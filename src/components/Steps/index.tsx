@@ -12,7 +12,7 @@ const STEP_GAP = 15;
 
 const Steps = ({
   nextStep,
-  isNextStep,
+  isNextStep = false,
   steps,
   currentStep,
   setCurrentStep,
@@ -20,9 +20,11 @@ const Steps = ({
   setStepFullScreen = null,
   updateStatus = null,
   isPrevStep = true,
+  isNextStepEnabled = true,
   handleNext = null,
   handlePrev = null,
   className = '',
+  showExtraStep = false,
   ...others
 }) => {
   let activeStep = currentStep;
@@ -75,6 +77,11 @@ const Steps = ({
     }
   };
 
+  const isNextButtonDisabled = React.useMemo(() => {
+    if (showExtraStep) return currentStep === steps.length || !nextStep || !isNextStepEnabled;
+    return currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || !isNextStepEnabled;
+  }, [currentStep, steps.length, showExtraStep, nextStep, isNextStep]);
+
   return (
     <div>
       {isMobile && !isTablet ? (
@@ -85,7 +92,7 @@ const Steps = ({
               size="small"
               variant="text"
               color="primary"
-              disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep}
+              disabled={isNextButtonDisabled}
               endIcon={<AiOutlineRight />}
               className="ml-1 MobileStep-next-back-button"
               onClick={goNext}
@@ -160,7 +167,7 @@ const Steps = ({
                         } as React.CSSProperties
                       }
                     >
-                      <Icon colors={['#fff', '#ffff']} />
+                      <Icon colors={['#fff', '#ffff']} style={{ color: '#fff' }} />
                     </Box>
                     <Typography className={styles.label}>{step.title}</Typography>
                     {!isStepEnded && setStepFullScreen && currentStep === i && (
@@ -176,11 +183,12 @@ const Steps = ({
                 );
               })}
             </div>
+
             {!isStepEnded && (
               <Box className={styles.iconButton}>
                 <IconButton
-                  style={{ opacity: currentStep === steps.length - 1 && '0' }}
-                  disabled={currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep}
+                  style={{ opacity: showExtraStep ? currentStep - 1 === steps.length && '0' : currentStep === steps.length - 1 && '0' }}
+                  disabled={isNextButtonDisabled}
                   onClick={goNext}
                 >
                   <RightIcon />

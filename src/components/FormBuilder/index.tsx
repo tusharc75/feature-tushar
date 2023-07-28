@@ -53,6 +53,7 @@ export const FormBuilder = ({
   resource,
   onAddRemoveField = null
 }) => {
+  
   const addSection = (sectionHoverIndex) => {
     let data = [...section];
     if (onAddRemoveField) onAddRemoveField();
@@ -107,6 +108,8 @@ export const FormBuilder = ({
         <Grid container spacing={1}>
           <Grid item xs={12} md={3} sm={4}>
             <Box border={1} p={2} borderColor="var(--common-border-color)" className={styles.set_gridbox_layout}>
+              <DragBox name="New Section" label="New Section" type="master"></DragBox>
+              <Box pt={1} pb={1}> </Box>
               <Grid container spacing={1} className={styles.form_grid_box}>
                 {Object.keys(FieldList).map((type, index) => {
                   return !filterFieldType.includes(type) ? (
@@ -114,10 +117,6 @@ export const FormBuilder = ({
                   ) : null;
                 })}
               </Grid>
-              <Box>
-                <Divider />
-              </Box>
-              <DragBox name="New Section" label="New Section" type="master"></DragBox>
               {isCustomField && (
                 <Box>
                   <CustomField />

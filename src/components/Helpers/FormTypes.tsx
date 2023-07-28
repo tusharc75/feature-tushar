@@ -564,7 +564,7 @@ const FormTypes = (props) => {
       setValues({ ...values, ...result });
     } else {
       for (var x in result) {
-        setFieldValue([x], result[x]);
+        setFieldValue(x, result[x]);
       }
     }
     //setFieldValue(name, value);
@@ -962,7 +962,6 @@ const FormTypes = (props) => {
           onChange={onChange}
           label={label}
           name={name}
-          addFieldOption={addFieldOption}
           setOptionsList={(data) => {
             setOptionsList(data);
             const tempallFields = [...allFields];

@@ -14,7 +14,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { ACTIVITY_RESOURCE, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
 import TabPanel from '../../components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
 import AddCost from './AddCost';
@@ -24,9 +24,10 @@ import Steps, { getIndex } from 'src/components/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Material from './material';
 import { camelCase, set } from 'lodash';
-import Invoice from './Invoice';
+import Submit from './Submit';
 
 const FieldTicketDetail = () => {
+
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -48,6 +49,7 @@ const FieldTicketDetail = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [nextStep, setNextStep] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -88,6 +90,7 @@ const FieldTicketDetail = () => {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);
+      setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -154,7 +157,7 @@ const FieldTicketDetail = () => {
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
-            {permissions?.fieldTicket?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            {permissions?.fieldTicket?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton referenceId={fieldTicketData?._id} resource={ACTIVITY_RESOURCE.fieldTicket} />
           </Box>
         </Box>
@@ -210,8 +213,9 @@ const FieldTicketDetail = () => {
             steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={false}
-            setStepFullScreen={() => setStepFullScreen(true)}
+            isStepEnded={false
+              // fieldTicketData?.status === FIELD_TICKET_STATUS.submitted
+            }
           />
           <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && (
@@ -225,10 +229,21 @@ const FieldTicketDetail = () => {
               />
             )}
             {currentStep === 1 && (
-              <AddCost fieldTicketData={fieldTicketData} id={id} setNextStep={setNextStep} />
+              <AddCost
+                fieldTicketData={fieldTicketData}
+                id={id}
+                renderedFrom={`${renderedFrom}_grid-2`}
+                setNextStep={setNextStep} />
             )}
             {currentStep === 2 && (
-              <Invoice id={id} fieldTicketData={fieldTicketData} renderedFrom={renderedFrom} />
+              <Submit
+                stepFullScreen={stepFullScreen}
+                fieldTicketData={fieldTicketData}
+                id={id}
+                renderedFrom={`${renderedFrom}_grid-3`}
+                allowedToEdit={allowedToEdit}
+                fetchData={fetchData}
+              />
             )}
           </ContentFullScreen>
         </TabPanel>

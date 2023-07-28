@@ -17,6 +17,9 @@ export default forwardRef((props: any, ref) => {
         } else {
           inputRef.current.value = parentModel.filter + '';
           setCurrentValue(parentModel.filter);
+          setTimeout(() => {
+            inputRef.current.firstChild.lastChild.focus();
+          }, 2000);
         }
       }
     };

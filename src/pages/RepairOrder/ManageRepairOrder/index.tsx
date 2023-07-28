@@ -197,7 +197,7 @@ const ManageRepairOrder = ({
 
   function validate(values) {
     const errors = {};
-    if (values?.type === REPAIR_ORDER_TYPE.external && !values?.customerAccount) {
+    if ((values?.type === REPAIR_ORDER_TYPE.external || values?.addQuotationStep) && !values?.customerAccount) {
       errors['customerAccount'] = 'Customer Account is required';
     }
     return errors;
@@ -343,7 +343,9 @@ const ManageRepairOrder = ({
                                         values={values}
                                         errors={errors}
                                         touched={touched}
-                                        required={field?.fieldName === 'customerAccount' ? values?.type === REPAIR_ORDER_TYPE.external ? true : false : field.required}
+                                        required={field?.fieldName === 'customerAccount' ?
+                                          values?.type === REPAIR_ORDER_TYPE.external
+                                            || values?.addQuotationStep ? true : false : field.required}
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}

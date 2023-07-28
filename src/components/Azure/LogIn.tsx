@@ -1,10 +1,12 @@
 import React from 'react';
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react';
 import { SiMicrosoftoffice } from 'react-icons/si';
 import { OfficeLogo } from 'src/assets/authenticationAssets';
 import axios from 'axios';
+import SSOLoginButton from 'src/pages/Auth/Buttons/SSOLoginButton';
+import { backendApi } from 'src/config';
 
 const LogIn = () => {
   const { instance, accounts } = useMsal();
@@ -13,7 +15,6 @@ const LogIn = () => {
     try {
       await instance.loginPopup();
     } catch (e) {
-      console.log(e)
     }
   };
   return (
@@ -28,6 +29,8 @@ const LogIn = () => {
         <Button startIcon={<OfficeLogo color="#FF5722" />} fullWidth className="azure-login" variant="outlined" onClick={azureLogin}>
           Office 365 Login
         </Button>
+        <Box mt={2} />
+        <SSOLoginButton />
       </UnauthenticatedTemplate>
     </>
   );

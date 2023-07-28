@@ -96,8 +96,8 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
 
   const handleRequest = (values) => {
     const data: any = {
-      referenceType:RESOURCE_LABEL.workOrder,
-      referenceId:workOrderId
+      referenceType: RESOURCE_LABEL.workOrder,
+      referenceId: workOrderId
     };
     const products: any = [];
     values?.products?.forEach((e) => {
@@ -139,13 +139,13 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
             errors.storageLocation = 'Storage Location is required';
           }
         }
-        if (!consumeRequest) {
-          let tempProduct = selectedRecords.find((u) => u._id === d._id);
-          let qty = tempProduct.qty - ((tempProduct?.consumedQty || 0) + (tempProduct?.requestedQty || 0));
-          if (tempProduct && d.consumedQty > qty) {
-            errors.consumedQty = `Consume Qty is limited to Qty.`;
-          }
-        }
+        // if (!consumeRequest) {
+        //   let tempProduct = selectedRecords.find((u) => u._id === d._id);
+        //   let qty = tempProduct.qty - ((tempProduct?.consumedQty || 0) + (tempProduct?.requestedQty || 0));
+        //   if (tempProduct && d.consumedQty > qty) {
+        //     errors.consumedQty = `Consume Qty is limited to Qty.`;
+        //   }
+        // }
       });
     }
     return errors;
