@@ -213,7 +213,7 @@ const WorkOrderDetails = () => {
           <CustomBreadCrumbs routes={[routes.workOrder, { title: workOrderData?.workOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-v1">
+          <Box className="control-buttons-v1 items-center">
             {workOrderData ? (
               <>
                 {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
@@ -225,7 +225,7 @@ const WorkOrderDetails = () => {
                   allowedToEdit &&
                   workOrderData?.canComplete &&
                   workOrderData?.status !== WORK_ORDER_STATUS.completed && (
-                    <div className="relative isolate">
+                    <div className="relative isolate ">
                       <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">
                         <span></span>
                         <span></span>
