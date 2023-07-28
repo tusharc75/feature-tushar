@@ -1116,12 +1116,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         />
                         <Box display="block">
                           <TextField
-                            inputRef={inputRef}
                             variant="outlined"
                             type="text"
                             label="System Generated Prefix"
-                            required={true}
-                            multiline={fieldData.type === 'multiLine'}
                             name="systemGeneratedPrefix"
                             rows={4}
                             fullWidth
@@ -1131,9 +1128,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             helperText={touched['systemGeneratedPrefix'] && errors['systemGeneratedPrefix']}
                             onChange={(e) => {
                               setFieldValue('systemGeneratedPrefix', e.target.value.trimStart());
-                            }}
-                            onKeyPress={(event) => {
-                              event.stopPropagation();
                             }}
                           />
                         </Box></>
