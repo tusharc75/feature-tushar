@@ -757,7 +757,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                 style={{ color: 'red', marginTop: '3px' }}
                                                 aria-label="delete"
                                                 disabled={
-                                                  !allowedToEdit || data?.status === WORKORDER_SERVICE_STATUS.pending ? false : true
+                                                  allowedToEdit && data?.status === WORKORDER_SERVICE_STATUS.pending ? false : true
                                                 }
                                                 onClick={() => setShowConfirmBox(true)}
                                               >

@@ -732,9 +732,6 @@ const Steps = ({
       });
   };
 
-  const isSelectAllCheckboxDisabled = React.useMemo(() => {
-    return serviceDetails?.steps?.filter((e) => e?.isAllowToCheck).map((i) => i._id).length === 0;
-  }, [selectedServiceRef.current, serviceDetails?._id]);
 
   return serviceDetails ? (
     serviceDetails?.steps?.length ? (
@@ -747,7 +744,6 @@ const Steps = ({
                   <Checkbox
                     id="select-all"
                     color="primary"
-                    disabled={isSelectAllCheckboxDisabled}
                     checked={isAllChecked()}
                     onChange={() => checkAll()} />
                   <span className="font-medium select-none">Select All</span>
