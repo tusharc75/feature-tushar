@@ -22,7 +22,7 @@ import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import { MdAssignmentTurnedIn } from 'react-icons/md';
-
+import EditIcon from '@material-ui/icons/Edit';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({
@@ -104,10 +104,7 @@ const WorkOrder = ({
             {row.original.type === 'service' ? (
               <p
                 onClick={() => {
-                  setUpdateDialog({
-                    open: true,
-                    data: row.original
-                  });
+                  openMaterial(row);
                 }}
                 className="link text-truncate"
                 title={row.original?.detail}
@@ -319,12 +316,33 @@ const WorkOrder = ({
                 </IconButton>
               </HtmlTooltip>
             )}
+             {row?.original?.type === 'service' && (
+               <HtmlTooltip title="Edit">
+               <IconButton
+                 color="primary"
+                 size="small"
+                 aria-label="Edit"
+                 onClick={() => {
+                   openMaterial(row);
+                 }}
+               >
+                 <EditIcon color="primary" />
+               </IconButton>
+             </HtmlTooltip>
+            )}
           </>
         );
       }
     });
     setColumns(coloum);
   };
+
+  const openMaterial = (row) => {
+    setUpdateDialog({
+      open: true,
+      data: row.original
+    });
+  }
 
   const handleWorkOrderDelete = (ids) => {
     axiosInstance()

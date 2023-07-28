@@ -24,6 +24,8 @@ import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SendEmail from 'src/pages/Quotation/SendEmail';
 import PreviewDownload from 'src/components/PreviewDownload';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Quotation = ({
   repairOrderData,
@@ -221,6 +223,35 @@ const Quotation = ({
       newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
     column = [...column, ...newColumns];
+    column.push({
+      accessor: 'action',
+      Header: 'Actions',
+      width: permissions?.irtTicket?.isCreate ? 150 : 100,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row, rows }) => {
+        return  (
+          <>
+          {allowedToEdit && (
+            <HtmlTooltip title="Edit">
+            <IconButton
+              color="primary"
+              size="small"
+              aria-label="Edit"
+              onClick={() => {
+                handleOpen(row.original);
+              }}
+            >
+              <EditIcon color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+          )}
+          </>
+        ) 
+      }
+    });
+
     setColumns(column);
     setAllColumn(column.map((d) => d.Header));
   };
