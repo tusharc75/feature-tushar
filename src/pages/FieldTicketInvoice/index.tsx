@@ -387,7 +387,7 @@ const FieldTicketInvoice = () => {
                         </Grid>
                     ) : (
                         <Box style={{ minHeight: 'calc(100vh - 349px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            <Typography>No Request Pending !</Typography>
+                            <Typography>No Field Ticket Pending !</Typography>
                         </Box>
                     )
                 ) : <Box p={2} height={500}>
