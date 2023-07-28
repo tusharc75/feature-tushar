@@ -3817,6 +3817,42 @@ body {
   }
 }
 
+.custom-filter {
+  .filter-chip {
+    font-weight: 500;
+    border: 1px solid var(--new_theme_secondary_border_color);
+    font-size: 12px !important;
+    line-height: 14px !important;
+    color: #2a3042 !important;
+    padding: 8px 3px !important;
+    background-color: var(--new_theme_secondary_color) !important;
+    border-radius: 3.09998px !important;
+    svg {
+      color: #2a3042 !important;
+    }
+  }
+
+  .chip-group {
+    display: flex;
+    max-width: 700px;
+    overflow: hidden;
+    flex-grow: 1;
+    & > div {
+      margin-left: 8px;
+      &:first-of-type {
+        margin-left: 0;
+      }
+    }
+  }
+  .chip-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    position: relative;
+  }
+}
+
 @mixin ripple($duration, $delay) {
   opacity: 0;
   display: flex;
