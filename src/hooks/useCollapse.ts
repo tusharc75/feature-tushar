@@ -63,7 +63,7 @@ const useCollapse = ({ minHeight = 'auto', collapsed = false, childClassName, is
         expandSection(containerRef.current);
       }
     }
-  }, [collapsed]);
+  }, [collapsed, iscollapsible]);
 
   return containerRef;
 };
