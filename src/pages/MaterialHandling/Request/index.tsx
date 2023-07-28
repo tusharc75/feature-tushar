@@ -19,7 +19,7 @@ import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
 import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
 
-const Request = ({ workOrder,referenceType }) => {
+const Request = ({ workOrder, referenceType }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
@@ -43,7 +43,7 @@ const Request = ({ workOrder,referenceType }) => {
   const handleUpdateStatus = (status, ids, comment) => {
     setLoading(true);
     axiosInstance()
-      .put(`/material-handling/status`, { status, ids, comment,referenceType,referenceId:workOrder })
+      .put(`/material-handling/status`, { status, ids, comment, referenceType, referenceId: workOrder })
       .then(({ data }) => {
         setLoading(false);
         toastConfig.setToastConfig({
@@ -63,7 +63,7 @@ const Request = ({ workOrder,referenceType }) => {
   const fetchData = () => {
     setRowsData(null);
     axiosInstance()
-      .get(`/material-handling/request/${workOrder}/${referenceType?.replace(' ','-')}`)
+      .get(`/material-handling/request/${workOrder}/${referenceType?.replace(' ', '-')}`)
       .then(({ data: { data } }) => {
         data?.forEach((e) => {
           e.productName = e.product?.optionLabel;
@@ -319,11 +319,13 @@ const Request = ({ workOrder,referenceType }) => {
         {rowsData && accessor ? (
           <Box zIndex={5} width={'100%'} height={'calc(100vh - 290px)'}>
             <CustomTableWithCard
+              // collapsible={true}
               data={rowsData}
               accessor={accessor}
               uniqueKey={(data) => data._id}
               onSelect={setSelectedRecords}
               checkBox={true}
+              showSelectAll={true}
               height={'calc(100vh - 290px)'}
             />
           </Box>

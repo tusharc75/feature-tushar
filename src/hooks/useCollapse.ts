@@ -4,10 +4,11 @@ interface CollapseProps {
   minHeight?: number | 'auto';
   collapsed?: boolean;
   childClassName: string;
+  iscollapsible?: boolean;
 }
 type CollpasebleElement = HTMLDivElement;
 
-const useCollapse = ({ minHeight = 'auto', collapsed = false, childClassName }: CollapseProps) => {
+const useCollapse = ({ minHeight = 'auto', collapsed = false, childClassName, iscollapsible = true }: CollapseProps) => {
   const containerRef = React.useRef<CollpasebleElement>(null);
   const [firstElementHeight, setFirstElementHeight] = React.useState<number>(61);
 
@@ -53,14 +54,16 @@ const useCollapse = ({ minHeight = 'auto', collapsed = false, childClassName }: 
   };
 
   React.useLayoutEffect(() => {
-    if (containerRef.current) getFirstElementHeight(containerRef.current);
-    if (collapsed && containerRef.current) {
-      collapseSection(containerRef.current);
+    if (iscollapsible) {
+      if (containerRef.current) getFirstElementHeight(containerRef.current);
+      if (collapsed && containerRef.current) {
+        collapseSection(containerRef.current);
+      }
+      if (!collapsed && containerRef.current) {
+        expandSection(containerRef.current);
+      }
     }
-    if (!collapsed && containerRef.current) {
-      expandSection(containerRef.current);
-    }
-  }, [collapsed]);
+  }, [collapsed, iscollapsible]);
 
   return containerRef;
 };
