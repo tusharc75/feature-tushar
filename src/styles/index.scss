@@ -64,7 +64,7 @@
   --flow-inActive: #ebebeb;
   --flow-currentStep: #fff;
   --flow-active: #c8e9ce;
-  --ripple-color: rgba(14, 14, 35, 0.4);
+  --ripple-color: green;
 }
 
 // Dark Theme
@@ -3851,21 +3851,30 @@ body {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  &::after {
-    @include ripple(var(--ripple-animation-duration, 2s), 0s);
+  &::before {
+    @include ripple(var(--ripple-animation-duration, 3s), 0s);
   }
-  span:first-of-type {
-    @include ripple(var(--ripple-animation-duration, 2s), 0.3s);
+  @for $i from 1 through 3 {
+    span:nth-child(#{$i}) {
+      @include ripple(var(--ripple-animation-duration, 3s), #{$i}s);
+    }
   }
 }
 
 @keyframes ripple {
-  from {
+  0% {
     opacity: 1;
     transform: scale3d(0.75, 0.75, 1);
   }
-
-  to {
+  // 1% {
+  //   opacity: 0.99;
+  //   transform: scale3d(1, 1, 1);
+  // }
+  // 80% {
+  //   opacity: 0.2;
+  //   transform: scale3d(1.32, 1.32, 1);
+  // }
+  100% {
     opacity: 0;
     transform: scale3d(1.4, 1.4, 1);
   }

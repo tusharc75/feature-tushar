@@ -24,6 +24,7 @@ import { FaWpforms } from 'react-icons/fa';
 import { RiFlowChart } from 'react-icons/ri';
 import PreviewDownload from 'src/components/PreviewDownload';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -225,15 +226,20 @@ const WorkOrderDetails = () => {
                   workOrderData?.canComplete &&
                   workOrderData?.status !== WORK_ORDER_STATUS.completed && (
                     <div className="relative isolate">
-                      <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">{/* <span></span> */}</span>
-                      <Button
-                        variant={'contained'}
-                        size="small"
-                        onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
-                        className={'btn-outline-v1 '}
-                      >
-                        Close
-                      </Button>
+                      <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">
+                        <span></span>
+                        <span></span>
+                      </span>
+                      <HtmlTooltip title="Complete Work Order" placement="top" arrow>
+                        <Button
+                          variant={'contained'}
+                          size="small"
+                          onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
+                          className={'btn-outline-v1 '}
+                        >
+                          Close
+                        </Button>
+                      </HtmlTooltip>
                     </div>
                   )}
                 <PreviewDownload
