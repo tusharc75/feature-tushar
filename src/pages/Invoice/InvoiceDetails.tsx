@@ -19,6 +19,7 @@ import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import Steps, { getIndex } from 'src/components/Steps';
 import Material from './Material';
+import AdditionalCost from './AdditionalCost';
 import Invoice from './Invoice';
 import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
@@ -101,7 +102,7 @@ const InvoiceDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${invoice.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -325,8 +326,14 @@ const InvoiceDetails = () => {
                 allowedToEdit={allowedToEdit && permissions?.invoice?.isUpdate ? true : false}
               />
             )}
-
             {currentStep === 1 && invoiceData && (
+              <AdditionalCost
+                invoiceData={invoiceData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-2`}
+              />
+            )}
+            {currentStep === 2 && invoiceData && (
               <Invoice
                 invoiceData={invoiceData}
                 setNextStep={setNextStep}

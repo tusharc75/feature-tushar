@@ -183,7 +183,7 @@ const ServiceMaster = (props: Props) => {
 
     columns.push({
       accessor: 'action',
-      Header: 'Action',
+      Header: 'Actions',
       width: 130,
       minWidth: 130,
       sticky: 'right',

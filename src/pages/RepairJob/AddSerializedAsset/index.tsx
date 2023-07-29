@@ -163,9 +163,9 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   };
 
   const AssetNumberRenderer = (params) => (
-    <Link to={`${routes.serializedAssetDetail.path}/${params.data._id}`} className="link cursor-pointer">
+    <p title={params.value} onClick={() => window.open(`${routes.serializedAssetDetail.path}/${params.data._id}`)} className="link cursor-pointer">
       {params.value}
-    </Link>
+    </p>
   );
 
   const ActionsRenderer = (params) => (

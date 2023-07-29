@@ -59,6 +59,7 @@ import ReturnTicketDialog from './ReturnTicketDialog';
 import Edit from '@material-ui/icons/Edit';
 import ChangeActualDateDialog from './ChangeActualDateDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -563,7 +564,7 @@ const ReceivingTicket = ({
               window.open(`${routes.repairJobDetail.path}/${params?.data?.repairJob}`)
             }}
           >
-            <OpenInNewIcon fontSize="small" color="primary" />
+            <MdHomeRepairService fontSize="20" color="#163340" />
           </IconButton>
         </HtmlTooltip>
       )}
@@ -575,7 +576,7 @@ const ReceivingTicket = ({
               window.open(`${routes.repairOrderDetail.path}/${params?.data?.repairOrder}`)
             }}
           >
-            <OpenInNewIcon fontSize="small" color="primary" />
+            <MdHandyman fontSize="20" color="#163340" />
           </IconButton>
         </HtmlTooltip>
       )}
@@ -1386,7 +1387,7 @@ const ReceivingTicket = ({
                 handelProcessTickets();
               }}
             >
-              Receive Products
+              Receive Items
             </MenuItem>
 
             <MenuItem

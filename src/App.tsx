@@ -224,6 +224,9 @@ import TrailerMaster from './pages/TrailerMaster';
 import TrailerMasterDetail from './pages/TrailerMaster/TrailerMasterDetail';
 import AssetsReceiving from './pages/AssetsReceiving';
 import AssetsReceivingDetail from './pages/AssetsReceiving/AssetsReceivingDetail';
+import FieldTicketInvoice from './pages/FieldTicketInvoice';
+import AzureSSOError from './pages/Auth/AzureSSOError';
+import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
 
 var notificationInterval: any = null;
 
@@ -394,6 +397,16 @@ function App() {
               // exact
               path="/office365/login"
               render={({ location }) => conditionalRedirect(AzureLogin, location)}
+            />
+            <Route
+              // exact
+              path="/sso-login-error"
+              render={({ location }) => conditionalRedirect(AzureSSOError, location)}
+            />
+            <Route
+              // exact
+              path="/sso-login"
+              render={({ location }) => conditionalRedirect(AzureSSOLogin, location)}
             />
             <Route exact path="/create-password" render={({ location }) => conditionalRedirect(PasswordSetup, location)} />
             <Route exact path="/forget-password" render={({ location }) => conditionalRedirect(ForgetPassword, location)} />
@@ -584,7 +597,7 @@ function App() {
             <PrivateRoute exact path={routes.termsAndConditions.path}>
               <TermsAndConditions />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.termsAndConditionsDetails.path}/:id`}>
+            <PrivateRoute exact path={`${routes.termsAndConditionsDetail.path}/:id`}>
               <TermsAndConditionDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.priceTemplate.path}>
@@ -922,6 +935,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldTicketDetail.path}/:id`}>
               <FieldTicketDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldTicketInvoice.path}`}>
+              <FieldTicketInvoice />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldServiceTechnician.path}`}>
               <FieldServiceTechnician />

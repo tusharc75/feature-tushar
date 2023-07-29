@@ -33,13 +33,13 @@ export default function CalendarList(props) {
 
   const types = useMemo(
     () => [
-      { _id: '1', name: 'Planned', type: 'planned', color: theme === 'light' ? 'hsl(46.5deg, 95.24%, 91.76%)' : 'hsla(46.5deg, 95.24%, 66.76%, .5)' },
-      { _id: '2', name: 'In-Use', type: 'inUse', color: theme === 'light' ? 'hsl(342.35deg, 100%, 96.67%)' : 'hsla(342.35deg, 100%, 66.67%, .5)' },
+      { _id: '1', name: 'Planned', type: 'planned', color: theme === 'light' ? 'hsl(46.5deg, 95.24%, 91.76%)' : '#dda900' },
+      { _id: '2', name: 'In-Use', type: 'inUse', color: theme === 'light' ? 'hsl(342.35deg, 100%, 96.67%)' : '#cd3865' },
       {
         _id: '3',
         name: 'Available',
         type: 'available',
-        color: theme === 'light' ? 'hsl(206.25deg, 100%, 96.86%)' : 'hsla(206.25deg, 100%, 66.86%, 0.5)'
+        color: theme === 'light' ? 'hsl(206.25deg, 100%, 96.86%)' : '#176fb2'
       }
     ],
     [theme]

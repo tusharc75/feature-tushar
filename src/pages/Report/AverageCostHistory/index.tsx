@@ -53,7 +53,6 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     let rows = data.map((u) => {
       let finalObject: any = prepareDataForGrid(u, user);
       finalObject.type = capitalize(u.type);
-      finalObject.amount = parseFloat((finalObject.qty * finalObject.price)?.toFixed(2));
       return finalObject;
     });
     dispatch({ type: 'initialize', data: rows, count: rows.length });
@@ -85,7 +84,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     },
     { field: 'price', headerName: 'Cost', show: true, cellRenderer: 'numberRenderer', filter: false, sortable: false },
     {
-      field: 'amount',
+      field: 'totalPrice',
       headerName: 'Amount',
       show: true,
       cellRenderer: 'creditDebitRenderer',
@@ -111,35 +110,35 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
   const ReferenceRenderer = (params) =>
     params?.value ? (
       params.data.referenceType === 'Purchase Order' ? (
-        <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Transfer Inventory' ? (
-        <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Transfer Asset' ? (
-        <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Sales Order' ? (
-        <Link className="link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Bulk Asset Creation' ? (
-        <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Serialized Asset' ? (
-        <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Rental Job' ? (
-        <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Work Order' ? (
-        <Link className="link" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : (

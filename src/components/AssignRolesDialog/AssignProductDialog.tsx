@@ -184,7 +184,7 @@ const AssignProductDialog = ({
       if (serialized != null) {
         updatedFilters.push({
           field: 'serializedProduct',
-          term: `${serialized === 'true' ? 'Yes' : 'No'}`
+          term: `${serialized === true ? 'Yes' : 'No'}`
         });
       }
     }

@@ -146,7 +146,8 @@ const ManageDeliveryTicket = ({
     isPickupFromDisable,
     isDeliveryToDisable,
     isPickupFromStorageLocationDisable,
-    isDeliveryToStorageLocationDisable
+    isDeliveryToStorageLocationDisable,
+    deliveryToLabel
   ) => {
     var warehouse = [];
     var customerAccount = [];
@@ -173,6 +174,12 @@ const ManageDeliveryTicket = ({
         }
       } else if (element.fieldName === 'deliveryTo') {
         if (deliveryToType === DELIVERY_FROM_TO_TYPE.plant) {
+          if (!warehouse?.find((e) => e.optionValue === deliveryTo) && deliveryToLabel) {
+            warehouse.push({
+              optionLabel: deliveryToLabel,
+              optionValue: deliveryTo,
+            })
+          }
           element.option = warehouse;
         }
         if (deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
@@ -254,7 +261,8 @@ const ManageDeliveryTicket = ({
           true,
           true,
           true,
-          true
+          true,
+          null
         );
         setInitialData({
           fields: fieldsDataForUpdate,
@@ -409,7 +417,8 @@ const ManageDeliveryTicket = ({
           isPickupFromDisable,
           isDeliveryToDisable,
           isPickupFromStorageLocationDisable,
-          isDeliveryToStorageLocationDisable
+          isDeliveryToStorageLocationDisable,
+          referenceData?.deliveryToLabel
         );
         setInitialData({
           fields: fieldsDataForCreate,

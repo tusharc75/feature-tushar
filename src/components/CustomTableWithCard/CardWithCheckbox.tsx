@@ -25,7 +25,7 @@ const CardWithCheckbox: FC<CardWithCheckboxProps> = ({
   ...props
 }) => {
   const [collapsed, setCollapsed] = React.useState(collapsible);
-  const containerRef = useCollapse({ collapsed, minHeight: 'auto', childClassName: styles.bodyColumn });
+  const containerRef = useCollapse({ collapsed, minHeight: 'auto', childClassName: styles.bodyColumn, iscollapsible: collapsible });
 
   return (
     <div

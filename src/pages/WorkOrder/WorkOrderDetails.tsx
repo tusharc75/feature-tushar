@@ -24,6 +24,7 @@ import { FaWpforms } from 'react-icons/fa';
 import { RiFlowChart } from 'react-icons/ri';
 import PreviewDownload from 'src/components/PreviewDownload';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -212,7 +213,7 @@ const WorkOrderDetails = () => {
           <CustomBreadCrumbs routes={[routes.workOrder, { title: workOrderData?.workOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-v1">
+          <Box className="control-buttons-v1 items-center">
             {workOrderData ? (
               <>
                 {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
@@ -224,16 +225,22 @@ const WorkOrderDetails = () => {
                   allowedToEdit &&
                   workOrderData?.canComplete &&
                   workOrderData?.status !== WORK_ORDER_STATUS.completed && (
-                    <Fragment>
-                      <Button
-                        variant={'contained'}
-                        size="small"
-                        onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
-                        className={'btn-outline-v1'}
-                      >
-                        Complete
-                      </Button>
-                    </Fragment>
+                    <div className="relative isolate ">
+                      <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">
+                        <span></span>
+                        <span></span>
+                      </span>
+                      <HtmlTooltip title="Complete Work Order" placement="top" arrow>
+                        <Button
+                          variant={'contained'}
+                          size="small"
+                          onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
+                          className={'btn-outline-v1 '}
+                        >
+                          Close
+                        </Button>
+                      </HtmlTooltip>
+                    </div>
                   )}
                 <PreviewDownload
                   resource={sidebarResource.workOrder}

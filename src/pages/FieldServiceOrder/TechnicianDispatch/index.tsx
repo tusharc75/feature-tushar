@@ -109,7 +109,7 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
     ];
     column.push({
       accessor: 'action',
-      Header: '',
+      Header: 'Actions',
       minWidth: 50,
       width: 50,
       sticky: 'right',

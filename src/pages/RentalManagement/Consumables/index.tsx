@@ -210,7 +210,7 @@ const Consumables = ({ rentalManagementData, setNextStep, currencySymbol, render
       ) : (
         coloum.push({
           accessor: 'action',
-          Header: '',
+          Header: 'Actions',
           minWidth: 50,
           width: 50,
           sticky: 'right',

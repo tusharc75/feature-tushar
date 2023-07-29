@@ -138,7 +138,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName, product })
       },
       {
         accessor: 'action',
-        Header: 'Action',
+        Header: 'Actions',
         width: 150,
         minWidth: 150,
         sticky: 'right',

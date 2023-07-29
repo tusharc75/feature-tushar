@@ -534,7 +534,7 @@ const SerializedAsset = () => {
                 </Fragment>
               ) : (
                 <Fragment>
-                  {permissions?.productCategory?.isRead &&
+                  {permissions?.productCategory?.isRead && (
                     <Autocomplete
                       style={{ width: '250px' }}
                       options={productCategoryList}
@@ -563,7 +563,8 @@ const SerializedAsset = () => {
                           <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
                         )
                       }
-                    />}
+                    />
+                  )}
                   {productCategory && (
                     <Autocomplete
                       style={{ width: '250px' }}
@@ -622,6 +623,8 @@ const SerializedAsset = () => {
                           color="primary"
                         />
                       }
+                      className="ml-2"
+                      style={{ color: 'var(--dark-primary-text, var(--primary))' }}
                       label="Sublease Assets"
                     />
                   )}
@@ -924,8 +927,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

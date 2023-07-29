@@ -21,6 +21,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { generateCustomTableColumns } from 'src/constants/columns';
+import { MdAssignmentTurnedIn } from 'react-icons/md';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -249,7 +250,7 @@ const WorkOrder = ({
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
-      Header: 'Action',
+      Header: 'Actions',
       minWidth: 70,
       width: 70,
       sticky: 'right',
@@ -302,7 +303,7 @@ const WorkOrder = ({
                 </IconButton>
               </>
             ) : null}
-            {row?.original?.canAutoCompleteWorkOrder && (
+            {row?.original?.type === 'serializedAsset' && (
               <HtmlTooltip title="Auto Complete Work Order">
                 <IconButton
                   size="small"
@@ -311,8 +312,10 @@ const WorkOrder = ({
                     setAutoCompleteData([row.original]);
                     setCompleteConfirmBox(true);
                   }}
+                  disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
                 >
-                  <CheckCircleOutline fontSize="small" />
+
+                  <MdAssignmentTurnedIn fontSize="20" />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -434,12 +437,12 @@ const WorkOrder = ({
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
-            ? parent?.productDetail?.productName
-            : parent.type === 'serializedAsset'
-              ? parent?.serializedAsset?.assetNumber
-              : parent?.packageDetail?.packageName
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === 'product'
+          ? parent?.productDetail?.productName
+          : parent.type === 'serializedAsset'
+            ? parent?.serializedAsset?.assetNumber
+            : parent?.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'service'
@@ -455,12 +458,12 @@ const WorkOrder = ({
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
       parent.status = `${parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
-            ? parent.productDetail?.status
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail.status
-              : parent.packageDetail?.status
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
+          ? parent.productDetail?.status
+          : parent.type === 'serializedAsset'
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
         }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
@@ -468,10 +471,10 @@ const WorkOrder = ({
         parent.hideSelection = true;
         parent.serviceStatus = parent?.workOrder?.status;
       }
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
+      parent.subRows = generateNestedData(data.material, parent);
+      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new && parent?.subRows?.some(obj => obj.type === "service")) {
         parent.canAutoCompleteWorkOrder = true;
       }
-      parent.subRows = generateNestedData(data.material, parent);
     });
 
     if (isPostWorkService) {

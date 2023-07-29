@@ -10,6 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { sidebarResource } from 'src/constants/helpers';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any);
 const localizer = momentLocalizer(moment);
@@ -51,6 +52,7 @@ const FILTERS = [
 ];
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
+  const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
@@ -332,18 +334,19 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
   };
 
   const setEventStyle = (obj) => {
-    let backgroundColor = 'rgba(234, 239, 254, 1)';
-    let color = 'rgba(4, 50, 161, 1)';
+    let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
+    let color = '#000';
+
     if (obj?.type === sidebarResource.planning) {
       if (obj?.fulfillStatus === 'Yes') {
-        backgroundColor = '#048e0a';
-        color = 'white';
+        backgroundColor = themeMode === 'light' ? 'rgb(207, 244, 168)' : '#048e0a';
+        color = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
       } else if (obj?.fulfillStatus === 'No') {
-        backgroundColor = '#d13925';
-        color = 'white';
+        backgroundColor = themeMode === 'light' ? 'rgb(255, 204, 204)' : 'rgb(156 1 22)';
+        color = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
       } else if (obj?.fulfillStatus === 'Partially') {
-        backgroundColor = '#F6BE00';
-        color = 'black';
+        backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+        color = themeMode === 'light' ? 'rgb(255 92 0)' : 'white';
       }
     }
     return {

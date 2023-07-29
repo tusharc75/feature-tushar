@@ -64,6 +64,7 @@
   --flow-inActive: #ebebeb;
   --flow-currentStep: #fff;
   --flow-active: #c8e9ce;
+  --ripple-color: green;
 }
 
 // Dark Theme
@@ -95,7 +96,10 @@
   --card-body: var(--dark-secondary);
   --dark-primary-text: #fff;
   --dark-secondary-text: #b8b8b8;
-  --dark-error: hsl(0, 52%, 36%);
+  --dark-error: hsl(358.89deg 62.92% 40.17%);
+  --dark-yellow: hsl(41.65deg 100% 44.31%);
+  --dark-gray: hsl(0deg 0% 14.49% / 70%);
+  --dark-green: hsl(132.04deg 80.8% 31.18%);
   --dark-active-border-color: #f99336;
   --form-head-bg: #282845;
   --primary-text: #fff;
@@ -103,6 +107,7 @@
   --flow-inActive: #525269cc;
   --flow-currentStep: var(--dark-primary);
   --flow-active: var(--dark-primary);
+  --ripple-color: rgba(255, 255, 255, 0.2);
 }
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
@@ -1615,44 +1620,26 @@ body::-webkit-scrollbar-thumb {
 
 .red-data-row {
   background-color: var(--dark-error, #ffcccb) !important;
-  [data-mode='dark'] & {
-    background-color: hsl(1 100% 65% / 1) !important;
-  }
 }
 
 .scrap-data-row {
-  background-color: #ffe4c0 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(34, 100%, 48%) !important;
-  }
+  background-color: var(--dark-yellow, #ffe4c0) !important;
 }
 
 .light-red-data-row {
-  background-color: #feb1b1 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(0, 97%, 45%) !important;
-  }
+  background-color: var(--dark-error, #feb1b1) !important;
 }
 
 .light-yellow-data-row {
-  background-color: #fae498 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(47, 91%, 39%) !important;
-  }
+  background-color: var(--dark-yellow, #fae498) !important;
 }
 
 .light-grey-data-row {
-  background-color: #d3d3d3 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(0, 0%, 53%) !important;
-  }
+  background-color: var(--dark-gray, #d3d3d3) !important;
 }
 
 .light-green-data-row {
-  background-color: #acf1c8 !important;
-  [data-mode='dark'] & {
-    background-color: hsl(144, 71%, 31%) !important;
-  }
+  background-color: var(--dark-green, #acf1c8) !important;
 }
 
 .a_divider_inner {
@@ -3757,6 +3744,11 @@ body {
   overflow: hidden;
   min-height: 100%;
 }
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 .new-table-font {
   font-size: 14px !important;
   * {
@@ -3822,5 +3814,104 @@ body {
     flex-grow: 0 !important;
     max-width: 11.111111% !important;
     flex-basis: 11.111111% !important;
+  }
+}
+
+.custom-filter {
+  .filter-chip {
+    font-weight: 500;
+    border: 1px solid var(--new_theme_secondary_border_color);
+    font-size: 12px !important;
+    line-height: 14px !important;
+    color: #2a3042 !important;
+    padding: 8px 3px !important;
+    background-color: var(--new_theme_secondary_color) !important;
+    border-radius: 3.09998px !important;
+    svg {
+      color: #2a3042 !important;
+    }
+  }
+
+  .chip-group {
+    display: flex;
+    max-width: 700px;
+    overflow: hidden;
+    flex-grow: 1;
+    & > div {
+      margin-left: 8px;
+      &:first-of-type {
+        margin-left: 0;
+      }
+    }
+  }
+  .chip-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    position: relative;
+  }
+}
+
+@mixin ripple($duration, $delay) {
+  opacity: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  border-radius: inherit;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  content: '';
+  height: 100%;
+  width: 100%;
+  background: var(--ripple-color);
+  animation-name: ripple;
+  animation-duration: $duration;
+  animation-delay: $delay;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.34, 1);
+  z-index: -1;
+}
+
+.animate-ripple {
+  left: 1px;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  &::before {
+    @include ripple(var(--ripple-animation-duration, 3s), 0s);
+  }
+  @for $i from 1 through 3 {
+    span:nth-child(#{$i}) {
+      @include ripple(var(--ripple-animation-duration, 3s), #{$i}s);
+    }
+  }
+}
+
+@keyframes ripple {
+  0% {
+    opacity: 1;
+    transform: scale3d(0.75, 0.75, 1);
+  }
+  // 1% {
+  //   opacity: 0.99;
+  //   transform: scale3d(1, 1, 1);
+  // }
+  // 80% {
+  //   opacity: 0.2;
+  //   transform: scale3d(1.32, 1.32, 1);
+  // }
+  100% {
+    opacity: 0;
+    transform: scale3d(1.4, 1.4, 1);
   }
 }
