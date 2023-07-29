@@ -298,21 +298,27 @@ const RepairOrderDetails = () => {
           <CustomBreadCrumbs routes={[routes.repairOrder, { title: repairOrderData?.repairOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-v1">
+          <Box className="control-buttons-v1 isolate">
             {repairOrderData ? (
               <>
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
                   (enableStatusChange || [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced].includes(repairOrderData?.status)) && (
                     <Fragment>
-                      <Button
-                        variant={'contained'}
-                        size="small"
-                        onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
-                        className={'btn-outline-v1'}
-                      >
-                        Complete
-                      </Button>
+                      <div className="relative isolate z-[-1]">
+                        <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">
+                          <span></span>
+                          <span></span>
+                        </span>
+                        <Button
+                          variant={'contained'}
+                          size="small"
+                          onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
+                          className={'btn-outline-v1'}
+                        >
+                          Complete
+                        </Button>
+                      </div>
                       {/* <Button
                         variant="outlined"
                         color="default"
