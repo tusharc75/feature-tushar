@@ -277,7 +277,11 @@ const ServiceOrderDetailsPage = () => {
                 </Menu>
               </Fragment>
             )}
-            <ActivityButton referenceId={serviceOrderData?._id} resource={ACTIVITY_RESOURCE.fieldServiceOrder} />
+            <ActivityButton 
+              referenceId={serviceOrderData?._id} 
+              resource={ACTIVITY_RESOURCE.fieldServiceOrder}
+              resourceLabel={serviceOrderData?.fieldServiceOrderNumber}
+              />
           </Box>
         </Box>
       </Box>

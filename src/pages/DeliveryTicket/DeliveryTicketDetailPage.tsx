@@ -645,7 +645,11 @@ export default function DeliveryTicketDetail(props) {
                   {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? 'Please wait...' : 'Download'}
                 </Button>
               )}
-              <ActivityButton referenceId={deliveryTicketData?._id} resource={ACTIVITY_RESOURCE.deliveryTicket} />
+              <ActivityButton 
+                referenceId={deliveryTicketData?._id} 
+                resource={ACTIVITY_RESOURCE.deliveryTicket} 
+                resourceLabel={deliveryTicketData?.ticketName}
+                />
             </Box>
           </Box>
         </Box>

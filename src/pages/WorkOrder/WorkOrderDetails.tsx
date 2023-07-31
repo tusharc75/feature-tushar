@@ -259,7 +259,11 @@ const WorkOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="40px" />
             )}
-            <ActivityButton referenceId={workOrderData?._id} resource={ACTIVITY_RESOURCE.workOrder} />
+            <ActivityButton 
+              referenceId={workOrderData?._id} 
+              resource={ACTIVITY_RESOURCE.workOrder} 
+              resourceLabel={workOrderData?.workOrderNumber}
+              />
           </Box>
         </Box>
       </Box>

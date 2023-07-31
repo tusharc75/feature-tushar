@@ -172,7 +172,11 @@ const PurchaseRequisitionDetail = () => {
               {permissions?.purchaseRequisition?.isDelete && allowedToDelete && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
-              <ActivityButton referenceId={purchaseRequisitionData?._id} resource={ACTIVITY_RESOURCE.purchaseRequisition} />
+              <ActivityButton 
+                referenceId={purchaseRequisitionData?._id} 
+                resource={ACTIVITY_RESOURCE.purchaseRequisition} 
+                resourceLabel={purchaseRequisitionData?.purchaseRequisitionNumber}
+                />
             </>
           </Box>
         </Box>

@@ -128,7 +128,11 @@ const ProductAuctionDetailsPage = () => {
               )}
               {permissions?.productAuction?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
-            <ActivityButton referenceId={productAuctionData?._id} resource={ACTIVITY_RESOURCE.productAuction} />
+            <ActivityButton 
+              referenceId={productAuctionData?._id} 
+              resource={ACTIVITY_RESOURCE.productAuction} 
+              resourceLabel={productAuctionData?.auctionNumber}
+              />
           </Box>
         </Box>
       </Box>

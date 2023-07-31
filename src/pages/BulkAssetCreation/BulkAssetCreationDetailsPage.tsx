@@ -190,7 +190,11 @@ const BulkAssetCreationDetailsPage = () => {
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
-              <ActivityButton referenceId={bulkAssetCreationData?._id} resource={ACTIVITY_RESOURCE.bulkAssetCreation} />
+              <ActivityButton 
+               referenceId={bulkAssetCreationData?._id} 
+               resource={ACTIVITY_RESOURCE.bulkAssetCreation} 
+               resourceLabel={bulkAssetCreationData?.baNumber}
+               />
             </>
           </Box>
         </Box>

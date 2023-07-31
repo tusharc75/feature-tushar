@@ -313,7 +313,11 @@ const TransferAssetDetailPage = () => {
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
-            <ActivityButton referenceId={transferAssetData?._id} resource={ACTIVITY_RESOURCE.transferAsset} />
+            <ActivityButton 
+              referenceId={transferAssetData?._id} 
+              resource={ACTIVITY_RESOURCE.transferAsset} 
+              resourceLabel={transferAssetData?.transferAssetNumber}
+              />
           </Box>
         </Box>
       </Box>

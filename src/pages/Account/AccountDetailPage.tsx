@@ -764,7 +764,11 @@ export default function AccountDetailPage(props) {
             accountData.owner.optionValue === user.user._id ? (
               <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
             ) : null}
-            <ActivityButton referenceId={accountData?._id} resource={accountResource} />
+            <ActivityButton 
+              referenceId={accountData?._id} 
+              resource={accountResource} 
+              resourceLabel={accountData?.accountName}
+              />
           </Box>
         </Box>
       </Box>

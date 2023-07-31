@@ -316,7 +316,11 @@ const ProjectSalesDetails = () => {
                     }}
                   />
                 ) : null}
-                <ActivityButton referenceId={projectSalesData?._id} resource={projectSales?.projectSalesResource} />
+                <ActivityButton 
+                  referenceId={projectSalesData?._id} 
+                  resource={projectSales?.projectSalesResource} 
+                  resourceLabel={projectSalesData?.projectName}
+                  />
               </>
             )}
           </Box>

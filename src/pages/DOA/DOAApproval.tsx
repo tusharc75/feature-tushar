@@ -265,7 +265,11 @@ const DOAApproval = () => {
                 </Button>
               </>
             ) : null}
-            <ActivityButton referenceId={QData?.quoteBuilderId} resource="DOA" />
+            <ActivityButton 
+              referenceId={QData?.quoteBuilderId} 
+              resource="DOA" 
+              resourceLabel={ QData?.quoteName}
+              />
           </Box>
         </Box>
       </Box>
