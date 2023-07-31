@@ -158,7 +158,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       canDrag: false,
       Cell: ({ row, rows }) => (
         <>
-          <HtmlTooltip title={allowedToEdit ? 'Edit' : 'Asset is already assigned'}>
+          <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
             <IconButton
               size="small"
               aria-label="Details"
