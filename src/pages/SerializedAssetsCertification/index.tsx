@@ -94,10 +94,10 @@ const SerializedAssetsCertification = () => {
 
   useEffect(() => {
     if (productCategory && productCategory !== '') {
-        const filteredProducts = products.filter(product => product?.productCategory === productCategory);
-        setProductFilterList(filteredProducts);
+      const filteredProducts = products.filter(product => product?.productCategory === productCategory);
+      setProductFilterList(filteredProducts);
     }
-}, [productCategory, products]);
+  }, [productCategory, products]);
 
 
   const fetchGridColumns = () => {
@@ -261,7 +261,7 @@ const SerializedAssetsCertification = () => {
       <div className="main-container">
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} sm={12} md={7} className="d-flex align-items-center gap-1 flex-wrap">
+            <Grid item xs={12} sm={12} md={9} className="d-flex align-items-center gap-1 flex-wrap">
               <Fragment>
                 <Autocomplete
                   style={{ width: '250px' }}
@@ -356,7 +356,7 @@ const SerializedAssetsCertification = () => {
                 />
               </Fragment>
             </Grid>
-            <Grid md={5} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
+            <Grid sm={12} xs={12} md={3} container className={`${styles.filter_side} align-items-center`}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Box style={{ flexGrow: '1' }}>
                   <SearchBox
