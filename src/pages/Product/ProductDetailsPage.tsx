@@ -60,7 +60,6 @@ const ProductDetailsPage = () => {
     state: { user, permissions }
   }: any = useData();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingWarehouse, setLoadingWarehouse] = useState(false);
@@ -163,12 +162,6 @@ const ProductDetailsPage = () => {
             }
             setProductData(data.productData);
             setLoading(false);
-            if (openEdit === 'true') {
-              setOpenUpdateDialog(true);
-              const params = new URLSearchParams();
-              params.delete('openEdit');
-              history.push({ search: params.toString() });
-            }
           })
           .catch((error) => {
             toastConfig.setToastConfig(error);

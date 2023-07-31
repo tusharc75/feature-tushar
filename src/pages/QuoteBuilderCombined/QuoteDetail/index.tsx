@@ -144,7 +144,6 @@ export default function QuoteDetail() {
   const classes = useStyles();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -385,13 +384,6 @@ export default function QuoteDetail() {
               { title: routes.quoteBuilder.title, path: routes.quoteBuilder.path },
               { title: `${data?.quoteName} (V-${tempCurrentVersion})`, hasOnClick: true }
             ]);
-
-            if (isAllowedToEdit && openEdit === 'true') {
-              setOpenUpdateDialog(true);
-              const params = new URLSearchParams();
-              params.delete('openEdit');
-              history.push({ search: params.toString() });
-            }
             fetchDoaLimit();
             setLoading(false);
           });

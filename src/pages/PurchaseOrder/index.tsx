@@ -560,7 +560,7 @@ const PurchaseOrder = () => {
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${routes.purchaseOrderDetail.path}/${data._id}?openEdit=true`);
+                  history.push(`${routes.purchaseOrderDetail.path}/${data._id}`);
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {

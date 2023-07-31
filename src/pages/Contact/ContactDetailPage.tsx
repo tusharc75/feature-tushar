@@ -52,7 +52,6 @@ const ContactDetailsPage = (props) => {
   } = props;
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const {
     state: { user, permissions, selectedEntity, tour },
     dispatch
@@ -223,13 +222,6 @@ const ContactDetailsPage = (props) => {
 
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
-
-        if (isAllowedToEdit && openEdit === 'true') {
-          setOpenUpdateDialog(true);
-          const params = new URLSearchParams();
-          params.delete('openEdit');
-          history.push({ search: params.toString() });
-        }
         setOrgChartData(orgChartData);
       })
       .catch((err) => {

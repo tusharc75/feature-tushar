@@ -392,7 +392,7 @@ const DemandOrder = () => {
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.demandOrderDetail.path}/${data._id}?openEdit=true`);
+                history.push(`${routes.demandOrderDetail.path}/${data._id}`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {

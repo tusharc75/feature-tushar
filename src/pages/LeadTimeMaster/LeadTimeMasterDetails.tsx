@@ -27,7 +27,7 @@ const LeadTimeMasterDetails = () => {
   const history = useHistory();
 
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -95,7 +95,7 @@ const LeadTimeMasterDetails = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchLeadTimeMasterData = () => {
@@ -103,13 +103,6 @@ const LeadTimeMasterDetails = () => {
       .get(`${leadTimeMaster.api}/${id}`)
       .then(({ data: { data } }) => {
         setLeadTimeMasterData({ ...data });
-        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (permissions?.leadTimeMaster?.isUpdate && openEdit === 'true') {
-          setOpenUpdateDialog(true);
-          const params = new URLSearchParams();
-          params.delete('openEdit');
-          history.push({ search: params.toString() });
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);

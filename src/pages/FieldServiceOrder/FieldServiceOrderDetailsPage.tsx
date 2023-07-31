@@ -47,7 +47,7 @@ const ServiceOrderDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
 
   const {
     state: { user, permissions }
@@ -130,12 +130,6 @@ const ServiceOrderDetailsPage = () => {
       setServiceOrderData(data);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       setCurrentStep(steps.map((s) => s.name).indexOf(data?.processStatus) !== -1 ? steps.map((s) => s.name).indexOf(data?.processStatus) : 0);
-      if (isAllowedToEdit && openEdit === 'true') {
-        setOpenUpdateDialog(true);
-        const params = new URLSearchParams();
-        params.delete('openEdit');
-        history.push({ search: params.toString() });
-      }
     } catch (error) {
       setLoadingDetails(false);
       toastConfig.setToastConfig(error);
@@ -406,7 +400,7 @@ const ServiceOrderDetailsPage = () => {
             )}
             {steps[currentStep]?.name === serviceOrderSteps[6]?.name && serviceOrderData && (
               <FieldTicketInvoice
-                fieldServiceOrderData={serviceOrderData}            
+                fieldServiceOrderData={serviceOrderData}
                 renderedFrom={`${renderedFrom}_grid-6`}
               />
             )}

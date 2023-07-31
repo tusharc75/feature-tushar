@@ -37,7 +37,7 @@ const SalesOrderDetails = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
 
   const {
     state: { user, permissions }
@@ -105,7 +105,7 @@ const SalesOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${salesOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -145,12 +145,7 @@ const SalesOrderDetails = () => {
 
       setAllowedToEdit(isAllowedToEdit && ['Invoiced', 'Closed'].indexOf(data.status) === -1);
 
-      if (isAllowedToEdit && openEdit === 'true') {
-        setOpenUpdateDialog(true);
-        const params = new URLSearchParams();
-        params.delete('openEdit');
-        history.push({ search: params.toString() });
-      }
+
       setLoading(false);
     } catch (error) {
       setLoading(false);

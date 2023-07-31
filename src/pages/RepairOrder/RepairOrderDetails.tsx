@@ -53,7 +53,7 @@ const RepairOrderDetails = () => {
   const history = useHistory();
 
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -164,19 +164,16 @@ const RepairOrderDetails = () => {
         }
         setStepList(steps);
         setStepNames(steps.map((item) => item.name));
-
-        setCurrentStep(
-          steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
-        );
-
+        if (data?.status === REPAIR_ORDER_STATUS.completed) {
+          setCurrentStep(steps?.length - 1);
+        }
+        else {
+          setCurrentStep(
+            steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
+          );
+        }
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setRepairOrderData({ ...data });
-        if (permissions?.repairOrder?.isUpdate && openEdit === 'true') {
-          setOpenUpdateDialog(true);
-          const params = new URLSearchParams();
-          params.delete('openEdit');
-          history.push({ search: params.toString() });
-        }
         if ((data?.type === REPAIR_ORDER_TYPE.internal || !data?.addQuotationStep) && data?.status !== REPAIR_ORDER_STATUS.completed) {
           checkStatusChange();
         } else {
@@ -228,8 +225,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -516,10 +513,10 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                        quotationVersionData?.status
-                      )
-                    ? false
-                    : allowedToEdit
+                      quotationVersionData?.status
+                    )
+                      ? false
+                      : allowedToEdit
                 }
                 allowedToDelete={allowedToDelete}
                 isPostWorkService={Boolean(currentStep === 3)}

@@ -246,7 +246,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
               selectedRecords={selectedRecords}
               dispatch={gridDispatch}
               onEdit={(data) => {
-                // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {}}

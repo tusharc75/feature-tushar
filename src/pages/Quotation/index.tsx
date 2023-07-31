@@ -430,7 +430,7 @@ const Quotation = () => {
               selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.quotationDetail.path}/${data._id}?openEdit=true`);
+                history.push(`${routes.quotationDetail.path}/${data._id}`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {

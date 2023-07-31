@@ -548,7 +548,7 @@ const Warehouse = () => {
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.warehouseDetail.path}/${data._id}?openEdit=true`);
+                history.push(`${routes.warehouseDetail.path}/${data._id}`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {

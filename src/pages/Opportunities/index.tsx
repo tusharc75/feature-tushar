@@ -530,7 +530,7 @@ const Opportunities = () => {
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${routes.opportunityDetail.path}/${data._id}?openEdit=true`)
+                  history.push(`${routes.opportunityDetail.path}/${data._id}`)
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {
