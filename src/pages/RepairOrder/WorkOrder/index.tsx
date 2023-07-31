@@ -808,6 +808,7 @@ const WorkOrder = ({
                     workOrderId: d?.workOrder?._id
                   };
                 })}
+              reference='service'
               assignedUsers={allAssignedUsers}
               handleClose={() => {
                 setUserAssignDialog(false);
