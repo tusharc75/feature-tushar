@@ -38,7 +38,6 @@ const PurchaseOrderDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -103,12 +102,6 @@ const PurchaseOrderDetailsPage = () => {
       setAllowedToEdit(isAllowedToEdit);
       setPurchaseOrderData(data);
       setCurrentStep(getIndex(data?.processStatus, purchaseOrderSteps));
-      if (isAllowedToEdit && openEdit === 'true') {
-        setOpenUpdateDialog(true);
-        const params = new URLSearchParams();
-        params.delete('openEdit');
-        history.push({ search: params.toString() });
-      }
       setLoadingPurchaseOrder(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

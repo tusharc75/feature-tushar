@@ -42,7 +42,7 @@ const RepairJobDetails = () => {
   const history = useHistory();
 
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const {  tab }: any = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -52,8 +52,6 @@ const RepairJobDetails = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [repairJobFields, setRepairJobFields] = useState([]);
-
-  const [showRepairJobCompleteConfirmationDialog, setShowRepairJobCompleteConfirmationDialog] = useState(false);
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -144,13 +142,6 @@ const RepairJobDetails = () => {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit);
-
-        if (permissions?.repairJob?.isUpdate && openEdit === 'true') {
-          setOpenUpdateDialog(true);
-          const params = new URLSearchParams();
-          params.delete('openEdit');
-          history.push({ search: params.toString() });
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);

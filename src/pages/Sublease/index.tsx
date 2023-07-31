@@ -467,7 +467,7 @@ const Sublease = () => {
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${routes.subleaseDetail.path}/${data._id}?openEdit=true`);
+                  history.push(`${routes.subleaseDetail.path}/${data._id}`);
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {

@@ -411,7 +411,7 @@ const ProductionOrder = () => {
                                 selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
                                 dispatch={dispatch}
                                 onEdit={(data) => {
-                                    history.push(`${routes.productionOrderDetail.path}/${data._id}?openEdit=true`)
+                                    history.push(`${routes.productionOrderDetail.path}/${data._id}`)
                                 }}
                                 extraParamsToCheckDelete={true}
                                 onDelete={(data) => {

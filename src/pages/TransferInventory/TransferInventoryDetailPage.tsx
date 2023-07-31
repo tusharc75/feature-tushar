@@ -32,7 +32,7 @@ const TransferInventoryDetailPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
   const parsedTab = tab !== undefined ? parseInt(tab) : 1;
   const {
     state: { permissions, user }
@@ -134,12 +134,6 @@ const TransferInventoryDetailPage = () => {
             const isAllowedToEdit = [...(transferData.collaborator ?? []), transferData.owner].some((d) => d?.optionValue === user?.user?._id);
             setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
             setTransferInventoryData(transferData);
-            if (permissions?.transferInventory?.isUpdate && openEdit === 'true') {
-              setOpenUpdateDialog(true);
-              const params = new URLSearchParams();
-              params.delete('openEdit');
-              history.push({ search: params.toString() });
-            }
           });
       })
       .catch((err) => {
@@ -204,7 +198,7 @@ const TransferInventoryDetailPage = () => {
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
         processStatus: stepNames[step]
       })
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });

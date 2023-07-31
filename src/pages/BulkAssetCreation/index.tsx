@@ -479,7 +479,7 @@ const BulkAssetCreation = () => {
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${routes.bulkAssetCreationDetail.path}/${data._id}?openEdit=true`);
+                  history.push(`${routes.bulkAssetCreationDetail.path}/${data._id}`);
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {

@@ -43,7 +43,6 @@ const ProjectSalesDetails = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -146,13 +145,6 @@ const ProjectSalesDetails = () => {
       setQuotes(data.staticData?.quoteBuilder);
       setCustomerContacts(data.staticData?.customerContact);
       initializeGraphData();
-      if (isAllowedToEdit && openEdit === 'true') {
-        setOpenUpdateDialog(true);
-        const params = new URLSearchParams();
-        params.delete('openEdit');
-        history.push({ search: params.toString() });
-      }
-
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);

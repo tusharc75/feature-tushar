@@ -409,7 +409,7 @@ const PackageList = () => {
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${routes.packagesDetail.path}/${data._id}?openEdit=true`);
+                  history.push(`${routes.packagesDetail.path}/${data._id}`);
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {
