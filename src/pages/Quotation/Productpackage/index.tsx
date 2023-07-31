@@ -28,6 +28,7 @@ import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManag
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -108,7 +109,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p
               onClick={() => {
-                handleOpen(row, rows);
+                openMaterial(row, rows);
               }}
               className="link text-truncate"
               title={row.original?.detail}
@@ -135,14 +136,13 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${
-                      row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : row.original.type === 'product'
+                    `${row.original.type === 'serializedAsset'
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === 'product'
                         ? routes.productDetail.path
                         : row.original.type === 'package'
-                        ? routes.packagesDetail.path
-                        : routes.serviceMasterDetail.path
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -178,36 +178,51 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       accessor: 'action',
       Header: 'Actions',
       minWidth: 100,
-      width: 100,
+      width: 150,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) =>
-        !row.original.hideSelection && (
-          <Grid container spacing={1}>
+      Cell: ({ row, rows }) =>
+        <>
+          <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
             <IconButton
               size="small"
-              aria-label="Details"
+              aria-label="Delete"
+              disabled={!allowedToEdit}
               onClick={() => {
-                setLeadTimeDialog({ open: true, data: row.original });
+                openMaterial(row, rows);
               }}
             >
-              <DateRangeIcon fontSize="small" color="primary" />
+              <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
-            <Box ml={1} />
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                getNestedSubRows(obj, row.original);
-                setDeleteData(obj);
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          </Grid>
-        )
+          </HtmlTooltip>
+          {
+            !row.original.hideSelection && (
+              <>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setLeadTimeDialog({ open: true, data: row.original });
+                  }}
+                >
+                  <DateRangeIcon fontSize="small" color="primary" />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                    getNestedSubRows(obj, row.original);
+                    setDeleteData(obj);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color="error" />
+                </IconButton>
+              </>
+            )
+          }
+        </>
     });
     setColumns(column);
   };
@@ -221,23 +236,22 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -258,23 +272,22 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.srno = parent.srno + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -401,7 +414,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       });
   };
 
-  const handleOpen = (row, rows) => {
+  const openMaterial = (row, rows) => {
     setIsProductEdit({
       open: true,
       isBulkedit: false,
