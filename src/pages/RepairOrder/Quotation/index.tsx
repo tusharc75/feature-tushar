@@ -234,19 +234,21 @@ const Quotation = ({
       Cell: ({ row, rows }) => {
         return  (
           <>
-          {allowedToEdit && !([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-              quotationInfo?.versions[tempCurrentVersion]?.status
-            ) || invoiceStep) && (
+          {allowedToEdit && (
             <HtmlTooltip title="Edit">
             <IconButton
-              color="primary"
               size="small"
+              disabled={([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationInfo?.versions[tempCurrentVersion]?.status
+              ) || invoiceStep)}
               aria-label="Edit"
               onClick={() => {
                 handleOpen(row.original);
               }}
             >
-              <EditIcon color="primary" />
+              <EditIcon color={([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationInfo?.versions[tempCurrentVersion]?.status
+              ) || invoiceStep) ? "disabled" : "primary"} />
             </IconButton>
           </HtmlTooltip>
           )}
@@ -688,12 +690,6 @@ const Quotation = ({
             childrenProperty="subRows"
             uniqueKey="_id"
             hideSelection={
-              !allowedToEdit ||
-              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                quotationData?.versions[currentVersion]?.status
-              )
-            }
-            hideAction={
               !allowedToEdit ||
               [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
