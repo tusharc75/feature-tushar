@@ -302,7 +302,7 @@ const RepairOrderDetails = () => {
                   allowedToEdit &&
                   (enableStatusChange || [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced].includes(repairOrderData?.status)) && (
                     <Fragment>
-                      <div className="relative isolate z-[-1]">
+                      <div className="relative isolate">
                         <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">
                           <span></span>
                           <span></span>
