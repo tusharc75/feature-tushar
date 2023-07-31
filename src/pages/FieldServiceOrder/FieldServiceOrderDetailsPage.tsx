@@ -125,8 +125,8 @@ const ServiceOrderDetailsPage = () => {
       data = response?.data?.data;
       setLoadingDetails(false);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      setAllowedToEdit(isAllowedToEdit);
-      setAllowedToDelete(data.owner.optionValue === user?.user?._id);
+      setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit);
+      setAllowedToDelete(permissions?.fieldServiceOrder?.isDelete && data.owner.optionValue === user?.user?._id && data.canDelete);
       setServiceOrderData(data);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       setCurrentStep(steps.map((s) => s.name).indexOf(data?.processStatus) !== -1 ? steps.map((s) => s.name).indexOf(data?.processStatus) : 0);
@@ -222,20 +222,19 @@ const ServiceOrderDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.fieldServiceOrder?.isUpdate && allowedToEdit && (
-              <Fragment>
-                <Button
-                  className={'btn-outline-v1'}
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  onClick={handleOpenUpdateDialog}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                </Button>
-              </Fragment>
-            )}
-            {permissions?.fieldServiceOrder?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            {permissions?.fieldServiceOrder?.isUpdate && allowedToEdit && (
+            <Fragment>
+              <Button
+                className={'btn-outline-v1'}
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                size="small"
+                disabled={!allowedToEdit}
+                onClick={handleOpenUpdateDialog}
+              >
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              </Button>
+            </Fragment>
+            <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
+            {allowedToEdit && (
               <Fragment>
                 {[SERVICE_ORDER_STATUS.readyToInvoice, SERVICE_ORDER_STATUS.invoiced]?.includes(serviceOrderData?.status) && (
                   <Button
@@ -346,7 +345,7 @@ const ServiceOrderDetailsPage = () => {
           />
           <ContentFullScreen title={steps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {steps[currentStep]?.name === serviceOrderSteps[0]?.name && serviceOrderData && (
-              <FieldTicket serviceOrderData={serviceOrderData} setNextStep={setNextStep} renderedFrom={`${renderedFrom}_grid-0`} />
+              <FieldTicket serviceOrderData={serviceOrderData} setNextStep={setNextStep} renderedFrom={`${renderedFrom}_grid-0`} allowedToEdit={allowedToEdit} refreshFieldServiceOrder={fetchServiceOrderData} />
             )}
             {steps[currentStep]?.name === serviceOrderSteps[1]?.name && serviceOrderData && (
               <Services
@@ -354,7 +353,7 @@ const ServiceOrderDetailsPage = () => {
                 setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
-                allowedToEdit={true}
+                allowedToEdit={allowedToEdit}
               />
             )}
             {steps[currentStep]?.name === serviceOrderSteps[2]?.name && serviceOrderData && (
@@ -363,7 +362,7 @@ const ServiceOrderDetailsPage = () => {
                 setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}_grid-2`}
                 stepFullScreen={stepFullScreen}
-                allowedToEdit={true}
+                allowedToEdit={allowedToEdit}
               />
             )}
             {steps[currentStep]?.name === serviceOrderSteps[3]?.name && serviceOrderData && (
@@ -373,7 +372,7 @@ const ServiceOrderDetailsPage = () => {
                 currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-3`}
                 stepFullScreen={stepFullScreen}
-                allowedToEdit={true}
+                allowedToEdit={allowedToEdit}
               />
             )}
             {steps[currentStep]?.name === serviceOrderSteps[4]?.name && serviceOrderData && (
@@ -382,7 +381,7 @@ const ServiceOrderDetailsPage = () => {
                 setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
-                allowedToEdit={true}
+                allowedToEdit={allowedToEdit}
               />
             )}
             {steps[currentStep]?.name === serviceOrderSteps[5]?.name && serviceOrderData && (
@@ -392,7 +391,7 @@ const ServiceOrderDetailsPage = () => {
                 currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-5`}
                 stepFullScreen={stepFullScreen}
-                allowedToEdit={false}
+                allowedToEdit={allowedToEdit}
                 fromInvoice={true}
                 updateStatus={updateStatus}
                 statusOptions={statusOptions}

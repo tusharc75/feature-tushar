@@ -11,7 +11,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import Autocomplete from '@material-ui/lab/Autocomplete/Autocomplete';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 
-const AssignUserDialog = ({ workOrderData, assignedUsers, handleClose, handleSucess }) => {
+const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceData = null, handleClose, handleSucess }) => {
   const toastConfig = useContext(CustomToastContext);
   const [userList, setUserList] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState(assignedUsers);
@@ -32,11 +32,22 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, handleClose, handleSuc
   };
 
   const handleAssignUser = () => {
+    const data: any = {
+      users: selectedUsers?.map((d) => d.optionValue),
+    }
+    let api = workOrder.api
+    if (reference === 'service') {
+      api = `${api}/service/assign-user`
+      data.workOrder = workOrderData
+    } else if (reference === 'steps') {
+      api = `${api}/step/assign-user`
+      data.workOrderId = workOrderData?.workOrderId;
+      data.stepId = referenceData?.stepId;
+      data.serviceUniqueId = referenceData?.serviceUniqueId;
+    }
+
     axiosInstance()
-      .put(`${workOrder.api}/service/assign-user`, {
-        users: selectedUsers?.map((d) => d.optionValue),
-        workOrder: workOrderData
-      })
+      .put(api, data)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
