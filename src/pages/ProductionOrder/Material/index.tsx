@@ -9,6 +9,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import { CHILD_RESOURCE, productionOrder, sidebarResource } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
@@ -155,8 +156,21 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) => (
+      Cell: ({ row, rows }) => (
         <>
+          <HtmlTooltip title={allowedToEdit ? 'Edit' : 'Asset is already assigned'}>
+            <IconButton
+              size="small"
+              aria-label="Details"
+              disabled={allowedToEdit ? false : true}
+              onClick={() => {
+                onMaterialEdit(row, rows);
+              }}
+            >
+              <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+            </IconButton>
+          </HtmlTooltip>
+
           <HtmlTooltip title={allowedToDelete && row.original?.allowedToDelete ? 'Asset is already assigned' : 'Delete'}>
             <IconButton
               size="small"
@@ -206,6 +220,14 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     setSelectedRecords([]);
   };
 
+  const onMaterialEdit = (row, rows) => {
+    setMaterialEdit({
+      open: true,
+      data: row.original,
+      bulkedit: false,
+      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+    });
+  };
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {

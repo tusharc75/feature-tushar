@@ -11,6 +11,7 @@ import { generateCustomTableColumns, flattenArray } from 'src/constants/columns'
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -144,9 +145,18 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) =>
+      Cell: ({ row, rows }) =>
         allowedToEdit && (
           <Grid container spacing={1}>
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                onMaterialEdit(row, rows);
+              }}
+            >
+              <EditIcon fontSize="small" color={'primary'} />
+            </IconButton>
             <IconButton
               size="small"
               aria-label="Details"
@@ -185,6 +195,14 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
     setSelectedRecords([]);
   };
 
+  const onMaterialEdit = (row, rows) => {
+    setMaterialEdit({
+      open: true,
+      data: row.original,
+      bulkedit: false,
+      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+    });
+  };
   const handleAdd = async (rows) => {
     const material: any = [];
     rows.forEach((d) => {
