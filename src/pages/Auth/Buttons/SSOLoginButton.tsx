@@ -16,8 +16,11 @@ function SSOLoginButton() {
         if (name === null || name === "" || name.length < 1) return setTextFieldError({ error: true, msg: "Please enter a brand" });
         setChecking(true)
         try {
-            await axiosInstance().get(`/brand/saml-check/${name}`).then(({ data: { data } }) => {
-                window.location.href = backendApi + '/user/login/sso/' + data?.brand
+            await axiosInstance().get(`/brand/saml-check/${name}`).then(async ({ data: { data } }) => {
+                const res = await axiosInstance().get(backendApi + '/user/login/sso/' + data?.brand);
+                const {data:resData} = res
+                console.log(res.data);
+                window.location.href = resData.redirectUrl
             })
             setChecking(false)
         } catch (e) {
