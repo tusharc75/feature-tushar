@@ -442,6 +442,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
         </CustomDialogContent>
         <CustomDialogFooter>
           <Button
+            style={{ padding: '4px 10px' }}
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedUserFilter });
             }}
@@ -453,7 +454,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
           >
             {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
           </Button>
-          <Button onClick={handleApplyFilter} size="small" color="primary" variant="contained">
+          <Button onClick={handleApplyFilter} size="small" className="no-shadow" color="primary" variant="contained">
             Apply Now
           </Button>
         </CustomDialogFooter>
