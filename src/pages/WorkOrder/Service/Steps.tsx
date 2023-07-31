@@ -862,6 +862,13 @@ const Steps = ({
                           {step.stepName}
                         </Typography>
                       </Box>
+                      {step?.assignedUsers?.length > 0 && (
+                        <Box ml={1}>
+                          <HtmlTooltip title={step?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                            <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
+                          </HtmlTooltip>
+                        </Box>
+                      )}
                     </Box>
                     <Box style={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset', flexWrap: 'wrap' }}>
                       {step?.isAllowToPerform && (
@@ -1022,13 +1029,6 @@ const Steps = ({
                           ) : null}
                         </Box>
                       )}
-                      {step?.assignedUsers?.length > 0 && (
-                        <Box ml={1}>
-                          <HtmlTooltip title={step?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                            <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
-                          </HtmlTooltip>
-                        </Box>
-                      )}
                     </Box>
                   </Box>
                   <Box display={'flex'} alignItems={'center'} gridGap={8}>
@@ -1121,6 +1121,7 @@ const Steps = ({
                 </MenuItem>
               )}
               <MenuItem
+                disabled={Boolean(getFields(selectedStep)?.stepData?.startDate)}
                 onClick={(e) => {
                   e.stopPropagation();
                   setUserAssignDialog(true);
@@ -1321,7 +1322,7 @@ const Steps = ({
             }}
             handleSucess={() => {
               setUserAssignDialog(false);
-              fetchServiceData();
+              fetchService()
             }}
           />
         )}
