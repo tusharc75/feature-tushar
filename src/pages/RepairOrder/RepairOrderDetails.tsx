@@ -165,9 +165,14 @@ const RepairOrderDetails = () => {
         setStepList(steps);
         setStepNames(steps.map((item) => item.name));
 
-        setCurrentStep(
-          steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
-        );
+        if (data?.status === REPAIR_ORDER_STATUS.completed) {
+          setCurrentStep(steps?.length - 1);
+        }
+        else {
+          setCurrentStep(
+            steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
+          );
+        }
 
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setRepairOrderData({ ...data });
