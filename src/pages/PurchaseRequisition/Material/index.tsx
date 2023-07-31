@@ -145,30 +145,34 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row, rows }) =>
-        allowedToEdit && (
-          <Grid container spacing={1}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                onMaterialEdit(row, rows);
-              }}
-            >
-              <EditIcon fontSize="small" color={'primary'} />
-            </IconButton>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                setDeleteData(obj);
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          </Grid>
-        )
+      Cell: ({ row, rows }) => (
+        <>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            disabled={allowedToEdit ? false : true}
+            onClick={() => {
+              onMaterialEdit(row, rows);
+            }}
+          >
+            <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+          </IconButton>
+          {allowedToEdit && (
+            <Grid container spacing={1}>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  setDeleteData(obj);
+                }}
+              >
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+            </Grid>
+          )}
+        </>
+      )
     });
     if (!allowedToEdit) {
       coloum?.forEach((e: any) => {
