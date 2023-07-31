@@ -30,6 +30,7 @@ import AssetAvailability from '../AssetAvailability';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -166,7 +167,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
               </Box>
             }
             {!isOffline && (
-                <IconButton
+              <IconButton
                 size="small"
                 onClick={() => {
                   if (row.original.type === 'service') {
@@ -206,36 +207,61 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) => {
-        return allowedToEdit ? (
-          row.original.hideSelection ? (
-            <HtmlTooltip title={'Asset is already assigned'}>
-              <span>
-                <IconButton size="small" aria-label="Details" disabled={true}>
-                  <DeleteIcon fontSize="small" color={'disabled'} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          ) : (
-            <HtmlTooltip title={'Delete'}>
+      Cell: ({ row, rows }) => {
+        return (
+          <>
+            <HtmlTooltip title={(isOffline || !allowedToEdit) ? '' : 'Edit'}>
               <span>
                 <IconButton
                   size="small"
                   aria-label="Details"
+                  disabled={(isOffline || !allowedToEdit) ? true : false}
                   onClick={() => {
-                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                    getNestedSubRows(obj, row.original);
-                    setDeleteData(obj);
+                    setIsProductEdit({
+                      open: true,
+                      data: row.original,
+                      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    });
+                    setIsBulkEdit(false);
                   }}
                 >
-                  <DeleteIcon fontSize="small" color={'error'} />
+                  <EditIcon fontSize="small" color={(isOffline || !allowedToEdit) ? 'disabled' : 'primary'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
-          )
-        ) : (
-          ''
-        );
+            {
+              allowedToEdit ? (
+                row.original.hideSelection ? (
+                  <HtmlTooltip title={'Asset is already assigned'}>
+                    <span>
+                      <IconButton size="small" aria-label="Details" disabled={true}>
+                        <DeleteIcon fontSize="small" color={'disabled'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                ) : (
+                  <HtmlTooltip title={'Delete'}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="Details"
+                        onClick={() => {
+                          const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                          getNestedSubRows(obj, row.original);
+                          setDeleteData(obj);
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" color={'error'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                )
+              ) : (
+                ''
+              )
+            }
+          </>
+        )
       }
     });
     setColumns(column);
