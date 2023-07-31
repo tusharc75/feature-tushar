@@ -20,6 +20,7 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import { calculatePrice } from 'src/components/RentalManagment/helper';
 import Consumables from './Consumables';
 import { fieldTicket } from 'src/constants/helpers';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -131,22 +132,43 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) => {
+      Cell: ({ row, rows }) => {
         return (
-          <HtmlTooltip title={'Delete'}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Delete"
-                disabled={!allowedToEdit}
-                onClick={() => {
-                  setDeleteData([{ id: row.original._id, service: row?.original?.materialId }]);
-                }}
-              >
-                <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
+          <>
+            <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    setIsServiceEdit({
+                      open: true,
+                      data: row.original,
+                      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    });
+                    setIsBulkEdit(false);
+                  }}
+                >
+                  <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+            <HtmlTooltip title={'Delete'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    setDeleteData([{ id: row.original._id, service: row?.original?.materialId }]);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </>
         );
       }
     });
