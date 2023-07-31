@@ -1,33 +1,29 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, MenuItem, Menu } from '@material-ui/core';
+import { Box, Button, IconButton, CircularProgress, MenuItem, Menu } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
 import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import moment from 'moment';
-import { sublease, dateFormat, pricingCondition, formatAmountWithCurrency, SUBLEASE_STATUS } from '../../../constants/helpers';
+import { sublease, pricingCondition, SUBLEASE_STATUS } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QtyDialog from './QtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import InfoIcon from '@material-ui/icons/Info';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdDelete } from 'react-icons/md';
-import { FiPackage } from 'react-icons/fi';
-import { RiEditCircleLine } from 'react-icons/ri';
+import { MdDelete } from 'react-icons/md';
 import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
 import { ExpandMore } from '@material-ui/icons';
 import styles from '../../Leads/Header.module.scss';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -92,7 +88,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
             ) : (
               <p
                 onClick={() => {
-                  handleOpen(row.original);
+                  openMaterial(row.original);
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -155,7 +151,20 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
       sticky: 'right',
       disableFilters: true,
       Cell: ({ row }) =>
-        !row.original.hideSelection &&
+      <>
+       <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={!allowedToEdit}
+              onClick={() => {
+                openMaterial(row.original);
+              }}
+            >
+              <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+            </IconButton>
+       </HtmlTooltip>
+      {!row.original.hideSelection &&
         allowedToEdit && (
           <IconButton
             size="small"
@@ -172,7 +181,9 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
           >
             <DeleteIcon fontSize="small" color="error" />
           </IconButton>
-        )
+        )}
+      </>
+
     });
     coloum.forEach((element) => {
       if (element.accessor === 'qtyDisplay') {
@@ -331,7 +342,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
       });
   };
 
-  const handleOpen = (rowData) => {
+  const openMaterial = (rowData) => {
     setIsProductEdit({ open: true, isBulkedit: false });
     setRecordToUpdate(rowData);
   };
