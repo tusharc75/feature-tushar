@@ -28,6 +28,7 @@ import { flattenArray, generateCustomTableColumns } from 'src/constants/columns'
 import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -127,12 +128,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             ) : (
               <p
                 onClick={() => {
-                  setIsProductEdit({
-                    open: true,
-                    data: row.original,
-                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                  });
-                  setIsBulkEdit(false);
+                  openMaterial(row, rows)
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -159,22 +155,22 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
               </Box>
             }
             {!isOffline && (
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === 'service') {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'product') {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'serializedAsset') {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                    } else {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'serializedAsset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
             )}
           </div>
         )
@@ -199,36 +195,54 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) => {
-        return allowedToEdit ? (
-          row.original.hideSelection ? (
-            <HtmlTooltip title={'Asset is already assigned'}>
-              <span>
-                <IconButton size="small" aria-label="Details" disabled={true}>
-                  <DeleteIcon fontSize="small" color={'disabled'} />
-                </IconButton>
-              </span>
+      Cell: ({ row, rows }) => {
+        return (
+          <>
+            <HtmlTooltip title={(isOffline || !allowedToEdit) ? '' : 'Edit'}>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                disabled={(isOffline || !allowedToEdit) ? true : false}
+                onClick={() => {
+                  openMaterial(row, rows)
+                }}
+              >
+                <EditIcon fontSize="small" color={(isOffline || !allowedToEdit) ? 'disabled' : 'primary'} />
+              </IconButton>
             </HtmlTooltip>
-          ) : (
-            <HtmlTooltip title={'Delete'}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                    getNestedSubRows(obj, row.original);
-                    setDeleteData(obj);
-                  }}
-                >
-                  <DeleteIcon fontSize="small" color={'error'} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          )
-        ) : (
-          ''
-        );
+            {
+              allowedToEdit ? (
+                row.original.hideSelection ? (
+                  <HtmlTooltip title={'Asset is already assigned'}>
+                    <span>
+                      <IconButton size="small" aria-label="Details" disabled={true}>
+                        <DeleteIcon fontSize="small" color={'disabled'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                ) : (
+                  <HtmlTooltip title={'Delete'}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="Details"
+                        onClick={() => {
+                          const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                          getNestedSubRows(obj, row.original);
+                          setDeleteData(obj);
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" color={'error'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                )
+              ) : (
+                ''
+              )
+            }
+          </>
+        )
       }
     });
     setColumns(column);
@@ -445,6 +459,15 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         toastConfig.setToastConfig(error);
         setDeleteData(null);
       });
+  };
+
+  const openMaterial = (data, rows) => {
+    setIsProductEdit({
+      open: true,
+      data: data.original,
+      showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
+    });
+    setIsBulkEdit(false);
   };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
