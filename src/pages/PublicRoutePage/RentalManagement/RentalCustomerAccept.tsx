@@ -38,7 +38,7 @@ const RJCustomerAccept = ({ openAuthId }) => {
 
   const fetchFields = async (rentalManagementData) => {
     const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === rentalManagementData['currency'])?.symbolNative;
-    var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, false);
+    var data = await fetch_rental_product_fields(rentalManagementData?.currency, false);
     const coloum: any = [
       {
         accessor: 'srno',
@@ -332,7 +332,7 @@ const RJCustomerAccept = ({ openAuthId }) => {
                     columns={columns}
                     data={rowsData}
                     setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                    onSelect={() => {}}
+                    onSelect={() => { }}
                     hideSelection={true}
                     hideAction={true}
                     childrenProperty="subRows"
