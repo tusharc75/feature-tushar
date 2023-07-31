@@ -284,45 +284,6 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     <>
       <Box display="flex" justifyContent="flex-end" m={1}>
         <Box display="flex" alignItems="center" gridGap={'8px'} className="isolate">
-          {/* {!isMobile && (
-            <Button
-              onClick={() => {
-                setDownlodingFile(true);
-                axiosInstance()
-                  .get(`/repair-job/${repairJobData._id}/pdf`)
-                  .then(({ data }) => {
-                    axiosInstance()
-                      .get(`user/download?fileName=${data.data.fileName}`, {
-                        responseType: 'blob'
-                      })
-                      .then(({ data }) => {
-                        const file = new Blob([data], { type: 'application/pdf' });
-                        const fileURL = URL.createObjectURL(file);
-                        const pdfWindow = window.open();
-                        pdfWindow.location.href = fileURL;
-                        toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                        setDownlodingFile(false);
-                      })
-                      .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                        setDownlodingFile(false);
-                      });
-                  })
-                  .catch((err) => {
-                    toastConfig.setToastConfig(err);
-                    setDownlodingFile(false);
-                  });
-              }}
-              variant="outlined"
-              color="primary"
-              type="button"
-              size="small"
-              disabled={downlodingFile}
-              startIcon={<AiFillFilePdf />}
-            >
-              {downlodingFile ? 'Please wait...' : 'Preview'}
-            </Button>
-          )} */}
           <PreviewDownload resource={sidebarResource.repairJob} referenceId={repairJobData?._id} columns={newColumns} hideDetailButton={true} />
           {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
             <Fragment>
@@ -371,32 +332,21 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                   {ASSET_STATUS.lost}
                 </MenuItem>
               </Menu>
-              <div className="relative isolate z-[-1]">
-                {selectedRecords.length === 0 ||
-                selectedRecords.some((s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
-                checkUniqcurrentOwnerType() ? null : (
-                  <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">
-                    <span></span>
-                    <span></span>
-                  </span>
-                )}
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  disabled={
-                    selectedRecords.length === 0 ||
-                    selectedRecords.some((s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
-                    checkUniqcurrentOwnerType()
-                  }
-                  onClick={() => {
-                    setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map((m) => m._id)] });
-                  }}
-                >
-                  {isMobile && !isTablet ? 'Complete' : 'Complete Repair'}
-                </Button>
-              </div>
-              <Box mx={1} />
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                disabled={
+                  selectedRecords.length === 0 ||
+                  selectedRecords.some((s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
+                  checkUniqcurrentOwnerType()
+                }
+                onClick={() => {
+                  setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map((m) => m._id)] });
+                }}
+              >
+                {isMobile && !isTablet ? 'Complete' : 'Complete Repair'}
+              </Button>
               <Button
                 variant="outlined"
                 color="default"
@@ -481,7 +431,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 setRepairProcessDialog({ open: true, assetId: data._id, assetNumber: data.assetNumber, repaired: data.repaired });
               }}
               extraParamsToCheckDelete={true}
-              onDelete={() => {}}
+              onDelete={() => { }}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -495,7 +445,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -589,9 +539,8 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       {repairAssetDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to mark repair complete for ${
-            repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
-          } ? `}
+          message={`Are you sure you want to mark repair complete for ${repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
+            } ? `}
           onClose={() => {
             setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
           }}
