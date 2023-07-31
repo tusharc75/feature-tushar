@@ -74,12 +74,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
             ) : (
               <p
                 onClick={() => {
-                  setIsServiceEdit({
-                    open: true,
-                    data: row.original,
-                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                  });
-                  setIsBulkEdit(false);
+                  openMaterial(row, rows)
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -136,23 +131,16 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
         return (
           <>
             <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="Delete"
-                  disabled={!allowedToEdit}
-                  onClick={() => {
-                    setIsServiceEdit({
-                      open: true,
-                      data: row.original,
-                      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                    });
-                    setIsBulkEdit(false);
-                  }}
-                >
-                  <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                </IconButton>
-              </span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={!allowedToEdit}
+                onClick={() => {
+                  openMaterial(row, rows)
+                }}
+              >
+                <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+              </IconButton>
             </HtmlTooltip>
             <HtmlTooltip title={'Delete'}>
               <span>
@@ -197,6 +185,15 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
     }
     setRowsData(data);
     setSelectedServices([]);
+  };
+
+  const openMaterial = (data, rows) => {
+    setIsServiceEdit({
+      open: true,
+      data: data.original,
+      showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
+    });
+    setIsBulkEdit(false);
   };
 
   useEffect(() => {

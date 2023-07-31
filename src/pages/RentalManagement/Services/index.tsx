@@ -128,12 +128,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             ) : (
               <p
                 onClick={() => {
-                  setIsProductEdit({
-                    open: true,
-                    data: row.original,
-                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                  });
-                  setIsBulkEdit(false);
+                  openMaterial(row, rows)
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -204,23 +199,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         return (
           <>
             <HtmlTooltip title={(isOffline || !allowedToEdit) ? '' : 'Edit'}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  disabled={(isOffline || !allowedToEdit) ? true : false}
-                  onClick={() => {
-                    setIsProductEdit({
-                      open: true,
-                      data: row.original,
-                      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                    });
-                    setIsBulkEdit(false);
-                  }}
-                >
-                  <EditIcon fontSize="small" color={(isOffline || !allowedToEdit) ? 'disabled' : 'primary'} />
-                </IconButton>
-              </span>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                disabled={(isOffline || !allowedToEdit) ? true : false}
+                onClick={() => {
+                  openMaterial(row, rows)
+                }}
+              >
+                <EditIcon fontSize="small" color={(isOffline || !allowedToEdit) ? 'disabled' : 'primary'} />
+              </IconButton>
             </HtmlTooltip>
             {
               allowedToEdit ? (
@@ -471,6 +459,15 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         toastConfig.setToastConfig(error);
         setDeleteData(null);
       });
+  };
+
+  const openMaterial = (data, rows) => {
+    setIsProductEdit({
+      open: true,
+      data: data.original,
+      showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
+    });
+    setIsBulkEdit(false);
   };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
