@@ -25,6 +25,7 @@ import { fetch_field_ticket_material_fields } from '../helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculatePrice } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fieldTicketData, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -110,12 +111,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
               ) : (
                 <p
                   onClick={() => {
-                    setIsConsumableEdit({
-                      open: true,
-                      data: row.original,
-                      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                    });
-                    setIsBulkEdit(false);
+                    openMaterial(row, rows)
                   }}
                   className="link text-truncate"
                   title={row.original[e?.fieldName]}
@@ -178,26 +174,40 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       {
         accessor: 'action',
         Header: 'Actions',
-        width: 150,
-        minWidth: 150,
+        width: 50,
+        minWidth: 50,
         sticky: 'right',
         disableFilters: true,
         canDrag: false,
-        Cell: ({ row }: any) => (
-          <HtmlTooltip title={'Delete'}>
-            <span>
+        Cell: ({ row, rows }: any) => (
+          <>
+            <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
               <IconButton
                 size="small"
                 aria-label="Delete"
                 disabled={!allowedToEdit}
                 onClick={() => {
-                  setDeleteData([{ id: row.original._id }]);
+                  openMaterial(row, rows)
                 }}
               >
-                <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
-            </span>
-          </HtmlTooltip>
+            </HtmlTooltip>
+            <HtmlTooltip title={'Delete'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    setDeleteData([{ id: row.original._id }]);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </>
         )
       }
     ];
@@ -364,6 +374,15 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     let rows: any = [{ ...dataRow, ...updatedData }];
     inputField.qty = parseInt(inputField.qty);
     handleSaveData(rows);
+  };
+
+  const openMaterial = (data, rows) => {
+    setIsConsumableEdit({
+      open: true,
+      data: data.original,
+      showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
+    });
+    setIsBulkEdit(false);
   };
 
   const [anchorEl, setAnchorEl] = useState(null);
