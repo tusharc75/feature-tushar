@@ -6,7 +6,7 @@ import HideWhenOffline from '../HideWhenOffline';
 import Activity from '.';
 import { useData } from 'src/StateProvider/Provider';
 
-const ActivityButton = ({ referenceId, resource, handleClose = null }) => {
+const ActivityButton = ({ referenceId, resource, resourceLabel = '', handleClose = null }) => {
   const [showActivity, setActivityShow] = useState(false);
 
   useEffect(() => {
@@ -43,6 +43,7 @@ const ActivityButton = ({ referenceId, resource, handleClose = null }) => {
               {showActivity && (
                 <Activity
                   resourceId={referenceId}
+                  resourceLabel={resourceLabel}
                   resource={resource}
                   restrictedAddActivities={
                     permissions && permissions[`${resource}`] && permissions[`${resource}`].isUpdate ? [] : ['Attachment', 'Case']
@@ -55,7 +56,7 @@ const ActivityButton = ({ referenceId, resource, handleClose = null }) => {
                     }
                   ]}
                   close={() => setActivityShow(false)}
-                  handleActivityRefresh={() => {}}
+                  handleActivityRefresh={() => { }}
                   emails={[]}
                 />
               )}

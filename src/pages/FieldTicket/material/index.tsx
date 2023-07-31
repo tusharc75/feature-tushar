@@ -22,7 +22,7 @@ import Consumables from './Consumables';
 import { fieldTicket } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 
-const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, setNextStep }) => {
+const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, setNextStep, refreshFieldTicket }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
@@ -263,7 +263,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       });
     }
 
-    axiosInstance()
+    await axiosInstance()
       .post(`${fieldTicket.api}/${id}/material`, { material: tempMaterial })
       .then(() => {
         setAddExistingServiceDialog(false);
@@ -272,6 +272,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+    refreshFieldTicket();
   };
 
   const handleDelete = (rows) => {
