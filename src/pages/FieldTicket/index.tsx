@@ -114,7 +114,7 @@ const FieldTicket = () => {
       const getAllData = await findAll(objectStore.fieldTicket);
       let rows = getAllData?.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && finalObject?.ownerId === user?.user?._id ;
+        finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && finalObject?.ownerId === user?.user?._id;
         finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
         finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
         return {
@@ -130,14 +130,17 @@ const FieldTicket = () => {
         .get(`${routes?.fieldTicket.path}${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data?.map((u: any) => {
+            const ownerAndColaborators = [u?.owner, ...u?.collaborator]?.map(o => o?.optionValue);
             let finalObject: any = prepareDataForGrid(u);
-            finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && finalObject?.ownerId === user?.user?._id ;
+            finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && ownerAndColaborators
+              .includes(user?.user?._id) && u?.canDelete
             finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
             finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
             return {
               ...finalObject
             };
           });
+          console.log(rows)
           if (appendRows) {
             dispatch({
               type: 'initialize',
@@ -247,8 +250,8 @@ const FieldTicket = () => {
         </Tooltip>
       ) : (
         <Tooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton aria-label="Delete" size="small">
-            <DeleteIcon fontSize="small" />
+          <IconButton aria-label="Delete">
+            <DeleteIcon fontSize="small" color="disabled" />
           </IconButton>
         </Tooltip>
       )}
