@@ -165,9 +165,14 @@ const RepairOrderDetails = () => {
         setStepList(steps);
         setStepNames(steps.map((item) => item.name));
 
-        setCurrentStep(
-          steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
-        );
+        if (data?.status === REPAIR_ORDER_STATUS.completed) {
+          setCurrentStep(steps?.length - 1);
+        }
+        else {
+          setCurrentStep(
+            steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
+          );
+        }
 
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setRepairOrderData({ ...data });
@@ -305,7 +310,7 @@ const RepairOrderDetails = () => {
                   allowedToEdit &&
                   (enableStatusChange || [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced].includes(repairOrderData?.status)) && (
                     <Fragment>
-                      <div className="relative isolate z-[-1]">
+                      <div className="relative isolate">
                         <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">
                           <span></span>
                           <span></span>
