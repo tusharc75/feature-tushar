@@ -10,6 +10,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import { CHILD_RESOURCE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
 import { isMobile } from 'react-device-detect';
 import { KeyboardArrowDown } from '@material-ui/icons';
@@ -104,21 +105,34 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) =>
-        allowedToEdit && (
-          <Grid container spacing={1}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                setDeleteData(obj);
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          </Grid>
-        )
+      Cell: ({ row, rows }) => (
+        <>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            disabled={allowedToEdit ? false : true}
+            onClick={() => {
+              onMaterialEdit(row, rows);
+            }}
+          >
+            <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+          </IconButton>
+          {allowedToEdit && (
+            <Grid container spacing={1}>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  setDeleteData(obj);
+                }}
+              >
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+            </Grid>
+          )}
+        </>
+      )
     });
     setColumns(coloum);
     fetchJobData();
@@ -227,6 +241,14 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
         setDeleteData(null);
       });
   };
+  const onMaterialEdit = (row, rows) => {
+    setMaterialEdit({
+      open: true,
+      data: row.original,
+      bulkedit: false,
+      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+    });
+  };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
@@ -239,7 +261,13 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center">
-          <Button variant="outlined" size="small" onClick={() => setAddDialog({ open: true, type: 'serializedAsset' })} startIcon={<AddIcon />} color="primary">
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => setAddDialog({ open: true, type: 'serializedAsset' })}
+            startIcon={<AddIcon />}
+            color="primary"
+          >
             Add
           </Button>
         </Box>
