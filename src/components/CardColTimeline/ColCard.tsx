@@ -22,16 +22,25 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
     >
       {cardDataRows.map((item, index) => {
         if (item.type === 'title') {
+          if (item.renderer)
+            return (
+              <div style={{ borderStyle: 'solid' }} className="pb-[12px] mb-[12px] border-b border-[var(--common-border-color)]">
+                {item.renderer(data)}
+              </div>
+            );
           return (
             <Typography key={index} component={'h5'} className={styles.cardTitle} title={data[item.accessor] || '--'}>
               {data[item.accessor] || '--'}
             </Typography>
           );
         }
+        if (item.renderer) {
+          return item.renderer(data);
+        }
         if (item.type === 'linkTitle') {
           return (
             <Typography key={index} component={'h5'} className={styles.cardTitle} title={data[item.accessor] || '--'}>
-              <Link target='_blank' className={styles.cardDetailsLink} to={() => item.link(data)}>
+              <Link target="_blank" className={styles.cardDetailsLink} to={() => item.link(data)}>
                 {data[item.accessor] || '--'}
               </Link>
             </Typography>

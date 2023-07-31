@@ -298,7 +298,7 @@ const RepairOrderDetails = () => {
           <CustomBreadCrumbs routes={[routes.repairOrder, { title: repairOrderData?.repairOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-v1 isolate">
+          <Box className="control-buttons-v1 ">
             {repairOrderData ? (
               <>
                 {permissions?.repairOrder?.isUpdate &&
