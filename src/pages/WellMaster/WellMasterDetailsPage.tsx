@@ -106,7 +106,11 @@ const WellMasterDetailsPage = () => {
               </Button>
             )}
             {permissions?.wellMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={wellMasterData?._id} resource={ACTIVITY_RESOURCE.wellMaster} />
+            <ActivityButton 
+              referenceId={wellMasterData?._id} 
+              resource={ACTIVITY_RESOURCE.wellMaster} 
+              resourceLabel={wellMasterData?.wellName}
+              />
           </Box>
         </Box>
       </Box>

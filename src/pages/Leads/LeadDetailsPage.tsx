@@ -369,7 +369,11 @@ const LeadDetailsPage = () => {
             {leadsPermissions.isDelete && allowedToDelete && (
               <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
-            <ActivityButton referenceId={leadData?._id} resource={ACTIVITY_RESOURCE.lead} />
+            <ActivityButton 
+              referenceId={leadData?._id} 
+              resource={ACTIVITY_RESOURCE.lead} 
+              resourceLabel={`${leadData?.firstName} ${leadData?.lastName}`}
+              />
           </Box>
         </Box>
       </Box>

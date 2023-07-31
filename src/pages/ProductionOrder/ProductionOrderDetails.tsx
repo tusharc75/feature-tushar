@@ -261,7 +261,11 @@ const ProductionOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={productionOrderData?._id} resource={ACTIVITY_RESOURCE.productionOrder} />
+            <ActivityButton 
+              referenceId={productionOrderData?._id} 
+              resource={ACTIVITY_RESOURCE.productionOrder} 
+              resourceLabel={productionOrderData?.productionOrderNumber}
+              />
           </Box>
         </Box>
       </Box>

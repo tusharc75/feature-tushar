@@ -28,7 +28,7 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity, user }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
@@ -152,7 +152,14 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
     const updatedFilters = [];
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {
-        updatedFilters.push(e);
+        if (e?.field === 'preWork') {
+          if (user?.user?.brandPolicy?.servicePrePost) {
+            updatedFilters.push(e);
+          }
+        }
+        else {
+          updatedFilters.push(e);
+        }
       });
     }
     if (!isObjectEmpty(filters)) {

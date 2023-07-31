@@ -66,13 +66,13 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
 
   const fetchFields = async () => {
     setColumns(null);
-    var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     if (!allowedToEdit) {
-      allFields?.forEach((e) => {
+      data?.forEach((e) => {
         e.isColumnEditable = false;
       });
     }
-    setAllFields(JSON.parse(JSON.stringify(allFields)));
+    setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {

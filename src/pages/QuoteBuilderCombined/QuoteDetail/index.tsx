@@ -851,7 +851,11 @@ export default function QuoteDetail() {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={quoteData?._id} resource={ACTIVITY_RESOURCE.quote} />
+            <ActivityButton 
+              referenceId={quoteData?._id} 
+              resource={ACTIVITY_RESOURCE.quote} 
+              resourceLabel={quoteData?.quoteName}
+              />
           </Box>
         </Box>
       </Box>

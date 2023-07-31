@@ -222,7 +222,11 @@ const TransferInventoryDetailPage = () => {
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
-            <ActivityButton referenceId={transferInventoryData?._id} resource={ACTIVITY_RESOURCE.transferInventory} />
+            <ActivityButton 
+              referenceId={transferInventoryData?._id} 
+              resource={ACTIVITY_RESOURCE.transferInventory} 
+              resourceLabel={transferInventoryData?.transferNumber}
+              />
           </Box>
         </Box>
       </Box>

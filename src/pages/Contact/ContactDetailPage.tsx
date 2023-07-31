@@ -595,7 +595,11 @@ const ContactDetailsPage = (props) => {
             {contactPermissions?.isDelete && contactData?.owner?.optionValue && user?.user?._id && contactData.owner.optionValue === user.user._id ? (
               <DeleteButton text={isMobile ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             ) : null}
-            <ActivityButton referenceId={contactData?._id} resource={contactResource} />
+            <ActivityButton 
+              referenceId={contactData?._id} 
+              resource={contactResource} 
+              resourceLabel={`${contactData?.firstName} ${contactData?.lastName}`}
+              />
           </Box>
         </Box>
       </Box>

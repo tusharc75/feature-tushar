@@ -139,7 +139,11 @@ const DemandOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={salesOrderData?._id} resource={ACTIVITY_RESOURCE.demandOrder} />
+            <ActivityButton 
+              referenceId={salesOrderData?._id} 
+              resource={ACTIVITY_RESOURCE.demandOrder} 
+              resourceLabel={salesOrderData?.demandOrderNumber}
+              />
           </Box>
         </Box>
       </Box>
