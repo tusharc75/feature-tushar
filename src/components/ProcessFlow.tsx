@@ -67,24 +67,24 @@ export default function ProcessFlow(props) {
     handleMarkAsCompleted({ isSetBackStep: true });
   };
 
+  if (steps.length === 0) return null;
+
   return (
     <>
-      {steps.length > 0 && (
-        <div className="my-4">
-          <Steps
-            currentStep={currentStep}
-            isNextStep={steps[activeStep + 1]?.canCompleteManually || isProcessing ? false : true || !disableBackNext}
-            isPrevStep={activeStep === 0 ? false : true || !disableBackNext}
-            isStepEnded={currentStep === steps.length + 1}
-            nextStep={steps[activeStep + 1]?.text}
-            setCurrentStep={setCurrentStep}
-            steps={stateSteps}
-            showExtraStep={true}
-            handleNext={handleNext}
-            handlePrev={handleBack}
-          />
-        </div>
-      )}
+      <div className="my-4">
+        <Steps
+          currentStep={currentStep}
+          isNextStep={steps[activeStep + 1]?.canCompleteManually || isProcessing ? false : true || !disableBackNext}
+          isPrevStep={activeStep === 0 ? false : true || !disableBackNext}
+          isStepEnded={currentStep === steps.length + 1}
+          nextStep={steps[activeStep + 1]?.text}
+          setCurrentStep={setCurrentStep}
+          steps={stateSteps}
+          showExtraStep={true}
+          handleNext={handleNext}
+          handlePrev={handleBack}
+        />
+      </div>
     </>
   );
 }
