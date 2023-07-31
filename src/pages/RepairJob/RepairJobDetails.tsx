@@ -42,7 +42,7 @@ const RepairJobDetails = () => {
   const history = useHistory();
 
   const parsed = queryString.parse(history.location.search);
-  const {  tab }: any = parsed;
+  const { tab }: any = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -127,7 +127,7 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchRepairJobData = () => {
@@ -176,14 +176,14 @@ const RepairJobDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairJob.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => {})
+      .then(({ data: { data } }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -215,7 +215,10 @@ const RepairJobDetails = () => {
                 </Button>
               )}
               {/* {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
-              <ActivityButton referenceId={repairJobData?._id} resource={ACTIVITY_RESOURCE.repairJob} />
+              <ActivityButton
+                referenceId={repairJobData?._id}
+                resource={ACTIVITY_RESOURCE.repairJob}
+                resourceLabel={repairJobData?.repairJobName} />
             </>
           </Box>
         </Box>

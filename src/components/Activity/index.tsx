@@ -36,7 +36,8 @@ import CloseIcon from '@material-ui/icons/Close';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import MailIcon from '@material-ui/icons/Mail';
 import HtmlTooltip from '../CustomTooltipTitle';
-import { isEmpty } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
+import routes from '../Helpers/Routes';
 
 const useStyles = makeStyles(() => ({
   activityBox: {
@@ -78,7 +79,7 @@ const useStyles = makeStyles(() => ({
 
 const Activity = (props) => {
   const classes = useStyles();
-  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => {} } = props;
+  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resourceLabel = '', resource = '', close = () => { } } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [type, setType] = useState(null);
@@ -223,7 +224,9 @@ const Activity = (props) => {
     <>
       <Box>
         <Box className={`${classes.detailsHeader} `}>
-          <h2 className="listingHeader single">Collaborate</h2>
+          <h2 className="listingHeader single">
+            {`Collaborate - ${routes[resource]?.title || camelCase(resource)} - ${resourceLabel}`}
+          </h2>
           <IconButton onClick={() => close()} className="close-icon-v1">
             <CloseIcon />
           </IconButton>
