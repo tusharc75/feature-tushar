@@ -291,7 +291,11 @@ const PurchaseOrderDetailsPage = () => {
                 </span>
               </HtmlTooltip>
             )}
-            <ActivityButton referenceId={purchaseOrderData?._id} resource={ACTIVITY_RESOURCE.purchaseOrder} />
+            <ActivityButton 
+              referenceId={purchaseOrderData?._id} 
+              resource={ACTIVITY_RESOURCE.purchaseOrder} 
+              resourceLabel={purchaseOrderData?.purchaseOrderNumber}
+              />
           </Box>
         </Box>
       </Box>

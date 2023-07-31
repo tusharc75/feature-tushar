@@ -544,7 +544,11 @@ const RentalManagementDetailsPage = () => {
                         {'Cancel ' + routes.rentalManagement.title}
                       </Button>
                     )} */}
-                <ActivityButton referenceId={rentalManagementData?._id} resource={ACTIVITY_RESOURCE.rentalManagement} />
+                <ActivityButton 
+                  referenceId={rentalManagementData?._id} 
+                  resource={ACTIVITY_RESOURCE.rentalManagement} 
+                  resourceLabel={rentalManagementData?.rentalJobName}
+                  />
               </>
             </Box>
           </Box>

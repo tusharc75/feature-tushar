@@ -166,7 +166,11 @@ const SubleaseDetailsPage = () => {
                 </Button>
               </>
             )}
-            <ActivityButton referenceId={subleaseData?._id} resource={ACTIVITY_RESOURCE.sublease} />
+            <ActivityButton 
+              referenceId={subleaseData?._id} 
+              resource={ACTIVITY_RESOURCE.sublease} 
+              resourceLabel={subleaseData?.subleaseName}
+              />
           </Box>
         </Box>
       </Box>

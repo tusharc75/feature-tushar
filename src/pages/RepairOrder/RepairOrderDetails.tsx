@@ -402,7 +402,11 @@ const RepairOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={repairOrderData?._id} resource={ACTIVITY_RESOURCE.repairOrder} />
+            <ActivityButton 
+              referenceId={repairOrderData?._id} 
+              resource={ACTIVITY_RESOURCE.repairOrder} 
+              resourceLabel={repairOrderData?.repairOrderNumber}
+              />
           </Box>
         </Box>
       </Box>

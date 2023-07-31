@@ -457,7 +457,11 @@ const QuotationDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={quotationData?._id} resource={ACTIVITY_RESOURCE.quotation} />
+            <ActivityButton 
+              referenceId={quotationData?._id} 
+              resource={ACTIVITY_RESOURCE.quotation} 
+              resourceLabel={quotationData?.quotationNumber}
+              />
           </Box>
         </Box>
       </Box>

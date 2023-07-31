@@ -605,7 +605,11 @@ function OpportunityDetailsPage() {
                   opportunityData.owner.optionValue === user.user._id ? (
                     <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
                   ) : null}
-                  <ActivityButton referenceId={opportunityData?._id} resource={opportunityResource} />
+                  <ActivityButton 
+                    referenceId={opportunityData?._id} 
+                    resource={opportunityResource} 
+                    resourceLabel={opportunityData?.opportunityName}
+                    />
                 </>
               ) : (
                 <Skeleton variant="text" width="150px" height="32px" />

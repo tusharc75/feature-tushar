@@ -158,7 +158,11 @@ const FieldTicketDetail = () => {
               {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
             </Button>
             <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
-            <ActivityButton referenceId={fieldTicketData?._id} resource={ACTIVITY_RESOURCE.fieldTicket} />
+            <ActivityButton 
+              referenceId={fieldTicketData?._id} 
+              resource={ACTIVITY_RESOURCE.fieldTicket} 
+              resourceLabel={fieldTicketData?.fieldTicketNumber}
+              />
           </Box>
         </Box>
       </Box>
