@@ -60,6 +60,8 @@ const WorkOrder = ({
   const [isUpdating, setUpdating] = useState(false);
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
+  const [isBulkEdit, setIsBulkEdit] = useState(false);
+
 
   useEffect(() => {
     fetchFields();
@@ -342,6 +344,7 @@ const WorkOrder = ({
       open: true,
       data: row.original
     });
+    setIsBulkEdit(false);
   }
 
   const handleWorkOrderDelete = (ids) => {
@@ -654,6 +657,7 @@ const WorkOrder = ({
           type: 'success',
           message: data.message
         });
+        setIsBulkEdit(false)
         setUpdateDialog({ open: false, data: null });
       })
       .catch((error) => {
@@ -755,6 +759,27 @@ const WorkOrder = ({
               >
                 Delete
               </MenuItem>
+              <HtmlTooltip
+                title={
+                  Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                    ? 'Bulk edit selected records'
+                    : 'Select records to edit'
+                }
+              >
+                <MenuItem
+                  onClick={() => {
+                    setIsBulkEdit(true)
+                    setUpdateDialog({
+                      open: true,
+                      data: null
+                    });
+                    closeActions()
+                  }}
+                  // disabled={selectedProducts.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
+                >
+                  Bulk Edit
+                </MenuItem>
+              </HtmlTooltip>
             </Menu>
           </Box>
         )}
@@ -860,11 +885,13 @@ const WorkOrder = ({
             <UpdateWorkOrderDialog
               onClose={() => {
                 setUpdateDialog({ open: false, data: null });
+                setIsBulkEdit(false);
               }}
-              materialData={updateDialog.data}
+              materialData={!isBulkEdit ? updateDialog.data : selectedProducts}
               handleUpdate={handleSaveData}
               loadingEdit={isUpdating}
               repairOrderData={repairOrderData}
+              isBulkEdit = {isBulkEdit}
             />
           )}
         </Grid>
