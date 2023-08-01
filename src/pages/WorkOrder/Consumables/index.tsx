@@ -415,7 +415,8 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         {openLogDialog.open && (
           <QtyRequestLog
             uniqueId={openLogDialog.uniqueId}
-            workOrderId={workOrderId}
+            referenceId={workOrderId}
+            referenceType={sidebarResource.workOrder}
             productName={openLogDialog?.data?.productName}
             product={openLogDialog?.product}
             onClose={() => {
