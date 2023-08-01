@@ -12,6 +12,7 @@ import { Autocomplete } from '@material-ui/lab';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import queryString from 'query-string';
 import { useHistory } from 'react-router-dom';
+import { sidebarResource } from 'src/constants/helpers';
 
 const MaterialHandling = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -122,7 +123,7 @@ const MaterialHandling = () => {
               <Autocomplete
                 options={workOrderOptions}
                 fullWidth
-                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionLabel={(option: any) => option?.optionLabel ?? ''}
                 getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                 value={
                   workOrderOptions.filter((data) => data.optionValue === selectedOptionWorkOrder?.optionValue).length
@@ -239,7 +240,7 @@ const MaterialHandling = () => {
                                   variant="subtitle2"
                                   style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8, fontWeight: 600 }}
                                 >
-                                  Work Order : <span style={{ color: 'var(--card-color-secondary)' }}>{data?.workOrderNumber}</span>
+                                  {data?.referenceType} : <span style={{ color: 'var(--card-color-secondary)' }}>{data?.referenceType === sidebarResource.workOrder ? data?.workOrderNumber : data?.referenceType === sidebarResource.fieldTicket ? data?.fieldTicketNumber : ''}</span>
                                 </Typography>
                                 <Box pl={1}>
                                   <IconButton
@@ -275,7 +276,7 @@ const MaterialHandling = () => {
               <Grid item xs={12} md={8} lg={selectedOptionWorkOrder ? 12 : 9}>
                 {selectedWorkOrder && (
                   <Box className="container-with-border " p={3}>
-                    <Request workOrder={selectedWorkOrder?._id} referenceType={selectedWorkOrder?.referenceType} />
+                    <Request referenceId={selectedWorkOrder?._id} referenceType={selectedWorkOrder?.referenceType} />
                   </Box>
                 )}
               </Grid>
