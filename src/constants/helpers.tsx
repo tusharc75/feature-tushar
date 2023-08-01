@@ -2537,7 +2537,8 @@ export const GenerateResourceLineNumber = (fields) => {
   var lineNumber = '';
   if (primaryField) {
     if (primaryField?.isSystemGenerate && !primaryField?.systemGeneratedAutoIncrement) {
-      const prefix = primaryField?.systemGeneratedPrefix != '' ? `${primaryField?.systemGeneratedPrefix}_` : '';
+      const prefix = primaryField?.systemGeneratedPrefix && primaryField?.systemGeneratedPrefix != undefined
+        && primaryField?.systemGeneratedPrefix != '' ? `${primaryField?.systemGeneratedPrefix}_` : '';
       lineNumber = `${prefix}${generateUniqueIdOnly()}`;
     }
     else if (primaryField?.isDefaultValue && primaryField?.defaultValue) {
