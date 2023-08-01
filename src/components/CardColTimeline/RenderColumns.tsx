@@ -43,11 +43,6 @@ const RenderColumns = ({
         handleScroll(scrollAmmount);
       });
     }
-    // if (listWrapperRef.current) {
-    //   const element = listWrapperRef.current as HTMLDivElement;
-    //   console.log('hi');
-    //   element.scrollTo(0, 0);
-    // }
   }, [scrollAmmount, listRef.current]);
 
   const Row = ({ index, style }) => {
