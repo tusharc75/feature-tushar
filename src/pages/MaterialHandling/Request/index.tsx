@@ -19,7 +19,7 @@ import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
 import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
 
-const Request = ({ workOrder, referenceType }) => {
+const Request = ({ referenceId, referenceType }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
@@ -38,12 +38,12 @@ const Request = ({ workOrder, referenceType }) => {
   useEffect(() => {
     fetchColumn();
     fetchData();
-  }, [workOrder]);
+  }, [referenceId]);
 
   const handleUpdateStatus = (status, ids, comment) => {
     setLoading(true);
     axiosInstance()
-      .put(`/material-handling/status`, { status, ids, comment, referenceType, referenceId: workOrder })
+      .put(`/material-handling/status`, { status, ids, comment, referenceType, referenceId: referenceId })
       .then(({ data }) => {
         setLoading(false);
         toastConfig.setToastConfig({
@@ -63,7 +63,7 @@ const Request = ({ workOrder, referenceType }) => {
   const fetchData = () => {
     setRowsData(null);
     axiosInstance()
-      .get(`/material-handling/request?referenceId=${workOrder}&referenceType=${sidebarResource.workOrder}`)
+      .get(`/material-handling/request?referenceId=${referenceId}&referenceType=${referenceType}`)
       .then(({ data: { data } }) => {
         data?.forEach((e) => {
           e.productName = e.product?.optionLabel;
