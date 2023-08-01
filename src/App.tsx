@@ -222,8 +222,6 @@ import DriverMaster from './pages/DriverMaster';
 import DriverMasterDetail from './pages/DriverMaster/DriverMasterDetail';
 import TrailerMaster from './pages/TrailerMaster';
 import TrailerMasterDetail from './pages/TrailerMaster/TrailerMasterDetail';
-import AssetsReceiving from './pages/AssetsReceiving';
-import AssetsReceivingDetail from './pages/AssetsReceiving/AssetsReceivingDetail';
 import FieldTicketInvoice from './pages/FieldTicketInvoice';
 import AzureSSOError from './pages/Auth/AzureSSOError';
 import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
@@ -1013,12 +1011,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.trailerMasterDetail.path}/:id`}>
               <TrailerMasterDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.assetsReceiving.path}`}>
-              <AssetsReceiving />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.assetsReceivingDetail.path}/:id`}>
-              <AssetsReceivingDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
