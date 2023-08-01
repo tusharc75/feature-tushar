@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, setFieldsInAscendingOrder, productAuction, generateUniqueIdOnly } from '../../constants/helpers';
+import { CustomDialogTransition, setFieldsInAscendingOrder, productAuction,GenerateResourceLineNumber } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -50,7 +50,7 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
               if (isClone) {
                 const { _id, createdBy, updatedBy, productAuction, ...rest } = data;
                 rest['status'] = 'New';
-                rest['auctionNumber'] = `AU_${generateUniqueIdOnly()}`;
+                rest['auctionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
                 setInitialData({
                   fields: fieldsDataForCreate,
                   values: getObjKeysWithValues(rest, fieldsDataForCreate)
@@ -71,9 +71,7 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
           if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
             createValues['currency'] = user.user?.brandCurrency;
           }
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'auctionNumber')) {
-            createValues['auctionNumber'] = `AU_${generateUniqueIdOnly()}`;
-          }
+          createValues['auctionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           setInitialData({
             fields: fieldsDataForCreate,
             values: createValues
