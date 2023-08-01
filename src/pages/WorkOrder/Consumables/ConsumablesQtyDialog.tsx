@@ -22,7 +22,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { RESOURCE_LABEL, sidebarResource, workOrder } from 'src/constants/helpers';
+import { sidebarResource, workOrder } from 'src/constants/helpers';
 
 const useClasses = makeStyles(() => ({
   tableContainer: {
@@ -30,7 +30,7 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, selectedRecords, serviceName, consumeRequest }) => {
+const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, onSuccess, selectedRecords, serviceName, consumeRequest }) => {
 
   const classes = useClasses();
   const toastConfig = useContext(CustomToastContext);
@@ -74,10 +74,12 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
       }
     });
     data.products = products;
+    data.referenceId = referenceId;
+    data.referenceType = referenceType;
     if (products?.length) {
       setIsSubmitting(true);
       axiosInstance()
-        .put(`${workOrder.api}/${workOrderId}/consumable/consume`, data)
+        .put('/material-handling/consume', data)
         .then(({ data }) => {
           onSuccess();
           setIsSubmitting(false);
@@ -96,8 +98,8 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
 
   const handleRequest = (values) => {
     const data: any = {
-      referenceType: sidebarResource.workOrder,
-      referenceId: workOrderId
+      referenceType,
+      referenceId
     };
     const products: any = [];
     values?.products?.forEach((e) => {

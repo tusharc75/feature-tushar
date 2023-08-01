@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { fieldTicket, prepareDataForGrid } from 'src/constants/helpers';
+import { fieldTicket, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem, Tab, Tabs, TextField } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -26,6 +26,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculatePrice } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import EditIcon from '@material-ui/icons/Edit';
+import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQtyDialog';
 
 const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fieldTicketData, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -42,6 +43,8 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
+  const [consumeRequest, setConsumeRequest] = useState(false);
+  const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
 
   useEffect(() => {
     setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
@@ -67,6 +70,17 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
 
   useEffect(() => {
     if (columns) {
+      var allowRequest = false;
+      if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
+        if ((fieldTicketData?.warehouse?.manager && fieldTicketData?.warehouse?.manager?.includes(user?.user?._id))
+          || (fieldTicketData?.warehouse?.materialHandlers && fieldTicketData?.warehouse?.materialHandlers?.includes(user?.user?._id))) {
+          allowRequest = false;
+        }
+        else {
+          allowRequest = true;
+        }
+      }
+      setConsumeRequest(allowRequest)
       fetchData();
     }
   }, [columns, services, selectedServiceOption]);
@@ -171,6 +185,19 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
         )
       },
       ...newColumns,
+      {
+        accessor: 'requestedQty',
+        Header: 'Requested Qty',
+        width: 150,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+      },
+      {
+        accessor: 'consumedQty',
+        Header: 'Consumed Qty',
+        primaryField: true,
+        width: 150,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+      },
       {
         accessor: 'action',
         Header: 'Actions',
@@ -439,6 +466,18 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
                 </Button>
               </Box>
               <Box display="flex" ml={1}>
+                <Box display="flex" mr={1}>
+                  <Button
+                    disabled={!Boolean(selectedRecords?.length)}
+                    onClick={() => setOpenConsumablesQtyDialog(true)}
+                    color="primary"
+                    size="small"
+                    variant="contained"
+                  >
+                    {consumeRequest ? 'Request ' : 'Consume '}{' '}
+                    {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
+                  </Button>
+                </Box>
                 <Button
                   variant="outlined"
                   color="primary"
@@ -557,6 +596,22 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
           selectedServices={selectedRecords}
           loading={isUpdating}
           showSaveAndNext={isConsumableEdit.showSaveAndNext}
+        />
+      )}
+
+      {openConsumablesQtyDialog && (
+        <ConsumablesQtyDialog
+          referenceId={id}
+          referenceType={sidebarResource.fieldTicket}
+          onClose={() => setOpenConsumablesQtyDialog(false)}
+          onSuccess={() => {
+            fetchData();
+            setOpenConsumablesQtyDialog(false);
+          }}
+          warehouse={fieldTicketData?.warehouse}
+          selectedRecords={selectedRecords}
+          serviceName={null}
+          consumeRequest={consumeRequest}
         />
       )}
 

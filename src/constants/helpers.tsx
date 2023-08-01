@@ -710,6 +710,14 @@ export const productInventory = {
   permission: 'productInventory',
   resource: 'product-inventory'
 };
+
+export const productCategory = {
+  api: '/product-category',
+  route: '/product-category',
+  permission: 'productCategory',
+  resource: 'Product Categories'
+}
+
 export const budget = {
   budgetApi: '/budget',
   budgetRoute: '/budget',
@@ -2522,3 +2530,19 @@ export const FIELD_TICKET_STATUS = {
   new: 'New',
   submitted: 'Submitted',
 };
+
+
+export const GenerateResourceLineNumber = (fields) => {
+  const primaryField = fields?.find((e) => e?.primaryField)
+  var lineNumber = '';
+  if (primaryField) {
+    if (primaryField?.isSystemGenerate && !primaryField?.systemGeneratedAutoIncrement) {
+      const prefix = primaryField?.systemGeneratedPrefix != '' ? `${primaryField?.systemGeneratedPrefix}_` : '';
+      lineNumber = `${prefix}${generateUniqueIdOnly()}`;
+    }
+    else if (primaryField?.isDefaultValue && primaryField?.defaultValue) {
+      lineNumber = primaryField?.defaultValue;
+    }
+  }
+  return lineNumber;
+}
