@@ -335,7 +335,6 @@ export const sidebarResource = {
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
-  assetsReceiving: 'Assets Receiving'
 };
 
 export const primaryFields = {
@@ -457,7 +456,6 @@ export const RESOURCE_LABEL = {
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
-  assetsReceiving: 'Assets Receiving'
 };
 
 export const CHILD_RESOURCE = {
@@ -1954,7 +1952,6 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
   repairOrder: 'Repair Order',
-  assetsReceiving: 'Assets Receiving'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2537,7 +2534,8 @@ export const GenerateResourceLineNumber = (fields) => {
   var lineNumber = '';
   if (primaryField) {
     if (primaryField?.isSystemGenerate && !primaryField?.systemGeneratedAutoIncrement) {
-      const prefix = primaryField?.systemGeneratedPrefix != '' ? `${primaryField?.systemGeneratedPrefix}_` : '';
+      const prefix = primaryField?.systemGeneratedPrefix && primaryField?.systemGeneratedPrefix != undefined
+        && primaryField?.systemGeneratedPrefix != '' ? `${primaryField?.systemGeneratedPrefix}_` : '';
       lineNumber = `${prefix}${generateUniqueIdOnly()}`;
     }
     else if (primaryField?.isDefaultValue && primaryField?.defaultValue) {

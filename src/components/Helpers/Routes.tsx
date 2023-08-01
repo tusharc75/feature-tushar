@@ -1005,14 +1005,6 @@ const routes = {
         : RESOURCE_LABEL.trailerMaster,
     path: '/trailer-master/detail'
   },
-  assetsReceiving: {
-    title: storedRoutes && storedRoutes.assetsReceiving && storedRoutes.assetsReceiving.title ? storedRoutes.assetsReceiving?.title : RESOURCE_LABEL.assetsReceiving,
-    path: '/assets-receiving'
-  },
-  assetsReceivingDetail: {
-    title: storedRoutes && storedRoutes.assetsReceiving && storedRoutes.assetsReceiving.title ? storedRoutes.assetsReceiving?.title : RESOURCE_LABEL.assetsReceiving,
-    path: '/assets-receiving/detail'
-  },
 };
 
 export default routes;
