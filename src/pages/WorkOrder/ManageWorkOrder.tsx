@@ -13,7 +13,8 @@ import {
   CustomDialogTransition,
   setFieldsInAscendingOrder,
   generateUniqueIdOnly,
-  serializedAsset
+  serializedAsset,
+  GenerateResourceLineNumber
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema, workOrder, sidebarResource } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
@@ -117,9 +118,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
         setAssetOptions(assetOptionsData.filter((i) => i.warehouse === data?.warehouse?.optionValue));
         if (isClone) {
           const { _id, createdBy, updatedBy, workOrderNumber, status, ...rest } = data;
-          if (fieldsDataForUpdate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-            rest['workOrderNumber'] = `WO_${generateUniqueIdOnly()}`;
-          }
+          rest['workOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           rest['status'] = 'New';
           rest['estimateCompleteDate'] = new Date();
           rest['createDate'] = new Date();
@@ -136,9 +135,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         if (referenceType && referenceData) {
-          if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-            tempInitialData['workOrderNumber'] = `WO_${generateUniqueIdOnly()}`;
-          }
+          tempInitialData['workOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           tempInitialData['type'] = referenceType;
           tempInitialData['product'] = referenceData?.product;
           if (referenceType === 'Repair Order') {

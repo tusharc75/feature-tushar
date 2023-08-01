@@ -16,7 +16,8 @@ import {
   quotation,
   setFieldsInAscendingOrder,
   yupSchema,
-  generateUniqueIdOnly
+  generateUniqueIdOnly,
+  GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -75,9 +76,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, quotationNumber, updatedBy, ...rest } = data;
             rest.status = 'New';
-            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-              rest.quotationNumber = `QN_${generateUniqueIdOnly()}`;
-            }
+            rest.quotationNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(quotationNumber);
             setInitialData({
               fields: fieldsDataForCreate,
@@ -97,9 +96,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate), currency: user.user?.brandCurrency || '' };
-        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-          initialData['quotationNumber'] = `QN_${generateUniqueIdOnly()}`;
-        }
+        initialData['quotationNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
