@@ -18,6 +18,7 @@ import {
   transferAsset,
   setFieldsInAscendingOrder,
   generateUniqueIdOnly,
+  GenerateResourceLineNumber,
 } from 'src/constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -94,9 +95,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
               if (isClone) {
                 const { _id, createdBy, updatedBy, entity, transferAssetNumber, ...rest } = data;
                 let oldValues = { ...rest };
-                if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-                  oldValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`;
-                }
+                oldValues.transferAssetNumber = GenerateResourceLineNumber(fieldsDataForCreate);
                 oldValues.status = 'New';
                 setCloneHeading(transferAssetNumber);
                 setInitialData({
@@ -117,9 +116,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
         } else {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
           setAllFields(fieldsDataForCreate);
-          if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-            createValues.transferAssetNumber = `TA_${generateUniqueIdOnly()}`;
-          }
+          createValues.transferAssetNumber = GenerateResourceLineNumber(fieldsDataForCreate);;
           if (referenceType === 'Rental Job') {
             createValues['transferFromPlant'] = referenceData?.transferFromPlant;
             createValues['transfertoPlant'] = referenceData?.transferToPlant;
@@ -492,7 +489,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   <FormTypes
                                     isNew={Boolean(transferAssetId)}
                                     {...field}
-                                    disabled={Boolean(transferAssetId) && field.disableOnEdit}
+                                    disabled={(Boolean(transferAssetId) && field.disableOnEdit) || (field.fieldName === 'transferAssetNumber' && field?.isSystemGenerate)}
                                     values={values}
                                     errors={errors}
                                     touched={touched}
