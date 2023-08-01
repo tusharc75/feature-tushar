@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { workOrder } from 'src/constants/helpers';
+import { sidebarResource, workOrder } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton } from '@material-ui/core';
@@ -400,7 +400,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         {openConsumablesQtyDialog && (
           <ConsumablesQtyDialog
             referenceId={workOrderId}
-            referenceType={'workOrder'}
+            referenceType={sidebarResource.workOrder}
             onClose={() => setOpenConsumablesQtyDialog(false)}
             onSuccess={() => {
               fetchData();

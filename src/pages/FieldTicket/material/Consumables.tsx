@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { fieldTicket, prepareDataForGrid } from 'src/constants/helpers';
+import { fieldTicket, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem, Tab, Tabs, TextField } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -43,6 +43,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
+  const [consumeRequest, setConsumeRequest] = useState(false);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
 
   useEffect(() => {
@@ -69,6 +70,17 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
 
   useEffect(() => {
     if (columns) {
+      var allowRequest = false;
+      if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
+        if ((fieldTicketData?.warehouse?.manager && fieldTicketData?.warehouse?.manager?.includes(user?.user?._id))
+          || (fieldTicketData?.warehouse?.materialHandlers && fieldTicketData?.warehouse?.materialHandlers?.includes(user?.user?._id))) {
+          allowRequest = false;
+        }
+        else {
+          allowRequest = true;
+        }
+      }
+      setConsumeRequest(allowRequest)
       fetchData();
     }
   }, [columns, services, selectedServiceOption]);
@@ -462,7 +474,8 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
                     size="small"
                     variant="contained"
                   >
-                    Request {' '} {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
+                    {consumeRequest ? 'Request ' : 'Consume '}{' '}
+                    {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
                   </Button>
                 </Box>
                 <Button
@@ -589,7 +602,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       {openConsumablesQtyDialog && (
         <ConsumablesQtyDialog
           referenceId={id}
-          referenceType={'fieldTicket'}
+          referenceType={sidebarResource.fieldTicket}
           onClose={() => setOpenConsumablesQtyDialog(false)}
           onSuccess={() => {
             fetchData();
@@ -598,7 +611,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
           warehouse={fieldTicketData?.warehouse}
           selectedRecords={selectedRecords}
           serviceName={null}
-          consumeRequest={true}
+          consumeRequest={consumeRequest}
         />
       )}
 
