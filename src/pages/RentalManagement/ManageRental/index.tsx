@@ -18,6 +18,7 @@ import {
   yupSchema,
   generateUniqueIdOnly,
   RENTAL_STATUS,
+  GenerateResourceLineNumber,
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -83,9 +84,7 @@ const ManageRentalManagementDialog = ({
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, rentalJobName, updatedBy, ...rest } = data;
             rest['status'] = 'New';
-            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-              rest['rentalJobName'] = `RJ_${generateUniqueIdOnly()}`;
-            }
+            rest['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
             rest['estimateStartDate'] = new Date();
             rest['estimateEndDate'] = '';
             rest['actualStartDate'] = '';
@@ -125,9 +124,7 @@ const ManageRentalManagementDialog = ({
         }
         initialData['actualStartDate'] = '';
         initialData['actualEndDate'] = '';
-        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-          initialData['rentalJobName'] = `RJ_${generateUniqueIdOnly()}`;
-        }
+        initialData['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
           if (fieldsDataForCreate?.some((e) => e.fieldName === 'warehouse')) {
             initialData['warehouse'] = referenceData?.warehouse;

@@ -5,7 +5,7 @@ import { Box, Typography, Grid } from '@material-ui/core';
 import RenderColumns from './RenderColumns';
 import { GridSize, BoxProps } from '@material-ui/core';
 
-interface cardColInterface extends BoxProps {
+interface CardColInterface extends BoxProps {
   data: any;
   loading: boolean;
   cardOnClick?: (e: React.MouseEvent, data: any) => void;
@@ -18,6 +18,9 @@ interface cardColInterface extends BoxProps {
   lg?: boolean | GridSize;
   xl?: boolean | GridSize;
   cardHeight?: number;
+  isCreateNew?: boolean;
+  createNew?: () => void;
+  createNewText?: string;
 }
 
 export interface datarowInterface {
@@ -25,9 +28,10 @@ export interface datarowInterface {
   title?: string;
   type: 'date' | 'dateTime' | 'text' | 'timer' | 'link' | 'title' | 'linkTitle';
   link?: (data: any) => string;
+  renderer?: (data: any) => string;
 }
 
-const CardColTimeline: React.FC<cardColInterface> = ({
+const CardColTimeline: React.FC<CardColInterface> = ({
   data,
   loading,
   cardOnClick = null,
@@ -41,6 +45,9 @@ const CardColTimeline: React.FC<cardColInterface> = ({
   lg = false,
   xl = false,
   cardHeight,
+  createNew,
+  createNewText,
+  isCreateNew,
   ...others
 }) => {
   return (
@@ -90,6 +97,9 @@ const CardColTimeline: React.FC<cardColInterface> = ({
                     passFailStatus={passFailStatus}
                     passFailAccessor={passFailAccessor}
                     cardHeight={cardHeight}
+                    isCreateNew={isCreateNew}
+                    createNew={createNew}
+                    createNewText={createNewText}
                   />
                 )}
               </div>
