@@ -88,7 +88,14 @@ const CustomTableWithCard: FC<TableInterface> = ({
       {showSelectAll && (
         <FormGroup row className={styles.selectall}>
           <FormControlLabel
-            control={<Checkbox checked={selected.length === data?.filter((e) => !e?.hideSelection).length} onChange={selectAll} name="select-all" />}
+            control={
+              <Checkbox
+                disabled={data?.filter((e) => !e?.hideSelection).length === 0}
+                checked={selected.length === data?.filter((e) => !e?.hideSelection).length && data?.filter((e) => !e?.hideSelection).length !== 0}
+                onChange={selectAll}
+                name="select-all"
+              />
+            }
             label="Select All"
           />
         </FormGroup>
