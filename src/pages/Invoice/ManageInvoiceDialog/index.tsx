@@ -16,7 +16,6 @@ import {
   invoice,
   setFieldsInAscendingOrder,
   yupSchema,
-  generateUniqueIdOnly,
   GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';

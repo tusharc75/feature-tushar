@@ -12,7 +12,6 @@ import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
-  generateUniqueIdOnly,
   bulkAssetCreation,
   setFieldsInAscendingOrder,
   GenerateResourceLineNumber,

@@ -12,7 +12,6 @@ import {
   getCollaboratorDropdownDataSource,
   CustomDialogTransition,
   setFieldsInAscendingOrder,
-  generateUniqueIdOnly,
   serializedAsset,
   GenerateResourceLineNumber
 } from '../../constants/helpers';
@@ -145,9 +144,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
             tempInitialData['serializedAsset'] = referenceData.serializedAsset;
           }
         } else {
-          if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-            tempInitialData['workOrderNumber'] = `WO_${generateUniqueIdOnly()}`;
-          }
+            tempInitialData['workOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         }
         setInitialData({
           fields: fieldsDataForCreate,
