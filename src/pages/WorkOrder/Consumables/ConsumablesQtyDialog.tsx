@@ -74,10 +74,12 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
       }
     });
     data.products = products;
+    data.referenceId = referenceId;
+    data.referenceType = referenceType;
     if (products?.length) {
       setIsSubmitting(true);
       axiosInstance()
-        .put(`${workOrder.api}/${referenceId}/consumable/consume`, data)
+        .put('/material-handling/consume', data)
         .then(({ data }) => {
           onSuccess();
           setIsSubmitting(false);
