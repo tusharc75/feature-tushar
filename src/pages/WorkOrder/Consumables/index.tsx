@@ -399,7 +399,8 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         )}
         {openConsumablesQtyDialog && (
           <ConsumablesQtyDialog
-            workOrderId={workOrderId}
+            referenceId={workOrderId}
+            referenceType='Work Order'
             onClose={() => setOpenConsumablesQtyDialog(false)}
             onSuccess={() => {
               fetchData();

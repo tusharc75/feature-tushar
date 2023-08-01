@@ -26,6 +26,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculatePrice } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import EditIcon from '@material-ui/icons/Edit';
+import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQtyDialog';
 
 const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fieldTicketData, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -42,6 +43,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
+  const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
 
   useEffect(() => {
     setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
@@ -171,6 +173,19 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
         )
       },
       ...newColumns,
+      {
+        accessor: 'requestedQty',
+        Header: 'Requested Qty',
+        width: 150,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+      },
+      {
+        accessor: 'consumedQty',
+        Header: 'Consumed Qty',
+        primaryField: true,
+        width: 150,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+      },
       {
         accessor: 'action',
         Header: 'Actions',
@@ -439,6 +454,17 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
                 </Button>
               </Box>
               <Box display="flex" ml={1}>
+                <Box display="flex" mr={1}>
+                  <Button
+                    disabled={!Boolean(selectedRecords?.length)}
+                    onClick={() => setOpenConsumablesQtyDialog(true)}
+                    color="primary"
+                    size="small"
+                    variant="contained"
+                  >
+                    Request {' '} {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
+                  </Button>
+                </Box>
                 <Button
                   variant="outlined"
                   color="primary"
@@ -557,6 +583,22 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
           selectedServices={selectedRecords}
           loading={isUpdating}
           showSaveAndNext={isConsumableEdit.showSaveAndNext}
+        />
+      )}
+
+      {openConsumablesQtyDialog && (
+        <ConsumablesQtyDialog
+          referenceId={id}
+          referenceType='Field Ticket'
+          onClose={() => setOpenConsumablesQtyDialog(false)}
+          onSuccess={() => {
+            fetchData();
+            setOpenConsumablesQtyDialog(false);
+          }}
+          warehouse={fieldTicketData?.warehouse}
+          selectedRecords={selectedRecords}
+          serviceName={null}
+          consumeRequest={true}
         />
       )}
 
