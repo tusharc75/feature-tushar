@@ -1207,6 +1207,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
             }
           ]}
           assignedUsers={selectedService?.assignedUsers}
+          reference={"service"}
           handleClose={() => {
             setUserAssignDialog(false);
           }}

@@ -126,7 +126,11 @@ const ProductCategoryDetailPage = () => {
                 </Button>
               )}
               {permissions?.productCategory?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={productCategoryData?._id} resource={ACTIVITY_RESOURCE.productCategory} />   
+            <ActivityButton 
+              referenceId={productCategoryData?._id} 
+              resource={ACTIVITY_RESOURCE.productCategory} 
+              resourceLabel={productCategoryData?.name}
+              />   
             </Box>
           </Box>
         </Box>

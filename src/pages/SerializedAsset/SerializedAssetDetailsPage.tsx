@@ -368,6 +368,7 @@ const SerializedAssetDetailsPage = () => {
             <ActivityButton
               referenceId={assetDetails?._id}
               resource={ACTIVITY_RESOURCE.serializedAsset}
+              resourceLabel={assetDetails?.assetNumber}
               handleClose={() => {
                 fetchData();
               }} />

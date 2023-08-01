@@ -695,6 +695,7 @@ const Quotation = ({
                 quotationData?.versions[currentVersion]?.status
               )
             }
+            hideAction={invoiceStep}
             onSaveEdit={onSaveInlineEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}

@@ -78,7 +78,6 @@ function OpportunityDetailsPage() {
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' });
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
 
   const [messageDialog, setMessageDialog] = useState({
     open: false,
@@ -228,12 +227,6 @@ function OpportunityDetailsPage() {
             tempExpanded.customerContacts = false;
           }
           setExpanded(tempExpanded);
-          if (isAllowedToEdit && openEdit === 'true') {
-            setOpenUpdateDialog(true);
-            const params = new URLSearchParams();
-            params.delete('openEdit');
-            history.push({ search: params.toString() });
-          }
           getOpportunityFields(data);
           setCustomizedRoutes([routes.opportunity, { title: `${data.opportunityName}` }]);
         })
@@ -612,7 +605,11 @@ function OpportunityDetailsPage() {
                   opportunityData.owner.optionValue === user.user._id ? (
                     <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
                   ) : null}
-                  <ActivityButton referenceId={opportunityData?._id} resource={opportunityResource} />
+                  <ActivityButton 
+                    referenceId={opportunityData?._id} 
+                    resource={opportunityResource} 
+                    resourceLabel={opportunityData?.opportunityName}
+                    />
                 </>
               ) : (
                 <Skeleton variant="text" width="150px" height="32px" />

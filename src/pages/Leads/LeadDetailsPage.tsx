@@ -30,7 +30,6 @@ const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
@@ -142,13 +141,6 @@ const LeadDetailsPage = () => {
           setLeadData(data);
           getLeadFields();
           setCustomizedRoutes([routes.lead, { title: name }]);
-
-          if (isAllowedToEdit && openEdit === 'true') {
-            setOpenUpdateDialog(true);
-            const params = new URLSearchParams();
-            params.delete('openEdit');
-            history.push({ search: params.toString() });
-          }
         })
         .catch((err) => {
           setLoading(false);
@@ -377,7 +369,11 @@ const LeadDetailsPage = () => {
             {leadsPermissions.isDelete && allowedToDelete && (
               <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
-            <ActivityButton referenceId={leadData?._id} resource={ACTIVITY_RESOURCE.lead} />
+            <ActivityButton 
+              referenceId={leadData?._id} 
+              resource={ACTIVITY_RESOURCE.lead} 
+              resourceLabel={`${leadData?.firstName} ${leadData?.lastName}`}
+              />
           </Box>
         </Box>
       </Box>

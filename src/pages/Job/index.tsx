@@ -428,7 +428,7 @@ const Job = () => {
                   selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
                   dispatch={dispatch}
                   onEdit={(data) => {
-                    history.push(`${routes.jobDetail.path}/${data._id}?openEdit=true`);
+                    history.push(`${routes.jobDetail.path}/${data._id}`);
                   }}
                   extraParamsToCheckDelete={true}
                   onDelete={(data) => {

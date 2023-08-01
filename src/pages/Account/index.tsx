@@ -986,7 +986,7 @@ export default function Account(props) {
               selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
               dispatch={dispatch}
               onEdit={(d) => {
-                history.push(`${accountApi}/detail/${d._id}?openEdit=true`);
+                history.push(`${accountApi}/detail/${d._id}`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(d) => {

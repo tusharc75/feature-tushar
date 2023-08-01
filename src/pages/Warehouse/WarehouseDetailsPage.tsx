@@ -14,7 +14,7 @@ import ManageWarehouse from './ManageWarehouse';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { BiEdit } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
-import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, warehouse } from 'src/constants/helpers';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import StorageLocation from './StorageLocation';
 import Users from './Users';
@@ -130,7 +130,11 @@ const WarehouseDetailsPage = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={warehouseData?._id} resource={ACTIVITY_RESOURCE.warehouse} />
+            <ActivityButton 
+              referenceId={warehouseData?._id} 
+              resource={ACTIVITY_RESOURCE.warehouse} 
+              resourceLabel={warehouseData?.warehouseName}
+              />
           </Box>
         </Box>
       </Box>

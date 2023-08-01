@@ -121,7 +121,11 @@ const CompetencyMasterDetail = () => {
               )}
               {permissions?.competencyType?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
-            <ActivityButton referenceId={competencyMasterData?._id} resource={ACTIVITY_RESOURCE.competencyType} />
+            <ActivityButton 
+              referenceId={competencyMasterData?._id} 
+              resource={ACTIVITY_RESOURCE.competencyType} 
+              resourceLabel={competencyMasterData?.competencyType}
+              />
           </Box>
         </Box>
       </Box>

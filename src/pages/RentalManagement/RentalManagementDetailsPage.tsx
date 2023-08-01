@@ -62,7 +62,7 @@ const RentalManagementDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
 
   const {
     state: { user, permissions }
@@ -253,12 +253,6 @@ const RentalManagementDetailsPage = () => {
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       setIsProcessor(isProcessor);
       setRentalManagementData(data);
-      if (isAllowedToEdit && openEdit === 'true') {
-        setOpenUpdateDialog(true);
-        const params = new URLSearchParams();
-        params.delete('openEdit');
-        history.push({ search: params.toString() });
-      }
     } catch (error) {
       setLoadingDetails(false);
       toastConfig.setToastConfig(error);
@@ -550,7 +544,11 @@ const RentalManagementDetailsPage = () => {
                         {'Cancel ' + routes.rentalManagement.title}
                       </Button>
                     )} */}
-                <ActivityButton referenceId={rentalManagementData?._id} resource={ACTIVITY_RESOURCE.rentalManagement} />
+                <ActivityButton 
+                  referenceId={rentalManagementData?._id} 
+                  resource={ACTIVITY_RESOURCE.rentalManagement} 
+                  resourceLabel={rentalManagementData?.rentalJobName}
+                  />
               </>
             </Box>
           </Box>

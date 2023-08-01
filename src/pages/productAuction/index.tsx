@@ -412,7 +412,7 @@ const ProductAuction = () => {
                 selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${routes.productAuctionDetail.path}/${data._id}?openEdit=true`);
+                  history.push(`${routes.productAuctionDetail.path}/${data._id}`);
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {

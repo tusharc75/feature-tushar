@@ -84,7 +84,6 @@ export default function AccountDetailPage(props) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const {
     account: { accountApi, accountResource, accountRoute },
     accountBreadcrumb,
@@ -377,12 +376,6 @@ export default function AccountDetailPage(props) {
     // }
     getAccountFields(data);
     setLoading(false);
-    if (openEdit === 'true') {
-      setOpenUpdateDialog(true);
-      const params = new URLSearchParams();
-      params.delete('openEdit');
-      history.push({ search: params.toString() });
-    }
     initializeGraphData();
   };
 
@@ -771,7 +764,11 @@ export default function AccountDetailPage(props) {
             accountData.owner.optionValue === user.user._id ? (
               <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
             ) : null}
-            <ActivityButton referenceId={accountData?._id} resource={accountResource} />
+            <ActivityButton 
+              referenceId={accountData?._id} 
+              resource={accountResource} 
+              resourceLabel={accountData?.accountName}
+              />
           </Box>
         </Box>
       </Box>

@@ -379,7 +379,7 @@ const PricingConditions = () => {
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.pricingConditionDetail.path}/${data._id}?openEdit=true`);
+                history.push(`${routes.pricingConditionDetail.path}/${data._id}`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {

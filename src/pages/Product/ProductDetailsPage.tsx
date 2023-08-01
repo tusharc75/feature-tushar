@@ -60,7 +60,6 @@ const ProductDetailsPage = () => {
     state: { user, permissions }
   }: any = useData();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingWarehouse, setLoadingWarehouse] = useState(false);
@@ -163,12 +162,6 @@ const ProductDetailsPage = () => {
             }
             setProductData(data.productData);
             setLoading(false);
-            if (openEdit === 'true') {
-              setOpenUpdateDialog(true);
-              const params = new URLSearchParams();
-              params.delete('openEdit');
-              history.push({ search: params.toString() });
-            }
           })
           .catch((error) => {
             toastConfig.setToastConfig(error);
@@ -280,7 +273,11 @@ const ProductDetailsPage = () => {
             {permissions?.product?.isDelete && (
               <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
-            <ActivityButton referenceId={productData?._id} resource={ACTIVITY_RESOURCE.product} />
+            <ActivityButton 
+              referenceId={productData?._id} 
+              resource={ACTIVITY_RESOURCE.product} 
+              resourceLabel={productData?.productName}
+              />
           </Box>
         </Box>
       </Box>

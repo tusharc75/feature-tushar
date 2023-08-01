@@ -449,7 +449,7 @@ const DynamicForm = () => {
                 selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${detailPagePath}/${data._id}?openEdit=true`);
+                  history.push(`${detailPagePath}/${data._id}`);
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {

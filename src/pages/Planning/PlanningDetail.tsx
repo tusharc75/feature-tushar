@@ -126,7 +126,11 @@ const PlanningDetail = () => {
               {permissions?.planning?.isDelete && allowedToDelete && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
-            <ActivityButton referenceId={planningData?._id} resource={ACTIVITY_RESOURCE.planning} />
+            <ActivityButton 
+              referenceId={planningData?._id} 
+              resource={ACTIVITY_RESOURCE.planning} 
+              resourceLabel={planningData?.planningNumber}
+              />
             </>
           </Box>
         </Box>

@@ -256,6 +256,20 @@ const WorkOrder = ({
       Cell: ({ row }) => {
         return (
           <>
+            {row?.original?.type === 'service' && (
+              <HtmlTooltip title="Edit">
+                <IconButton
+                  color="primary"
+                  size="small"
+                  aria-label="Edit"
+                  onClick={() => {
+                    openMaterial(row);
+                  }}
+                >
+                  <EditIcon color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
             {row?.original?.type === 'service' || row?.original?.type === 'package' ? (
               <>
                 <IconButton
@@ -315,20 +329,6 @@ const WorkOrder = ({
                   <MdAssignmentTurnedIn fontSize="20" />
                 </IconButton>
               </HtmlTooltip>
-            )}
-             {row?.original?.type === 'service' && (
-               <HtmlTooltip title="Edit">
-               <IconButton
-                 color="primary"
-                 size="small"
-                 aria-label="Edit"
-                 onClick={() => {
-                   openMaterial(row);
-                 }}
-               >
-                 <EditIcon color="primary" />
-               </IconButton>
-             </HtmlTooltip>
             )}
           </>
         );
@@ -808,6 +808,7 @@ const WorkOrder = ({
                     workOrderId: d?.workOrder?._id
                   };
                 })}
+              reference='service'
               assignedUsers={allAssignedUsers}
               handleClose={() => {
                 setUserAssignDialog(false);

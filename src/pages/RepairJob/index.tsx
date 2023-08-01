@@ -485,7 +485,7 @@ const RepairJob = () => {
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${routes.repairJobDetail.path}/${data._id}?openEdit=true`)
+                  history.push(`${routes.repairJobDetail.path}/${data._id}`)
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {
