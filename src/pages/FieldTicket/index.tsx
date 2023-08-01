@@ -140,7 +140,6 @@ const FieldTicket = () => {
               ...finalObject
             };
           });
-          console.log(rows)
           if (appendRows) {
             dispatch({
               type: 'initialize',

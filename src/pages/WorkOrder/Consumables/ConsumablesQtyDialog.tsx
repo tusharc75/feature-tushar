@@ -96,7 +96,7 @@ const ConsumablesQtyDialog = ({ workOrderId, warehouse, onClose, onSuccess, sele
 
   const handleRequest = (values) => {
     const data: any = {
-      referenceType: RESOURCE_LABEL.workOrder,
+      referenceType: sidebarResource.workOrder,
       referenceId: workOrderId
     };
     const products: any = [];

@@ -18,8 +18,7 @@ function SSOLoginButton() {
         try {
             await axiosInstance().get(`/brand/saml-check/${name}`).then(async ({ data: { data } }) => {
                 const res = await axiosInstance().get(backendApi + '/user/login/sso/' + data?.brand);
-                const {data:resData} = res
-                console.log(res.data);
+                const { data: resData } = res
                 window.location.href = resData.redirectUrl
             })
             setChecking(false)
