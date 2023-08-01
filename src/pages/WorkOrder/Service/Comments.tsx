@@ -15,7 +15,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import EditIcon from '@material-ui/icons/Edit';
 
-const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId }) => {
+const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, userId }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState(null);
   const [comment, setComment] = useState('');
@@ -141,15 +141,17 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId }) =
                     ) : (
                       <>
                         <p className="basis-[calc(100%-100px)] font-[500] text-[16px]">{item.comment}</p>
-                        <IconButton
-                          aria-label="edit"
-                          onClick={(e) => {
-                            handleEdit(item);
-                          }}
-                          size="small"
-                        >
-                          <EditIcon color="primary" fontSize="small" />
-                        </IconButton>
+                        {userId === item?.user?.optionValue ? (
+                          <IconButton
+                            aria-label="edit"
+                            onClick={(e) => {
+                              handleEdit(item);
+                            }}
+                            size="small"
+                          >
+                            <EditIcon color="primary" fontSize="small" />
+                          </IconButton>
+                        ) : null}
                       </>
                     )}
                   </div>

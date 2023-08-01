@@ -16,7 +16,6 @@ import {
   rentalManagement,
   setFieldsInAscendingOrder,
   yupSchema,
-  generateUniqueIdOnly,
   RENTAL_STATUS,
   GenerateResourceLineNumber,
 } from '../../../constants/helpers';
