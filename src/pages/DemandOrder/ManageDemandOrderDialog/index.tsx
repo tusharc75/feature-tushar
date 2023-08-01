@@ -16,7 +16,8 @@ import {
   setFieldsInAscendingOrder,
   yupSchema,
   generateUniqueIdOnly,
-  demandOrder
+  demandOrder,
+  GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -67,9 +68,7 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
 
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, demandOrderNumber, updatedBy, ...rest } = data;
-            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-              rest.demandOrderNumber = `DO_${generateUniqueIdOnly()}`;
-            }
+            rest['demandOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(demandOrderNumber);
             setSalesData({
               fields: fieldsDataForCreate,
@@ -88,9 +87,7 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-          initialData['demandOrderNumber'] = `DO_${generateUniqueIdOnly()}`;
-        }
+        initialData['demandOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         setSalesData({
           fields: fieldsDataForCreate,
           initialValues: initialData
@@ -152,7 +149,6 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
       });
     }
   };
-
 
   return (
     <>
