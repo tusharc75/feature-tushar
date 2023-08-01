@@ -1120,16 +1120,18 @@ const Steps = ({
                   Add/Consume Products
                 </MenuItem>
               )}
-              <MenuItem
-                disabled={Boolean(getFields(selectedStep)?.stepData?.startDate)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setUserAssignDialog(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Assign Technicians
-              </MenuItem>
+              {referencType !== 'workOrderTechnician' && (
+                <MenuItem
+                  disabled={Boolean(getFields(selectedStep)?.stepData?.startDate)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setUserAssignDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Assign Technicians
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1311,7 +1313,7 @@ const Steps = ({
             workOrderData={{
               workOrderId: workOrderId
             }}
-            assignedUsers={selectedService?.assignedUsers}
+            assignedUsers={selectedStep?.assignedUsers}
             reference={"steps"}
             referenceData={{
               stepId: selectedStep?._id,
