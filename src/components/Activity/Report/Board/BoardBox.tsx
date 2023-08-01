@@ -14,11 +14,11 @@ const useStyles = makeStyles(() => ({
     flexDirection: 'column',
     position: 'relative',
     margin: '0px 6px 14px',
-    borderRadius: '4px',
-    // boxShadow: 'rgb(23 43 77 / 20%) 0px 1px 1px, rgb(23 43 77 / 20%) 0px 0px 1px',
+    borderRadius: '8px',
+    boxShadow: '0px 3.5833494663238525px 26.8751220703125px rgba(0, 0, 0, 0.06)',
     backgroundColor: 'var(--dark-primary, rgb(255, 255, 255))',
     color: 'var(--dark-primary-text, rgb(23, 43, 77))',
-    padding: '14px 15px',
+    padding: '11px 18px',
     transition: 'transform .2s, background .3s',
     '&:hover': {
       transform: 'scale(1.02)',
@@ -128,76 +128,28 @@ export const BoardBox = (props) => {
             handleActivityOpen(id);
           }
         }}
-        className={` ${classes.activitybox}`}
+        className={` ${classes.activitybox} text-[#2A3042] dark:text-white`}
         style={{ opacity }}
       >
+        <div className="flex flex-wrap items-center justify-between gap-4  mb-[5px]">
+          <Typography className=" truncate" variant="subtitle2" style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.57 }}>
+            {data?.name}
+          </Typography>
+          {canDelete ? (
+            <IconButton size="small" aria-label="delete" onClick={handleOpenMenu}>
+              <MoreHoriz />
+            </IconButton>
+          ) : null}
+        </div>
+        <Typography
+          className="flex gap-[5px] items-center text-[#6B6B6B] dark:text-[var(--dark-secondary-text)] pb-[12px] mb-[12px]"
+          variant="body2"
+          style={{ fontSize: 12, borderBottom: '1px solid var(--common-border-color)', marginBottom: 12 }}
+        >
+          <DateRange className="text-[#000] dark:text-white" style={{ fontSize: 12 }} />
+          {new Date(data?.dueDate).toDateString()}
+        </Typography>
         <Box>
-          <Grid container>
-            <Grid item xs={11}>
-              <Box display="flex" mr="10px">
-                <Typography
-                  style={{
-                    textOverflow: 'ellipsis',
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                    marginRight: '5px'
-                  }}
-                  variant="subtitle2"
-                >
-                  {data?.name}
-                </Typography>
-                <Chip
-                  size="small"
-                  icon={
-                    <DateRange
-                      style={{
-                        color:
-                          // new Date(data?.dueDate).getDate() < new Date().getDate() ||
-                          // new Date(data?.dueDate).getMonth() < new Date().getMonth() ||
-                          // new Date(data?.dueDate).getFullYear() < new Date().getFullYear()
-                          //   ? '#dc3545'
-                          //   : new Date(data?.dueDate).getDate() === new Date().getDate() &&
-                          //     new Date(data?.dueDate).getMonth() === new Date().getMonth() &&
-                          //     new Date(data?.dueDate).getFullYear() === new Date().getFullYear()
-                          //   ? '#28a745'
-                          //   : '#838485'
-                          '#969696'
-                      }}
-                      fontSize="small"
-                    />
-                  }
-                  label={new Date(data?.dueDate).toDateString()}
-                  style={{
-                    background: 'transparent',
-                    color:
-                      // new Date(data?.dueDate).getDate() < new Date().getDate() ||
-                      // new Date(data?.dueDate).getMonth() < new Date().getMonth() ||
-                      // new Date(data?.dueDate).getFullYear() < new Date().getFullYear()
-                      //   ? '#dc3545'
-                      //   : new Date(data?.dueDate).getDate() === new Date().getDate() &&
-                      //     new Date(data?.dueDate).getMonth() === new Date().getMonth() &&
-                      //     new Date(data?.dueDate).getFullYear() === new Date().getFullYear()
-                      //   ? '#28a745'
-                      //   : '#838485'
-                      '#969696'
-                  }}
-                />
-              </Box>
-            </Grid>
-            {canDelete ? (
-              <Grid item xs={1}>
-                <IconButton size="small" aria-label="delete" onClick={handleOpenMenu}>
-                  <MoreHoriz />
-                </IconButton>
-              </Grid>
-            ) : null}
-          </Grid>
-          {/* COMMENTED DESCTIPTION BOARD */}
-          {/* <Typography color="textSecondary" variant="body2">
-            {data?.description}
-          </Typography> */}
-        </Box>
-        <Box pt={2}>
           <ListRelatedTo relatedTo={data?.relatedTo} originRelatedTo={[]} />
         </Box>
         {canDelete ? (
