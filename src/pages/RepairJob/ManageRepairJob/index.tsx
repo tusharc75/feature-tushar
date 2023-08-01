@@ -17,7 +17,8 @@ import {
   yupSchema,
   repairJobProcessSteps,
   generateUniqueIdOnly,
-  sidebarResource
+  sidebarResource,
+  GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -68,9 +69,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
               if (isClone) {
                 const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
                 setTitle(`Clone - ${repairJobName}`);
-                if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-                  rest.repairJobName = `RJ_${generateUniqueIdOnly()}`;
-                }
+                rest.repairJobName = GenerateResourceLineNumber(fieldsDataForCreate);
                 rest.status = `New`;
                 setInitialData({
                   fields: fieldsDataForCreate,
@@ -107,9 +106,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
         } else {
           setTitle(`Create ${routes.repairJob.title}`);
           let initialData = getObjKeys('', fieldsDataForCreate);
-          if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-            initialData['repairJobName'] = `RJ_${generateUniqueIdOnly()}`;
-          }
+          initialData['repairJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
           if (fieldsDataForCreate?.some((e) => e.fieldName === 'expectedCompletionDate')) {
             initialData['expectedCompletionDate'] = null;
           }
