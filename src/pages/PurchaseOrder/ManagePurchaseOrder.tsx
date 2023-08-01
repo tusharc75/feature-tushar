@@ -15,6 +15,7 @@ import {
   purchaseOrder,
   PURCHASE_ORDER_STATUS,
   setFieldsInAscendingOrder,
+  GenerateResourceLineNumber,
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -70,10 +71,7 @@ const ManagePurchaseOrder = ({
               if (isClone) {
                 const { _id, createdBy, updatedBy, serialNumber, purchaseOrderNumber, ...rest } = data;
                 rest['status'] = PURCHASE_ORDER_STATUS.open;
-                const purchaseOrderNumberField = fieldsDataForCreate?.find((e) => e.fieldName === 'purchaseOrderNumber')
-                if (purchaseOrderNumberField) {
-                  rest['purchaseOrderNumber'] = purchaseOrderNumberField?.defaultValue;
-                }
+                rest['purchaseOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
                 if (fieldsDataForCreate?.filter((e) => e.fieldName === 'purchaseOrderDate').length) {
                   rest['purchaseOrderDate'] = new Date();
                 }
@@ -105,6 +103,7 @@ const ManagePurchaseOrder = ({
             });
         } else {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
+          createValues['purchaseOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           if (rentalManagementId) {
             createValues['rentalJob'] = rentalManagementId;
           }
