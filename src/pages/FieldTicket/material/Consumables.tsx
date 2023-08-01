@@ -589,7 +589,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       {openConsumablesQtyDialog && (
         <ConsumablesQtyDialog
           referenceId={id}
-          referenceType='Field Ticket'
+          referenceType={'fieldTicket'}
           onClose={() => setOpenConsumablesQtyDialog(false)}
           onSuccess={() => {
             fetchData();

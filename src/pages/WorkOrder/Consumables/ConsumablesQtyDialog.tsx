@@ -96,7 +96,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
 
   const handleRequest = (values) => {
     const data: any = {
-      referenceType: referenceType,
+      referenceType: sidebarResource[referenceType],
       referenceId: referenceId
     };
     const products: any = [];
