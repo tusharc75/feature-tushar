@@ -15,9 +15,8 @@ import {
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
   yupSchema,
-  generateUniqueIdOnly,
   productionOrder,
-  GenerateResourceLineNumber 
+  GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -214,35 +213,35 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field) => (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                      <FormTypes
-                                        productionOrderId={productionOrderId}
-                                        {...field}
-                                        fieldData={field}
-                                        fields={initialData?.fields}
-                                        disabled={productionOrderId && field.disableOnEdit}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                            : null
-                                        }
-                                      />
+                                    <FormTypes
+                                      productionOrderId={productionOrderId}
+                                      {...field}
+                                      fieldData={field}
+                                      fields={initialData?.fields}
+                                      disabled={productionOrderId && field.disableOnEdit}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      imageOrFileUploadCompletePercentage={
+                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                          ? (completePercentage) => {
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
+                                          : null
+                                      }
+                                    />
                                   </Grid>
                                 ))}
                               </Grid>
