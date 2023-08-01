@@ -3915,11 +3915,3 @@ body {
     transform: scale3d(1.4, 1.4, 1);
   }
 }
-
-.hiddenScrollbar {
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}

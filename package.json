@@ -19,7 +19,6 @@
     "@sentry/react": "^6.8.0",
     "@sentry/tracing": "^6.8.0",
     "@tinymce/tinymce-react": "^3.12.6",
-    "@types/react-window": "^1.8.5",
     "@typescript-eslint/eslint-plugin": "4.5.0",
     "@typescript-eslint/parser": "4.5.0",
     "ag-grid-community": "25.3.0",
