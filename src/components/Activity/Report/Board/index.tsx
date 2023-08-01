@@ -189,52 +189,50 @@ const Board = ({ type, filter }) => {
         )}
       </Box>
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-        <Grid container spacing={2} className={` ${classes.activityMainBlock}`}>
+        <div className=" grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 h-[calc(100vh-32vh)] overflow-auto">
           {statusList.map((data, index) => {
             return (
-              <Grid item md={3} xs={12} sm={4} style={{ paddingTop: '0px' }} key={index} className={classes.mediumDevice}>
-                <div className={classes.block}>
-                  {!loading && (
-                    <Box p={1} className="fixedBoardHeader">
-                      <Typography variant="subtitle2" style={{ width: '50%' }}>
-                        {data.status.toUpperCase()}
-                        {' (' +
-                          activities.filter(function (o) {
-                            return o.status === data.status;
-                          }).length +
-                          ')'}
-                      </Typography>
-                      {permissions && permissions[type?.toLowerCase()]?.isCreate ? (
-                        <Tooltip title={`Create ${type}`}>
-                          <IconButton
-                            size="small"
-                            style={{ float: 'right', marginTop: '-25px' }}
-                            onClick={() => {
-                              setSelectedStatus(data.status);
-                              setOpenDialog(true);
-                              setFullScreen(false);
-                            }}
-                          >
-                            <Add fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      ) : null}
-                    </Box>
-                  )}
-                  <BoardList
-                    loading={loading}
-                    selectedResource={selectedResourceData}
-                    resource={resource?.optionValue}
-                    status={data.status}
-                    activity={activities.filter(function (o) {
-                      return o.status === data.status;
-                    })}
-                    fetchBoard={fetchBoard}
-                    type={type}
-                    handleChangeStatus={handleChangeStatus}
-                  />
-                </div>
-              </Grid>
+              <div className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px]`}>
+                {!loading && (
+                  <Box className="bg-[var(--dark-secondary,#f1f5ff)] sticky top-0 z-10 rounded-[8px] px-[13px] py-[14px]">
+                    <Typography variant="subtitle2" style={{ width: '50%', fontSize: '0.95rem', fontWeight: 700 }} className=" capitalize">
+                      {data.status}
+                      {' (' +
+                        activities.filter(function (o) {
+                          return o.status === data.status;
+                        }).length +
+                        ')'}
+                    </Typography>
+                    {permissions && permissions[type?.toLowerCase()]?.isCreate ? (
+                      <Tooltip title={`Create ${type}`}>
+                        <IconButton
+                          size="small"
+                          style={{ float: 'right', marginTop: '-25px' }}
+                          onClick={() => {
+                            setSelectedStatus(data.status);
+                            setOpenDialog(true);
+                            setFullScreen(false);
+                          }}
+                        >
+                          <Add fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    ) : null}
+                  </Box>
+                )}
+                <BoardList
+                  loading={loading}
+                  selectedResource={selectedResourceData}
+                  resource={resource?.optionValue}
+                  status={data.status}
+                  activity={activities.filter(function (o) {
+                    return o.status === data.status;
+                  })}
+                  fetchBoard={fetchBoard}
+                  type={type}
+                  handleChangeStatus={handleChangeStatus}
+                />
+              </div>
             );
           })}
           <Dialog
@@ -294,7 +292,7 @@ const Board = ({ type, filter }) => {
               />
             ) : null}
           </Dialog>
-        </Grid>
+        </div>
       </DndProvider>
     </>
   );
