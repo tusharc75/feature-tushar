@@ -710,6 +710,14 @@ export const productInventory = {
   permission: 'productInventory',
   resource: 'product-inventory'
 };
+
+export const productCategory = {
+  api: '/product-category',
+  route: '/product-category',
+  permission: 'productCategory',
+  resource: 'Product Categories'
+}
+
 export const budget = {
   budgetApi: '/budget',
   budgetRoute: '/budget',
