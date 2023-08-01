@@ -61,6 +61,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
   };
 
   const handleSubmit = (values) => {
+    let api;
     const data: any = {};
     const products: any = [];
     values?.products?.forEach((e) => {
@@ -73,11 +74,18 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
         });
       }
     });
+    if (referenceType === sidebarResource.workOrder) {
+      api = `${workOrder.api}/${referenceId}/consumable/consume`
+    } else if (referenceType === sidebarResource.fieldTicket) {
+      api = '/material-handling/consume'
+      data.referenceId = referenceId;
+      data.referenceType = referenceType;
+    }
     data.products = products;
     if (products?.length) {
       setIsSubmitting(true);
       axiosInstance()
-        .put(`${workOrder.api}/${referenceId}/consumable/consume`, data)
+        .put(api, data)
         .then(({ data }) => {
           onSuccess();
           setIsSubmitting(false);
