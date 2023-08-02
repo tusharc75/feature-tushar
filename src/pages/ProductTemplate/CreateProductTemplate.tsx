@@ -409,76 +409,74 @@ const ProductTemplate = () => {
               {({ submitForm, touched, errors, setFieldValue, values }) => (
                 <Form>
                   <Box p={1}>
-                    <Grid container spacing={3}>
-                      <Grid item xs={12} sm={3}>
-                        <TextField
-                          disabled={!hasPermissionToUpdate}
-                          variant="outlined"
-                          type="text"
-                          label="Product Template Name"
-                          required={true}
-                          name="name"
-                          fullWidth
-                          margin="dense"
-                          value={values['name']}
-                          error={touched['name'] && Boolean(errors['name'])}
-                          helperText={touched['name'] && errors['name']}
-                          onChange={(e) => {
-                            setFieldValue('name', e.target.value.trimStart());
-                          }}
+                    <div className="grid md:grid-cols-2 lg:grid-cols-[3fr_108px_3fr_180px] items-center md:gap-4 mb-2">
+                      <TextField
+                        disabled={!hasPermissionToUpdate}
+                        variant="outlined"
+                        type="text"
+                        label="Product Template Name"
+                        required={true}
+                        name="name"
+                        fullWidth
+                        margin="dense"
+                        value={values['name']}
+                        error={touched['name'] && Boolean(errors['name'])}
+                        helperText={touched['name'] && errors['name']}
+                        onChange={(e) => {
+                          setFieldValue('name', e.target.value.trimStart());
+                        }}
+                      />
+
+                      <Box>
+                        <FormControlLabel
+                          style={{ marginRight: 0 }}
+                          control={
+                            <Checkbox
+                              disabled={!hasPermissionToUpdate}
+                              name="isStandard"
+                              checked={values['isStandard']}
+                              onChange={(e) => {
+                                setFieldValue('isStandard', e.target.checked);
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label="Standard"
                         />
-                      </Grid>
-                      <Grid item xs={12} sm={1}>
-                        <Box mt={0.5} mr={3}>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                disabled={!hasPermissionToUpdate}
-                                name="isStandard"
-                                checked={values['isStandard']}
-                                onChange={(e) => {
-                                  setFieldValue('isStandard', e.target.checked);
-                                }}
-                                color="primary"
-                              />
-                            }
-                            label="Standard"
-                          />
-                        </Box>
-                      </Grid>
-                      <Grid item xs={12} sm={4}>
-                        {!values['isStandard'] && (
-                          <Autocomplete
-                            disabled={!hasPermissionToUpdate}
-                            options={productCategory}
-                            multiple
-                            getOptionLabel={(option: any) => (option ? option.name : '')}
-                            getOptionSelected={(option: any, val) => option._id === val}
-                            value={
-                              productCategory.filter((data) => values['productCategory']?.some((d) => d === data._id)).length
-                                ? productCategory.filter((data) => values['productCategory']?.some((d) => d === data._id))
-                                : []
-                            }
-                            onChange={(e, val) => {
-                              setFieldValue('productCategory', val && val?.map((d) => d._id));
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                margin="dense"
-                                name="productCategory"
-                                label="Product Category"
-                                variant="outlined"
-                                error={touched['productCategory'] && Boolean(errors['productCategory'])}
-                                helperText={touched['productCategory'] && errors['productCategory']}
-                                required={true}
-                                fullWidth
-                              />
-                            )}
-                          />
-                        )}
-                      </Grid>
-                      <Grid item xs={12} sm={4} container justify="flex-end">
+                      </Box>
+
+                      {!values['isStandard'] && (
+                        <Autocomplete
+                          disabled={!hasPermissionToUpdate}
+                          options={productCategory}
+                          multiple
+                          getOptionLabel={(option: any) => (option ? option.name : '')}
+                          getOptionSelected={(option: any, val) => option._id === val}
+                          value={
+                            productCategory.filter((data) => values['productCategory']?.some((d) => d === data._id)).length
+                              ? productCategory.filter((data) => values['productCategory']?.some((d) => d === data._id))
+                              : []
+                          }
+                          onChange={(e, val) => {
+                            setFieldValue('productCategory', val && val?.map((d) => d._id));
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              margin="dense"
+                              name="productCategory"
+                              label="Product Category"
+                              variant="outlined"
+                              error={touched['productCategory'] && Boolean(errors['productCategory'])}
+                              helperText={touched['productCategory'] && errors['productCategory']}
+                              required={true}
+                              fullWidth
+                            />
+                          )}
+                        />
+                      )}
+
+                      <div className="ml-auto flex mt-3 md:mt-0">
                         <HistoryButton onClick={() => setShowHistory(true)} />
                         <Box>
                           {((id === '0' && productTemplatePermissions.isCreate) || (id !== '0' && productTemplatePermissions.isUpdate)) && (
@@ -516,139 +514,125 @@ const ProductTemplate = () => {
                             Close
                           </Button>
                         </Box>
-                      </Grid>
-                    </Grid>
-                    <Grid container spacing={3}>
-                      <Grid item xs={12} sm={4}>
-                        {
-                          <Autocomplete
-                            disabled={!hasPermissionToUpdate}
-                            multiple
-                            options={user?.entity}
-                            getOptionLabel={(option: any) => (option ? option?.entityName : '')}
-                            value={
-                              user?.entity.filter((data) => values['entity']?.some((d) => d === data._id)).length
-                                ? user?.entity.filter((data) => values['entity']?.some((d) => d === data._id))
-                                : []
-                            }
-                            onChange={(e, val) => {
-                              setFieldValue('entity', val && val?.map((d) => d._id));
-                              val && val.length !== 0
-                                ? setOwnerCollaboratorData(
-                                    ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                                  )
-                                : setOwnerCollaboratorData(ownerCollaboratorDataConst);
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                margin="dense"
-                                name="entity"
-                                label="Entity"
-                                variant="outlined"
-                                error={touched['entity'] && Boolean(errors['entity'])}
-                                helperText={touched['entity'] && errors['entity']}
-                                fullWidth
-                              />
-                            )}
-                          />
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_153px] items-center md:gap-4 mb-2">
+                      <Autocomplete
+                        disabled={!hasPermissionToUpdate}
+                        multiple
+                        options={user?.entity}
+                        getOptionLabel={(option: any) => (option ? option?.entityName : '')}
+                        value={
+                          user?.entity.filter((data) => values['entity']?.some((d) => d === data._id)).length
+                            ? user?.entity.filter((data) => values['entity']?.some((d) => d === data._id))
+                            : []
                         }
-                      </Grid>
-                      <Grid item xs={12} sm={4}>
-                        {
-                          <Autocomplete
-                            disabled={!hasPermissionToUpdate}
-                            getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
-                            value={
-                              ownerCollaboratorData.filter((data) => data._id === values['owner']).length
-                                ? ownerCollaboratorData.filter((data) => data._id === values['owner'])[0]
-                                : ''
-                            }
-                            options={ownerCollaboratorData.filter((user) => !values['collaborator']?.some((d) => user._id === d))}
-                            onChange={(e, val) => {
-                              setFieldValue('owner', val && val._id ? val._id : '');
-                            }}
-                            onOpen={() =>
-                              values['entity'] && values['entity'].length !== 0
-                                ? setOwnerCollaboratorData(
-                                    ownerCollaboratorDataConst.filter((data) =>
-                                      values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                    )
-                                  )
-                                : setOwnerCollaboratorData(ownerCollaboratorDataConst)
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                margin="dense"
-                                name="owner"
-                                label="Owner"
-                                variant="outlined"
-                                error={touched['owner'] && Boolean(errors['owner'])}
-                                helperText={touched['owner'] && errors['owner']}
-                                required={true}
-                                fullWidth
-                              />
-                            )}
-                          />
-                        }
-                      </Grid>
-                      <Grid item xs={12} sm={3}>
-                        {
-                          <Autocomplete
-                            disabled={!hasPermissionToUpdate}
-                            multiple
-                            options={ownerCollaboratorData.filter((d) => d._id !== values['owner'])}
-                            getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
-                            value={
-                              ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id)).length
-                                ? ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id))
-                                : []
-                            }
-                            onChange={(e, val) => {
-                              setFieldValue('collaborator', val && val?.map((d) => d._id));
-                            }}
-                            onOpen={() =>
-                              values['entity'] && values['entity'].length !== 0
-                                ? setOwnerCollaboratorData(
-                                    ownerCollaboratorDataConst.filter((data) =>
-                                      values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                    )
-                                  )
-                                : setOwnerCollaboratorData(ownerCollaboratorDataConst)
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                margin="dense"
-                                name="collaborator"
-                                label="Collaborator"
-                                variant="outlined"
-                                error={touched['collaborator'] && Boolean(errors['collaborator'])}
-                                helperText={touched['collaborator'] && errors['collaborator']}
-                                fullWidth
-                              />
-                            )}
-                          />
-                        }
-                      </Grid>
-                      <Grid item xs={12} sm={1} container>
-                        <Box mt={1}>
-                          <Button
+                        onChange={(e, val) => {
+                          setFieldValue('entity', val && val?.map((d) => d._id));
+                          val && val.length !== 0
+                            ? setOwnerCollaboratorData(
+                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                              )
+                            : setOwnerCollaboratorData(ownerCollaboratorDataConst);
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            margin="dense"
+                            name="entity"
+                            label="Entity"
                             variant="outlined"
-                            size="small"
-                            className={'btn-outline-v1'}
-                            onClick={() => {
-                              setGeneralRemarkOpen(true);
-                            }}
-                          >
-                            General Remark
-                          </Button>
-                        </Box>
-                      </Grid>
-                    </Grid>
+                            error={touched['entity'] && Boolean(errors['entity'])}
+                            helperText={touched['entity'] && errors['entity']}
+                            fullWidth
+                          />
+                        )}
+                      />
+
+                      <Autocomplete
+                        disabled={!hasPermissionToUpdate}
+                        getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
+                        value={
+                          ownerCollaboratorData.filter((data) => data._id === values['owner']).length
+                            ? ownerCollaboratorData.filter((data) => data._id === values['owner'])[0]
+                            : ''
+                        }
+                        options={ownerCollaboratorData.filter((user) => !values['collaborator']?.some((d) => user._id === d))}
+                        onChange={(e, val) => {
+                          setFieldValue('owner', val && val._id ? val._id : '');
+                        }}
+                        onOpen={() =>
+                          values['entity'] && values['entity'].length !== 0
+                            ? setOwnerCollaboratorData(
+                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                              )
+                            : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            margin="dense"
+                            name="owner"
+                            label="Owner"
+                            variant="outlined"
+                            error={touched['owner'] && Boolean(errors['owner'])}
+                            helperText={touched['owner'] && errors['owner']}
+                            required={true}
+                            fullWidth
+                          />
+                        )}
+                      />
+
+                      <Autocomplete
+                        disabled={!hasPermissionToUpdate}
+                        multiple
+                        options={ownerCollaboratorData.filter((d) => d._id !== values['owner'])}
+                        getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
+                        value={
+                          ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id)).length
+                            ? ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id))
+                            : []
+                        }
+                        onChange={(e, val) => {
+                          setFieldValue('collaborator', val && val?.map((d) => d._id));
+                        }}
+                        onOpen={() =>
+                          values['entity'] && values['entity'].length !== 0
+                            ? setOwnerCollaboratorData(
+                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                              )
+                            : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            margin="dense"
+                            name="collaborator"
+                            label="Collaborator"
+                            variant="outlined"
+                            error={touched['collaborator'] && Boolean(errors['collaborator'])}
+                            helperText={touched['collaborator'] && errors['collaborator']}
+                            fullWidth
+                          />
+                        )}
+                      />
+
+                      <div className="mt-2 md:mt-0">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          className={'btn-outline-v1'}
+                          onClick={() => {
+                            setGeneralRemarkOpen(true);
+                          }}
+                        >
+                          General Remark
+                        </Button>
+                      </div>
+                    </div>
                   </Box>
-                  <Box>
+                  <Box className="">
                     <FormBuilder
                       section={section}
                       setSection={setSection}
