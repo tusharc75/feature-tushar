@@ -32,9 +32,9 @@ const Entity: FC = () => {
 
   const renderedFrom = camelCase(routes?.entity.title);
 
-  const provider = useData();
-  const { permissions, user } = provider?.state;
-  const mappedEntitiesDispatch = provider?.dispatch;
+  const {
+    state: { permissions, user }
+  }: any = useData();
 
   const { getColumnData } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, entityId: null });
