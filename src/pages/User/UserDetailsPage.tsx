@@ -256,7 +256,7 @@ const UserDetailsPage = () => {
       onClick: () => {
         setOrgChartInFullScreenDialog(true);
       },
-      icon: <FcFlowChart />,
+      icon: <FcFlowChart size={42} />,
       show: true,
       class: 'account'
     }
@@ -380,9 +380,9 @@ const UserDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`
-      }))
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`
+        }))
       : [];
 
     setUserList(rows);
@@ -624,11 +624,11 @@ const UserDetailsPage = () => {
                   onClick={() => handleDeleteUser(true)}
                 />
               ) : null}
-              <ActivityButton 
-                referenceId={userData?._id} 
-                resource={ACTIVITY_RESOURCE.user} 
+              <ActivityButton
+                referenceId={userData?._id}
+                resource={ACTIVITY_RESOURCE.user}
                 resourceLabel={`${userData?.firstName} ${userData?.lastName}`}
-                />
+              />
             </Box>
           </Box>
         </Box>
@@ -1113,8 +1113,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
               : roleDeleteRec
-                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
-                : ''
+              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
+              : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

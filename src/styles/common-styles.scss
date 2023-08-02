@@ -198,18 +198,18 @@ $sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
 }
 
 // Margins
-@include fixed-list-loop('.mt-', 'margin-top', 'rem');
-@include fixed-list-loop('.mr-', 'margin-right', 'rem');
-@include fixed-list-loop('.mb-', 'margin-bottom', 'rem');
-@include fixed-list-loop('.ml-', 'margin-left', 'rem');
-@include fixed-list-loop('.m-', 'margin', 'rem');
+// @include fixed-list-loop('.mt-', 'margin-top', 'rem');
+// @include fixed-list-loop('.mr-', 'margin-right', 'rem');
+// @include fixed-list-loop('.mb-', 'margin-bottom', 'rem');
+// @include fixed-list-loop('.ml-', 'margin-left', 'rem');
+// @include fixed-list-loop('.m-', 'margin', 'rem');
 
 // Paddings
-@include fixed-list-loop('.pt-', 'padding-top', 'rem');
-@include fixed-list-loop('.pr-', 'padding-right', 'rem');
-@include fixed-list-loop('.pb-', 'padding-bottom', 'rem');
-@include fixed-list-loop('.pl-', 'padding-left', 'rem');
-@include fixed-list-loop('.p-', 'padding', 'rem');
+// @include fixed-list-loop('.pt-', 'padding-top', 'rem');
+// @include fixed-list-loop('.pr-', 'padding-right', 'rem');
+// @include fixed-list-loop('.pb-', 'padding-bottom', 'rem');
+// @include fixed-list-loop('.pl-', 'padding-left', 'rem');
+// @include fixed-list-loop('.p-', 'padding', 'rem');
 
 // Font size
 @include fixed-list-loop('.font-size-', 'font-size', 'rem');

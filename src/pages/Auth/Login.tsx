@@ -57,14 +57,6 @@ const Login = () => {
           localStorage.setItem('gridMetaData', tempMetaData);
           dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
 
-          let mappedEntities = [];
-          if (data.entity && data.entity.length) {
-            data.entity.forEach((o) => {
-              mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
-            });
-          }
-          localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
-
           dispatch({ type: SET_USER, payload: data });
           if (data?.role?.selectedEntity?._id) {
             dispatch({
@@ -104,14 +96,6 @@ const Login = () => {
         setSubmitting(false);
         const { data } = response;
         localStorage.setItem('token', data.token);
-
-        let mappedEntities = [];
-        if (data.entity && data.entity.length) {
-          data.entity.forEach((o) => {
-            mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
-          });
-        }
-        localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
 
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {

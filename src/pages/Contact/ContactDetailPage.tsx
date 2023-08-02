@@ -8,14 +8,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from '../../StateProvider/Provider';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import axiosInstance from './../../axios/axiosInstance';
-import {
-  getObjKeysWithValues,
-  sidebarResource,
-  customerAccount,
-  processFieldName,
-  userType,
-  customerContact
-} from './../../constants/helpers';
+import { getObjKeysWithValues, sidebarResource, customerAccount, processFieldName, userType, customerContact } from './../../constants/helpers';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageContactDialog from './ManageContact';
@@ -328,7 +321,7 @@ const ContactDetailsPage = (props) => {
       onClick: () => {
         setOrgChartInFullScreenDialog(true);
       },
-      icon: <AccountHierarchyIcon width={23} height={23} />,
+      icon: <AccountHierarchyIcon width={42} height={42} />,
       show: true,
       class: 'account'
     }
@@ -423,7 +416,6 @@ const ContactDetailsPage = (props) => {
     }
     setOpenUpdateDialog(true);
   };
-
 
   const handleSave = (data) => {
     setShowAtLast(true);
@@ -555,7 +547,6 @@ const ContactDetailsPage = (props) => {
 
   let filteredContactFields = contactFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -587,7 +578,12 @@ const ContactDetailsPage = (props) => {
               </Button>
             )}
             {contactPermissions?.isUpdate && canEdit ? (
-              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} size="small" onClick={handleOpneUpdateDialog} className={'btn-outline-v1'}>
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                size="small"
+                onClick={handleOpneUpdateDialog}
+                className={'btn-outline-v1'}
+              >
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             ) : null}
@@ -595,11 +591,11 @@ const ContactDetailsPage = (props) => {
             {contactPermissions?.isDelete && contactData?.owner?.optionValue && user?.user?._id && contactData.owner.optionValue === user.user._id ? (
               <DeleteButton text={isMobile ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             ) : null}
-            <ActivityButton 
-              referenceId={contactData?._id} 
-              resource={contactResource} 
+            <ActivityButton
+              referenceId={contactData?._id}
+              resource={contactResource}
               resourceLabel={`${contactData?.firstName} ${contactData?.lastName}`}
-              />
+            />
           </Box>
         </Box>
       </Box>
@@ -886,7 +882,7 @@ const ContactDetailsPage = (props) => {
             setOpenUpdateDialog(false);
           }}
           onSuccess={() => {
-            fetchContactData()
+            fetchContactData();
             setOpenUpdateDialog(false);
           }}
         />

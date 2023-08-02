@@ -9,7 +9,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 const style = {
   cursor: 'pointer',
-  backgroundColor: 'white'
+  backgroundColor: 'var(--dark-primary, white)'
 };
 
 export const DragBox = ({ data, handleEdit, handleDelete, handleAddField }) => {
