@@ -409,7 +409,7 @@ const ProductTemplate = () => {
               {({ submitForm, touched, errors, setFieldValue, values }) => (
                 <Form>
                   <Box p={1}>
-                    <Grid container spacing={1}>
+                    <Grid container spacing={3}>
                       <Grid item xs={12} sm={3}>
                         <TextField
                           disabled={!hasPermissionToUpdate}
@@ -429,7 +429,7 @@ const ProductTemplate = () => {
                         />
                       </Grid>
                       <Grid item xs={12} sm={1}>
-                        <Box mt={0.5}>
+                        <Box mt={0.5} mr={3}>
                           <FormControlLabel
                             control={
                               <Checkbox
@@ -518,7 +518,7 @@ const ProductTemplate = () => {
                         </Box>
                       </Grid>
                     </Grid>
-                    <Grid container spacing={1}>
+                    <Grid container spacing={3}>
                       <Grid item xs={12} sm={4}>
                         {
                           <Autocomplete

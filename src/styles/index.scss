@@ -877,6 +877,9 @@ body::-webkit-scrollbar-thumb {
 
 .text-primary {
   color: var(--primary);
+  [data-mode='dark'] & {
+    color: white;
+  }
 }
 
 .text-error {
@@ -950,17 +953,17 @@ body::-webkit-scrollbar-thumb {
 }
 
 .badge-date {
-  background: #ebf9ff;
+  background: var(--dark-secondary, #ebf9ff);
   padding: 0px 6px;
   border-radius: 2px;
   margin-left: 2px;
-  color: #001520;
+  color: var(--dark-secondary-text, #001520);
   display: inline-block !important;
   text-align: right;
   align-items: inherit;
   font-weight: bold;
   font-size: 0.6rem;
-  border: 1px solid #bbd5e0;
+  border: 1px solid var(--common-border-color);
   margin-left: 10px;
 }
 
@@ -3913,5 +3916,12 @@ body {
   100% {
     opacity: 0;
     transform: scale3d(1.4, 1.4, 1);
+  }
+}
+
+.MuiChip-colorPrimary {
+  [data-mode='dark'] & {
+    color: white !important;
+    background: var(--dark-secondary) !important;
   }
 }
