@@ -17,7 +17,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import QtyWithdrawalDialog from './QtyWithdrawalDialog';
 
-function QtyRequestLog({ onClose, workOrderId, uniqueId, productName, product }) {
+function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productName, product }) {
 
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
@@ -34,7 +34,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName, product })
   useEffect(() => {
     fetchColumn();
     fetchData();
-  }, [workOrderId, uniqueId]);
+  }, [referenceId, uniqueId]);
 
   const fetchColumn = async () => {
     setColumns(null)
@@ -182,7 +182,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName, product })
 
   const fetchData = () => {
     axiosInstance()
-      .get(`/material-handling/request?referenceId=${workOrderId}&referenceType=${sidebarResource.workOrder}`)
+      .get(`/material-handling/request?referenceId=${referenceId}&referenceType=${referenceType}`)
       .then(({ data: { data } }) => {
         const filteredData = data?.filter((e) => e.uniqueId === uniqueId);
         filteredData?.forEach((e) => {
@@ -270,7 +270,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName, product })
             setWithdrawalQtyDialog({ open: false, data: null })
           }}
           data={withdrawalQtyDialog.data}
-          workOrderId={workOrderId}
+          workOrderId={referenceId}
         />}
     </>
   );
