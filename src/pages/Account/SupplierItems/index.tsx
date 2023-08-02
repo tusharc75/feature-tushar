@@ -16,13 +16,19 @@ import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile, isTablet } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import { useHistory } from 'react-router-dom';
+import queryString from 'query-string';
 
-function SupplierItems({ api, id, allowedToEdit }) {
 
+function SupplierItems({ api, id, allowedToEdit, permission }) {
+    const history = useHistory();
+    const parsed = queryString.parse(history.location.search);
+    const { itemTab }: any = parsed;
     const toastConfig = useContext(CustomToastContext);
     const { getColumnData } = useColumns();
     const renderForm = camelCase(routes?.supplierAccount?.title + '_supplierItems');
-    const [tabValue, setTabValue] = useState(0);
+    const [tabValue, setTabValue] = useState(itemTab ? parseInt(itemTab) : 0);
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({});
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -149,11 +155,26 @@ function SupplierItems({ api, id, allowedToEdit }) {
 
 
     const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+        history.push(`?itemTab=${newValue}`);
         setTabValue(newValue);
     };
 
     return (
         <>
+            <Box display="flex" justifyContent={"space-between"}>
+                <Box />
+                <ImportExportMenu
+                    permissions={permission}
+                    module="supplier-account-items"
+                    api={`${api}/items/${id}`}
+                    afterImportCompleted={() => {
+                        fetchData();
+                    }}
+                    isExportAllOrSomeFeature={true}
+                    ids={[]}
+                    additionalParams={``}
+                />
+            </Box>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
                 <CustomTab index={0} label={'Product Category'} value={0} primaryColor={true} />
                 <CustomTab index={1} label={'Products'} value={1} primaryColor={true} />
@@ -161,7 +182,7 @@ function SupplierItems({ api, id, allowedToEdit }) {
             </CustomTabs>
 
             <Box display="flex" justifyContent={"space-between"}>
-                <Button variant="outlined" color="primary" size="small"
+                <Button variant="contained" color="primary" size="small"
                     onClick={() => {
                         if (tabValue === 0) {
                             setAssignDialog({ open: true, type: 'productCategory', data: dataRows })
@@ -225,7 +246,7 @@ function SupplierItems({ api, id, allowedToEdit }) {
                         renderedFrom={renderForm}
                         refreshGrid={fetchData}
                         selectedRecords={selectedRecords}
-                        showFilters={true}
+                        showFilters={false}
                         allowSelection={true}
                         showOnlyShowFilteredRecordSwitch={false}
                     />
@@ -252,7 +273,7 @@ function SupplierItems({ api, id, allowedToEdit }) {
                         loading={loading}
                         renderedFrom={renderForm}
                         refreshGrid={fetchData}
-                        showFilters={true}
+                        showFilters={false}
                         allowSelection={true}
                         showOnlyShowFilteredRecordSwitch={false}
                     />
@@ -279,7 +300,7 @@ function SupplierItems({ api, id, allowedToEdit }) {
                         loading={loading}
                         renderedFrom={renderForm}
                         refreshGrid={fetchData}
-                        showFilters={true}
+                        showFilters={false}
                         allowSelection={true}
                         showOnlyShowFilteredRecordSwitch={false}
                     />

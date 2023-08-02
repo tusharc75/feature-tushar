@@ -1019,7 +1019,7 @@ export default function AccountDetailPage(props) {
             </TabPanel>
             {accountResource === 'supplierAccount' && permissions?.productInventory && tabValue === 3 && (
               <TabPanel value={tabValue} index={3}>
-                <SupplierItems api={accountApi} id={id} allowedToEdit={permissions[accountResource].isUpdate} />
+                <SupplierItems api={accountApi} id={id} allowedToEdit={permissions[accountResource].isUpdate} permission={permissions[accountResource]} />
               </TabPanel>
             )}
             {accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (

@@ -65,10 +65,9 @@
     border-top: 2px solid #cdcdcd;
   }
 
-
   .google-visualization-orgchart-node {
     position: relative;
-    box-shadow: 0px 3px 7px #6e6d6d !important;
+    box-shadow: unset !important;
     position: relative;
     overflow: hidden;
     cursor: pointer;
@@ -149,8 +148,14 @@
   background-color: white;
 
   &.current {
-    border: 3px solid #bce2c3;
-    background: #e7f8ea;
+    border: 3px solid #d0daf3;
+    background: var(--accordion-expanded-summary-bg, #f1f5ff);
+    [data-mode='dark'] & {
+      border: 3px solid #3a3874 !important;
+      * {
+        color: white !important;
+      }
+    }
   }
 }
 .badgescard {
