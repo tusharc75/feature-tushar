@@ -11,7 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, generateUniqueIdOnly } from 'src/constants/helpers';
+import { CustomDialogTransition, GenerateResourceLineNumber } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -52,7 +52,7 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
             if (isClone) {
               fields = fieldsDataForCreate;
               const { irtTicketNumber, ...rest } = data;
-              rest.irtTicketNumber = `IRT_${generateUniqueIdOnly()}`;
+              rest.irtTicketNumber = GenerateResourceLineNumber(fieldsDataForCreate);
               setCloneHeading(irtTicketNumber);
               tempData = rest;
             }
@@ -66,10 +66,10 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
           });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        tempInitialData['irtTicketNumber'] = `IRT_${generateUniqueIdOnly()}`;
+        tempInitialData['irtTicketNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
 
         if (referenceData) {
-          tempInitialData['irtTicketNumber'] = `IRT_${generateUniqueIdOnly()}`;
+          tempInitialData['irtTicketNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           tempInitialData['purchaseOrder'] = referenceData?.purchaseOrder;
           tempInitialData['warehouse'] = referenceData?.warehouse;
           tempInitialData['qty'] = referenceData?.qty;
