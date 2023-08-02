@@ -613,7 +613,6 @@ const UserDetailsPage = () => {
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   className={`btn-outline-v1`}
                   onClick={handleOpenUpdateDialog}
-                  disabled={!isLoggedInUserBrandAdmin && userData?.userType}
                 >
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
