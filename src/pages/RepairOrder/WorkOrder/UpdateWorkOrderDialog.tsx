@@ -12,7 +12,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { uniq, map, orderBy } from 'lodash';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { CURReplaceByCurrencySingle, autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+
 
 const UpdateWorkOrderDialog = ({isBulkEdit=null, onClose, materialData, handleUpdate, loadingEdit, repairOrderData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -51,18 +52,35 @@ const UpdateWorkOrderDialog = ({isBulkEdit=null, onClose, materialData, handleUp
   };
 
   const handleSubmit = (values) => {
-    let returnData = [];
+    // let returnData = [];
+    // console.log(materialData)
+    // if(isBulkEdit){
+    //   // Assuming materialData is an array of objects
+    //   returnData = materialData.map((item) => {
+    //       return { ...item, ...values };
+    //   });
+    // }
+    // else {
+    //   returnData = [{ ...materialData, ...values }];
+    // }
+    // handleUpdate(returnData, saveAndNext);
 
-    if(isBulkEdit){
-      // Assuming materialData is an array of objects
-      returnData = materialData.map((item) => {
-          return { ...item, ...values };
+    let returnData = [];
+    if (isBulkEdit) {
+      for (const x in values) {
+        if (values[x] === '' || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
+          delete values[x];
+        }
+      }
+      materialData.forEach((element) => {
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        returnData.push({ id: element._id, ...calValues, workOrder : element.workOrder });
       });
+      handleUpdate(returnData);
+    } else {
+      returnData = [{ id: materialData._id, ...values, workOrder : materialData.workOrder  }];
+      handleUpdate(returnData, saveAndNext);
     }
-    else {
-      returnData = [{ ...materialData, ...values }];
-    }
-    handleUpdate(returnData, saveAndNext);
   };
 
   return (

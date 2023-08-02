@@ -451,7 +451,7 @@ const WorkOrder = ({
 
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
     data = response?.data?.data;
-
+    
     const rows = data.material?.filter((e) => e.parentId === null);
 
     createWorkorderService(rows);
@@ -640,13 +640,14 @@ const WorkOrder = ({
 
   const handleSaveData = async (rows: any) => {
     setUpdating(true);
+    const workOrderId = rows[0]?.workOrder?._id;
     rows.forEach((element) => {
       delete element.index;
       delete element.detail;
       delete element.isValid;
       delete element.hideSelection;
+      delete element.workOrder;
     });
-    const workOrderId = rows[0]?.workOrder?._id;
     axiosInstance()
       .put(`${repairOrder.api}/${repairOrderData._id}/work-order/${workOrderId}`, { material: rows })
       .then(({ data }) => {
@@ -771,11 +772,11 @@ const WorkOrder = ({
                     setIsBulkEdit(true)
                     setUpdateDialog({
                       open: true,
-                      data: null
+                      data: selectedProducts.filter((e)=>e.type === "service")
                     });
                     closeActions()
                   }}
-                  // disabled={selectedProducts.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
+                  disabled={(selectedProducts.filter((e)=>e.type !== "service")).length === selectedProducts.length}
                 >
                   Bulk Edit
                 </MenuItem>
@@ -887,7 +888,7 @@ const WorkOrder = ({
                 setUpdateDialog({ open: false, data: null });
                 setIsBulkEdit(false);
               }}
-              materialData={!isBulkEdit ? updateDialog.data : selectedProducts}
+              materialData={updateDialog.data}
               handleUpdate={handleSaveData}
               loadingEdit={isUpdating}
               repairOrderData={repairOrderData}
