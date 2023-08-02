@@ -3,7 +3,6 @@ import { useHistory, Link } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import { SET_GRID_METADATA, SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
-import axiosInstance from 'src/axios/axiosInstance';
 import { backendApi } from 'src/config';
 
 const AzureSSOLogin = () => {
@@ -21,7 +20,11 @@ const AzureSSOLogin = () => {
         })
         const { data: { data } } = res;
 
-        localStorage.setItem('token', token);
+        if (data?.user?.gridMetaData) {
+          let tempMetaData = JSON.stringify(data?.user?.gridMetaData);
+          localStorage.setItem('gridMetaData', tempMetaData);
+          dispatch({ type: SET_GRID_METADATA, payload: data?.user?.gridMetaData });
+        }
 
         let mappedEntities = [];
         if (data.entity && data.entity.length) {
@@ -32,7 +35,7 @@ const AzureSSOLogin = () => {
         localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
 
         dispatch({ type: SET_USER, payload: data });
-        
+
         if (data?.role?.selectedEntity?._id) {
           dispatch({
             type: SET_SELECTED_ENTITY,
@@ -40,11 +43,7 @@ const AzureSSOLogin = () => {
           });
         }
 
-        const gridRequest = await axiosInstance().get(`user/meta-grid/${data?.user?._id}`);
-
-        let tempMetaData = JSON.stringify(gridRequest?.data?.data?.gridMetaData);
-        localStorage.setItem('gridMetaData', tempMetaData);
-        dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
+        localStorage.setItem('token', token);
 
         window.location.href = '/';
       } else {
