@@ -259,14 +259,14 @@ const WorkOrder = ({
             {row?.original?.type === 'service' && (
               <HtmlTooltip title="Edit">
                 <IconButton
-                  color="primary"
                   size="small"
                   aria-label="Edit"
                   onClick={() => {
                     openMaterial(row);
                   }}
+                  disabled={row?.original?.status === WORKORDER_SERVICE_STATUS?.completed ? true : false}
                 >
-                  <EditIcon color="primary" />
+                  <EditIcon color={row?.original?.status === WORKORDER_SERVICE_STATUS?.completed ? "disabled" : "primary"} />
                 </IconButton>
               </HtmlTooltip>
             )}
