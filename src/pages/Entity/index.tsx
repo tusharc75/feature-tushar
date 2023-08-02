@@ -40,7 +40,7 @@ const Entity: FC = () => {
   const {
     state: { permissions, user },
   }: any = useData();
-  
+
   const { getColumnData } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, entityId: null });
   const [renderCount, setRenderCount] = useState(0);
@@ -440,7 +440,7 @@ const Entity: FC = () => {
             <ResourceTransferDialog
               open={true}
               fromResource={{ ...deleteEntity, name: deleteEntity.entityName ?? '' }}
-              allResourceData={user?.entity?.filter(entity => entity._id !== deleteEntity?._id).map(e => ({ optionLabel: e?.entityName, optionValue: e?._id }))}
+              allResourceData={user?.entity?.filter(entity => entity._id !== deleteEntity?._id).map(e => ({ ...e, optionLabel: e?.entityName, optionValue: e?._id }))}
               onClose={() => {
                 setDeleteEntity({})
                 setShowDeleteDialog(false)
