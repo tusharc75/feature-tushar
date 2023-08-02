@@ -25,7 +25,11 @@ const AzureLogin = () => {
           });
           const { data } = res.data;
 
-          localStorage.setItem('token', data.token);
+          if (data?.user?.gridMetaData) {
+            let tempMetaData = JSON.stringify(data?.user?.gridMetaData);
+            localStorage.setItem('gridMetaData', tempMetaData);
+            dispatch({ type: SET_GRID_METADATA, payload: data?.user?.gridMetaData });
+          }
 
           let mappedEntities = [];
           if (data.entity && data.entity.length) {
@@ -44,11 +48,7 @@ const AzureLogin = () => {
             });
           }
 
-          const gridRequest = await axiosInstance().get(`user/meta-grid/${data?.user?._id}`);
-
-          let tempMetaData = JSON.stringify(gridRequest?.data?.data?.gridMetaData);
-          localStorage.setItem('gridMetaData', tempMetaData);
-          dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
+          localStorage.setItem('token', data.token);
 
         } catch (e) {
           setCounter(10);

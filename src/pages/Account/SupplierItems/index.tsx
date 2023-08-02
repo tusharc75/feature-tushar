@@ -16,8 +16,9 @@ import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile, isTablet } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
-function SupplierItems({ api, id, allowedToEdit }) {
+function SupplierItems({ api, id, allowedToEdit, permission }) {
 
     const toastConfig = useContext(CustomToastContext);
     const { getColumnData } = useColumns();
@@ -154,6 +155,20 @@ function SupplierItems({ api, id, allowedToEdit }) {
 
     return (
         <>
+            <Box display="flex" justifyContent={"space-between"}>
+                <Box />
+                <ImportExportMenu
+                    permissions={permission}
+                    module="supplier-account-items"
+                    api={`${api}/items/${id}`}
+                    afterImportCompleted={() => {
+                        fetchData();
+                    }}
+                    isExportAllOrSomeFeature={true}
+                    ids={[]}
+                    additionalParams={``}
+                />
+            </Box>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
                 <CustomTab index={0} label={'Product Category'} value={0} primaryColor={true} />
                 <CustomTab index={1} label={'Products'} value={1} primaryColor={true} />
