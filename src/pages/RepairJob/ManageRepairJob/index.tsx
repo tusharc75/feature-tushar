@@ -16,7 +16,6 @@ import {
   setFieldsInAscendingOrder,
   yupSchema,
   repairJobProcessSteps,
-  generateUniqueIdOnly,
   sidebarResource,
   GenerateResourceLineNumber
 } from '../../../constants/helpers';
