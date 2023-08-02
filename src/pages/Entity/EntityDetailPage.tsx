@@ -290,9 +290,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`
-        }))
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`
+      }))
       : [];
 
     setUserList(rows);
@@ -456,7 +456,7 @@ const EntityDetailsPage = () => {
           open={true}
           resource="Entity"
           fromResource={{ ...entityData, name: entityData?.entityName }}
-          allResourceData={JSON.parse(localStorage.getItem('mappedEntities')).map((o) => ({ ...o, name: o?.entityName }))}
+          allResourceData={user?.entity?.map(e => ({ ...e, optionLabel: e?.entityName, optionValue: e?._id }))}
           onClose={() => setShowDeleteEntityDialog(false)}
           handleDelete={handleDeleteEntity}
         />

@@ -239,7 +239,6 @@ function App() {
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
   const { isOffline } = useContext(CustomOfflineContext);
-  let mappedEntities = JSON.parse(localStorage.getItem('mappedEntities'));
 
   const {
     state: { user },
@@ -266,22 +265,6 @@ function App() {
   });
 
   useEffect(() => {
-    if (!mappedEntities && localStorage.getItem('token')) {
-      axiosInstance()
-        .get(`${entityApi}`)
-        .then(({ data: { data } }) => {
-          let mappedEntities = [];
-          if (data && data.length) {
-            data.forEach((o) => {
-              mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
-            });
-          }
-          localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
-        });
-    }
-  }, [mappedEntities]);
-
-  useEffect(() => {
     try {
       if (!isOffline) {
         getNotification();
@@ -296,7 +279,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {

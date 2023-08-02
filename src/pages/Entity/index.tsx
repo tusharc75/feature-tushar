@@ -19,9 +19,10 @@ import useColumns, { getStaticFields, getFrameworkComponents } from '../../const
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { camelCase } from 'lodash';
+import { useHistory } from 'react-router-dom'
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { camelCase } from "lodash";
+import { SET_USER } from "src/StateProvider/actionTypes";
 
 let entityTimeout;
 
@@ -34,6 +35,7 @@ const Entity: FC = () => {
   const {
     state: { permissions, user }
   }: any = useData();
+
   const { getColumnData } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, entityId: null });
   const [renderCount, setRenderCount] = useState(0);
@@ -219,7 +221,7 @@ const Entity: FC = () => {
     return deepFilter;
   };
 
-  const fetchEntity = (setEntities = false) => {
+  const fetchEntity = () => {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
 
@@ -233,15 +235,6 @@ const Entity: FC = () => {
         let rows = data.map((u) => {
           return prepareDataForGrid(u);
         });
-        if (setEntities) {
-          let mappedEntities = [];
-          if (data && data.length) {
-            data.forEach((o) => {
-              mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
-            });
-          }
-          localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
-        }
 
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
@@ -338,7 +331,7 @@ const Entity: FC = () => {
               history.push(`${routes.entityDetail.path}/${d._id}`);
             }}
             extraParamsToCheckDelete={false}
-            onDelete={(d) => {}}
+            onDelete={(d) => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -368,7 +361,7 @@ const Entity: FC = () => {
             owerCollaboratorInitialsOrImages=""
             onCreate={false}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -392,37 +385,47 @@ const Entity: FC = () => {
           />
         ) : null}
 
-        {isOpen?.open && (
-          <ManageEntity
-            open={isOpen}
-            close={handleClose}
-            fetchData={fetchEntity}
-            isNew={true}
-            entityId={isOpen?.entityId}
-            isClone={isOpen?.isClone}
-          />
-        )}
-        {usersDialogOpen && !usersDialogLoding && (
-          <Dialog fullWidth maxWidth="sm" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
-            <AssignUsersDialog
-              entitiesDialogOpen={usersDialogOpen}
-              handleCloseDialog={handleCloseDialog}
-              type="user"
-              ids={selectedEntity ? [selectedEntity] : selectedRecords.map((rec) => rec._id)}
-              assignedEntity={users}
-              regionalRole={false}
-              onSuccess={() => {
-                setSelectedEntity(null);
-                handleCloseDialog();
-              }}
+        {
+          isOpen?.open && (
+            <ManageEntity
+              open={isOpen}
+              close={handleClose}
+              fetchData={fetchEntity}
+              isNew={true}
+              entityId={isOpen?.entityId}
+              isClone={isOpen?.isClone}
             />
-          </Dialog>
-        )}
+          )
+        }
+        {
+          usersDialogOpen && !usersDialogLoding && (
+            <Dialog
+              fullWidth
+              maxWidth="sm"
+              open={usersDialogOpen}
+              onClose={handleCloseDialog}
+              aria-labelledby="assign-roles-dialog"
+            >
+              <AssignUsersDialog
+                entitiesDialogOpen={usersDialogOpen}
+                handleCloseDialog={handleCloseDialog}
+                type="user"
+                ids={selectedEntity ? [selectedEntity] : selectedRecords.map(rec => rec._id)}
+                assignedEntity={users}
+                regionalRole={false}
+                onSuccess={() => {
+                  setSelectedEntity(null)
+                  handleCloseDialog();
+                }}
+              />
+            </Dialog>
+          )
+        }
         {showDeleteDialog ? (
           <ResourceTransferDialog
             open={true}
             fromResource={{ ...deleteEntity, name: deleteEntity.entityName ?? '' }}
-            allResourceData={JSON.parse(localStorage.getItem('mappedEntities')).filter((entity) => entity.optionValue !== deleteEntity?._id)}
+            allResourceData={user?.entity?.filter(entity => entity._id !== deleteEntity?._id).map(e => ({ ...e, optionLabel: e?.entityName, optionValue: e?._id }))}
             onClose={() => {
               setDeleteEntity({});
               setShowDeleteDialog(false);
