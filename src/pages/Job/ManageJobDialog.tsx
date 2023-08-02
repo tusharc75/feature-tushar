@@ -15,7 +15,7 @@ import {
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
   yupSchema,
-  generateUniqueIdOnly
+  GenerateResourceLineNumber
 } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -73,9 +73,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, jobNumber, updatedBy, ...rest } = data;
             rest['status'] = 'New';
-            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-              rest['jobNumber'] = `JOB_${generateUniqueIdOnly()}`;
-            }
+            rest['jobNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(jobNumber);
             setInitialData({
               fields: fieldsDataForCreate,
@@ -98,9 +96,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           initialData['currency'] = user.user?.brandCurrency;
         }
-        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-          initialData['jobNumber'] = `JOB_${generateUniqueIdOnly()}`;
-        }
+        initialData['jobNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData

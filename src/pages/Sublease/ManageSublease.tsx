@@ -12,10 +12,10 @@ import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
-  generateUniqueIdOnly,
   sublease,
   setFieldsInAscendingOrder,
-  SUBLEASE_STATUS
+  SUBLEASE_STATUS,
+  GenerateResourceLineNumber
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -65,9 +65,7 @@ const ManageSublease = ({
               setSubleaseData(data);
               if (isClone) {
                 const { _id, createdBy, updatedBy, serialNumber, ...rest } = data;
-                if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-                  rest['subleaseName'] = `SL_${generateUniqueIdOnly()}`;
-                }
+                rest['subleaseName'] = GenerateResourceLineNumber(fieldsDataForCreate);
                 rest['status'] = SUBLEASE_STATUS.new;
                 rest['estimateStartDate'] = new Date();
                 rest['estimateEndDate'] = '';
@@ -105,9 +103,7 @@ const ManageSublease = ({
         } else {
           fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate'].includes(obj.fieldName));
           let createValues: any = getObjKeys('', fieldsDataForCreate);
-          if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-            createValues['subleaseName'] = `SL_${generateUniqueIdOnly()}`;
-          }
+          createValues['subleaseName'] = GenerateResourceLineNumber(fieldsDataForCreate);
           if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
             createValues['currency'] = user.user?.brandCurrency;
           }
