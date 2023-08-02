@@ -4,9 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import { SET_GRID_METADATA, SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
 import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import { backendApi } from 'src/config';
-import { camelCase } from 'lodash';
 
 const AzureSSOLogin = () => {
   const { dispatch }: any = useData();
@@ -16,13 +14,14 @@ const AzureSSOLogin = () => {
     const token = searchParams.get('token');
     (async () => {
       if (token) {
-        const res = await axios.get(backendApi+"/user/me",{
-          headers:{
-            Authorization:`Bearer ${token}`
+        const res = await axios.get(backendApi + "/user/me", {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
         })
+        const { data: { data } } = res;
 
-        const { data:{data} } = res;
+        localStorage.setItem('token', token);
 
         let mappedEntities = [];
         if (data.entity && data.entity.length) {
@@ -30,10 +29,23 @@ const AzureSSOLogin = () => {
             mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
           });
         }
-
         localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
 
-        localStorage.setItem('token', token);
+        dispatch({ type: SET_USER, payload: data });
+        
+        if (data?.role?.selectedEntity?._id) {
+          dispatch({
+            type: SET_SELECTED_ENTITY,
+            payload: data.role.selectedEntity._id
+          });
+        }
+
+        const gridRequest = await axiosInstance().get(`user/meta-grid/${data?.user?._id}`);
+
+        let tempMetaData = JSON.stringify(gridRequest?.data?.data?.gridMetaData);
+        localStorage.setItem('gridMetaData', tempMetaData);
+        dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
+
         window.location.href = '/';
       } else {
         window.location.href = '/sso-login-error';
