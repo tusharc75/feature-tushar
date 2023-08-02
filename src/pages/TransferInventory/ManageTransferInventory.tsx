@@ -10,7 +10,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, transferInventory, setFieldsInAscendingOrder, generateUniqueIdOnly, GenerateResourceLineNumber } from 'src/constants/helpers';
+import { CustomDialogTransition, transferInventory, setFieldsInAscendingOrder, GenerateResourceLineNumber } from 'src/constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';

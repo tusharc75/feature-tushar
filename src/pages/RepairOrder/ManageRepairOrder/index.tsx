@@ -15,7 +15,6 @@ import {
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
   yupSchema,
-  generateUniqueIdOnly,
   repairOrder,
   REPAIR_ORDER_TYPE,
   GenerateResourceLineNumber

@@ -26,7 +26,11 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculatePrice } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import EditIcon from '@material-ui/icons/Edit';
+import HistoryIcon from '@material-ui/icons/History';
+import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQtyDialog';
+import History from '../../ProductInventory/LedgerHistory';
+import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
 
 const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fieldTicketData, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -40,11 +44,14 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   const [tabValue, setTabValue] = useState(0);
   const [serviceOption, setServiceOption] = useState(null);
   const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All' });
+  const [renderCount, setRenderCount] = useState(0)
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [consumeRequest, setConsumeRequest] = useState(false);
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
+  const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
+  const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
 
   useEffect(() => {
     setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
@@ -55,9 +62,13 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
         _id: s?._id
       };
     })]);
-    if (!services?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
+    if (selectedServiceOption?.optionValue !== 'All' && !services?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
       setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
     }
+    if (renderCount > 1) {
+      setDataRows(null)
+    }
+    setRenderCount(renderCount + 1)
   }, [services]);
 
   const {
@@ -69,7 +80,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   }, [id]);
 
   useEffect(() => {
-    if (columns) {
+    if (columns && !dataRows && tabValue === 0) {
       var allowRequest = false;
       if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
         if ((fieldTicketData?.warehouse?.manager && fieldTicketData?.warehouse?.manager?.includes(user?.user?._id))
@@ -83,7 +94,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       setConsumeRequest(allowRequest)
       fetchData();
     }
-  }, [columns, services, selectedServiceOption]);
+  }, [columns, renderCount, selectedServiceOption, tabValue]);
 
   const fetchColumns = async () => {
     var { fields, allFields } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
@@ -201,8 +212,8 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       {
         accessor: 'action',
         Header: 'Actions',
-        width: 50,
-        minWidth: 50,
+        width: 150,
+        minWidth: 100,
         sticky: 'right',
         disableFilters: true,
         canDrag: false,
@@ -220,17 +231,46 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
+            {row.original?.isqtyRequestLog && (
+              <HtmlTooltip title="View Requests">
+                <IconButton
+                  size="small"
+                  aria-label="Requests"
+                  onClick={() => {
+                    setOpenLogDialog({ open: true, product: row?.original?.materialId, uniqueId: row.original._id, data: row.original });
+                  }}
+                >
+                  <FormatListBulletedIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            <HtmlTooltip title="History">
+              <IconButton
+                size="small"
+                aria-label="History"
+                onClick={() => {
+                  setHistoryDialog({
+                    open: true,
+                    _id: row?.original?._id,
+                    product: row?.original?.materialId,
+                    productName: row?.original?.productName
+                  });
+                }}
+              >
+                <HistoryIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
             <HtmlTooltip title={'Delete'}>
               <span>
                 <IconButton
                   size="small"
                   aria-label="Delete"
-                  disabled={!allowedToEdit}
+                  disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
                   onClick={() => {
                     setDeleteData([{ id: row.original._id }]);
                   }}
                 >
-                  <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                  <DeleteIcon fontSize="small" color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
@@ -424,6 +464,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   };
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setDataRows(null)
     setTabValue(newValue);
   };
 
@@ -445,6 +486,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
               if (!val) {
                 value = { optionLabel: 'All', optionValue: 'All' }
               }
+              setDataRows(null)
               setSelectedServiceOption(value)
             }}
             renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
@@ -609,9 +651,38 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
             setOpenConsumablesQtyDialog(false);
           }}
           warehouse={fieldTicketData?.warehouse}
-          selectedRecords={selectedRecords}
+          selectedRecords={selectedRecords?.map(e => ({ ...e, product: e?.productName }))}
           serviceName={null}
           consumeRequest={consumeRequest}
+        />
+      )}
+
+      {openLogDialog.open && (
+        <QtyRequestLog
+          uniqueId={openLogDialog.uniqueId}
+          referenceId={id}
+          referenceType={sidebarResource.fieldTicket}
+          productName={openLogDialog?.data?.productName}
+          product={openLogDialog?.product}
+          onClose={() => {
+            setOpenLogDialog({
+              open: false,
+              uniqueId: null,
+              product: null,
+              data: null
+            });
+            fetchData();
+          }}
+        />
+      )}
+
+      {historyDialog.open && (
+        <History
+          handleClose={() => setHistoryDialog({ open: false, _id: '', product: '', productName: '' })}
+          productName={historyDialog.productName}
+          referenceId={id}
+          uniqueId={historyDialog._id}
+          product={historyDialog.product}
         />
       )}
 

@@ -16,7 +16,6 @@ import {
   fieldServiceOrder,
   setFieldsInAscendingOrder,
   yupSchema,
-  generateUniqueIdOnly,
   sidebarResource,
   GenerateResourceLineNumber
 } from '../../../constants/helpers';

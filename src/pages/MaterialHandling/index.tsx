@@ -245,7 +245,13 @@ const MaterialHandling = () => {
                                 <Box pl={1}>
                                   <IconButton
                                     onClick={() => {
-                                      window.open(`${routes.workOrderDetail.path}/${data?._id}`);
+                                      let route;
+                                      if (data?.referenceType === sidebarResource.workOrder) {
+                                        route = routes.workOrderDetail.path
+                                      } else if (data?.referenceType === sidebarResource.fieldTicket) {
+                                        route = routes.fieldTicketDetail.path
+                                      }
+                                      window.open(`${route}/${data?._id}`);
                                     }}
                                     aria-label="delete"
                                     size="small"
@@ -254,13 +260,17 @@ const MaterialHandling = () => {
                                   </IconButton>
                                 </Box>
                               </Box>
-                              <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
-                                Product : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.product?.optionLabel}</span>
-                              </Typography>
-                              <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
-                                Asset :{' '}
-                                <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.serializedAsset?.optionLabel}</span>
-                              </Typography>
+                              {data?.referenceType === sidebarResource.workOrder && (
+                                <>
+                                  <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                                    Product : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.product?.optionLabel}</span>
+                                  </Typography>
+                                  <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                                    Asset :{' '}
+                                    <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.serializedAsset?.optionLabel}</span>
+                                  </Typography>
+                                </>
+                              )}
                               <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 600 }}>
                                 {routes.warehouse.title} :{' '}
                                 <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.warehouse?.optionLabel}</span>

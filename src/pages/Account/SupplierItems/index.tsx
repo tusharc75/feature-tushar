@@ -1,58 +1,54 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
-import { camelCase, capitalize, set } from 'lodash';
+import { Box, Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react'
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import AssignProductCategoryDialog from 'src/components/AssignRolesDialog/AssignProductCategoryDialog';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import { useData } from 'src/StateProvider/Provider';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { isMobile, isTablet } from 'react-device-detect';
+import { ExpandMore } from '@material-ui/icons';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import { useHistory } from 'react-router-dom';
+import queryString from 'query-string';
 
 
-
-
-function SupplierItems({ api, id, allowedToEdit }) {
-
+function SupplierItems({ api, id, allowedToEdit, permission }) {
+    const history = useHistory();
+    const parsed = queryString.parse(history.location.search);
+    const { itemTab }: any = parsed;
     const toastConfig = useContext(CustomToastContext);
-    const { isOffline } = useContext(CustomOfflineContext);
     const { getColumnData } = useColumns();
-
-    let selectedResource;
-
-
-
     const renderForm = camelCase(routes?.supplierAccount?.title + '_supplierItems');
-    const [tabValue, setTabValue] = useState(0);
-    const [selectedRecords, setSelectedRecords] = useState([]);
-    const [pCategoryRows, setPCategoryRows] = useState(null)
-    const [pRows, setPRows] = useState(null)
-    const [aRows, setARows] = useState(null)
+    const [tabValue, setTabValue] = useState(itemTab ? parseInt(itemTab) : 0);
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({});
     const [state, dispatch] = useReducer(reducer, intialState);
     const [gridApi, setGridApi] = useState(null);
+    const [anchorEl, setAnchorEl] = useState(null);
 
 
-    const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, appendRows } = state;
+
+    const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords, filters, sorting, appendRows } = state;
 
 
     const [assignDialog, setAssignDialog] = useState({ open: false, type: null, data: null })
 
     useEffect(() => {
         fetchData()
-    }, [id, tabValue])
+    }, [tabValue])
+
+    useEffect(() => {
+        console.log('selectedRecords', selectedRecords)
+    }, [selectedRecords])
 
     const {
         state: { user }
@@ -80,7 +76,6 @@ function SupplierItems({ api, id, allowedToEdit }) {
     }
     const fetchFields = async () => {
         const selectedResourceData: any = tabValue === 0 ? sidebarResource.productCategory : tabValue === 1 ? sidebarResource.product : sidebarResource.serializedAsset
-        selectedResource = selectedResource
         axiosInstance()
             .get(`/field?resource=${selectedResourceData}`)
             .then(({ data: { data } }) => {
@@ -98,6 +93,7 @@ function SupplierItems({ api, id, allowedToEdit }) {
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
                 tempFrameworkComponent = {
                     ...tempFrameworkComponent,
+                    actionsRenderer: ActionsRenderer
                 };
                 setFrameWorkComponent({ ...tempFrameworkComponent });
                 columns = [...columns, ...getStaticFields()];
@@ -105,10 +101,35 @@ function SupplierItems({ api, id, allowedToEdit }) {
             });
     }
 
+    const ActionsRenderer = (params) => (
+        <>
+            <Tooltip title="Delete">
+                <IconButton
+                    size="small"
+                    aria-label="Delete"
+                    onClick={() => {
+                        deleteItems([params.data])
+                    }}
+                >
+                    <DeleteIcon color="error" />
+                </IconButton>
+            </Tooltip>
+        </>
+    );
+
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
+
     const deleteItems = async (values) => {
-        const ids = values?.map((item) => item.materialId)
+        const ids = values?.map((item) => item._id)
         axiosInstance().put(`${api}/items/${id}/delete`, { ids: ids }).then((res) => {
             fetchData();
+            closeActions();
             toastConfig.setToastConfig({
                 open: true,
                 type: 'success',
@@ -134,31 +155,79 @@ function SupplierItems({ api, id, allowedToEdit }) {
 
 
     const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+        history.push(`?itemTab=${newValue}`);
         setTabValue(newValue);
     };
 
     return (
         <>
-            <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
+            <Box display="flex" justifyContent={"space-between"}>
+                <Box />
+                <ImportExportMenu
+                    permissions={permission}
+                    module="supplier-account-items"
+                    api={`${api}/items/${id}`}
+                    afterImportCompleted={() => {
+                        fetchData();
+                    }}
+                    isExportAllOrSomeFeature={true}
+                    ids={[]}
+                    additionalParams={``}
+                />
+            </Box>
+            <CustomTabs value={tabValue} onChange={handleMainTabChange}>
                 <CustomTab index={0} label={'Product Category'} value={0} primaryColor={true} />
                 <CustomTab index={1} label={'Products'} value={1} primaryColor={true} />
                 <CustomTab index={2} label={'Assets'} value={2} primaryColor={true} />
             </CustomTabs>
 
-            <Box display="flex" padding={2} flexWrap={'wrap'}>
-                <Button variant="outlined" color="primary" size="small"
+            <Box display="flex" justifyContent={"space-between"}>
+                <Button variant="contained" color="primary" size="small"
                     onClick={() => {
                         if (tabValue === 0) {
-                            setAssignDialog({ open: true, type: 'productCategory', data: pCategoryRows })
+                            setAssignDialog({ open: true, type: 'productCategory', data: dataRows })
                         } else if (tabValue === 1) {
-                            setAssignDialog({ open: true, type: 'product', data: pRows })
+                            setAssignDialog({ open: true, type: 'product', data: dataRows })
                         } else {
-                            setAssignDialog({ open: true, type: 'serializedAsset', data: aRows })
+                            setAssignDialog({ open: true, type: 'serializedAsset', data: dataRows })
                         }
                     }}
                 >
                     Add {tabValue === 0 ? 'Product Category' : tabValue === 1 ? 'Product' : 'Asset'}
                 </Button>
+                <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    disabled={selectedRecords.length ? false : true}
+                    aria-controls="action-menu"
+                    className={`${isMobile && !isTablet ? 'mobile_button' : 'new-dropdown-v1'}`}
+                    endIcon={<ExpandMore />}
+                >
+                    {isMobile && !isTablet ? '' : 'Actions'}
+                </Button>
+                <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                >
+                    <MenuItem
+                        disabled={selectedRecords.length ? false : true}
+                        onClick={() => {
+                            deleteItems(selectedRecords)
+                        }}
+                    >
+                        Delete
+                    </MenuItem>
+                </Menu>
             </Box>
             <TabPanel value={tabValue} index={0}>
                 {Object.keys(frameWorkComponent).length > 0 && columns?.length ? (
@@ -172,13 +241,13 @@ function SupplierItems({ api, id, allowedToEdit }) {
                         limit={limit}
                         pageSizes={pageSizes}
                         page={page}
-                        allowAction={false}
+                        allowAction={true}
                         loading={loading}
                         renderedFrom={renderForm}
                         refreshGrid={fetchData}
-                        showFilters={true}
-                        allowSelection={false}
-                        resource={selectedResource}
+                        selectedRecords={selectedRecords}
+                        showFilters={false}
+                        allowSelection={true}
                         showOnlyShowFilteredRecordSwitch={false}
                     />
                 )
@@ -200,13 +269,12 @@ function SupplierItems({ api, id, allowedToEdit }) {
                         limit={limit}
                         pageSizes={pageSizes}
                         page={page}
-                        allowAction={false}
+                        allowAction={true}
                         loading={loading}
                         renderedFrom={renderForm}
                         refreshGrid={fetchData}
-                        showFilters={true}
-                        allowSelection={false}
-                        resource={selectedResource}
+                        showFilters={false}
+                        allowSelection={true}
                         showOnlyShowFilteredRecordSwitch={false}
                     />
                 )
@@ -228,13 +296,12 @@ function SupplierItems({ api, id, allowedToEdit }) {
                         limit={limit}
                         pageSizes={pageSizes}
                         page={page}
-                        allowAction={false}
+                        allowAction={true}
                         loading={loading}
                         renderedFrom={renderForm}
                         refreshGrid={fetchData}
-                        showFilters={true}
-                        allowSelection={false}
-                        resource={selectedResource}
+                        showFilters={false}
+                        allowSelection={true}
                         showOnlyShowFilteredRecordSwitch={false}
                     />
                 )
@@ -249,7 +316,7 @@ function SupplierItems({ api, id, allowedToEdit }) {
                     <AssignProductDialog
                         productsDialogOpen={assignDialog.open}
                         productId={null}
-                        assignedProducts={assignDialog?.data?.map((item) => item.materialId) || []}
+                        assignedProducts={assignDialog?.data?.map((item) => item._id) || []}
                         reference='supplier'
                         handleCloseDialog={() =>
                             setAssignDialog({ open: false, type: null, data: null })}
@@ -265,7 +332,7 @@ function SupplierItems({ api, id, allowedToEdit }) {
                     <AssignSerializedAssetDialog
                         reference={'supplier'}
                         referenceData={null}
-                        ids={assignDialog?.data?.map((item) => item.materialId) || []}
+                        ids={assignDialog?.data?.map((item) => item._id) || []}
                         isAssigning={false}
                         handleClose={() =>
                             setAssignDialog({ open: false, type: null, data: null })}
@@ -281,7 +348,7 @@ function SupplierItems({ api, id, allowedToEdit }) {
                     <AssignProductCategoryDialog
                         reference={'supplier'}
                         referenceData={null}
-                        ids={assignDialog?.data?.map((item) => item.materialId) || []}
+                        ids={assignDialog?.data?.map((item) => item._id) || []}
                         isAssigning={false}
                         handleClose={() =>
                             setAssignDialog({ open: false, type: null, data: null })}
@@ -292,8 +359,6 @@ function SupplierItems({ api, id, allowedToEdit }) {
                     />
                 )
             }
-
-
         </>
     )
 }
