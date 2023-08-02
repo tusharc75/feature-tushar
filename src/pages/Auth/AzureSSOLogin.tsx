@@ -22,7 +22,7 @@ const AzureSSOLogin = () => {
           }
         })
 
-        const { data } = res;
+        const { data:{data} } = res;
 
         let mappedEntities = [];
         if (data.entity && data.entity.length) {
