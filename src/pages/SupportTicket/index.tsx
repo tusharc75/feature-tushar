@@ -29,6 +29,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ManageSupportTicket from './ManageSupportTicket';
 import styles from '../Leads/Header.module.scss';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const SupportTicket = () => {
   const renderedFrom = camelCase(routes?.supportTicket.title);
@@ -305,27 +306,18 @@ const SupportTicket = () => {
                   )}
                   {permissions?.supportTicket?.isDelete && (
                     <>
-                      <div className="relative isolate">
-                        {selectedRecords.length ? (
-                          <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">
-                            <span></span>
-                            <span></span>
-                          </span>
-                        ) : null}
-
-                        <Button
-                          variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                          color="default"
-                          size="small"
-                          onClick={openActions}
-                          disabled={selectedRecords.length ? false : true}
-                          aria-controls="action-menu"
-                          className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                          endIcon={<ExpandMore />}
-                        >
-                          {isMobile && !isTablet ? '' : 'Actions'}
-                        </Button>
-                      </div>
+                      <ButtonWithPulse
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        disabled={selectedRecords.length ? false : true}
+                        aria-controls="action-menu"
+                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
+                        endIcon={<ExpandMore />}
+                      >
+                        {isMobile && !isTablet ? '' : 'Actions'}
+                      </ButtonWithPulse>
 
                       <Menu
                         anchorEl={anchorEl}
