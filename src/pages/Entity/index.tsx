@@ -41,8 +41,6 @@ const Entity: FC = () => {
   const provider = useData();
 
   const { permissions, user, mappedEntities } = provider?.state;
-  console.log('mappedEntitiesmappedEntities', mappedEntities)
-
   const mappedEntitiesDispatch = provider?.dispatch;
 
   const { getColumnData } = useColumns();
