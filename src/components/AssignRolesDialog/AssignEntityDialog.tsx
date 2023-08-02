@@ -56,6 +56,11 @@ const AssignEntityDialog = ({
   contactResource = ''
 }) => {
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { mappedEntities },
+  }: any = useData();
+
   const [data, setData] = useState([]);
   const [dataConst, setDataConst] = useState([]);
   const [role, setRole] = useState([]);
@@ -100,7 +105,7 @@ const AssignEntityDialog = ({
     } else {
       setLoadingData(false);
       setData(
-        JSON.parse(localStorage.getItem('mappedEntities')).map((obj) => ({
+        mappedEntities?.map((obj) => ({
           ...obj,
           entityName: obj.optionLabel,
           _id: obj.optionValue,
@@ -109,7 +114,7 @@ const AssignEntityDialog = ({
         }))
       );
       setDataConst(
-        JSON.parse(localStorage.getItem('mappedEntities')).map((obj) => ({
+        mappedEntities?.map((obj) => ({
           ...obj,
           entityName: obj.optionLabel,
           _id: obj.optionValue,

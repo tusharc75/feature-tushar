@@ -27,6 +27,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom'
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { camelCase } from "lodash";
+import { SET_MAPPED_ENTITIES } from "src/StateProvider/actionTypes";
 
 let entityTimeout;
 
@@ -37,9 +38,13 @@ const Entity: FC = () => {
 
   const renderedFrom = camelCase(routes?.entity.title)
 
-  const {
-    state: { permissions, user },
-  }: any = useData();
+  const provider = useData();
+
+  const { permissions, user, mappedEntities } = provider?.state;
+  console.log('mappedEntitiesmappedEntities', mappedEntities)
+
+  const mappedEntitiesDispatch = provider?.dispatch;
+
   const { getColumnData } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, entityId: null });
   const [renderCount, setRenderCount] = useState(0);
@@ -239,7 +244,8 @@ const Entity: FC = () => {
         let rows = data.map((u) => {
           return prepareDataForGrid(u);
         });
-        if (setEntities) {
+
+        if (setEntities || mappedEntities?.length === 0) {
           let mappedEntities = []
           if (data && data.length) {
             data.forEach(o => {
@@ -247,7 +253,7 @@ const Entity: FC = () => {
               { optionLabel: o?.entityName, optionValue: o?._id }]
             })
           }
-          localStorage.setItem("mappedEntities", JSON.stringify(mappedEntities))
+          mappedEntitiesDispatch({ type: SET_MAPPED_ENTITIES, payload: mappedEntities });
         }
 
         dispatch({ type: "initialize", data: rows, count: count });
@@ -439,7 +445,7 @@ const Entity: FC = () => {
             <ResourceTransferDialog
               open={true}
               fromResource={{ ...deleteEntity, name: deleteEntity.entityName ?? '' }}
-              allResourceData={JSON.parse(localStorage.getItem("mappedEntities")).filter(entity => entity.optionValue !== deleteEntity?._id)}
+              allResourceData={mappedEntities?.filter(entity => entity.optionValue !== deleteEntity?._id)}
               onClose={() => {
                 setDeleteEntity({})
                 setShowDeleteDialog(false)

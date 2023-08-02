@@ -8,7 +8,7 @@ import { CustomNotificationCountContext } from './StateProvider/CustomNotificati
 import axiosInstance from './axios/axiosInstance';
 import { CustomChatNotificationCountContext } from './StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import queryString from 'query-string';
-import { SET_USER, SET_SELECTED_ENTITY } from './StateProvider/actionTypes';
+import { SET_USER, SET_SELECTED_ENTITY, SET_MAPPED_ENTITIES } from './StateProvider/actionTypes';
 import routes from './components/Helpers/Routes';
 import { termsAndCondition, customerAccount, customerContact, supplierAccount, supplierContact } from './constants/helpers';
 import CustomToaster from './components/Helpers/CustomToast';
@@ -239,10 +239,9 @@ function App() {
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
   const { isOffline } = useContext(CustomOfflineContext);
-  let mappedEntities = JSON.parse(localStorage.getItem('mappedEntities'));
 
   const {
-    state: { user },
+    state: { user, mappedEntities },
     dispatch
   }: any = useData();
   const { entityApi } = entity;
@@ -276,7 +275,10 @@ function App() {
               mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
             });
           }
-          localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
+          dispatch({
+            type: SET_MAPPED_ENTITIES,
+            payload: mappedEntities
+          });
         });
     }
   }, [mappedEntities]);
@@ -296,7 +298,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {

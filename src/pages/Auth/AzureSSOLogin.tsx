@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useHistory, Link } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
-import { SET_GRID_METADATA, SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
+import { SET_GRID_METADATA, SET_SELECTED_ENTITY, SET_USER, SET_MAPPED_ENTITIES } from 'src/StateProvider/actionTypes';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { backendApi } from 'src/config';
@@ -16,9 +16,9 @@ const AzureSSOLogin = () => {
     const token = searchParams.get('token');
     (async () => {
       if (token) {
-        const res = await axios.get(backendApi+"/user/me",{
-          headers:{
-            Authorization:`Bearer ${token}`
+        const res = await axios.get(backendApi + "/user/me", {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
         })
 
@@ -30,8 +30,10 @@ const AzureSSOLogin = () => {
             mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
           });
         }
-
-        localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
+        dispatch({
+          type: SET_MAPPED_ENTITIES,
+          payload: mappedEntities
+        });
 
         localStorage.setItem('token', token);
         window.location.href = '/';
