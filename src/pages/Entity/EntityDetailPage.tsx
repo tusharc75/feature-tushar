@@ -31,7 +31,7 @@ const EntityDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { user, permissions, mappedEntities },
+    state: { user, permissions },
     dispatch
   }: any = useData();
   const [headingLbl, setHeadingLbl] = useState('');
@@ -290,9 +290,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`
-      }))
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`
+        }))
       : [];
 
     setUserList(rows);
@@ -456,7 +456,7 @@ const EntityDetailsPage = () => {
           open={true}
           resource="Entity"
           fromResource={{ ...entityData, name: entityData?.entityName }}
-          allResourceData={mappedEntities?.map((o) => ({ ...o, name: o?.entityName }))}
+          allResourceData={user?.entity?.map(e => ({ optionLabel: e?.entityName, optionValue: e?._id }))}
           onClose={() => setShowDeleteEntityDialog(false)}
           handleDelete={handleDeleteEntity}
         />

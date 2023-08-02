@@ -27,7 +27,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom'
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { camelCase } from "lodash";
-import { SET_MAPPED_ENTITIES } from "src/StateProvider/actionTypes";
 
 let entityTimeout;
 
@@ -38,11 +37,10 @@ const Entity: FC = () => {
 
   const renderedFrom = camelCase(routes?.entity.title)
 
-  const provider = useData();
-
-  const { permissions, user, mappedEntities } = provider?.state;
-  const mappedEntitiesDispatch = provider?.dispatch;
-
+  const {
+    state: { permissions, user },
+  }: any = useData();
+  
   const { getColumnData } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, entityId: null });
   const [renderCount, setRenderCount] = useState(0);
@@ -242,16 +240,15 @@ const Entity: FC = () => {
         let rows = data.map((u) => {
           return prepareDataForGrid(u);
         });
-
-        if (setEntities || mappedEntities?.length === 0) {
-          let mappedEntities = []
-          if (data && data.length) {
-            data.forEach(o => {
-              mappedEntities = [...mappedEntities,
-              { optionLabel: o?.entityName, optionValue: o?._id }]
-            })
-          }
-          mappedEntitiesDispatch({ type: SET_MAPPED_ENTITIES, payload: mappedEntities });
+        if (setEntities) {
+          // let mappedEntities = []
+          // if (data && data.length) {
+          //   data.forEach(o => {
+          //     mappedEntities = [...mappedEntities,
+          //     { optionLabel: o?.entityName, optionValue: o?._id }]
+          //   })
+          // }
+          // localStorage.setItem("mappedEntities", JSON.stringify(mappedEntities))
         }
 
         dispatch({ type: "initialize", data: rows, count: count });
@@ -443,7 +440,7 @@ const Entity: FC = () => {
             <ResourceTransferDialog
               open={true}
               fromResource={{ ...deleteEntity, name: deleteEntity.entityName ?? '' }}
-              allResourceData={mappedEntities?.filter(entity => entity.optionValue !== deleteEntity?._id)}
+              allResourceData={user?.entity?.filter(entity => entity._id !== deleteEntity?._id).map(e => ({ optionLabel: e?.entityName, optionValue: e?._id }))}
               onClose={() => {
                 setDeleteEntity({})
                 setShowDeleteDialog(false)

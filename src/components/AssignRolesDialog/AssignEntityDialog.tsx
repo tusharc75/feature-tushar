@@ -58,7 +58,7 @@ const AssignEntityDialog = ({
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { mappedEntities },
+    state: { user },
   }: any = useData();
 
   const [data, setData] = useState([]);
@@ -105,19 +105,19 @@ const AssignEntityDialog = ({
     } else {
       setLoadingData(false);
       setData(
-        mappedEntities?.map((obj) => ({
+        user?.entity?.map((obj) => ({
           ...obj,
-          entityName: obj.optionLabel,
-          _id: obj.optionValue,
+          optionLabel: obj.entityName,
+          optionValue: obj._id,
           isChecked: false,
           show: true
         }))
       );
       setDataConst(
-        mappedEntities?.map((obj) => ({
+        user?.entity?.map((obj) => ({
           ...obj,
-          entityName: obj.optionLabel,
-          _id: obj.optionValue,
+          optionLabel: obj.entityName,
+          optionValue: obj._id,
           isChecked: false,
           show: true
         }))

@@ -3,7 +3,7 @@ import { useHistory, Link } from 'react-router-dom';
 import { CssBaseline, Button, Box, TextField, CircularProgress, Link as MuiLink, Typography } from '@material-ui/core';
 import { Formik, Form } from 'formik';
 import { useData } from '../../StateProvider/Provider';
-import { SET_USER, SET_SELECTED_ENTITY, SET_MAPPED_ENTITIES } from '../../StateProvider/actionTypes';
+import { SET_USER, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
@@ -57,14 +57,6 @@ const Login = () => {
           localStorage.setItem('gridMetaData', tempMetaData);
           dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
 
-          let mappedEntities = [];
-          if (data.entity && data.entity.length) {
-            data.entity.forEach((o) => {
-              mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
-            });
-          }
-          dispatch({ type: SET_MAPPED_ENTITIES, payload: mappedEntities });
-
           dispatch({ type: SET_USER, payload: data });
           if (data?.role?.selectedEntity?._id) {
             dispatch({
@@ -104,14 +96,6 @@ const Login = () => {
         setSubmitting(false);
         const { data } = response;
         localStorage.setItem('token', data.token);
-
-        let mappedEntities = [];
-        if (data.entity && data.entity.length) {
-          data.entity.forEach((o) => {
-            mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
-          });
-        }
-        dispatch({ type: SET_MAPPED_ENTITIES, payload: mappedEntities });
 
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {

@@ -8,7 +8,7 @@ import { CustomNotificationCountContext } from './StateProvider/CustomNotificati
 import axiosInstance from './axios/axiosInstance';
 import { CustomChatNotificationCountContext } from './StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import queryString from 'query-string';
-import { SET_USER, SET_SELECTED_ENTITY, SET_MAPPED_ENTITIES } from './StateProvider/actionTypes';
+import { SET_USER, SET_SELECTED_ENTITY } from './StateProvider/actionTypes';
 import routes from './components/Helpers/Routes';
 import { termsAndCondition, customerAccount, customerContact, supplierAccount, supplierContact } from './constants/helpers';
 import CustomToaster from './components/Helpers/CustomToast';
@@ -241,7 +241,7 @@ function App() {
   const { isOffline } = useContext(CustomOfflineContext);
 
   const {
-    state: { user, mappedEntities },
+    state: { user },
     dispatch
   }: any = useData();
   const { entityApi } = entity;
@@ -263,25 +263,6 @@ function App() {
       localStorage.setItem('slowInternetConnection', 'false');
     }
   });
-
-  useEffect(() => {
-    if (!mappedEntities && localStorage.getItem('token')) {
-      axiosInstance()
-        .get(`${entityApi}`)
-        .then(({ data: { data } }) => {
-          let mappedEntities = [];
-          if (data && data.length) {
-            data.forEach((o) => {
-              mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
-            });
-          }
-          dispatch({
-            type: SET_MAPPED_ENTITIES,
-            payload: mappedEntities
-          });
-        });
-    }
-  }, [mappedEntities]);
 
   useEffect(() => {
     try {

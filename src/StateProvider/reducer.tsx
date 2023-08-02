@@ -6,7 +6,6 @@ import {
   SET_SELECTED_ENTITY,
   SET_CHATTER,
   SET_CART,
-  SET_MAPPED_ENTITIES,
   SET_START_TOUR,
   SET_GRID_METADATA,
   SET_SEARCH
@@ -27,7 +26,6 @@ export const initialState = {
     stepIndex: 0
   },
   gridMetaData: {},
-  mappedEntities: []
 };
 
 const reducer = (state = initialState, action) => {
@@ -53,9 +51,6 @@ const reducer = (state = initialState, action) => {
 
     case SET_CART:
       return { ...state, cartItems: [...action.payload] };
-
-    case SET_MAPPED_ENTITIES:
-      return { ...state, mappedEntities: [...action.payload] };
 
     case SET_SELECTED_ENTITY:
       localStorage.setItem('selectedEntity', action.payload);
