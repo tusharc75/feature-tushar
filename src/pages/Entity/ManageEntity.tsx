@@ -93,7 +93,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
         .then(({ data }) => {
           const newId = data.data._id;
           setSubmitting(false);
-          fetchData(true, newId);
+          fetchData();
           toastConfig.setToastConfig({
             type: 'success',
             open: true,

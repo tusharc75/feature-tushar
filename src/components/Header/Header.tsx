@@ -734,7 +734,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-          !curEntity?.hideGlobal &&
           <MenuItem
             title={curEntity.entityName}
             key={curEntity._id}

@@ -221,7 +221,7 @@ const Entity: FC = () => {
     return deepFilter;
   };
 
-  const fetchEntity = (setEntities = false, entityId = null) => {
+  const fetchEntity = () => {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
 
@@ -235,15 +235,6 @@ const Entity: FC = () => {
         let rows = data.map((u) => {
           return prepareDataForGrid(u);
         });
-        if (setEntities && entityId) {
-          const entities = data?.filter(d => d?._id === entityId)
-          if (entities && entities.length) {
-            entities.forEach(o => {
-              user?.entity.push({ ...o, optionLabel: o?.entityName, optionValue: o?._id, hideGlobal: true })
-            })
-          }
-          mappedEntitiesDispatch({ type: SET_USER, payload: user });
-        }
 
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
