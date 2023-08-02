@@ -27,6 +27,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom'
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { camelCase } from "lodash";
+import { SET_USER } from "src/StateProvider/actionTypes";
 
 let entityTimeout;
 
@@ -37,9 +38,9 @@ const Entity: FC = () => {
 
   const renderedFrom = camelCase(routes?.entity.title)
 
-  const {
-    state: { permissions, user },
-  }: any = useData();
+  const provider = useData();
+  const { permissions, user } = provider?.state;
+  const mappedEntitiesDispatch = provider?.dispatch;
 
   const { getColumnData } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, entityId: null });
@@ -225,7 +226,7 @@ const Entity: FC = () => {
     return deepFilter;
   };
 
-  const fetchEntity = (setEntities = false) => {
+  const fetchEntity = (setEntities = false, entityId = null) => {
     const queryString = getQueryString();
     dispatch({ type: "loading", loading: true });
 
@@ -240,15 +241,14 @@ const Entity: FC = () => {
         let rows = data.map((u) => {
           return prepareDataForGrid(u);
         });
-        if (setEntities) {
-          // let mappedEntities = []
-          // if (data && data.length) {
-          //   data.forEach(o => {
-          //     mappedEntities = [...mappedEntities,
-          //     { optionLabel: o?.entityName, optionValue: o?._id }]
-          //   })
-          // }
-          // localStorage.setItem("mappedEntities", JSON.stringify(mappedEntities))
+        if (setEntities && entityId) {
+          const entities = data?.filter(d => d?._id === entityId)
+          if (entities && entities.length) {
+            entities.forEach(o => {
+              user?.entity.push({ ...o, optionLabel: o?.entityName, optionValue: o?._id, hideGlobal: true })
+            })
+          }
+          mappedEntitiesDispatch({ type: SET_USER, payload: user });
         }
 
         dispatch({ type: "initialize", data: rows, count: count });
