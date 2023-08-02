@@ -17,7 +17,6 @@ import {
   CustomDialogTransition,
   transferAsset,
   setFieldsInAscendingOrder,
-  generateUniqueIdOnly,
   GenerateResourceLineNumber,
 } from 'src/constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
