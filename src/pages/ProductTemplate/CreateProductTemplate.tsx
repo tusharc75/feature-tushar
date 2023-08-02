@@ -409,7 +409,7 @@ const ProductTemplate = () => {
               {({ submitForm, touched, errors, setFieldValue, values }) => (
                 <Form>
                   <Box p={1}>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-[3fr_108px_3fr_180px] items-center md:gap-4 mb-2">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-[3fr_108px_3fr_180px]  md:gap-4 mb-2">
                       <TextField
                         disabled={!hasPermissionToUpdate}
                         variant="outlined"
@@ -476,7 +476,7 @@ const ProductTemplate = () => {
                         />
                       )}
 
-                      <div className="ml-auto flex mt-3 md:mt-0">
+                      <div className="ml-auto flex mt-3 md:mt-0 items-center">
                         <HistoryButton onClick={() => setShowHistory(true)} />
                         <Box>
                           {((id === '0' && productTemplatePermissions.isCreate) || (id !== '0' && productTemplatePermissions.isUpdate)) && (
