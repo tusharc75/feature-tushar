@@ -10,18 +10,13 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import {
-  CustomDialogTransition,
-  generateUniqueIdOnly,
-  setFieldsInAscendingOrder
-} from 'src/constants/helpers';
+import { CustomDialogTransition, setFieldsInAscendingOrder, GenerateResourceLineNumber } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { FaDiceOne } from 'react-icons/fa';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { useHistory } from 'react-router-dom';
-
 
 const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -57,9 +52,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
             if (isClone) {
               fields = fieldsDataForCreate;
               const { planningNumber, ...rest } = data;
-              if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-                rest.planningNumber = `PLO_${generateUniqueIdOnly()}`;
-              }
+              rest.planningNumber = GenerateResourceLineNumber(fieldsDataForCreate);
               setCloneHeading(planningNumber);
               tempData = rest;
             }
@@ -73,9 +66,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
           });
       } else {
         const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
-        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-          tempInitialData['planningNumber'] = `PLO_${generateUniqueIdOnly()}`;
-        }
+        tempInitialData['planningNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           tempInitialData['currency'] = user.user?.brandCurrency;
         }
@@ -188,26 +179,26 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field, index2) => (
                                   <Grid key={index2} item xs={12} sm={6} md={6}>
-                                      <FormTypes
-                                        {...field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={setFieldValue}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={null}
-                                        disabled={field.disableOnEdit}
-                                        fieldData={field}
-                                        fields={initialData?.fields}
-                                      />
+                                    <FormTypes
+                                      {...field}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={setFieldValue}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      imageOrFileUploadCompletePercentage={null}
+                                      disabled={field.disableOnEdit}
+                                      fieldData={field}
+                                      fields={initialData?.fields}
+                                    />
                                   </Grid>
                                 ))}
                               </Grid>

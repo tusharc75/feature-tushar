@@ -15,7 +15,6 @@ import {
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
   yupSchema,
-  generateUniqueIdOnly,
   demandOrder,
   GenerateResourceLineNumber
 } from '../../../constants/helpers';

@@ -1,9 +1,8 @@
 import { useState, useContext, useEffect } from 'react';
 import { useData } from '../../StateProvider/Provider';
-import { SET_USER, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import { SET_USER, SET_SELECTED_ENTITY, SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
 import { isEmpty } from 'lodash';
 import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
@@ -25,14 +24,32 @@ const AzureLogin = () => {
             'graph-token': graphToken
           });
           const { data } = res.data;
+
           localStorage.setItem('token', data.token);
+
+          let mappedEntities = [];
+          if (data.entity && data.entity.length) {
+            data.entity.forEach((o) => {
+              mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
+            });
+          }
+          localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
+
           dispatch({ type: SET_USER, payload: data });
+
           if (data?.role?.selectedEntity?._id) {
             dispatch({
               type: SET_SELECTED_ENTITY,
               payload: data.role.selectedEntity._id
             });
           }
+
+          const gridRequest = await axiosInstance().get(`user/meta-grid/${data?.user?._id}`);
+
+          let tempMetaData = JSON.stringify(gridRequest?.data?.data?.gridMetaData);
+          localStorage.setItem('gridMetaData', tempMetaData);
+          dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
+
         } catch (e) {
           setCounter(10);
           setInvalidAzureLogin(true);

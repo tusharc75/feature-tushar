@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, generateUniqueIdOnly, setFieldsInAscendingOrder, sidebarResource } from '../../constants/helpers';
+import { CustomDialogTransition, GenerateResourceLineNumber, setFieldsInAscendingOrder, sidebarResource } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -50,7 +50,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
               setTransactionLockData(data);
               if (isClone) {
                 const { lockNumber, ...rest } = data;
-                rest.lockNumber = `LN_${generateUniqueIdOnly()}`;
+                rest.lockNumber = GenerateResourceLineNumber(fieldsDataForCreate);
                 setCloneHeading(lockNumber);
                 setInitialData({
                   fields: fieldsDataForCreate,
@@ -69,7 +69,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
             });
         } else {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
-          createValues['lockNumber'] = `LN_${generateUniqueIdOnly()}`;
+          createValues['lockNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           setInitialData({
             fields: fieldsDataForCreate,
             values: createValues
