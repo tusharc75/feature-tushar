@@ -44,6 +44,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   const [tabValue, setTabValue] = useState(0);
   const [serviceOption, setServiceOption] = useState(null);
   const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All' });
+  const [renderCount, setRenderCount] = useState(0)
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
@@ -62,9 +63,12 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       };
     })]);
     if (selectedServiceOption?.optionValue !== 'All' && !services?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
-      setDataRows(null)
       setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
     }
+    if (renderCount > 1) {
+      setDataRows(null)
+    }
+    setRenderCount(renderCount + 1)
   }, [services]);
 
   const {
@@ -76,7 +80,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   }, [id]);
 
   useEffect(() => {
-    if (columns && !dataRows) {
+    if (columns && !dataRows && tabValue === 0) {
       var allowRequest = false;
       if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
         if ((fieldTicketData?.warehouse?.manager && fieldTicketData?.warehouse?.manager?.includes(user?.user?._id))
@@ -90,13 +94,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       setConsumeRequest(allowRequest)
       fetchData();
     }
-  }, [columns, services, selectedServiceOption]);
-
-  useEffect(() => {
-    if (tabValue === 0 && !dataRows) {
-      fetchData();
-    }
-  }, [tabValue])
+  }, [columns, renderCount, selectedServiceOption, tabValue]);
 
   const fetchColumns = async () => {
     var { fields, allFields } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
