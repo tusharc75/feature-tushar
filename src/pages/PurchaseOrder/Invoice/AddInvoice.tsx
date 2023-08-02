@@ -78,7 +78,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
       fullWidth
     >
       <CustomDialogHeader
-        title={'Add Invoice'}
+        title={invoiceData ? 'Edit Invoice' : 'Add Invoice'}
         onClose={() => {
           handleClose();
         }}

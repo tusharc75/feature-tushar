@@ -230,7 +230,7 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
                             className="th text-truncate table-header overflow-initial"
                           >
                             <div className="d-flex align-items-center justify-content-space-between pos-rel">
-                              <div className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
+                              <div className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps({ title: undefined })}>
                                 <span>{column.render('Header')}</span>
                               </div>
                             </div>

@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { MATERIAL_REQUEST_STATUS, RESOURCE_LABEL, dateTimeFormat } from 'src/constants/helpers';
+import { MATERIAL_REQUEST_STATUS, RESOURCE_LABEL, dateTimeFormat, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -17,7 +17,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import QtyWithdrawalDialog from './QtyWithdrawalDialog';
 
-function QtyRequestLog({ onClose, workOrderId, uniqueId, productName, product }) {
+function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productName, product }) {
 
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
@@ -34,7 +34,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName, product })
   useEffect(() => {
     fetchColumn();
     fetchData();
-  }, [workOrderId, uniqueId]);
+  }, [referenceId, uniqueId]);
 
   const fetchColumn = async () => {
     setColumns(null)
@@ -182,7 +182,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName, product })
 
   const fetchData = () => {
     axiosInstance()
-      .get(`/material-handling/request/${workOrderId}/${RESOURCE_LABEL.workOrder.replace(" ","-")}`)
+      .get(`/material-handling/request?referenceId=${referenceId}&referenceType=${referenceType}`)
       .then(({ data: { data } }) => {
         const filteredData = data?.filter((e) => e.uniqueId === uniqueId);
         filteredData?.forEach((e) => {
@@ -270,7 +270,7 @@ function QtyRequestLog({ onClose, workOrderId, uniqueId, productName, product })
             setWithdrawalQtyDialog({ open: false, data: null })
           }}
           data={withdrawalQtyDialog.data}
-          workOrderId={workOrderId}
+          workOrderId={referenceId}
         />}
     </>
   );

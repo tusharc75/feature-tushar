@@ -12,9 +12,9 @@ import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
   CustomDialogTransition,
-  generateUniqueIdOnly,
   bulkAssetCreation,
   setFieldsInAscendingOrder,
+  GenerateResourceLineNumber,
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -55,9 +55,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
               setBulkAssetCreationData(data);
               if (isClone) {
                 const { _id, createdBy, updatedBy, serialNumber, baNumber, ...rest } = data;
-                if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-                  rest['baNumber'] = `BA_${generateUniqueIdOnly()}`;
-                }
+                rest['baNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
                 rest['status'] = 'New';
                 setInitialData({
                   fields: fieldsDataForCreate,
@@ -80,9 +78,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
           if (fieldsDataForCreate.some((e) => e.fieldName === 'currency')) {
             createValues['currency'] = user.user?.brandCurrency;
           }
-          if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-            createValues['baNumber'] = `BA_${generateUniqueIdOnly()}`;
-          }
+          createValues['baNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           if (refrenceData) {
             createValues['rentalJob'] = referenceId;
             createValues['warehouse'] = refrenceData?.warehouse;

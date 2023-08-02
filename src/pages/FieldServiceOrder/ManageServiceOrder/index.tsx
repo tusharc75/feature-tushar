@@ -16,8 +16,8 @@ import {
   fieldServiceOrder,
   setFieldsInAscendingOrder,
   yupSchema,
-  generateUniqueIdOnly,
-  sidebarResource
+  sidebarResource,
+  GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -86,9 +86,7 @@ const ManageServiceOrderDialog = ({
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, fieldServiceOrderNumber, updatedBy, ...rest } = data;
             rest['status'] = 'New';
-            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-              rest['fieldServiceOrderNumber'] = `FSO_${generateUniqueIdOnly()}`;
-            }
+            rest['fieldServiceOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(fieldServiceOrderNumber);
             setInitialData({
               fields: fieldsDataForCreate,
@@ -111,9 +109,7 @@ const ManageServiceOrderDialog = ({
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           initialData['currency'] = user.user?.brandCurrency;
         }
-        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-          initialData['fieldServiceOrderNumber'] = `FSO_${generateUniqueIdOnly()}`;
-        }
+        initialData['fieldServiceOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData

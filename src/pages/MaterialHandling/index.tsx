@@ -12,6 +12,7 @@ import { Autocomplete } from '@material-ui/lab';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import queryString from 'query-string';
 import { useHistory } from 'react-router-dom';
+import { sidebarResource } from 'src/constants/helpers';
 
 const MaterialHandling = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -122,7 +123,7 @@ const MaterialHandling = () => {
               <Autocomplete
                 options={workOrderOptions}
                 fullWidth
-                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionLabel={(option: any) => option?.optionLabel ?? ''}
                 getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
                 value={
                   workOrderOptions.filter((data) => data.optionValue === selectedOptionWorkOrder?.optionValue).length
@@ -239,12 +240,18 @@ const MaterialHandling = () => {
                                   variant="subtitle2"
                                   style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8, fontWeight: 600 }}
                                 >
-                                  Work Order : <span style={{ color: 'var(--card-color-secondary)' }}>{data?.workOrderNumber}</span>
+                                  {data?.referenceType} : <span style={{ color: 'var(--card-color-secondary)' }}>{data?.referenceType === sidebarResource.workOrder ? data?.workOrderNumber : data?.referenceType === sidebarResource.fieldTicket ? data?.fieldTicketNumber : ''}</span>
                                 </Typography>
                                 <Box pl={1}>
                                   <IconButton
                                     onClick={() => {
-                                      window.open(`${routes.workOrderDetail.path}/${data?._id}`);
+                                      let route;
+                                      if (data?.referenceType === sidebarResource.workOrder) {
+                                        route = routes.workOrderDetail.path
+                                      } else if (data?.referenceType === sidebarResource.fieldTicket) {
+                                        route = routes.fieldTicketDetail.path
+                                      }
+                                      window.open(`${route}/${data?._id}`);
                                     }}
                                     aria-label="delete"
                                     size="small"
@@ -253,13 +260,17 @@ const MaterialHandling = () => {
                                   </IconButton>
                                 </Box>
                               </Box>
-                              <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
-                                Product : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.product?.optionLabel}</span>
-                              </Typography>
-                              <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
-                                Asset :{' '}
-                                <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.serializedAsset?.optionLabel}</span>
-                              </Typography>
+                              {data?.referenceType === sidebarResource.workOrder && (
+                                <>
+                                  <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                                    Product : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.product?.optionLabel}</span>
+                                  </Typography>
+                                  <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                                    Asset :{' '}
+                                    <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.serializedAsset?.optionLabel}</span>
+                                  </Typography>
+                                </>
+                              )}
                               <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 600 }}>
                                 {routes.warehouse.title} :{' '}
                                 <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.warehouse?.optionLabel}</span>
@@ -275,7 +286,7 @@ const MaterialHandling = () => {
               <Grid item xs={12} md={8} lg={selectedOptionWorkOrder ? 12 : 9}>
                 {selectedWorkOrder && (
                   <Box className="container-with-border " p={3}>
-                    <Request workOrder={selectedWorkOrder?._id} referenceType={selectedWorkOrder?.referenceType} />
+                    <Request referenceId={selectedWorkOrder?._id} referenceType={selectedWorkOrder?.referenceType} />
                   </Box>
                 )}
               </Grid>

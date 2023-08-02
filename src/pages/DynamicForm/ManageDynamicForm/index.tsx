@@ -11,7 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, generateUniqueIdOnly } from 'src/constants/helpers';
+import { CustomDialogTransition, GenerateResourceLineNumber } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
@@ -56,7 +56,7 @@ const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, isClone
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField && e?.isSystemGenerate)
         if (primaryField) {
-          tempInitialData[primaryField?.fieldName] = `${generateUniqueIdOnly()}`;
+          tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);;
         }
         setInitialData({
           fields: fieldsDataForCreate,

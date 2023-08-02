@@ -475,7 +475,7 @@ const Productpackage = ({
                       {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add New Customer Assets` : `Add New ${routes.serializedAsset.title}`}
                     </MenuItem>
                   )}
-                  {/* <MenuItem
+                  <MenuItem
                     onClick={() => {
                       closeAddActions();
                       setAddExistingProductDialog({ open: true, type: 'product', parentId: null, existing: false, productId: null, productCategory: null });
@@ -490,7 +490,7 @@ const Productpackage = ({
                     }}
                   >
                     Add Packages
-                  </MenuItem> */}
+                  </MenuItem>
                 </Menu>
               </Fragment>
             )}

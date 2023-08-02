@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, Typography } from '@material-ui/core';
 import moment from 'moment';
-import { MATERIAL_REQUEST_STATUS, dateTimeFormat } from 'src/constants/helpers';
+import { MATERIAL_REQUEST_STATUS, dateTimeFormat, sidebarResource } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -19,7 +19,7 @@ import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
 import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
 
-const Request = ({ workOrder, referenceType }) => {
+const Request = ({ referenceId, referenceType }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
@@ -38,12 +38,12 @@ const Request = ({ workOrder, referenceType }) => {
   useEffect(() => {
     fetchColumn();
     fetchData();
-  }, [workOrder]);
+  }, [referenceId]);
 
   const handleUpdateStatus = (status, ids, comment) => {
     setLoading(true);
     axiosInstance()
-      .put(`/material-handling/status`, { status, ids, comment, referenceType, referenceId: workOrder })
+      .put(`/material-handling/status`, { status, ids, comment, referenceType, referenceId: referenceId })
       .then(({ data }) => {
         setLoading(false);
         toastConfig.setToastConfig({
@@ -63,7 +63,7 @@ const Request = ({ workOrder, referenceType }) => {
   const fetchData = () => {
     setRowsData(null);
     axiosInstance()
-      .get(`/material-handling/request/${workOrder}/${referenceType?.replace(' ', '-')}`)
+      .get(`/material-handling/request?referenceId=${referenceId}&referenceType=${referenceType}`)
       .then(({ data: { data } }) => {
         data?.forEach((e) => {
           e.productName = e.product?.optionLabel;
@@ -268,6 +268,7 @@ const Request = ({ workOrder, referenceType }) => {
             size="small"
             aria-controls="action-menu"
             onClick={openActions}
+            disabled={selectedRecords?.length ? false : true}
             endIcon={<ExpandMore />}
           >
             {'Actions'}
@@ -287,7 +288,7 @@ const Request = ({ workOrder, referenceType }) => {
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }
@@ -301,7 +302,7 @@ const Request = ({ workOrder, referenceType }) => {
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }
