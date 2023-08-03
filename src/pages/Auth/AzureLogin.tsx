@@ -31,14 +31,6 @@ const AzureLogin = () => {
             dispatch({ type: SET_GRID_METADATA, payload: data?.user?.gridMetaData });
           }
 
-          let mappedEntities = [];
-          if (data.entity && data.entity.length) {
-            data.entity.forEach((o) => {
-              mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
-            });
-          }
-          localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
-
           dispatch({ type: SET_USER, payload: data });
 
           if (data?.role?.selectedEntity?._id) {
