@@ -43,6 +43,8 @@ import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Comments from './Comments';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import AssignUserDialog from './AssignUserDialog';
+import PeopleIcon from '@material-ui/icons/People';
 
 interface StepInterface {
   _id: string;
@@ -250,6 +252,7 @@ const Steps = ({
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
   const [commentsDialog, setCommentsDialog] = useState(false);
+  const [userAssignDialog, setUserAssignDialog] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
 
   const {
@@ -859,6 +862,13 @@ const Steps = ({
                           {step.stepName}
                         </Typography>
                       </Box>
+                      {step?.assignedUsers?.length > 0 && (
+                        <Box ml={1}>
+                          <HtmlTooltip title={step?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                            <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
+                          </HtmlTooltip>
+                        </Box>
+                      )}
                     </Box>
                     <Box style={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset', flexWrap: 'wrap' }}>
                       {step?.isAllowToPerform && (
@@ -1110,6 +1120,18 @@ const Steps = ({
                   Add/Consume Products
                 </MenuItem>
               )}
+              {referencType !== 'workOrderTechnician' && (
+                <MenuItem
+                  disabled={Boolean(getFields(selectedStep)?.stepData?.startDate)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setUserAssignDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Assign Technicians
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1284,6 +1306,26 @@ const Steps = ({
             stepId={consumablesDialog.stepId}
             serviceName={consumablesDialog.serviceName}
             warehouse={warehouse}
+          />
+        )}
+        {userAssignDialog && (
+          <AssignUserDialog
+            workOrderData={{
+              workOrderId: workOrderId
+            }}
+            assignedUsers={selectedStep?.assignedUsers}
+            reference={"steps"}
+            referenceData={{
+              stepId: selectedStep?._id,
+              serviceUniqueId: selectedService?.uniqueId,
+            }}
+            handleClose={() => {
+              setUserAssignDialog(false);
+            }}
+            handleSucess={() => {
+              setUserAssignDialog(false);
+              fetchService()
+            }}
           />
         )}
         {assignSteps && (

@@ -15,9 +15,9 @@ import {
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
   yupSchema,
-  generateUniqueIdOnly,
   repairOrder,
-  REPAIR_ORDER_TYPE
+  REPAIR_ORDER_TYPE,
+  GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -84,9 +84,7 @@ const ManageRepairOrder = ({
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, repairOrderNumber, updatedBy, ...rest } = data;
             rest.status = 'New';
-            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-              rest.repairOrderNumber = `RO_${generateUniqueIdOnly()}`;
-            }
+            rest.repairOrderNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(repairOrderNumber);
             setInitialData({
               fields: fieldsDataForCreate,
@@ -112,9 +110,7 @@ const ManageRepairOrder = ({
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-          initialData['repairOrderNumber'] = `RO_${generateUniqueIdOnly()}`;
-        }
+        initialData['repairOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceType === 'rentalJob') {
           initialData['rentalJob'] = referenceData?._id;
           if (fieldsDataForCreate?.some((e) => e?.fieldName === 'warehouse')) {

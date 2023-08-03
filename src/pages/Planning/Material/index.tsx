@@ -11,6 +11,7 @@ import { generateCustomTableColumns, flattenArray } from 'src/constants/columns'
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -88,12 +89,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail?.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail?.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </Box>
           </div>
         )
@@ -183,21 +184,34 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) =>
-        allowedToEdit && (
-          <Grid container spacing={1}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                setDeleteData(obj);
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          </Grid>
-        )
+      Cell: ({ row, rows }) => (
+        <>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            disabled={allowedToEdit ? false : true}
+            onClick={() => {
+              onMaterialEdit(row, rows);
+            }}
+          >
+            <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+          </IconButton>
+          {allowedToEdit && (
+            <Grid container spacing={1}>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  setDeleteData(obj);
+                }}
+              >
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+            </Grid>
+          )}
+        </>
+      )
     });
     if (!allowedToEdit) {
       coloum?.forEach((e: any) => {
@@ -219,14 +233,14 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'package'
-            ? parent.packageDetail?.packageName
-            : parent.serviceDetail?.serviceName;
+          ? parent.packageDetail?.packageName
+          : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription
-            : parent?.serviceDetail?.serviceDescription;
+          ? parent?.packageDetail?.packageDescription
+          : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === 'serializedAsset')?.length;
@@ -237,6 +251,15 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
     setSelectedRecords([]);
   };
 
+  const onMaterialEdit = (row, rows) => {
+    setMaterialEdit({
+      open: true,
+      data: row.original,
+      bulkedit: false,
+      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+    });
+  };
+
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
@@ -245,18 +268,18 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow.assetDetail.assetNumber
-              : _subRow.serviceDetail?.serviceName;
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.assetDetail.assetNumber
+          : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow.type === 'serializedAsset'
-              ? parent.description
-              : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow.type === 'serializedAsset'
+          ? parent.description
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;

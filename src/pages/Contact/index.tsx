@@ -827,7 +827,7 @@ export default function Contact(props) {
               selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
               dispatch={dispatch}
               onEdit={(d) => {
-                history.push(`${contactApi}/detail/${d._id}?openEdit=true`);
+                history.push(`${contactApi}/detail/${d._id}`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(d) => {

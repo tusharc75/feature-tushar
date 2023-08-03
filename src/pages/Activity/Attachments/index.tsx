@@ -167,7 +167,7 @@ export default function Attachment() {
       canDrag: false,
       disableFilters: true,
       Cell: ({ row }) => (
-        <p style={{ display: 'flex', alignItems: 'center', color: '#3B4F60' }}>
+        <p style={{ display: 'flex', alignItems: 'center', color: 'var(--dark-primary-text, #3B4F60)' }}>
           {row.original?.type === 'folder' ? (
             <>
               <FolderIcon style={{ paddingRight: 5 }} />
@@ -191,9 +191,9 @@ export default function Attachment() {
       disableFilters: true,
       Cell: ({ row }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <a className={permissions?.attachment?.isUpdate ? 'link cursor-pointer' : ''} onClick={() => handleActivityOpen(row.original)}>
+          <p className={permissions?.attachment?.isUpdate ? 'link cursor-pointer' : ''} onClick={() => handleActivityOpen(row.original)}>
             {row.original.name || ''}
-          </a>
+          </p>
           {row.original?.type === 'folder' && (
             <Box pl={1}>
               <HtmlTooltip title={'Add Folder/File'}>
@@ -223,12 +223,12 @@ export default function Attachment() {
           {row.original.relatedTo && row.original.relatedTo?.length > 0 ? (
             row.original.relatedTo.map((d) => {
               return (
-                <>
+                <div>
                   <Link className="link text-truncate" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                     {d.name}
                   </Link>
                   <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
-                </>
+                </div>
               );
             })
           ) : (

@@ -196,7 +196,7 @@ const AddServiceMaster = (props: Props) => {
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.serviceMaster.path}/${data._id}?openEdit=true`);
+                history.push(`${routes.serviceMaster.path}/${data._id}`);
               }}
               extraParamsToCheckDelete={false}
               onDelete={() => {}}

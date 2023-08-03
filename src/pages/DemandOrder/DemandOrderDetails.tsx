@@ -28,7 +28,7 @@ const DemandOrderDetails = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
 
   const {
     state: { user, permissions }
@@ -89,13 +89,6 @@ const DemandOrderDetails = () => {
       setSalesOrderData(data);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit && ['Invoiced', 'Closed'].indexOf(data.status) === -1);
-
-      if (isAllowedToEdit && openEdit === 'true') {
-        setOpenUpdateDialog(true);
-        const params = new URLSearchParams();
-        params.delete('openEdit');
-        history.push({ search: params.toString() });
-      }
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -146,7 +139,11 @@ const DemandOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={salesOrderData?._id} resource={ACTIVITY_RESOURCE.demandOrder} />
+            <ActivityButton 
+              referenceId={salesOrderData?._id} 
+              resource={ACTIVITY_RESOURCE.demandOrder} 
+              resourceLabel={salesOrderData?.demandOrderNumber}
+              />
           </Box>
         </Box>
       </Box>

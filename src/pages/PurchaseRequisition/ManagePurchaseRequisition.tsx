@@ -12,10 +12,10 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, generateUniqueIdOnly } from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, GenerateResourceLineNumber } from '../../constants/helpers';
 
 const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const history = useHistory();
@@ -51,7 +51,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
             if (isClone) {
               fields = fieldsDataForCreate;
               const { purchaseRequisitionNumber, ...rest } = data;
-              rest.purchaseRequisitionNumber = `PR_${generateUniqueIdOnly()}`;
+              rest.purchaseRequisitionNumber = GenerateResourceLineNumber(fieldsDataForCreate);
               setCloneHeading(purchaseRequisitionNumber);
               tempData = rest;
             }
@@ -65,7 +65,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
           });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        tempInitialData['purchaseRequisitionNumber'] = `PR_${generateUniqueIdOnly()}`;
+        tempInitialData['purchaseRequisitionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -148,13 +148,12 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                     setShowConfirmDialog(true);
                   }
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
                     : `Create ${routes?.purchaseRequisition?.title}`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

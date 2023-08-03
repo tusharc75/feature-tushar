@@ -50,7 +50,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
 
   const fetchFields = async () => {
     try {
-      let { fields } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+      let fields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
 
       const resultCost = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
 

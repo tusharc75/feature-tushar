@@ -29,6 +29,8 @@ import { uniq, map } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { useData } from 'src/StateProvider/Provider';
+
 
 const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -42,10 +44,34 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
 
+  const {
+    state: { user, permissions }
+  }: any = useData();
+
   useEffect(() => {
-    fetchRecords();
     getColumn();
+    if (user.user.brandPolicy?.repairOrderAutoLoadingTicket) {
+      createLoadingTicket();
+    } else {
+      fetchRecords();
+    }
   }, []);
+
+  const createLoadingTicket = async () => {
+    await axiosInstance()
+      .put(`${repairOrder.api}/loading-ticket/${repairOrderData._id}`)
+      .then(({ data: { data } }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Loading Ticket Created Successfully`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    fetchRecords();
+  }
 
   const fetchRecords = async () => {
     setNextStep(false);
@@ -379,7 +405,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (

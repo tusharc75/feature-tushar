@@ -24,6 +24,8 @@ import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SendEmail from 'src/pages/Quotation/SendEmail';
 import PreviewDownload from 'src/components/PreviewDownload';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Quotation = ({
   repairOrderData,
@@ -221,6 +223,40 @@ const Quotation = ({
       newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
     column = [...column, ...newColumns];
+    column.push({
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row, rows }) => {
+        return  (
+          <>
+          {allowedToEdit && (
+            <HtmlTooltip title="Edit">
+            <IconButton
+              size="small"
+              disabled={([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationInfo?.versions[tempCurrentVersion]?.status
+              ) || invoiceStep)}
+              aria-label="Edit"
+              onClick={() => {
+                handleOpen(row.original);
+              }}
+            >
+              <EditIcon color={([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationInfo?.versions[tempCurrentVersion]?.status
+              ) || invoiceStep) ? "disabled" : "primary"} />
+            </IconButton>
+          </HtmlTooltip>
+          )}
+          </>
+        ) 
+      }
+    });
+
     setColumns(column);
     setAllColumn(column.map((d) => d.Header));
   };
@@ -659,12 +695,7 @@ const Quotation = ({
                 quotationData?.versions[currentVersion]?.status
               )
             }
-            hideAction={
-              !allowedToEdit ||
-              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                quotationData?.versions[currentVersion]?.status
-              )
-            }
+            hideAction={invoiceStep}
             onSaveEdit={onSaveInlineEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}

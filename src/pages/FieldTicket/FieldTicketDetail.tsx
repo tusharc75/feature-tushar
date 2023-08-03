@@ -89,8 +89,8 @@ const FieldTicketDetail = () => {
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
       }
-      setAllowedToEdit(isAllowedToEdit);
-      setAllowedToDelete(data.owner.optionValue === user?.user?._id);
+      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && isAllowedToEdit);
+      setAllowedToDelete(permissions?.fieldTicket?.isDelete && data.owner.optionValue === user?.user?._id && data?.canDelete);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -152,13 +152,17 @@ const FieldTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.fieldTicket?.isUpdate && (
-              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-              </Button>
-            )}
-            {permissions?.fieldTicket?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={fieldTicketData?._id} resource={ACTIVITY_RESOURCE.fieldTicket} />
+            <Button variant={isMobile && !isTablet ? 'text' : 'contained'}
+              disabled={!allowedToEdit}
+              className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+              {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+            </Button>
+            <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
+            <ActivityButton 
+              referenceId={fieldTicketData?._id} 
+              resource={ACTIVITY_RESOURCE.fieldTicket} 
+              resourceLabel={fieldTicketData?.fieldTicketNumber}
+              />
           </Box>
         </Box>
       </Box>
@@ -226,6 +230,7 @@ const FieldTicketDetail = () => {
                 renderedFrom={`${renderedFrom}_grid-1`}
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
+                refreshFieldTicket={fetchData}
               />
             )}
             {currentStep === 1 && (

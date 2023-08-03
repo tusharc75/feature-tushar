@@ -456,7 +456,7 @@ const LeadTimeMaster = () => {
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.leadTimeMasterDetail.path}/${data._id}?openEdit=true`);
+                history.push(`${routes.leadTimeMasterDetail.path}/${data._id}`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {

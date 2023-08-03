@@ -151,7 +151,11 @@ const JobDetail = () => {
               </Button>
             )}
             {permissions?.job?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={jobData?._id} resource={ACTIVITY_RESOURCE.job} />
+            <ActivityButton 
+              referenceId={jobData?._id} 
+              resource={ACTIVITY_RESOURCE.job} 
+              resourceLabel={jobData?.jobNumber}
+              />
           </Box>
         </Box>
       </Box>

@@ -67,6 +67,8 @@ export default function ProcessFlow(props) {
     handleMarkAsCompleted({ isSetBackStep: true });
   };
 
+  if (steps.length === 0) return null;
+
   return (
     <>
       <div className="my-4">

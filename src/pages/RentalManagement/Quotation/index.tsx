@@ -31,7 +31,6 @@ import {
 } from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { isMobile, isTablet } from 'react-device-detect';
-import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 import { useData } from 'src/StateProvider/Provider';
 import { quotation } from '../../../constants/helpers';

@@ -15,14 +15,14 @@ import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { capitalize, sortBy, startCase } from 'lodash';
+import { capitalize, map, sortBy, startCase, uniq } from 'lodash';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import { MdAssignmentTurnedIn } from 'react-icons/md';
-
+import EditIcon from '@material-ui/icons/Edit';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({
@@ -60,6 +60,8 @@ const WorkOrder = ({
   const [isUpdating, setUpdating] = useState(false);
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
+  const [isBulkEdit, setIsBulkEdit] = useState(false);
+
 
   useEffect(() => {
     fetchFields();
@@ -101,13 +103,10 @@ const WorkOrder = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original.type === 'service' ? (
+            {row.original.type === 'service' && row?.original?.status !== WORKORDER_SERVICE_STATUS.completed ? (
               <p
                 onClick={() => {
-                  setUpdateDialog({
-                    open: true,
-                    data: row.original
-                  });
+                  openMaterial(row);
                 }}
                 className="link text-truncate"
                 title={row.original?.detail}
@@ -259,6 +258,20 @@ const WorkOrder = ({
       Cell: ({ row }) => {
         return (
           <>
+            {row?.original?.type === 'service' && (
+              <HtmlTooltip title="Edit">
+                <IconButton
+                  size="small"
+                  aria-label="Edit"
+                  onClick={() => {
+                    openMaterial(row);
+                  }}
+                  disabled={row?.original?.status === WORKORDER_SERVICE_STATUS?.completed ? true : false}
+                >
+                  <EditIcon color={row?.original?.status === WORKORDER_SERVICE_STATUS?.completed ? "disabled" : "primary"} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
             {row?.original?.type === 'service' || row?.original?.type === 'package' ? (
               <>
                 <IconButton
@@ -325,6 +338,14 @@ const WorkOrder = ({
     });
     setColumns(coloum);
   };
+
+  const openMaterial = (row) => {
+    setUpdateDialog({
+      open: true,
+      data: row.original
+    });
+    setIsBulkEdit(false);
+  }
 
   const handleWorkOrderDelete = (ids) => {
     axiosInstance()
@@ -619,12 +640,6 @@ const WorkOrder = ({
 
   const handleSaveData = async (rows: any) => {
     setUpdating(true);
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.isValid;
-      delete element.hideSelection;
-    });
     const workOrderId = rows[0]?.workOrder?._id;
     axiosInstance()
       .put(`${repairOrder.api}/${repairOrderData._id}/work-order/${workOrderId}`, { material: rows })
@@ -636,12 +651,23 @@ const WorkOrder = ({
           type: 'success',
           message: data.message
         });
+        setIsBulkEdit(false)
         setUpdateDialog({ open: false, data: null });
       })
       .catch((error) => {
         setUpdating(false);
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const checkUniqWorkOrder = () => {
+    if (selectedProducts.length === 0) {
+      return false;
+    } else if (uniq(map(selectedProducts?.filter((e: any) => e.type === 'service'), 'workOrder')).length === 1) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
   return (
@@ -710,6 +736,19 @@ const WorkOrder = ({
                 disabled={selectedProducts.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
               >
                 Auto Complete Work Order
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setIsBulkEdit(true)
+                  setUpdateDialog({
+                    open: true,
+                    data: selectedProducts.filter((e) => e.type === "service")
+                  });
+                  closeActions()
+                }}
+                disabled={((selectedProducts.filter((e) => e.type === "service")).length > 0 && checkUniqWorkOrder()) ? false : true}
+              >
+                Bulk Edit
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -790,6 +829,7 @@ const WorkOrder = ({
                     workOrderId: d?.workOrder?._id
                   };
                 })}
+              reference='service'
               assignedUsers={allAssignedUsers}
               handleClose={() => {
                 setUserAssignDialog(false);
@@ -841,11 +881,13 @@ const WorkOrder = ({
             <UpdateWorkOrderDialog
               onClose={() => {
                 setUpdateDialog({ open: false, data: null });
+                setIsBulkEdit(false);
               }}
               materialData={updateDialog.data}
               handleUpdate={handleSaveData}
               loadingEdit={isUpdating}
               repairOrderData={repairOrderData}
+              isBulkEdit={isBulkEdit}
             />
           )}
         </Grid>

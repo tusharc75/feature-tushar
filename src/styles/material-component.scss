@@ -123,6 +123,12 @@
   }
 }
 
+.MuiIconButton-root {
+  &.cursor-stop {
+    color: gray !important;
+  }
+}
+
 .MuiOutlinedInput-root {
   .MuiInputAdornment-positionEnd {
     .MuiIconButton-root {

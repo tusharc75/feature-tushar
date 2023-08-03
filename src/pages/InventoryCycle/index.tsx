@@ -345,7 +345,7 @@ const InventoryCycle = () => {
                 selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${routes.inventoryCycleDetail.path}/${data._id}?openEdit=true`);
+                  history.push(`${routes.inventoryCycleDetail.path}/${data._id}`);
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {

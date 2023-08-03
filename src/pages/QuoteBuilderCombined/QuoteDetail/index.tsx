@@ -144,7 +144,6 @@ export default function QuoteDetail() {
   const classes = useStyles();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -385,13 +384,6 @@ export default function QuoteDetail() {
               { title: routes.quoteBuilder.title, path: routes.quoteBuilder.path },
               { title: `${data?.quoteName} (V-${tempCurrentVersion})`, hasOnClick: true }
             ]);
-
-            if (isAllowedToEdit && openEdit === 'true') {
-              setOpenUpdateDialog(true);
-              const params = new URLSearchParams();
-              params.delete('openEdit');
-              history.push({ search: params.toString() });
-            }
             fetchDoaLimit();
             setLoading(false);
           });
@@ -859,7 +851,11 @@ export default function QuoteDetail() {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={quoteData?._id} resource={ACTIVITY_RESOURCE.quote} />
+            <ActivityButton 
+              referenceId={quoteData?._id} 
+              resource={ACTIVITY_RESOURCE.quote} 
+              resourceLabel={quoteData?.quoteName}
+              />
           </Box>
         </Box>
       </Box>

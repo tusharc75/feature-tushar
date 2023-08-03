@@ -32,7 +32,7 @@ const WorkOrderDetails = () => {
   const history = useHistory();
 
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -131,12 +131,6 @@ const WorkOrderDetails = () => {
         }
         setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
         setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false);
-        if (permissions?.workOrder?.isUpdate && openEdit === 'true') {
-          setOpenUpdateDialog(true);
-          const params = new URLSearchParams();
-          params.delete('openEdit');
-          history.push({ search: params.toString() });
-        }
         setWorkOrderData({ ...data });
       })
       .catch((err) => {
@@ -265,7 +259,11 @@ const WorkOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="40px" />
             )}
-            <ActivityButton referenceId={workOrderData?._id} resource={ACTIVITY_RESOURCE.workOrder} />
+            <ActivityButton 
+              referenceId={workOrderData?._id} 
+              resource={ACTIVITY_RESOURCE.workOrder} 
+              resourceLabel={workOrderData?.workOrderNumber}
+              />
           </Box>
         </Box>
       </Box>

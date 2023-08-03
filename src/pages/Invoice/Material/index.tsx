@@ -24,6 +24,7 @@ import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/Assign
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, updateJobStatus, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -89,12 +90,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
             {allowedToEdit && row.original.type !== 'serializedAsset' ? (
               <p
                 onClick={() => {
-                  setMaterialEdit({
-                    open: true,
-                    data: row.original,
-                    bulkedit: false,
-                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                  });
+                  openMaterial(row, rows);
                 }}
                 className="link text-truncate"
                 title={row.original?.detail}
@@ -174,21 +170,35 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) =>
-        allowedToEdit && (
-          <Grid container spacing={1}>
+      Cell: ({ row, rows }) =>
+        <>
+          <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
             <IconButton
               size="small"
-              aria-label="Details"
+              aria-label="Delete"
+              disabled={!allowedToEdit}
               onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                setDeleteData(obj);
+                openMaterial(row, rows);
               }}
             >
-              <DeleteIcon fontSize="small" color="error" />
+              <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
-          </Grid>
-        )
+          </HtmlTooltip>
+          {
+            allowedToEdit && (
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  setDeleteData(obj);
+                }}
+              >
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+            )
+          }
+        </>
     });
     setColumns(coloum);
     fetchInvoiceData();
@@ -260,6 +270,15 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
+  };
+
+  const openMaterial = (data, rows) => {
+    setMaterialEdit({
+      open: true,
+      data: data.original,
+      bulkedit: false,
+      showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
+    });
   };
 
   const openActions = (event) => {

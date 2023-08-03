@@ -11,7 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, RESOURCE_LABEL, generateUniqueIdOnly, serviceMaster, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, GenerateResourceLineNumber, RESOURCE_LABEL, serviceMaster, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
@@ -20,7 +20,6 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { FaDiceOne } from 'react-icons/fa';
 import { findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { is } from 'date-fns/locale';
 import moment from 'moment';
 
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false, renderedFrom = '' }) => {
@@ -86,7 +85,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         if (isClone) {
           fields = fieldsDataForCreate;
           const { fieldTicketNumber, ...rest } = mainData;
-          rest.fieldTicketNumber = `FT_${generateUniqueIdOnly()}`;
+          rest.fieldTicketNumber = GenerateResourceLineNumber(fieldsDataForCreate);
           setCloneHeading(fieldTicketNumber);
           tempData = rest;
         } else {
@@ -107,7 +106,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        tempInitialData['fieldTicketNumber'] = `FT_${generateUniqueIdOnly()}`;
+        tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
           if (renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0`) {
             fieldsDataForCreate?.forEach((e) => {

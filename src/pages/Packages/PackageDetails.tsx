@@ -155,7 +155,11 @@ const PackageDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={packageData?._id} resource={ACTIVITY_RESOURCE.packages} />
+            <ActivityButton 
+              referenceId={packageData?._id} 
+              resource={ACTIVITY_RESOURCE.packages} 
+              resourceLabel={packageData?.packageName}
+              />
           </Box>
         </Box>
       </Box>

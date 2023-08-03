@@ -60,8 +60,8 @@ const Consumables = ({ rentalManagementData, setNextStep, currencySymbol, render
   }, [columns]);
 
   const fetchFields = async () => {
-    var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
-    setAllFields(JSON.parse(JSON.stringify(allFields)));
+    var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
       {
         accessor: 'srno',

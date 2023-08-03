@@ -32,7 +32,7 @@ const TransferAssetDetailPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
   const parsedTab = tab !== undefined ? parseInt(tab) : 1;
   const {
     state: { user, permissions }
@@ -187,13 +187,6 @@ const TransferAssetDetailPage = () => {
         } else {
           setCanReceive(true);
         }
-
-        if (permissions?.transferAsset?.isUpdate && openEdit === 'true') {
-          setOpenUpdateDialog(true);
-          const params = new URLSearchParams();
-          params.delete('openEdit');
-          history.push({ search: params.toString() });
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -320,7 +313,11 @@ const TransferAssetDetailPage = () => {
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
-            <ActivityButton referenceId={transferAssetData?._id} resource={ACTIVITY_RESOURCE.transferAsset} />
+            <ActivityButton 
+              referenceId={transferAssetData?._id} 
+              resource={ACTIVITY_RESOURCE.transferAsset} 
+              resourceLabel={transferAssetData?.transferAssetNumber}
+              />
           </Box>
         </Box>
       </Box>
