@@ -76,13 +76,14 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
     }
     const fetchFields = async () => {
         const selectedResourceData: any = tabValue === 0 ? sidebarResource.productCategory : tabValue === 1 ? sidebarResource.product : sidebarResource.serializedAsset
+        const path = tabValue === 0 ? routes.productCategoryDetail.path : tabValue === 1 ? routes.productDetail.path : routes.serializedAssetDetail.path
         axiosInstance()
             .get(`/field?resource=${selectedResourceData}`)
             .then(({ data: { data } }) => {
                 let columns = [];
                 let rendererNames = [];
                 data.forEach((o) => {
-                    let currentColumn = getColumnData(renderForm, o?.fieldData, selectedResourceData.path, true);
+                    let currentColumn = getColumnData(renderForm, o?.fieldData, path, true);
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData];
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
