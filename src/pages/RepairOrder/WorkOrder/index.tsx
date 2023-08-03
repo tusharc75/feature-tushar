@@ -103,7 +103,7 @@ const WorkOrder = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original.type === 'service' ? (
+            {row.original.type === 'service' && row?.original?.status !== WORKORDER_SERVICE_STATUS.completed ?  (
               <p
                 onClick={() => {
                   openMaterial(row);
