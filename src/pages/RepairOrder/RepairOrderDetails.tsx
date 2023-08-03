@@ -164,6 +164,7 @@ const RepairOrderDetails = () => {
         }
         setStepList(steps);
         setStepNames(steps.map((item) => item.name));
+
         if (data?.status === REPAIR_ORDER_STATUS.completed) {
           setCurrentStep(steps?.length - 1);
         }
@@ -172,6 +173,7 @@ const RepairOrderDetails = () => {
             steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
           );
         }
+
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setRepairOrderData({ ...data });
         if ((data?.type === REPAIR_ORDER_TYPE.internal || !data?.addQuotationStep) && data?.status !== REPAIR_ORDER_STATUS.completed) {
