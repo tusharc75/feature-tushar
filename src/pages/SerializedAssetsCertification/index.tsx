@@ -31,6 +31,7 @@ import CertificateHistoryDialog from './CertificateHistoryDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
+import DurationFilter from 'src/components/DurationFilter';
 
 const SerializedAssetsCertification = () => {
   const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
@@ -52,6 +53,14 @@ const SerializedAssetsCertification = () => {
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [products, setProducts] = useState(null);
+  const [issueDuration, setIssueDuration] = useState({
+    from: new Date(moment().subtract('1', 'year').calendar()),
+    to: new Date()
+  });
+  const [expireDuration, setExpireDuration] = useState({
+    from: new Date(moment().subtract('1', 'year').calendar()),
+    to: new Date()
+  });
 
   const {
     state: { permissions, user }
@@ -64,7 +73,19 @@ const SerializedAssetsCertification = () => {
 
   useEffect(() => {
     fetchProductInventory();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedWarehouse, productCategory, productFilter]);
+  }, [
+    page,
+    limit,
+    filters,
+    sorting,
+    search,
+    showFilteredRecordsOnly,
+    selectedWarehouse,
+    productCategory,
+    productFilter,
+    issueDuration,
+    expireDuration
+  ]);
 
   useEffect(() => {
     axiosInstance()
@@ -147,7 +168,7 @@ const SerializedAssetsCertification = () => {
 
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${serializedAssetsCertification.api}?${queryString}`)
+      .get(`${serializedAssetsCertification.api}${queryString}`)
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
@@ -187,7 +208,7 @@ const SerializedAssetsCertification = () => {
   };
 
   const getQueryString = () => {
-    let deepFilter = ``;
+    let deepFilter = `?page=${page}&limit=${limit}`;
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (selectedWarehouse && selectedWarehouse !== '') {
@@ -209,6 +230,28 @@ const SerializedAssetsCertification = () => {
 
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
+    }
+    const updatedFilters = [];
+    if (issueDuration) {
+      updatedFilters.push({
+        field: 'certificateIssueDate',
+        term: {
+          from: moment(issueDuration?.from).format('MM/DD/YYYY'),
+          to: moment(issueDuration?.to).format('MM/DD/YYYY')
+        }
+      });
+    }
+    if (expireDuration) {
+      updatedFilters.push({
+        field: 'certificateExpireDate',
+        term: {
+          from: moment(expireDuration?.from).format('MM/DD/YYYY'),
+          to: moment(expireDuration?.to).format('MM/DD/YYYY')
+        }
+      });
+    }
+    if (updatedFilters?.length > 0) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -361,6 +404,12 @@ const SerializedAssetsCertification = () => {
                     )
                   }
                 />
+                <Box mt={1}>
+                  <DurationFilter duration={issueDuration} setDuration={setIssueDuration} disabled={false} />
+                </Box>
+                <Box mt={1}>
+                  <DurationFilter duration={expireDuration} setDuration={setExpireDuration} disabled={false} />
+                </Box>
               </Fragment>
             </Grid>
             <Grid sm={12} xs={12} md={3} container className={`${styles.filter_side} align-items-center`}>
