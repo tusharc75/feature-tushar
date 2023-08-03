@@ -20,7 +20,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { ExpandMore } from '@material-ui/icons';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
-import { GrDrag } from 'react-icons/gr';
+import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const Steps = ({ serviceId }) => {
@@ -205,8 +205,13 @@ const Steps = ({ serviceId }) => {
             <Grid item xs={9} md={9} sm={9}>
               <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
                 {dataRows?.length ? (
-                  <Button variant="outlined" className="btn-outline-v1" size="small" onClick={() => setArrangeView(true)}>
-                    <GrDrag fontSize="small" color="primary" className="mr-1" />
+                  <Button
+                    variant="outlined"
+                    className="btn-outline-v1"
+                    size="small"
+                    onClick={() => setArrangeView(true)}
+                    startIcon={<DragIndicatorIcon fontSize="small" className="mr-1 dark:text-white text-[var(--primary)]" />}
+                  >
                     Arrange
                   </Button>
                 ) : null}
