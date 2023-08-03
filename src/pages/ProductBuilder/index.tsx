@@ -213,19 +213,21 @@ const ProductBuilder = () => {
                 </Button>
               )}
               {permission?.isDelete && (
-                <Button
-                  className={isMobile ? 'mobile_button ml-2' : `${styles.action_submit_btn} ${'ml-2'} new-dropdown-v1`}
-                  // className={styles.action_submit_btn}
-                  variant={isMobile ? 'text' : 'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length > 0 ? false : true}
-                  endIcon={<ExpandMore />}
-                >
-                  {isMobile ? '' : 'Actions'}
-                </Button>
+                <div className="ml-[8px]">
+                  <Button
+                    className={isMobile ? 'mobile_button ml-2' : `${styles.action_submit_btn} ${'ml-2'} new-dropdown-v1`}
+                    // className={styles.action_submit_btn}
+                    variant={isMobile ? 'text' : 'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedRecords.length > 0 ? false : true}
+                    endIcon={<ExpandMore />}
+                  >
+                    {isMobile ? '' : 'Actions'}
+                  </Button>
+                </div>
               )}
               <Menu
                 anchorEl={anchorEl}
