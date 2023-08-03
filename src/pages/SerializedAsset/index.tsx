@@ -624,7 +624,7 @@ const SerializedAsset = () => {
                         />
                       }
                       className="ml-2"
-                      style={{ color: 'var(--dark-primary-text, var(--primary))' }}
+                      style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: 'unset' }}
                       label="Sublease Assets"
                     />
                   )}
