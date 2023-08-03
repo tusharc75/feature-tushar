@@ -84,7 +84,12 @@ const FieldTicketDetail = () => {
         data = response?.data?.data;
       }
       setFieldTicketData(data);
-      setCurrentStep(getIndex(data?.processStatus, fieldTicketSteps));
+      if (data?.status === FIELD_TICKET_STATUS.invoiced) {
+        setCurrentStep(fieldTicketSteps?.length - 1);
+      }
+      else {
+        setCurrentStep(getIndex(data?.processStatus, fieldTicketSteps));
+      }
       let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
@@ -158,11 +163,11 @@ const FieldTicketDetail = () => {
               {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
             </Button>
             <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
-            <ActivityButton 
-              referenceId={fieldTicketData?._id} 
-              resource={ACTIVITY_RESOURCE.fieldTicket} 
+            <ActivityButton
+              referenceId={fieldTicketData?._id}
+              resource={ACTIVITY_RESOURCE.fieldTicket}
               resourceLabel={fieldTicketData?.fieldTicketNumber}
-              />
+            />
           </Box>
         </Box>
       </Box>
@@ -217,9 +222,7 @@ const FieldTicketDetail = () => {
             steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={false
-              // fieldTicketData?.status === FIELD_TICKET_STATUS.submitted
-            }
+            isStepEnded={fieldTicketData?.status === FIELD_TICKET_STATUS.invoiced}
           />
           <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && (
