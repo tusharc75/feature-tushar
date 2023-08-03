@@ -17,13 +17,18 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile, isTablet } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import { useHistory } from 'react-router-dom';
+import queryString from 'query-string';
+
 
 function SupplierItems({ api, id, allowedToEdit, permission }) {
-
+    const history = useHistory();
+    const parsed = queryString.parse(history.location.search);
+    const { itemTab }: any = parsed;
     const toastConfig = useContext(CustomToastContext);
     const { getColumnData } = useColumns();
     const renderForm = camelCase(routes?.supplierAccount?.title + '_supplierItems');
-    const [tabValue, setTabValue] = useState(0);
+    const [tabValue, setTabValue] = useState(itemTab ? parseInt(itemTab) : 0);
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({});
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -71,13 +76,14 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
     }
     const fetchFields = async () => {
         const selectedResourceData: any = tabValue === 0 ? sidebarResource.productCategory : tabValue === 1 ? sidebarResource.product : sidebarResource.serializedAsset
+        const path = tabValue === 0 ? routes.productCategoryDetail.path : tabValue === 1 ? routes.productDetail.path : routes.serializedAssetDetail.path
         axiosInstance()
             .get(`/field?resource=${selectedResourceData}`)
             .then(({ data: { data } }) => {
                 let columns = [];
                 let rendererNames = [];
                 data.forEach((o) => {
-                    let currentColumn = getColumnData(renderForm, o?.fieldData, selectedResourceData.path, true);
+                    let currentColumn = getColumnData(renderForm, o?.fieldData, path, true);
                     if (currentColumn !== null) {
                         columns = [...columns, currentColumn?.columnData];
                         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -150,6 +156,7 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
 
 
     const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+        history.push(`?itemTab=${newValue}`);
         setTabValue(newValue);
     };
 
@@ -176,7 +183,7 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
             </CustomTabs>
 
             <Box display="flex" justifyContent={"space-between"}>
-                <Button variant="outlined" color="primary" size="small"
+                <Button variant="contained" color="primary" size="small"
                     onClick={() => {
                         if (tabValue === 0) {
                             setAssignDialog({ open: true, type: 'productCategory', data: dataRows })
@@ -240,7 +247,7 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
                         renderedFrom={renderForm}
                         refreshGrid={fetchData}
                         selectedRecords={selectedRecords}
-                        showFilters={true}
+                        showFilters={false}
                         allowSelection={true}
                         showOnlyShowFilteredRecordSwitch={false}
                     />
@@ -267,7 +274,7 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
                         loading={loading}
                         renderedFrom={renderForm}
                         refreshGrid={fetchData}
-                        showFilters={true}
+                        showFilters={false}
                         allowSelection={true}
                         showOnlyShowFilteredRecordSwitch={false}
                     />
@@ -294,7 +301,7 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
                         loading={loading}
                         renderedFrom={renderForm}
                         refreshGrid={fetchData}
-                        showFilters={true}
+                        showFilters={false}
                         allowSelection={true}
                         showOnlyShowFilteredRecordSwitch={false}
                     />

@@ -60,6 +60,8 @@ const WorkOrder = ({
   const [isUpdating, setUpdating] = useState(false);
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
+  const [isBulkEdit, setIsBulkEdit] = useState(false);
+
 
   useEffect(() => {
     fetchFields();
@@ -259,14 +261,14 @@ const WorkOrder = ({
             {row?.original?.type === 'service' && (
               <HtmlTooltip title="Edit">
                 <IconButton
-                  color="primary"
                   size="small"
                   aria-label="Edit"
                   onClick={() => {
                     openMaterial(row);
                   }}
+                  disabled={row?.original?.status === WORKORDER_SERVICE_STATUS?.completed ? true : false}
                 >
-                  <EditIcon color="primary" />
+                  <EditIcon color={row?.original?.status === WORKORDER_SERVICE_STATUS?.completed ? "disabled" : "primary"} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -342,6 +344,7 @@ const WorkOrder = ({
       open: true,
       data: row.original
     });
+    setIsBulkEdit(false);
   }
 
   const handleWorkOrderDelete = (ids) => {
@@ -448,7 +451,7 @@ const WorkOrder = ({
 
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
     data = response?.data?.data;
-
+    
     const rows = data.material?.filter((e) => e.parentId === null);
 
     createWorkorderService(rows);
@@ -637,13 +640,14 @@ const WorkOrder = ({
 
   const handleSaveData = async (rows: any) => {
     setUpdating(true);
+    const workOrderId = rows[0]?.workOrder?._id;
     rows.forEach((element) => {
       delete element.index;
       delete element.detail;
       delete element.isValid;
       delete element.hideSelection;
+      delete element.workOrder;
     });
-    const workOrderId = rows[0]?.workOrder?._id;
     axiosInstance()
       .put(`${repairOrder.api}/${repairOrderData._id}/work-order/${workOrderId}`, { material: rows })
       .then(({ data }) => {
@@ -654,6 +658,7 @@ const WorkOrder = ({
           type: 'success',
           message: data.message
         });
+        setIsBulkEdit(false)
         setUpdateDialog({ open: false, data: null });
       })
       .catch((error) => {
@@ -755,6 +760,27 @@ const WorkOrder = ({
               >
                 Delete
               </MenuItem>
+              <HtmlTooltip
+                title={
+                  Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                    ? 'Bulk edit selected records'
+                    : 'Select records to edit'
+                }
+              >
+                <MenuItem
+                  onClick={() => {
+                    setIsBulkEdit(true)
+                    setUpdateDialog({
+                      open: true,
+                      data: selectedProducts.filter((e)=>e.type === "service")
+                    });
+                    closeActions()
+                  }}
+                  disabled={(selectedProducts.filter((e)=>e.type !== "service")).length === selectedProducts.length}
+                >
+                  Bulk Edit
+                </MenuItem>
+              </HtmlTooltip>
             </Menu>
           </Box>
         )}
@@ -860,11 +886,13 @@ const WorkOrder = ({
             <UpdateWorkOrderDialog
               onClose={() => {
                 setUpdateDialog({ open: false, data: null });
+                setIsBulkEdit(false);
               }}
               materialData={updateDialog.data}
               handleUpdate={handleSaveData}
               loadingEdit={isUpdating}
               repairOrderData={repairOrderData}
+              isBulkEdit = {isBulkEdit}
             />
           )}
         </Grid>
