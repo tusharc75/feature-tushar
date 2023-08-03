@@ -15,7 +15,7 @@ import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { capitalize, sortBy, startCase } from 'lodash';
+import { capitalize, map, sortBy, startCase, uniq } from 'lodash';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
@@ -103,7 +103,7 @@ const WorkOrder = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original.type === 'service' && row?.original?.status !== WORKORDER_SERVICE_STATUS.completed ?  (
+            {row.original.type === 'service' && row?.original?.status !== WORKORDER_SERVICE_STATUS.completed ? (
               <p
                 onClick={() => {
                   openMaterial(row);
@@ -451,7 +451,7 @@ const WorkOrder = ({
 
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
     data = response?.data?.data;
-    
+
     const rows = data.material?.filter((e) => e.parentId === null);
 
     createWorkorderService(rows);
@@ -641,13 +641,6 @@ const WorkOrder = ({
   const handleSaveData = async (rows: any) => {
     setUpdating(true);
     const workOrderId = rows[0]?.workOrder?._id;
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.workOrder;
-    });
     axiosInstance()
       .put(`${repairOrder.api}/${repairOrderData._id}/work-order/${workOrderId}`, { material: rows })
       .then(({ data }) => {
@@ -665,6 +658,16 @@ const WorkOrder = ({
         setUpdating(false);
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const checkUniqWorkOrder = () => {
+    if (selectedProducts.length === 0) {
+      return false;
+    } else if (uniq(map(selectedProducts?.filter((e: any) => e.type === 'service'), 'workOrder')).length === 1) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
   return (
@@ -736,6 +739,19 @@ const WorkOrder = ({
               </MenuItem>
               <MenuItem
                 onClick={() => {
+                  setIsBulkEdit(true)
+                  setUpdateDialog({
+                    open: true,
+                    data: selectedProducts.filter((e) => e.type === "service")
+                  });
+                  closeActions()
+                }}
+                disabled={((selectedProducts.filter((e) => e.type === "service")).length > 0 && checkUniqWorkOrder()) ? false : true}
+              >
+                Bulk Edit
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
                   setDeleteData(selectedServices?.length ? selectedServices : selectedAssets);
                   setShowConfirmBox(true);
                   closeActions();
@@ -760,27 +776,6 @@ const WorkOrder = ({
               >
                 Delete
               </MenuItem>
-              <HtmlTooltip
-                title={
-                  Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
-                    ? 'Bulk edit selected records'
-                    : 'Select records to edit'
-                }
-              >
-                <MenuItem
-                  onClick={() => {
-                    setIsBulkEdit(true)
-                    setUpdateDialog({
-                      open: true,
-                      data: selectedProducts.filter((e)=>e.type === "service")
-                    });
-                    closeActions()
-                  }}
-                  disabled={(selectedProducts.filter((e)=>e.type !== "service")).length === selectedProducts.length}
-                >
-                  Bulk Edit
-                </MenuItem>
-              </HtmlTooltip>
             </Menu>
           </Box>
         )}
@@ -892,7 +887,7 @@ const WorkOrder = ({
               handleUpdate={handleSaveData}
               loadingEdit={isUpdating}
               repairOrderData={repairOrderData}
-              isBulkEdit = {isBulkEdit}
+              isBulkEdit={isBulkEdit}
             />
           )}
         </Grid>
