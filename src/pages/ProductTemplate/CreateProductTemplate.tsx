@@ -408,7 +408,7 @@ const ProductTemplate = () => {
             <Formik innerRef={ref} initialValues={initialValues} validationSchema={ProductTemplateSchema} onSubmit={handleSave} validate={validate}>
               {({ submitForm, touched, errors, setFieldValue, values }) => (
                 <Form>
-                  <Box p={1}>
+                  <Box py={1}>
                     <div className="grid md:grid-cols-2 lg:grid-cols-[3fr_108px_3fr_180px]  md:gap-4 mb-2">
                       <TextField
                         disabled={!hasPermissionToUpdate}
@@ -452,6 +452,7 @@ const ProductTemplate = () => {
                           multiple
                           getOptionLabel={(option: any) => (option ? option.name : '')}
                           getOptionSelected={(option: any, val) => option._id === val}
+                          className="autocomplete-with-chip"
                           value={
                             productCategory.filter((data) => values['productCategory']?.some((d) => d === data._id)).length
                               ? productCategory.filter((data) => values['productCategory']?.some((d) => d === data._id))
