@@ -681,25 +681,24 @@ const ProductBuilder = (props) => {
             </Button>
           )}
           {permissions?.isUpdate && (
-            <div className="ml-[8px]">
-              <Button
-                size="small"
-                color="primary"
-                className="float-right new-dropdown-v1"
-                disabled={
-                  isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
-                    ? false
-                    : selectedRecords.length
-                    ? false
-                    : true
-                }
-                onClick={openActions}
-                endIcon={<ExpandMore />}
-                aria-controls="action-menu"
-              >
-                {isMobile && !isTablet ? '' : 'Actions'}
-              </Button>
-            </div>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              className="float-right new-dropdown-v1"
+              disabled={
+                isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
+                  ? false
+                  : selectedRecords.length
+                  ? false
+                  : true
+              }
+              onClick={openActions}
+              startIcon={<ExpandMore />}
+              aria-controls="action-menu"
+            >
+              {isMobile && !isTablet ? '' : 'Actions'}
+            </Button>
           )}
           <Menu
             anchorEl={anchorEl}

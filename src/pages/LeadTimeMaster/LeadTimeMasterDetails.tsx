@@ -20,6 +20,7 @@ import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 
 const LeadTimeMasterDetails = () => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
@@ -94,7 +95,7 @@ const LeadTimeMasterDetails = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchLeadTimeMasterData = () => {
@@ -150,7 +151,7 @@ const LeadTimeMasterDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Grid container spacing={3}>
+        <Grid container spacing={1}>
           <Grid item xs={12} sm={12} md={8}>
             <Box style={{ minHeight: '80vh' }}>
               {leadTimeMasterData ? (

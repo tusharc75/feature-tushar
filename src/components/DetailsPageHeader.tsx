@@ -70,7 +70,7 @@ const DetailsPageHeader = (props) => {
   const classes = useStyles();
   return (
     <>
-      <div className={'mainHeader'}>
+      <Paper elevation={0} className={'mainHeader'}>
         {/* <Grid container justifyContent="space-between" className="detailHeader detail-header-purchase-order">
           <Grid item className="d-flex align-items-center">
             {loading ? (
@@ -118,8 +118,7 @@ const DetailsPageHeader = (props) => {
             {children}
           </Grid>
         </Grid> */}
-
-        <Box className={`gap-2 ${mainPoints && 'detailHeaderDashboard'}`}>
+        <Box className="gap-2 detailHeaderDashboard">
           {loading ? (
             <Box display="flex" flexWrap="nowrap">
               {[...Array(4).keys()].map((i, index) => (
@@ -179,7 +178,7 @@ const DetailsPageHeader = (props) => {
             })
           ) : null}
         </Box>
-      </div>
+      </Paper>
     </>
   );
 };
