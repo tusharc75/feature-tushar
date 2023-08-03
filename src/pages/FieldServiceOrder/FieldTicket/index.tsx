@@ -286,6 +286,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             warehouse: serviceOrderData?.warehouse?.optionValue || '',
             wellName: serviceOrderData?.wellName?.optionValue || '',
             wellNumber: serviceOrderData?.wellNumber?.map((m) => m.optionValue) || [],
+            numberOfWells: serviceOrderData?.numberOfWells,
             estimateStartDate: serviceOrderData?.estimateStartDate || '',
             estimateEndDate: serviceOrderData?.estimateEndDate || '',
             customerAccount: serviceOrderData?.customerAccount?.optionValue || '',

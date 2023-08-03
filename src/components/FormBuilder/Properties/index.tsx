@@ -817,27 +817,19 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       _id={fieldData._id}
                     />
                   )}
-                  {(values['type'] === 'currencyAmount' ||
-                    values['type'] === 'decimal' ||
-                    values['type'] === 'percent' ||
-                    values['type'] === 'converter') && (
-                      <>
-                        <br></br>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              name="isShowFieldDependentOn"
-                              checked={values['isShowFieldDependentOn']}
-                              onChange={(e) => {
-                                setFieldValue('isShowFieldDependentOn', e.target.checked);
-                              }}
-                              color="primary"
-                            />
-                          }
-                          label="Show Field Dependent On"
-                        />
-                      </>
-                    )}
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="isShowFieldDependentOn"
+                        checked={values['isShowFieldDependentOn']}
+                        onChange={(e) => {
+                          setFieldValue('isShowFieldDependentOn', e.target.checked);
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Show Field Dependent On"
+                  />
                   {(values['isShowFieldDependentOn']) && (
                     <ShowFieldDependentOn
                       values={values}
