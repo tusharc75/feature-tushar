@@ -19,7 +19,7 @@ import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 
 import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
 
-const Request = ({ referenceId, referenceType }) => {
+const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
@@ -52,7 +52,7 @@ const Request = ({ referenceId, referenceType }) => {
           message: data.message
         });
         setQtyDialog({ open: false, status: null, data: null });
-        fetchData();
+        fetchDataMaster();
       })
       .catch((err) => {
         setLoading(false);
@@ -237,6 +237,7 @@ const Request = ({ referenceId, referenceType }) => {
     }
     setAccessor(accessor);
   };
+
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
