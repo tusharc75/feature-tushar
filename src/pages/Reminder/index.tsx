@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState, Fragment } from 'react';
-import { Box, Chip, Grid, Paper, Typography } from '@material-ui/core';
-import { MdDateRange } from 'react-icons/md';
+import { useCallback, useEffect, useState } from 'react';
+import { Box, Typography } from '@material-ui/core';
 import moment from 'moment';
 import { useLocation, useHistory } from 'react-router-dom';
 
@@ -134,8 +133,8 @@ const Reminder = () => {
         <Grid container className="headerbox-v1">
           <CustomBreadCrumbs routes={[{ title: routes.reminder.title }]} />
         </Grid>
-        <div className="detail-container-v1">
-          <div className=" grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 h-[calc(100vh-32vh)] overflow-auto">
+        <div className="detail-container-v1  min-h-[calc(100vh-99px)]">
+          <div className=" grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 h-[calc(100vh-172px)] overflow-auto">
             <div className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px]`}>
               <Box className="bg-[var(--dark-secondary,#f1f5ff)] sticky top-0 z-10 rounded-[8px] px-[13px] py-[14px]">
                 <Typography variant="subtitle2" style={{ width: '50%', fontSize: '0.95rem', fontWeight: 700 }} className=" capitalize">
