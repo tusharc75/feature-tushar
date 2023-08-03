@@ -200,6 +200,9 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       if (element.fieldName === 'price' && element.required) {
         setIsRateRequired(true);
       }
+      if (element.fieldName === 'taxPercentage' && element.isColumnEditable) {
+        element.decimalPlaces = 2;
+      }
     });
 
     setProductFields(JSON.parse(JSON.stringify(p_fields)));
@@ -322,8 +325,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         item.type === 'Product'
           ? item?.productDetail?.productDescription
           : item.type === 'Service'
-          ? item?.serviceDetail?.serviceDescription
-          : item?.description;
+            ? item?.serviceDetail?.serviceDescription
+            : item?.description;
       res.materialId = item.type === 'Product' ? item?.productDetail?._id : item.type === 'Service' ? item?.serviceDetail?._id : item?._id;
       res.productNumber = item.productDetail?.productNumber;
       res.serializedProduct = item.productDetail?.serializedProduct;
@@ -679,12 +682,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               <MenuItem
                 disabled={
                   selectedProducts?.filter((e) => !e.hideSelection).length > 0 &&
-                  uniq(
-                    map(
-                      selectedProducts?.filter((e) => !e.hideSelection),
-                      'type'
-                    )
-                  )?.length === 1
+                    uniq(
+                      map(
+                        selectedProducts?.filter((e) => !e.hideSelection),
+                        'type'
+                      )
+                    )?.length === 1
                     ? false
                     : true
                 }
