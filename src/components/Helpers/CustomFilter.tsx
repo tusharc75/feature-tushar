@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Box, Button, Chip, Dialog, Grid, TextField } from "@material-ui/core";
+import { Box, Button, Chip, Dialog, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from "@material-ui/core";
 import { BiFilterAlt } from "react-icons/bi";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
@@ -10,6 +10,10 @@ import { debounce, isEmpty } from "lodash";
 import { Autocomplete } from "@material-ui/lab";
 import axiosInstance from "src/axios/axiosInstance";
 import CloseIcon from '@material-ui/icons/Close';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
+import { dateFormat } from "src/constants/helpers";
+import MomentUtils from '@date-io/moment';
+import moment from "moment";
 
 const CustomFilter = ({ field, setFilterQuery }) => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -18,6 +22,8 @@ const CustomFilter = ({ field, setFilterQuery }) => {
 
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [statusTimeFrame, setStatusTimeFrame] = useState<any>({});
+    const [betweenDate, setBetweenDate] = useState(null);
 
     const [chipData, setChipData] = useState([]);
 
@@ -47,34 +53,133 @@ const CustomFilter = ({ field, setFilterQuery }) => {
     };
 
     const handleApplyFilter = () => {
-        const chipData: any = [];
+        const deepFilter: any = [];
         const filterById: any = [];
-        Object.keys(formValues)?.forEach(_f => {
-            if (formValues[_f]) {
-                chipData.push({
-                    title: field?.filter(f => f?.fieldName === _f)[0]?.resource,
-                    name: _f,
-                    value: formValues[_f]?.optionLabel
-                })
-                filterById.push({
-                    field: _f,
-                    term: formValues[_f]?.optionValue
-                })
+        const chipData: any = [];
+
+        for (let i = 0; i < field.length; i++) {
+            const col = field[i];
+            const fieldName = col?.fieldName;
+            if (['date'].includes(col.type)) {
+                const from = `from_${fieldName}`;
+                const to = `to_${fieldName}`;
+
+                const fromDate = formValues[from] ? formValues[from] : null;
+                const toDate = formValues[to] ? formValues[to] : null;
+
+                if (fromDate || toDate) {
+                    deepFilter.push({
+                        field: fieldName,
+                        term: {
+                            from: fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null,
+                            to: toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
+                        }
+                    })
+                    const dateValue =
+                        fromDate && toDate
+                            ? `${fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null} - ${toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null}`
+                            : fromDate || toDate
+                                ? `${fromDate ? `${moment(new Date(fromDate)).format('MM/DD/YYYY')} (From Date)` : ''} ${toDate ? `${moment(new Date(toDate)).format('MM/DD/YYYY')} (To Date)` : ''}`
+                                : null;
+                    chipData.push({
+                        title: col?.fieldLabel,
+                        name: fieldName,
+                        value: dateValue
+                    })
+                }
+            } else if (['dropDown'].includes(col.type)) {
+                if (formValues[fieldName]) {
+                    filterById.push({
+                        field: fieldName,
+                        term: formValues[fieldName]?.optionValue
+                    })
+                    chipData.push({
+                        title: col?.fieldLabel,
+                        name: fieldName,
+                        value: formValues[fieldName]?.optionLabel
+                    })
+                }
             }
-        });
-        setFilterQuery(filterById)
+        }
+        setFilterQuery({
+            filterById,
+            deepFilter
+        })
         setChipData(chipData)
         handleClose();
-    };
+    }
 
     const clearSingleFilter = (name) => {
         delete formValues[name];
+        delete formValues[`from_${name}`];
+        delete formValues[`to_${name}`];
         setChipData((prev) => prev.filter((item) => item.name !== name));
-        setFilterQuery((prev) => prev.filter((item) => item.field !== name));
+        setFilterQuery((prev) => {
+            return ({
+                filterById: prev?.filterById?.filter((item) => item.field !== name),
+                deepFilter: prev?.deepFilter?.filter((item) => item.field !== name),
+
+            })
+        });
+    };
+
+    const handleDuration = (timeFrameTemp, field) => {
+        switch (timeFrameTemp) {
+            case '1-month':
+                setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: '1-month' });
+                formValues[`from_${field.fieldName}`] = new Date(moment().subtract('1', 'month').calendar());
+                formValues[`to_${field.fieldName}`] = new Date();
+                setBetweenDate((prevState) => ({
+                    ...prevState,
+                    [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
+                    [`to_${field.fieldName}`]: new Date()
+                }));
+                break;
+            case '3-months':
+                setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: '3-months' });
+                formValues[`from_${field.fieldName}`] = new Date(moment().subtract('3', 'months').calendar());
+                formValues[`to_${field.fieldName}`] = new Date();
+                setBetweenDate((prevState) => ({
+                    ...prevState,
+                    [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
+                    [`to_${field.fieldName}`]: new Date()
+                }));
+                break;
+            case '6-months':
+                setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: '6-months' });
+                formValues[`from_${field.fieldName}`] = new Date(moment().subtract('6', 'months').calendar());
+                formValues[`to_${field.fieldName}`] = new Date();
+                setBetweenDate((prevState) => ({
+                    ...prevState,
+                    [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
+                    [`to_${field.fieldName}`]: new Date()
+                }));
+                break;
+            case '1-year':
+                setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: '1-year' });
+                formValues[`from_${field.fieldName}`] = new Date(moment().subtract('1', 'year').calendar());
+                formValues[`to_${field.fieldName}`] = new Date();
+                setBetweenDate((prevState) => ({
+                    ...prevState,
+                    [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
+                    [`to_${field.fieldName}`]: new Date()
+                }));
+                break;
+            default:
+                setStatusTimeFrame({ ...statusTimeFrame, [field.fieldName]: 'custom' });
+                formValues[`from_${field.fieldName}`] = null;
+                formValues[`to_${field.fieldName}`] = null;
+                setBetweenDate((prevState) => ({
+                    ...prevState,
+                    [`from_${field.fieldName}`]: null,
+                    [`to_${field.fieldName}`]: null
+                }));
+                break;
+        }
     };
 
     return (
-        <>
+        <MuiPickersUtilsProvider utils={MomentUtils}>
             <Box mb={1} display='flex' justifyContent='space-between'>
                 <Box minWidth="70%">
                     <DisplyaFilters
@@ -117,35 +222,124 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                                 {
                                     field ? (
                                         field?.map((field: any, i: number) => {
+                                            if (
+                                                !statusTimeFrame[field.fieldName] &&
+                                                field.type === 'date' &&
+                                                !formValues[`from_${field.fieldName}`] &&
+                                                formValues[`to_${field.fieldName}`]
+                                            ) {
+                                                handleDuration('custom', field);
+                                            }
                                             return (
-                                                <Grid item xs={12} sm={6} md={6} key={i}>
-                                                    <Autocomplete
-                                                        onOpen={() => {
-                                                            setOptions([])
-                                                            setLoading(true)
-                                                            fetchOptions(field?.resource, '')
-                                                        }}
-                                                        onInputChange={(event, value) => fetchOptions(field?.resource, value)}
-                                                        options={options}
-                                                        fullWidth
-                                                        loading={loading}
-                                                        getOptionLabel={(option: any) => option.optionLabel ?? ''}
-                                                        getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
-                                                        value={!isEmpty(formValues) && formValues[field?.fieldName]}
-                                                        onChange={(e, val) => {
-                                                            handleSelectFilter(field?.fieldName, val)
-                                                        }}
-                                                        size="small"
-                                                        renderInput={(params) => (
-                                                            <TextField
-                                                                {...params}
-                                                                label={field?.fieldLabel}
-                                                                variant="outlined"
-                                                                name={field?.fieldName}
-                                                            />
-                                                        )}
-                                                    />
-                                                </Grid>
+                                                <>
+                                                    {
+                                                        field?.type === 'date' ?
+                                                            (
+                                                                <>
+                                                                    <Grid item xs={12} sm={6} md={6} key={i}>
+                                                                        <FormControl fullWidth size="small" variant="outlined">
+                                                                            <InputLabel id={field.fieldName}>Select Duration</InputLabel>
+                                                                            <Select
+                                                                                labelId={field.fieldLabel}
+                                                                                id={`time-${field.fieldName}`}
+                                                                                defaultValue={'custom'}
+                                                                                value={statusTimeFrame[field.fieldName] ?? 'custom'}
+                                                                                onChange={(e) => {
+                                                                                    handleDuration(e.target.value, field);
+                                                                                }}
+                                                                                label="Select Duration"
+                                                                            >
+                                                                                <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                                                                                <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                                                                                <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                                                                                <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                                                                                <MenuItem value={'custom'}>Custom</MenuItem>
+                                                                            </Select>
+                                                                        </FormControl>
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={6} md={6} key={i}>
+                                                                        <KeyboardDatePicker
+                                                                            autoOk
+                                                                            disabled={!(statusTimeFrame[field.fieldName] === 'custom' || !(field.fieldName in statusTimeFrame))}
+                                                                            fullWidth
+                                                                            size="small"
+                                                                            variant="inline"
+                                                                            inputVariant="outlined"
+                                                                            name={`from_${field.fieldName}`}
+                                                                            label={`From ${field.fieldLabel}`}
+                                                                            value={formValues[`from_${field.fieldName}`] ? formValues[`from_${field.fieldName}`] : null}
+                                                                            onChange={(date: any) => {
+                                                                                setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
+                                                                                handleSelectFilter(`from_${field.fieldName}`, date);
+                                                                            }}
+                                                                            format={dateFormat}
+                                                                            InputLabelProps={{
+                                                                                shrink: true
+                                                                            }}
+                                                                        />
+                                                                    </Grid>
+                                                                    <Grid item xs={12} sm={6} md={6} key={i}>
+                                                                        <KeyboardDatePicker
+                                                                            autoOk
+                                                                            disabled={!(statusTimeFrame[field.fieldName] === 'custom' || !(field.fieldName in statusTimeFrame))}
+                                                                            fullWidth
+                                                                            size="small"
+                                                                            variant="inline"
+                                                                            inputVariant="outlined"
+                                                                            name={`to_${field.fieldName}`}
+                                                                            label={`To ${field.fieldLabel}`}
+                                                                            value={formValues[`to_${field.fieldName}`] ? formValues[`to_${field.fieldName}`] : null}
+                                                                            onChange={(date: any) => {
+                                                                                setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
+                                                                                handleSelectFilter(`to_${field.fieldName}`, date);
+                                                                            }}
+                                                                            format={dateFormat}
+                                                                            InputLabelProps={{
+                                                                                shrink: true
+                                                                            }}
+                                                                            minDate={
+                                                                                betweenDate && betweenDate[`from_${field.fieldName}`]
+                                                                                    ? betweenDate[`from_${field.fieldName}`]
+                                                                                    : formValues[`from_${field.fieldName}`]
+                                                                                        ? formValues[`from_${field.fieldName}`]
+                                                                                        : new Date()
+                                                                            }
+                                                                        />
+                                                                    </Grid>
+                                                                </>
+                                                            )
+                                                            : (
+                                                                <Grid item xs={12} sm={6} md={6} key={i}>
+                                                                    <Autocomplete
+                                                                        onOpen={() => {
+                                                                            setOptions([])
+                                                                            setLoading(true)
+                                                                            fetchOptions(field?.resource, '')
+                                                                        }}
+                                                                        onInputChange={(event, value) => fetchOptions(field?.resource, value)}
+                                                                        options={options}
+                                                                        fullWidth
+                                                                        loading={loading}
+                                                                        getOptionLabel={(option: any) => option.optionLabel ?? ''}
+                                                                        getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
+                                                                        value={!isEmpty(formValues) && formValues[field?.fieldName]}
+                                                                        onChange={(e, val) => {
+                                                                            handleSelectFilter(field?.fieldName, val)
+                                                                        }}
+                                                                        size="small"
+                                                                        renderInput={(params) => (
+                                                                            <TextField
+                                                                                {...params}
+                                                                                label={field?.fieldLabel}
+                                                                                variant="outlined"
+                                                                                name={field?.fieldName}
+                                                                            />
+                                                                        )}
+                                                                    />
+                                                                </Grid>
+                                                            )
+                                                    }
+                                                </>
                                             )
                                         })
                                     ) : (
@@ -188,7 +382,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                     </CustomDialogFooter>
                 </Dialog>
             }
-        </>
+        </MuiPickersUtilsProvider>
     )
 }
 
@@ -262,7 +456,7 @@ const DisplyaFilters = (props) => {
 
                     <div
                         ref={countRef}
-                        style={{ cursor: 'pointer', position: 'absolute', top: '50%', transform: 'translateY(-50%)' }}
+                        style={{ cursor: 'pointer', position: 'absolute', top: '50%', transform: 'translateY(-50%)', border: '1px solid red' }}
                         onClick={handleFilterOpen}
                     >
                         +{hiddenItems} more
