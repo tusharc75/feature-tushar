@@ -200,7 +200,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       if (element.fieldName === 'price' && element.required) {
         setIsRateRequired(true);
       }
-      if (element.fieldName === 'taxPercentage' && element.isColumnEditable) {
+      if (element.fieldName === 'taxPercentage' && element.isColumnEditable && !element.decimalPlaces) {
         element.decimalPlaces = 2;
       }
     });
