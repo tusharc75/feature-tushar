@@ -54,12 +54,12 @@ const SerializedAssetsCertification = () => {
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [products, setProducts] = useState(null);
   const [issueDuration, setIssueDuration] = useState({
-    from: new Date(moment().subtract('1', 'year').calendar()),
-    to: new Date()
+    from: null,
+    to: null
   });
   const [expireDuration, setExpireDuration] = useState({
-    from: new Date(moment().subtract('1', 'year').calendar()),
-    to: new Date()
+    from: null,
+    to: null
   });
 
   const {
@@ -232,7 +232,7 @@ const SerializedAssetsCertification = () => {
       deepFilter = `${deepFilter}&filterType=and`;
     }
     const updatedFilters = [];
-    if (issueDuration) {
+    if (issueDuration?.from && issueDuration?.to) {
       updatedFilters.push({
         field: 'certificateIssueDate',
         term: {
@@ -241,7 +241,7 @@ const SerializedAssetsCertification = () => {
         }
       });
     }
-    if (expireDuration) {
+    if (expireDuration?.from && expireDuration?.to) {
       updatedFilters.push({
         field: 'certificateExpireDate',
         term: {
@@ -405,10 +405,10 @@ const SerializedAssetsCertification = () => {
                   }
                 />
                 <Box mt={1}>
-                  <DurationFilter duration={issueDuration} setDuration={setIssueDuration} disabled={false} />
+                  <DurationFilter label={"Certificate Issue Date"} duration={issueDuration} setDuration={setIssueDuration} disabled={false} />
                 </Box>
                 <Box mt={1}>
-                  <DurationFilter duration={expireDuration} setDuration={setExpireDuration} disabled={false} />
+                  <DurationFilter label={"Certificate Expire Date"} duration={expireDuration} setDuration={setExpireDuration} disabled={false} />
                 </Box>
               </Fragment>
             </Grid>
