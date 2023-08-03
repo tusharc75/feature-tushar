@@ -94,7 +94,7 @@ const FIELD_TO_FILTER = [
     },
     {
         fieldName: 'estimateStartDate',
-        fieldLabel: 'estimate Start Date',
+        fieldLabel: 'Estimate Start Date',
         type: 'date'
     },
     {
@@ -134,7 +134,6 @@ const FieldTicketInvoice = () => {
         setFieldServiceOrder(null);
         let api = `${routes?.fieldTicketInvoice.path}/field-service-order`;
         const { filterById, deepFilter } = filterQuery;
-        console.log('ffffffff', filterById, deepFilter)
         if (filterById?.length > 0 || deepFilter?.length > 0) {
             api = `${api}?filterType=and`;
         }
@@ -356,8 +355,8 @@ const FieldTicketInvoice = () => {
                                                                 <Box sx={{ ...style.title, textAlign: 'unset' }}>
                                                                     <Typography component={'span'} style={{ ...style.date, marginBottom: '8px', marginTop: '5px' }}>
                                                                         <EventNoteIcon style={{ fontSize: '15px' }} />
-                                                                        {moment(data?.technicianAssign?.estimateStartDate).format(dateFormat)} -{' '}
-                                                                        {moment(data?.technicianAssign?.estimateEndDate).format(dateFormat)}
+                                                                        {moment(data?.estimateStartDate).format(dateFormat)} -{' '}
+                                                                        {moment(data?.estimateEndDate).format(dateFormat)}
                                                                     </Typography>
                                                                 </Box>
                                                             </Box>
