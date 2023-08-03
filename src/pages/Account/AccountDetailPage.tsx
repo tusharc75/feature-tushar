@@ -806,7 +806,9 @@ export default function AccountDetailPage(props) {
               <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
               <Tab label={<div className="tab-font">Account Hierarchy</div>} id="a11y-tab-1" className="tabLayout" />
               <Tab label={<div className="tab-font">OM-Neurons</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
-              {accountResource === 'supplierAccount' && <Tab label={<div className="tab-font">Supplier Items</div>} aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className="tabLayout" />}
+              {(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification) &&
+                <Tab label={<div className="tab-font">Supplier View</div>}
+                  aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className="tabLayout" />}
               {accountResource === 'customerAccount' && permissions?.productInventory && (
                 <Tab
                   label={<div className="tab-font">{routes.warehouse.title}</div>}
@@ -879,7 +881,6 @@ export default function AccountDetailPage(props) {
                     <QuickLinks quickLinks={quickLinks} />
                   </Grid>
                 </Box>
-
                 <div className="single-form-v1">
                   <div className="form-head-v1 relative">
                     <h3 className="form-label-style-v1">Related Contacts & Leads</h3>
@@ -1017,9 +1018,13 @@ export default function AccountDetailPage(props) {
                 />
               </Box>
             </TabPanel>
-            {accountResource === 'supplierAccount' && permissions?.productInventory && tabValue === 3 && (
+            {accountResource === 'supplierAccount' && tabValue === 3 && (
               <TabPanel value={tabValue} index={3}>
-                <SupplierItems api={accountApi} id={id} allowedToEdit={permissions[accountResource].isUpdate} permission={permissions[accountResource]} />
+                <SupplierItems
+                  api={accountApi}
+                  id={id}
+                  allowedToEdit={permissions[accountResource].isUpdate}
+                  permission={permissions[accountResource]} />
               </TabPanel>
             )}
             {accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (

@@ -5,9 +5,11 @@ import { dateFormatForInputControl } from '../../constants/helpers';
 import moment from 'moment';
 import DateFnsUtils from '@date-io/date-fns';
 
-const DurationFilter = ({ duration, setDuration, disabled }) => {
+const DurationFilter = ({ label, duration, setDuration, disabled }) => {
 
-    const [timeFrame, setTimeFrame] = React.useState<any>('1-year');
+    const [timeFrame, setTimeFrame] = React.useState<any>('');
+    const fromLabel = `From ${label}`;
+    const toLabel = `To ${label}`;
 
     React.useEffect(() => {
         switch (timeFrame) {
@@ -81,7 +83,7 @@ const DurationFilter = ({ duration, setDuration, disabled }) => {
                         size="small"
                         format={dateFormatForInputControl}
                         maxDate={duration.to}
-                        label="From"
+                        label={fromLabel}
                         autoOk
                         views={['year', 'month', 'date']}
                         value={duration.from}
@@ -100,7 +102,7 @@ const DurationFilter = ({ duration, setDuration, disabled }) => {
                         autoOk
                         minDate={duration.from}
                         format={dateFormatForInputControl}
-                        label="To"
+                        label={toLabel}
                         views={['year', 'month', 'date']}
                         value={duration.to}
                         onChange={(date) => {

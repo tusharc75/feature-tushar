@@ -22,11 +22,9 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { camelCase } from 'lodash';
-import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
 import IssueCertificateDialog from './IssueCertificateDialog';
-import { Autocomplete } from '@material-ui/lab';
 import CertificateHistoryDialog from './CertificateHistoryDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import SearchBox from 'src/components/Helpers/SearchBox';
@@ -46,20 +44,13 @@ const SerializedAssetsCertification = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [productCategoryList, setProductCategoryList] = useState([]);
-  const [productCategory, setProductCategory] = useState(null);
-  const [productFilterList, setProductFilterList] = useState([]);
-  const [productFilter, setProductFilter] = useState(null);
-  const [warehouseOptions, setWarehouseOptions] = useState([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
-  const [products, setProducts] = useState(null);
   const [issueDuration, setIssueDuration] = useState({
-    from: new Date(moment().subtract('1', 'year').calendar()),
-    to: new Date()
+    from: null,
+    to: null
   });
   const [expireDuration, setExpireDuration] = useState({
-    from: new Date(moment().subtract('1', 'year').calendar()),
-    to: new Date()
+    from: null,
+    to: null
   });
 
   const {
@@ -80,43 +71,10 @@ const SerializedAssetsCertification = () => {
     sorting,
     search,
     showFilteredRecordsOnly,
-    selectedWarehouse,
-    productCategory,
-    productFilter,
     issueDuration,
     expireDuration
   ]);
 
-  useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Product Category`)
-      .then(({ data: { data } }) => {
-        setProductCategoryList(data['Product Category']);
-      });
-  }, []);
-
-  useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Warehouse`)
-      .then(({ data: { data } }) => {
-        setWarehouseOptions(data['Warehouse']);
-      });
-  }, []);
-
-  useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Product`)
-      .then(({ data: { data } }) => {
-        setProducts(data['Product']);
-      });
-  }, []);
-
-  useEffect(() => {
-    if (productCategory && productCategory !== '') {
-      const filteredProducts = products.filter((product) => product?.productCategory === productCategory);
-      setProductFilterList(filteredProducts);
-    }
-  }, [productCategory, products]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -211,16 +169,6 @@ const SerializedAssetsCertification = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (selectedWarehouse && selectedWarehouse !== '') {
-      filterByIds.push({ field: 'warehouse', term: selectedWarehouse });
-    }
-    if (productCategory && productCategory !== '') {
-      filterByIds.push({ field: 'productCategory', term: productCategory });
-    }
-    if (productFilter && productFilter !== '') {
-      filterByIds.push({ field: 'product', term: productFilter });
-    }
-
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -232,7 +180,7 @@ const SerializedAssetsCertification = () => {
       deepFilter = `${deepFilter}&filterType=and`;
     }
     const updatedFilters = [];
-    if (issueDuration) {
+    if (issueDuration?.from && issueDuration?.to) {
       updatedFilters.push({
         field: 'certificateIssueDate',
         term: {
@@ -241,7 +189,7 @@ const SerializedAssetsCertification = () => {
         }
       });
     }
-    if (expireDuration) {
+    if (expireDuration?.from && expireDuration?.to) {
       updatedFilters.push({
         field: 'certificateExpireDate',
         term: {
@@ -329,86 +277,11 @@ const SerializedAssetsCertification = () => {
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} sm={12} md={9} className="d-flex align-items-center gap-1 flex-wrap">
               <Fragment>
-                <Autocomplete
-                  style={{ width: '250px' }}
-                  options={productCategoryList}
-                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
-                  value={
-                    productCategoryList.filter((data) => data.optionValue === productCategory).length
-                      ? productCategoryList.filter((data) => data.optionValue === productCategory)[0]
-                      : ''
-                  }
-                  onChange={(e, val) => {
-                    setProductCategory(val && val.optionValue ? val.optionValue : '');
-                  }}
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name="productCategory"
-                        placeholder="Product Category"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
-                    )
-                  }
-                />
-                {productCategory && (
-                  <Autocomplete
-                    style={{ width: '250px' }}
-                    options={productFilterList}
-                    getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
-                    value={
-                      productFilterList.filter((data) => data.optionValue === productFilter).length
-                        ? productFilterList.filter((data) => data.optionValue === productFilter)[0]
-                        : ''
-                    }
-                    onChange={(e, val) => {
-                      setProductFilter(val && val.optionValue ? val.optionValue : '');
-                    }}
-                    renderInput={(params) => <TextField {...params} margin="dense" name="product" label="Product" variant="outlined" fullWidth />}
-                  />
-                )}
-                <Autocomplete
-                  style={{ width: '250px' }}
-                  options={warehouseOptions}
-                  getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                  getOptionSelected={(option: any, val) => option.optionValue === val}
-                  value={
-                    warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-                      ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
-                      : ''
-                  }
-                  onChange={(e, val) => {
-                    setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
-                  }}
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name="plant"
-                        placeholder={routes.warehouse.title}
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-                    )
-                  }
-                />
                 <Box mt={1}>
-                  <DurationFilter duration={issueDuration} setDuration={setIssueDuration} disabled={false} />
+                  <DurationFilter label={"Certificate Issue Date"} duration={issueDuration} setDuration={setIssueDuration} disabled={false} />
                 </Box>
                 <Box mt={1}>
-                  <DurationFilter duration={expireDuration} setDuration={setExpireDuration} disabled={false} />
+                  <DurationFilter label={"Certificate Expire Date"} duration={expireDuration} setDuration={setExpireDuration} disabled={false} />
                 </Box>
               </Fragment>
             </Grid>
