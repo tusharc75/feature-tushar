@@ -15,7 +15,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CURReplaceByCurrencySingle, autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
 
-const UpdateWorkOrderDialog = ({isBulkEdit=null, onClose, materialData, handleUpdate, loadingEdit, repairOrderData }) => {
+const UpdateWorkOrderDialog = ({ isBulkEdit = null, onClose, materialData, handleUpdate, loadingEdit, repairOrderData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
@@ -37,7 +37,7 @@ const UpdateWorkOrderDialog = ({isBulkEdit=null, onClose, materialData, handleUp
       fields: data,
       values: getObjKeysWithValues(materialData, data)
     });
-   
+
     EvaluteFields(data);
   };
 
@@ -52,19 +52,6 @@ const UpdateWorkOrderDialog = ({isBulkEdit=null, onClose, materialData, handleUp
   };
 
   const handleSubmit = (values) => {
-    // let returnData = [];
-    // console.log(materialData)
-    // if(isBulkEdit){
-    //   // Assuming materialData is an array of objects
-    //   returnData = materialData.map((item) => {
-    //       return { ...item, ...values };
-    //   });
-    // }
-    // else {
-    //   returnData = [{ ...materialData, ...values }];
-    // }
-    // handleUpdate(returnData, saveAndNext);
-
     let returnData = [];
     if (isBulkEdit) {
       for (const x in values) {
@@ -74,11 +61,11 @@ const UpdateWorkOrderDialog = ({isBulkEdit=null, onClose, materialData, handleUp
       }
       materialData.forEach((element) => {
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-        returnData.push({ id: element._id, ...calValues, workOrder : element.workOrder });
+        returnData.push({ _id: element._id, ...calValues, workOrder: element.workOrder });
       });
       handleUpdate(returnData);
     } else {
-      returnData = [{ id: materialData._id, ...values, workOrder : materialData.workOrder  }];
+      returnData = [{ _id: materialData._id, ...values, workOrder: materialData.workOrder }];
       handleUpdate(returnData, saveAndNext);
     }
   };
