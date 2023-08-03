@@ -12,9 +12,10 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { uniq, map, orderBy } from 'lodash';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { CURReplaceByCurrencySingle, autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
-const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdit, repairOrderData }) => {
+
+const UpdateWorkOrderDialog = ({isBulkEdit=null, onClose, materialData, handleUpdate, loadingEdit, repairOrderData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
@@ -31,10 +32,12 @@ const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdi
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, repairOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
+
     setInitialData({
       fields: data,
       values: getObjKeysWithValues(materialData, data)
     });
+   
     EvaluteFields(data);
   };
 
@@ -49,9 +52,35 @@ const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdi
   };
 
   const handleSubmit = (values) => {
+    // let returnData = [];
+    // console.log(materialData)
+    // if(isBulkEdit){
+    //   // Assuming materialData is an array of objects
+    //   returnData = materialData.map((item) => {
+    //       return { ...item, ...values };
+    //   });
+    // }
+    // else {
+    //   returnData = [{ ...materialData, ...values }];
+    // }
+    // handleUpdate(returnData, saveAndNext);
+
     let returnData = [];
-    returnData = [{ ...materialData, ...values }];
-    handleUpdate(returnData, saveAndNext);
+    if (isBulkEdit) {
+      for (const x in values) {
+        if (values[x] === '' || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
+          delete values[x];
+        }
+      }
+      materialData.forEach((element) => {
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        returnData.push({ id: element._id, ...calValues, workOrder : element.workOrder });
+      });
+      handleUpdate(returnData);
+    } else {
+      returnData = [{ id: materialData._id, ...values, workOrder : materialData.workOrder  }];
+      handleUpdate(returnData, saveAndNext);
+    }
   };
 
   return (
@@ -74,7 +103,7 @@ const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdi
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={`Edit - ${materialData?.index} (${materialData?.detail || ''})`}
+                title={isBulkEdit ? 'Bulk Edit' : `Edit - ${materialData?.index} (${materialData?.detail || ''})`}
                 onClose={() => {
                   onClose();
                 }}
