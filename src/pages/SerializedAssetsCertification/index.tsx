@@ -3,8 +3,8 @@ import Grid from '@material-ui/core/Grid';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { Box, Button, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { Box, Button, Chip, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
+import { Publish, Info } from '@material-ui/icons';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
@@ -14,7 +14,7 @@ import {
   ASSET_STATUS,
   COLOUR_MASTER,
   getLocalStorageArrayData,
-  sidebarResource,
+  sidebarResource
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -37,14 +37,14 @@ const SerializedAssetsCertification = () => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
-  const [openDialog, setOpenDialog] = useState({ open: false, id: null });
+  const [issueCertificateDialog, setIssueCertificateDialog] = useState({ open: false, id: null });
+  const [certificateHistoryDialog, setCertificateHistoryDialog] = useState({ open: false, id: null });
   const [gridApi, setGridApi] = useState(null);
   const [columns, setColumns] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [certificateStatus, setCertificateStatus] = useState<{ _id: string; name: string }>({ _id: 'Pending', name: 'Pending' });
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productCategory, setProductCategory] = useState(null);
   const [productFilterList, setProductFilterList] = useState([]);
@@ -64,7 +64,7 @@ const SerializedAssetsCertification = () => {
 
   useEffect(() => {
     fetchProductInventory();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedWarehouse, productCategory, productFilter, certificateStatus]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedWarehouse, productCategory, productFilter]);
 
   useEffect(() => {
     axiosInstance()
@@ -80,7 +80,6 @@ const SerializedAssetsCertification = () => {
       .then(({ data: { data } }) => {
         setWarehouseOptions(data['Warehouse']);
       });
-
   }, []);
 
   useEffect(() => {
@@ -89,16 +88,14 @@ const SerializedAssetsCertification = () => {
       .then(({ data: { data } }) => {
         setProducts(data['Product']);
       });
-
   }, []);
 
   useEffect(() => {
     if (productCategory && productCategory !== '') {
-      const filteredProducts = products.filter(product => product?.productCategory === productCategory);
+      const filteredProducts = products.filter((product) => product?.productCategory === productCategory);
       setProductFilterList(filteredProducts);
     }
   }, [productCategory, products]);
-
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -150,10 +147,13 @@ const SerializedAssetsCertification = () => {
 
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${serializedAssetsCertification.api}?certificateStatus=${certificateStatus.name}${queryString}`)
+      .get(`${serializedAssetsCertification.api}?${queryString}`)
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
+          const dateToQuery = moment().add(30, 'days').toDate();
+          const certificateExpireDate = u.certificateExpireDate ? moment(u.certificateExpireDate).toDate() : null;
+          finalObject['canIssueCertificate'] = !certificateExpireDate || certificateExpireDate <= dateToQuery;
           finalObject['canDelete'] = permissions?.serializedAsset?.isDelete;
           finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
@@ -221,19 +221,15 @@ const SerializedAssetsCertification = () => {
       const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
+    if (deepFilter !== '') {
+      deepFilter = `${deepFilter}&filterType=and&filterByIdType=and`;
+    }
+    return deepFilter;
   };
 
   const AssetNumberRenderer = (params) => (
     <Fragment>
-      <p
-        className="link text-truncate"
-        onClick={() => {
-          setOpenDialog({ open: true, id: params?.data?._id });
-        }}
-      >
-        {params.value}
-      </p>
+      <p className="text-truncate">{params.value}</p>
       {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
         <Box ml={1} pt={1}>
           <HtmlTooltip title="Asset needs to be recert">
@@ -244,7 +240,34 @@ const SerializedAssetsCertification = () => {
     </Fragment>
   );
 
-  const ActionsRenderer = (params) => <></>;
+  const ActionsRenderer = (params) => (
+    <>
+      {params?.data?.canIssueCertificate && (
+        <HtmlTooltip title="Issue Certificate">
+          <IconButton
+            size="small"
+            aria-label="Issue"
+            onClick={() => {
+              setIssueCertificateDialog({ open: true, id: params?.data?._id });
+            }}
+          >
+            <Publish />
+          </IconButton>
+        </HtmlTooltip>
+      )}
+      <HtmlTooltip title="View Certificate">
+        <IconButton
+          size="small"
+          aria-label="View"
+          onClick={() => {
+            setCertificateHistoryDialog({ open: true, id: params?.data?._id });
+          }}
+        >
+          <Info />
+        </IconButton>
+      </HtmlTooltip>
+    </>
+  );
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
@@ -263,22 +286,6 @@ const SerializedAssetsCertification = () => {
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} sm={12} md={9} className="d-flex align-items-center gap-1 flex-wrap">
               <Fragment>
-                <Autocomplete
-                  style={{ width: '250px' }}
-                  options={[
-                    { _id: 'Pending', name: 'Pending' },
-                    { _id: 'Completed', name: 'Completed' }
-                  ]}
-                  getOptionLabel={(option: any) => (option ? option.name : '')}
-                  getOptionSelected={(option: any, val) => option._id === val._id}
-                  value={certificateStatus}
-                  onChange={(e, val) => {
-                    setCertificateStatus(val ? val : { _id: 'Pending', name: 'Pending' });
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} margin="dense" name="certificateStatus" label="Certificate Status" variant="outlined" fullWidth />
-                  )}
-                />
                 <Autocomplete
                   style={{ width: '250px' }}
                   options={productCategoryList}
@@ -436,18 +443,18 @@ const SerializedAssetsCertification = () => {
           </Box>
         )}
       </div>
-      {openDialog?.open && certificateStatus._id === 'Pending' && (
+      {issueCertificateDialog?.open && (
         <IssueCertificateDialog
-          onClose={() => setOpenDialog({ open: false, id: null })}
+          onClose={() => setIssueCertificateDialog({ open: false, id: null })}
           onSuccess={() => {
-            setOpenDialog({ open: false, id: null });
+            setIssueCertificateDialog({ open: false, id: null });
             fetchProductInventory();
           }}
-          assetId={openDialog?.id}
+          assetId={issueCertificateDialog?.id}
         />
       )}
-      {openDialog?.open && certificateStatus._id === 'Completed' && (
-        <CertificateHistoryDialog onClose={() => setOpenDialog({ open: false, id: null })} id={openDialog?.id} />
+      {certificateHistoryDialog?.open && (
+        <CertificateHistoryDialog onClose={() => setCertificateHistoryDialog({ open: false, id: null })} id={certificateHistoryDialog?.id} />
       )}
     </Fragment>
   );
