@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Typography, IconButton, Paper, Dialog } from '@material-ui/core';
+import { Grid, Box, Button, Typography, IconButton, Dialog } from '@material-ui/core';
 import { ControlPoint } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
@@ -290,9 +290,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`
-      }))
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`
+        }))
       : [];
 
     setUserList(rows);
@@ -329,7 +329,7 @@ const EntityDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Grid container spacing={1}>
+        <Grid container spacing={3}>
           <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
             <Box>
               {loading || !entityFields.length ? (
@@ -362,7 +362,7 @@ const EntityDetailsPage = () => {
                       {doa.length > 0 ? (
                         <NewStepper heading={' '} steps={doa} doaCurrency={doaCurrency} doaApproveType={doaApproveType} />
                       ) : (
-                        <Box textAlign="center" marginTop={2}>
+                        <Box textAlign="center" my={2}>
                           <Typography variant="body2">Entity doesn't have any DOA</Typography>
                         </Box>
                       )}
@@ -456,7 +456,7 @@ const EntityDetailsPage = () => {
           open={true}
           resource="Entity"
           fromResource={{ ...entityData, name: entityData?.entityName }}
-          allResourceData={user?.entity?.map(e => ({ ...e, optionLabel: e?.entityName, optionValue: e?._id }))}
+          allResourceData={user?.entity?.map((e) => ({ ...e, optionLabel: e?.entityName, optionValue: e?._id }))}
           onClose={() => setShowDeleteEntityDialog(false)}
           handleDelete={handleDeleteEntity}
         />
