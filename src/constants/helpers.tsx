@@ -2206,7 +2206,15 @@ export const REPORT_LIST = [
     type: 'dynamic',
     iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
     color: '#F3F8FF'
-  }
+  },
+  {
+    title: 'Assets Number By Days',
+    permission: 'serializedAsset',
+    key: 'assets-number-by-days',
+    type: '',
+    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
+    color: '#FFEFEE'
+  },
 ];
 
 export const RESOURCE_CALENDAR = [
