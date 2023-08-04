@@ -108,7 +108,7 @@ const ServiceMaster = (props: Props) => {
               <IconButton
                 size='small'
                 onClick={() => {
-                  if (row?.original?.type === 'product') {
+                  if (row?.original?.type === 'Product') {
                     window.open(`${routes.productDetail.path}/${row.original?.product}`);
                   } else {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original?.serviceId}`)
