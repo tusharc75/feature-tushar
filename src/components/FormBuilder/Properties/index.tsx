@@ -290,7 +290,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 });
               ele.option = values.option;
             }
-            if (fieldData.type === 'decimal' || fieldData.type === 'converter' || fieldData.type === 'currencyAmount') {
+            if (fieldData.type === 'decimal' || fieldData.type === 'converter' || fieldData.type === 'currencyAmount' || fieldData.type === 'percent') {
               ele.decimalPlaces = values.decimalPlaces;
             }
             if (fieldData.type === 'formula' || values.isFormula === true) {
@@ -554,6 +554,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   {(values['type'] === 'decimal' ||
                     values['type'] === 'formula' ||
                     values['type'] === 'converter' ||
+                    values['type'] === 'percent' ||
                     values['type'] === 'currencyAmount') && (
                       <Grid spacing={3} container>
                         {values['type'] === 'formula' && (
@@ -579,6 +580,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         )}
                         {(values['type'] === 'decimal' ||
                           values['type'] === 'converter' ||
+                          values['type'] === 'percent' ||
                           values['type'] === 'currencyAmount' ||
                           values['returnType'] === 'decimal') && (
                             <Grid item xs={12} sm={6} md={6}>
@@ -817,27 +819,19 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       _id={fieldData._id}
                     />
                   )}
-                  {(values['type'] === 'currencyAmount' ||
-                    values['type'] === 'decimal' ||
-                    values['type'] === 'percent' ||
-                    values['type'] === 'converter') && (
-                      <>
-                        <br></br>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              name="isShowFieldDependentOn"
-                              checked={values['isShowFieldDependentOn']}
-                              onChange={(e) => {
-                                setFieldValue('isShowFieldDependentOn', e.target.checked);
-                              }}
-                              color="primary"
-                            />
-                          }
-                          label="Show Field Dependent On"
-                        />
-                      </>
-                    )}
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="isShowFieldDependentOn"
+                        checked={values['isShowFieldDependentOn']}
+                        onChange={(e) => {
+                          setFieldValue('isShowFieldDependentOn', e.target.checked);
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Show Field Dependent On"
+                  />
                   {(values['isShowFieldDependentOn']) && (
                     <ShowFieldDependentOn
                       values={values}

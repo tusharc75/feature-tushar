@@ -1,4 +1,4 @@
-import { Box, Button, Chip, CircularProgress, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Chip, CircularProgress, Dialog, TextField, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { camelCase, isEqual, update } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -9,9 +9,8 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, GenerateResourceLineNumber, RESOURCE_LABEL, serviceMaster, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, GenerateResourceLineNumber, RESOURCE_LABEL, serviceMaster, setFieldsInAscendingOrder, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
@@ -21,6 +20,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import { findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import moment from 'moment';
+import FormTypes from 'src/components/Helpers/FormTypes';
 
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false, renderedFrom = '' }) => {
   const {
@@ -37,6 +37,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [stepOptions, setStepOptions] = useState(referenceData?.steps || []);
   const [completeSteps, setCompleteSteps] = useState([]);
+  const [formsData, setFormsData] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -116,41 +117,13 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                 e.isUneditable = true;
               }
             });
-            if (referenceData?.warehouse && fieldsDataForCreate?.some((e) => e.fieldName === 'warehouse')) {
-              tempInitialData['warehouse'] = referenceData?.warehouse;
-            }
-            if (referenceData?.customerAccount && fieldsDataForCreate?.some((e) => e.fieldName === 'customerAccount')) {
-              tempInitialData['customerAccount'] = referenceData?.customerAccount;
-            }
-            if (referenceData?.billingAddress && fieldsDataForCreate?.some((e) => e.fieldName === 'billingAddress')) {
-              tempInitialData['billingAddress'] = referenceData?.billingAddress;
-            }
-            if (referenceData?.shippingAddress && fieldsDataForCreate?.some((e) => e.fieldName === 'shippingAddress')) {
-              tempInitialData['shippingAddress'] = referenceData?.shippingAddress;
-            }
-            if (referenceData?.estimateStartDate && fieldsDataForCreate?.some((e) => e.fieldName === 'estimateStartDate')) {
-              tempInitialData['estimateStartDate'] = referenceData?.estimateStartDate;
-            }
-            if (referenceData?.estimateEndDate && fieldsDataForCreate?.some((e) => e.fieldName === 'estimateEndDate')) {
-              tempInitialData['estimateEndDate'] = referenceData?.estimateEndDate;
-            }
-            if (referenceData?.wellName && fieldsDataForCreate?.some((e) => e.fieldName === 'wellName')) {
-              tempInitialData['wellName'] = referenceData?.wellName;
-            }
-            if (referenceData?.wellNumber && fieldsDataForCreate?.some((e) => e.fieldName === 'wellNumber')) {
-              tempInitialData['wellNumber'] = referenceData?.wellNumber;
-            }
-            if (referenceData?.currency && fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
-              tempInitialData['currency'] = referenceData?.currency;
-            }
-            if (referenceData?.technician && fieldsDataForCreate?.some((e) => e.fieldName === 'technician')) {
-              tempInitialData['technician'] = referenceData?.technician;
-            }
-            if (referenceData?.service && fieldsDataForCreate?.some((e) => e.fieldName === 'service')) {
-              tempInitialData['service'] = referenceData?.service;
-            }
-            if (referenceData?.collaborator && fieldsDataForCreate?.some((e) => e.fieldName === 'collaborator')) {
-              tempInitialData['collaborator'] = referenceData?.collaborator;
+
+            if (referenceData) {
+              for (const key in referenceData) {
+                if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+                  tempInitialData[key] = referenceData[key];
+                }
+              }
             }
           }
         }
@@ -257,6 +230,11 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     }
   };
 
+
+  useEffect(() => {
+    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+  }, [initialData.fields]);
+
   return (
     <Dialog
       maxWidth="md"
@@ -294,15 +272,56 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <InputField
-                    errors={errors}
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    touched={touched}
-                    fieldsData={initialData.fields}
-                    size="small"
-                    fullWidth
-                  />
+                  {formsData &&
+                    formsData.map((form, i) => {
+                      return (
+                        form.name && (
+                          <div key={i}>
+                            <div className={'detail-box-content'}>
+                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                            </div>
+                            <Box marginY={2}>
+                              <Grid spacing={3} container>
+                                {form.sectionFields.map((field) => (
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <FormTypes
+                                      {...field}
+                                      fieldData={field}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                        if (name === 'wellNumber') {
+                                          if (initialData?.fields.find((e) => e?.fieldName === 'numberOfWells')) {
+                                            if (value) {
+                                              setFieldValue('numberOfWells', value?.length);
+                                            } else {
+                                              setFieldValue('numberOfWells', 0);
+                                            }
+                                          }
+                                        }
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      fields={initialData?.fields}
+                                    />
+                                  </Grid>
+                                ))}
+                              </Grid>
+                            </Box>
+                          </div>
+                        )
+                      );
+                    })}
                 </Form>
                 {initialData?.fields?.find((f) => f?.fieldName === 'service' && f?.lookupResource === RESOURCE_LABEL.serviceMaster) && (
                   <>

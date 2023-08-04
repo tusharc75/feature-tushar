@@ -420,9 +420,10 @@ const History = ({ product, warehouse, storageLocation }) => {
               <Grid item md={6} sm={12} xs={12}>
                 <Box mt={1}>
                   <DurationFilter
+                    label={''}
+                    defaultTimeFrame="1-year"
                     duration={duration}
                     setDuration={setDuration}
-                    disabled={false}
                   />
                 </Box>
               </Grid>
