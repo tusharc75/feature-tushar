@@ -10,7 +10,8 @@ import {
   workOrder,
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS,
-  WORK_ORDER_STATUS
+  WORK_ORDER_STATUS,
+  getChipColor
 } from 'src/constants/helpers';
 import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, Tooltip, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -684,34 +685,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                               label={data?.status}
                                               variant="outlined"
                                               style={{
-                                                borderColor:
-                                                  data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                    ? '#E1FCE3'
-                                                    : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                    ? '#fabebe'
-                                                    : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
-                                                    ? '#D3D3D3'
-                                                    : '#FFF5DD',
-                                                color:
-                                                  data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                    ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
-                                                      ? '#059825'
-                                                      : '#EE0E06'
-                                                    : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                    ? '#fa0202'
-                                                    : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
-                                                    ? 'inherit'
-                                                    : '#FF8C21',
-                                                background:
-                                                  data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
-                                                    ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
-                                                      ? '#E1FCE3'
-                                                      : '#FFECEB'
-                                                    : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                    ? '#fabebe'
-                                                    : WORKORDER_SERVICE_STEP_STATUS.skipped === data?.status
-                                                    ? '#D3D3D3'
-                                                    : '#FFF5DD',
+                                                ...getChipColor(data?.status),
                                                 fontWeight: 700
                                               }}
                                             />
