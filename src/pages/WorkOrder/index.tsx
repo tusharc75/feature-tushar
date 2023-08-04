@@ -153,7 +153,7 @@ const WorkOrder = () => {
     if (renderCount > 0) {
       fetchWorkOrder();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, selectedType, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, selectedType, selectedEntity, showFilteredRecordsOnly]);
 
   const ActionsRenderer = (params) => (
     <>

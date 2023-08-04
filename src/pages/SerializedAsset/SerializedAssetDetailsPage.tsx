@@ -114,6 +114,9 @@ const SerializedAssetDetailsPage = () => {
         routes.serializedAsset,
         { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
       ]);
+      if (data.certificateExpireDate && new Date(data.certificateExpireDate) > new Date()) {
+        data.certificateAttached = true;
+      }
       setAssetDetails({ ...data, currentOwner: data?.currentOwner?.optionLabel });
       if (data.status === ASSET_STATUS.scrap) {
         setCustomField({
