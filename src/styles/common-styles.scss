@@ -186,35 +186,85 @@ $directions: top, bottom, left, right;
 }
 
 $offset: 1;
-$sizes: 0, 0.25rem, 0.5rem, 1rem, 1.5rem, 3rem;
+$sizes: 0, 0.25rem, 0.5rem, 0.75rem, 1rem, 1.25rem;
 @mixin fixed-list-loop($className, $styleName, $unit) {
   $i: 0;
   @each $size in $sizes {
-    #{$className + $i} {
+    .#{$className + $i} {
       #{$styleName}: #{$size} !important;
     }
     $i: $i + $offset;
   }
+
+  $i: 0;
+  @media (min-width: 640px) {
+    @each $size in $sizes {
+      .sm\:#{$className + $i} {
+        #{$styleName}: #{$size} !important;
+      }
+      $i: $i + 1;
+    }
+  }
+
+  $i: 0;
+  @media (min-width: 768px) {
+    @each $size in $sizes {
+      .md\:#{$className + $i} {
+        #{$styleName}: #{$size} !important;
+      }
+      $i: $i + 1;
+    }
+  }
+
+  $i: 0;
+  @media (min-width: 1024px) {
+    @each $size in $sizes {
+      .lg\:#{$className + $i} {
+        #{$styleName}: #{$size} !important;
+      }
+      $i: $i + 1;
+    }
+  }
+
+  $i: 0;
+  @media (min-width: 1280px) {
+    @each $size in $sizes {
+      .xl\:#{$className + $i} {
+        #{$styleName}: #{$size} !important;
+      }
+      $i: $i + 1;
+    }
+  }
+
+  $i: 0;
+  @media (min-width: 1280px) {
+    @each $size in $sizes {
+      .\32xl\:#{$className + $i} {
+        #{$styleName}: #{$size} !important;
+      }
+      $i: $i + 1;
+    }
+  }
 }
 
 // Margins
-// @include fixed-list-loop('.mt-', 'margin-top', 'rem');
-// @include fixed-list-loop('.mr-', 'margin-right', 'rem');
-// @include fixed-list-loop('.mb-', 'margin-bottom', 'rem');
-// @include fixed-list-loop('.ml-', 'margin-left', 'rem');
-// @include fixed-list-loop('.m-', 'margin', 'rem');
+@include fixed-list-loop('mt-', 'margin-top', 'rem');
+@include fixed-list-loop('mr-', 'margin-right', 'rem');
+@include fixed-list-loop('mb-', 'margin-bottom', 'rem');
+@include fixed-list-loop('ml-', 'margin-left', 'rem');
+@include fixed-list-loop('m-', 'margin', 'rem');
 
 // Paddings
-// @include fixed-list-loop('.pt-', 'padding-top', 'rem');
-// @include fixed-list-loop('.pr-', 'padding-right', 'rem');
-// @include fixed-list-loop('.pb-', 'padding-bottom', 'rem');
-// @include fixed-list-loop('.pl-', 'padding-left', 'rem');
-// @include fixed-list-loop('.p-', 'padding', 'rem');
+@include fixed-list-loop('pt-', 'padding-top', 'rem');
+@include fixed-list-loop('pr-', 'padding-right', 'rem');
+@include fixed-list-loop('pb-', 'padding-bottom', 'rem');
+@include fixed-list-loop('pl-', 'padding-left', 'rem');
+@include fixed-list-loop('p-', 'padding', 'rem');
 
 // Font size
-@include fixed-list-loop('.font-size-', 'font-size', 'rem');
+@include fixed-list-loop('font-size-', 'font-size', 'rem');
 
-@include fixed-list-loop('.border-radius-', 'border-radius', 'rem');
+@include fixed-list-loop('border-radius-', 'border-radius', 'rem');
 
 // Gap
 
