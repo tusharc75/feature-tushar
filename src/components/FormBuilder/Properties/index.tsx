@@ -208,6 +208,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
   });
 
   const handleSave = (values) => {
+    console.log(values)
     let data = [...section];
     data.forEach((row) => {
       if (row.sectionId.toString() === sectionId.toString()) {
@@ -293,11 +294,15 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             if (fieldData.type === 'decimal' || fieldData.type === 'converter' || fieldData.type === 'currencyAmount' || fieldData.type === 'percent') {
               ele.decimalPlaces = values.decimalPlaces;
             }
-            if (fieldData.type === 'formula' || values.isFormula === true) {
+            if (fieldData.type === 'formula' || values.isFormula) {
               ele.formula = values.formula;
               ele.inputFields = values.inputFields;
               ele.returnType = values.returnType ? values.returnType : 'decimal';
               ele.decimalPlaces = values.decimalPlaces ? values.decimalPlaces : 2;
+            }
+            else {
+              ele.formula = '';
+              ele.inputFields = [];
             }
             if (fieldData.type === 'vlookupDropdown' || fieldData.isVlookup) {
               values.option.forEach((ele) => {
@@ -330,6 +335,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.formulaFields = values.formulaFields;
               ele.formulainputFields = values.formulainputFields;
               ele.formulaoption = values.formulaoption;
+            }
+            else {
+              ele.formulaFields = [];
+              ele.formulainputFields = [];
+              ele.formulaoption = {};
             }
 
             if (ele.isDropdown) {
@@ -686,7 +696,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                               checked={values['isFormula']}
                               onChange={(e) => {
                                 setFieldValue('isFormula', e.target.checked);
-                                setFieldValue('inputFields', '');
+                                setFieldValue('inputFields', []);
                                 setFieldValue('formula', '');
                               }}
                               color="primary"
