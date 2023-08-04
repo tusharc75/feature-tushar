@@ -65,6 +65,22 @@
   --flow-currentStep: #fff;
   --flow-active: #c8e9ce;
   --ripple-color: green;
+
+  --chip-color-completed: #048e0a;
+  --chip-border-completed: #e1fce3;
+  --chip-background-completed: #e1fce3;
+
+  --chip-color-failed: #fa0202;
+  --chip-border-failed: #fabebe;
+  --chip-background-failed: #fabebe;
+
+  --chip-color-inProgress: #ff8c21;
+  --chip-border-inProgress: #fff5dd;
+  --chip-background-inProgress: #fff5dd;
+
+  --chip-color-pending: #ffaa16;
+  --chip-border-pending: rgb(255 243 202);
+  --chip-background-pending: #fffbd1;
 }
 
 // Dark Theme
@@ -108,6 +124,22 @@
   --flow-currentStep: var(--dark-primary);
   --flow-active: var(--dark-primary);
   --ripple-color: rgba(255, 255, 255, 0.2);
+
+  --chip-color-completed: rgb(255 255 255);
+  --chip-border-completed: rgb(43 160 52);
+  --chip-background-completed: rgb(37 107 43);
+
+  --chip-color-failed: rgb(255 255 255);
+  --chip-border-failed: #f6676e;
+  --chip-background-failed: #c33535;
+
+  --chip-color-inProgress: rgb(255 255 255);
+  --chip-border-inProgress: #ec9e3f;
+  --chip-background-inProgress: #ff8400;
+
+  --chip-color-pending: rgb(255 255 255);
+  --chip-border-pending: #eec032;
+  --chip-background-pending: rgb(214 161 0);
 }
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
