@@ -2108,112 +2108,84 @@ export const REPORT_LIST = [
     permission: 'rentalManagement',
     key: 'rentalManagement',
     type: 'dynamic',
-    iconsColor: ['#059825', '#059825 ', '#60D778'],
-    color: '#F9FDEC'
   },
   {
     title: sidebarResource.salesOrder,
     permission: 'salesOrder',
     key: 'salesOrder',
     type: 'dynamic',
-    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
-    color: '#FFEFEE'
   },
   {
     title: sidebarResource.serializedAsset,
     permission: 'serializedAsset',
     key: 'serializedAsset',
     type: 'dynamic',
-    iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
-    color: '#F3F8FF'
   },
   {
     title: sidebarResource.lead,
     permission: 'lead',
     key: 'lead',
     type: 'dynamic',
-    iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6'],
-    color: '#FFFAEC'
   },
   {
     title: sidebarResource.opportunity,
     permission: 'opportunity',
     key: 'opportunity',
     type: 'dynamic',
-    iconsColor: ['#AD14F5', '#6203AC', '#BE74E5'],
-    color: '#F6F1FF'
   },
   {
     title: sidebarResource.quoteBuilder,
     permission: 'quoteBuilder',
     key: 'quoteBuilder',
     type: 'dynamic',
-    iconsColor: ['#FFA800', '#E35200', '#FBC56E'],
-    color: '#FFF7F2'
   },
   {
     title: sidebarResource.projectSales,
     permission: 'projectSales',
     key: 'projectSales',
     type: 'dynamic',
-    iconsColor: ['#059825', '#059825', '#60D778'],
-    color: '#F9FDEC'
-  },
-  {
-    title: sidebarResource.purchaseOrder,
-    permission: 'purchaseOrder',
-    key: 'purchaseOrder',
-    type: 'dynamic',
-    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
-    color: '#FFEFEE'
-  },
-  {
-    title: 'Purchase Order Details',
-    permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    type: 'purchaseOrderDetails',
-    iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6 '],
-    color: '#FFFAEC'
-  },
-  {
-    title: 'Inventory Evaluation',
-    permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    type: 'inventoryEvaluation',
-    iconsColor: ['#059825', '#059825', '#60D778'],
-    color: '#F9FDEC'
-  },
-  {
-    title: 'Inventory History',
-    permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    type: 'inventoryHistory',
-    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
-    color: '#FFEFEE'
-  },
-  {
-    title: 'Average Price By Supplier',
-    permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    type: 'averagePriceBySupplier',
-    iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
-    color: '#F3F8FF'
   },
   {
     title: 'Work Order',
     permission: 'workOrder',
     key: 'workOrder',
     type: 'dynamic',
-    iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
-    color: '#F3F8FF'
+  },
+  {
+    title: sidebarResource.purchaseOrder,
+    permission: 'purchaseOrder',
+    key: 'purchaseOrder',
+    type: 'dynamic',
+  },
+  {
+    title: 'Purchase Order Details',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'purchaseOrderDetails',
+  },
+  {
+    title: 'Inventory Evaluation',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'inventoryEvaluation',
+  },
+  {
+    title: 'Inventory History',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'inventoryHistory',
+  },
+  {
+    title: 'Average Price By Supplier',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'averagePriceBySupplier',
   },
   {
     title: 'Assets Number By Days',
     permission: 'serializedAsset',
-    key: 'assets-number-by-days',
-    type: '',
-    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
-    color: '#FFEFEE'
+    key: 'purchaseOrderType',
+    type: 'assetsNumberByDays',
   },
 ];
 
