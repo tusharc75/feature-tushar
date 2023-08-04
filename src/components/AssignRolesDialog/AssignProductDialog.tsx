@@ -64,7 +64,6 @@ const AssignProductDialog = ({
     { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
   ];
 
-  const [filter, setFilter] = useState(`All ${routes.product.title}`);
   const [isProductType, setIsProductType] = useState(false);
   const { getColumnData } = useColumns();
 
@@ -272,13 +271,6 @@ const AssignProductDialog = ({
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleFilter = (event, newFilter) => {
-    if (newFilter !== null) {
-      setFilter(newFilter);
-      setSelectedType(options.find((d) => d.key === newFilter).value);
-    }
-  };
-
   const onCellValueChanged = (row) => {
     if (!row || !row?.data) return;
     const { data } = row;
@@ -307,19 +299,6 @@ const AssignProductDialog = ({
           <div className="header-panel">
             <Grid container className={styles.filter_side_container}>
               <Grid item xs={6} className="d-flex align-items-center gap-1">
-                {/* {
-                                    options && <ToggleButtonGroup size="small" className="ml-2"
-                                        value={filter}
-                                        exclusive
-                                        onChange={handleFilter}>
-                                        {options.map((k, index) => {
-                                            return (
-                                                <ToggleButton value={k.key} key={index}>{k.key}
-                                                </ToggleButton>
-                                            );
-                                        })}
-                                    </ToggleButtonGroup>
-                                } */}
               </Grid>
               <Grid item xs={6} className={styles.filter_side}>
                 <Box className={styles.filter_side_header} component="div">

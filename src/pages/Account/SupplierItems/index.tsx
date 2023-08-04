@@ -64,7 +64,6 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
         }).catch((err) => {
             dispatch({ type: 'loading', loading: false });
         })
-
     }
 
     const fetchFields = async () => {
@@ -265,6 +264,7 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
                         const assignProducts = data?.map((item) => item.id)
                         assignItems({ products: assignProducts || [] })
                     }}
+                    serialized={true}
                 />
             )}
             {assignDialog.open && assignDialog.type === 'serializedAsset' && (
