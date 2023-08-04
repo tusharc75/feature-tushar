@@ -74,7 +74,7 @@ const SerializedAsset = () => {
   const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false);
 
   const {
-    state: { permissions }
+    state: { permissions, selectedEntity }
   }: any = useData();
   const { getColumnData } = useColumns();
   const history = useHistory();
@@ -110,7 +110,8 @@ const SerializedAsset = () => {
     productCategory,
     productFilter,
     subleaseAsset,
-    showFilteredRecordsOnly
+    showFilteredRecordsOnly,
+    selectedEntity
   ]);
 
   useEffect(() => {
@@ -927,9 +928,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
