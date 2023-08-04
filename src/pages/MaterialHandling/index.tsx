@@ -9,8 +9,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Request from './Request';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import queryString from 'query-string';
-import { useHistory } from 'react-router-dom';
 import { sidebarResource } from 'src/constants/helpers';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
 
@@ -68,6 +66,7 @@ const MaterialHandling = () => {
 
   const fetchData = () => {
     setWorkOrder(null);
+    setSelectedWorkOrder(null);
     let api = `/material-handling`;
     const { filterById, deepFilter } = filterQuery;
     if (filterById?.length > 0 || deepFilter?.length > 0) {
