@@ -174,6 +174,7 @@ const Report = () => {
         toastConfig.setToastConfig(error);
       });
   }, [showGrid]);
+
   React.useEffect(() => {
     if (showGrid) {
       fetchResourceData();
@@ -199,10 +200,7 @@ const Report = () => {
     });
   }, [selectedData, selectedResources]);
 
-  /**
-   * Fetch resource data for selected filters,
-   * @returns none if no data selected
-   */
+
   const fetchResourceData = () => {
     setShowGrid(true);
 
@@ -516,7 +514,7 @@ const Report = () => {
                     selectedRecords={[]}
                     dataRows={dataRows}
                     dispatch={dispatch}
-                    onEdit={() => {}}
+                    onEdit={() => { }}
                     extraParamsToCheckDelete={false}
                     rowCount={rowCount}
                     page={page}
@@ -531,8 +529,8 @@ const Report = () => {
                     owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                     onCreate={false}
                     showClone={false}
-                    onDelete={(data) => {}}
-                    onClone={(data) => {}}
+                    onDelete={(data) => { }}
+                    onClone={(data) => { }}
                     renderedFrom={routes.transferAsset?.title}
                   />
                 ) : (
