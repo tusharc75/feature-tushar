@@ -5,11 +5,9 @@ import { dateFormatForInputControl } from '../../constants/helpers';
 import moment from 'moment';
 import DateFnsUtils from '@date-io/date-fns';
 
-const DurationFilter = ({ label, duration, setDuration, disabled }) => {
+const DurationFilter = ({ label, duration, setDuration, defaultTimeFrame }) => {
 
-    const [timeFrame, setTimeFrame] = React.useState<any>('');
-    const fromLabel = `From ${label}`;
-    const toLabel = `To ${label}`;
+    const [timeFrame, setTimeFrame] = React.useState<any>(defaultTimeFrame);
 
     React.useEffect(() => {
         switch (timeFrame) {
@@ -56,7 +54,7 @@ const DurationFilter = ({ label, duration, setDuration, disabled }) => {
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={4}>
-                    <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
+                    <FormControl fullWidth size="small" variant="outlined">
                         <InputLabel id="duration">Select Duration</InputLabel>
                         <Select
                             labelId="duration"
@@ -76,15 +74,18 @@ const DurationFilter = ({ label, duration, setDuration, disabled }) => {
                 </Grid>
                 <Grid item xs={6} sm={4}>
                     <KeyboardDatePicker
-                        disabled={timeFrame !== 'custom' || disabled}
+                        disabled={timeFrame !== 'custom'}
                         inputVariant="outlined"
                         variant="inline"
                         fullWidth
                         size="small"
                         format={dateFormatForInputControl}
                         maxDate={duration.to}
-                        label={fromLabel}
+                        label={`From ${label}`}
                         autoOk
+                        InputLabelProps={{
+                            shrink: true
+                        }}
                         views={['year', 'month', 'date']}
                         value={duration.from}
                         onChange={(date) => {
@@ -94,15 +95,18 @@ const DurationFilter = ({ label, duration, setDuration, disabled }) => {
                 </Grid>
                 <Grid item xs={6} sm={4}>
                     <KeyboardDatePicker
-                        disabled={timeFrame !== 'custom' || disabled}
+                        disabled={timeFrame !== 'custom'}
                         inputVariant="outlined"
                         variant="inline"
                         fullWidth
                         size="small"
                         autoOk
+                        InputLabelProps={{
+                            shrink: true
+                        }}
                         minDate={duration.from}
                         format={dateFormatForInputControl}
-                        label={toLabel}
+                        label={`To ${label}`}
                         views={['year', 'month', 'date']}
                         value={duration.to}
                         onChange={(date) => {
