@@ -65,7 +65,7 @@ export const rentalManagementSteps: stepInterface[] = [
 export const fieldTicketSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
-  { name: 'Submit', title: 'Submit', icon: 'end' },
+  { name: 'Submit', title: 'Submit', icon: 'end' }
 ];
 
 export const demandOrderSteps = ['Add Products'];
@@ -334,7 +334,7 @@ export const sidebarResource = {
   competencies: 'Competencies',
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
-  trailerMaster: 'Trailer Master',
+  trailerMaster: 'Trailer Master'
 };
 
 export const primaryFields = {
@@ -455,7 +455,7 @@ export const RESOURCE_LABEL = {
   materialHandling: 'Material Handling',
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
-  trailerMaster: 'Trailer Master',
+  trailerMaster: 'Trailer Master'
 };
 
 export const CHILD_RESOURCE = {
@@ -485,7 +485,7 @@ export const CHILD_RESOURCE = {
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
-  invoiceCost: 'Invoice Cost',
+  invoiceCost: 'Invoice Cost'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -714,7 +714,7 @@ export const productCategory = {
   route: '/product-category',
   permission: 'productCategory',
   resource: 'Product Categories'
-}
+};
 
 export const budget = {
   budgetApi: '/budget',
@@ -990,21 +990,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1951,7 +1951,7 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   salesOrder: 'Sales Order',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
-  repairOrder: 'Repair Order',
+  repairOrder: 'Repair Order'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2352,6 +2352,59 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   needReperform: 'Need Reperform'
 };
 
+type ChipStatus =
+  | 'Pending'
+  | 'Backlog'
+  | 'In-Progress'
+  | 'Completed'
+  | 'Failed'
+  | 'Skipped'
+  | 'start'
+  | 'pause'
+  | 'end'
+  | 'Completed'
+  | 'Passed'
+  | 'Failed'
+  | 'Skipped'
+  | 'Need Reperform';
+
+export const getChipColor = (status: ChipStatus): React.CSSProperties => {
+  let color = 'var(--chip-color-inProgress)';
+  let borderColor = 'var(--chip-border-inProgress)';
+  let background = 'var(--chip-background-inProgress)';
+
+  switch (true) {
+    case status === 'Completed' || status === 'Passed' || status === 'end':
+      color = 'var(--chip-color-completed)';
+      borderColor = 'var(--chip-border-completed)';
+      background = 'var(--chip-background-completed)';
+      break;
+
+    case status === 'Failed' || status === 'Skipped' || status === 'Need Reperform':
+      color = 'var(--chip-color-failed)';
+      borderColor = 'var(--chip-border-failed)';
+      background = 'var(--chip-background-failed)';
+      break;
+
+    case status === 'Pending' || status === 'Backlog':
+      color = 'var(--chip-color-pending)';
+      borderColor = 'var(--chip-border-pending)';
+      background = 'var(--chip-background-pending)';
+      break;
+
+    case status === 'pause' || status === 'In-Progress':
+      color = 'var(--chip-color-inProgress)';
+      borderColor = 'var(--chip-border-inProgress)';
+      background = 'var(--chip-background-inProgress)';
+      break;
+
+    default:
+      break;
+  }
+
+  return { color, borderColor, background };
+};
+
 export const REPAIR_ORDER_TYPE = {
   internal: 'Asset Repair',
   external: 'Customer Owned Asset Repair'
@@ -2506,22 +2559,22 @@ export const getNestedlookupDependentOn = (fields, fieldName) => {
 export const FIELD_TICKET_STATUS = {
   new: 'New',
   submitted: 'Submitted',
-  invoiced: 'Invoiced',
+  invoiced: 'Invoiced'
 };
 
-
 export const GenerateResourceLineNumber = (fields) => {
-  const primaryField = fields?.find((e) => e?.primaryField)
+  const primaryField = fields?.find((e) => e?.primaryField);
   var lineNumber = '';
   if (primaryField) {
     if (primaryField?.isSystemGenerate && !primaryField?.systemGeneratedAutoIncrement) {
-      const prefix = primaryField?.systemGeneratedPrefix && primaryField?.systemGeneratedPrefix != undefined
-        && primaryField?.systemGeneratedPrefix != '' ? `${primaryField?.systemGeneratedPrefix}_` : '';
+      const prefix =
+        primaryField?.systemGeneratedPrefix && primaryField?.systemGeneratedPrefix != undefined && primaryField?.systemGeneratedPrefix != ''
+          ? `${primaryField?.systemGeneratedPrefix}_`
+          : '';
       lineNumber = `${prefix}${generateUniqueIdOnly()}`;
-    }
-    else if (primaryField?.isDefaultValue && primaryField?.defaultValue) {
+    } else if (primaryField?.isDefaultValue && primaryField?.defaultValue) {
       lineNumber = primaryField?.defaultValue;
     }
   }
   return lineNumber;
-}
+};

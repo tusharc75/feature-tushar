@@ -4,6 +4,7 @@ import { AiOutlinePlus } from 'react-icons/ai';
 import Button from '@material-ui/core/Button';
 import {
   convertMsToTime,
+  getChipColor,
   getObjKeys,
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
@@ -1406,17 +1407,7 @@ export const RenderPassFailChip = ({ status, className = '', ...others }) => {
       variant="outlined"
       {...others}
       style={{
-        border: 0,
-        background: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
-          ? '#e1fce3'
-          : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-          ? '#D3D3D3'
-          : '#FAD9D4',
-        color: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
-          ? '#048e0a'
-          : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-          ? 'inherit'
-          : '#D13925'
+        ...getChipColor(status)
       }}
     />
   );
