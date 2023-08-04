@@ -24,7 +24,7 @@ import Quotation from '../Quotation';
 import AssignUserDialog from './AssignUserDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
-import { GrDrag } from 'react-icons/gr';
+import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PeopleIcon from '@material-ui/icons/People';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
@@ -553,7 +553,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                             size="small"
                             onClick={() => setArrangeView(true)}
                           >
-                            <GrDrag fontSize="small" color="primary" className="mr-1" />
+                            <DragIndicatorIcon fontSize="small" className="mr-1" />
                             Arrange
                           </Button>
                         </Box>
@@ -614,7 +614,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                   {data?.type === 'service' ? (
                                     <Box
                                       style={{
-                                        backgroundColor: 'var(--primary)',
+                                        backgroundColor: 'var(--dark-secondary, var(--primary))',
                                         color: 'white',
                                         width: '20px',
                                         height: '20px',
@@ -1064,7 +1064,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                     {serviceSteps?.length > 0 && (
                       <Box>
                         <Button disabled={!allowedToEdit} variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
-                          <GrDrag fontSize="small" color="primary" className="mr-1" />
+                          <DragIndicatorIcon fontSize="small" className="mr-1" />
                           Arrange
                         </Button>
                       </Box>
