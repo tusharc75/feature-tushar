@@ -18,7 +18,8 @@ import {
   repairOrderSteps,
   REPAIR_ORDER_TYPE,
   QUOTATION_STATUS,
-  WORKORDER_SERVICE_STATUS
+  WORKORDER_SERVICE_STATUS,
+  MATERIAL_TYPE
 } from 'src/constants/helpers';
 import ManageRepairOrder from './ManageRepairOrder';
 import queryString from 'query-string';
@@ -192,7 +193,7 @@ const RepairOrderDetails = () => {
       .get(`${repairOrder.api}/${id}/work-order/service`)
       .then(({ data: { data } }) => {
         if (data?.material?.length) {
-          const material = data?.material?.filter((e) => !e.parentId);
+          const material = data?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset);
           if (material?.filter((e) => e?.workOrder?.status === WORKORDER_SERVICE_STATUS.completed)?.length === material?.length) {
             setEnableStatusChange(true);
           }
@@ -404,11 +405,11 @@ const RepairOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton 
-              referenceId={repairOrderData?._id} 
-              resource={ACTIVITY_RESOURCE.repairOrder} 
+            <ActivityButton
+              referenceId={repairOrderData?._id}
+              resource={ACTIVITY_RESOURCE.repairOrder}
               resourceLabel={repairOrderData?.repairOrderNumber}
-              />
+            />
           </Box>
         </Box>
       </Box>
