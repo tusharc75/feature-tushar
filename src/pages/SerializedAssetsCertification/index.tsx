@@ -4,7 +4,6 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import { Box, Button, Chip, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { Publish, Info } from '@material-ui/icons';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
@@ -30,8 +29,11 @@ import { isMobile, isTablet } from 'react-device-detect';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import DurationFilter from 'src/components/DurationFilter';
+import NoteAddIcon from '@material-ui/icons/NoteAdd';
+import HistoryIcon from '@material-ui/icons/History';
 
 const SerializedAssetsCertification = () => {
+
   const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -66,16 +68,7 @@ const SerializedAssetsCertification = () => {
 
   useEffect(() => {
     fetchProductInventory();
-  }, [
-    page,
-    limit,
-    filters,
-    sorting,
-    search,
-    showFilteredRecordsOnly,
-    issueDuration,
-    expireDuration
-  ]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration]);
 
 
   const fetchGridColumns = () => {
@@ -104,10 +97,6 @@ const SerializedAssetsCertification = () => {
             };
           }
         });
-
-        columns.push({ field: 'ownerType', headerName: 'Actual Owner Type', show: true, disabled: true, cellRenderer: 'commonRenderer' });
-        columns.push({ field: 'owner', headerName: 'Actual Owner', show: true, disabled: true, cellRenderer: 'commonRenderer' });
-
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
@@ -125,7 +114,6 @@ const SerializedAssetsCertification = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     const queryString = getQueryString();
     axiosInstance()
       .get(`${serializedAssetsCertification.api}${queryString}`)
@@ -135,9 +123,7 @@ const SerializedAssetsCertification = () => {
           const dateToQuery = moment().add(30, 'days').toDate();
           const certificateExpireDate = u.certificateExpireDate ? moment(u.certificateExpireDate).toDate() : null;
           finalObject['canIssueCertificate'] = !certificateExpireDate || certificateExpireDate <= dateToQuery;
-          finalObject['canDelete'] = permissions?.serializedAsset?.isDelete;
           finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
           return {
             ...finalObject
           };
@@ -244,11 +230,11 @@ const SerializedAssetsCertification = () => {
               setIssueCertificateDialog({ open: true, id: params?.data?._id });
             }}
           >
-            <Publish />
+            <NoteAddIcon color='primary' />
           </IconButton>
         </HtmlTooltip>
       )}
-      <HtmlTooltip title="View Certificate">
+      <HtmlTooltip title="Certificate History">
         <IconButton
           size="small"
           aria-label="View"
@@ -256,7 +242,7 @@ const SerializedAssetsCertification = () => {
             setCertificateHistoryDialog({ open: true, id: params?.data?._id });
           }}
         >
-          <Info />
+          <HistoryIcon color='primary' />
         </IconButton>
       </HtmlTooltip>
     </>
@@ -324,43 +310,6 @@ const SerializedAssetsCertification = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchProductInventory}
               showOnlyShowFilteredRecordSwitch={true}
-              rowClassRules={{
-                'light-red-data-row': function (params) {
-                  if (params.data?.recertDate) {
-                    var a = moment(params.data?.recertDate);
-                    var b = moment();
-                    const days = a.diff(b, 'days');
-                    if (days < 15 && days >= 0) {
-                      return true;
-                    } else if (days < 0) {
-                      return true;
-                    }
-                  }
-                  return false;
-                },
-                'light-yellow-data-row': function (params) {
-                  if (params.data?.recertDate) {
-                    var a = moment(params.data?.recertDate);
-                    var b = moment();
-                    const days = a.diff(b, 'days');
-                    if (days < 30 && days >= 15) {
-                      return true;
-                    }
-                  }
-                  return false;
-                },
-                'light-green-data-row': function (params) {
-                  if (params.data?.recertDate) {
-                    var a = moment(params.data?.recertDate);
-                    var b = moment();
-                    const days = a.diff(b, 'days');
-                    if (days <= 60 && days >= 30) {
-                      return true;
-                    }
-                  }
-                  return false;
-                }
-              }}
               showFilters={true}
               resource={sidebarResource.serializedAsset}
             />
@@ -382,7 +331,9 @@ const SerializedAssetsCertification = () => {
         />
       )}
       {certificateHistoryDialog?.open && (
-        <CertificateHistoryDialog onClose={() => setCertificateHistoryDialog({ open: false, id: null })} id={certificateHistoryDialog?.id} />
+        <CertificateHistoryDialog
+          onClose={() => setCertificateHistoryDialog({ open: false, id: null })}
+          id={certificateHistoryDialog?.id} />
       )}
     </Fragment>
   );

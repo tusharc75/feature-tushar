@@ -15,7 +15,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import styles from '../../Leads/Header.module.scss';
 import IssueCertificateDialog from '../IssueCertificate';
 
-const CertificationHistory = ({ id }) => {
+const CertificationHistory = ({ id, canIssueCertificate }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -79,19 +80,21 @@ const CertificationHistory = ({ id }) => {
 
   return (
     <>
-      <Grid item xs={12} sm={12} md={6}>
-        <Button
-          variant={isMobile && !isTablet ? 'text' : 'contained'}
-          color="primary"
-          size="small"
-          onClick={() => {
-            setOpenDialog({ open: true, id: id });
-          }}
-          className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-        >
-          {'Issue Certificate'}
-        </Button>
-      </Grid>
+      {canIssueCertificate &&
+        <Grid item xs={12} sm={12} md={6}>
+          <Button
+            variant={isMobile && !isTablet ? 'text' : 'contained'}
+            color="primary"
+            size="small"
+            onClick={() => {
+              setOpenDialog({ open: true, id: id });
+            }}
+            className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+          >
+            {'Issue Certificate'}
+          </Button>
+        </Grid>
+      }
       <Box>
         {columns ? (
           <CustomAgGrid

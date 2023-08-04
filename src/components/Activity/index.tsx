@@ -225,7 +225,7 @@ const Activity = (props) => {
       <Box>
         <Box className={`${classes.detailsHeader} `}>
           <h2 className="listingHeader single">
-            {`Collaborate - ${routes[resource]?.title || camelCase(resource)} - ${resourceLabel}`}
+            {`Collaborate - ${resourceLabel}`}
           </h2>
           <IconButton onClick={() => close()} className="close-icon-v1">
             <CloseIcon />

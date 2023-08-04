@@ -35,7 +35,7 @@ const SerializedAssetDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { user, permissions }
   }: any = useData();
 
   const [headingLbl, setHeadingLbl] = useState('');
@@ -205,7 +205,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -378,7 +378,7 @@ const SerializedAssetDetailsPage = () => {
         >
           <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Details</div>} {...a11yProps(0)} />
           <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Asset History</div>} {...a11yProps(1)} />
-          {assetDetails?.product?.assetCertification && (
+          {user?.user?.brandPolicy?.serializedAssetCertification && (
             <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Certification History</div>} {...a11yProps(2)} />
           )}
         </Tabs>
@@ -407,7 +407,9 @@ const SerializedAssetDetailsPage = () => {
           <AssetHistory id={id} />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-          <CertificationHistory id={id} />
+          <CertificationHistory
+            id={id}
+            canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate} />
         </TabPanel>
       </Box>
       {showConfirmBox && (
