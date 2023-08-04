@@ -42,10 +42,10 @@ import Dialog from '@material-ui/core/Dialog';
 let cancelTokenSource = null;
 
 const Report = () => {
+
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
   const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
@@ -217,24 +217,11 @@ const Report = () => {
         let {
           data: { data: POFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order`);
-        // let {
-        //   data: { data: productOption }
-        // } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
         POFields.filter((field) => ['purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
           if (field?.fieldData.fieldName === 'warehouse') {
             resourceFieldData.push(field);
           }
-          // if (field?.fieldData.fieldName === 'supplierAccount') {
-          //   resourceFieldData.push(field);
-          //   // columns.push({
-          //   //   field: 'supplierAccount',
-          //   //   headerName: field?.fieldData?.fieldLabel,
-          //   //   show: true,
-          //   //   disabled: false,
-          //   //   cellRenderer: 'supplierRenderer'
-          //   // });
-          // }
           if (field?.fieldData.fieldName === 'purchaseOrderDate') {
             resourceFieldData.push({
               ...field,
@@ -247,12 +234,6 @@ const Report = () => {
           if (o?.fieldData.fieldName === 'productCategory') {
             resourceFieldData.push(o);
           }
-          // if (o?.fieldData.fieldName === 'productName') {
-          //   resourceFieldData.push({
-          //     ...o,
-          //     fieldData: { ...o.fieldData, fieldName: 'product', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
-          //   });
-          // }
           let currentColumn = getColumnData('Product', o?.fieldData, routes['productDetail'].path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
@@ -431,13 +412,13 @@ const Report = () => {
           { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
           ...(user?.user?.brandPolicy?.storageLocation
             ? [
-                {
-                  field: 'storageLocation',
-                  headerName: 'Storage Location',
-                  show: true,
-                  cellRenderer: 'commonRenderer'
-                }
-              ]
+              {
+                field: 'storageLocation',
+                headerName: 'Storage Location',
+                show: true,
+                cellRenderer: 'commonRenderer'
+              }
+            ]
             : []),
           { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
           { field: 'serialNumber', headerName: 'Serial Number', filter: false, show: true, cellRenderer: 'serialNumberRenderer' },
@@ -540,6 +521,64 @@ const Report = () => {
           numberRenderer: NumberRenderer
         });
       }
+      if (resourceCamelCase === 'assetsNumberByDays') {
+        let { data } = await axiosInstance().get(`/serialized-asset/report/assets-number-by-status?page=0&limit=1`);
+        data?.columns?.forEach((e) => {
+          var cellRenderer = 'numberRenderer'
+          if (e.fieldName === 'productName') {
+            cellRenderer = 'productRenderer'
+          }
+          if (["productDescription", "productNumber", "productCategory"]?.includes(e.fieldName)) {
+            cellRenderer = 'commonRenderer'
+          }
+          if (e.fieldName === 'warehouse') {
+            cellRenderer = 'plantRenderer'
+          }
+          columns.push({
+            field: e.fieldName,
+            headerName: e.fieldLabel,
+            show: true,
+            disabled: false,
+            cellRenderer: cellRenderer
+          })
+        })
+
+        let fieldOptionResponce = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Product Category,Warehouse`);
+        const fieldOption = fieldOptionResponce?.data?.data;
+        resourceFieldData.push({
+          isCreate: true,
+          isRead: true,
+          isUpdate: true,
+          fieldData: {
+            _id: '63f71ce5b17c69a1ab7e4c06',
+            fieldLabel: columns?.find((e) => e.field === 'warehouse')?.headerName,
+            fieldName: 'warehouse',
+            type: 'dropDown',
+            lookup: true,
+            option: fieldOption["Warehouse"]
+          }
+        });
+        resourceFieldData.push({
+          isCreate: true,
+          isRead: true,
+          isUpdate: true,
+          fieldData: {
+            _id: '63f71ce5b17c69a1ab7e4c07',
+            fieldLabel: columns?.find((e) => e.field === 'productCategory')?.headerName,
+            fieldName: 'productCategory',
+            type: 'dropDown',
+            lookup: true,
+            option: fieldOption["Product Category"]
+          }
+        });
+
+        setFrameWorkComponent({
+          productRenderer: ProductRenderer,
+          commonRenderer: CommonRenderer,
+          plantRenderer: PlantRenderer,
+          numberRenderer: NumberRenderer
+        });
+      }
 
       setResourceColumns(resourceFieldData);
       setColumns(columns);
@@ -575,8 +614,6 @@ const Report = () => {
   }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
   React.useEffect(() => {
-    // const selectedResourceNames = selectedResources?.map((field) => field.fieldName);
-    // const selectedDataNames = Object.keys(selectedData);
     if (!selectedData) return;
     setSelectedData((prevState: any) => {
       const dataKeys = Object.keys(prevState);
@@ -708,22 +745,28 @@ const Report = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
+
+    var api = ''
+    if (resourceCamelCase === 'purchaseOrderDetails') {
+      api = `${productInventory.api}/report/purchase-order-product-wise-report`;
+    }
+    if (resourceCamelCase === 'inventoryEvaluation') {
+      api = `${productInventory.api}/report/purchase-order-price`;
+    }
+    if (resourceCamelCase === 'inventoryHistory') {
+      api = `${productInventory.api}/report/history-report`;
+    }
+    if (resourceCamelCase === 'averagePriceBySupplier') {
+      api = `${productInventory.api}/report/supplier-product-price`;
+    }
+    if (resourceCamelCase === 'assetsNumberByDays') {
+      api = `/serialized-asset/report/assets-number-by-status`;
+    }
+
     axiosInstance()
-      .get(
-        `${
-          resourceCamelCase === 'purchaseOrderDetails'
-            ? `${productInventory.api}/report/purchase-order-product-wise-report`
-            : resourceCamelCase === 'inventoryEvaluation'
-            ? `${productInventory.api}/report/purchase-order-price`
-            : resourceCamelCase === 'inventoryHistory'
-            ? `${productInventory.api}/report/history-report`
-            : `${productInventory.api}/report/supplier-product-price`
-        }${filterQuery}`,
-        {
-          cancelToken: cancelTokenSource.token
-        }
-      )
-      .then(({ data: { data, count } }) => {
+      .get(`${api}${filterQuery}`, {
+        cancelToken: cancelTokenSource.token
+      }).then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
           if (resourceCamelCase === 'purchaseOrderDetails') {
             if (u?.productLedger?.type === 'credit') {
@@ -860,17 +903,26 @@ const Report = () => {
     }
     setExporting(true);
     let filterQuery = getFilter(true);
+
+    var api = ''
+    if (resourceCamelCase === 'purchaseOrderDetails') {
+      api = `${productInventory.api}/report/purchase-order-product-wise-report/export`;
+    }
+    if (resourceCamelCase === 'inventoryEvaluation') {
+      api = `${productInventory.api}/report/purchase-order-price/export`;
+    }
+    if (resourceCamelCase === 'inventoryHistory') {
+      api = `${productInventory.api}/report/history-report/export`;
+    }
+    if (resourceCamelCase === 'averagePriceBySupplier') {
+      api = `${productInventory.api}/report/supplier-product-price/export`;
+    }
+    if (resourceCamelCase === 'assetsNumberByDays') {
+      api = `/serialized-asset/report/assets-number-by-status/export`;
+    }
+
     axiosInstance()
-      .get(
-        `${
-          resourceCamelCase === 'purchaseOrderDetails'
-            ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
-            : resourceCamelCase === 'inventoryEvaluation'
-            ? `${productInventory.api}/report/purchase-order-price/export`
-            : resourceCamelCase === 'inventoryHistory'
-            ? `${productInventory.api}/report/history-report/export`
-            : `${productInventory.api}/report/supplier-product-price/export`
-        }${filterQuery}&exportColumn=${JSON.stringify(columns)} `,
+      .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(columns)} `,
         {
           responseType: 'arraybuffer'
         }

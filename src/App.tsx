@@ -225,7 +225,6 @@ import TrailerMasterDetail from './pages/TrailerMaster/TrailerMasterDetail';
 import FieldTicketInvoice from './pages/FieldTicketInvoice';
 import AzureSSOError from './pages/Auth/AzureSSOError';
 import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
-import AssetNumberByDays from './pages/Report/Asset/AssetNumberByDays';
 
 var notificationInterval: any = null;
 
@@ -701,9 +700,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}`}>
               <ReportMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}/assets-number-by-days`}>
-              <AssetNumberByDays />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
               <Report />
