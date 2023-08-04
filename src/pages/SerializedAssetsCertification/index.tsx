@@ -44,10 +44,12 @@ const SerializedAssetsCertification = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
+
   const [issueDuration, setIssueDuration] = useState({
     from: null,
     to: null
   });
+
   const [expireDuration, setExpireDuration] = useState({
     from: null,
     to: null
@@ -180,7 +182,7 @@ const SerializedAssetsCertification = () => {
       deepFilter = `${deepFilter}&filterType=and`;
     }
     const updatedFilters = [];
-    if (issueDuration?.from && issueDuration?.to) {
+    if (issueDuration?.from && issueDuration?.from) {
       updatedFilters.push({
         field: 'certificateIssueDate',
         term: {
@@ -189,7 +191,7 @@ const SerializedAssetsCertification = () => {
         }
       });
     }
-    if (expireDuration?.from && expireDuration?.to) {
+    if (expireDuration?.from && expireDuration?.from) {
       updatedFilters.push({
         field: 'certificateExpireDate',
         term: {
@@ -274,18 +276,22 @@ const SerializedAssetsCertification = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} sm={12} md={9} className="d-flex align-items-center gap-1 flex-wrap">
-              <Fragment>
-                <Box mt={1}>
-                  <DurationFilter label={"Certificate Issue Date"} duration={issueDuration} setDuration={setIssueDuration} disabled={false} />
-                </Box>
-                <Box mt={1}>
-                  <DurationFilter label={"Certificate Expire Date"} duration={expireDuration} setDuration={setExpireDuration} disabled={false} />
-                </Box>
-              </Fragment>
+          <Grid container spacing={2} className={styles.filter_side_container}>
+            <Grid item xs={12} sm={12} md={5} >
+              <DurationFilter
+                label={"Issue Date"}
+                duration={issueDuration}
+                setDuration={setIssueDuration}
+                defaultTimeFrame='custom' />
             </Grid>
-            <Grid sm={12} xs={12} md={3} container className={`${styles.filter_side} align-items-center`}>
+            <Grid item xs={12} sm={12} md={5} >
+              <DurationFilter
+                label={"Expire Date"}
+                duration={expireDuration}
+                setDuration={setExpireDuration}
+                defaultTimeFrame='custom' />
+            </Grid>
+            <Grid sm={12} xs={12} md={2} container className={`${styles.filter_side} align-items-center`}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Box style={{ flexGrow: '1' }}>
                   <SearchBox
