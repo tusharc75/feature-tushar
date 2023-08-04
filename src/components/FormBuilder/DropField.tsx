@@ -157,6 +157,7 @@ export const DropField = ({
 
   const deleteField = (fieldId) => {
     if (onAddRemoveField) onAddRemoveField();
+    console.log(section)
     let data = [...section];
     var result = checkFieldDependency(fieldId, sectionId, data);
     if (result.error) {
