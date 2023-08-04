@@ -26,6 +26,12 @@ const FIELD_TO_FILTER = [
     type: 'dropDown'
   },
   {
+    fieldName: 'serializedAsset',
+    fieldLabel: routes.serializedAsset.title,
+    resource: sidebarResource.serializedAsset,
+    type: 'dropDown'
+  },
+  {
     fieldName: 'productCategory',
     fieldLabel: routes.productCategory.title,
     resource: sidebarResource.productCategory,
@@ -42,11 +48,11 @@ const FIELD_TO_FILTER = [
     fieldLabel: 'Create Date',
     type: 'date'
   },
-  {
-    fieldName: 'requestDate',
-    fieldLabel: 'Request Date',
-    type: 'date'
-  },
+  // {
+  //   fieldName: 'requestDate',
+  //   fieldLabel: 'Request Date',
+  //   type: 'date'
+  // },
 ]
 
 const MaterialHandling = () => {
