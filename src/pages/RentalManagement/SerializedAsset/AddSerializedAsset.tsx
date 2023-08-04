@@ -259,9 +259,9 @@ const AddSerializedAsset = ({
       deepFilter = `${deepFilter}&transferAssetId=${transferAssetId}&notIn=${notIn}`;
     } else {
       if (selectedWarehouse == null) {
-        deepFilter = `${deepFilter}&entityWise=1`;
+        deepFilter = `${deepFilter}`;
       } else {
-        deepFilter = `${deepFilter}&entityWise=0&plant=${selectedWarehouse}`;
+        deepFilter = `${deepFilter}&plant=${selectedWarehouse}`;
       }
       if (referenceType === 'Repair Job') {
         deepFilter = `${deepFilter}&repairable=true`;
