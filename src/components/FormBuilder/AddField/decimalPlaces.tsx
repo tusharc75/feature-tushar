@@ -10,7 +10,7 @@ export const DecimalPlaces = ({ values, setFieldValue }) => {
         <Select
             labelId="demo-simple-select-outlined-label"
             id="demo-simple-select-outlined"
-            value={values["decimalPlaces"]}
+            value={values["decimalPlaces"] || 0}
             onChange={(e) => setFieldValue("decimalPlaces", e.target.value)}
             label="Number of decimal places"
             name="decimalPlaces"
