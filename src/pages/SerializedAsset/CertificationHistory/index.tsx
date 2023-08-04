@@ -79,7 +79,7 @@ const CertificationHistory = ({ id }) => {
 
   return (
     <>
-      <Grid>
+      <Grid item xs={12} sm={12} md={6} className={`${styles.filter_side} `}>
         <Button
           variant={isMobile && !isTablet ? 'text' : 'contained'}
           color="primary"
