@@ -7,7 +7,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { repairOrder, REPAIR_ORDER_TYPE, workOrder, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, CHILD_RESOURCE } from '../../../constants/helpers';
+import { repairOrder, REPAIR_ORDER_TYPE, workOrder, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, CHILD_RESOURCE, MATERIAL_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { Delete, ExpandMore, CheckCircleOutline } from '@material-ui/icons';
@@ -452,7 +452,7 @@ const WorkOrder = ({
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
     data = response?.data?.data;
 
-    const rows = data.material?.filter((e) => e.parentId === null);
+    const rows = data.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset);
 
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
