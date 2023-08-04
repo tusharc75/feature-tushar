@@ -136,7 +136,7 @@ const AssignSerializedAssetDialog = ({
     }
 
     if (reference === 'repairOrder') {
-      deepFilter = `${deepFilter}&entityWise=0`;
+      deepFilter = `${deepFilter}`;
       deepFilter += '&repairOrder=1';
       if (referenceData?.customerAccount) {
         deepFilter = `${deepFilter}&owner=${referenceData?.customerAccount}`;
