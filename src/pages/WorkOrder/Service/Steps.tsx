@@ -37,7 +37,7 @@ import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import AttachmentDialog from './AttachmentDialog';
 import InfoIcon from '@material-ui/icons/Info';
-import { GrDrag } from 'react-icons/gr';
+import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Comments from './Comments';
@@ -318,7 +318,9 @@ const Steps = ({
         ele.isAllowToPerform = true;
         ele.isAllowToCheck = stepSubmitedData?.find(
           (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === ele?._id
-        ) ? false : true;
+        )
+          ? false
+          : true;
       });
     }
 
@@ -661,7 +663,7 @@ const Steps = ({
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-      })
+      });
   };
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -676,8 +678,7 @@ const Steps = ({
   };
 
   const isAllChecked = (): boolean => {
-    return selectedSteps.length === serviceDetails?.steps?.filter((e) => e?.isAllowToCheck).length
-      && selectedSteps.length > 0 ? true : false;
+    return selectedSteps.length === serviceDetails?.steps?.filter((e) => e?.isAllowToCheck).length && selectedSteps.length > 0 ? true : false;
   };
 
   const checkAll = (): void => {
@@ -689,7 +690,6 @@ const Steps = ({
     }
   };
 
-
   const completeAllSteps = async () => {
     setIsCompleteAllLoading(true);
     const payload = {
@@ -697,7 +697,8 @@ const Steps = ({
       uniqueId: selectedService?.uniqueId,
       serviceId: selectedService?._id
     };
-    axiosInstance().put(`${workOrder.api}/${workOrderId}/multiple-step-complete`, payload)
+    axiosInstance()
+      .put(`${workOrder.api}/${workOrderId}/multiple-step-complete`, payload)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -720,7 +721,8 @@ const Steps = ({
       serviceUniqueId: selectedService?.uniqueId,
       steps: showDeleteConfirmBox.steps.map((item) => item._id)
     };
-    axiosInstance().put(`${workOrder.api}/${workOrderId}/step/remove`, payload)
+    axiosInstance()
+      .put(`${workOrder.api}/${workOrderId}/step/remove`, payload)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -735,35 +737,23 @@ const Steps = ({
       });
   };
 
-
   return serviceDetails ? (
     serviceDetails?.steps?.length ? (
       <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }}>
         <div className="flex justify-between items-center gap-[8px] p-[8px] flex-wrap">
           <div className="flex items-center gap-[15px] flex-wrap pl-2">
-            {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) &&
+            {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) && (
               <>
                 <label htmlFor="select-all" className={`cursor-pointer`}>
-                  <Checkbox
-                    id="select-all"
-                    color="primary"
-                    checked={isAllChecked()}
-                    onChange={() => checkAll()} />
+                  <Checkbox id="select-all" color="primary" checked={isAllChecked()} onChange={() => checkAll()} />
                   <span className="font-medium select-none">Select All</span>
                 </label>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  disabled={selectedSteps.length ? false : true}
-                  onClick={completeAllSteps}
-                >
+                <Button variant="contained" color="primary" size="small" disabled={selectedSteps.length ? false : true} onClick={completeAllSteps}>
                   Complete
-                  {isCompleteAllLoading ?
-                    <CircularProgress size={20} className="ml-[8px]" /> : `(${isAllChecked() ? 'All' : selectedSteps.length})`}
+                  {isCompleteAllLoading ? <CircularProgress size={20} className="ml-[8px]" /> : `(${isAllChecked() ? 'All' : selectedSteps.length})`}
                 </Button>
               </>
-            }
+            )}
           </div>
           <div className={`d-flex flex-wrap align-center justify-end gap-[8px] ml-auto ${serviceDetails?.steps?.length ? 'h-auto' : 'h-[500]'}`}>
             {referencType !== 'workOrderTechnician' && (
@@ -793,7 +783,7 @@ const Steps = ({
                 )}
                 onClick={() => setArrangeView(true)}
               >
-                <GrDrag fontSize="small" color="primary" className="mr-1" />
+                <DragIndicatorIcon className="mr-1" fontSize="small" />
                 Arrange
               </Button>
             )}
@@ -818,15 +808,15 @@ const Steps = ({
                 style={{
                   cursor: !stepData?.status ? 'default' : 'pointer',
                   transition: 'all .5s ease',
-                  backgroundColor: selectedStep?._id === step._id && fieldDialog ? '#ecfdf7' : ''
+                  backgroundColor: selectedStep?._id === step._id && fieldDialog ? 'var(--accordion-summary-bg, #ecfdf7)' : ''
                 }}
                 className={`${classes.accordionHeading}  ${classes.white}`}
               >
                 <Box sx={{ display: 'flex', flexWrap: 'wrap' }} gridGap={'8px'}>
-                  {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) &&
+                  {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) && (
                     <Checkbox
                       name={`checkbox_${step._id}`}
-                      color={"primary"}
+                      color={'primary'}
                       disabled={step?.isAllowToCheck ? false : true}
                       className={`${!step?.isAllowToCheck ? 'opacity-0' : ''}`}
                       checked={selectedSteps.find((e) => e === step._id) ? true : false}
@@ -838,7 +828,7 @@ const Steps = ({
                         }
                       }}
                     />
-                  }
+                  )}
                   <Box
                     style={{
                       display: 'flex',
@@ -913,8 +903,8 @@ const Steps = ({
                                 {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
                                   ? 'Resume'
                                   : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                                    ? 'Pause'
-                                    : 'Restart'}
+                                  ? 'Pause'
+                                  : 'Restart'}
                               </Button>
                             ))}
                           {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
@@ -983,9 +973,9 @@ const Steps = ({
                             )
                           ) : null}
                           {stepData?.status &&
-                            ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                            ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                            (isMeTechnician || !isAnyTechnician) ? (
+                          ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                          ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                          (isMeTechnician || !isAnyTechnician) ? (
                             [
                               WORKORDER_SERVICE_STEP_STATUS.passed,
                               WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -1234,18 +1224,20 @@ const Steps = ({
             open={true}
             message={
               addServiceConfirmation.type === 'skipServices'
-                ? `As per the logic applied on this step, service${addServiceConfirmation?.services?.length > 1 ? 's' : ''
-                }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been skipped. Do you want to Skip ? `
+                ? `As per the logic applied on this step, service${
+                    addServiceConfirmation?.services?.length > 1 ? 's' : ''
+                  }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been skipped. Do you want to Skip ? `
                 : addServiceConfirmation.type === 'returnToStepOnFail'
-                  ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
+                ? `As per the logic applied on this step, we need to return to step ${
+                    addServiceConfirmation.step?.stepName || ''
                   }. Do you want to continue ?`
-                  : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                    ? ` Step fail requires Quote Revision. Do you confirm on this?`
-                    : addServiceConfirmation.type === 'jumpStep'
-                      ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                      : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                        ?.map((e) => e.serviceName)
-                        ?.toString()} has been added. Do you want to Add ? `
+                : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
+                ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                : addServiceConfirmation.type === 'jumpStep'
+                ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                    ?.map((e) => e.serviceName)
+                    ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
@@ -1289,7 +1281,7 @@ const Steps = ({
             handleClose={() => {
               setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
             }}
-            handleSuccess={() => { }}
+            handleSuccess={() => {}}
           />
         )}
         {consumablesDialog.open && (
@@ -1314,17 +1306,17 @@ const Steps = ({
               workOrderId: workOrderId
             }}
             assignedUsers={selectedStep?.assignedUsers}
-            reference={"steps"}
+            reference={'steps'}
             referenceData={{
               stepId: selectedStep?._id,
-              serviceUniqueId: selectedService?.uniqueId,
+              serviceUniqueId: selectedService?.uniqueId
             }}
             handleClose={() => {
               setUserAssignDialog(false);
             }}
             handleSucess={() => {
               setUserAssignDialog(false);
-              fetchService()
+              fetchService();
             }}
           />
         )}
@@ -1418,13 +1410,13 @@ export const RenderPassFailChip = ({ status, className = '', ...others }) => {
         background: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
           ? '#e1fce3'
           : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-            ? '#D3D3D3'
-            : '#FAD9D4',
+          ? '#D3D3D3'
+          : '#FAD9D4',
         color: [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(status)
           ? '#048e0a'
           : WORKORDER_SERVICE_STEP_STATUS.skipped === status
-            ? 'inherit'
-            : '#D13925'
+          ? 'inherit'
+          : '#D13925'
       }}
     />
   );
