@@ -108,7 +108,6 @@ const FieldTicketDetail = () => {
         .put(`${routes?.fieldTicket?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
           setShowConfirmBox(false);
-
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
