@@ -131,7 +131,7 @@ const ScheduleReport = () => {
           ? finalObject.subscribeUsers.map((user: any) => `${user?.firstName} ${user?.lastName}`).join(', ')
           : [];
         finalObject.date = new Date(finalObject.date).toDateString();
-        finalObject.time = new Date(finalObject.time).toLocaleTimeString();
+        // finalObject.time = new Date(finalObject.time).toLocaleTimeString();
         finalObject.column = finalObject.column
           .split(',')
           .map((s: string) => startCase(s))

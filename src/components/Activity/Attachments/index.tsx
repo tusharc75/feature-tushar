@@ -328,7 +328,12 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
             <TreeItem
               nodeId={_attachment._id}
               className="attachment"
-              style={{ padding: '14px 0px 14px 9px' }}
+              style={{
+                padding: '14px 0px 14px 9px',
+                borderLeft: '4px solid #FFC955',
+                borderRadius: '4px',
+                boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.08)'
+              }}
               label={
                 <div
                   style={{
@@ -387,7 +392,8 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           <TreeItem
             nodeId="2"
             label={
-              <Box key={_attachment._id} className="activity">
+              <Box key={_attachment._id} className="activity" style={{ borderLeft: '4px solid #FFC955', marginLeft: '-24px' }}>
+                {/*  */}
                 <Box style={{ padding: '0px 10px' }}>
                   <Box
                     className="cursor-pointer"
