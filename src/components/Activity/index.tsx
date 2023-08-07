@@ -55,12 +55,12 @@ const useStyles = makeStyles(() => ({
     boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.04)',
     borderRadius: '4px',
     minHeight: '46px',
-    color: 'var(--dark-primary-text,#5B5B5B)',
+    color: 'var(--dark-primary-text,#2A3042)',
     '& h6': {
       fontWeight: '500',
       fontSize: '14px',
       lineHeight: '17px',
-      color: 'var(--dark-primary-text,#5B5B5B)'
+      color: 'var(--dark-primary-text,#2A3042)'
     }
   },
   historyButton: {
@@ -266,7 +266,7 @@ const Activity = (props) => {
                           <Typography
                             variant="subtitle2"
                             className={`d-flex align-items-center `}
-                            style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: 'var(--dark-primary-text,#5B5B5B)' }}
+                            style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: 'var(--dark-primary-text,#2A3042)' }}
                           >
                             {getIcon(data)} {data} ({totalCount[data]})
                           </Typography>
@@ -280,7 +280,7 @@ const Activity = (props) => {
                             <Box mr={1}>
                               <HtmlTooltip title={'Add Folder'}>
                                 <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}>
-                                  <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
+                                  <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                                 </IconButton>
                               </HtmlTooltip>
                             </Box>
@@ -299,18 +299,18 @@ const Activity = (props) => {
                                     );
                                   }}
                                 >
-                                  <MailIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
+                                  <MailIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                                 </IconButton>
                               </HtmlTooltip>
                             </Box>
                           )}
                           <Box mr={1}>
                             <HtmlTooltip title={infoTitle[data]}>
-                              <InfoOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
+                              <InfoOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                             </HtmlTooltip>
                           </Box>
                           <IconButton size="small" onClick={(event) => handleCreateActivity(event, data)}>
-                            <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
+                            <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                           </IconButton>
                         </Grid>
                       )

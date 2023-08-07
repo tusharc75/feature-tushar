@@ -2182,10 +2182,10 @@ export const REPORT_LIST = [
     type: 'averagePriceBySupplier',
   },
   {
-    title: 'Assets Number By Days',
+    title: 'Number Of Assets by Status',
     permission: 'serializedAsset',
     key: 'purchaseOrderType',
-    type: 'assetsNumberByDays',
+    type: 'numberOfAssetsByStatus',
   },
 ];
 

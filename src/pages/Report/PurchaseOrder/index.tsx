@@ -521,14 +521,17 @@ const Report = () => {
           numberRenderer: NumberRenderer
         });
       }
-      if (resourceCamelCase === 'assetsNumberByDays') {
+      if (resourceCamelCase === 'numberOfAssetsByStatus') {
         let { data } = await axiosInstance().get(`/serialized-asset/report/assets-number-by-status?page=0&limit=1`);
         data?.columns?.forEach((e) => {
           var cellRenderer = 'numberRenderer'
           if (e.fieldName === 'productName') {
             cellRenderer = 'productRenderer'
           }
-          if (["productDescription", "productNumber", "productCategory"]?.includes(e.fieldName)) {
+          if (e.fieldName === 'productCategory') {
+            cellRenderer = 'productCategoryRenderer'
+          }
+          if (["productDescription", "productNumber"]?.includes(e.fieldName)) {
             cellRenderer = 'commonRenderer'
           }
           if (e.fieldName === 'warehouse') {
@@ -538,13 +541,30 @@ const Report = () => {
             field: e.fieldName,
             headerName: e.fieldLabel,
             show: true,
-            disabled: false,
-            cellRenderer: cellRenderer
+            disabled: e.fieldName === 'productName' ? true : false,
+            cellRenderer: cellRenderer,
+            filter: false,
+            sortable: false,
           })
         })
 
-        let fieldOptionResponce = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Product Category,Warehouse`);
+        let fieldOptionResponce = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Product,Product Category,Warehouse`);
         const fieldOption = fieldOptionResponce?.data?.data;
+        resourceFieldData.push({
+          isCreate: true,
+          isRead: true,
+          isUpdate: true,
+          fieldData: {
+            _id: '63f71ce5b17c69a1ab7e4c01',
+            fieldLabel: columns?.find((e) => e.field === 'productName')?.headerName || 'Product Name',
+            fieldName: 'product',
+            type: 'dropDown',
+            lookup: true,
+            option: fieldOption["Product"],
+            filter: false,
+            sortable: false,
+          }
+        });
         resourceFieldData.push({
           isCreate: true,
           isRead: true,
@@ -555,7 +575,9 @@ const Report = () => {
             fieldName: 'warehouse',
             type: 'dropDown',
             lookup: true,
-            option: fieldOption["Warehouse"]
+            option: fieldOption["Warehouse"],
+            filter: false,
+            sortable: false,
           }
         });
         resourceFieldData.push({
@@ -568,12 +590,16 @@ const Report = () => {
             fieldName: 'productCategory',
             type: 'dropDown',
             lookup: true,
-            option: fieldOption["Product Category"]
+            option: fieldOption["Product Category"],
+            filter: false,
+            sortable: false,
           }
         });
 
+
         setFrameWorkComponent({
           productRenderer: ProductRenderer,
+          productCategoryRenderer: ProductCategoryRenderer,
           commonRenderer: CommonRenderer,
           plantRenderer: PlantRenderer,
           numberRenderer: NumberRenderer
@@ -695,6 +721,12 @@ const Report = () => {
     </Link>
   );
 
+  const ProductCategoryRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.productCategoryDetail.path}/${params.data.productCategoryId}`} target="_blank" >
+      {params.value}
+    </Link>
+  );
+
   const PlantRenderer = (params: any) => (
     <Link className="link" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`} target="_blank" >
       {params.value}
@@ -759,7 +791,7 @@ const Report = () => {
     if (resourceCamelCase === 'averagePriceBySupplier') {
       api = `${productInventory.api}/report/supplier-product-price`;
     }
-    if (resourceCamelCase === 'assetsNumberByDays') {
+    if (resourceCamelCase === 'numberOfAssetsByStatus') {
       api = `/serialized-asset/report/assets-number-by-status`;
     }
 
@@ -917,7 +949,7 @@ const Report = () => {
     if (resourceCamelCase === 'averagePriceBySupplier') {
       api = `${productInventory.api}/report/supplier-product-price/export`;
     }
-    if (resourceCamelCase === 'assetsNumberByDays') {
+    if (resourceCamelCase === 'numberOfAssetsByStatus') {
       api = `/serialized-asset/report/assets-number-by-status/export`;
     }
 
