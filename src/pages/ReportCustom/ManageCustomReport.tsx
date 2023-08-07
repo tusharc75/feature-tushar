@@ -326,7 +326,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
       errors['customReportName'] = 'Custom report name is required';
     }
     if (!values.resource) {
-      errors['resource'] = 'Resource is required';
+      errors['resource'] = 'Report is required';
     }
     return errors;
   };
@@ -497,7 +497,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                               required
                               error={touched['resource'] && Boolean(errors['resource'])}
                               helperText={touched['resource'] && errors['resource']}
-                              label="Resource"
+                              label="Report"
                               variant="outlined"
                               name="resource"
                             />

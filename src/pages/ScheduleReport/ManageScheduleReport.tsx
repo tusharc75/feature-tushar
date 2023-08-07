@@ -363,10 +363,10 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       errors['scheduleName'] = 'Schedule name is required';
     }
     if (!values.resource) {
-      errors['resource'] = 'Resource is required';
+      errors['resource'] = 'Report is required';
     }
     if (values?.subscribeUsers?.length === 0) {
-      errors['subscribeUsers'] = 'Subscribe users is required';
+      errors['subscribeUsers'] = 'Users is required';
     }
     if (!values.frequency) {
       errors['frequency'] = 'Frequency is required';
@@ -560,7 +560,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                               required
                               error={touched['resource'] && Boolean(errors['resource'])}
                               helperText={touched['resource'] && errors['resource']}
-                              label="Resource"
+                              label="Report"
                               variant="outlined"
                               name="resource"
                             />
@@ -658,7 +658,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                               {...params}
                               error={touched['subscribeUsers'] && Boolean(errors['subscribeUsers'])}
                               helperText={touched['subscribeUsers'] && errors['subscribeUsers']}
-                              label="Subscibe User"
+                              label="Users"
                               name="subscribeUsers"
                               required
                               variant="outlined"
