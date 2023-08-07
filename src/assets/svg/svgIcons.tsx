@@ -179,6 +179,51 @@ export const ProjectsIcon: React.FC<svgInterface> = ({ ...other }) => {
   );
 };
 
+export const SendIcon: React.FC<svgInterfaceWithSize> = ({ height, width, size = 24, ...other }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      {...other}
+      width={width ? width : size + 'px'}
+      height={height ? height : size + 'px'}
+      fill="none"
+      viewBox="0 0 32 33"
+    >
+      <path
+        fill="currentcolor"
+        d="M27.709 4.822a1 1 0 00-1.05-.23l-22 8a1 1 0 000 1.87l8.59 3.43 6.34-6.36 1.41 1.41-6.37 6.37 3.44 8.59a1 1 0 00.93.63 1 1 0 00.92-.66l8-22a1 1 0 00-.21-1.05z"
+      ></path>
+    </svg>
+  );
+};
+export const CollaborateIcon: React.FC<svgInterfaceWithSize> = ({ height, width, size = 24, ...other }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      {...other}
+      width={width ? width : size + 'px'}
+      height={height ? height : size + 'px'}
+      fill="none"
+      viewBox="0 0 23 22"
+    >
+      <g fill="#fff" clipPath="url(#clip0_4969_23976)">
+        <path
+          stroke="#fff"
+          strokeWidth="0.928"
+          d="M7.775 16.205A3.73 3.73 0 0111.5 12.48a3.73 3.73 0 013.725 3.725v2.114h-7.45v-2.114zM11.5 6.679a2.44 2.44 0 012.436 2.436 2.44 2.44 0 01-2.436 2.437 2.44 2.44 0 01-2.436-2.437A2.44 2.44 0 0111.5 6.68z"
+        ></path>
+        <path d="M7.633 6.215c0-1.6-1.301-2.9-2.9-2.9-1.6 0-2.901 1.3-2.901 2.9 0 1.6 1.301 2.9 2.9 2.9 1.6 0 2.9-1.3 2.9-2.9zM18.267 9.115a4.19 4.19 0 00-3.82 2.487 5.468 5.468 0 012.53 4.603H22.5v-2.9c0-2.31-1.922-4.19-4.232-4.19z"></path>
+        <path d="M21.168 6.215c0-1.6-1.301-2.9-2.9-2.9-1.6 0-2.9 1.3-2.9 2.9 0 1.6 1.3 2.9 2.9 2.9 1.599 0 2.9-1.3 2.9-2.9zM8.552 11.602a4.19 4.19 0 00-3.82-2.487c-2.31 0-4.232 1.88-4.232 4.19v2.9h5.521a5.468 5.468 0 012.531-4.603z"></path>
+      </g>
+      <defs>
+        <clipPath id="clip0_4969_23976">
+          <path fill="#fff" d="M0 0H22V22H0z" transform="translate(.5)"></path>
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
+
 export const OpportunityIcon: React.FC<svgInterface> = ({ ...other }) => {
   return (
     <svg {...other} viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">

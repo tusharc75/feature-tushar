@@ -2999,7 +2999,7 @@ svg.MuiSvgIcon-root {
 
   .activity-new-v1 {
     @media all and (min-width: 500px) {
-      --width: 500px;
+      --width: 450px;
     }
 
     @media all and (min-width: 768px) {
@@ -3014,13 +3014,13 @@ svg.MuiSvgIcon-root {
     top: var(--top, 112px);
     bottom: 0;
     overflow: auto;
-    background-color: white;
+    background-color: var(--dark-secondary, white);
     border-radius: 7px 0 0 7px;
 
     .close-icon-v1 {
       position: absolute;
-      top: 0;
-      right: 0;
+      top: 12px;
+      right: 8px;
 
       @media all and (max-width: 1024px) {
         padding: 9px;
