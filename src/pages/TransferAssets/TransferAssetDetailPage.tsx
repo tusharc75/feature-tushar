@@ -165,7 +165,10 @@ const TransferAssetDetailPage = () => {
 
         setCustomizedRoutes([routes.transferAsset, { title: data.transferAssetNumber }]);
 
-        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        if (user?.role?.selectedEntity?.superAdminAccess) {
+          isAllowedToEdit = true;
+        }
         setAllowedToEdit(isAllowedToEdit);
 
         if (data.processor) {

@@ -125,7 +125,10 @@ const ProductionOrderDetails = () => {
       .get(`${routes.productionOrder.path}/${id}`)
       .then(({ data: { data } }) => {
         setCurrentStep(getIndex(data?.processStatus, productionOrderProcessSteps));
-        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        if (user?.role?.selectedEntity?.superAdminAccess) {
+          isAllowedToEdit = true;
+        }
         setAllowedToEdit(isAllowedToEdit);
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setProductionOrderData({ ...data });
