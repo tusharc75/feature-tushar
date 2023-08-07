@@ -107,7 +107,10 @@ const BulkAssetCreationDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${bulkAssetCreation.api}/${id}`);
-      const isAllowedToEdit = [...(data?.collaborator ?? []), data?.owner, data?.processor].some((d) => d?.optionValue === user?.user?._id);
+      var isAllowedToEdit = [...(data?.collaborator ?? []), data?.owner, data?.processor].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       setAllowedToEdit(isAllowedToEdit);
       setCurrentStep(getIndex(data?.processStatus, bulkAssetCreationSteps));
       setBulkAssetCreationData(data);

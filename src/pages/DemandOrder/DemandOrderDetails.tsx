@@ -87,7 +87,10 @@ const DemandOrderDetails = () => {
       setHeadingLabel(data.demandOrderNumber);
       setCustomizedRoutes([routes.demandOrder, { title: `${data.demandOrderNumber}` }]);
       setSalesOrderData(data);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       setAllowedToEdit(isAllowedToEdit && ['Invoiced', 'Closed'].indexOf(data.status) === -1);
       setLoading(false);
     } catch (error) {
