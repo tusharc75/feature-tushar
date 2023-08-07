@@ -94,12 +94,12 @@ const FIELD_TO_FILTER = [
     },
     {
         fieldName: 'estimateStartDate',
-        fieldLabel: 'Estimate Start Date',
+        fieldLabel: 'Estimated Start Date',
         type: 'date'
     },
     {
         fieldName: 'estimateEndDate',
-        fieldLabel: 'Estimate End Date',
+        fieldLabel: 'Estimated End Date',
         type: 'date'
     },
 ]

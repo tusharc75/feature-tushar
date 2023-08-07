@@ -49,6 +49,7 @@ const FieldTicketDetail = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [nextStep, setNextStep] = useState(false);
+  const [prevStep, setPrevStep] = useState(true);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
 
   useEffect(() => {
@@ -218,6 +219,7 @@ const FieldTicketDetail = () => {
           <Steps
             isNextStep={false}
             nextStep={nextStep}
+            isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.submitted ? false : true}
             steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
