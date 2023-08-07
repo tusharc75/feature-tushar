@@ -399,7 +399,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         }
       });
 
-      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
+      if (rows.filter((_rows) => _rows.isValid === false).length > 0 && !user?.user?.brandPolicy?.rentalStopAssetNextStepValidation) {
         setNextStep(false);
       } else {
         setNextStep(true);

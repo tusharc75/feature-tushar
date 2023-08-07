@@ -182,7 +182,10 @@ function OpportunityDetailsPage() {
           Object.assign(modifiedData, data);
           modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).fullFormatAmount;
           setCopyOfOpportunityData(modifiedData);
-          const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+          var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+          if (user?.role?.selectedEntity?.superAdminAccess) {
+            isAllowedToEdit = true;
+          }
           setAllowedToEdit(isAllowedToEdit);
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);

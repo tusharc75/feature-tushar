@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { Box, IconButton, InputBase, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import { Send } from '@material-ui/icons';
 import io, { Socket } from 'socket.io-client';
+import { SendIcon } from 'src/assets/svg/svgIcons';
 
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -178,9 +178,8 @@ const Chatter = (props: any) => {
                 onBlur={() => setFocused(false)}
               />
             </Box>
-            <Box mx={1} />
-            <IconButton size="small" type="submit" disabled={!message || isSending} color="secondary">
-              <Send />
+            <IconButton size="small" type="submit" disabled={!message || isSending} style={{ borderRadius: 500 }} className="ml-[5px_!important]">
+              <SendIcon size={35} className={`text-[var(--dark-primary-text,#2A3042)] ${!message || isSending ? ' opacity-70' : ''}`} />
             </IconButton>
           </Box>
         </Box>
