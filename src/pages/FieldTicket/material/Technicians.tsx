@@ -20,6 +20,7 @@ import { displayDate } from 'src/constants/helpers';
 
 
 const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketData, selectedService }) => {
+
     const toastConfig = useContext(CustomToastContext);
     const [dataRows, setDataRows] = useState(null);
     const [columns, setColumns] = useState(null);
@@ -27,6 +28,8 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
     const [deleteData, setDeleteData] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [technicianDialog, setTechnicianDialog] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
 
     const {
         state: { user }
@@ -36,6 +39,10 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
         fetchColumns();
     }, []);
 
+    useEffect(() => {
+        fetchData()
+    }, [selectedService])
+
     const fetchColumns = async () => {
         const column: any = [
             {
@@ -43,15 +50,15 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                 Header: 'Index',
                 width: 50,
                 sticky: isMobile ? 'none' : 'left',
-                Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+                Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
             },
             {
                 accessor: 'technicianName',
                 Header: 'Name',
                 width: 250,
-                sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row }) => (
-                    <a className="link text-truncate" href={`${routes.employeeMasterDetail.path}/${row.original?.technicianId}`} target="_blank">
+                    <a className="link text-truncate" href={`${routes.employeeMasterDetail.path}/${row.original?.technicianId}`}
+                        target="_blank">
                         {row.original?.technicianName}
                     </a>
                 )
@@ -60,11 +67,13 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                 accessor: 'service',
                 Header: 'Service',
                 width: 250,
-                sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row }) => (
-                    <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original?.serviceId}`} target="_blank">
-                        {row.original?.service}
-                    </a>
+                    row.original?.service ?
+                        <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original?.serviceId}`}
+                            target="_blank">
+                            {row.original?.service}
+                        </a>
+                        : <NoDataCell />
                 )
             },
             {
@@ -77,7 +86,7 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                 accessor: 'competencyType',
                 Header: 'Competency Type',
                 width: 250,
-                Cell: ({ row }) => (row.original['competencyType']?.optionLabel ? <p>{row.original?.competencyType?.optionLabel}</p> : <NoDataCell />)
+                Cell: ({ row }) => (row.original['competencyType'] ? <p>{row.original?.competencyType}</p> : <NoDataCell />)
             },
             {
                 accessor: 'competencies',
@@ -140,24 +149,11 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                     let res: any = {
                         ...prepareDataForGrid(u)
                     };
-                    res.srno = i + 1;
+                    res.index = i + 1;
                     res.technicianName = u?.technician['firstName'] + " " + u?.technician['lastName'];
                     res.technicianId = u?.technician['_id'];
-                    res.competencyType = u?.technician['competencyType'];
-                    const competencies = u?.technician['competencies'];
-                    let data = '';
-                    competencies.forEach((f, i) => {
-                        if (f.optionLabel) {
-                            if (i === competencies?.length - 1) {
-                                data = data + " " + f.optionLabel
-                            } else {
-                                data = data + " " + f.optionLabel + ','
-                            }
-                        }
-                    })
-
-                    res['competencies'] = data
-
+                    res.competencyType = u?.technician['competencyType']?.optionLabel;
+                    res.competencies = u?.technician['competencies']?.map((e) => e?.optionLabel)?.toString()
                     return res;
                 });
                 setDataRows(rows);
@@ -167,15 +163,26 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
             });
     };
 
-    useEffect(() => {
-        fetchData()
-    }, [selectedService])
+
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     const handleDelete = async (rows) => {
         setIsDeleting(true);
         axiosInstance()
             .put(`${fieldTicket.api}/technician`, { ids: rows })
-            .then(() => {
+            .then(({ data }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: data?.message
+                });
                 setIsDeleting(false);
                 fetchData();
                 setDeleteData(null);
@@ -185,17 +192,6 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                 toastConfig.setToastConfig(error);
                 setDeleteData(null);
             });
-    };
-
-    const [anchorEl, setAnchorEl] = useState(null);
-    const open = Boolean(anchorEl);
-
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
     };
 
     const handleAssign = (rows) => {
@@ -209,13 +205,16 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
             element.status = 'Assigned';
             element.estimateStartDate = fieldTicketData?.estimateStartDate || new Date()
             element.estimateEndDate = fieldTicketData?.estimateEndDate || new Date()
-
             technician.push(element);
         });
-
         axiosInstance()
             .post(`${fieldTicket.api}/technician`, { technician })
-            .then(() => {
+            .then(({ data }) => {
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: 'success',
+                    message: data?.message
+                });
                 setTechnicianDialog(false);
                 fetchData();
             })
@@ -230,13 +229,13 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                 {allowedToEdit && (
                     <Box display="flex" justifyContent="space-between" mb={2}>
                         <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-                            {/* <Tooltip title={(!selectedService || selectedService?.optionValue === 'All') ? 'Please Select Service' : ''}>
-                                <span> */}
-                            <Button variant="outlined" color="primary" size="small" onClick={() => setTechnicianDialog(true)}>
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                onClick={() => setTechnicianDialog(true)}>
                                 Add
                             </Button>
-                            {/* </span>
-                            </Tooltip> */}
                         </Box>
                         <Box display="flex" ml={1}>
                             <Button
