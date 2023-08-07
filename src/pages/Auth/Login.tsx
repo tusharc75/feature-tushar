@@ -263,7 +263,7 @@ const Login = () => {
               </Formik>
             </div>
             <div className={styles.rightSlider}>
-              <AuthSlider />
+              <AuthSlider style={{ minHeight: '100%' }} />
             </div>
           </div>
         </div>
