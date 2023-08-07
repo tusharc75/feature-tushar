@@ -98,7 +98,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
 
   const fetchData = async () => {
     setFetchingData(true);
-    var { fields: data } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       let unitArray: any = [];

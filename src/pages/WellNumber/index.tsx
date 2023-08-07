@@ -429,7 +429,7 @@ const WellNumber = () => {
                 selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${routes.wellNumberDetail.path}/${data._id}?openEdit=true`);
+                  history.push(`${routes.wellNumberDetail.path}/${data._id}`);
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {

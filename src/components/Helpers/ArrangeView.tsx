@@ -112,7 +112,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
       <CustomDialogContent>
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
           {preRows?.length > 0 && (
-            <Box mb={2} p={1} border={1} borderColor="var(--common-border-color)" bgcolor="grey.100">
+            <Box mb={2} p={1} border={1} borderColor="var(--common-border-color)" bgcolor="var(--dark-secondary, grey.100)">
               {postRows?.length > 0 ? (
                 <Typography variant="subtitle2" gutterBottom>
                   Pre Work
@@ -132,7 +132,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
             </Box>
           )}
           {postRows?.length > 0 && (
-            <Box mb={2} p={1} border={1} borderColor="var(--common-border-color)" bgcolor="grey.100">
+            <Box mb={2} p={1} border={1} borderColor="var(--common-border-color)" bgcolor="var(--dark-secondary, grey.100)">
               {preRows?.length > 0 ? (
                 <Typography variant="subtitle2" gutterBottom>
                   Post Work
@@ -237,7 +237,7 @@ const RenderListItem = ({ column, moveItem, id, index, onChangeValue }) => {
 
   return (
     <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
-      <Box bgcolor="white" border={1} mb={1} p={1} borderColor="var(--common-border-color)">
+      <Box bgcolor="var(--dark-primary, white)" border={1} mb={1} p={1} borderColor="var(--common-border-color)">
         <Grid container spacing={1}>
           <Grid item xs={1}>
             <Box pt={1}>

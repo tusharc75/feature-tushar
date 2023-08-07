@@ -183,6 +183,9 @@ const QuotationDetails = () => {
       data = response?.data?.data;
 
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       if ([QUOTATION_STATUS.converted].includes(data.status)) {
         isAllowedToEdit = false;
       }
@@ -457,7 +460,11 @@ const QuotationDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={quotationData?._id} resource={ACTIVITY_RESOURCE.quotation} />
+            <ActivityButton
+              referenceId={quotationData?._id}
+              resource={ACTIVITY_RESOURCE.quotation}
+              resourceLabel={quotationData?.quotationNumber}
+            />
           </Box>
         </Box>
       </Box>
@@ -529,16 +536,16 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-            <Box
-              style={{
-                marginLeft: 'auto',
-                maxWidth: 'max-content',
-                marginTop: '-30px'
-              }}
-            >
-              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-            </Box>
-          )}
+              <Box
+                style={{
+                  marginLeft: 'auto',
+                  maxWidth: 'max-content',
+                  marginTop: '-30px'
+                }}
+              >
+                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+              </Box>
+            )}
           <div>
             <Steps
               isNextStep={false}
@@ -555,8 +562,8 @@ const QuotationDetails = () => {
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
-                      setCustomerAcceptable(true);
-                    }
+                    setCustomerAcceptable(true);
+                  }
                   : null
               }
             />

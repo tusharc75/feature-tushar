@@ -84,13 +84,18 @@ const FieldTicketDetail = () => {
         data = response?.data?.data;
       }
       setFieldTicketData(data);
-      setCurrentStep(getIndex(data?.processStatus, fieldTicketSteps));
+      if (data?.status === FIELD_TICKET_STATUS.invoiced) {
+        setCurrentStep(fieldTicketSteps?.length - 1);
+      }
+      else {
+        setCurrentStep(getIndex(data?.processStatus, fieldTicketSteps));
+      }
       let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
       }
-      setAllowedToEdit(isAllowedToEdit);
-      setAllowedToDelete(data.owner.optionValue === user?.user?._id);
+      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && isAllowedToEdit);
+      setAllowedToDelete(permissions?.fieldTicket?.isDelete && data.owner.optionValue === user?.user?._id && data?.canDelete);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -103,7 +108,6 @@ const FieldTicketDetail = () => {
         .put(`${routes?.fieldTicket?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
           setShowConfirmBox(false);
-
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -152,13 +156,17 @@ const FieldTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.fieldTicket?.isUpdate && (
-              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-              </Button>
-            )}
-            {permissions?.fieldTicket?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={fieldTicketData?._id} resource={ACTIVITY_RESOURCE.fieldTicket} />
+            <Button variant={isMobile && !isTablet ? 'text' : 'contained'}
+              disabled={!allowedToEdit}
+              className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+              {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+            </Button>
+            <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
+            <ActivityButton
+              referenceId={fieldTicketData?._id}
+              resource={ACTIVITY_RESOURCE.fieldTicket}
+              resourceLabel={fieldTicketData?.fieldTicketNumber}
+            />
           </Box>
         </Box>
       </Box>
@@ -213,9 +221,7 @@ const FieldTicketDetail = () => {
             steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={false
-              // fieldTicketData?.status === FIELD_TICKET_STATUS.submitted
-            }
+            isStepEnded={fieldTicketData?.status === FIELD_TICKET_STATUS.invoiced}
           />
           <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && (
@@ -226,6 +232,7 @@ const FieldTicketDetail = () => {
                 renderedFrom={`${renderedFrom}_grid-1`}
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
+                refreshFieldTicket={fetchData}
               />
             )}
             {currentStep === 1 && (

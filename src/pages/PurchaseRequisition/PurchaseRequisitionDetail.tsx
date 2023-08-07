@@ -69,7 +69,10 @@ const PurchaseRequisitionDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.purchaseRequisition.path}/${id}`);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPurchaseRequisitionData(data);
@@ -172,7 +175,11 @@ const PurchaseRequisitionDetail = () => {
               {permissions?.purchaseRequisition?.isDelete && allowedToDelete && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
-              <ActivityButton referenceId={purchaseRequisitionData?._id} resource={ACTIVITY_RESOURCE.purchaseRequisition} />
+              <ActivityButton 
+                referenceId={purchaseRequisitionData?._id} 
+                resource={ACTIVITY_RESOURCE.purchaseRequisition} 
+                resourceLabel={purchaseRequisitionData?.purchaseRequisitionNumber}
+                />
             </>
           </Box>
         </Box>

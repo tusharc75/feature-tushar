@@ -290,14 +290,18 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 });
               ele.option = values.option;
             }
-            if (fieldData.type === 'decimal' || fieldData.type === 'converter' || fieldData.type === 'currencyAmount') {
+            if (fieldData.type === 'decimal' || fieldData.type === 'converter' || fieldData.type === 'currencyAmount' || fieldData.type === 'percent') {
               ele.decimalPlaces = values.decimalPlaces;
             }
-            if (fieldData.type === 'formula' || values.isFormula === true) {
+            if (fieldData.type === 'formula' || values.isFormula) {
               ele.formula = values.formula;
               ele.inputFields = values.inputFields;
               ele.returnType = values.returnType ? values.returnType : 'decimal';
               ele.decimalPlaces = values.decimalPlaces ? values.decimalPlaces : 2;
+            }
+            else {
+              ele.formula = '';
+              ele.inputFields = [];
             }
             if (fieldData.type === 'vlookupDropdown' || fieldData.isVlookup) {
               values.option.forEach((ele) => {
@@ -330,6 +334,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.formulaFields = values.formulaFields;
               ele.formulainputFields = values.formulainputFields;
               ele.formulaoption = values.formulaoption;
+            }
+            else {
+              ele.formulaFields = [];
+              ele.formulainputFields = [];
+              ele.formulaoption = {};
             }
 
             if (ele.isDropdown) {
@@ -554,6 +563,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                   {(values['type'] === 'decimal' ||
                     values['type'] === 'formula' ||
                     values['type'] === 'converter' ||
+                    values['type'] === 'percent' ||
                     values['type'] === 'currencyAmount') && (
                       <Grid spacing={3} container>
                         {values['type'] === 'formula' && (
@@ -579,6 +589,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         )}
                         {(values['type'] === 'decimal' ||
                           values['type'] === 'converter' ||
+                          values['type'] === 'percent' ||
                           values['type'] === 'currencyAmount' ||
                           values['returnType'] === 'decimal') && (
                             <Grid item xs={12} sm={6} md={6}>
@@ -684,7 +695,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                               checked={values['isFormula']}
                               onChange={(e) => {
                                 setFieldValue('isFormula', e.target.checked);
-                                setFieldValue('inputFields', '');
+                                setFieldValue('inputFields', []);
                                 setFieldValue('formula', '');
                               }}
                               color="primary"
@@ -817,27 +828,19 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       _id={fieldData._id}
                     />
                   )}
-                  {(values['type'] === 'currencyAmount' ||
-                    values['type'] === 'decimal' ||
-                    values['type'] === 'percent' ||
-                    values['type'] === 'converter') && (
-                      <>
-                        <br></br>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              name="isShowFieldDependentOn"
-                              checked={values['isShowFieldDependentOn']}
-                              onChange={(e) => {
-                                setFieldValue('isShowFieldDependentOn', e.target.checked);
-                              }}
-                              color="primary"
-                            />
-                          }
-                          label="Show Field Dependent On"
-                        />
-                      </>
-                    )}
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="isShowFieldDependentOn"
+                        checked={values['isShowFieldDependentOn']}
+                        onChange={(e) => {
+                          setFieldValue('isShowFieldDependentOn', e.target.checked);
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Show Field Dependent On"
+                  />
                   {(values['isShowFieldDependentOn']) && (
                     <ShowFieldDependentOn
                       values={values}
@@ -962,7 +965,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         }}
                       />
                     )}
-
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -977,8 +979,41 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       }
                       label="Default Value"
                     />
-                    {values['isDefaultValue'] && (
-                      <Box display="block">
+                    {values['isDefaultValue'] ?
+                      fieldData.type === 'imageUpload' ? (
+                        <FormTypes
+                          values={{ defaultValue: values['defaultValue'] }}
+                          errors={errors}
+                          touched={touched}
+                          label={''}
+                          name={'defaultValue'}
+                          type={fieldData.type}
+                          setFieldValue={(name, value) => {
+                            setFieldValue(name, value);
+                          }}
+                          isTooltip={false}
+                        />
+                      ) : fieldData.type === 'colorPicker' ? (
+                        <Box>
+                          <input
+                            value={values['defaultValue']}
+                            type="color"
+                            onChange={(e) => {
+                              setFieldValue('defaultValue', e.target.value);
+                            }}
+                          />
+                          <Box component="span" ml={2}>
+                            {values['defaultValue']}
+                          </Box>
+                        </Box>
+                      ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['lookup'] ? (
+                        <ResourceDropdown
+                          type={fieldData.type}
+                          lookupResource={values['lookupResource']}
+                          value={values['defaultValue']}
+                          setFieldValue={setFieldValue}
+                        />
+                      ) : <Box display="block">
                         <TextField
                           variant="outlined"
                           type="text"
@@ -994,9 +1029,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             setFieldValue('defaultValue', e.target.value.trimStart());
                           }}
                         />
-                      </Box>
-                    )}
-
+                      </Box> : null}
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -1010,7 +1043,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       }
                       label="Editable Column"
                     />
-
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -1132,40 +1164,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           />
                         </Box></>
                     )}
-                    {fieldData.type === 'imageUpload' && values['isDefaultValue'] ? (
-                      <FormTypes
-                        values={{ defaultValue: values['defaultValue'] }}
-                        errors={errors}
-                        touched={touched}
-                        label={''}
-                        name={'defaultValue'}
-                        type={fieldData.type}
-                        setFieldValue={(name, value) => {
-                          setFieldValue(name, value);
-                        }}
-                        isTooltip={false}
-                      />
-                    ) : fieldData.type === 'colorPicker' && values['isDefaultValue'] ? (
-                      <Box>
-                        <input
-                          value={values['defaultValue']}
-                          type="color"
-                          onChange={(e) => {
-                            setFieldValue('defaultValue', e.target.value);
-                          }}
-                        />
-                        <Box component="span" ml={2}>
-                          {values['defaultValue']}
-                        </Box>
-                      </Box>
-                    ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['isDefaultValue'] && values['lookup'] ? (
-                      <ResourceDropdown
-                        type={fieldData.type}
-                        lookupResource={values['lookupResource']}
-                        value={values['defaultValue']}
-                        setFieldValue={setFieldValue}
-                      />
-                    ) : null}
                     {module !== 'price-template' && module !== 'product-template' ? (
                       <FormControlLabel
                         disabled={values['required']}

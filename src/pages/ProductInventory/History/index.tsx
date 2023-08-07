@@ -5,7 +5,7 @@ import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridCo
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, isObjectEmpty, productInventory } from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, productInventory, sidebarResource } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
@@ -235,7 +235,7 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`}>
+      <Link className="link" target="_blank" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`}>
         {params.value}
       </Link>
     ) : (
@@ -244,7 +244,7 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   const StorageLocationRenderer = (params) =>
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.storageLocationDetail.path}/${params.data.storageLocationId}`}>
+      <Link className="link" target="_blank" title={params.value} to={`${routes.storageLocationDetail.path}/${params.data.storageLocationId}`}>
         {params.value}
       </Link>
     ) : (
@@ -253,7 +253,7 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   const UserRenderer = (params) =>
     params?.value ? (
-      <Link className="link" title={params.value} to={`${routes.userDetail.path}/${params.data.userId}`}>
+      <Link className="link" target="_blank" title={params.value} to={`${routes.userDetail.path}/${params.data.userId}`}>
         {params.value}
       </Link>
     ) : (
@@ -263,35 +263,39 @@ const History = ({ product, warehouse, storageLocation }) => {
   const ReferenceRenderer = (params) =>
     params?.value ? (
       params.data.referenceType === 'Purchase Order' ? (
-        <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" target="_blank" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Transfer Inventory' ? (
-        <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" target="_blank" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`}>
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Transfer Asset' ? (
-        <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" target="_blank" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Sales Order' ? (
-        <Link className="link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" target="_blank" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`}>
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Bulk Asset Creation' ? (
-        <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" target='_blank' title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Serialized Asset' ? (
-        <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" target="_blank" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data.referenceId}`}>
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Rental Job' ? (
-        <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" target="_blank" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Work Order' ? (
-        <Link className="link" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" target="_blank" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`}>
+          {params.value}
+        </Link>
+      ) : params.data.referenceType === sidebarResource.fieldTicket ? (
+        <Link className="link" target="_blank" title={params.value} to={`${routes.fieldTicketDetail.path}/${params.data.referenceId}`}>
           {params.value}
         </Link>
       ) : (
@@ -323,7 +327,7 @@ const History = ({ product, warehouse, storageLocation }) => {
   const ActionsRenderer = (params) => (
     <>
       {(['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted) ||
-        (['Work Order'].includes(params.data.referenceType) &&
+        ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(params.data.referenceType) &&
           params.data.type?.toLowerCase() === 'debit' &&
           params.data.qty - (params.data?.revertedQty || 0) > 0) ? (
         <Box pl={1}>
@@ -332,7 +336,7 @@ const History = ({ product, warehouse, storageLocation }) => {
               size="small"
               aria-label="revert"
               onClick={() => {
-                if (params.data.referenceType === 'Work Order') {
+                if ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(params.data.referenceType)) {
                   setRevertQtyDialog({
                     open: true,
                     productName: '',
@@ -416,9 +420,10 @@ const History = ({ product, warehouse, storageLocation }) => {
               <Grid item md={6} sm={12} xs={12}>
                 <Box mt={1}>
                   <DurationFilter
+                    label={''}
+                    defaultTimeFrame="1-year"
                     duration={duration}
                     setDuration={setDuration}
-                    disabled={false}
                   />
                 </Box>
               </Grid>

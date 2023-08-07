@@ -20,14 +20,13 @@ import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 
 const LeadTimeMasterDetails = () => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const { id } = useParams();
   const history = useHistory();
 
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -103,13 +102,6 @@ const LeadTimeMasterDetails = () => {
       .get(`${leadTimeMaster.api}/${id}`)
       .then(({ data: { data } }) => {
         setLeadTimeMasterData({ ...data });
-        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (permissions?.leadTimeMaster?.isUpdate && openEdit === 'true') {
-          setOpenUpdateDialog(true);
-          const params = new URLSearchParams();
-          params.delete('openEdit');
-          history.push({ search: params.toString() });
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -158,7 +150,7 @@ const LeadTimeMasterDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Grid container spacing={1}>
+        <Grid container spacing={3}>
           <Grid item xs={12} sm={12} md={8}>
             <Box style={{ minHeight: '80vh' }}>
               {leadTimeMasterData ? (

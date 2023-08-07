@@ -11,14 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import {
-  serializedAsset,
-  ASSET_STATUS,
-  repairJob,
-  INVENTORY_OWNER_TYPE,
-  INVENTORY_HISTORY_TYPE,
-  sidebarResource
-} from '../../constants/helpers';
+import { serializedAsset, ASSET_STATUS, repairJob, INVENTORY_OWNER_TYPE, INVENTORY_HISTORY_TYPE, sidebarResource } from '../../constants/helpers';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -32,18 +25,17 @@ import { MdEdit } from 'react-icons/md';
 import { startCase } from 'lodash';
 import moment from 'moment';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import CertificationHistory from "./CertificationHistory";
-import AssetHistory from "./AssetHistory";
+import CertificationHistory from './CertificationHistory';
+import AssetHistory from './AssetHistory';
 import queryString from 'query-string';
-import TabPanel from "src/components/TabPanel";
+import TabPanel from 'src/components/TabPanel';
 
 const SerializedAssetDetailsPage = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
   const {
-    state: { permissions }
+    state: { user, permissions }
   }: any = useData();
 
   const [headingLbl, setHeadingLbl] = useState('');
@@ -68,7 +60,6 @@ const SerializedAssetDetailsPage = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
-
 
   useEffect(() => {
     if (id) {
@@ -123,6 +114,9 @@ const SerializedAssetDetailsPage = () => {
         routes.serializedAsset,
         { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
       ]);
+      if (data.certificateExpireDate && new Date(data.certificateExpireDate) > new Date()) {
+        data.certificateAttached = true;
+      }
       setAssetDetails({ ...data, currentOwner: data?.currentOwner?.optionLabel });
       if (data.status === ASSET_STATUS.scrap) {
         setCustomField({
@@ -256,13 +250,7 @@ const SerializedAssetDetailsPage = () => {
   useEffect(() => {
     if (assetDetails) {
       if (assetDetails.status === ASSET_STATUS.underReview) {
-        setManualStatus([
-          ASSET_STATUS.available,
-          ASSET_STATUS.scrap,
-          ASSET_STATUS.lost,
-          ASSET_STATUS.needRepair,
-          ASSET_STATUS.needRecert
-        ]);
+        setManualStatus([ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]);
       } else if (assetDetails.status === ASSET_STATUS.scrap) {
         setManualStatus([ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]);
       } else if (assetDetails.status === ASSET_STATUS.lost) {
@@ -272,7 +260,6 @@ const SerializedAssetDetailsPage = () => {
       }
     }
   }, [assetDetails]);
-
 
   return (
     <Box className="main-container-v1">
@@ -315,6 +302,7 @@ const SerializedAssetDetailsPage = () => {
                           color="default"
                           size="small"
                           onClick={openActions}
+                          className="btn-outline-v1"
                           disabled={updateLoading}
                           aria-controls="action-menu"
                           endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
@@ -368,9 +356,11 @@ const SerializedAssetDetailsPage = () => {
             <ActivityButton
               referenceId={assetDetails?._id}
               resource={ACTIVITY_RESOURCE.serializedAsset}
+              resourceLabel={assetDetails?.assetNumber}
               handleClose={() => {
                 fetchData();
-              }} />
+              }}
+            />
           </Box>
         </Box>
       </Box>
@@ -386,36 +376,11 @@ const SerializedAssetDetailsPage = () => {
             }
           }}
         >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                Details
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                Asset History
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-          {assetDetails?.product?.assetCertification &&
-
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  Certification History
-                </div>
-              }
-              {...a11yProps(2)}
-            />
-          }
+          <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Details</div>} {...a11yProps(0)} />
+          <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Asset History</div>} {...a11yProps(1)} />
+          {user?.user?.brandPolicy?.serializedAssetCertification && (
+            <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Certification History</div>} {...a11yProps(2)} />
+          )}
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           {assetDetails && <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true}></DetailsPageHeader>}
@@ -442,7 +407,9 @@ const SerializedAssetDetailsPage = () => {
           <AssetHistory id={id} />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-          <CertificationHistory id={id} />
+          <CertificationHistory
+            id={id}
+            canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate} />
         </TabPanel>
       </Box>
       {showConfirmBox && (

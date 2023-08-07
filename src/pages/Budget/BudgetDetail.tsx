@@ -115,7 +115,11 @@ const BudgetDetail = () => {
                   </Button>
                 )}
                 {permissions?.budget?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                <ActivityButton referenceId={budgetData?._id} resource={ACTIVITY_RESOURCE.budget} />
+                <ActivityButton 
+                  referenceId={budgetData?._id} 
+                  resource={ACTIVITY_RESOURCE.budget} 
+                  resourceLabel={budgetData?.name}
+                  />
               </>
           </Box>
         </Box>

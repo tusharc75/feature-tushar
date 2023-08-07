@@ -32,7 +32,7 @@ const TransferInventoryDetailPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
   const parsedTab = tab !== undefined ? parseInt(tab) : 1;
   const {
     state: { permissions, user }
@@ -131,15 +131,12 @@ const TransferInventoryDetailPage = () => {
             setHeadingLabel(transferData.transferNumber);
             setCustomizedRoutes([routes.transferInventory, { title: transferData.transferNumber }]);
             setCurrentStep(stepNames.indexOf(transferData?.processStatus) !== -1 ? stepNames.indexOf(transferData?.processStatus) : 0);
-            const isAllowedToEdit = [...(transferData.collaborator ?? []), transferData.owner].some((d) => d?.optionValue === user?.user?._id);
+            var isAllowedToEdit = [...(transferData.collaborator ?? []), transferData.owner].some((d) => d?.optionValue === user?.user?._id);
+            if (user?.role?.selectedEntity?.superAdminAccess) {
+              isAllowedToEdit = true;
+            }
             setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
             setTransferInventoryData(transferData);
-            if (permissions?.transferInventory?.isUpdate && openEdit === 'true') {
-              setOpenUpdateDialog(true);
-              const params = new URLSearchParams();
-              params.delete('openEdit');
-              history.push({ search: params.toString() });
-            }
           });
       })
       .catch((err) => {
@@ -204,7 +201,7 @@ const TransferInventoryDetailPage = () => {
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
         processStatus: stepNames[step]
       })
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -228,7 +225,11 @@ const TransferInventoryDetailPage = () => {
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             )}
-            <ActivityButton referenceId={transferInventoryData?._id} resource={ACTIVITY_RESOURCE.transferInventory} />
+            <ActivityButton 
+              referenceId={transferInventoryData?._id} 
+              resource={ACTIVITY_RESOURCE.transferInventory} 
+              resourceLabel={transferInventoryData?.transferNumber}
+              />
           </Box>
         </Box>
       </Box>

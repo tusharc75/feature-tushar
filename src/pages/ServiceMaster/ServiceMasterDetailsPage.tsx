@@ -107,7 +107,11 @@ const ServiceMasterDetailsPage = () => {
                 {permissions?.serviceMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             )}
-            <ActivityButton referenceId={serviceMasterDetailData?._id} resource={ACTIVITY_RESOURCE.serviceMaster} />
+            <ActivityButton 
+              referenceId={serviceMasterDetailData?._id} 
+              resource={ACTIVITY_RESOURCE.serviceMaster} 
+              resourceLabel={serviceMasterDetailData?.serviceName}
+              />
           </Box>
         </Box>
       </Box>

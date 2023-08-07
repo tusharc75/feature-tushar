@@ -870,7 +870,7 @@ const Product = () => {
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.productDetail.path}/${data._id}?openEdit=true`);
+                history.push(`${routes.productDetail.path}/${data._id}`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {

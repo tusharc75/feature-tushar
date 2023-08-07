@@ -72,7 +72,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
 
   const fetchFields = async () => {
     setNextStep(false);
-    var { fields: data } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
@@ -399,7 +399,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         }
       });
 
-      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
+      if (rows.filter((_rows) => _rows.isValid === false).length > 0 && !user?.user?.brandPolicy?.rentalStopAssetNextStepValidation) {
         setNextStep(false);
       } else {
         setNextStep(true);

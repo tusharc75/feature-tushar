@@ -65,7 +65,7 @@ export const rentalManagementSteps: stepInterface[] = [
 export const fieldTicketSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
-  { name: 'Submit', title: 'Submit', icon: 'end' },
+  { name: 'Submit', title: 'Submit', icon: 'end' }
 ];
 
 export const demandOrderSteps = ['Add Products'];
@@ -334,8 +334,7 @@ export const sidebarResource = {
   competencies: 'Competencies',
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
-  trailerMaster: 'Trailer Master',
-  assetsReceiving: 'Assets Receiving'
+  trailerMaster: 'Trailer Master'
 };
 
 export const primaryFields = {
@@ -456,8 +455,7 @@ export const RESOURCE_LABEL = {
   materialHandling: 'Material Handling',
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
-  trailerMaster: 'Trailer Master',
-  assetsReceiving: 'Assets Receiving'
+  trailerMaster: 'Trailer Master'
 };
 
 export const CHILD_RESOURCE = {
@@ -487,7 +485,7 @@ export const CHILD_RESOURCE = {
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
-  invoiceCost: 'Invoice Cost',
+  invoiceCost: 'Invoice Cost'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -710,6 +708,14 @@ export const productInventory = {
   permission: 'productInventory',
   resource: 'product-inventory'
 };
+
+export const productCategory = {
+  api: '/product-category',
+  route: '/product-category',
+  permission: 'productCategory',
+  resource: 'Product Categories'
+};
+
 export const budget = {
   budgetApi: '/budget',
   budgetRoute: '/budget',
@@ -876,7 +882,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'colorPicker') {
       obj[key.fieldName] = value ? value : '#aaaaaa';
     } else if (key.type === 'switch' || key.type === 'checkBox') {
-      obj[key.fieldName] = value ? value : false;
+      obj[key.fieldName] = value ? Boolean(value) : false;
     } else if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
       key.displayUnits &&
         key.displayUnits.forEach((_unit) => {
@@ -984,21 +990,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1945,8 +1951,7 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   salesOrder: 'Sales Order',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
-  repairOrder: 'Repair Order',
-  assetsReceiving: 'Assets Receiving'
+  repairOrder: 'Repair Order'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2103,105 +2108,85 @@ export const REPORT_LIST = [
     permission: 'rentalManagement',
     key: 'rentalManagement',
     type: 'dynamic',
-    iconsColor: ['#059825', '#059825 ', '#60D778'],
-    color: '#F9FDEC'
   },
   {
     title: sidebarResource.salesOrder,
     permission: 'salesOrder',
     key: 'salesOrder',
     type: 'dynamic',
-    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
-    color: '#FFEFEE'
   },
   {
     title: sidebarResource.serializedAsset,
     permission: 'serializedAsset',
     key: 'serializedAsset',
     type: 'dynamic',
-    iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
-    color: '#F3F8FF'
   },
   {
     title: sidebarResource.lead,
     permission: 'lead',
     key: 'lead',
     type: 'dynamic',
-    iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6'],
-    color: '#FFFAEC'
   },
   {
     title: sidebarResource.opportunity,
     permission: 'opportunity',
     key: 'opportunity',
     type: 'dynamic',
-    iconsColor: ['#AD14F5', '#6203AC', '#BE74E5'],
-    color: '#F6F1FF'
   },
   {
     title: sidebarResource.quoteBuilder,
     permission: 'quoteBuilder',
     key: 'quoteBuilder',
     type: 'dynamic',
-    iconsColor: ['#FFA800', '#E35200', '#FBC56E'],
-    color: '#FFF7F2'
   },
   {
     title: sidebarResource.projectSales,
     permission: 'projectSales',
     key: 'projectSales',
     type: 'dynamic',
-    iconsColor: ['#059825', '#059825', '#60D778'],
-    color: '#F9FDEC'
-  },
-  {
-    title: sidebarResource.purchaseOrder,
-    permission: 'purchaseOrder',
-    key: 'purchaseOrder',
-    type: 'dynamic',
-    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
-    color: '#FFEFEE'
-  },
-  {
-    title: 'Purchase Order Details',
-    permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    type: 'purchaseOrderDetails',
-    iconsColor: ['#FAC94B', '#FF9B04', '#FFDDA6 '],
-    color: '#FFFAEC'
-  },
-  {
-    title: 'Inventory Evaluation',
-    permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    type: 'inventoryEvaluation',
-    iconsColor: ['#059825', '#059825', '#60D778'],
-    color: '#F9FDEC'
-  },
-  {
-    title: 'Inventory History',
-    permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    type: 'inventoryHistory',
-    iconsColor: ['#D51E1E', '#D51E1E', '#FD6E6E'],
-    color: '#FFEFEE'
-  },
-  {
-    title: 'Average Price By Supplier',
-    permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    type: 'averagePriceBySupplier',
-    iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
-    color: '#F3F8FF'
   },
   {
     title: 'Work Order',
     permission: 'workOrder',
     key: 'workOrder',
     type: 'dynamic',
-    iconsColor: ['#577BFC', '#1608BD', '#ABB6EF'],
-    color: '#F3F8FF'
-  }
+  },
+  {
+    title: sidebarResource.purchaseOrder,
+    permission: 'purchaseOrder',
+    key: 'purchaseOrder',
+    type: 'dynamic',
+  },
+  {
+    title: 'Purchase Order Details',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'purchaseOrderDetails',
+  },
+  {
+    title: 'Inventory Evaluation',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'inventoryEvaluation',
+  },
+  {
+    title: 'Inventory History',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'inventoryHistory',
+  },
+  {
+    title: 'Average Price By Supplier',
+    permission: 'purchaseOrder',
+    key: 'purchaseOrderType',
+    type: 'averagePriceBySupplier',
+  },
+  {
+    title: 'Number Of Assets by Status',
+    permission: 'serializedAsset',
+    key: 'purchaseOrderType',
+    type: 'numberOfAssetsByStatus',
+  },
 ];
 
 export const RESOURCE_CALENDAR = [
@@ -2367,6 +2352,59 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   needReperform: 'Need Reperform'
 };
 
+type ChipStatus =
+  | 'Pending'
+  | 'Backlog'
+  | 'In-Progress'
+  | 'Completed'
+  | 'Failed'
+  | 'Skipped'
+  | 'start'
+  | 'pause'
+  | 'end'
+  | 'Completed'
+  | 'Passed'
+  | 'Failed'
+  | 'Skipped'
+  | 'Need Reperform';
+
+export const getChipColor = (status: ChipStatus): React.CSSProperties => {
+  let color = 'var(--chip-color-inProgress)';
+  let borderColor = 'var(--chip-border-inProgress)';
+  let background = 'var(--chip-background-inProgress)';
+
+  switch (true) {
+    case status === 'Completed' || status === 'Passed' || status === 'end':
+      color = 'var(--chip-color-completed)';
+      borderColor = 'var(--chip-border-completed)';
+      background = 'var(--chip-background-completed)';
+      break;
+
+    case status === 'Failed' || status === 'Skipped' || status === 'Need Reperform':
+      color = 'var(--chip-color-failed)';
+      borderColor = 'var(--chip-border-failed)';
+      background = 'var(--chip-background-failed)';
+      break;
+
+    case status === 'Pending' || status === 'Backlog':
+      color = 'var(--chip-color-pending)';
+      borderColor = 'var(--chip-border-pending)';
+      background = 'var(--chip-background-pending)';
+      break;
+
+    case status === 'pause' || status === 'In-Progress':
+      color = 'var(--chip-color-inProgress)';
+      borderColor = 'var(--chip-border-inProgress)';
+      background = 'var(--chip-background-inProgress)';
+      break;
+
+    default:
+      break;
+  }
+
+  return { color, borderColor, background };
+};
+
 export const REPAIR_ORDER_TYPE = {
   internal: 'Asset Repair',
   external: 'Customer Owned Asset Repair'
@@ -2521,4 +2559,22 @@ export const getNestedlookupDependentOn = (fields, fieldName) => {
 export const FIELD_TICKET_STATUS = {
   new: 'New',
   submitted: 'Submitted',
+  invoiced: 'Invoiced'
+};
+
+export const GenerateResourceLineNumber = (fields) => {
+  const primaryField = fields?.find((e) => e?.primaryField);
+  var lineNumber = '';
+  if (primaryField) {
+    if (primaryField?.isSystemGenerate && !primaryField?.systemGeneratedAutoIncrement) {
+      const prefix =
+        primaryField?.systemGeneratedPrefix && primaryField?.systemGeneratedPrefix != undefined && primaryField?.systemGeneratedPrefix != ''
+          ? `${primaryField?.systemGeneratedPrefix}_`
+          : '';
+      lineNumber = `${prefix}${generateUniqueIdOnly()}`;
+    } else if (primaryField?.isDefaultValue && primaryField?.defaultValue) {
+      lineNumber = primaryField?.defaultValue;
+    }
+  }
+  return lineNumber;
 };

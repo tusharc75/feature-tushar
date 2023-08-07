@@ -36,10 +36,8 @@ const useStyles = makeStyles((theme: Theme) =>
       fontWeight: 600,
       fontSize: '16px',
       lineHeight: '1.6',
-      color: '#5B5B5B',
+      color: 'var(--dark-primary-text,#2A3042)',
       '& span': {
-        background: '#DBDBDBE5',
-        color: '#5B5B5B',
         fontWeight: 600,
         width: '19px',
         height: '19px',
@@ -67,13 +65,13 @@ const useStyles = makeStyles((theme: Theme) =>
       fontWeight: 500,
       fontSize: '12px',
       lineHeight: '1.5',
-      color: '#8A8A8A'
+      color: 'var(--dark-primary-text,#8A8A8A)'
     },
     sectionColDetail: {
       fontWeight: 400,
       fontSize: '12px',
       lineHeight: 1.5,
-      color: '#5B5B5B',
+      color: 'var(--dark-primary-text,#2A3042)',
       textTransform: 'capitalize'
     },
     centerText: {
@@ -153,7 +151,10 @@ const StepFieldsDialog = ({
     return (
       <div className={classes.sectionContainer}>
         <h6 className={`${classes.sectionHead} `} onClick={() => setIsVisible((prev) => !prev)}>
-          <span style={{ transform: isVisible ? 'rotate(180deg)' : 'rotate(0)' }}>
+          <span
+            style={{ transform: isVisible ? 'rotate(180deg)' : 'rotate(0)' }}
+            className="bg-[#DBDBDBE5] text-[#5B5B5B] dark:text-black dark:bg-white"
+          >
             <MdKeyboardArrowDown />
           </span>
           Extra Details
@@ -366,7 +367,7 @@ const StepFieldsDialog = ({
                   )
                 ) : (
                   <div className={classes.centerText}>
-                    <Typography variant={'body1'} style={{ color: 'var(--new_theme_color)' }}>
+                    <Typography variant={'body1'} style={{ color: 'var(--dark-primary-text, var(--new_theme_color))' }}>
                       No Fields...
                     </Typography>
                   </div>

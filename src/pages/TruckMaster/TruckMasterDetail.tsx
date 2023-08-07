@@ -200,7 +200,11 @@ const TruckMasterDetail = () => {
               </Button>
             )}
             {permissions?.truckMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={truckMasterData?._id} resource={ACTIVITY_RESOURCE.truckMaster} />
+            <ActivityButton 
+              referenceId={truckMasterData?._id} 
+              resource={ACTIVITY_RESOURCE.truckMaster}
+              resourceLabel={truckMasterData?.truckName}
+              />
           </Box>
         </Box>
       </Box>

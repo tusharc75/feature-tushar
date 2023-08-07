@@ -3,8 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { Box, Button, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { Box, Button, Chip, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
@@ -14,7 +13,7 @@ import {
   ASSET_STATUS,
   COLOUR_MASTER,
   getLocalStorageArrayData,
-  sidebarResource,
+  sidebarResource
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -22,12 +21,16 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { camelCase } from 'lodash';
-import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
 import IssueCertificateDialog from './IssueCertificateDialog';
-import { Autocomplete } from '@material-ui/lab';
 import CertificateHistoryDialog from './CertificateHistoryDialog';
+import { isMobile, isTablet } from 'react-device-detect';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import styles from '../Leads/Header.module.scss';
+import DurationFilter from 'src/components/DurationFilter';
+import NoteAddIcon from '@material-ui/icons/NoteAdd';
+import HistoryIcon from '@material-ui/icons/History';
 
 const SerializedAssetsCertification = () => {
 
@@ -35,14 +38,24 @@ const SerializedAssetsCertification = () => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
-  const [openDialog, setOpenDialog] = useState({open: false, id: null})
+  const [issueCertificateDialog, setIssueCertificateDialog] = useState({ open: false, id: null });
+  const [certificateHistoryDialog, setCertificateHistoryDialog] = useState({ open: false, id: null });
   const [gridApi, setGridApi] = useState(null);
   const [columns, setColumns] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [certificateStatus, setCertificateStatus] = useState<{_id: string, name: string}>({ _id: "Pending", name: "Pending" });
+
+  const [issueDuration, setIssueDuration] = useState({
+    from: null,
+    to: null
+  });
+
+  const [expireDuration, setExpireDuration] = useState({
+    from: null,
+    to: null
+  });
 
   const {
     state: { permissions, user }
@@ -55,7 +68,8 @@ const SerializedAssetsCertification = () => {
 
   useEffect(() => {
     fetchProductInventory();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, certificateStatus]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration]);
+
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -76,21 +90,13 @@ const SerializedAssetsCertification = () => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
             e.cellStyle = (params) => {
-              if (
-                [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                  params?.data?.status
-                )
-              ) {
+              if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
                 return { backgroundColor: COLOUR_MASTER.lostAssets.background };
               }
               return null;
             };
           }
         });
-
-        columns.push({ field: 'ownerType', headerName: 'Actual Owner Type', show: true, disabled: true, cellRenderer: 'commonRenderer' });
-        columns.push({ field: 'owner', headerName: 'Actual Owner', show: true, disabled: true, cellRenderer: 'commonRenderer' });
-
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
@@ -108,15 +114,16 @@ const SerializedAssetsCertification = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
+    const queryString = getQueryString();
     axiosInstance()
-      .get(`${serializedAssetsCertification.api}?certificateStatus=${certificateStatus.name}`)
+      .get(`${serializedAssetsCertification.api}${queryString}`)
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.serializedAsset?.isDelete;
+          const dateToQuery = moment().add(30, 'days').toDate();
+          const certificateExpireDate = u.certificateExpireDate ? moment(u.certificateExpireDate).toDate() : null;
+          finalObject['canIssueCertificate'] = !certificateExpireDate || certificateExpireDate <= dateToQuery;
           finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
           return {
             ...finalObject
           };
@@ -146,15 +153,62 @@ const SerializedAssetsCertification = () => {
       });
   };
 
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+    }
+
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+    const updatedFilters = [];
+    if (issueDuration?.from && issueDuration?.from) {
+      updatedFilters.push({
+        field: 'certificateIssueDate',
+        term: {
+          from: moment(issueDuration?.from).format('MM/DD/YYYY'),
+          to: moment(issueDuration?.to).format('MM/DD/YYYY')
+        }
+      });
+    }
+    if (expireDuration?.from && expireDuration?.from) {
+      updatedFilters.push({
+        field: 'certificateExpireDate',
+        term: {
+          from: moment(expireDuration?.from).format('MM/DD/YYYY'),
+          to: moment(expireDuration?.to).format('MM/DD/YYYY')
+        }
+      });
+    }
+    if (updatedFilters?.length > 0) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+    }
+    if (showFilteredRecordsOnly) {
+      const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+    }
+    if (deepFilter !== '') {
+      deepFilter = `${deepFilter}&filterType=and&filterByIdType=and`;
+    }
+    return deepFilter;
+  };
+
   const AssetNumberRenderer = (params) => (
-     <Fragment>
-      <p 
-      className="link text-truncate" 
-      onClick={() => {
-        setOpenDialog({open: true, id: params?.data?._id})
-      }}>
-        {params.value}
-      </p>
+    <Fragment>
+      <p className="text-truncate">{params.value}</p>
       {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
         <Box ml={1} pt={1}>
           <HtmlTooltip title="Asset needs to be recert">
@@ -167,9 +221,36 @@ const SerializedAssetsCertification = () => {
 
   const ActionsRenderer = (params) => (
     <>
+      {params?.data?.canIssueCertificate && (
+        <HtmlTooltip title="Issue Certificate">
+          <IconButton
+            size="small"
+            aria-label="Issue"
+            onClick={() => {
+              setIssueCertificateDialog({ open: true, id: params?.data?._id });
+            }}
+          >
+            <NoteAddIcon color='primary' />
+          </IconButton>
+        </HtmlTooltip>
+      )}
+      <HtmlTooltip title="Certificate History">
+        <IconButton
+          size="small"
+          aria-label="View"
+          onClick={() => {
+            setCertificateHistoryDialog({ open: true, id: params?.data?._id });
+          }}
+        >
+          <HistoryIcon color='primary' />
+        </IconButton>
+      </HtmlTooltip>
     </>
   );
 
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
 
   return (
     <Fragment>
@@ -177,104 +258,82 @@ const SerializedAssetsCertification = () => {
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[routes.serializedAssetsCertification]} />
         </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-
-        </Grid>
+        <Grid item md={8} sm={1} xs={2}></Grid>
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-        <Autocomplete
-          style={{ width: '250px' }}
-          options={[{ _id: "Pending", name: "Pending" },{ _id: "Completed", name: "Completed" }]}
-          getOptionLabel={(option: any) => (option ? option.name : '')}
-          getOptionSelected={(option: any, val) => option._id === val._id}
-          value={certificateStatus}
-          onChange={(e, val) => {
-            setCertificateStatus(val ? val : { _id: "Pending", name: "Pending" });
-          }}
-          renderInput={(params) => (
-            <TextField {...params} margin="dense" name="certificateStatus" label="Certificate Status" variant="outlined" fullWidth />
-          )}
-        />
+          <Grid container spacing={2} className={styles.filter_side_container}>
+            <Grid item xs={12} sm={12} md={5} >
+              <DurationFilter
+                label={"Issue Date"}
+                duration={issueDuration}
+                setDuration={setIssueDuration}
+                defaultTimeFrame='custom' />
+            </Grid>
+            <Grid item xs={12} sm={12} md={5} >
+              <DurationFilter
+                label={"Expire Date"}
+                duration={expireDuration}
+                setDuration={setExpireDuration}
+                defaultTimeFrame='custom' />
+            </Grid>
+            <Grid sm={12} xs={12} md={2} container className={`${styles.filter_side} align-items-center`}>
+              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                <Box style={{ flexGrow: '1' }}>
+                  <SearchBox
+                    onChange={handleSearch}
+                    className={styles.search_box_input}
+                    width={isMobile ? '200px' : '210px'}
+                    style={{ width: '100%', maxWidth: 250, display: 'flex' }}
+                    size="small"
+                    value={search}
+                  />
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
         </div>
-        {columns ? (Object.keys(frameWorkComponent).length > 0 && columns ? (
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={150}
-            loading={loading}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchProductInventory}
-            showOnlyShowFilteredRecordSwitch={true}
-            rowClassRules={{
-              'light-red-data-row': function (params) {
-                if (params.data?.recertDate) {
-                  var a = moment(params.data?.recertDate);
-                  var b = moment();
-                  const days = a.diff(b, 'days');
-                  if (days < 15 && days >= 0) {
-                    return true;
-                  } else if (days < 0) {
-                    return true;
-                  }
-                }
-                return false;
-              },
-              'light-yellow-data-row': function (params) {
-                if (params.data?.recertDate) {
-                  var a = moment(params.data?.recertDate);
-                  var b = moment();
-                  const days = a.diff(b, 'days');
-                  if (days < 30 && days >= 15) {
-                    return true;
-                  }
-                }
-                return false;
-              },
-              'light-green-data-row': function (params) {
-                if (params.data?.recertDate) {
-                  var a = moment(params.data?.recertDate);
-                  var b = moment();
-                  const days = a.diff(b, 'days');
-                  if (days <= 60 && days >= 30) {
-                    return true;
-                  }
-                }
-                return false;
-              }
-            }}
-            showFilters={true}
-            resource={sidebarResource.serializedAsset}
-          />
-        ) : null
+        {columns ? (
+          Object.keys(frameWorkComponent).length > 0 && columns ? (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={150}
+              loading={loading}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchProductInventory}
+              showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.serializedAsset}
+            />
+          ) : null
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
       </div>
-      {openDialog?.open && certificateStatus._id === "Pending" && (
-        <IssueCertificateDialog 
-        onClose={()=>  setOpenDialog({open: false, id: null})}
-        onSuccess={()=>{
-          setOpenDialog({open: false, id: null});
-          fetchProductInventory()
-        }}
-        assetId={openDialog?.id}
+      {issueCertificateDialog?.open && (
+        <IssueCertificateDialog
+          onClose={() => setIssueCertificateDialog({ open: false, id: null })}
+          onSuccess={() => {
+            setIssueCertificateDialog({ open: false, id: null });
+            fetchProductInventory();
+          }}
+          assetId={issueCertificateDialog?.id}
         />
       )}
-      {openDialog?.open && certificateStatus._id === "Completed" && (
-        <CertificateHistoryDialog 
-        onClose={()=>  setOpenDialog({open: false, id: null})}
-        id={openDialog?.id}
-        />
+      {certificateHistoryDialog?.open && (
+        <CertificateHistoryDialog
+          onClose={() => setCertificateHistoryDialog({ open: false, id: null })}
+          id={certificateHistoryDialog?.id} />
       )}
     </Fragment>
   );

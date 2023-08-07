@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { fieldTicket, prepareDataForGrid } from 'src/constants/helpers';
+import { fieldTicket, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem, Tab, Tabs, TextField } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -25,6 +25,12 @@ import { fetch_field_ticket_material_fields } from '../helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculatePrice } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
+import EditIcon from '@material-ui/icons/Edit';
+import HistoryIcon from '@material-ui/icons/History';
+import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
+import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQtyDialog';
+import History from '../../ProductInventory/LedgerHistory';
+import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
 
 const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fieldTicketData, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -38,9 +44,14 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   const [tabValue, setTabValue] = useState(0);
   const [serviceOption, setServiceOption] = useState(null);
   const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All' });
+  const [renderCount, setRenderCount] = useState(0)
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
+  const [consumeRequest, setConsumeRequest] = useState(false);
+  const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
+  const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
+  const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
 
   useEffect(() => {
     setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
@@ -51,9 +62,13 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
         _id: s?._id
       };
     })]);
-    if (!services?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
+    if (selectedServiceOption?.optionValue !== 'All' && !services?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
       setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
     }
+    if (renderCount > 1) {
+      setDataRows(null)
+    }
+    setRenderCount(renderCount + 1)
   }, [services]);
 
   const {
@@ -65,19 +80,30 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   }, [id]);
 
   useEffect(() => {
-    if (columns) {
+    if (columns && !dataRows && tabValue === 0) {
+      var allowRequest = false;
+      if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
+        if ((fieldTicketData?.warehouse?.manager && fieldTicketData?.warehouse?.manager?.includes(user?.user?._id))
+          || (fieldTicketData?.warehouse?.materialHandlers && fieldTicketData?.warehouse?.materialHandlers?.includes(user?.user?._id))) {
+          allowRequest = false;
+        }
+        else {
+          allowRequest = true;
+        }
+      }
+      setConsumeRequest(allowRequest)
       fetchData();
     }
-  }, [columns, services, selectedServiceOption]);
+  }, [columns, renderCount, selectedServiceOption, tabValue]);
 
   const fetchColumns = async () => {
-    var { fields, allFields } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
+    var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
     if (!allowedToEdit) {
-      allFields?.forEach((e) => {
+      fields?.forEach((e) => {
         e.isColumnEditable = false;
       });
     }
-    setAllFields(JSON.parse(JSON.stringify(allFields)));
+    setAllFields(JSON.parse(JSON.stringify(fields)));
     const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
@@ -110,12 +136,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
               ) : (
                 <p
                   onClick={() => {
-                    setIsConsumableEdit({
-                      open: true,
-                      data: row.original,
-                      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                    });
-                    setIsBulkEdit(false);
+                    openMaterial(row, rows)
                   }}
                   className="link text-truncate"
                   title={row.original[e?.fieldName]}
@@ -176,39 +197,95 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       },
       ...newColumns,
       {
+        accessor: 'requestedQty',
+        Header: 'Requested Qty',
+        width: 150,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+      },
+      {
+        accessor: 'consumedQty',
+        Header: 'Consumed Qty',
+        primaryField: true,
+        width: 150,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+      },
+      {
         accessor: 'action',
         Header: 'Actions',
         width: 150,
-        minWidth: 150,
+        minWidth: 100,
         sticky: 'right',
         disableFilters: true,
         canDrag: false,
-        Cell: ({ row }: any) => (
-          <HtmlTooltip title={'Delete'}>
-            <span>
+        Cell: ({ row, rows }: any) => (
+          <>
+            <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
               <IconButton
                 size="small"
                 aria-label="Delete"
                 disabled={!allowedToEdit}
                 onClick={() => {
-                  setDeleteData([{ id: row.original._id }]);
+                  openMaterial(row, rows)
                 }}
               >
-                <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
-            </span>
-          </HtmlTooltip>
+            </HtmlTooltip>
+            {row.original?.isqtyRequestLog && (
+              <HtmlTooltip title="View Requests">
+                <IconButton
+                  size="small"
+                  aria-label="Requests"
+                  onClick={() => {
+                    setOpenLogDialog({ open: true, product: row?.original?.materialId, uniqueId: row.original._id, data: row.original });
+                  }}
+                >
+                  <FormatListBulletedIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            <HtmlTooltip title="History">
+              <IconButton
+                size="small"
+                aria-label="History"
+                onClick={() => {
+                  setHistoryDialog({
+                    open: true,
+                    _id: row?.original?._id,
+                    product: row?.original?.materialId,
+                    productName: row?.original?.productName
+                  });
+                }}
+              >
+                <HistoryIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title={'Delete'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
+                  onClick={() => {
+                    setDeleteData([{ id: row.original._id }]);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </>
         )
       }
     ];
 
     setColumns([
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -224,22 +301,19 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedServiceOption?.optionValue}`;
     }
-
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data } }) => {
-        const consumables = data?.material;
-        consumables?.forEach((parent, i) => {
-          parent.srno = i + 1;
-          parent.productName = parent?.productDetail?.productName;
-          parent.productDescription = parent?.productDetail?.productDescription;
-          parent.productNumber = parent?.productDetail?.productNumber;
-          parent.qtyDisplay = parent?.qty;
-          parent.serviceId = parent?.service?.optionValue;
-          parent.service = parent?.service?.optionLabel;
-        });
-        setDataRows(consumables);
-      })
+    axiosInstance().get(api).then(({ data: { data } }) => {
+      const consumables = data?.material;
+      consumables?.forEach((parent, i) => {
+        parent.index = i + 1;
+        parent.productName = parent?.productDetail?.productName;
+        parent.productDescription = parent?.productDetail?.productDescription;
+        parent.productNumber = parent?.productDetail?.productNumber;
+        parent.qtyDisplay = parent?.qty;
+        parent.serviceId = parent?.service?.optionValue;
+        parent.service = parent?.service?.optionLabel;
+      });
+      setDataRows(consumables);
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -264,7 +338,6 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       }
       material.push(element);
     });
-
     const priceData: any = await calculatePrice(fieldTicketData, material);
     AddConsumables(material, priceData);
   };
@@ -291,10 +364,14 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
         }
       });
     }
-
     axiosInstance()
       .post(`${fieldTicket.api}/${id}/material`, { material })
-      .then(() => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
         setConsumablesDialog(false);
         fetchData();
       })
@@ -307,7 +384,12 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     setDeleting(true);
     axiosInstance()
       .put(`${fieldTicket.api}/${id}/material/delete`, { ids: rows })
-      .then(() => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
         setDeleting(false);
         fetchData();
         setDeleteData(null);
@@ -323,7 +405,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     rows.forEach((element) => {
       element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
       element.service = element.serviceId;
-      delete element.srno;
+      delete element.index;
       delete element.productDescription;
       delete element.productName;
       delete element.productNumber;
@@ -334,7 +416,12 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     setUpdating(true);
     axiosInstance()
       .put(`${fieldTicket.api}/${id}/material`, { material: rows })
-      .then(() => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
         fetchData();
         if (saveAndNext) {
           const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
@@ -366,6 +453,15 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     handleSaveData(rows);
   };
 
+  const openMaterial = (data, rows) => {
+    setIsConsumableEdit({
+      open: true,
+      data: data.original,
+      showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
+    });
+    setIsBulkEdit(false);
+  };
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -378,6 +474,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   };
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setDataRows(null)
     setTabValue(newValue);
   };
 
@@ -399,6 +496,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
               if (!val) {
                 value = { optionLabel: 'All', optionValue: 'All' }
               }
+              setDataRows(null)
               setSelectedServiceOption(value)
             }}
             renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
@@ -420,6 +518,18 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
                 </Button>
               </Box>
               <Box display="flex" ml={1}>
+                <Box display="flex" mr={1}>
+                  <Button
+                    disabled={!Boolean(selectedRecords?.length)}
+                    onClick={() => setOpenConsumablesQtyDialog(true)}
+                    color="primary"
+                    size="small"
+                    variant="contained"
+                  >
+                    {consumeRequest ? 'Request ' : 'Consume '}{' '}
+                    {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
+                  </Button>
+                </Box>
                 <Button
                   variant="outlined"
                   color="primary"
@@ -538,6 +648,51 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
           selectedServices={selectedRecords}
           loading={isUpdating}
           showSaveAndNext={isConsumableEdit.showSaveAndNext}
+        />
+      )}
+
+      {openConsumablesQtyDialog && (
+        <ConsumablesQtyDialog
+          referenceId={id}
+          referenceType={sidebarResource.fieldTicket}
+          onClose={() => setOpenConsumablesQtyDialog(false)}
+          onSuccess={() => {
+            fetchData();
+            setOpenConsumablesQtyDialog(false);
+          }}
+          warehouse={fieldTicketData?.warehouse}
+          selectedRecords={selectedRecords?.map(e => ({ ...e, product: e?.productName }))}
+          serviceName={null}
+          consumeRequest={consumeRequest}
+        />
+      )}
+
+      {openLogDialog.open && (
+        <QtyRequestLog
+          uniqueId={openLogDialog.uniqueId}
+          referenceId={id}
+          referenceType={sidebarResource.fieldTicket}
+          productName={openLogDialog?.data?.productName}
+          product={openLogDialog?.product}
+          onClose={() => {
+            setOpenLogDialog({
+              open: false,
+              uniqueId: null,
+              product: null,
+              data: null
+            });
+            fetchData();
+          }}
+        />
+      )}
+
+      {historyDialog.open && (
+        <History
+          handleClose={() => setHistoryDialog({ open: false, _id: '', product: '', productName: '' })}
+          productName={historyDialog.productName}
+          referenceId={id}
+          uniqueId={historyDialog._id}
+          product={historyDialog.product}
         />
       )}
 

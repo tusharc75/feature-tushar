@@ -18,7 +18,8 @@ import {
   repairOrderSteps,
   REPAIR_ORDER_TYPE,
   QUOTATION_STATUS,
-  WORKORDER_SERVICE_STATUS
+  WORKORDER_SERVICE_STATUS,
+  MATERIAL_TYPE
 } from 'src/constants/helpers';
 import ManageRepairOrder from './ManageRepairOrder';
 import queryString from 'query-string';
@@ -53,7 +54,7 @@ const RepairOrderDetails = () => {
   const history = useHistory();
 
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -176,12 +177,6 @@ const RepairOrderDetails = () => {
 
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setRepairOrderData({ ...data });
-        if (permissions?.repairOrder?.isUpdate && openEdit === 'true') {
-          setOpenUpdateDialog(true);
-          const params = new URLSearchParams();
-          params.delete('openEdit');
-          history.push({ search: params.toString() });
-        }
         if ((data?.type === REPAIR_ORDER_TYPE.internal || !data?.addQuotationStep) && data?.status !== REPAIR_ORDER_STATUS.completed) {
           checkStatusChange();
         } else {
@@ -198,7 +193,7 @@ const RepairOrderDetails = () => {
       .get(`${repairOrder.api}/${id}/work-order/service`)
       .then(({ data: { data } }) => {
         if (data?.material?.length) {
-          const material = data?.material?.filter((e) => !e.parentId);
+          const material = data?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset);
           if (material?.filter((e) => e?.workOrder?.status === WORKORDER_SERVICE_STATUS.completed)?.length === material?.length) {
             setEnableStatusChange(true);
           }
@@ -233,8 +228,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -303,7 +298,7 @@ const RepairOrderDetails = () => {
           <CustomBreadCrumbs routes={[routes.repairOrder, { title: repairOrderData?.repairOrderNumber }]} />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-v1 isolate">
+          <Box className="control-buttons-v1 ">
             {repairOrderData ? (
               <>
                 {permissions?.repairOrder?.isUpdate &&
@@ -410,7 +405,11 @@ const RepairOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={repairOrderData?._id} resource={ACTIVITY_RESOURCE.repairOrder} />
+            <ActivityButton
+              referenceId={repairOrderData?._id}
+              resource={ACTIVITY_RESOURCE.repairOrder}
+              resourceLabel={repairOrderData?.repairOrderNumber}
+            />
           </Box>
         </Box>
       </Box>
@@ -521,10 +520,10 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                        quotationVersionData?.status
-                      )
-                    ? false
-                    : allowedToEdit
+                      quotationVersionData?.status
+                    )
+                      ? false
+                      : allowedToEdit
                 }
                 allowedToDelete={allowedToDelete}
                 isPostWorkService={Boolean(currentStep === 3)}

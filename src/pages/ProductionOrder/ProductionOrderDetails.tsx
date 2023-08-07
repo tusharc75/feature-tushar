@@ -43,7 +43,7 @@ const ProductionOrderDetails = () => {
   const history = useHistory();
 
   const parsed = queryString.parse(history.location.search);
-  const { openEdit, tab }: any = parsed;
+  const { tab }: any = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -125,16 +125,13 @@ const ProductionOrderDetails = () => {
       .get(`${routes.productionOrder.path}/${id}`)
       .then(({ data: { data } }) => {
         setCurrentStep(getIndex(data?.processStatus, productionOrderProcessSteps));
-        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        if (user?.role?.selectedEntity?.superAdminAccess) {
+          isAllowedToEdit = true;
+        }
         setAllowedToEdit(isAllowedToEdit);
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setProductionOrderData({ ...data });
-        if (permissions?.productionOrder?.isUpdate && openEdit === 'true') {
-          setOpenUpdateDialog(true);
-          const params = new URLSearchParams();
-          params.delete('openEdit');
-          history.push({ search: params.toString() });
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -165,8 +162,8 @@ const ProductionOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${productionOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const handleStatusChange = (o) => {
@@ -267,7 +264,11 @@ const ProductionOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={productionOrderData?._id} resource={ACTIVITY_RESOURCE.productionOrder} />
+            <ActivityButton 
+              referenceId={productionOrderData?._id} 
+              resource={ACTIVITY_RESOURCE.productionOrder} 
+              resourceLabel={productionOrderData?.productionOrderNumber}
+              />
           </Box>
         </Box>
       </Box>
@@ -334,7 +335,7 @@ const ProductionOrderDetails = () => {
                 allowedToDelete={allowedToDelete}
               />
             )}
-             {productionOrderProcessStepsNames[currentStep] === 'Work Order' && productionOrderData && (
+            {productionOrderProcessStepsNames[currentStep] === 'Work Order' && productionOrderData && (
               <WorkOrder
                 productionOrderData={productionOrderData}
                 setNextStep={setNextStep}

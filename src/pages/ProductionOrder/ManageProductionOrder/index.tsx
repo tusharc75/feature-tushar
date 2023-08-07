@@ -15,8 +15,8 @@ import {
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
   yupSchema,
-  generateUniqueIdOnly,
-  productionOrder
+  productionOrder,
+  GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -69,9 +69,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, productionOrderNumber, updatedBy, ...rest } = data;
             rest.status = 'New';
-            if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-              rest.productionOrderNumber = `PO_${generateUniqueIdOnly()}`;
-            }
+            rest.productionOrderNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(productionOrderNumber);
             setInitialData({
               fields: fieldsDataForCreate,
@@ -90,9 +88,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-        if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
-          initialData['productionOrderNumber'] = `PO_${generateUniqueIdOnly()}`;
-        }
+        initialData['productionOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
@@ -217,35 +213,35 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field) => (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                      <FormTypes
-                                        productionOrderId={productionOrderId}
-                                        {...field}
-                                        fieldData={field}
-                                        fields={initialData?.fields}
-                                        disabled={productionOrderId && field.disableOnEdit}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                            : null
-                                        }
-                                      />
+                                    <FormTypes
+                                      productionOrderId={productionOrderId}
+                                      {...field}
+                                      fieldData={field}
+                                      fields={initialData?.fields}
+                                      disabled={productionOrderId && field.disableOnEdit}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      imageOrFileUploadCompletePercentage={
+                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                          ? (completePercentage) => {
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
+                                          : null
+                                      }
+                                    />
                                   </Grid>
                                 ))}
                               </Grid>

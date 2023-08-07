@@ -41,7 +41,6 @@ const BulkAssetCreationDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -108,16 +107,13 @@ const BulkAssetCreationDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${bulkAssetCreation.api}/${id}`);
-      const isAllowedToEdit = [...(data?.collaborator ?? []), data?.owner, data?.processor].some((d) => d?.optionValue === user?.user?._id);
+      var isAllowedToEdit = [...(data?.collaborator ?? []), data?.owner, data?.processor].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       setAllowedToEdit(isAllowedToEdit);
       setCurrentStep(getIndex(data?.processStatus, bulkAssetCreationSteps));
       setBulkAssetCreationData(data);
-      if (isAllowedToEdit && openEdit === 'true') {
-        setOpenUpdateDialog(true);
-        const params = new URLSearchParams();
-        params.delete('openEdit');
-        history.push({ search: params.toString() });
-      }
       setLoadingBulkAssetCreation(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -197,7 +193,11 @@ const BulkAssetCreationDetailsPage = () => {
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
-              <ActivityButton referenceId={bulkAssetCreationData?._id} resource={ACTIVITY_RESOURCE.bulkAssetCreation} />
+              <ActivityButton 
+               referenceId={bulkAssetCreationData?._id} 
+               resource={ACTIVITY_RESOURCE.bulkAssetCreation} 
+               resourceLabel={bulkAssetCreationData?.baNumber}
+               />
             </>
           </Box>
         </Box>

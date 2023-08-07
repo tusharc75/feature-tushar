@@ -82,7 +82,7 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
             if (value == "Infinity") {
                 value = 0
             }
-            value = parseFloat(value.toFixed(decimalPlaces))
+            //value = parseFloat(value.toFixed(decimalPlaces))
         }
     }
     catch (e) {

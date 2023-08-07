@@ -567,7 +567,7 @@ const ProjectSales: FC = () => {
                   selectedRecords={selectedRecords}
                   dispatch={dispatch}
                   onEdit={(data) => {
-                    history.push(`${routes.projectSalesDetail.path}/${data._id}?openEdit=true`)
+                    history.push(`${routes.projectSalesDetail.path}/${data._id}`)
                   }}
                   extraParamsToCheckDelete={true}
                   onDelete={(data) => {

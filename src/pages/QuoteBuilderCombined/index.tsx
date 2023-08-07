@@ -784,7 +784,7 @@ const QuoteBuilders = () => {
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
                 onEdit={(data) => {
-                  history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
+                  history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
                 }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {

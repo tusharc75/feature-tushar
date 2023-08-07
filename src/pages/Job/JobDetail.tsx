@@ -76,7 +76,10 @@ const JobDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.job.path}/${id}`);
       setCurrentStep(getIndex(data?.processStatus, jobProcessSteps));
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setJobData(data);
@@ -151,7 +154,11 @@ const JobDetail = () => {
               </Button>
             )}
             {permissions?.job?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={jobData?._id} resource={ACTIVITY_RESOURCE.job} />
+            <ActivityButton 
+              referenceId={jobData?._id} 
+              resource={ACTIVITY_RESOURCE.job} 
+              resourceLabel={jobData?.jobNumber}
+              />
           </Box>
         </Box>
       </Box>

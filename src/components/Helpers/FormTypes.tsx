@@ -824,7 +824,8 @@ const FormTypes = (props) => {
             onChange
               ? onChange
               : (e) => {
-                handleChange(name, e.target.value ? parseFloat(e.target.value) : 0);
+                handleChange(name, e.target.value ?
+                  parseFloat((parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))) : 0);
               }
           }
         />

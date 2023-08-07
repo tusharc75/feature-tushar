@@ -289,7 +289,11 @@ const DoaQuotationApproval = () => {
                 </Button>
               </>
             ) : null}
-            <ActivityButton referenceId={quoteData?.quotation} resource={sidebarResource.quotation} />
+            <ActivityButton 
+            referenceId={quoteData?.quotation} 
+            resource={sidebarResource.quotation} 
+            resourceLabel={DOAData?.DOAName}
+            />
           </Box>
         </Box>
       </Box>

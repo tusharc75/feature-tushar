@@ -18,7 +18,7 @@ import AccountHierarchy from './AccountHierarchy';
 import accountClass from './account.module.scss';
 import ManageContactDialog from '../Contact/ManageContact';
 import DeleteButton from '../../components/Helpers/DeleteButton';
-import { getObjKeysWithValues, isObjectEmpty, sidebarResource, customerAccount, processFieldName } from '../../constants/helpers';
+import { getObjKeysWithValues, isObjectEmpty, sidebarResource, customerAccount, processFieldName, RESOURCE_LABEL } from '../../constants/helpers';
 import ManageAccount from './ManageAccount/ManageAccount';
 import ManageAccountDialog from './ManageAccount/index';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -44,6 +44,7 @@ import Warehouse from './Warehouse';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import AddIcon from '@material-ui/icons/Add';
 import { AccountHierarchyIcon, ProjectsIcon, OpportunityIcon, QuoteIcon, AccountsTeamsIcon, ContactsIcon } from 'src/assets/svg/svgIcons';
+import SupplierItems from './SupplierItems';
 
 function DisplayData({ label, value, icon, highlightsHead = false }) {
   return (
@@ -84,7 +85,6 @@ export default function AccountDetailPage(props) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const {
     account: { accountApi, accountResource, accountRoute },
     accountBreadcrumb,
@@ -321,9 +321,9 @@ export default function AccountDetailPage(props) {
           current: true,
           parentAccount: data.parentAccount
             ? {
-                _id: data.parentAccount.optionValue,
-                accountName: data.parentAccount.optionLabel
-              }
+              _id: data.parentAccount.optionValue,
+              accountName: data.parentAccount.optionLabel
+            }
             : null,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         }
@@ -377,12 +377,6 @@ export default function AccountDetailPage(props) {
     // }
     getAccountFields(data);
     setLoading(false);
-    if (openEdit === 'true') {
-      setOpenUpdateDialog(true);
-      const params = new URLSearchParams();
-      params.delete('openEdit');
-      history.push({ search: params.toString() });
-    }
     initializeGraphData();
   };
 
@@ -735,8 +729,8 @@ export default function AccountDetailPage(props) {
                         ? accountClass.mobile_button_layout_secondary
                         : ''
                       : isMobile
-                      ? accountClass.mobile_button_layout
-                      : ''
+                        ? accountClass.mobile_button_layout
+                        : ''
                   }
                   onClick={() => {
                     setShowApproveDisapproveConfirmBox(true);
@@ -764,14 +758,18 @@ export default function AccountDetailPage(props) {
               </>
             )}
             {permissions &&
-            permissions[accountResource] &&
-            permissions[accountResource].isDelete &&
-            accountData?.owner?.optionValue &&
-            user?.user?._id &&
-            accountData.owner.optionValue === user.user._id ? (
+              permissions[accountResource] &&
+              permissions[accountResource].isDelete &&
+              accountData?.owner?.optionValue &&
+              user?.user?._id &&
+              accountData.owner.optionValue === user.user._id ? (
               <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
             ) : null}
-            <ActivityButton referenceId={accountData?._id} resource={accountResource} />
+            <ActivityButton
+              referenceId={accountData?._id}
+              resource={accountResource}
+              resourceLabel={accountData?.accountName}
+            />
           </Box>
         </Box>
       </Box>
@@ -808,6 +806,9 @@ export default function AccountDetailPage(props) {
               <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
               <Tab label={<div className="tab-font">Account Hierarchy</div>} id="a11y-tab-1" className="tabLayout" />
               <Tab label={<div className="tab-font">OM-Neurons</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
+              {(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification) &&
+                <Tab label={<div className="tab-font">Supplier View</div>}
+                  aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className="tabLayout" />}
               {accountResource === 'customerAccount' && permissions?.productInventory && (
                 <Tab
                   label={<div className="tab-font">{routes.warehouse.title}</div>}
@@ -880,7 +881,6 @@ export default function AccountDetailPage(props) {
                     <QuickLinks quickLinks={quickLinks} />
                   </Grid>
                 </Box>
-
                 <div className="single-form-v1">
                   <div className="form-head-v1 relative">
                     <h3 className="form-label-style-v1">Related Contacts & Leads</h3>
@@ -1018,6 +1018,15 @@ export default function AccountDetailPage(props) {
                 />
               </Box>
             </TabPanel>
+            {accountResource === 'supplierAccount' && tabValue === 3 && (
+              <TabPanel value={tabValue} index={3}>
+                <SupplierItems
+                  api={accountApi}
+                  id={id}
+                  allowedToEdit={permissions[accountResource].isUpdate}
+                  permission={permissions[accountResource]} />
+              </TabPanel>
+            )}
             {accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
               <TabPanel value={tabValue} index={3}>
                 <Warehouse reference={accountResource} api={accountApi} id={id} />
@@ -1029,9 +1038,8 @@ export default function AccountDetailPage(props) {
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this Account ${
-            deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
-          }`}
+          message={`Are you sure you want to delete this Account ${deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
+            }`}
           onClose={() => {
             setShowConfirmBox(false);
             setDeleteAccountId({});
@@ -1088,7 +1096,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => {}}
+          handleAddressDataSource={() => { }}
         />
       ) : null}
 

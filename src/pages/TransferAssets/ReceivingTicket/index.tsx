@@ -369,7 +369,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             selectedRecords={selectedRecords}
             dispatch={dispatch}
             onEdit={(data) => {
-              // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
             }}
             extraParamsToCheckDelete={true}
             onDelete={(data) => {}}

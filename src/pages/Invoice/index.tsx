@@ -424,7 +424,7 @@ const Invoice = () => {
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.invoiceDetail.path}/${data._id}?openEdit=true`);
+                history.push(`${routes.invoiceDetail.path}/${data._id}`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {

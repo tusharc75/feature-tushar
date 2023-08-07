@@ -61,7 +61,10 @@ const IrtTicketDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.irtTicket.path}/${id}`);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setHeadingLbl(data.irtTicketNumber);
@@ -124,7 +127,11 @@ const IrtTicketDetail = () => {
               </Button>
             )}
             {permissions?.irtTicket?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={irtTicketData?._id} resource={ACTIVITY_RESOURCE.irtTicket} />
+            <ActivityButton 
+              referenceId={irtTicketData?._id} 
+              resource={ACTIVITY_RESOURCE.irtTicket} 
+              resourceLabel={irtTicketData?.irtTicketNumber}
+              />
           </Box>
         </Box>
       </Box>

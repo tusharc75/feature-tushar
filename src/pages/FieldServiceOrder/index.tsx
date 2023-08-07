@@ -199,7 +199,7 @@ const ServiceOrder = () => {
           </IconButton>
         </Tooltip>
       )}
-      {params?.data?.canDelete && (
+      {params?.data?.canDelete ? (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -215,20 +215,27 @@ const ServiceOrder = () => {
             <DeleteIcon color="error" />
           </IconButton>
         </HtmlTooltip>
-      )}
+      ) : <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
+        <IconButton
+          size="small"
+          aria-label="Delete"
+        >
+          <DeleteIcon color="disabled" />
+        </IconButton>
+      </HtmlTooltip>}
     </>
   );
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    
+
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
@@ -266,10 +273,11 @@ const ServiceOrder = () => {
       data = response?.data?.data;
       count = response?.data?.count;
       let rows = data.map((u) => {
+        const ownerAndColaborators = [u?.owner, ...u?.collaborator]?.map(o => o?.optionValue);
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
         finalObject['allowedToEdit'] = permissions?.fieldServiceOrder?.isUpdate;
-        finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+        finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && ownerAndColaborators.includes(user?.user?._id) && u?.canDelete;
         return finalObject;
       });
       if (appendRows) {
@@ -425,7 +433,7 @@ const ServiceOrder = () => {
               selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}?openEdit=true`);
+                history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {

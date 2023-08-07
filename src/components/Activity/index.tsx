@@ -36,11 +36,13 @@ import CloseIcon from '@material-ui/icons/Close';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import MailIcon from '@material-ui/icons/Mail';
 import HtmlTooltip from '../CustomTooltipTitle';
-import { isEmpty } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
+import routes from '../Helpers/Routes';
+import { CollaborateIcon } from 'src/assets/svg/svgIcons';
 
 const useStyles = makeStyles(() => ({
   activityBox: {
-    padding: '15px 30px 30px',
+    padding: '18px 20px 30px',
     background: 'var(--dark-secondary, #FFFFFF)'
   },
   activitySubBox: {
@@ -53,12 +55,12 @@ const useStyles = makeStyles(() => ({
     boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.04)',
     borderRadius: '4px',
     minHeight: '46px',
-    color: 'var(--dark-primary-text,#5B5B5B)',
+    color: 'var(--dark-primary-text,#2A3042)',
     '& h6': {
       fontWeight: '500',
       fontSize: '14px',
       lineHeight: '17px',
-      color: 'var(--dark-primary-text,#5B5B5B)'
+      color: 'var(--dark-primary-text,#2A3042)'
     }
   },
   historyButton: {
@@ -66,19 +68,29 @@ const useStyles = makeStyles(() => ({
     padding: '4px'
   },
   detailsHeader: {
-    padding: '10px',
+    padding: '14px 20px 16px',
     background: 'var(--card-bg, #FFFFFF)',
     borderRadius: '7px 7px 0 0',
     position: 'sticky',
     top: '0px',
     zIndex: 5,
-    boxShadow: '0px 4px 40px rgb(0 0 0 / 6%)'
+    paddingLeft: 20,
+    borderBottom: '1px solid var(--common-border-color)'
   }
 }));
 
 const Activity = (props) => {
   const classes = useStyles();
-  const { relatedTo, handleActivityRefresh, emails = [], restrictedAddActivities = [], resourceId = '', resource = '', close = () => {} } = props;
+  const {
+    relatedTo,
+    handleActivityRefresh,
+    emails = [],
+    restrictedAddActivities = [],
+    resourceId = '',
+    resourceLabel = '',
+    resource = '',
+    close = () => {}
+  } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [type, setType] = useState(null);
@@ -223,7 +235,18 @@ const Activity = (props) => {
     <>
       <Box>
         <Box className={`${classes.detailsHeader} `}>
-          <h2 className="listingHeader single">Collaborate</h2>
+          <div className="flex gap-[14px] items-center">
+            <div
+              className="icon w-[37px] h-[34px] rounded-[6px] bg-gradient-to-r from-[#FAC94B] to-[rgb(255,155,4)] grid place-items-center"
+              style={{ backgroundImage: 'linear-gradient(to right, #FAC94B, rgb(255,155,4))' }}
+            >
+              <CollaborateIcon />
+            </div>
+            <div>
+              <span className=" text-[11px] text-[#8c8c8c] dark:text-[var(--dark-secondary-text)]">Collaborate</span>
+              <h2 className=" truncate text-sm md:text-[15px] text-[var(--dark-primary-text,#2A3042)]">{resourceLabel}</h2>
+            </div>
+          </div>
           <IconButton onClick={() => close()} className="close-icon-v1">
             <CloseIcon />
           </IconButton>
@@ -243,7 +266,7 @@ const Activity = (props) => {
                           <Typography
                             variant="subtitle2"
                             className={`d-flex align-items-center `}
-                            style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: 'var(--dark-primary-text,#5B5B5B)' }}
+                            style={{ fontWeight: 500, fontSize: '14px', lineHeight: '17px', color: 'var(--dark-primary-text,#2A3042)' }}
                           >
                             {getIcon(data)} {data} ({totalCount[data]})
                           </Typography>
@@ -257,7 +280,7 @@ const Activity = (props) => {
                             <Box mr={1}>
                               <HtmlTooltip title={'Add Folder'}>
                                 <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}>
-                                  <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
+                                  <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                                 </IconButton>
                               </HtmlTooltip>
                             </Box>
@@ -276,18 +299,18 @@ const Activity = (props) => {
                                     );
                                   }}
                                 >
-                                  <MailIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
+                                  <MailIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                                 </IconButton>
                               </HtmlTooltip>
                             </Box>
                           )}
                           <Box mr={1}>
                             <HtmlTooltip title={infoTitle[data]}>
-                              <InfoOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
+                              <InfoOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                             </HtmlTooltip>
                           </Box>
                           <IconButton size="small" onClick={(event) => handleCreateActivity(event, data)}>
-                            <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
+                            <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                           </IconButton>
                         </Grid>
                       )

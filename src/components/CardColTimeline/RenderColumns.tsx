@@ -1,7 +1,9 @@
 import React from 'react';
 import ColCard from './ColCard';
 import { datarowInterface } from './index';
-import { FixedSizeList as List, } from 'react-window';
+import { FixedSizeList as List } from 'react-window';
+import { Button } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 
 export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   data: any;
@@ -10,9 +12,23 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   passFailStatus?: boolean;
   passFailAccessor?: string;
   cardHeight?: number;
+  createNew?: () => void;
+  createNewText?: string;
+  isCreateNew?: boolean;
 }
 
-const RenderColumns: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, passFailStatus, passFailAccessor, cardHeight = 130 }) => {
+const RenderColumns: React.FC<colDataInterface> = ({
+  data,
+  cardOnClick,
+  cardDataRows,
+  passFailStatus,
+  passFailAccessor,
+  cardHeight = 130,
+  createNew,
+  isCreateNew,
+  createNewText
+}) => {
+  const listRef = React.useRef(null);
   const Row = ({ index, style }) => {
     const colData = data[index];
 
@@ -31,15 +47,22 @@ const RenderColumns: React.FC<colDataInterface> = ({ data, cardOnClick, cardData
   };
 
   return (
-    <List
-      style={{ overflowX: 'hidden' }}
-      height={500}
-      itemCount={data.length}
-      itemSize={cardHeight}
-      width={'100%'}
-    >
-      {Row}
-    </List>
+    <div className="col group">
+      <List ref={listRef} style={{ overflowX: 'hidden' }} height={800} itemCount={data.length} itemSize={cardHeight} width={'100%'}>
+        {Row}
+      </List>
+      {createNew && isCreateNew && (
+        <Button
+          onClick={createNew}
+          style={{ marginTop: '10px' }}
+          startIcon={<AddIcon />}
+          fullWidth
+          className="group-hover:opacity-1 opacity-0 transition-opacity"
+        >
+          {createNewText || 'Create Task'}
+        </Button>
+      )}
+    </div>
   );
 };
 

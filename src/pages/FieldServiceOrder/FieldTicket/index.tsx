@@ -15,7 +15,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 
-const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom }) => {
+const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, refreshFieldServiceOrder }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = useState({ open: false, id: null });
@@ -204,7 +204,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom }) => {
       <Box p={1} pb={2}>
         <Grid container>
           <Grid item xs={3} md={3} sm={3}>
-            <Button
+            {allowedToEdit && <Button
               size="small"
               variant="contained"
               color="primary"
@@ -214,7 +214,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom }) => {
               startIcon={<AddOutlined />}
             >
               {`Create ${routes.fieldTicket.title}`}
-            </Button>
+            </Button>}
           </Grid>
           <Grid item xs={9} md={9} sm={9}>
             <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
@@ -286,6 +286,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom }) => {
             warehouse: serviceOrderData?.warehouse?.optionValue || '',
             wellName: serviceOrderData?.wellName?.optionValue || '',
             wellNumber: serviceOrderData?.wellNumber?.map((m) => m.optionValue) || [],
+            numberOfWells: serviceOrderData?.numberOfWells,
             estimateStartDate: serviceOrderData?.estimateStartDate || '',
             estimateEndDate: serviceOrderData?.estimateEndDate || '',
             customerAccount: serviceOrderData?.customerAccount?.optionValue || '',
@@ -296,6 +297,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom }) => {
           onSuccess={() => {
             setOpenDialog({ open: false, id: null });
             fetchData();
+            refreshFieldServiceOrder();
           }}
           renderedFrom={renderedFrom}
         />

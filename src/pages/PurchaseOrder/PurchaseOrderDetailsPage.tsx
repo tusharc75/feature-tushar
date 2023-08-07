@@ -38,7 +38,6 @@ const PurchaseOrderDetailsPage = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -99,16 +98,13 @@ const PurchaseOrderDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       setAllowedToEdit(isAllowedToEdit);
       setPurchaseOrderData(data);
       setCurrentStep(getIndex(data?.processStatus, purchaseOrderSteps));
-      if (isAllowedToEdit && openEdit === 'true') {
-        setOpenUpdateDialog(true);
-        const params = new URLSearchParams();
-        params.delete('openEdit');
-        history.push({ search: params.toString() });
-      }
       setLoadingPurchaseOrder(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -298,7 +294,11 @@ const PurchaseOrderDetailsPage = () => {
                 </span>
               </HtmlTooltip>
             )}
-            <ActivityButton referenceId={purchaseOrderData?._id} resource={ACTIVITY_RESOURCE.purchaseOrder} />
+            <ActivityButton 
+              referenceId={purchaseOrderData?._id} 
+              resource={ACTIVITY_RESOURCE.purchaseOrder} 
+              resourceLabel={purchaseOrderData?.purchaseOrderNumber}
+              />
           </Box>
         </Box>
       </Box>

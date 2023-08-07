@@ -43,7 +43,6 @@ const ProjectSalesDetails = () => {
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { openEdit } = parsed;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -128,11 +127,12 @@ const ProjectSalesDetails = () => {
 
       modifiedData['amount'] = formatAmountWithCurrency(modifiedData.currency, modifiedData.amount).fullFormatAmount;
 
-      const isAllowedToEdit = data.projectManager.optionValue === user?.user?._id;
+      var isAllowedToEdit = data.projectManager.optionValue === user?.user?._id;
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       setAllowedToEdit(isAllowedToEdit);
-
       setCopyOfProjectSalesData(modifiedData);
-
       setProjectSalesData(data);
       currentTabIndex === 0 && setCurrentTabIndex(0);
       handleMainPoints(data);
@@ -146,13 +146,6 @@ const ProjectSalesDetails = () => {
       setQuotes(data.staticData?.quoteBuilder);
       setCustomerContacts(data.staticData?.customerContact);
       initializeGraphData();
-      if (isAllowedToEdit && openEdit === 'true') {
-        setOpenUpdateDialog(true);
-        const params = new URLSearchParams();
-        params.delete('openEdit');
-        history.push({ search: params.toString() });
-      }
-
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -324,7 +317,11 @@ const ProjectSalesDetails = () => {
                     }}
                   />
                 ) : null}
-                <ActivityButton referenceId={projectSalesData?._id} resource={projectSales?.projectSalesResource} />
+                <ActivityButton 
+                  referenceId={projectSalesData?._id} 
+                  resource={projectSales?.projectSalesResource} 
+                  resourceLabel={projectSalesData?.projectName}
+                  />
               </>
             )}
           </Box>

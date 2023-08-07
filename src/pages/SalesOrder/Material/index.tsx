@@ -12,6 +12,7 @@ import { pricingCondition, salesOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import { isMobile } from 'react-device-detect';
 import { startCase } from 'lodash';
 import DateRangeIcon from '@material-ui/icons/DateRange';
@@ -159,14 +160,23 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 100,
-      width: 100,
+      minWidth: 140,
+      width: 140,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) =>
+      Cell: ({ row, rows }) =>
         !row.original.hideSelection && (
           <Grid container spacing={1}>
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                handleOpen(row, rows);
+              }}
+            >
+              <EditIcon fontSize="small" color="primary" />
+            </IconButton>
             <IconButton
               size="small"
               aria-label="Details"

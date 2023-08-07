@@ -29,6 +29,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ManageSupportTicket from './ManageSupportTicket';
 import styles from '../Leads/Header.module.scss';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const SupportTicket = () => {
   const renderedFrom = camelCase(routes?.supportTicket.title);
@@ -305,7 +306,7 @@ const SupportTicket = () => {
                   )}
                   {permissions?.supportTicket?.isDelete && (
                     <>
-                      <Button
+                      <ButtonWithPulse
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
                         color="default"
                         size="small"
@@ -316,7 +317,8 @@ const SupportTicket = () => {
                         endIcon={<ExpandMore />}
                       >
                         {isMobile && !isTablet ? '' : 'Actions'}
-                      </Button>
+                      </ButtonWithPulse>
+
                       <Menu
                         anchorEl={anchorEl}
                         keepMounted

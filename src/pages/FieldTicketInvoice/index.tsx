@@ -92,6 +92,16 @@ const FIELD_TO_FILTER = [
         resource: sidebarResource.warehouse,
         type: 'dropDown'
     },
+    {
+        fieldName: 'estimateStartDate',
+        fieldLabel: 'Estimate Start Date',
+        type: 'date'
+    },
+    {
+        fieldName: 'estimateEndDate',
+        fieldLabel: 'Estimate End Date',
+        type: 'date'
+    },
 ]
 
 const FieldTicketInvoice = () => {
@@ -115,14 +125,23 @@ const FieldTicketInvoice = () => {
     const { getColumnData } = useColumns();
     const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null })
     const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null })
-    const [filterQuery, setFilterQuery] = useState([])
+    const [filterQuery, setFilterQuery] = useState({
+        filterById: [],
+        deepFilter: [],
+    })
 
     const fetchFieldServiceOrderData = async () => {
         setFieldServiceOrder(null);
-
         let api = `${routes?.fieldTicketInvoice.path}/field-service-order`;
-        if (filterQuery?.length > 0) {
-            api = `${api}?filterById=${JSON.stringify(filterQuery)}&filterType=and`;
+        const { filterById, deepFilter } = filterQuery;
+        if (filterById?.length > 0 || deepFilter?.length > 0) {
+            api = `${api}?filterType=and`;
+        }
+        if (filterById?.length > 0) {
+            api = `${api}&filterById=${JSON.stringify(filterById)}`;
+        }
+        if (deepFilter?.length > 0) {
+            api = `${api}&deepFilter=${JSON.stringify(deepFilter)}`;
         }
         axiosInstance()
             .get(api)
@@ -293,7 +312,7 @@ const FieldTicketInvoice = () => {
                 {fieldServiceOrder ? (
                     fieldServiceOrder?.length ? (
                         <Grid container spacing={2}>
-                            {(filterQuery?.findIndex(f => f?.field === '_id') === -1) &&
+                            {(filterQuery?.filterById?.findIndex(f => f?.field === '_id') === -1) &&
                                 <Grid item xs={12} sm={12} md={4} xl={3} lg={4}>
                                     <Box p={2} className='container-with-border'>
                                         <Box className="hide-scrollbar" style={{ height: 'calc(100vh - 100px)', overflowY: "auto" }}>
@@ -336,8 +355,8 @@ const FieldTicketInvoice = () => {
                                                                 <Box sx={{ ...style.title, textAlign: 'unset' }}>
                                                                     <Typography component={'span'} style={{ ...style.date, marginBottom: '8px', marginTop: '5px' }}>
                                                                         <EventNoteIcon style={{ fontSize: '15px' }} />
-                                                                        {moment(data?.technicianAssign?.estimateStartDate).format(dateFormat)} -{' '}
-                                                                        {moment(data?.technicianAssign?.estimateEndDate).format(dateFormat)}
+                                                                        {moment(data?.estimateStartDate).format(dateFormat)} -{' '}
+                                                                        {moment(data?.estimateEndDate).format(dateFormat)}
                                                                     </Typography>
                                                                 </Box>
                                                             </Box>
@@ -358,7 +377,7 @@ const FieldTicketInvoice = () => {
                                     </Box>
                                 </Grid>
                             }
-                            <Grid item xs={12} sm={12} md={filterQuery?.findIndex(f => f?.field === '_id') === -1 ? 8 : 12} xl={filterQuery?.findIndex(f => f?.field === '_id') === -1 ? 9 : 12} lg={filterQuery?.findIndex(f => f?.field === '_id') === -1 ? 8 : 12}>
+                            <Grid item xs={12} sm={12} md={filterQuery?.filterById?.findIndex(f => f?.field === '_id') === -1 ? 8 : 12} xl={filterQuery?.filterById?.findIndex(f => f?.field === '_id') === -1 ? 9 : 12} lg={filterQuery?.filterById?.findIndex(f => f?.field === '_id') === -1 ? 8 : 12}>
                                 <Box p={2} className="container-with-border">
                                     {Object.keys(frameWorkComponent).length > 0 ? (
                                         <CustomAgGrid

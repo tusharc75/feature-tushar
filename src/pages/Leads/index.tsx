@@ -577,7 +577,7 @@ const Leads = () => {
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.leadDetail.path}/${data._id}?openEdit=true`);
+                history.push(`${routes.leadDetail.path}/${data._id}`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {
