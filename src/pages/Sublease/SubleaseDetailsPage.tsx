@@ -117,7 +117,10 @@ const SubleaseDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`${sublease.api}/${id}`);
       setCurrentStep(getIndex(data?.processStatus, subleaseSteps));
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       const isProcessorToEdit = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       if (data?.productInventory?.length) {
         setIsIssued(true);

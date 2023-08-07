@@ -124,7 +124,10 @@ const ServiceOrderDetailsPage = () => {
       const response: any = await axiosInstance().get(`${fieldServiceOrder.api}/${id}`);
       data = response?.data?.data;
       setLoadingDetails(false);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit);
       setAllowedToDelete(permissions?.fieldServiceOrder?.isDelete && data.owner.optionValue === user?.user?._id && data.canDelete);
       setServiceOrderData(data);

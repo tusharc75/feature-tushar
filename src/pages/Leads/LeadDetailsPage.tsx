@@ -104,7 +104,10 @@ const LeadDetailsPage = () => {
           const userId = user?.user?._id;
           handleMainPoints(data);
           let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
-          const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+          var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+          if (user?.role?.selectedEntity?.superAdminAccess) {
+            isAllowedToEdit = true;
+          }
           setAllowedToEdit(isAllowedToEdit);
           let dontHavePermissions = [];
 
