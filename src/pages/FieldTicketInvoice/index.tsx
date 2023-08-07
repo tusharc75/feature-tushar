@@ -8,6 +8,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
+    FIELD_TICKET_STATUS,
     dateFormat,
     gridLoadingTimeout,
     prepareDataForGrid,
@@ -125,6 +126,7 @@ const FieldTicketInvoice = () => {
     const { getColumnData } = useColumns();
     const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null })
     const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null })
+
     const [filterQuery, setFilterQuery] = useState({
         filterById: [],
         deepFilter: [],
@@ -147,10 +149,13 @@ const FieldTicketInvoice = () => {
             .get(api)
             .then(({ data: { data } }) => {
                 setFieldServiceOrder(data);
-                const isAvailable = data.find((d) => d._id === selectedFieldServiceOrder?._id);
-                const index = data.findIndex((d) => d._id === selectedFieldServiceOrder?._id);
                 if (data?.length) {
-                    isAvailable ? setSelectedFieldServiceOrder(data[index]) : setSelectedFieldServiceOrder(data[0]);
+                    if (selectedFieldServiceOrder && data?.find((d) => d._id === selectedFieldServiceOrder?._id)) {
+                        setSelectedFieldServiceOrder(data?.find((d) => d._id === selectedFieldServiceOrder?._id))
+                    }
+                    else {
+                        setSelectedFieldServiceOrder(data[0]);
+                    }
                 }
             })
             .catch((error) => {
@@ -239,6 +244,8 @@ const FieldTicketInvoice = () => {
         }
 
         const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+        deepFilters.push({ field: 'status', term: [FIELD_TICKET_STATUS.submitted, FIELD_TICKET_STATUS.invoiced] });
 
         if (filterByIds?.length) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;

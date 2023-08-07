@@ -113,26 +113,25 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
             parent.qty = parent.qty;
             parent.type = parent.type;
         });
-
         costs?.forEach((ele, i) => {
             ele.index = (i + 1) + material?.length;
             ele.detail = ele.description || "";
             ele.description = ele.description || "";
             ele.type = 'manualEntry';
         });
-
         setRowsData([...material, ...costs]);
     };
 
     const handleReOpen = async () => {
         await axiosInstance().patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, {
             status: FIELD_TICKET_STATUS.inProgress
-        }).then((res) => {
-            fetchData()
+        }).then(({ data }) => {
             toastConfig.setToastConfig({
-                type: 'SUCCESS',
-                message: 'Field Ticket Re Opened successfully'
-            })
+                open: true,
+                type: 'success',
+                message: data?.message
+            });
+            fetchData()
         }).catch((err) => {
             toastConfig.setToastConfig(err)
         })
@@ -162,7 +161,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                         size='small'
                         onClick={handleReOpen}
                     >
-                        Re Open
+                        Re-Open
                     </Button>}
                 </Box>
             </Box>

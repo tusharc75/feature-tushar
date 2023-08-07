@@ -342,7 +342,7 @@ const RentalManagementDetailsPage = () => {
     axiosInstance()
       .patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: status })
       .then(({ data: { data } }) => {
-        if (status === 'Invoiced' || status === 'Closed') {
+        if (status === RENTAL_STATUS.invoiced || status === RENTAL_STATUS.closed) {
           updateProcessStatus(rentalSteps[rentalSteps?.length - 1]?.name);
           setCurrentStep(rentalSteps?.length - 1);
         }
@@ -544,11 +544,11 @@ const RentalManagementDetailsPage = () => {
                         {'Cancel ' + routes.rentalManagement.title}
                       </Button>
                     )} */}
-                <ActivityButton 
-                  referenceId={rentalManagementData?._id} 
-                  resource={ACTIVITY_RESOURCE.rentalManagement} 
+                <ActivityButton
+                  referenceId={rentalManagementData?._id}
+                  resource={ACTIVITY_RESOURCE.rentalManagement}
                   resourceLabel={rentalManagementData?.rentalJobName}
-                  />
+                />
               </>
             </Box>
           </Box>

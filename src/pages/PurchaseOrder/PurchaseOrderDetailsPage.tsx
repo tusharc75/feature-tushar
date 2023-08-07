@@ -104,7 +104,12 @@ const PurchaseOrderDetailsPage = () => {
       }
       setAllowedToEdit(isAllowedToEdit);
       setPurchaseOrderData(data);
-      setCurrentStep(getIndex(data?.processStatus, purchaseOrderSteps));
+      if (data?.status === PURCHASE_ORDER_STATUS.closed) {
+        setCurrentStep(purchaseOrderSteps?.length - 1);
+      }
+      else {
+        setCurrentStep(getIndex(data?.processStatus, purchaseOrderSteps));
+      }
       setLoadingPurchaseOrder(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -162,8 +167,8 @@ const PurchaseOrderDetailsPage = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const updateStatus = (status) => {
@@ -294,11 +299,11 @@ const PurchaseOrderDetailsPage = () => {
                 </span>
               </HtmlTooltip>
             )}
-            <ActivityButton 
-              referenceId={purchaseOrderData?._id} 
-              resource={ACTIVITY_RESOURCE.purchaseOrder} 
+            <ActivityButton
+              referenceId={purchaseOrderData?._id}
+              resource={ACTIVITY_RESOURCE.purchaseOrder}
               resourceLabel={purchaseOrderData?.purchaseOrderNumber}
-              />
+            />
           </Box>
         </Box>
       </Box>
