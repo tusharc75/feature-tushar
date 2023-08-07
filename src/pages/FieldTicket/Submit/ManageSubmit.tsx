@@ -15,6 +15,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 
 const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
+
     const toastConfig = useContext(CustomToastContext);
     const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -23,13 +24,9 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
     const [formsData, setFormsData] = useState([]);
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
 
-
-
     useEffect(() => {
         fetchFields();
     }, []);
-
-
 
     const fetchFields = async () => {
         try {
@@ -81,7 +78,6 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
                 fields: fieldsDataForCreate,
                 values: tempInitialData
             });
-
         } catch (error) {
             toastConfig.setToastConfig(error);
         }
@@ -103,13 +99,14 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
             obj.signature = values.signature;
         }
 
-        await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData._id}/submit`, obj).then((res) => {
+        await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData._id}/submit`, obj).then(({ data }) => {
+            toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: data?.message
+            });
             setSubmitting(false);
             onSuccess();
-            toastConfig.setToastConfig({
-                type: 'SUCCESS',
-                message: 'Field Ticket submitted successfully'
-            })
         }).catch((err) => {
             setSubmitting(false);
             toastConfig.setToastConfig(err)
