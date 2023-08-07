@@ -346,15 +346,6 @@ export default function CustomReactTable({
         setColumnOrder(newColumns.map((m) => m?.id || m?.accessor));
         setHiddenColumns(gridMetaData[renderedFrom]?.hide || [])
       }
-      // const storedColumns = localStorage.getItem(renderedFrom);
-      // if (storedColumns) {
-      //   setColumnOrder(JSON.parse(storedColumns).map((m) => m.id));
-      //   setHiddenColumns(
-      //     JSON.parse(storedColumns)
-      //       .filter((f) => f.isVisible === false && !['expander', 'selection', 'action']?.includes(f.id))
-      //       .map((m) => m.id)
-      //   );
-      // }
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
     }
