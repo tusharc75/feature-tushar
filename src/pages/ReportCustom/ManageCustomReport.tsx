@@ -46,7 +46,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
   useEffect(() => {
     const options = []
     REPORT_LIST?.forEach((item) => {
-      if (permissions[item.permission] && permissions[item.permission]?.isRead === true ) {
+      if (permissions[item.permission] && permissions[item.permission]?.isRead === true && item.key !== "purchaseOrderType") {
         options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key })
       }
     })
