@@ -115,15 +115,15 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                             padding: '0 10px'
                           }}
                         >
-                          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', cursor: 'pointer', width: '100%' }}>
-                            <FolderOpenIcon className="mr-2" style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
+                          <div style={{ display: 'flex', flexDirection: 'row', cursor: 'pointer', width: '100%' }}>
+                            <FolderOpenIcon className="mr-2 mt-[4px]" style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                             <Box sx={{ flexGrow: 1 }}>
                               <Typography
                                 style={{
                                   fontWeight: 500,
                                   fontSize: '14px',
                                   lineHeight: '17px',
-                                  color: 'var(--dark-primary-text,#5B5B5B)',
+                                  color: 'var(--dark-primary-text,#2A3042)',
                                   display: 'flex',
                                   justifyContent: 'space-between',
                                   alignItems: 'center'
@@ -201,7 +201,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                         <Box>
                           <Box
                             className="cursor-pointer"
-                            style={{ display: 'flex', alignItems: 'center' }}
+                            style={{ display: 'flex' }}
                             onClick={() => {
                               setAttachmentId(_attachment._id);
                               setOpen({
@@ -212,14 +212,14 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                               });
                             }}
                           >
-                            <AiOutlineFile style={{ marginRight: '8px' }} />
+                            <AiOutlineFile style={{ marginRight: '8px' }} className="mt-[8px]" />
                             <Box style={{ flexGrow: 1 }}>
                               <Typography
                                 style={{
                                   fontWeight: 500,
                                   fontSize: '14px',
                                   lineHeight: '17px',
-                                  color: 'var(--dark-primary-text,#5B5B5B)',
+                                  color: 'var(--dark-primary-text,#2A3042)',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'space-between'
@@ -343,15 +343,15 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                     padding: '0 10px'
                   }}
                 >
-                  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', cursor: 'pointer', width: '100%' }}>
-                    <FolderOpenIcon className="mr-2" style={{ maxWidth: '18px', color: '#5B5B5B' }} />
+                  <div style={{ display: 'flex', flexDirection: 'row', cursor: 'pointer', width: '100%' }}>
+                    <FolderOpenIcon className="mr-2 mt-[4px]" style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                     <Box style={{ flexGrow: 1 }}>
                       <Typography
                         style={{
                           fontWeight: 500,
                           fontSize: '14px',
                           lineHeight: '17px',
-                          color: 'var(--dark-primary-text,#5B5B5B)',
+                          color: 'var(--dark-primary-text,#2A3042)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between'
@@ -397,7 +397,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                 <Box style={{ padding: '0px 10px' }}>
                   <Box
                     className="cursor-pointer"
-                    style={{ display: 'flex', alignItems: 'center' }}
+                    style={{ display: 'flex' }}
                     onClick={() => {
                       setAttachmentId(_attachment._id);
                       setOpen({
@@ -408,14 +408,14 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                       });
                     }}
                   >
-                    <AiOutlineFile style={{ marginRight: '8px' }} />
+                    <AiOutlineFile style={{ marginRight: '8px' }} className="mt-[8px]" />
                     <Box sx={{ flexGrow: '1' }}>
                       <Typography
                         style={{
                           fontWeight: 500,
                           fontSize: '14px',
                           lineHeight: '17px',
-                          color: 'var(--dark-primary-text,#5B5B5B)',
+                          color: 'var(--dark-primary-text,#2A3042)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between'
@@ -513,7 +513,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               setOpen({ open: true, type: 'file', parentFolder: attachment._id, purpose: 'add' });
             }}
           >
-            <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
+            <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
           </IconButton>
         </HtmlTooltip>
         <HtmlTooltip title={'Create folder'}>
@@ -526,7 +526,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               setOpen({ open: true, type: 'folder', parentFolder: attachment._id, purpose: 'add' });
             }}
           >
-            <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#5B5B5B)' }} />
+            <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
           </IconButton>
         </HtmlTooltip>
       </>

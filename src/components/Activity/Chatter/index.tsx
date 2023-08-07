@@ -167,9 +167,14 @@ const Chatter = (props: any) => {
 
         <Box component="form" onSubmit={sendMessage} className="chatbox-footer">
           <Box display="flex" alignItems="center">
-            <Box border="1px solid #aaa" borderRadius={20} width="100%" borderColor={isFocused ? '#555' : '#aaa'}>
+            <Box
+              border="1px solid var(--common-border-color)"
+              borderRadius={25}
+              width="100%"
+              borderColor={isFocused ? 'var(--common-border-color)' : 'var(--common-border-color)'}
+            >
               <InputBase
-                style={{ padding: '0 10px' }}
+                style={{ padding: '7px 22px' }}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 fullWidth
