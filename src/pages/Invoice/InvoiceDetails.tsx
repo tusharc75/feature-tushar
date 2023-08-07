@@ -137,7 +137,10 @@ const InvoiceDetails = () => {
       setInvoiceData(data);
 
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
-      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       setAllowedToEdit(isAllowedToEdit && ['Invoiced', 'Closed'].indexOf(data.status) === -1);
       setLoading(false);
     } catch (error) {

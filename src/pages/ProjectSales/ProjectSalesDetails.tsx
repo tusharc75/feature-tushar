@@ -127,11 +127,12 @@ const ProjectSalesDetails = () => {
 
       modifiedData['amount'] = formatAmountWithCurrency(modifiedData.currency, modifiedData.amount).fullFormatAmount;
 
-      const isAllowedToEdit = data.projectManager.optionValue === user?.user?._id;
+      var isAllowedToEdit = data.projectManager.optionValue === user?.user?._id;
+      if (user?.role?.selectedEntity?.superAdminAccess) {
+        isAllowedToEdit = true;
+      }
       setAllowedToEdit(isAllowedToEdit);
-
       setCopyOfProjectSalesData(modifiedData);
-
       setProjectSalesData(data);
       currentTabIndex === 0 && setCurrentTabIndex(0);
       handleMainPoints(data);

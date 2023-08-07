@@ -131,7 +131,10 @@ const TransferInventoryDetailPage = () => {
             setHeadingLabel(transferData.transferNumber);
             setCustomizedRoutes([routes.transferInventory, { title: transferData.transferNumber }]);
             setCurrentStep(stepNames.indexOf(transferData?.processStatus) !== -1 ? stepNames.indexOf(transferData?.processStatus) : 0);
-            const isAllowedToEdit = [...(transferData.collaborator ?? []), transferData.owner].some((d) => d?.optionValue === user?.user?._id);
+            var isAllowedToEdit = [...(transferData.collaborator ?? []), transferData.owner].some((d) => d?.optionValue === user?.user?._id);
+            if (user?.role?.selectedEntity?.superAdminAccess) {
+              isAllowedToEdit = true;
+            }
             setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
             setTransferInventoryData(transferData);
           });
