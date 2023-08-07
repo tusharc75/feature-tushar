@@ -965,7 +965,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         }}
                       />
                     )}
-
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -980,8 +979,41 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       }
                       label="Default Value"
                     />
-                    {values['isDefaultValue'] && (
-                      <Box display="block">
+                    {values['isDefaultValue'] ?
+                      fieldData.type === 'imageUpload' ? (
+                        <FormTypes
+                          values={{ defaultValue: values['defaultValue'] }}
+                          errors={errors}
+                          touched={touched}
+                          label={''}
+                          name={'defaultValue'}
+                          type={fieldData.type}
+                          setFieldValue={(name, value) => {
+                            setFieldValue(name, value);
+                          }}
+                          isTooltip={false}
+                        />
+                      ) : fieldData.type === 'colorPicker' ? (
+                        <Box>
+                          <input
+                            value={values['defaultValue']}
+                            type="color"
+                            onChange={(e) => {
+                              setFieldValue('defaultValue', e.target.value);
+                            }}
+                          />
+                          <Box component="span" ml={2}>
+                            {values['defaultValue']}
+                          </Box>
+                        </Box>
+                      ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['lookup'] ? (
+                        <ResourceDropdown
+                          type={fieldData.type}
+                          lookupResource={values['lookupResource']}
+                          value={values['defaultValue']}
+                          setFieldValue={setFieldValue}
+                        />
+                      ) : <Box display="block">
                         <TextField
                           variant="outlined"
                           type="text"
@@ -997,9 +1029,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             setFieldValue('defaultValue', e.target.value.trimStart());
                           }}
                         />
-                      </Box>
-                    )}
-
+                      </Box> : null}
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -1013,7 +1043,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       }
                       label="Editable Column"
                     />
-
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -1135,40 +1164,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           />
                         </Box></>
                     )}
-                    {fieldData.type === 'imageUpload' && values['isDefaultValue'] ? (
-                      <FormTypes
-                        values={{ defaultValue: values['defaultValue'] }}
-                        errors={errors}
-                        touched={touched}
-                        label={''}
-                        name={'defaultValue'}
-                        type={fieldData.type}
-                        setFieldValue={(name, value) => {
-                          setFieldValue(name, value);
-                        }}
-                        isTooltip={false}
-                      />
-                    ) : fieldData.type === 'colorPicker' && values['isDefaultValue'] ? (
-                      <Box>
-                        <input
-                          value={values['defaultValue']}
-                          type="color"
-                          onChange={(e) => {
-                            setFieldValue('defaultValue', e.target.value);
-                          }}
-                        />
-                        <Box component="span" ml={2}>
-                          {values['defaultValue']}
-                        </Box>
-                      </Box>
-                    ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['isDefaultValue'] && values['lookup'] ? (
-                      <ResourceDropdown
-                        type={fieldData.type}
-                        lookupResource={values['lookupResource']}
-                        value={values['defaultValue']}
-                        setFieldValue={setFieldValue}
-                      />
-                    ) : null}
                     {module !== 'price-template' && module !== 'product-template' ? (
                       <FormControlLabel
                         disabled={values['required']}

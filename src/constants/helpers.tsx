@@ -882,7 +882,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'colorPicker') {
       obj[key.fieldName] = value ? value : '#aaaaaa';
     } else if (key.type === 'switch' || key.type === 'checkBox') {
-      obj[key.fieldName] = value ? value : false;
+      obj[key.fieldName] = value ? Boolean(value) : false;
     } else if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
       key.displayUnits &&
         key.displayUnits.forEach((_unit) => {
