@@ -1,4 +1,17 @@
-import { Box, Button, Checkbox, Dialog, FormControl, Grid, TextField } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField
+} from '@material-ui/core';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillFilePdf } from 'react-icons/ai';
@@ -20,15 +33,17 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [], hideDetailButton = false }) {
-
   const toastConfig = useContext(CustomToastContext);
 
-  const allColumn = columns?.filter((d) => !['Actions'].includes(d?.Header || d?.headerName))?.map((d) => {
-    return {
-      fieldLabel: (d?.Header || d?.headerName),
-      fieldName: (d?.accessor || d?.field),
-    }
-  }) || [];
+  const allColumn =
+    columns
+      ?.filter((d) => !['Actions'].includes(d?.Header || d?.headerName))
+      ?.map((d) => {
+        return {
+          fieldLabel: d?.Header || d?.headerName,
+          fieldName: d?.accessor || d?.field
+        };
+      }) || [];
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -41,27 +56,65 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
   const [loading, setLoading] = useState(false);
 
   const [emailAttachments, setEmailAttachments] = useState([]);
+  const [views, setViews] = useState([]);
+  const [newViewName, setNewViewName] = useState('');
+  const [showSaveViewDialog, setShowSaveViewDialog] = useState(false);
+  const [selectedView, setSelectedView] = useState(null);
 
   useEffect(() => {
-    const temp = defaultColumns?.length > 0 ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName))?.map((e) => e.fieldLabel)
-      : allColumn?.map((e) => e.fieldLabel);
+    axiosInstance()
+      .get(`/pdf/${referenceId}/view?resource=${resource}`)
+      .then(({ data }) => {
+        setViews(data.data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }, []);
+
+  useEffect(() => {
+    const temp =
+      defaultColumns?.length > 0
+        ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName))?.map((e) => e.fieldLabel)
+        : allColumn?.map((e) => e.fieldLabel);
     setVisibleColumnsPdf([...temp]);
   }, [columns]);
 
+  const handleSaveView = () => {
+    const visibleColumnsString = visibleColumnsPdf.join(', ');
+    axiosInstance()
+      .put(`/pdf/${referenceId}/view?resource=${resource}`, {
+        name: newViewName,
+        columns: visibleColumnsString
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({ open: true, type: 'success', message: 'View saved successfully.' });
+        setViews((prevViews) => [...prevViews, data?.data?.ops[0]]);
+        setShowSaveViewDialog(false);
+        setNewViewName('');
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   const handleViewPdf = (type, pdfType, visibleColumns) => {
-    let showColumns = allColumn?.filter((d) => visibleColumns?.includes(d?.fieldLabel)).map((d) => {
-      let k = d?.fieldName;
-      if (k === 'qtyDisplay') {
-        return 'qty';
-      }
-      return k;
-    });
+    let showColumns = allColumn
+      ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
+      .map((d) => {
+        let k = d?.fieldName;
+        if (k === 'qtyDisplay') {
+          return 'qty';
+        }
+        return k;
+      });
     setLoadingType(pdfType);
-    axiosInstance().get(
-      pdfType === 'Detail'
-        ? `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`
-        : `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`
-    )
+    axiosInstance()
+      .get(
+        pdfType === 'Detail'
+          ? `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`
+          : `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`
+      )
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -202,6 +255,28 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             showRequiredLabel={false}
           />
           <CustomDialogContent>
+            <FormControl fullWidth margin="dense" size="small" variant="outlined">
+              <InputLabel id="views-label">Views</InputLabel>
+              <Select
+                labelId="views-label"
+                value={selectedView}
+                onChange={(e) => {
+                  const viewId: any = e.target.value;
+                  setSelectedView(viewId);
+                  const view = views.find((v) => v._id === e.target.value);
+                  if (view && view.columns) {
+                    const columnsArray = view.columns.split(',').map((item) => item.trim());
+                    setVisibleColumnsPdf(columnsArray);
+                  }
+                }}
+              >
+                {views.map((view) => (
+                  <MenuItem key={view._id} value={view._id}>
+                    {view.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <Grid container justify="space-between" alignItems="center">
               <Grid item style={{ padding: 5, marginTop: 10 }} xs={12} md={12} sm={12}>
                 <FormControl fullWidth>
@@ -212,7 +287,10 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                     multiple
                     value={visibleColumnsPdf}
                     onChange={(e, val) => {
-                      if (val.includes('Select All') && ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() !== val.sort().toString()) {
+                      if (
+                        val.includes('Select All') &&
+                        ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() !== val.sort().toString()
+                      ) {
                         setVisibleColumnsPdf(allColumn?.map((e) => e?.fieldLabel));
                       } else if (['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() === val.sort().toString()) {
                         setVisibleColumnsPdf([]);
@@ -231,7 +309,8 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                           style={{ marginRight: 8 }}
                           checked={
                             showColumnsDialog &&
-                              ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() === ['Select All', ...visibleColumnsPdf].sort().toString()
+                            ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() ===
+                              ['Select All', ...visibleColumnsPdf].sort().toString()
                               ? true
                               : selected
                           }
@@ -240,11 +319,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                       </React.Fragment>
                     )}
                     renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        variant="outlined"
-                        label={`Visible Columns in ${showColumnsDialog.type}`}
-                        placeholder="Select" />
+                      <TextField {...params} variant="outlined" label={`Visible Columns in ${showColumnsDialog.type}`} placeholder="Select" />
                     )}
                   />
                 </FormControl>
@@ -252,6 +327,15 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
+            <CustomButton
+              disabled={visibleColumnsPdf.length == 0}
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={() => setShowSaveViewDialog(true)}
+            >
+              Save View
+            </CustomButton>
             <CustomButton
               variant="contained"
               color="primary"
@@ -264,7 +348,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             >
               Regular
             </CustomButton>
-            {hideDetailButton ? null :
+            {hideDetailButton ? null : (
               <CustomButton
                 variant="contained"
                 color="primary"
@@ -276,7 +360,8 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                 }}
               >
                 Detail
-              </CustomButton>}
+              </CustomButton>
+            )}
           </CustomDialogFooter>
         </Dialog>
       )}
@@ -315,6 +400,21 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             showManimizeMaximize={true}
             referenceType={resource}
           />
+        </Dialog>
+      )}
+      {showSaveViewDialog && (
+        <Dialog open={showSaveViewDialog} onClose={() => setShowSaveViewDialog(false)}>
+          <DialogContent>
+            <TextField autoFocus label="View Name" type="text" fullWidth value={newViewName} onChange={(e) => setNewViewName(e.target.value)} />
+          </DialogContent>
+          <DialogActions>
+            <Button size="small" onClick={() => setShowSaveViewDialog(false)} color="primary">
+              Cancel
+            </Button>
+            <Button disabled={newViewName === ''} size="small" onClick={handleSaveView} color="primary">
+              Save
+            </Button>
+          </DialogActions>
         </Dialog>
       )}
     </Box>
