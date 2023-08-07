@@ -83,7 +83,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
   const handleSaveView = () => {
     const visibleColumnsString = visibleColumnsPdf.join(', ');
     axiosInstance()
-      .put(`/pdf/${referenceId}/view?resource=${resource}`, {
+      .post(`/pdf/${referenceId}/view?resource=${resource}`, {
         name: newViewName,
         columns: visibleColumnsString
       })
