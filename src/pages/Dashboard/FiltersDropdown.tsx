@@ -3,7 +3,7 @@ import { Popover, TextField, Box } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 
 interface Props {
-  filters: { key: string; title: string; multiple?: boolean ; defaultValue?: number;}[];
+  filters: { key: string; title: string; multiple?: boolean; defaultValue?: number; }[];
   anchorEl: any;
   closeAnchor: () => any;
   values: any;
@@ -49,7 +49,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
       <Box width={300} padding={'0px 16px 16px 16px'}>
         {filters.map((filter, index) => (
           <Box mt={'16px'} key={index}>
-            {filterOptions[filter.key] && filter?.multiple ? (
+            {filterOptions[filter.key] ? (
               <Autocomplete
                 size="small"
                 multiple={filter?.multiple}
@@ -68,16 +68,16 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
               />
             ) : (
               <TextField
-              variant="outlined"
-              type="number"
-              onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-              label={filter?.title}
-              name={filter.key}
-              fullWidth
-              margin="dense"
-              value={values[filter.key]}
-              onChange={(e) => handleChange(filter.key, Number(e.target.value))}
-            />
+                variant="outlined"
+                type="number"
+                onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                label={filter?.title}
+                name={filter.key}
+                fullWidth
+                margin="dense"
+                value={values[filter.key]}
+                onChange={(e) => handleChange(filter.key, Number(e.target.value))}
+              />
             )}
           </Box>
         ))}
