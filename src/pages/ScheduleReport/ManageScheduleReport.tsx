@@ -2,7 +2,6 @@ import { useEffect, useState, useContext, useRef } from 'react';
 import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@material-ui/core';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import { Form, Formik, FormikProps } from 'formik';
-import { KeyboardTimePicker } from '@material-ui/pickers';
 import { REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -95,7 +94,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         column: [],
         subscribeUsers: [],
         frequency: 'Daily',
-        time: new Date(),
+        time: '',
         week: '',
         day: new Date().getDay().toString()
       });
@@ -427,7 +426,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       filters,
       resource: values.resource?.value,
       column: values.column.length > 0 ? values.column.map((field) => field.fieldName) : [],
-      time: new Date(values.time),
+      // time: new Date(values.time),
       subscribeUsers: values.subscribeUsers.map((user) => user.userId)
     };
 
@@ -467,6 +466,14 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         });
     }
   };
+
+  const getTimeOption = () => {
+    const option: any = []
+    for (let i = 0; i < 24; i++) {
+      option.push(`${i}:00`)
+    }
+    return option;
+  }
 
   return (
     <Dialog
@@ -660,22 +667,27 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
-                        <KeyboardTimePicker
-                          inputVariant="outlined"
-                          size="small"
-                          id="time-picker"
-                          name="time"
-                          label="Time"
-                          autoOk
+                        <Autocomplete
+                          options={getTimeOption()}
                           fullWidth
-                          required={Boolean(values.frequency)}
+                          size="small"
+                          getOptionSelected={(option, val) => option === val}
+                          getOptionLabel={(option) => option ?? ''}
                           value={values.time}
-                          error={touched['time'] && Boolean(errors['time'])}
-                          helperText={touched['time'] && errors['time']}
-                          onChange={(date) => setFieldValue('time', date)}
-                          KeyboardButtonProps={{
-                            'aria-label': 'change time'
+                          onChange={(_, newVal) => {
+                            setFieldValue('time', newVal)
                           }}
+                          renderInput={(params) => (
+                            <TextField
+                              required={Boolean(values.frequency)}
+                              error={touched['time'] && Boolean(errors['time'])}
+                              helperText={touched['time'] && errors['time']}
+                              {...params}
+                              label="Time"
+                              name="time"
+                              variant="outlined"
+                            />
+                          )}
                         />
                       </Grid>
                       <Grid item xs={12}>
