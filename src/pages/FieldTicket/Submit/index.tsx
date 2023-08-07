@@ -125,7 +125,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
     };
 
     const handleReOpen = async () => {
-        await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData._id}/submit/re-open`, {
+        await axiosInstance().patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, {
             status: FIELD_TICKET_STATUS.inProgress
         }).then((res) => {
             fetchData()
