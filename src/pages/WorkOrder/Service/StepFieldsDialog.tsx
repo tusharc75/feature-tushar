@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme: Theme) =>
       fontWeight: 600,
       fontSize: '16px',
       lineHeight: '1.6',
-      color: 'var(--dark-primary-text,#5B5B5B)',
+      color: 'var(--dark-primary-text,#2A3042)',
       '& span': {
         fontWeight: 600,
         width: '19px',
@@ -71,7 +71,7 @@ const useStyles = makeStyles((theme: Theme) =>
       fontWeight: 400,
       fontSize: '12px',
       lineHeight: 1.5,
-      color: 'var(--dark-primary-text,#5B5B5B)',
+      color: 'var(--dark-primary-text,#2A3042)',
       textTransform: 'capitalize'
     },
     centerText: {
