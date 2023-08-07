@@ -1,8 +1,7 @@
 import { useEffect, useState, useContext, useRef } from 'react';
-import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
+import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@material-ui/core';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import { Form, Formik, FormikProps } from 'formik';
-import { KeyboardTimePicker } from '@material-ui/pickers';
 import { REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -690,23 +689,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             />
                           )}
                         />
-                        {/* <KeyboardTimePicker
-                          inputVariant="outlined"
-                          size="small"
-                          id="time-picker"
-                          name="time"
-                          label="Time"
-                          autoOk
-                          fullWidth
-                          required={Boolean(values.frequency)}
-                          value={values.time}
-                          error={touched['time'] && Boolean(errors['time'])}
-                          helperText={touched['time'] && errors['time']}
-                          onChange={(date) => setFieldValue('time', date)}
-                          KeyboardButtonProps={{
-                            'aria-label': 'change time'
-                          }}
-                        /> */}
                       </Grid>
                       <Grid item xs={12}>
                         <Box mt={2}>
