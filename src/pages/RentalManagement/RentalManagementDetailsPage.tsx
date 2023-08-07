@@ -241,7 +241,12 @@ const RentalManagementDetailsPage = () => {
         steps = steps?.filter((e) => !['Add Services'].includes(e.name));
       }
       setRentalSteps(steps);
-      setCurrentStep(getIndex(data?.processStatus, steps));
+      if (data?.status === RENTAL_STATUS.closed) {
+        setCurrentStep(steps?.length - 1);
+      }
+      else {
+        setCurrentStep(getIndex(data?.processStatus, steps));
+      }
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);

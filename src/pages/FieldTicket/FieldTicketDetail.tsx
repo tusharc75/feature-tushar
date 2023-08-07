@@ -85,7 +85,7 @@ const FieldTicketDetail = () => {
         data = response?.data?.data;
       }
       setFieldTicketData(data);
-      if (data?.status === FIELD_TICKET_STATUS.invoiced) {
+      if ([FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.submitted]?.includes(data?.status)) {
         setCurrentStep(fieldTicketSteps?.length - 1);
       }
       else {
