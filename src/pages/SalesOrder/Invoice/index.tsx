@@ -3,7 +3,7 @@ import { useState, useEffect, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Grid from '@material-ui/core/Grid/Grid';
 import { IconButton } from '@material-ui/core';
-import { salesOrder, sidebarResource } from '../../../constants/helpers';
+import { SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile } from 'react-device-detect';
 import routes from '../../../components/Helpers/Routes';
@@ -22,9 +22,9 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
 
   useEffect(() => {
     if (
-      statusOptions.findIndex((d) => d.optionLabel === 'Ready to Invoice') > statusOptions.findIndex((d) => d.optionLabel === salesOrderData?.status)
+      statusOptions.findIndex((d) => d.optionLabel === SALES_ORDER_STATUS.readyToInvoice) > statusOptions.findIndex((d) => d.optionLabel === salesOrderData?.status)
     ) {
-      updateJobStatus('Ready to Invoice');
+      updateJobStatus(SALES_ORDER_STATUS.readyToInvoice);
     }
   }, []);
 

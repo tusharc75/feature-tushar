@@ -3,7 +3,7 @@ import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Grid from '@material-ui/core/Grid/Grid';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, invoice, sidebarResource } from '../../../constants/helpers';
+import { CustomDialogTransition, INVOICE_STATUS, invoice, sidebarResource } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_invoice_product_fields } from '../../../components/Invoice/helper';
@@ -16,7 +16,7 @@ import { IconButton } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import routes from 'src/components/Helpers/Routes';
 
-const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, statusOptions, stepFullScreen, renderedFrom }) => {
+const Invoice = ({ invoiceData, setNextStep, updateJobStatus, statusOptions, stepFullScreen, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -25,8 +25,8 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
-    if (statusOptions.findIndex((d) => d.optionLabel === 'Ready to Invoice') > statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)) {
-      updateJobStatus('Ready to Invoice');
+    if (statusOptions.findIndex((d) => d.optionLabel === INVOICE_STATUS.readyToInvoice) > statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)) {
+      updateJobStatus(INVOICE_STATUS.readyToInvoice);
     }
   }, []);
 
@@ -37,6 +37,9 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
   const fetchFields = async () => {
     try {
       let data = await fetch_invoice_product_fields(invoiceData?.currency);
+      data?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
       setAllFields(JSON.parse(JSON.stringify(data)));
       const newColumns = generateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
       let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
@@ -168,7 +171,7 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
 
   return (
     <Fragment>
-      <Box pb={2}>
+      <Box p={2}>
         <PreviewDownload
           resource={sidebarResource.invoice}
           referenceId={invoiceData?._id}
