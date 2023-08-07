@@ -1,5 +1,5 @@
 import { Box, Button, IconButton } from '@material-ui/core';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -13,9 +13,10 @@ import { FIELD_TICKET_STATUS, fieldTicket, sidebarResource } from 'src/constants
 import PreviewDownload from 'src/components/PreviewDownload';
 import { set, startCase } from 'lodash';
 import ManageSubmit from './ManageSubmit';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, fetchData }) => {
-
+    const toastConfig = useContext(CustomToastContext);
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState([]);
     const [submitDialog, setSubmitDialog] = useState(false);
@@ -112,16 +113,29 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
             parent.qty = parent.qty;
             parent.type = parent.type;
         });
-
         costs?.forEach((ele, i) => {
             ele.index = (i + 1) + material?.length;
             ele.detail = ele.description || "";
             ele.description = ele.description || "";
             ele.type = 'manualEntry';
         });
-
         setRowsData([...material, ...costs]);
     };
+
+    const handleReOpen = async () => {
+        await axiosInstance().patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, {
+            status: FIELD_TICKET_STATUS.inProgress
+        }).then(({ data }) => {
+            toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: data?.message
+            });
+            fetchData()
+        }).catch((err) => {
+            toastConfig.setToastConfig(err)
+        })
+    }
 
 
     return (
@@ -131,7 +145,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                     <PreviewDownload resource={sidebarResource.fieldTicket} referenceId={id} columns={columns} isSendEmail />
                 </Box>
                 <Box display="flex">
-                    {fieldTicketData.status === FIELD_TICKET_STATUS.new && <Button
+                    {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && <Button
                         variant="contained"
                         color="primary"
                         size='small'
@@ -140,6 +154,14 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                         }}
                     >
                         Submit
+                    </Button>}
+                    {fieldTicketData.status === FIELD_TICKET_STATUS.submitted && <Button
+                        variant="contained"
+                        color="primary"
+                        size='small'
+                        onClick={handleReOpen}
+                    >
+                        Re-Open
                     </Button>}
                 </Box>
             </Box>
