@@ -83,24 +83,22 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [isMinimized, setMinimized] = React.useState(true);
 
   React.useEffect(() => {
-    try {
-      const storedColumns = localStorage.getItem(renderedFrom)
-      if (storedColumns) {
-        const latestColumns = [...JSON.parse(storedColumns)];
-        setSortedColumns(latestColumns);
-        if (latestColumns.filter(f => f.sticky === undefined).some(s => s.isVisible === false)) {
-          setAllChecked(false)
-        }
-      } else {
-        setSortedColumns([...columns]);
-      }
-    } catch (ex) {
-      setSortedColumns([...columns]);
-    }
+    setSortedColumns([...columns]);
     setOldData([...columns].map(d => {
       return { [d.id]: d.isVisible }
     }));
   }, []);
+
+  useEffect(() => {
+    const tempColumns = sortedColumns?.length > 0 ? sortedColumns : [...columns];
+    if (tempColumns?.some(s => s.sticky === undefined && !s.isVisible)) {
+      setAllChecked(false)
+    } else {
+      setAllChecked(true)
+    }
+
+  }, [sortedColumns])
+
 
 
   const handleToggle = (column: any, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,16 +129,22 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       })
       dataToStore.push(object);
     })
-    const columnState = JSON.stringify([...dataToStore]);
-    localStorage.setItem(renderedFrom, columnState);
+
+    if (renderedFrom && renderedFrom !== '') {
+      let hidedColumns = dataToStore?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.id)).map((o) => o?.id);
+      updateGridHiddenColumns(hidedColumns);
+    }
+
     setColumnOrder([...sortedColumns.map(m => m.id)])
     setHiddenColumns([...sortedColumns].filter(f => f.sticky === undefined && f.isVisible === false).map(m => m.id))
     onClose();
   };
 
   const resetColumnOrder = () => {
-    localStorage.removeItem(renderedFrom)
-    setColumnOrder([])
+    if (renderedFrom && renderedFrom !== '') {
+      updateGridHiddenColumns([]);
+    }
+    setColumnOrder([...columns.map(m => m.id)])
     setHiddenColumns([])
     onClose()
   }

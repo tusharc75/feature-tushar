@@ -35,7 +35,7 @@ const CreateInvoiceDialog = ({ fieldTicketData, onSuccess, onClose }) => {
 
     const fetchFields = async () => {
         setColumns(null);
-        var { fields } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
+        var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
         const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
         let column: any = [
             {

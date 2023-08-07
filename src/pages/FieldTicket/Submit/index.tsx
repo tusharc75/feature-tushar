@@ -28,13 +28,13 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
 
     const fetchFields = async () => {
         setColumns(null);
-        var { fields: data, allFields } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
+        var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
         if (!allowedToEdit) {
-            allFields?.forEach((e) => {
+            fields?.forEach((e) => {
                 e.isColumnEditable = false;
             });
         }
-        const newColumns = generateCustomTableColumns(data, fieldTicketData?.currency, renderedFrom);
+        const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
         let column: any = [
             {
                 accessor: 'index',

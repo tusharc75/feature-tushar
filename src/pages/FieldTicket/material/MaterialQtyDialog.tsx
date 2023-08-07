@@ -76,7 +76,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
     const fetchData = async () => {
         setFetchingData(true);
-        var { fields: data } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
+        var data = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
         setAllFields(JSON.parse(JSON.stringify(data)));
         if (isBulkedit) {
             let unitArray: any = [];
@@ -521,8 +521,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                                                                     isTooltip={field.isTooltip}
                                                                                     tooltipMessage={field.tooltipMessage}
                                                                                     size="small"
-                                                                                    // minDate={fieldTicketData?.estimateStartDate}
-                                                                                    // maxDate={fieldTicketData?.estimateEndDate}
+                                                                                // minDate={fieldTicketData?.estimateStartDate}
+                                                                                // maxDate={fieldTicketData?.estimateEndDate}
                                                                                 />
                                                                             </Box>
                                                                         </Box>
