@@ -97,13 +97,13 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   }, [columns, renderCount, selectedServiceOption, tabValue]);
 
   const fetchColumns = async () => {
-    var { fields, allFields } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
+    var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
     if (!allowedToEdit) {
-      allFields?.forEach((e) => {
+      fields?.forEach((e) => {
         e.isColumnEditable = false;
       });
     }
-    setAllFields(JSON.parse(JSON.stringify(allFields)));
+    setAllFields(JSON.parse(JSON.stringify(fields)));
     const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
@@ -281,11 +281,11 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
 
     setColumns([
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -301,22 +301,19 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedServiceOption?.optionValue}`;
     }
-
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data } }) => {
-        const consumables = data?.material;
-        consumables?.forEach((parent, i) => {
-          parent.srno = i + 1;
-          parent.productName = parent?.productDetail?.productName;
-          parent.productDescription = parent?.productDetail?.productDescription;
-          parent.productNumber = parent?.productDetail?.productNumber;
-          parent.qtyDisplay = parent?.qty;
-          parent.serviceId = parent?.service?.optionValue;
-          parent.service = parent?.service?.optionLabel;
-        });
-        setDataRows(consumables);
-      })
+    axiosInstance().get(api).then(({ data: { data } }) => {
+      const consumables = data?.material;
+      consumables?.forEach((parent, i) => {
+        parent.index = i + 1;
+        parent.productName = parent?.productDetail?.productName;
+        parent.productDescription = parent?.productDetail?.productDescription;
+        parent.productNumber = parent?.productDetail?.productNumber;
+        parent.qtyDisplay = parent?.qty;
+        parent.serviceId = parent?.service?.optionValue;
+        parent.service = parent?.service?.optionLabel;
+      });
+      setDataRows(consumables);
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -341,7 +338,6 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       }
       material.push(element);
     });
-
     const priceData: any = await calculatePrice(fieldTicketData, material);
     AddConsumables(material, priceData);
   };
@@ -368,10 +364,14 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
         }
       });
     }
-
     axiosInstance()
       .post(`${fieldTicket.api}/${id}/material`, { material })
-      .then(() => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
         setConsumablesDialog(false);
         fetchData();
       })
@@ -384,7 +384,12 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     setDeleting(true);
     axiosInstance()
       .put(`${fieldTicket.api}/${id}/material/delete`, { ids: rows })
-      .then(() => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
         setDeleting(false);
         fetchData();
         setDeleteData(null);
@@ -400,7 +405,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     rows.forEach((element) => {
       element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
       element.service = element.serviceId;
-      delete element.srno;
+      delete element.index;
       delete element.productDescription;
       delete element.productName;
       delete element.productNumber;
@@ -411,7 +416,12 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     setUpdating(true);
     axiosInstance()
       .put(`${fieldTicket.api}/${id}/material`, { material: rows })
-      .then(() => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
         fetchData();
         if (saveAndNext) {
           const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);

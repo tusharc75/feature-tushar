@@ -38,13 +38,13 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
 
   const fetchFields = async () => {
     setColumns(null);
-    var { fields: data, allFields } = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
+    var data = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
     if (!allowedToEdit) {
-      allFields?.forEach((e) => {
+      data?.forEach((e) => {
         e.isColumnEditable = false;
       });
     }
-    setAllFields(JSON.parse(JSON.stringify(allFields)));
+    setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateCustomTableColumns(data, fieldTicketData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
