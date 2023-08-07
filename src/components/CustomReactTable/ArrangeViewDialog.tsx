@@ -132,7 +132,12 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       dataToStore.push(object);
     })
     const columnState = JSON.stringify([...dataToStore]);
-    localStorage.setItem(renderedFrom, columnState);
+
+    if (renderedFrom && renderedFrom !== '') {
+      let hidedColumns = dataToStore?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.id)).map((o) => o?.id);
+      updateGridHiddenColumns(hidedColumns);
+    }
+
     setColumnOrder([...sortedColumns.map(m => m.id)])
     setHiddenColumns([...sortedColumns].filter(f => f.sticky === undefined && f.isVisible === false).map(m => m.id))
     onClose();
