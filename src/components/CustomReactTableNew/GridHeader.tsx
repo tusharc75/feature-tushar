@@ -4,19 +4,19 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { IconButton } from '@material-ui/core';
 
 interface GridHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  onGridRefresh: () => void | null;
+  refreshGrid: () => void | null;
   children?: React.ReactNode;
   buttons?: React.ReactNode;
   loading: boolean;
 }
 
-const GridHeader: FC<GridHeaderProps> = ({ onGridRefresh, children, buttons, className, loading, ...others }) => {
+const GridHeader: FC<GridHeaderProps> = ({ refreshGrid, children, buttons, className, loading, ...others }) => {
   return (
     <div className={`flex items-center justify-between my-[8px] gap-[8px] flex-wrap ${className}`} {...others}>
       <div>{children}</div>
       <div className="buttons flex flex-wrap gap-[8px]">
         {buttons}
-        {onGridRefresh && (
+        {refreshGrid && (
           <HtmlTooltip title="Refresh" placement="top" arrow>
             <IconButton
               className={`refresh-arrange-button`}
@@ -24,7 +24,7 @@ const GridHeader: FC<GridHeaderProps> = ({ onGridRefresh, children, buttons, cla
               disabled={loading}
               size="small"
               onClick={() => {
-                onGridRefresh();
+                refreshGrid();
               }}
             >
               <RefreshIcon style={{ fontSize: '20px' }} />

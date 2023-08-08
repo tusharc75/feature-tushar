@@ -770,7 +770,7 @@ const SerializedAssetTest = () => {
               limit={limit}
               customFilters={filters}
               sorting={sorting}
-              onGridRefresh={fetchProductInventory}
+              refreshGrid={fetchProductInventory}
               loading={loading}
             />
           )

@@ -198,7 +198,7 @@ function CustomReactTable({
   allowPagination = true,
   limit = gridPageSizes[0],
   customFilters = [],
-  onGridRefresh = null,
+  refreshGrid = null,
   dispatch,
   sorting,
   loading
@@ -591,7 +591,7 @@ function CustomReactTable({
 
       <div className="table-container-v1" style={{ position: 'relative' }}>
         <GridHeader
-          onGridRefresh={onGridRefresh}
+          refreshGrid={refreshGrid}
           loading={loading}
           buttons={
             <>
