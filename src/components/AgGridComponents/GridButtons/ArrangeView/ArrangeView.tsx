@@ -39,11 +39,12 @@ const ArrangeView = ({
   }: any = useData();
   const { dispatch }: any = useData();
 
-  const updateGridHiddenColumns = (hiddenColumns = []) => {
+  const updateGridHiddenColumns = (hiddenColumns = [], columnOrder = []) => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(function () {
       let data = localStorage.getItem('gridMetaData');
       let request = data == 'undefined' ? {} : { ...JSON.parse(data) };
+      request[renderedFrom].order = columnOrder;
       if (request[renderedFrom]) {
         request[renderedFrom].hide = [...hiddenColumns];
       } else {
@@ -125,7 +126,7 @@ const ArrangeView = ({
               columnApi={columnApi}
               isClientSideGrid={isClientSideGrid}
               renderedFrom={renderedFrom}
-              refreshGrid={refreshGrid} 
+              refreshGrid={refreshGrid}
               defaultColumns={defaultColumns}
             />
           )}

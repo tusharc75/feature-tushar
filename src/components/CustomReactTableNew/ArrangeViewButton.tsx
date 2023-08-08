@@ -1,16 +1,18 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Tooltip, IconButton } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
 import { disabledColumns } from '../../constants/useColumns';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import ArrangeViewDialog from './ArrangeViewDialog';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 let timeout;
 
 const ArrangeViewButton = ({
   columns,
+  loading = false,
   renderedFrom = null,
   isClientSideGrid = false,
   saveColumnOptions = false,
@@ -71,11 +73,13 @@ const ArrangeViewButton = ({
 
   return (
     <>
-      <Tooltip title="Arrange View" placement="top">
+      <HtmlTooltip title="Arrange View" placement="top" arrow>
         <IconButton
           aria-describedby="columnSelection"
           size="small"
-          className="px-2  arrange-view-v2"
+          color="primary"
+          disabled={loading}
+          className="refresh-arrange-button"
           onClick={(event) => {
             setOpenColumnSelection(true);
             setOpenColumnSelectionAnchorEl(event.currentTarget);
@@ -83,7 +87,7 @@ const ArrangeViewButton = ({
         >
           <SwapHorizIcon />
         </IconButton>
-      </Tooltip>
+      </HtmlTooltip>
 
       {openColumnSelection && (
         <>

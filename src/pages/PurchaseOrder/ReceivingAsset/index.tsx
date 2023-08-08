@@ -4,7 +4,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Button, Chip, Dialog, Grid, IconButton, useMediaQuery, useTheme } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { dateFormat, purchaseOrder, PURCHASE_ORDER_STATUS, prepareDataForGrid, formatAmountWithCurrency } from 'src/constants/helpers';
+import { dateFormat, purchaseOrder, PURCHASE_ORDER_STATUS, prepareDataForGrid, formatAmountWithCurrency, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
@@ -25,6 +25,7 @@ import Logs from './Logs';
 import History from 'src/pages/ProductInventory/LedgerHistory';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 
 const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
@@ -86,22 +87,22 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       disabled: true,
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
-        <p className="text-truncate">{row.original.detail}</p>
+          <p className="text-truncate">{row.original.detail}</p>
           <IconButton
             size="small"
             onClick={() => {
-              if(row.original.type === 'Product') {
-               window.open(`${routes.productDetail.path}/${row.original.productId}`)
-              } 
+              if (row.original.type === 'Product') {
+                window.open(`${routes.productDetail.path}/${row.original.productId}`)
+              }
               else if (row.original.type === 'Asset') {
                 window.open(`${routes.serializedAssetDetail.path}/${row.original.assetId}`)
-              } 
+              }
             }}
           >
             <OpenInNewIcon fontSize="small" color="primary" />
           </IconButton>
-      </div>
-        )
+        </div>
+      )
     });
     column.push({
       accessor: 'description',
@@ -264,9 +265,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             row?.original?.type === 'Product' ? (
               <>
                 {permissions?.purchaseOrder?.isUpdate &&
-                allowedToEdit &&
-                row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) &&
-                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+                  allowedToEdit &&
+                  row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) &&
+                  ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
                   <HtmlTooltip title="Reject">
                     <span>
                       <IconButton
@@ -437,6 +438,22 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           )}
         </Box>
         <div className="d-flex gap-2">
+          {/* <PreviewDownload
+            resource={sidebarResource.purchaseOrder}
+            referenceId={purchaseOrderData?._id}
+            columns={columns?.map((e) => { return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor } })}
+            isSendEmail={true}
+            defaultColumns={[
+              'index',
+              'type',
+              'detail',
+              'description',
+              'qty',
+              `price_${purchaseOrderData?.currency?.toLowerCase()}`,
+              `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
+              `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
+              `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
+            ]} /> */}
           <SendEmail purchaseOrderData={purchaseOrderData} />
         </div>
       </Box>
