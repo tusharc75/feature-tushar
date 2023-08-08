@@ -122,7 +122,7 @@ const SerializedAsset = () => {
           setProductCategoryList(data);
         });
     }
-  }, []);
+  }, [selectedEntity]);
 
   useEffect(() => {
     axiosInstance()
@@ -130,7 +130,7 @@ const SerializedAsset = () => {
       .then(({ data: { data } }) => {
         setWarehouseOptions(data['Warehouse']);
       });
-  }, []);
+  }, [selectedEntity]);
 
   useEffect(() => {
     if (productCategory && productCategory !== '') {
