@@ -43,6 +43,7 @@ const useStyles = makeStyles((theme: Theme) =>
 interface ArrangeColumnsProps {
   onClose: VoidFunction;
   columns: any[];
+  defaultColumns: any[];
   setColumns?: any;
   columnApi: any;
   isClientSideGrid: boolean;
@@ -63,6 +64,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const {
     onClose,
     columns,
+    defaultColumns,
     setColumns,
     columnApi,
     isClientSideGrid,
@@ -131,8 +133,11 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     })
 
     if (renderedFrom && renderedFrom !== '') {
-      let hidedColumns = dataToStore?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.id)).map((o) => o?.id);
-      updateGridHiddenColumns(hidedColumns);
+      const hidedColumns = dataToStore?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.id)).map((o) => o?.id);
+
+      const columnOrder = dataToStore?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.id)).map((o) => o?.id);
+
+      updateGridHiddenColumns(hidedColumns, columnOrder);
     }
 
     setColumnOrder([...sortedColumns.map(m => m.id)])
@@ -142,9 +147,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
   const resetColumnOrder = () => {
     if (renderedFrom && renderedFrom !== '') {
-      updateGridHiddenColumns([]);
+      updateGridHiddenColumns([], []);
     }
-    setColumnOrder([...columns.map(m => m.id)])
+    setColumnOrder([...defaultColumns.map(m => m.id)])
     setHiddenColumns([])
     onClose()
   }

@@ -153,7 +153,10 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     if (!isClientSideGrid || saveColumnOptions) {
       let tempColumnState = columnApi.getColumnState();
       let hidedColumns = tempColumnState.filter((o) => o?.hide).map((o) => o?.colId);
-      updateGridHiddenColumns(hidedColumns);
+      const lockedColumns = newColumns?.filter(col => col?.lockPosition)?.map((col) => col?.field) || [];
+      const otherColumns = newColumns?.filter(col => !col?.lockPosition)?.map((col) => col?.field) || [];
+      const colOrder = [...lockedColumns, ...otherColumns];
+      updateGridHiddenColumns(hidedColumns, colOrder);
     }
     const columnState = JSON.stringify(columnApi.getColumnState());
     localStorage.setItem(renderedFrom, columnState);
@@ -183,7 +186,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
   const handleReset = () => {
     // refreshGrid();
-  
+
     delete localStorage[renderedFrom];
     const newColumns = [...defaultColumns];
     newColumns?.forEach((e: any) => {
@@ -225,7 +228,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     if (!isClientSideGrid || saveColumnOptions) {
       let tempColumnState = columnApi.getColumnState();
       let hidedColumns = tempColumnState.filter((o) => o?.hide).map((o) => o?.colId);
-      updateGridHiddenColumns(hidedColumns);
+      updateGridHiddenColumns(hidedColumns, []);
     }
 
     onClose();
