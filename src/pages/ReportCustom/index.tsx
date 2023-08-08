@@ -42,7 +42,7 @@ const CustomReport = () => {
     },
     {
       field: 'resource',
-      headerName: 'Resource',
+      headerName: 'Report',
       show: true,
       disabled: false,
       cellRenderer: 'commonRenderer',

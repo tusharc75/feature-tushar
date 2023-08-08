@@ -10,7 +10,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { invoice, invoiceProcessSteps, getUniqueCurrencies, ACTIVITY_RESOURCE } from '../../constants/helpers';
+import { invoice, invoiceProcessSteps, ACTIVITY_RESOURCE, INVOICE_STATUS } from '../../constants/helpers';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
@@ -50,7 +50,6 @@ const InvoiceDetails = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -94,7 +93,7 @@ const InvoiceDetails = () => {
   }, [id]);
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 1) {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 2) {
       updateProcessStatus(invoiceProcessStepsNames[currentStep]);
     }
   }, [currentStep]);
@@ -125,23 +124,24 @@ const InvoiceDetails = () => {
 
   const fetchInvoiceData = async () => {
     setLoading(true);
-
     try {
       let data;
       const response: any = await axiosInstance().get(`${invoice.api}/${id}`);
       data = response?.data?.data;
-
-      setCurrentStep(getIndex(data?.processStatus, invoiceProcessSteps));
+      if ([INVOICE_STATUS.invoiced, INVOICE_STATUS.closed]?.includes(data?.status)) {
+        setCurrentStep(invoiceProcessSteps?.length - 1);
+      }
+      else {
+        setCurrentStep(getIndex(data?.processStatus, invoiceProcessSteps));
+      }
       setHeadingLabel(data.invoiceNumber);
       setCustomizedRoutes([routes.invoice, { title: `${data.invoiceNumber}` }]);
       setInvoiceData(data);
-
-      setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
       }
-      setAllowedToEdit(isAllowedToEdit && ['Invoiced', 'Closed'].indexOf(data.status) === -1);
+      setAllowedToEdit(isAllowedToEdit);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -192,71 +192,71 @@ const InvoiceDetails = () => {
           <Box className="control-buttons-v1">
             {invoiceData ? (
               <>
-                {permissions?.invoice?.isUpdate && allowedToEdit && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-
-                {permissions?.invoice?.isDelete && ['Invoiced', 'Closed'].indexOf(invoiceData?.status) === -1 && (
+                {permissions?.invoice?.isUpdate && allowedToEdit &&
+                  ![INVOICE_STATUS.invoiced, INVOICE_STATUS.closed].includes(invoiceData?.status) && (
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      className={'btn-outline-v1'}
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                    >
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    </Button>
+                  )}
+                {permissions?.invoice?.isDelete && ![INVOICE_STATUS.invoiced, INVOICE_STATUS.closed].includes(invoiceData?.status) && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
-
-                {permissions?.invoice?.isUpdate && ['Ready to Invoice', 'Invoiced'].includes(invoiceData?.status) && (
-                  <>
-                    <Button
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                    >
-                      {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {statusOptions?.map((o, index) => {
-                        return (
-                          <MenuItem
-                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)}
-                            onClick={() => {
-                              closeActions();
-                              handleStatusChange(o);
-                            }}
-                            value={o}
-                          >
-                            {o?.optionLabel}
-                          </MenuItem>
-                        );
-                      })}
-                    </Menu>
-                  </>
-                )}
+                {permissions?.invoice?.isUpdate &&
+                  [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
+                    <>
+                      <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                      >
+                        {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        {statusOptions?.map((o, index) => {
+                          return (
+                            <MenuItem
+                              disabled={index <= statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)}
+                              onClick={() => {
+                                closeActions();
+                                handleStatusChange(o);
+                              }}
+                              value={o}
+                            >
+                              {o?.optionLabel}
+                            </MenuItem>
+                          );
+                        })}
+                      </Menu>
+                    </>
+                  )}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton 
-              referenceId={invoiceData?._id} 
-              resource={ACTIVITY_RESOURCE.invoice} 
+            <ActivityButton
+              referenceId={invoiceData?._id}
+              resource={ACTIVITY_RESOURCE.invoice}
               resourceLabel={invoiceData?.invoiceNumber}
-              />
+            />
           </Box>
         </Box>
       </Box>
@@ -312,7 +312,7 @@ const InvoiceDetails = () => {
             steps={invoiceProcessSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={['Invoiced', 'Closed'].includes(invoiceData?.status)}
+            isStepEnded={[INVOICE_STATUS.invoiced, INVOICE_STATUS.closed].includes(invoiceData?.status)}
           />
           <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && invoiceData && (
@@ -336,7 +336,6 @@ const InvoiceDetails = () => {
               <Invoice
                 invoiceData={invoiceData}
                 setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
                 updateJobStatus={updateJobStatus}
                 stepFullScreen={stepFullScreen}
                 statusOptions={statusOptions}

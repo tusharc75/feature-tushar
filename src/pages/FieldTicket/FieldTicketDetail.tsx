@@ -49,6 +49,7 @@ const FieldTicketDetail = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [nextStep, setNextStep] = useState(false);
+  const [prevStep, setPrevStep] = useState(true);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
 
   useEffect(() => {
@@ -84,7 +85,7 @@ const FieldTicketDetail = () => {
         data = response?.data?.data;
       }
       setFieldTicketData(data);
-      if (data?.status === FIELD_TICKET_STATUS.invoiced) {
+      if ([FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.submitted]?.includes(data?.status)) {
         setCurrentStep(fieldTicketSteps?.length - 1);
       }
       else {
@@ -218,6 +219,7 @@ const FieldTicketDetail = () => {
           <Steps
             isNextStep={false}
             nextStep={nextStep}
+            isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.submitted ? false : true}
             steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}

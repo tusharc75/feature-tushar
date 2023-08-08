@@ -91,7 +91,7 @@ const DemandOrderDetails = () => {
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
       }
-      setAllowedToEdit(isAllowedToEdit && ['Invoiced', 'Closed'].indexOf(data.status) === -1);
+      setAllowedToEdit(isAllowedToEdit);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -142,11 +142,11 @@ const DemandOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton 
-              referenceId={salesOrderData?._id} 
-              resource={ACTIVITY_RESOURCE.demandOrder} 
+            <ActivityButton
+              referenceId={salesOrderData?._id}
+              resource={ACTIVITY_RESOURCE.demandOrder}
               resourceLabel={salesOrderData?.demandOrderNumber}
-              />
+            />
           </Box>
         </Box>
       </Box>

@@ -81,7 +81,8 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
-          finalObject['canDelete'] = permissions?.fieldTicket?.isDelete;
+          finalObject['canDelete'] = u?.canDelete && permissions?.fieldTicket?.isDelete && u?.owner?.optionValue === user?.user?._id
+
           let res = {
             ...finalObject
           };
@@ -174,17 +175,22 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
           </IconButton>
         </HtmlTooltip>
       )}
-      {permissions?.fieldTicket?.isDelete && (
+      {params?.data?.canDelete ? (
         <HtmlTooltip title="Delete">
           <IconButton
-            size="small"
             aria-label="Delete"
             onClick={() => {
               setDeleteRecord([params.data._id]);
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon color="error" />
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </HtmlTooltip>
+      ) : (
+        <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
+          <IconButton aria-label="Delete">
+            <DeleteIcon fontSize="small" color="disabled" />
           </IconButton>
         </HtmlTooltip>
       )}

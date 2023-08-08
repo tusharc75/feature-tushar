@@ -49,7 +49,7 @@ const ScheduleReport = () => {
     },
     {
       field: 'resource',
-      headerName: 'Resource',
+      headerName: 'Report',
       show: true,
       disabled: false,
       cellRenderer: 'commonRenderer',
@@ -73,7 +73,7 @@ const ScheduleReport = () => {
     // },
     {
       field: 'subscribeUsers',
-      headerName: 'Subscribe Users',
+      headerName: 'Users',
       show: true,
       disabled: false,
       cellRenderer: 'commonRenderer',

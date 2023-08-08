@@ -53,6 +53,11 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
 
   const fetchFields = async () => {
     let data = await fetch_invoice_product_fields(invoiceData?.currency);
+    if (!allowedToEdit) {
+      data?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
+    }
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');

@@ -11,7 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { salesOrder, salesOrderProcessSteps, getUniqueCurrencies, ACTIVITY_RESOURCE } from '../../constants/helpers';
+import { salesOrder, salesOrderProcessSteps, getUniqueCurrencies, ACTIVITY_RESOURCE, SALES_ORDER_STATUS } from '../../constants/helpers';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
@@ -145,7 +145,7 @@ const SalesOrderDetails = () => {
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
       }
-      setAllowedToEdit(isAllowedToEdit && ['Invoiced', 'Closed'].indexOf(data.status) === -1);
+      setAllowedToEdit(isAllowedToEdit);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -171,14 +171,10 @@ const SalesOrderDetails = () => {
   };
 
   const updateJobStatus = (status) => {
-    // need to change the api
     axiosInstance()
       .patch(`${salesOrder.api}/status/${salesOrderData._id}`, { status: status })
       .then(({ data: { data } }) => {
         fetchSalesOrderData();
-        if (status === 'Invoiced') {
-          setCurrentStep(1);
-        }
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -211,11 +207,11 @@ const SalesOrderDetails = () => {
                   </Button>
                 )}
 
-                {permissions?.salesOrder?.isDelete && ['Invoiced', 'Closed'].indexOf(salesOrderData?.status) === -1 && (
+                {permissions?.salesOrder?.isDelete && [SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
 
-                {permissions?.salesOrder?.isUpdate && ['Ready to Invoice', 'Invoiced'].includes(salesOrderData?.status) && (
+                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
                   <>
                     <Button
                       variant="outlined"
@@ -260,11 +256,11 @@ const SalesOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton 
-              referenceId={salesOrderData?._id} 
-              resource={ACTIVITY_RESOURCE.salesOrder} 
+            <ActivityButton
+              referenceId={salesOrderData?._id}
+              resource={ACTIVITY_RESOURCE.salesOrder}
               resourceLabel={salesOrderData?.salesOrderNo}
-              />
+            />
           </Box>
         </Box>
       </Box>
@@ -328,7 +324,7 @@ const SalesOrderDetails = () => {
             steps={salesOrderProcessSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={['Invoiced', 'Closed'].includes(salesOrderData?.status)}
+            isStepEnded={[SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.closed].includes(salesOrderData?.status)}
           />
           <ContentFullScreen title={salesOrderProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && salesOrderData && (
