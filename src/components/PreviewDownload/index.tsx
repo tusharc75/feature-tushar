@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Dialog, FormControl, Grid, IconButton, TextField} from '@material-ui/core';
+import { Box, Button, Checkbox, Dialog, FormControl, Grid, IconButton, TextField } from '@material-ui/core';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillEdit, AiFillFilePdf } from 'react-icons/ai';
@@ -23,6 +23,7 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [], hideDetailButton = false }) {
+  
   const toastConfig = useContext(CustomToastContext);
 
   const allColumn =
@@ -47,13 +48,15 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
 
   const [emailAttachments, setEmailAttachments] = useState([]);
   const [views, setViews] = useState([]);
+
   const [showSaveViewDialog, setShowSaveViewDialog] = useState({ open: false, data: null });
   const [selectedView, setSelectedView] = useState(null);
+
   const [isViewDeleteConfirm, setIsViewDeleteConfirm] = useState({ open: false, id: null });
 
   const fetchUserViews = () => {
     axiosInstance()
-      .get(`/pdf/${referenceId}/view?resource=${resource}`)
+      .get(`/pdf/view?resource=${resource}`)
       .then(({ data }) => {
         setViews(data.data);
       })
@@ -76,16 +79,16 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
 
   const handleDeleteView = () => {
     axiosInstance()
-      .post(`/pdf/${referenceId}/view/remove`, { _id: isViewDeleteConfirm.id })
+      .post(`/pdf/view/remove`, { _id: isViewDeleteConfirm.id })
       .then(({ data }) => {
-        fetchUserViews();
-        setIsViewDeleteConfirm({ open: false, id: null });
-        setSelectedView(null);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
+        fetchUserViews();
+        setIsViewDeleteConfirm({ open: false, id: null });
+        setSelectedView(null);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -249,40 +252,42 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             showRequiredLabel={false}
           />
           <CustomDialogContent>
-            <Autocomplete
-              fullWidth
-              size="small"
-              value={selectedView}
-              onChange={(e, selectedOption) => {
-                setSelectedView(selectedOption);
-                if (selectedOption && selectedOption.columns) {
-                  const columnsArray = selectedOption.columns.split(',').map((item) => item.trim());
-                  setVisibleColumnsPdf(columnsArray);
-                }
-              }}
-              getOptionLabel={(option) => option.name}
-              renderOption={(option) => (
-                <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-                  <span style={{ width: 'calc(100% - 71px)' }}>
-                    {option?.name}
-                  </span>
-                  <Box>
-                    <IconButton size="small" style={{ marginRight: '20px' }}>
-                      <AiFillEdit />
-                    </IconButton>
-                    <IconButton size="small" onClick={() => setIsViewDeleteConfirm({ open: true, id: option._id })}>
-                      <RiDeleteBin6Fill />
-                    </IconButton>
-                  </Box>
-                </Box>
-              )}
-              id="controllable-states-demo"
-              options={views}
-              renderInput={(params) => <TextField {...params} fullWidth label="Select a View" variant="outlined" />}
-            />
             <Grid container justify="space-between" alignItems="center">
               <Grid item style={{ padding: 5, marginTop: 10 }} xs={12} md={12} sm={12}>
                 <FormControl fullWidth>
+                  <Box pb={5}>
+                    <Autocomplete
+                      fullWidth
+                      size="small"
+                      value={selectedView}
+                      onChange={(e, selectedOption) => {
+                        setSelectedView(selectedOption);
+                        if (selectedOption && selectedOption.columns) {
+                          const columnsArray = selectedOption.columns.split(',').map((item) => item.trim());
+                          setVisibleColumnsPdf(columnsArray);
+                        }
+                      }}
+                      getOptionLabel={(option) => option.name}
+                      renderOption={(option) => (
+                        <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
+                          <span style={{ width: 'calc(100% - 71px)' }}>
+                            {option?.name}
+                          </span>
+                          <Box>
+                            <IconButton size="small" style={{ marginRight: '20px' }}>
+                              <AiFillEdit />
+                            </IconButton>
+                            <IconButton size="small" onClick={() => setIsViewDeleteConfirm({ open: true, id: option._id })}>
+                              <RiDeleteBin6Fill />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      )}
+                      id="controllable-states-demo"
+                      options={views}
+                      renderInput={(params) => <TextField {...params} fullWidth label="Select View" variant="outlined" />}
+                    />
+                  </Box>
                   <Autocomplete
                     id="demo-mutiple-chip"
                     fullWidth
@@ -312,7 +317,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                           style={{ marginRight: 8 }}
                           checked={
                             showColumnsDialog &&
-                            ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() ===
+                              ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() ===
                               ['Select All', ...visibleColumnsPdf].sort().toString()
                               ? true
                               : selected
@@ -336,7 +341,6 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
               }}
               disabled={visibleColumnsPdf.length == 0}
               size="small"
-              color="primary"
               className="new-dropdown-v1"
             >
               {selectedView ? 'Update View' : 'Save View'}
@@ -419,11 +423,14 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
         <ViewDialog
           columns={visibleColumnsPdf}
           resource={resource}
-          referenceId={referenceId}
-          showSaveViewDialog={showSaveViewDialog}
-          setShowSaveViewDialog={setShowSaveViewDialog}
-          fetchUserViews={fetchUserViews}
-          setViews={setViews}
+          handleSucess={() => {
+            setShowSaveViewDialog({ open: false, data: null });
+            fetchUserViews()
+          }}
+          handleClose={() => {
+            setShowSaveViewDialog({ open: false, data: null });
+          }}
+          viewData={showSaveViewDialog.data}
         />
       )}
     </Box>
