@@ -42,7 +42,8 @@ const AssignProductDialog = ({
   handleCloseDialog,
   assignedProducts,
   reference = 'product',
-  serialized = null
+  serialized = null,
+  extraDeepFilter = []
 }) => {
   const renderedFrom = `${routes.product.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -169,6 +170,11 @@ const AssignProductDialog = ({
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     const updatedFilters = [];
+    if (extraDeepFilter?.length > 0) {
+      extraDeepFilter?.map((e) => {
+        updatedFilters.push(e);
+      })
+    }
     if (isProductType) {
       updatedFilters.push({
         field: 'productType',

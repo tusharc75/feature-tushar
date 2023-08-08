@@ -763,7 +763,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {addProductDialog && (
+      {addProductDialog && purchaseOrderData && (
         <AssignProductDialog
           productsDialogOpen={addProductDialog}
           handleCloseDialog={() => setAddProductDialog(false)}
@@ -771,6 +771,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           onSuccess={handleAddProduct}
           productId={null}
           assignedProducts={[]}
+          extraDeepFilter={[{
+            field: 'expenseItem',
+            term: purchaseOrderData?.expenseItem
+              ? 'Yes' : 'No'
+          }
+          ]}
         />
       )}
       {showProductDialog.open && (
