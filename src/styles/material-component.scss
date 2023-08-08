@@ -507,3 +507,7 @@ Button.MuiButtonBase-root:not(.MuiFab-root) {
     opacity: 0.7 !important;
   }
 }
+.MuiFormControlLabel-root,
+.MuiCheckbox-root {
+  color: var(--dark-primary-text, #2a3042) !important;
+}
