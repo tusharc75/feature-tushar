@@ -3681,12 +3681,12 @@ body {
       flex-wrap: wrap;
     }
   }
-  .table .td:last-of-type,
-  .table .th:last-of-type {
-    // min-width: var(--last-child-width, var(--last-child-fallback-width)) !important;
-    min-width: unset !important;
-    margin-right: 45px !important;
-  }
+  // .table .td:last-of-type,
+  // .table .th:last-of-type {
+  //   // min-width: var(--last-child-width, var(--last-child-fallback-width)) !important;
+  //   min-width: unset !important;
+  //   margin-right: 45px !important;
+  // }
   .table tfoot .tr {
     background-color: white;
     border-bottom: 0;
@@ -3967,4 +3967,8 @@ body {
       color: white;
     }
   }
+}
+
+.MuiCheckbox-root {
+  color: var(--dark-primary-text, #2a3042) !important;
 }

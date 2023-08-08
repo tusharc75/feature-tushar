@@ -43,6 +43,7 @@ export const getStaticFields = () => {
       accessor: 'createdBy',
       Header: 'Created By',
       show: true,
+      minWidth: 185,
       Cell: ({ row }) =>
         row?.original?.createdBy ? (
           <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}`}>
@@ -56,6 +57,7 @@ export const getStaticFields = () => {
     {
       accessor: 'updatedBy',
       Header: 'Updated By',
+      minWidth: 185,
       show: true,
       Cell: ({ row }) =>
         row?.original?.updatedBy ? (

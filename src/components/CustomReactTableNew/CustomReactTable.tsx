@@ -45,6 +45,7 @@ import HtmlTooltip from '../CustomTooltipTitle';
 import ArrangeViewButton from './ArrangeViewButton';
 import { GrFormClose } from 'react-icons/gr';
 import { CgSearch } from 'react-icons/cg';
+import GridHeader from './GridHeader';
 
 interface CustomCheckBoxProps extends CheckboxProps {
   indeterminate: any;
@@ -197,6 +198,7 @@ function CustomReactTable({
   allowPagination = true,
   limit = gridPageSizes[0],
   customFilters = [],
+  onGridRefresh = null,
   dispatch,
   sorting,
   loading
@@ -224,81 +226,81 @@ function CustomReactTable({
     () =>
       expander
         ? [
-          {
-            id: 'expander', // Make sure it has an ID
-            Header: ({ isAllRowsExpanded }) => (
-              <span
-                style={{
-                  paddingLeft: '0.3rem',
-                  color: 'black'
-                }}
-              >
-                {isAllRowsExpanded ? (
-                  <FaAngleDown
-                    style={{ color: 'white' }}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      toggleAllRowsExpanded(false);
-                    }}
-                  />
-                ) : (
-                  <FaAngleRight
-                    style={{ color: 'white' }}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      toggleAllRowsExpanded(true);
-                    }}
-                  />
-                )}
-              </span>
-            ),
-            sticky: 'left',
-            width: isMobile && !isTablet ? 40 : 70,
-            minWidth: isMobile && !isTablet ? 40 : 70,
-            //maxWidth: 70,
-            canDrag: false,
-            Cell: ({ row }) =>
-              row.canExpand ? (
+            {
+              id: 'expander', // Make sure it has an ID
+              Header: ({ isAllRowsExpanded }) => (
                 <span
-                  {...row.getToggleRowExpandedProps({
-                    style: {
-                      paddingLeft: `${row.depth * 2}rem`
-                    }
-                  })}
+                  style={{
+                    paddingLeft: '0.3rem',
+                    color: 'black'
+                  }}
                 >
-                  {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
+                  {isAllRowsExpanded ? (
+                    <FaAngleDown
+                      style={{ color: 'white' }}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        toggleAllRowsExpanded(false);
+                      }}
+                    />
+                  ) : (
+                    <FaAngleRight
+                      style={{ color: 'white' }}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        toggleAllRowsExpanded(true);
+                      }}
+                    />
+                  )}
                 </span>
-              ) : null
-          },
-          {
-            id: 'selection',
-            minWidth: 50,
-            width: 50,
-            maxWidth: 50,
-            Header: ({ getToggleAllRowsSelectedProps }) => (
-              <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
-            ),
-            Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-          },
-          ...baseColumns.map((m) => {
-            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-          })
-        ]
+              ),
+              sticky: 'left',
+              width: isMobile && !isTablet ? 40 : 70,
+              minWidth: isMobile && !isTablet ? 40 : 70,
+              //maxWidth: 70,
+              canDrag: false,
+              Cell: ({ row }) =>
+                row.canExpand ? (
+                  <span
+                    {...row.getToggleRowExpandedProps({
+                      style: {
+                        paddingLeft: `${row.depth * 2}rem`
+                      }
+                    })}
+                  >
+                    {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
+                  </span>
+                ) : null
+            },
+            {
+              id: 'selection',
+              minWidth: 50,
+              width: 50,
+              maxWidth: 50,
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
+              ),
+              Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+            },
+            ...baseColumns.map((m) => {
+              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+            })
+          ]
         : [
-          {
-            id: 'selection',
-            minWidth: 50,
-            width: 50,
-            maxWidth: 50,
-            Header: ({ getToggleAllRowsSelectedProps }) => (
-              <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
-            ),
-            Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-          },
-          ...baseColumns.map((m) => {
-            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-          })
-        ],
+            {
+              id: 'selection',
+              minWidth: 50,
+              width: 50,
+              maxWidth: 50,
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
+              ),
+              Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+            },
+            ...baseColumns.map((m) => {
+              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+            })
+          ],
     [baseColumns]
   );
 
@@ -309,7 +311,7 @@ function CustomReactTable({
     []
   );
 
-  const updateData = () => { };
+  const updateData = () => {};
 
   const {
     getTableProps,
@@ -367,9 +369,9 @@ function CustomReactTable({
         hiddenColumns: hideSelection ? ['selection', 'action'] : [],
         selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`)
           ? Object.assign(
-            {},
-            data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
-          )
+              {},
+              data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
+            )
           : {}
       },
       getSubRows: (row: any) => row.subRows,
@@ -588,14 +590,24 @@ function CustomReactTable({
       />
 
       <div className="table-container-v1" style={{ position: 'relative' }}>
-        <ArrangeViewButton
-          columns={baseColumns}
-          renderedFrom={renderedFrom}
-          isClientSideGrid={isClientSideGrid}
-          setHiddenColumns={setHiddenColumns}
-          getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-          setColumnOrder={setColumnOrder}
-        />
+        <GridHeader
+          onGridRefresh={onGridRefresh}
+          loading={loading}
+          buttons={
+            <>
+              <ArrangeViewButton
+                loading={loading}
+                columns={baseColumns}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={isClientSideGrid}
+                setHiddenColumns={setHiddenColumns}
+                getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
+                setColumnOrder={setColumnOrder}
+              />
+            </>
+          }
+        ></GridHeader>
+
         <div
           style={{
             display: 'block',
@@ -686,13 +698,14 @@ function CustomReactTable({
                             }}
                             key={index2}
                             {...cell.getCellProps()}
-                            className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
-                              }`}
+                            className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${
+                              setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
+                            }`}
                           >
                             {!['selection'].includes(cell?.column.id) &&
-                              rowState &&
-                              rowState.hasOwnProperty(row.id) &&
-                              rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
+                            rowState &&
+                            rowState.hasOwnProperty(row.id) &&
+                            rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
                               <input
                                 autoFocus
                                 onBlur={submitInput}
@@ -798,7 +811,11 @@ const DraggableHeader = ({ column, index, reorder }: { column: any; index: numbe
   return (
     <TableCell {...column.getHeaderProps()} className="th text-truncate table-header">
       <div className="d-flex align-items-center justify-content-space-between pos-rel" style={{ width: '100%' }}>
-        <div style={{ opacity: isDragging ? 0.2 : 1 }} className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps({ title: undefined })}>
+        <div
+          style={{ opacity: isDragging ? 0.2 : 1 }}
+          className="d-flex gap-2 align-items-center"
+          {...column.getSortByToggleProps({ title: undefined })}
+        >
           <span>{column.render('Header')}</span>
           {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
         </div>
