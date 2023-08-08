@@ -1,20 +1,7 @@
-import {
-  Box,
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField
-} from '@material-ui/core';
+import { Box, Button, Checkbox, Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AiFillFilePdf } from 'react-icons/ai';
+import { AiFillEdit, AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -28,6 +15,9 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { MdEmail } from 'react-icons/md';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
+import { ViewDialog } from './ViewDialog';
+import { RiDeleteBin6Fill } from 'react-icons/ri';
+import ConfirmationDialog from '../Helpers/ConfirmationDialog';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -57,11 +47,11 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
 
   const [emailAttachments, setEmailAttachments] = useState([]);
   const [views, setViews] = useState([]);
-  const [newViewName, setNewViewName] = useState('');
-  const [showSaveViewDialog, setShowSaveViewDialog] = useState(false);
+  const [showSaveViewDialog, setShowSaveViewDialog] = useState({ open: false, data: null });
   const [selectedView, setSelectedView] = useState(null);
+  const [isViewDeleteConfirm, setIsViewDeleteConfirm] = useState({ open: false, id: null });
 
-  useEffect(() => {
+  const fetchUserViews = () => {
     axiosInstance()
       .get(`/pdf/${referenceId}/view?resource=${resource}`)
       .then(({ data }) => {
@@ -70,6 +60,10 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
+  };
+
+  useEffect(() => {
+    fetchUserViews();
   }, []);
 
   useEffect(() => {
@@ -80,18 +74,18 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
     setVisibleColumnsPdf([...temp]);
   }, [columns]);
 
-  const handleSaveView = () => {
-    const visibleColumnsString = visibleColumnsPdf.join(', ');
+  const handleDeleteView = () => {
     axiosInstance()
-      .post(`/pdf/${referenceId}/view?resource=${resource}`, {
-        name: newViewName,
-        columns: visibleColumnsString
-      })
+      .post(`/pdf/${referenceId}/view/remove`, { _id: isViewDeleteConfirm.id })
       .then(({ data }) => {
-        toastConfig.setToastConfig({ open: true, type: 'success', message: 'View saved successfully.' });
-        setViews((prevViews) => [...prevViews, data?.data?.ops[0]]);
-        setShowSaveViewDialog(false);
-        setNewViewName('');
+        fetchUserViews();
+        setIsViewDeleteConfirm({ open: false, id: null });
+        setSelectedView(null);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -255,28 +249,37 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             showRequiredLabel={false}
           />
           <CustomDialogContent>
-            <FormControl fullWidth margin="dense" size="small" variant="outlined">
-              <InputLabel id="views-label">Views</InputLabel>
-              <Select
-                labelId="views-label"
-                value={selectedView}
-                onChange={(e) => {
-                  const viewId: any = e.target.value;
-                  setSelectedView(viewId);
-                  const view = views.find((v) => v._id === e.target.value);
-                  if (view && view.columns) {
-                    const columnsArray = view.columns.split(',').map((item) => item.trim());
-                    setVisibleColumnsPdf(columnsArray);
-                  }
-                }}
-              >
-                {views.map((view) => (
-                  <MenuItem key={view._id} value={view._id}>
-                    {view.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              fullWidth
+              size="small"
+              value={selectedView}
+              onChange={(e, selectedOption) => {
+                setSelectedView(selectedOption);
+                if (selectedOption && selectedOption.columns) {
+                  const columnsArray = selectedOption.columns.split(',').map((item) => item.trim());
+                  setVisibleColumnsPdf(columnsArray);
+                }
+              }}
+              getOptionLabel={(option) => option.name}
+              renderOption={(option) => (
+                <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
+                  <span style={{ width: 'calc(100% - 71px)' }}>
+                    {option?.name}
+                  </span>
+                  <Box>
+                    <IconButton size="small" style={{ marginRight: '20px' }}>
+                      <AiFillEdit />
+                    </IconButton>
+                    <IconButton size="small" onClick={() => setIsViewDeleteConfirm({ open: true, id: option._id })}>
+                      <RiDeleteBin6Fill />
+                    </IconButton>
+                  </Box>
+                </Box>
+              )}
+              id="controllable-states-demo"
+              options={views}
+              renderInput={(params) => <TextField {...params} fullWidth label="Select a View" variant="outlined" />}
+            />
             <Grid container justify="space-between" alignItems="center">
               <Grid item style={{ padding: 5, marginTop: 10 }} xs={12} md={12} sm={12}>
                 <FormControl fullWidth>
@@ -328,13 +331,15 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
           </CustomDialogContent>
           <CustomDialogFooter>
             <CustomButton
+              onClick={() => {
+                setShowSaveViewDialog({ open: true, data: selectedView });
+              }}
               disabled={visibleColumnsPdf.length == 0}
-              variant="contained"
-              color="primary"
               size="small"
-              onClick={() => setShowSaveViewDialog(true)}
+              color="primary"
+              className="new-dropdown-v1"
             >
-              Save View
+              {selectedView ? 'Update View' : 'Save View'}
             </CustomButton>
             <CustomButton
               variant="contained"
@@ -364,6 +369,14 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             )}
           </CustomDialogFooter>
         </Dialog>
+      )}
+      {isViewDeleteConfirm.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to delete ?`}
+          onClose={() => setIsViewDeleteConfirm({ open: false, id: null })}
+          onOk={handleDeleteView}
+        />
       )}
       {sendEmail && (
         <Dialog
@@ -402,20 +415,16 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
           />
         </Dialog>
       )}
-      {showSaveViewDialog && (
-        <Dialog open={showSaveViewDialog} onClose={() => setShowSaveViewDialog(false)}>
-          <DialogContent>
-            <TextField autoFocus label="View Name" type="text" fullWidth value={newViewName} onChange={(e) => setNewViewName(e.target.value)} />
-          </DialogContent>
-          <DialogActions>
-            <Button size="small" onClick={() => setShowSaveViewDialog(false)} color="primary">
-              Cancel
-            </Button>
-            <Button disabled={newViewName === ''} size="small" onClick={handleSaveView} color="primary">
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
+      {showSaveViewDialog.open && (
+        <ViewDialog
+          columns={visibleColumnsPdf}
+          resource={resource}
+          referenceId={referenceId}
+          showSaveViewDialog={showSaveViewDialog}
+          setShowSaveViewDialog={setShowSaveViewDialog}
+          fetchUserViews={fetchUserViews}
+          setViews={setViews}
+        />
       )}
     </Box>
   );
