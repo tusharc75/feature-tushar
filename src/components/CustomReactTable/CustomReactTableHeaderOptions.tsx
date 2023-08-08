@@ -17,6 +17,7 @@ import { BsArrowLeftRight } from 'react-icons/bs';
 let timeout;
 export default function CustomReactTableHeaderOptions({
   columns,
+  defaultColumns,
   // setColumns,
   // columnApi,
   // refreshGrid = null,
@@ -59,11 +60,12 @@ export default function CustomReactTableHeaderOptions({
   }: any = useData();
   const { dispatch }: any = useData();
 
-  const updateGridHiddenColumns = (hiddenColumns = []) => {
+  const updateGridHiddenColumns = (hiddenColumns = [], columnOrder = []) => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(function () {
       let data = localStorage.getItem('gridMetaData');
-      let request = data == 'undefined' ? {} : { ...JSON.parse(data) };
+      let request = data === 'undefined' ? {} : { ...JSON.parse(data) };
+      request[renderedFrom].order = columnOrder;
       if (request[renderedFrom]) {
         request[renderedFrom].hide = [...hiddenColumns];
       } else {
@@ -212,6 +214,7 @@ export default function CustomReactTableHeaderOptions({
                             /> : */}
           <ArrangeViewDialog
             columns={columns}
+            defaultColumns={defaultColumns}
             onClose={() => setOpenColumnSelection(false)}
             updateGridHiddenColumns={updateGridHiddenColumns}
             saveColumnOptions={saveColumnOptions}
