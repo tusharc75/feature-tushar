@@ -265,6 +265,9 @@ export default function CustomReactTable({
     []
   );
 
+  const [colsToShow, setColsToShow] = useState(newColumns)
+
+
   const filterTypes = React.useMemo(() => ({ filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue) }), []);
 
   const {
@@ -300,7 +303,7 @@ export default function CustomReactTable({
     }
   } = useTable(
     {
-      columns: newColumns,
+      columns: colsToShow,
       data,
       onSelect,
       defaultColumn,
@@ -343,8 +346,20 @@ export default function CustomReactTable({
         gridMetaData = JSON.parse(data);
       }
       if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
-        setColumnOrder(newColumns.map((m) => m?.id || m?.accessor));
         setHiddenColumns(gridMetaData[renderedFrom]?.hide || [])
+      }
+
+      if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
+        const colOrder = gridMetaData[renderedFrom]?.order || [];
+        let orderIndices = {};
+        for (let i = 0; i < colOrder.length; i++) {
+          orderIndices[colOrder[i]] = i;
+        }
+        let orderedArr = [...newColumns].sort((a, b) => orderIndices[a?.id || a?.accessor] - orderIndices[b?.id || b?.accessor]);
+        setColsToShow(orderedArr)
+        setColumnOrder(orderedArr);
+      } else {
+        setColumnOrder(newColumns.map((m) => m?.id || m?.accessor));
       }
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
@@ -404,6 +419,7 @@ export default function CustomReactTable({
       {displayCustomReactTableHeaderOptions && (
         <CustomReactTableHeaderOptions
           columns={allColumns}
+          defaultColumns={newColumns}
           // setSelectedReportView={setSelectedReportView}
           // selectedReportView={selectedReportView}
           // columns={columns}

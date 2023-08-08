@@ -5,7 +5,7 @@ import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { purchaseOrder } from 'src/constants/helpers';
+import { purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -28,6 +28,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import { map, startCase, uniq } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -322,8 +323,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         item.type === 'Product'
           ? item?.productDetail?.productDescription
           : item.type === 'Service'
-          ? item?.serviceDetail?.serviceDescription
-          : item?.description;
+            ? item?.serviceDetail?.serviceDescription
+            : item?.description;
       res.materialId = item.type === 'Product' ? item?.productDetail?._id : item.type === 'Service' ? item?.serviceDetail?._id : item?._id;
       res.productNumber = item.productDetail?.productNumber;
       res.serializedProduct = item.productDetail?.serializedProduct;
@@ -649,6 +650,22 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             </Menu>
           </Box>
           <div className="d-flex gap-2">
+            {/* <PreviewDownload
+              resource={sidebarResource.purchaseOrder}
+              referenceId={purchaseOrderData?._id}
+              columns={columns?.map((e) => { return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor } })}
+              isSendEmail={true}
+              defaultColumns={[
+                'index',
+                'type',
+                'detail',
+                'description',
+                'qty',
+                `price_${purchaseOrderData?.currency?.toLowerCase()}`,
+                `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
+                `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
+                `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
+              ]} /> */}
             <SendEmail purchaseOrderData={purchaseOrderData} />
             <HtmlTooltip title="Please select some product">
               <Button
@@ -679,12 +696,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               <MenuItem
                 disabled={
                   selectedProducts?.filter((e) => !e.hideSelection).length > 0 &&
-                  uniq(
-                    map(
-                      selectedProducts?.filter((e) => !e.hideSelection),
-                      'type'
-                    )
-                  )?.length === 1
+                    uniq(
+                      map(
+                        selectedProducts?.filter((e) => !e.hideSelection),
+                        'type'
+                      )
+                    )?.length === 1
                     ? false
                     : true
                 }
