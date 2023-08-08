@@ -124,7 +124,6 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
           type: 'selection',
           selectedRecords: savedRecords
         });
-        console.log('data', data)
         dispatch({ type: 'initialize', data: rows, count: data?.data?.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
