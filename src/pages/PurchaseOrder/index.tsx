@@ -84,8 +84,11 @@ const PurchaseOrder = () => {
 
   useEffect(() => {
     fetchGridColumns();
-    getPlants();
   }, []);
+
+  useEffect(() => {
+    getPlants();
+  }, [selectedEntity])
 
   useEffect(() => {
     fetchPurchaseOrder();
