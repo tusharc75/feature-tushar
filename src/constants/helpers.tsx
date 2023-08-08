@@ -2187,6 +2187,12 @@ export const REPORT_LIST = [
     key: 'purchaseOrderType',
     type: 'numberOfAssetsByStatus',
   },
+  {
+    title: 'Asset Utilization',
+    permission: 'serializedAsset',
+    key: 'purchaseOrderType',
+    type: 'assetUtilization',
+  },
 ];
 
 export const RESOURCE_CALENDAR = [
