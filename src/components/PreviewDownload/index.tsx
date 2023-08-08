@@ -1,7 +1,7 @@
-import { Box, Button, Checkbox, Dialog, FormControl, Grid, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, Dialog, FormControl, Grid, IconButton, TextField} from '@material-ui/core';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AiFillFilePdf } from 'react-icons/ai';
+import { AiFillEdit, AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -15,20 +15,25 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { MdEmail } from 'react-icons/md';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
+import { ViewDialog } from './ViewDialog';
+import { RiDeleteBin6Fill } from 'react-icons/ri';
+import ConfirmationDialog from '../Helpers/ConfirmationDialog';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [], hideDetailButton = false }) {
-
   const toastConfig = useContext(CustomToastContext);
 
-  const allColumn = columns?.filter((d) => !['Actions'].includes(d?.Header || d?.headerName))?.map((d) => {
-    return {
-      fieldLabel: (d?.Header || d?.headerName),
-      fieldName: (d?.accessor || d?.field),
-    }
-  }) || [];
+  const allColumn =
+    columns
+      ?.filter((d) => !['Actions'].includes(d?.Header || d?.headerName))
+      ?.map((d) => {
+        return {
+          fieldLabel: d?.Header || d?.headerName,
+          fieldName: d?.accessor || d?.field
+        };
+      }) || [];
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -41,27 +46,69 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
   const [loading, setLoading] = useState(false);
 
   const [emailAttachments, setEmailAttachments] = useState([]);
+  const [views, setViews] = useState([]);
+  const [showSaveViewDialog, setShowSaveViewDialog] = useState({ open: false, data: null });
+  const [selectedView, setSelectedView] = useState(null);
+  const [isViewDeleteConfirm, setIsViewDeleteConfirm] = useState({ open: false, id: null });
+
+  const fetchUserViews = () => {
+    axiosInstance()
+      .get(`/pdf/${referenceId}/view?resource=${resource}`)
+      .then(({ data }) => {
+        setViews(data.data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   useEffect(() => {
-    const temp = defaultColumns?.length > 0 ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName))?.map((e) => e.fieldLabel)
-      : allColumn?.map((e) => e.fieldLabel);
+    fetchUserViews();
+  }, []);
+
+  useEffect(() => {
+    const temp =
+      defaultColumns?.length > 0
+        ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName))?.map((e) => e.fieldLabel)
+        : allColumn?.map((e) => e.fieldLabel);
     setVisibleColumnsPdf([...temp]);
   }, [columns]);
 
+  const handleDeleteView = () => {
+    axiosInstance()
+      .post(`/pdf/${referenceId}/view/remove`, { _id: isViewDeleteConfirm.id })
+      .then(({ data }) => {
+        fetchUserViews();
+        setIsViewDeleteConfirm({ open: false, id: null });
+        setSelectedView(null);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   const handleViewPdf = (type, pdfType, visibleColumns) => {
-    let showColumns = allColumn?.filter((d) => visibleColumns?.includes(d?.fieldLabel)).map((d) => {
-      let k = d?.fieldName;
-      if (k === 'qtyDisplay') {
-        return 'qty';
-      }
-      return k;
-    });
+    let showColumns = allColumn
+      ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
+      .map((d) => {
+        let k = d?.fieldName;
+        if (k === 'qtyDisplay') {
+          return 'qty';
+        }
+        return k;
+      });
     setLoadingType(pdfType);
-    axiosInstance().get(
-      pdfType === 'Detail'
-        ? `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`
-        : `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`
-    )
+    axiosInstance()
+      .get(
+        pdfType === 'Detail'
+          ? `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`
+          : `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`
+      )
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -202,6 +249,37 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             showRequiredLabel={false}
           />
           <CustomDialogContent>
+            <Autocomplete
+              fullWidth
+              size="small"
+              value={selectedView}
+              onChange={(e, selectedOption) => {
+                setSelectedView(selectedOption);
+                if (selectedOption && selectedOption.columns) {
+                  const columnsArray = selectedOption.columns.split(',').map((item) => item.trim());
+                  setVisibleColumnsPdf(columnsArray);
+                }
+              }}
+              getOptionLabel={(option) => option.name}
+              renderOption={(option) => (
+                <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
+                  <span style={{ width: 'calc(100% - 71px)' }}>
+                    {option?.name}
+                  </span>
+                  <Box>
+                    <IconButton size="small" style={{ marginRight: '20px' }}>
+                      <AiFillEdit />
+                    </IconButton>
+                    <IconButton size="small" onClick={() => setIsViewDeleteConfirm({ open: true, id: option._id })}>
+                      <RiDeleteBin6Fill />
+                    </IconButton>
+                  </Box>
+                </Box>
+              )}
+              id="controllable-states-demo"
+              options={views}
+              renderInput={(params) => <TextField {...params} fullWidth label="Select a View" variant="outlined" />}
+            />
             <Grid container justify="space-between" alignItems="center">
               <Grid item style={{ padding: 5, marginTop: 10 }} xs={12} md={12} sm={12}>
                 <FormControl fullWidth>
@@ -212,7 +290,10 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                     multiple
                     value={visibleColumnsPdf}
                     onChange={(e, val) => {
-                      if (val.includes('Select All') && ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() !== val.sort().toString()) {
+                      if (
+                        val.includes('Select All') &&
+                        ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() !== val.sort().toString()
+                      ) {
                         setVisibleColumnsPdf(allColumn?.map((e) => e?.fieldLabel));
                       } else if (['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() === val.sort().toString()) {
                         setVisibleColumnsPdf([]);
@@ -231,7 +312,8 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                           style={{ marginRight: 8 }}
                           checked={
                             showColumnsDialog &&
-                              ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() === ['Select All', ...visibleColumnsPdf].sort().toString()
+                            ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() ===
+                              ['Select All', ...visibleColumnsPdf].sort().toString()
                               ? true
                               : selected
                           }
@@ -240,11 +322,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                       </React.Fragment>
                     )}
                     renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        variant="outlined"
-                        label={`Visible Columns in ${showColumnsDialog.type}`}
-                        placeholder="Select" />
+                      <TextField {...params} variant="outlined" label={`Visible Columns in ${showColumnsDialog.type}`} placeholder="Select" />
                     )}
                   />
                 </FormControl>
@@ -252,6 +330,17 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             </Grid>
           </CustomDialogContent>
           <CustomDialogFooter>
+            <CustomButton
+              onClick={() => {
+                setShowSaveViewDialog({ open: true, data: selectedView });
+              }}
+              disabled={visibleColumnsPdf.length == 0}
+              size="small"
+              color="primary"
+              className="new-dropdown-v1"
+            >
+              {selectedView ? 'Update View' : 'Save View'}
+            </CustomButton>
             <CustomButton
               variant="contained"
               color="primary"
@@ -264,7 +353,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             >
               Regular
             </CustomButton>
-            {hideDetailButton ? null :
+            {hideDetailButton ? null : (
               <CustomButton
                 variant="contained"
                 color="primary"
@@ -276,9 +365,18 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                 }}
               >
                 Detail
-              </CustomButton>}
+              </CustomButton>
+            )}
           </CustomDialogFooter>
         </Dialog>
+      )}
+      {isViewDeleteConfirm.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to delete ?`}
+          onClose={() => setIsViewDeleteConfirm({ open: false, id: null })}
+          onOk={handleDeleteView}
+        />
       )}
       {sendEmail && (
         <Dialog
@@ -316,6 +414,17 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             referenceType={resource}
           />
         </Dialog>
+      )}
+      {showSaveViewDialog.open && (
+        <ViewDialog
+          columns={visibleColumnsPdf}
+          resource={resource}
+          referenceId={referenceId}
+          showSaveViewDialog={showSaveViewDialog}
+          setShowSaveViewDialog={setShowSaveViewDialog}
+          fetchUserViews={fetchUserViews}
+          setViews={setViews}
+        />
       )}
     </Box>
   );
