@@ -7,48 +7,43 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-export const ViewDialog = ({columns, resource, referenceId, showSaveViewDialog, setShowSaveViewDialog, fetchUserViews, setViews}) => {
+export const ViewDialog = ({ columns, resource, handleSucess, viewData, handleClose }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const [newViewName, setNewViewName] = useState('');
+  const [name, setName] = useState(viewData?.name || '');
 
-  useEffect(() => {
-    if (showSaveViewDialog.data) {
-      setNewViewName(showSaveViewDialog.data.name);
-    } else {
-      setNewViewName('');
-    }
-  }, [showSaveViewDialog.data]);
-
-  const handleSaveView = () => {
-    const visibleColumnsString = columns.join(', ');
-    if (showSaveViewDialog.data) {
+  const handleSubmit = () => {
+    if (viewData?._id) {
       axiosInstance()
-        .put(`/pdf/${referenceId}/view?resource=${resource}`, {
-          _id: showSaveViewDialog.data._id,
-          name: newViewName,
-          columns: visibleColumnsString
+        .put(`/pdf/view?resource=${resource}`, {
+          _id: viewData?._id,
+          name: name,
+          columns: columns?.toString()
         })
         .then(({ data }) => {
-          toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
-          fetchUserViews();
-          setShowSaveViewDialog({ open: false, data: null });
-          setNewViewName('');
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          handleSucess()
         })
         .catch((err) => {
           toastConfig.setToastConfig(err);
         });
     } else {
       axiosInstance()
-        .post(`/pdf/${referenceId}/view?resource=${resource}`, {
-          name: newViewName,
-          columns: visibleColumnsString
+        .post(`/pdf/view?resource=${resource}`, {
+          name: name,
+          columns: columns?.toString()
         })
         .then(({ data }) => {
-          toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
-          setViews((prevViews) => [...prevViews, data?.data?.ops[0]]);
-          setShowSaveViewDialog({ open: false, data: null });
-          setNewViewName('');
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          handleSucess()
         })
         .catch((err) => {
           toastConfig.setToastConfig(err);
@@ -59,19 +54,19 @@ export const ViewDialog = ({columns, resource, referenceId, showSaveViewDialog, 
   return (
     <Dialog
       maxWidth={'sm'}
-      open={showSaveViewDialog.open}
+      open={true}
       fullWidth
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          setShowSaveViewDialog({open: false, data: null});
+          handleClose()
         }
       }}
       aria-describedby="View Dialog"
     >
       <CustomDialogHeader
-        title="View"
+        title="PDF View Name"
         onClose={() => {
-          setShowSaveViewDialog({open: false, data: null});
+          handleClose()
         }}
         showRequiredLabel={true}
       />
@@ -85,17 +80,25 @@ export const ViewDialog = ({columns, resource, referenceId, showSaveViewDialog, 
           label="View Name"
           name="viewName"
           variant="outlined"
-          value={newViewName}
+          value={name}
           onChange={(e) => {
-            setNewViewName(e.target.value);
+            setName(e.target.value);
           }}
         />
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button size="small" onClick={() => setShowSaveViewDialog({open: false, data: null})} color="primary">
+        <Button
+          size="small"
+          onClick={() => handleClose()}
+          color="primary">
           Cancel
         </Button>
-        <CustomButton disabled={newViewName === ''} variant="contained" color="primary" type="submit" onClick={handleSaveView}>
+        <CustomButton
+          disabled={name?.trim() === ''}
+          variant="contained"
+          color="primary"
+          type="submit"
+          onClick={handleSubmit}>
           Save
         </CustomButton>
       </CustomDialogFooter>
