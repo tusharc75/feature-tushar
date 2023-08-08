@@ -3,7 +3,7 @@ import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { FIELD_TICKET_STATUS, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -14,6 +14,8 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 
 const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, refreshFieldServiceOrder }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -41,6 +43,32 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
     fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
+
+  const FieldTicketNumberRenderer = (params) => (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      {params?.data?.allowedToEdit ?
+        <span
+          className="link"
+          onClick={() => {
+            setOpenDialog({ open: true, id: params.data._id });
+          }}
+        >
+          <CustomRenderCell value={params?.value} />
+        </span> :
+        <p>{params?.value}</p>}
+      <Box ml={1}>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.fieldTicketDetail.path}/${params?.data?._id}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Box>
+    </div>
+  );
+
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.fieldTicket}`)
@@ -48,17 +76,33 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.fieldTicket?.title, o?.fieldData, routes.fieldTicketDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
+          if (o?.fieldData?.fieldName === 'fieldTicketNumber') {
+            columns = [
+              ...columns,
+              {
+                ...o?.fieldData,
+                pivotIndex: 0,
+                field: o?.fieldData?.fieldName,
+                headerName: o?.fieldData?.fieldLabel,
+                show: true,
+                disabled: true,
+                cellRenderer: 'fieldTicketNumberRenderer'
+              }
+            ];
+          } else {
+            let currentColumn = getColumnData(routes.fieldTicket?.title, o?.fieldData, routes.fieldTicketDetail.path);
+            if (currentColumn !== null) {
+              columns = [...columns, currentColumn?.columnData];
+              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                rendererNames.push(currentColumn?.rendererName);
+              }
             }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
+          fieldTicketNumberRenderer: FieldTicketNumberRenderer,
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -80,9 +124,9 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
+          var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
+          finalObject['allowedToEdit'] = isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced]?.includes(u?.status);
           finalObject['canDelete'] = u?.canDelete && permissions?.fieldTicket?.isDelete && u?.owner?.optionValue === user?.user?._id
-
           let res = {
             ...finalObject
           };
@@ -162,23 +206,23 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions?.fieldTicket?.isCreate && (
-        <HtmlTooltip title="Edit">
-          <IconButton
-            size="small"
-            aria-label="Edit"
-            onClick={() => {
-              setOpenDialog({ open: true, id: params.data._id });
-            }}
-          >
-            <EditIcon color="primary" fontSize="small" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
+      <HtmlTooltip title="Edit">
+        <IconButton
+          size="small"
+          aria-label="Edit"
+          onClick={() => {
+            setOpenDialog({ open: true, id: params.data._id });
+          }}
+          disabled={params?.data?.allowedToEdit ? false : true}
+        >
+          <EditIcon color={params?.data?.allowedToEdit ? "primary" : "disabled"} fontSize="small" />
+        </IconButton>
+      </HtmlTooltip>
       {params?.data?.canDelete ? (
         <HtmlTooltip title="Delete">
           <IconButton
             aria-label="Delete"
+            size="small"
             onClick={() => {
               setDeleteRecord([params.data._id]);
               setShowDeleteConfirmBox(true);
@@ -189,7 +233,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
         </HtmlTooltip>
       ) : (
         <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton aria-label="Delete">
+          <IconButton size="small" aria-label="Delete">
             <DeleteIcon fontSize="small" color="disabled" />
           </IconButton>
         </HtmlTooltip>

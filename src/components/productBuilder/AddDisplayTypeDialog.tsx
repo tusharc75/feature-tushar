@@ -50,7 +50,7 @@ const AddDisplayTypeDialog = (props) => {
             }
             else {
                 if (fieldData.displayCurrency.includes(values.currency)) {
-                    errors["currency"] = "currency alreday added";
+                    errors["currency"] = "currency already added";
                 }
             }
         }
@@ -60,19 +60,19 @@ const AddDisplayTypeDialog = (props) => {
             }
             else {
                 if (fieldData.displayUnits.includes(values.unit)) {
-                    errors["unit"] = "unit alreday added";
+                    errors["unit"] = "unit already added";
                 }
             }
         }
         else if (displayType === "currencyConverter") {
             if (values.currency || values.currency !== "") {
                 if (fieldData.displayCurrency.includes(values.currency)) {
-                    errors["currency"] = "currency alreday added";
+                    errors["currency"] = "currency already added";
                 }
             }
             if (values.unit || values.unit !== "") {
                 if (fieldData.displayUnits.includes(values.unit)) {
-                    errors["unit"] = "unit alreday added";
+                    errors["unit"] = "unit already added";
                 }
             }
         }
