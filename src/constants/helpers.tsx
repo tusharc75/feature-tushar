@@ -334,7 +334,8 @@ export const sidebarResource = {
   competencies: 'Competencies',
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
-  trailerMaster: 'Trailer Master'
+  trailerMaster: 'Trailer Master',
+  iotDataPoints: 'Iot Data Points',
 };
 
 export const primaryFields = {
@@ -455,7 +456,8 @@ export const RESOURCE_LABEL = {
   materialHandling: 'Material Handling',
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
-  trailerMaster: 'Trailer Master'
+  trailerMaster: 'Trailer Master',
+  iotDataPoints: 'Iot Data Points',
 };
 
 export const CHILD_RESOURCE = {

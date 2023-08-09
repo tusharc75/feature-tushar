@@ -12,7 +12,6 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { startCase } from 'lodash';
 import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
-import InvoiceFacility from './InvoiceFacility';
 import PreviewDownload from 'src/components/PreviewDownload';
 
 const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, renderedFrom, stepFullScreen }) => {

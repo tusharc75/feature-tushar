@@ -1,4 +1,4 @@
-import { Box, Button, Dialog} from '@material-ui/core';
+import { Box, Button, Dialog } from '@material-ui/core';
 import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillFilePdf } from 'react-icons/ai';
@@ -10,7 +10,8 @@ import { MdEmail } from 'react-icons/md';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
 
-function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [], hideDetailButton = false }) {
+function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [], hideDetailButton = false,
+  button1Title = 'Regular', button2Title = 'Detail' }) {
   const toastConfig = useContext(CustomToastContext);
 
   const allColumn =
@@ -179,6 +180,8 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
           resource={resource}
           defaultColumns={defaultColumns}
           columns={columns}
+          button1Title={button1Title}
+          button2Title={button2Title}
         />
       )}
 
