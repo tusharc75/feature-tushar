@@ -281,11 +281,11 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
 
     setColumns([
       {
-        accessor: 'index',
+        accessor: 'srno',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.srno}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -304,7 +304,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     axiosInstance().get(api).then(({ data: { data } }) => {
       const consumables = data?.material;
       consumables?.forEach((parent, i) => {
-        parent.index = i + 1;
+        parent.srno = i + 1;
         parent.productName = parent?.productDetail?.productName;
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
@@ -405,7 +405,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     rows.forEach((element) => {
       element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
       element.service = element.serviceId;
-      delete element.index;
+      delete element.srno;
       delete element.productDescription;
       delete element.productName;
       delete element.productNumber;
@@ -648,6 +648,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
           selectedServices={selectedRecords}
           loading={isUpdating}
           showSaveAndNext={isConsumableEdit.showSaveAndNext}
+          referenceType={'consumables'}
         />
       )}
 

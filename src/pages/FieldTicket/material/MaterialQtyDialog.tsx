@@ -38,6 +38,7 @@ interface EditDialogProps {
     isQtyOnly?: Boolean;
     isInlineEdit?: Boolean;
     showSaveAndNext?: Boolean;
+    referenceType?: any;
 }
 
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
@@ -53,7 +54,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     loading,
     isQtyOnly = false,
     isInlineEdit = false,
-    showSaveAndNext = false
+    showSaveAndNext = false,
+    referenceType = null,
 }) => {
     const ref = useRef(null);
 
@@ -205,21 +207,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
             return { name, sectionFields };
         });
         setFields(customData);
-    };
-
-    const getTitle = () => {
-        if (isBulkedit) {
-            return 'Bulk Edit';
-        }
-        if (rowData) {
-            let editTitle = `Edit ${showSaveAndNext ? `-${rowData.srno}` : ''} -${rowData.detail}`;
-            if (rowData.subRows && rowData.subRows?.length > 0) {
-                editTitle = `Edit ${showSaveAndNext ? `-${rowData.srno}` : ''} -${rowData.detail}`;
-            }
-            return editTitle;
-        } else {
-            return 'Edit';
-        }
     };
 
     const handleSubmit = async (values) => {
@@ -374,7 +361,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                     {({ values, errors, touched, setFieldValue, submitForm }) => (
                         <Fragment>
                             <CustomDialogHeader
-                                title={getTitle()}
+                                title={isBulkedit ? `Bulk Edit` : `Edit - ${rowData.srno} (${referenceType === 'consumables' ? rowData?.productName || '' : rowData?.detail || ''})`}
                                 onClose={() => {
                                     if (!isEqual(ref?.current?.values, initialData.values)) {
                                         setShowConfirmDialog(true);
