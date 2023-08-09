@@ -29,7 +29,9 @@ export const PreviewDialog = ({
     allColumn,
     resource,
     defaultColumns,
-    columns
+    columns,
+    button1Title,
+    button2Title
 }) => {
     const toastConfig = useContext(CustomToastContext);
 
@@ -40,21 +42,6 @@ export const PreviewDialog = ({
     const [showSaveViewDialog, setShowSaveViewDialog] = useState({ open: false, data: null });
     const [visibleColumnsPdf, setVisibleColumnsPdf] = useState([]);
 
-    const fetchUserViews = () => {
-        axiosInstance()
-            .get(`/pdf/view?resource=${resource}`)
-            .then(({ data }) => {
-                setViews(data.data);
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-            });
-    };
-
-    useEffect(() => {
-        fetchUserViews();
-    }, []);
-
     useEffect(() => {
         const temp =
             defaultColumns?.length > 0
@@ -62,6 +49,24 @@ export const PreviewDialog = ({
                 : allColumn?.map((e) => e.fieldLabel);
         setVisibleColumnsPdf([...temp]);
     }, [columns]);
+
+    useEffect(() => {
+        fetchUserViews();
+    }, []);
+
+    const fetchUserViews = () => {
+        axiosInstance()
+            .get(`/pdf/view?resource=${resource}`)
+            .then(({ data: { data } }) => {
+                setViews(data);
+                if (data?.length && !selectedView) {
+                    handleSelectView(data[0])
+                }
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    };
 
     const handleDeleteView = () => {
         axiosInstance()
@@ -80,6 +85,14 @@ export const PreviewDialog = ({
                 toastConfig.setToastConfig(err);
             });
     };
+
+    const handleSelectView = (data) => {
+        setSelectedView(data);
+        if (data && data.columns) {
+            const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
+            setVisibleColumnsPdf(columnsArray);
+        }
+    }
 
     return (
         <>
@@ -118,11 +131,7 @@ export const PreviewDialog = ({
                                         size="small"
                                         value={selectedView}
                                         onChange={(e, selectedOption) => {
-                                            setSelectedView(selectedOption);
-                                            if (selectedOption && selectedOption.columns) {
-                                                const columnsArray = selectedOption.columns.split(',').map((item) => item.trim());
-                                                setVisibleColumnsPdf(columnsArray);
-                                            }
+                                            handleSelectView(selectedOption)
                                         }}
                                         getOptionLabel={(option) => option.name}
                                         renderOption={(option) => (
@@ -208,9 +217,8 @@ export const PreviewDialog = ({
                             handleViewPdf('Regular', visibleColumnsPdf);
                         }}
                     >
-                        Regular
+                        {button1Title}
                     </CustomButton>
-
                     {hideDetailButton ? null : (
                         <CustomButton
                             variant="contained"
@@ -223,7 +231,7 @@ export const PreviewDialog = ({
                                 handleViewPdf('Detail', visibleColumnsPdf);
                             }}
                         >
-                            Detail
+                            {button2Title}
                         </CustomButton>
                     )}
                 </CustomDialogFooter>

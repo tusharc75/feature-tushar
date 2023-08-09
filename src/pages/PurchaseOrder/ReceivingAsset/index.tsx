@@ -13,7 +13,6 @@ import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helpe
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import moment from 'moment';
-import SendEmail from './../SendEmail';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RejectProduct from './RejectProduct';
 import TransformIcon from '@material-ui/icons/Transform';
@@ -24,7 +23,6 @@ import Reject from './Reject';
 import Logs from './Logs';
 import History from 'src/pages/ProductInventory/LedgerHistory';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { startCase } from 'lodash';
 import PreviewDownload from 'src/components/PreviewDownload';
 
 
@@ -438,11 +436,13 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           )}
         </Box>
         <div className="d-flex gap-2">
-          {/* <PreviewDownload
+          <PreviewDownload
             resource={sidebarResource.purchaseOrder}
             referenceId={purchaseOrderData?._id}
             columns={columns?.map((e) => { return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor } })}
             isSendEmail={true}
+            button1Title='Ordered'
+            button2Title='Received'
             defaultColumns={[
               'index',
               'type',
@@ -453,8 +453,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
               `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
               `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
               `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
-            ]} /> */}
-          <SendEmail purchaseOrderData={purchaseOrderData} />
+            ]} />
         </div>
       </Box>
       <Grid item xs={12} md={12} sm={12}>
