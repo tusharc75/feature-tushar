@@ -120,7 +120,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
     const queryString = getQueryString();
     axiosInstance()
       .get(`${routes.fieldTicket.path}${queryString}`)
-      .then(({ data: { data } }) => {
+      .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
@@ -136,14 +136,14 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
           dispatch({
             type: 'initialize',
             data: [...dataRows, ...rows],
-            count: data?.count,
+            count: count,
             selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
-            count: data?.count,
+            count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
