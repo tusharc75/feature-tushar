@@ -145,63 +145,67 @@ function QuotationHeader(props) {
         )}
         {children}
       </div>
-      <div>
-        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <SearchBox
-            onChange={onSearch}
-            className={styles.search_box_input}
-            value={searchVal}
-            size="small"
-            width="200px"
-            placeholder="Search Quotation"
-            style={isMobile ? { flex: 1 } : {}}
-          />
-
-          <div className="flex gap-[8px] flex-wrap items-center">
-            {QuotationPermissions?.isCreate && (
-              <Button variant={'contained'} color="primary" size="small" onClick={onCreate} startIcon={isMobile ? null : <AddOutlined />}>
-                Add
+      <div className="flex flex-wrap gap-[8px]">
+        <SearchBox
+          onChange={onSearch}
+          className={styles.search_box_input}
+          value={searchVal}
+          size="small"
+          width="200px"
+          placeholder="Search Quotation"
+          style={isMobile ? { flex: 1 } : {}}
+        />
+        <div className="flex gap-[8px] flex-wrap items-center">
+          {QuotationPermissions?.isCreate && (
+            <Button
+              variant={'contained'}
+              className="no-shadow"
+              color="primary"
+              size="small"
+              onClick={onCreate}
+              startIcon={isMobile ? null : <AddOutlined />}
+            >
+              Add
+            </Button>
+          )}
+          {(QuotationPermissions?.isDelete || QuotationPermissions?.isUpdate) && (
+            <>
+              <Button
+                disabled={canDelete}
+                variant={isMobile ? 'text' : 'outlined'}
+                color="default"
+                size="small"
+                onClick={openActions}
+                className={`new-dropdown-v1`}
+                aria-controls="action-menu"
+                endIcon={<ExpandMore />}
+              >
+                Actions
               </Button>
-            )}
-            {(QuotationPermissions?.isDelete || QuotationPermissions?.isUpdate) && (
-              <>
-                <Button
-                  disabled={canDelete}
-                  variant={isMobile ? 'text' : 'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={`new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    showConfirmBox(null);
                   }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
                 >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      showConfirmBox(null);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </>
-            )}
-          </div>
-        </Box>
+                  Delete
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
