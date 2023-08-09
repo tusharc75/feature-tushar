@@ -442,7 +442,6 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
         </CustomDialogContent>
         <CustomDialogFooter>
           <Button
-            style={{ padding: '4px 10px' }}
             onClick={() => {
               setIsSaveFilter({ open: true, data: selectedUserFilter });
             }}
@@ -450,7 +449,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
             size="small"
             color="primary"
             // variant="outlined"
-            className="new-dropdown-v1"
+            className="yellow-button"
           >
             {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
           </Button>

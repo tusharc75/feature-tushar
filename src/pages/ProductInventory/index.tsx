@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, IconButton, Tooltip, Button, Menu, MenuItem, Chip } from '@material-ui/core';
+import { Grid, IconButton, Tooltip, Button, Menu, MenuItem, Chip, Checkbox, FormControlLabel } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -29,7 +29,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import SoftHoldDialog from './SoftHold';
 import HistoryDialog from './History/historyDialog';
 import SerialNumberDialog from './SerialNumber/SerialNumberDialog';
-import { camelCase } from 'lodash';
+import { camelCase, set } from 'lodash';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import NoDataCell from '../../components/Helpers/NoDataCell';
@@ -68,6 +68,9 @@ const InventoryProduct = () => {
   const [inventory, setInventory] = useState({ open: false, product: [], type: '' });
 
   const [settingDialogOpen, setSettingDialogOpen] = useState(false);
+
+  const [showExpenseItem, setShowExpenseItem] = useState(false)
+  const [expenseItemValue, setExpenseItemValue] = useState(false)
 
   const {
     state: { user, permissions, selectedEntity }
@@ -108,7 +111,7 @@ const InventoryProduct = () => {
     searchTimeout = setTimeout(() => {
       fetchProductInventory();
     }, millisec);
-  }, [plantId, storageLocationId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, fromProductMaster]);
+  }, [plantId, storageLocationId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, fromProductMaster, expenseItemValue]);
 
   const getPlants = () => {
     axiosInstance()
@@ -128,10 +131,14 @@ const InventoryProduct = () => {
     const productFields = await axiosInstance().get('/field?resource=Product&view=true');
     const productInventoryFields = await axiosInstance().get('/field?resource=Product Inventory&view=true');
 
+
     let columns = [];
     let rendererNames = [];
 
     productFields?.data?.data?.forEach((o) => {
+      if (o.fieldData.fieldName === 'expenseItem') {
+        setShowExpenseItem(true)
+      }
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
@@ -259,6 +266,9 @@ const InventoryProduct = () => {
     const updatedFilters = [];
     if (!user?.user?.brandPolicy?.showSerializedProduct) {
       updatedFilters.push({ field: 'serializedProduct', term: 'No' });
+    }
+    if (showExpenseItem && !deepFilter?.includes('expenseItem')) {
+      updatedFilters.push({ field: 'expenseItem', term: expenseItemValue ? 'Yes' : 'No' });
     }
 
     if (!isObjectEmpty(filters)) {
@@ -568,6 +578,22 @@ const InventoryProduct = () => {
                   }
                 />
               )}
+              {
+                showExpenseItem && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={expenseItemValue}
+                        onChange={(e) => {
+                          setExpenseItemValue(e.target.checked)
+                        }}
+                        name="expenseItem"
+                        color="primary"
+                      />
+                    }
+                    label="Expense Item"
+                  />
+                )}
               {fromProductMaster?.product && (
                 <Chip
                   className="ml-3"

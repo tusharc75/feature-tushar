@@ -1005,6 +1005,20 @@ const routes = {
         : RESOURCE_LABEL.trailerMaster,
     path: '/trailer-master/detail'
   },
+  iotDataPoints: {
+    title:
+      storedRoutes && storedRoutes.iotDataPoints && storedRoutes.iotDataPoints.title
+        ? storedRoutes.iotDataPoints?.title
+        : RESOURCE_LABEL.iotDataPoints,
+    path: '/iot-data-points'
+  },
+  iotDataPointsDetail: {
+    title:
+      storedRoutes && storedRoutes.iotDataPoints && storedRoutes.iotDataPoints.title
+        ? storedRoutes.iotDataPoints?.title
+        : RESOURCE_LABEL.iotDataPoints,
+    path: '/iot-data-points/detail'
+  },
 };
 
 export default routes;

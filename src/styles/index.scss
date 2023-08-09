@@ -3812,6 +3812,17 @@ body {
     opacity: 0.7 !important;
   }
 }
+[data-mode='dark'] .yellow-button,
+.yellow-button {
+  background-color: var(--new_theme_secondary_color) !important;
+  color: #2a3042 !important;
+  font-weight: 600 !important;
+  box-shadow: inset 0px 0px 0px 1px var(--new_theme_secondary_border_color) !important;
+  &:disabled {
+    background-color: var(--new_theme_secondary_color) !important;
+    opacity: 0.7 !important;
+  }
+}
 .no-shadow {
   box-shadow: unset !important;
 }

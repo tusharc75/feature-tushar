@@ -629,7 +629,7 @@ const AddSerializedAsset = ({
                               }}
                               variant={isMobile && !isTablet ? 'text' : 'contained'}
                               disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
-                              className={`${isMobile && !isTablet ? 'mobile_button' : ''} new-dropdown-v1 `}
+                              className={`${isMobile && !isTablet ? 'mobile_button' : ''} yellow-button `}
                               endIcon={isAdding && <CircularProgress size={20} />}
                             >
                               {'Transfer to Job Plant'}

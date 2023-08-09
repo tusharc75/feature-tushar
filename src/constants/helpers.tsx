@@ -334,7 +334,8 @@ export const sidebarResource = {
   competencies: 'Competencies',
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
-  trailerMaster: 'Trailer Master'
+  trailerMaster: 'Trailer Master',
+  iotDataPoints: 'Iot Data Points',
 };
 
 export const primaryFields = {
@@ -455,7 +456,8 @@ export const RESOURCE_LABEL = {
   materialHandling: 'Material Handling',
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
-  trailerMaster: 'Trailer Master'
+  trailerMaster: 'Trailer Master',
+  iotDataPoints: 'Iot Data Points',
 };
 
 export const CHILD_RESOURCE = {
@@ -2186,6 +2188,12 @@ export const REPORT_LIST = [
     permission: 'serializedAsset',
     key: 'purchaseOrderType',
     type: 'numberOfAssetsByStatus',
+  },
+  {
+    title: 'Asset Utilization',
+    permission: 'serializedAsset',
+    key: 'purchaseOrderType',
+    type: 'assetUtilization',
   },
 ];
 

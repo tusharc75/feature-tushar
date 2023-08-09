@@ -103,6 +103,18 @@ const FIELD_TO_FILTER = [
         fieldLabel: 'Estimated End Date',
         type: 'date'
     },
+    {
+        fieldName: 'wellName',
+        fieldLabel: routes.wellMaster.title,
+        resource: sidebarResource.wellMaster,
+        type: 'dropDown'
+    },
+    {
+        fieldName: 'wellNumber',
+        fieldLabel: routes.wellNumber.title,
+        resource: sidebarResource.wellNumber,
+        type: 'dropDown'
+    },
 ]
 
 const FieldTicketInvoice = () => {
@@ -372,6 +384,12 @@ const FieldTicketInvoice = () => {
                                                                 <Typography style={style.titleText}>
                                                                     Customer: <span style={style.subTitleText}>{data?.customerAccount?.optionLabel}</span>
                                                                 </Typography>
+                                                                <Typography style={style.titleText}>
+                                                                    Well Name: <span style={style.subTitleText}>{data?.wellName?.optionLabel}</span>
+                                                                </Typography>
+                                                                <Typography style={style.titleText}>
+                                                                    Well Number: <span style={style.subTitleText}>{data?.wellNumber?.map(w => w?.optionLabel).toString()}</span>
+                                                                </Typography>
                                                                 <Typography style={{ ...style.titleText, marginBottom: 0 }}>
                                                                     Location: <span style={style.subTitleText}>{data?.shippingAddress?.optionLabel}</span>
                                                                 </Typography>
@@ -438,6 +456,7 @@ const FieldTicketInvoice = () => {
                     }}
                     onSuccess={() => {
                         setViewInvoiceDialog({ open: false, data: null });
+                        fetchFieldTicketData()
                     }}
                 />
             )}
