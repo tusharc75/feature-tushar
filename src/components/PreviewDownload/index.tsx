@@ -23,7 +23,6 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [], hideDetailButton = false }) {
-  
   const toastConfig = useContext(CustomToastContext);
 
   const allColumn =
@@ -270,9 +269,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                       getOptionLabel={(option) => option.name}
                       renderOption={(option) => (
                         <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-                          <span style={{ width: 'calc(100% - 71px)' }}>
-                            {option?.name}
-                          </span>
+                          <span style={{ width: 'calc(100% - 71px)' }}>{option?.name}</span>
                           <Box>
                             <IconButton size="small" style={{ marginRight: '20px' }}>
                               <AiFillEdit />
@@ -317,7 +314,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
                           style={{ marginRight: 8 }}
                           checked={
                             showColumnsDialog &&
-                              ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() ===
+                            ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() ===
                               ['Select All', ...visibleColumnsPdf].sort().toString()
                               ? true
                               : selected
@@ -341,12 +338,13 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
               }}
               disabled={visibleColumnsPdf.length == 0}
               size="small"
-              className="new-dropdown-v1"
+              className="yellow-button"
             >
               {selectedView ? 'Update View' : 'Save View'}
             </CustomButton>
             <CustomButton
               variant="contained"
+              className="no-shadow"
               color="primary"
               size="small"
               loading={loadingType === 'Regular' || loading}
@@ -361,6 +359,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
               <CustomButton
                 variant="contained"
                 color="primary"
+                className="no-shadow"
                 size="small"
                 loading={loadingType === 'Detail' || loading}
                 disabled={loadingType || visibleColumnsPdf?.length === 0}
@@ -425,7 +424,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
           resource={resource}
           handleSucess={() => {
             setShowSaveViewDialog({ open: false, data: null });
-            fetchUserViews()
+            fetchUserViews();
           }}
           handleClose={() => {
             setShowSaveViewDialog({ open: false, data: null });
