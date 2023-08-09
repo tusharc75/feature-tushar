@@ -31,11 +31,18 @@ const ScreenOrientationOverlay: FC<ScreenOrientationOverlayProps> = ({ displayOn
   const { landscape, portrait } = useDeviceOrientation();
 
   const shouldDisplay = useMemo(() => {
-    return (
-      ((displayOn === 'landscape' && landscape) || (displayOn === 'portrait' && portrait)) &&
-      ((device === 'mobile' && isMobile) || (device === 'tablet' && isTablet))
-    );
-  }, [landscape, portrait, isMobile, isTablet, displayOn, device]);
+    if (device === 'mobile' && isMobile) {
+      if (displayOn === 'landscape' && landscape) return true;
+      if (displayOn === 'portrait' && portrait) return true;
+      return false;
+    }
+    if (device === 'tablet' && isTablet) {
+      if (displayOn === 'landscape' && landscape) return true;
+      if (displayOn === 'portrait' && portrait) return true;
+      return false;
+    }
+    return false;
+  }, [landscape, portrait, displayOn, device]);
 
   useEffect(() => {
     if (shouldDisplay) {
