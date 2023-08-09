@@ -18,7 +18,6 @@ import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
-import SendEmail from '../SendEmail';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
 
@@ -172,8 +171,8 @@ const Technician = ({
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent?.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent?.packageDetail?.packageName;
       parent.competencies = parent.type === 'service' ? parent?.serviceDetail?.competencies?.map((e) => e?.optionLabel)?.join(', ') : null;
       parent.competencyType = parent.type === 'service' ? parent?.serviceDetail?.competencyType?.optionLabel : null;
       parent.mainCompetencyType = parent.type === 'service' ? parent?.serviceDetail?.competencyType : {};
@@ -214,8 +213,8 @@ const Technician = ({
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.subRows = generateNestedData(material, technician, _subRow);
     });
 
@@ -286,7 +285,9 @@ const Technician = ({
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           <Box display="flex" justifyContent="space-between" m={1} mb={0}>
-            <Box display="flex">{fromInvoice && <SendEmail serviceOrderData={serviceOrderData} />}</Box>
+            <Box display="flex">
+
+            </Box>
             {allowedToEdit && (
               <Box display="flex">
                 <Button
