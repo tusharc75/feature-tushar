@@ -17,6 +17,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { displayDate } from 'src/constants/helpers';
+import { Add } from '@material-ui/icons';
 
 
 const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketData, selectedService }) => {
@@ -233,6 +234,7 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                                 variant="outlined"
                                 color="primary"
                                 size="small"
+                                startIcon={<Add />}
                                 onClick={() => setTechnicianDialog(true)}>
                                 Add
                             </Button>

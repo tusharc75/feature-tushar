@@ -31,6 +31,7 @@ import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQtyDialog';
 import History from '../../ProductInventory/LedgerHistory';
 import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
+import { Add } from '@material-ui/icons';
 
 const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fieldTicketData, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -513,7 +514,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
           {allowedToEdit && (
             <Box display="flex" justifyContent="space-between" mb={2}>
               <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-                <Button variant="outlined" color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
+                <Button variant="outlined" color="primary" size="small" startIcon={<Add />} onClick={() => setConsumablesDialog(true)}>
                   Add
                 </Button>
               </Box>
