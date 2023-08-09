@@ -225,6 +225,8 @@ import TrailerMasterDetail from './pages/TrailerMaster/TrailerMasterDetail';
 import FieldTicketInvoice from './pages/FieldTicketInvoice';
 import AzureSSOError from './pages/Auth/AzureSSOError';
 import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
+import IotDataPoints from './pages/IotDataPoints';
+import IotDataPointsDetail from './pages/IotDataPoints/IotDataPointsDetail';
 
 var notificationInterval: any = null;
 
@@ -994,6 +996,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.trailerMasterDetail.path}/:id`}>
               <TrailerMasterDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.iotDataPoints.path}`}>
+              <IotDataPoints />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.iotDataPointsDetail.path}/:id`}>
+              <IotDataPointsDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
