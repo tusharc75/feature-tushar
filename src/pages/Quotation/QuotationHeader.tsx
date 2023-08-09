@@ -145,16 +145,8 @@ function QuotationHeader(props) {
         )}
         {children}
       </div>
-      <div className="flex flex-wrap gap-[8px]">
-        <SearchBox
-          onChange={onSearch}
-          className={styles.search_box_input}
-          value={searchVal}
-          size="small"
-          width="200px"
-          placeholder="Search Quotation"
-          style={isMobile ? { flex: 1 } : {}}
-        />
+      <div className="flex flex-wrap gap-[8px]  justify-end">
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Quotation" />
         <div className="flex gap-[8px] flex-wrap items-center">
           {QuotationPermissions?.isCreate && (
             <Button
