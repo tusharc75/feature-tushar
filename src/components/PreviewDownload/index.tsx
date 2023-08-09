@@ -1,5 +1,5 @@
-import { Box, Button, Checkbox, Dialog, FormControl, Grid, IconButton, TextField } from '@material-ui/core';
-import React, { useContext, useEffect, useState } from 'react';
+import { Box, Button, Dialog} from '@material-ui/core';
+import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
@@ -8,7 +8,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { MdEmail } from 'react-icons/md';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
-import { ViewDialog } from './ViewDialog';
 import { PreviewDialog } from './PreviewDialog';
 
 function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [], hideDetailButton = false }) {
@@ -28,39 +27,11 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
 
   const [sendEmail, setSendEmail] = useState(false);
   const [downlodingFile, setDownlodingFile] = useState(null);
-
-  const [visibleColumnsPdf, setVisibleColumnsPdf] = useState([]);
   const [showColumnsDialog, setShowColumnsDialog] = useState({ open: false, type: '' });
   const [loadingType, setLoadingType] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const [emailAttachments, setEmailAttachments] = useState([]);
-  const [views, setViews] = useState([]);
-
-  const [showSaveViewDialog, setShowSaveViewDialog] = useState({ open: false, data: null });
-
-  const fetchUserViews = () => {
-    axiosInstance()
-      .get(`/pdf/view?resource=${resource}`)
-      .then(({ data }) => {
-        setViews(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
-  useEffect(() => {
-    fetchUserViews();
-  }, []);
-
-  useEffect(() => {
-    const temp =
-      defaultColumns?.length > 0
-        ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName))?.map((e) => e.fieldLabel)
-        : allColumn?.map((e) => e.fieldLabel);
-    setVisibleColumnsPdf([...temp]);
-  }, [columns]);
 
   const handleViewPdf = (type, pdfType, visibleColumns) => {
     let showColumns = allColumn
@@ -198,18 +169,16 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
           handleClose={() => {
             setShowColumnsDialog({ open: false, type: '' });
           }}
-          setShowSaveViewDialog={setShowSaveViewDialog}
-          visibleColumnsPdf={visibleColumnsPdf}
-          setVisibleColumnsPdf={setVisibleColumnsPdf}
-          handleViewPdf={(type) => {
+          handleViewPdf={(type, visibleColumnsPdf) => {
             handleViewPdf(downlodingFile, type, visibleColumnsPdf);
           }}
           loadingType={loadingType}
           loading={loading}
           hideDetailButton={hideDetailButton}
-          views={views}
           allColumn={allColumn}
-          fetchUserViews={fetchUserViews}
+          resource={resource}
+          defaultColumns={defaultColumns}
+          columns={columns}
         />
       )}
 
@@ -249,20 +218,6 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
             referenceType={resource}
           />
         </Dialog>
-      )}
-      {showSaveViewDialog.open && (
-        <ViewDialog
-          columns={visibleColumnsPdf}
-          resource={resource}
-          handleSucess={() => {
-            setShowSaveViewDialog({ open: false, data: null });
-            fetchUserViews();
-          }}
-          handleClose={() => {
-            setShowSaveViewDialog({ open: false, data: null });
-          }}
-          viewData={showSaveViewDialog.data}
-        />
       )}
     </Box>
   );
