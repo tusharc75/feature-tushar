@@ -12,7 +12,6 @@ import { ViewDialog } from './ViewDialog';
 import { PreviewDialog } from './PreviewDialog';
 
 function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [], hideDetailButton = false }) {
-
   const toastConfig = useContext(CustomToastContext);
 
   const allColumn =
@@ -257,7 +256,7 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
           resource={resource}
           handleSucess={() => {
             setShowSaveViewDialog({ open: false, data: null });
-            fetchUserViews()
+            fetchUserViews();
           }}
           handleClose={() => {
             setShowSaveViewDialog({ open: false, data: null });
