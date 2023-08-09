@@ -84,19 +84,18 @@ function QuoteHeader({
   );
 
   return (
-    <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={6} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className={'d-flex align-items-center gap-1'}>
         <div className="d-flex align-items-center">
           {icon} <span className="listingHeader">{heading}</span>
         </div>
-        {isMobile ? (
+        {isMobile && !isTablet ? (
           <div className="d-flex ">
             <Button
               onClick={handleClickOpen}
               id="demo-customized-button"
               aria-controls="demo-customized-menu"
               aria-haspopup="true"
-              color="secondary"
               variant="text"
               disableElevation
               startIcon={<MdSort />}
@@ -116,7 +115,6 @@ function QuoteHeader({
               aria-controls="demo-customized-menu"
               aria-haspopup="true"
               variant="text"
-              color="secondary"
               disableElevation
               startIcon={<MdFilterList />}
               onClick={handleOpen}
@@ -147,97 +145,77 @@ function QuoteHeader({
           )
         )}
         {children}
-      </Grid>
-      <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: 'flex', flex: 1 }}>
-            <SearchBox
-              onChange={onSearch}
-              className={styles.search_box_input}
-              value={searchVal}
-              size="small"
-              placeholder="Search Quotes"
-              width={isMobile && !isTablet ? '200px' : '242px'}
-              style={isMobile && !isTablet ? { flex: 1 } : {}}
-            />
-          </Grid>
+      </div>
+      <div className="flex flex-wrap gap-[8px]  justify-end">
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Quotes" />
 
-          <Grid style={{ display: 'flex', gap: '5px' }}>
-            {QuotePermissions.isCreate && (
+        <div className="flex gap-[8px] flex-wrap items-center">
+          {QuotePermissions.isCreate && (
+            <Button variant={'contained'} color="primary" size="small" onClick={onCreate} className={'no-shadow'} startIcon={<AddOutlined />}>
+              Add
+            </Button>
+          )}
+          {(QuotePermissions.isCreate || QuotePermissions.isUpdate) && (
+            <>
               <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                color="primary"
+                disabled={canDelete}
+                variant={'outlined'}
+                color="default"
                 size="small"
-                onClick={onCreate}
-                className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                onClick={openActions}
+                className={` new-dropdown-v1`}
+                aria-controls="action-menu"
+                endIcon={<ExpandMore />}
               >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                Actions
               </Button>
-            )}
-            {(QuotePermissions.isCreate || QuotePermissions.isUpdate) && (
-              <>
-                <Button
-                  disabled={canDelete}
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  fullWidth={true}
-                  className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                >
-                  {isMobile && !isTablet ? '' : 'Actions'}
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    showConfirmBox(null);
                   }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
+                  disabled={!permissions?.quoteBuilder?.isDelete}
                 >
+                  Delete
+                </MenuItem>
+                {QuotePermissions.isUpdate && (
                   <MenuItem
+                    disabled={selectedRecords.find((d) => d.canDelete === false)}
                     onClick={() => {
                       closeActions();
-                      showConfirmBox(null);
-                    }}
-                    disabled={!permissions?.quoteBuilder?.isDelete}
-                  >
-                    Delete
-                  </MenuItem>
-                  {QuotePermissions.isUpdate && (
-                    <MenuItem
-                      disabled={selectedRecords.find((d) => d.canDelete === false)}
-                      onClick={() => {
-                        closeActions();
-                        showTransferEntityDialog();
-                      }}
-                    >
-                      Transfer Entity
-                    </MenuItem>
-                  )}
-                  <MenuItem
-                    disabled={selectedRecords.length !== 1}
-                    onClick={() => {
-                      closeActions();
-                      showCloneQuoteDialog();
+                      showTransferEntityDialog();
                     }}
                   >
-                    Clone
+                    Transfer Entity
                   </MenuItem>
-                </Menu>
-              </>
-            )}
-          </Grid>
-        </Box>
-      </Grid>
-    </Grid>
+                )}
+                <MenuItem
+                  disabled={selectedRecords.length !== 1}
+                  onClick={() => {
+                    closeActions();
+                    showCloneQuoteDialog();
+                  }}
+                >
+                  Clone
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 export default QuoteHeader;
