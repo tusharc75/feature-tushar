@@ -156,15 +156,7 @@ function LeadsHeader(props) {
 
         <div className="flex gap-[8px] flex-wrap items-center">
           {leadPermissions.isCreate && (
-            <Button
-              variant={'contained'}
-              color="primary"
-              size="small"
-              // className={styles.add_submit_btn}
-              onClick={onCreate}
-              // startIcon={<AddOutlined />}
-              className={`no-shadow`}
-            >
+            <Button variant={'contained'} color="primary" size="small" onClick={onCreate} startIcon={<AddOutlined />} className={`no-shadow`}>
               Add
             </Button>
           )}

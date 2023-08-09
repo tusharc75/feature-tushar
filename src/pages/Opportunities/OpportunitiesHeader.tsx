@@ -165,14 +165,7 @@ function OpportunitiesHeader(props) {
         <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Opportunity" />
         <div className="flex gap-[8px] flex-wrap items-center">
           {opportunityPermissions.isCreate && opportunityPermissions.isUpdate && (
-            <Button
-              variant={'contained'}
-              color="primary"
-              size="small"
-              className={'no-shadow'}
-              onClick={onCreate}
-              startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-            >
+            <Button variant={'contained'} color="primary" size="small" className={'no-shadow'} onClick={onCreate} startIcon={<AddOutlined />}>
               Add
             </Button>
           )}

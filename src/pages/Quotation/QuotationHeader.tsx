@@ -149,14 +149,7 @@ function QuotationHeader(props) {
         <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Quotation" />
         <div className="flex gap-[8px] flex-wrap items-center">
           {QuotationPermissions?.isCreate && (
-            <Button
-              variant={'contained'}
-              className="no-shadow"
-              color="primary"
-              size="small"
-              onClick={onCreate}
-              startIcon={isMobile ? null : <AddOutlined />}
-            >
+            <Button variant={'contained'} className="no-shadow" color="primary" size="small" onClick={onCreate} startIcon={<AddOutlined />}>
               Add
             </Button>
           )}
@@ -164,7 +157,7 @@ function QuotationHeader(props) {
             <>
               <Button
                 disabled={canDelete}
-                variant={isMobile ? 'text' : 'outlined'}
+                variant={'outlined'}
                 color="default"
                 size="small"
                 onClick={openActions}
