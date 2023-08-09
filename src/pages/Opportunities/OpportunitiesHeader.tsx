@@ -99,8 +99,8 @@ function OpportunitiesHeader(props) {
     </ToggleButtonGroup>
   );
   return (
-    <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className={'d-flex align-items-center gap-1'}>
         {isMobile && !isTablet ? (
           <div className="d-flex ">
             <Button
@@ -108,7 +108,6 @@ function OpportunitiesHeader(props) {
               id="demo-customized-button"
               aria-controls="demo-customized-menu"
               aria-haspopup="true"
-              color="secondary"
               variant="text"
               disableElevation
               startIcon={<MdSort />}
@@ -130,7 +129,6 @@ function OpportunitiesHeader(props) {
               aria-controls="demo-customized-menu"
               aria-haspopup="true"
               variant="text"
-              color="secondary"
               disableElevation
               startIcon={<MdFilterList />}
               onClick={handleOpen}
@@ -162,83 +160,71 @@ function OpportunitiesHeader(props) {
         )}
 
         {children}
-      </Grid>
-      <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
-        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: 'flex', flex: 1 }}>
-            <SearchBox
-              onChange={onSearch}
-              className={styles.search_box_input}
-              value={searchVal}
+      </div>
+      <div className="flex flex-wrap gap-[8px]  justify-end">
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Opportunity" />
+        <div className="flex gap-[8px] flex-wrap items-center">
+          {opportunityPermissions.isCreate && opportunityPermissions.isUpdate && (
+            <Button
+              variant={'contained'}
+              color="primary"
               size="small"
-              placeholder="Search Opportunity"
-              width={isMobile && !isTablet ? '200px' : '242px'}
-              style={isMobile && !isTablet ? { flex: 1 } : {}}
-            />
-          </Grid>
-          <Grid style={{ display: 'flex', gap: '5px' }}>
-            {opportunityPermissions.isCreate && opportunityPermissions.isUpdate && (
+              className={'no-shadow'}
+              onClick={onCreate}
+              startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+            >
+              Add
+            </Button>
+          )}
+          {(opportunityPermissions.isDelete || opportunityPermissions.isUpdate) && (
+            <>
               <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                color="primary"
+                disabled={canDelete}
+                variant={'outlined'}
+                color="default"
                 size="small"
-                className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                onClick={onCreate}
-                startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                onClick={openActions}
+                className={`new-dropdown-v1`}
+                aria-controls="action-menu"
+                endIcon={<ExpandMore />}
               >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                Actions
               </Button>
-            )}
-            {(opportunityPermissions.isDelete || opportunityPermissions.isUpdate) && (
-              <>
-                <Button
-                  disabled={canDelete}
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                >
-                  {isMobile && !isTablet ? '' : 'Actions'}
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    showConfirmBox(null);
                   }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
                 >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      showConfirmBox(null);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                  <MenuItem
-                    disabled={selectedRecords.find((d) => d.canDelete === false)}
-                    onClick={() => {
-                      closeActions();
-                      showTransferEntityDialog();
-                    }}
-                  >
-                    Transfer Entity
-                  </MenuItem>
-                </Menu>
-              </>
-            )}
-          </Grid>
-        </Box>
-      </Grid>
-    </Grid>
+                  Delete
+                </MenuItem>
+                <MenuItem
+                  disabled={selectedRecords.find((d) => d.canDelete === false)}
+                  onClick={() => {
+                    closeActions();
+                    showTransferEntityDialog();
+                  }}
+                >
+                  Transfer Entity
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 export default OpportunitiesHeader;
