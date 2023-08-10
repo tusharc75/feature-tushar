@@ -36,20 +36,8 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
       let data;
       const response = await axiosInstance().get('/field?resource=Support Ticket');
       data = response?.data?.data;
-      const fieldsDataForCreate = [];
-      const fieldsDataForUpdate = [];
-      
-      for (const obj of data) {
-        const fieldData = obj.fieldData;
-        if (fieldData && fieldData.sectionName !== "Internal Information") {
-          if (obj.isCreate) {
-            fieldsDataForCreate.push(fieldData);
-          }
-          if (obj.isUpdate) {
-            fieldsDataForUpdate.push(fieldData);
-          }
-        }
-      }
+      const fieldsDataForCreate = data.filter((obj) => obj?.isCreate && obj?.fieldData?.sectionName !== "Internal Information").map((d: any) => d?.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj?.isUpdate && obj?.fieldData?.sectionName !== "Internal Information").map((d: any) => d?.fieldData);
 
       if (id) {
         axiosInstance()
