@@ -61,7 +61,7 @@ const Productpackage = ({
 
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
-  
+
 
   useEffect(() => {
     fetchFields();
@@ -117,12 +117,12 @@ const Productpackage = ({
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
             </Box>
-             <Box ml={1} className="d-flex align-items-center">
+            <Box ml={1} className="d-flex align-items-center">
               <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
               </span>
               {allowedToEdit && row.original.type !== 'serializedAsset' && (
-                <HtmlTooltip title={ row.original.type === 'package' ? `Add Product` : `Add` }>
+                <HtmlTooltip title={row.original.type === 'package' ? `Add Product` : `Add`}>
                   <IconButton
                     onClick={(event) => {
                       row.original.type === 'product'
@@ -238,25 +238,24 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
+      parent.detail = `${parent.type === 'service'
           ? parent.serviceDetail?.serviceName
           : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.assetNumber
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.productDetail?.productName
+            : parent.type === 'serializedAsset'
+              ? parent.serializedAssetDetail.assetNumber
+              : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent?.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
@@ -267,12 +266,12 @@ const Productpackage = ({
         parent.type === 'service'
           ? parent.serviceDetail?.status
           : parent.type === 'product'
-          ? parent?.productDetail?.status
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.status
-          : parent.type === 'package'
-          ? parent.packageDetail?.status
-          : '';
+            ? parent?.productDetail?.status
+            : parent.type === 'serializedAsset'
+              ? parent?.serializedAssetDetail?.status
+              : parent.type === 'package'
+                ? parent.packageDetail?.status
+                : '';
     });
 
     if (rows.length !== 0) {
@@ -296,23 +295,22 @@ const Productpackage = ({
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'service'
+      _subRow.detail = `${_subRow.type === 'service'
           ? _subRow.serviceDetail?.serviceName
           : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.productDetail?.productName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow.serializedAssetDetail.assetNumber
+              : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -323,10 +321,10 @@ const Productpackage = ({
         _subRow.type === 'service'
           ? _subRow.serviceDetail?.status
           : _subRow.type === 'product'
-          ? _subRow.productDetail?.status
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.status
-          : _subRow.packageDetail?.status;
+            ? _subRow.productDetail?.status
+            : _subRow.type === 'serializedAsset'
+              ? _subRow.serializedAssetDetail.status
+              : _subRow.packageDetail?.status;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -475,7 +473,7 @@ const Productpackage = ({
                       {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add New Customer Assets` : `Add New ${routes.serializedAsset.title}`}
                     </MenuItem>
                   )}
-                  {/* <MenuItem
+                  <MenuItem
                     onClick={() => {
                       closeAddActions();
                       setAddExistingProductDialog({ open: true, type: 'product', parentId: null, existing: false, productId: null, productCategory: null });
@@ -490,7 +488,7 @@ const Productpackage = ({
                     }}
                   >
                     Add Packages
-                  </MenuItem> */}
+                  </MenuItem>
                 </Menu>
               </Fragment>
             )}
@@ -583,21 +581,21 @@ const Productpackage = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
         <AssignProductDialog
-        reference="repairOrder"
-        serialized={true}
-        productsDialogOpen={addExistingProductDialog.open}
-        productId={null}
-        handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null})}
-        assignedProducts={[]}
-        onSuccess={(d) => {
-          handleAdd(d);
-        }}
-      />
+          reference="repairOrder"
+          serialized={true}
+          productsDialogOpen={addExistingProductDialog.open}
+          productId={null}
+          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })}
+          assignedProducts={[]}
+          onSuccess={(d) => {
+            handleAdd(d);
+          }}
+        />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
           referenceType="repairOrder"
-          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null})}
+          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })}
           ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
@@ -656,7 +654,7 @@ const Productpackage = ({
             <MenuItem
               disabled={rowsData ? false : true}
               onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId, existing: true , productId: addchildDialog.productId, productCategory: addchildDialog.productCategory});
+                setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId, existing: true, productId: addchildDialog.productId, productCategory: addchildDialog.productCategory });
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, productId: null, productCategory: null });
               }}
             >
@@ -665,7 +663,7 @@ const Productpackage = ({
             {permissions?.serializedAsset?.isCreate && (
               <MenuItem
                 onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId, existing: false, productId: addchildDialog.productId, productCategory: addchildDialog.productCategory});
+                  setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId, existing: false, productId: addchildDialog.productId, productCategory: addchildDialog.productCategory });
                   setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, productId: null, productCategory: null });
                 }}
               >

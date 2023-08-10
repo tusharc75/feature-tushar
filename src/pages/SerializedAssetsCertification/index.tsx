@@ -309,9 +309,10 @@ const SerializedAssetsCertification = () => {
               loading={loading}
               renderedFrom={renderedFrom}
               refreshGrid={fetchProductInventory}
-              showOnlyShowFilteredRecordSwitch={true}
+              showOnlyShowFilteredRecordSwitch={false}
               showFilters={true}
               resource={sidebarResource.serializedAsset}
+              allowSelection={false}
             />
           ) : null
         ) : (
@@ -333,7 +334,9 @@ const SerializedAssetsCertification = () => {
       {certificateHistoryDialog?.open && (
         <CertificateHistoryDialog
           onClose={() => setCertificateHistoryDialog({ open: false, id: null })}
-          id={certificateHistoryDialog?.id} />
+          id={certificateHistoryDialog?.id}
+          supplierAccount={user?.user?.supplierAccountId}
+        />
       )}
     </Fragment>
   );

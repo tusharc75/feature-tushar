@@ -486,8 +486,8 @@ const SerializedAsset = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} sm={12} md={7} className="d-flex align-items-center gap-1 flex-wrap">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'flex flex-wrap align-items-center gap-[8px]'}>
               <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
               <span className="listingHeader">{routes.serializedAsset?.title} </span>
               {warehouse || warehouse || fromPurchaseOrder?.pOId ? (
@@ -537,7 +537,7 @@ const SerializedAsset = () => {
                 <Fragment>
                   {permissions?.productCategory?.isRead && (
                     <Autocomplete
-                      style={{ width: '250px' }}
+                      className={`xl:w-[250px] w-full`}
                       options={productCategoryList}
                       getOptionLabel={(option: any) => (option ? option.name : '')}
                       getOptionSelected={(option: any, val) => option._id === val}
@@ -553,7 +553,8 @@ const SerializedAsset = () => {
                         isMobile && !isTablet ? (
                           <TextField
                             {...params}
-                            margin="dense"
+                            margin="none"
+                            size="small"
                             name="productCategory"
                             placeholder="Product Category"
                             variant="standard"
@@ -561,15 +562,24 @@ const SerializedAsset = () => {
                             className={isMobile ? 'serchBox' : ''}
                           />
                         ) : (
-                          <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+                          <TextField
+                            {...params}
+                            size="small"
+                            margin="none"
+                            name="productCategory"
+                            label="Product Category"
+                            variant="outlined"
+                            fullWidth
+                          />
                         )
                       }
                     />
                   )}
                   {productCategory && (
                     <Autocomplete
-                      style={{ width: '250px' }}
+                      className={`xl:w-[250px] w-full`}
                       options={productFilterList}
+                      size="small"
                       getOptionLabel={(option: any) => (option ? option.productName : '')}
                       getOptionSelected={(option: any, val) => option._id === val}
                       value={
@@ -580,11 +590,13 @@ const SerializedAsset = () => {
                       onChange={(e, val) => {
                         setProductFilter(val && val._id ? val._id : '');
                       }}
-                      renderInput={(params) => <TextField {...params} margin="dense" name="product" label="Product" variant="outlined" fullWidth />}
+                      renderInput={(params) => (
+                        <TextField size="small" {...params} margin="none" name="product" label="Product" variant="outlined" fullWidth />
+                      )}
                     />
                   )}
                   <Autocomplete
-                    style={{ width: '250px' }}
+                    className={`xl:w-[250px] w-full`}
                     options={warehouseOptions}
                     getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                     getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -600,15 +612,16 @@ const SerializedAsset = () => {
                       isMobile && !isTablet ? (
                         <TextField
                           {...params}
-                          margin="dense"
+                          margin="none"
                           name="plant"
                           placeholder={routes.warehouse.title}
                           variant="standard"
+                          size="small"
                           fullWidth
                           className={isMobile ? 'serchBox' : ''}
                         />
                       ) : (
-                        <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                        <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
                       )
                     }
                   />
@@ -624,169 +637,158 @@ const SerializedAsset = () => {
                           color="primary"
                         />
                       }
-                      className="ml-2"
-                      style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: 'unset' }}
+                      style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
                       label="Sublease Assets"
                     />
                   )}
                 </Fragment>
               )}
-            </Grid>
-            <Grid md={5} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Box style={{ flexGrow: '1' }}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={styles.search_box_input}
-                    width={isMobile ? '200px' : '210px'}
-                    style={{ width: '100%', maxWidth: 250, display: 'flex' }}
-                    size="small"
-                    value={search}
-                  />
-                </Box>
-                <Box style={{ display: 'flex', gap: '5px', marginLeft: 'auto' }}>
-                  {permissions?.serializedAsset?.isCreate && (
-                    <Button
-                      onClick={() => {
-                        setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null });
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      color="primary"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                  )}
-                  {(permissions?.serializedAsset?.isDelete || permissions?.serializedAsset?.isUpdate) && (
-                    <Button
-                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                    >
-                      {isMobile && !isTablet ? '' : 'Actions'}
-                    </Button>
-                  )}
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.serializedAsset?.isCreate && (
+                  <Button
+                    onClick={() => {
+                      setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null });
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
                   >
-                    <MenuItem
-                      disabled={!permissions?.serializedAsset?.isDelete}
-                      onClick={() => {
-                        closeActions();
-                        setShowDeleteConfirmBox(true);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                    {permissions?.serializedAsset?.isUpdate &&
-                      allowUpdateStatus &&
-                      [ASSET_STATUS.available].map((status) => (
+                    Add
+                  </Button>
+                )}
+                {(permissions?.serializedAsset?.isDelete || permissions?.serializedAsset?.isUpdate) && (
+                  <Button
+                    className={`new-dropdown-v1`}
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
+                    aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
+                  >
+                    Actions
+                  </Button>
+                )}
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={!permissions?.serializedAsset?.isDelete}
+                    onClick={() => {
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                  {permissions?.serializedAsset?.isUpdate &&
+                    allowUpdateStatus &&
+                    [ASSET_STATUS.available].map((status) => (
+                      <MenuItem
+                        onClick={() => {
+                          closeActions();
+                          handleStatusUpdate(status);
+                        }}
+                        disabled={
+                          [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) =>
+                            [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(o.status)
+                          ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                            ? false
+                            : true
+                        }
+                      >
+                        {`Status Change - ${status}`}
+                      </MenuItem>
+                    ))}
+                  {permissions?.serializedAsset?.isUpdate &&
+                    allowUpdateStatus &&
+                    [...getLocalStorageArrayData(localStorageSelectedRecords)]?.length && (
+                      <>
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(status);
+                            handleStatusUpdate(ASSET_STATUS.needRepair);
                           }}
                           disabled={
-                            [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) =>
-                              [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(o.status)
-                            ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                            [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRepair].includes(o.status))
+                              .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
                               ? false
                               : true
                           }
                         >
-                          {`Status Change - ${status}`}
+                          {`Status Change - ${ASSET_STATUS.needRepair}`}
                         </MenuItem>
-                      ))}
-                    {permissions?.serializedAsset?.isUpdate &&
-                      allowUpdateStatus &&
-                      [...getLocalStorageArrayData(localStorageSelectedRecords)]?.length && (
-                        <>
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleStatusUpdate(ASSET_STATUS.needRecert);
+                          }}
+                          disabled={
+                            [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRecert].includes(o.status))
+                              .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                              ? false
+                              : true
+                          }
+                        >
+                          {`Status Change - ${ASSET_STATUS.needRecert}`}
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleStatusUpdate(ASSET_STATUS.scrap);
+                          }}
+                          disabled={
+                            [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status))
+                              .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                              ? false
+                              : true
+                          }
+                        >
+                          {`Status Change - ${ASSET_STATUS.scrap}`}
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            handleStatusUpdate(ASSET_STATUS.lost);
+                          }}
+                          disabled={
+                            [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.lost].includes(o.status))
+                              .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                              ? false
+                              : true
+                          }
+                        >
+                          {`Status Change - ${ASSET_STATUS.lost}`}
+                        </MenuItem>
+                        {columns?.some((e) => e.field === 'certificationSupplier') && (
                           <MenuItem
+                            disabled={!permissions?.serializedAsset?.isUpdate}
                             onClick={() => {
                               closeActions();
-                              handleStatusUpdate(ASSET_STATUS.needRepair);
+                              setOpenSupplierAccountDialog(true);
                             }}
-                            disabled={
-                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRepair].includes(o.status))
-                                .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                                ? false
-                                : true
-                            }
                           >
-                            {`Status Change - ${ASSET_STATUS.needRepair}`}
+                            {`Assign Certification Supplier`}
                           </MenuItem>
-                          <MenuItem
-                            onClick={() => {
-                              closeActions();
-                              handleStatusUpdate(ASSET_STATUS.needRecert);
-                            }}
-                            disabled={
-                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRecert].includes(o.status))
-                                .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                                ? false
-                                : true
-                            }
-                          >
-                            {`Status Change - ${ASSET_STATUS.needRecert}`}
-                          </MenuItem>
-                          <MenuItem
-                            onClick={() => {
-                              closeActions();
-                              handleStatusUpdate(ASSET_STATUS.scrap);
-                            }}
-                            disabled={
-                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status))
-                                .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                                ? false
-                                : true
-                            }
-                          >
-                            {`Status Change - ${ASSET_STATUS.scrap}`}
-                          </MenuItem>
-                          <MenuItem
-                            onClick={() => {
-                              closeActions();
-                              handleStatusUpdate(ASSET_STATUS.lost);
-                            }}
-                            disabled={
-                              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.lost].includes(o.status))
-                                .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                                ? false
-                                : true
-                            }
-                          >
-                            {`Status Change - ${ASSET_STATUS.lost}`}
-                          </MenuItem>
-                          {columns?.some((e) => e.field === 'certificationSupplier') && (
-                            <MenuItem
-                              disabled={!permissions?.serializedAsset?.isUpdate}
-                              onClick={() => {
-                                closeActions();
-                                setOpenSupplierAccountDialog(true);
-                              }}
-                            >
-                              {`Assign Certification Supplier`}
-                            </MenuItem>
-                          )}
-                        </>
-                      )}
-                    {/* {columns?.some(e => e.field === "mtrAttached") &&
+                        )}
+                      </>
+                    )}
+                  {/* {columns?.some(e => e.field === "mtrAttached") &&
                       <>
                         <MenuItem
                           onClick={() => {
@@ -806,11 +808,10 @@ const SerializedAsset = () => {
                         </MenuItem>
                       </>
                     } */}
-                  </Menu>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
         {columns ? (
           isMobile && !isTablet ? (
@@ -928,8 +929,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

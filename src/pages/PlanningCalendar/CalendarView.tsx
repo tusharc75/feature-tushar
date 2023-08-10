@@ -85,32 +85,24 @@ const CalendarView = (props: Props) => {
   return (
     <>
       <div className={`${classes.whiteBg}`}>
-        <Grid container className={` ${classes.topbar}`}>
-          <Grid item xs={12} sm={5}>
-            <Box display="flex" alignItems="center">
-              <Box component="span" mx={1} />
-              {['Rental Job', 'Sales Order', 'Field Service Order'].map((item) => (
-                <>
-                  <Box
-                    display="flex"
-                    bgcolor={
-                      item === 'Rental Job' ? 'rgba(255, 232, 204, 1)' : item === 'Sales Order' ? 'rgba(234, 239, 254, 1)' : 'rgba(253, 220, 228, 1)'
-                    }
-                    className={`${classes.indicators}`}
-                    style={{
-                      color: `${
-                        item === 'Rental Job' ? 'rgba(236, 85, 0, 1)' : item === 'Sales Order' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)'
-                      }`
-                    }}
-                  >
-                    {item}
-                  </Box>
-                  <Box component="span" ml={1} />
-                </>
-              ))}
-            </Box>
-          </Grid>
-        </Grid>
+        <div className="flex flex-wrap gap-[8px] py-[10px]">
+          {['Rental Job', 'Sales Order', 'Field Service Order'].map((item) => (
+            <>
+              <Box
+                display="flex"
+                bgcolor={
+                  item === 'Rental Job' ? 'rgba(255, 232, 204, 1)' : item === 'Sales Order' ? 'rgba(234, 239, 254, 1)' : 'rgba(253, 220, 228, 1)'
+                }
+                className={`${classes.indicators}`}
+                style={{
+                  color: `${item === 'Rental Job' ? 'rgba(236, 85, 0, 1)' : item === 'Sales Order' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)'}`
+                }}
+              >
+                {item}
+              </Box>
+            </>
+          ))}
+        </div>
         <Calendar
           defaultDate={moment().toDate()}
           defaultView="day"
