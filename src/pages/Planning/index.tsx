@@ -359,8 +359,8 @@ const Planning = () => {
       </Grid>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex align-items-center gap-1'}>
               <ToggleButtonGroup
                 size="small"
                 className="align-items-center gap-1 layout-for-mobile "
@@ -404,86 +404,74 @@ const Planning = () => {
                   }}
                 />
               )}
-            </Grid>
-            <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={styles.search_box_input}
-                    width={isMobile ? '200px' : '242px'}
-                    style={isMobile ? { flex: 1 } : {}}
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.planning?.isCreate && (
+                  <Button
+                    className={'no-shadow'}
+                    onClick={() => {
+                      setPlanningId(null);
+                      setOpen({ open: true, isClone: false });
+                    }}
+                    variant={'contained'}
                     size="small"
-                    value={search}
-                  />
-                </Grid>
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.planning?.isCreate && (
+                    color="primary"
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
+                {permissions?.planning?.isDelete && (
+                  <>
                     <Button
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      onClick={() => {
-                        setPlanningId(null);
-                        setOpen({ open: true, isClone: false });
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      variant={'outlined'}
+                      color="default"
                       size="small"
-                      color="primary"
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                      className={`new-dropdown-v1`}
+                      endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                      Actions
                     </Button>
-                  )}
-                  {permissions?.planning?.isDelete && (
-                    <>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        disabled={selectedRecords.length ? false : true}
-                        aria-controls="action-menu"
-                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                        endIcon={<ExpandMore />}
-                      >
-                        {isMobile && !isTablet ? '' : 'Actions'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        <MenuItem
-                          disabled={
-                            !(
-                              (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) ===
-                              selectedRecords?.length
-                            )
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
+                        onClick={() => {
+                          closeActions();
+                          // eslint-disable-next-line no-lone-blocks
+                          {
+                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
                           }
-                          onClick={() => {
-                            closeActions();
-                            // eslint-disable-next-line no-lone-blocks
-                            {
-                              selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                            }
-                            setShowDeleteConfirmBox(true);
-                          }}
-                        >
-                          Delete
-                        </MenuItem>
-                      </Menu>
-                    </>
-                  )}
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+                          setShowDeleteConfirmBox(true);
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
         {Object.keys(frameWorkComponent).length > 0 ? (
           isMobile && !isTablet ? (

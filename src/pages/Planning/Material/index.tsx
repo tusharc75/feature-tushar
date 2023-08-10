@@ -464,10 +464,11 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
               color="default"
               size="small"
               onClick={openActions}
+              className="new-dropdown-v1"
               aria-controls="action-menu"
               endIcon={<ExpandMore />}
             >
-              {isMobile ? '' : 'Actions'}
+              Actions
             </Button>
             <Menu
               anchorEl={anchorEl}
