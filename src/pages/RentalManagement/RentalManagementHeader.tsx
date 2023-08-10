@@ -140,14 +140,14 @@ function RentalManagementHeader({
   );
 
   return (
-    <Grid container className={styles.rental_header_layout}>
-      <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet">
-        <Grid>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div className={'d-flex flex-wrap align-items-center gap-1'}>
+        <div className="flex flex-wrap">
           {icon} <span className="listingHeader">{heading}</span>
-        </Grid>
-        {isMobile ? (
+        </div>
+        {isMobile && !isTablet ? (
           <>
-            <Grid style={{ display: 'inline-flex' }}>
+            <div className="">
               <Button
                 onClick={handleClickOpen}
                 id="demo-customized-button"
@@ -194,13 +194,13 @@ function RentalManagementHeader({
                 filters={filters}
                 title={routes?.rentalManagement?.title}
               />
-            </Grid>
+            </div>
           </>
         ) : (
           <HideWhenOffline>
-            <div className={`align-items-center gap-1 layout-for-mobile `}>
+            <div className={`flex flex-wrap items-center gap-2 `}>
               {options && (
-                <ToggleButtonGroup size="small" className="ml-2" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
+                <ToggleButtonGroup size="small" value={options[selectedType - 1].key} exclusive onChange={handleFilter}>
                   {options.map((k, index) => {
                     return (
                       <ToggleButton value={k.key} key={index}>
@@ -211,111 +211,103 @@ function RentalManagementHeader({
                 </ToggleButtonGroup>
               )}
               {permissions?.planning?.isRead && (
-                <Box ml={1}>
-                  <ToggleButtonGroup size="small">
-                    <ToggleButton
-                      onClick={() => {
-                        history.push({
-                          pathname: routes.planning.path,
-                          state: 'Rental Job'
-                        });
-                      }}
-                    >
-                      <span>{`Planned Rental`}</span>
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                </Box>
+                <ToggleButtonGroup size="small">
+                  <ToggleButton
+                    onClick={() => {
+                      history.push({
+                        pathname: routes.planning.path,
+                        state: 'Rental Job'
+                      });
+                    }}
+                  >
+                    <span>{`Planned Rental`}</span>
+                  </ToggleButton>
+                </ToggleButtonGroup>
               )}
               {permissions?.planningView?.isRead && (
-                <Box ml={1}>
-                  <ToggleButtonGroup size="small">
-                    <ToggleButton
-                      onClick={() => {
-                        history.push({
-                          pathname: routes.planningView.path,
-                          state: {
-                            resource: sidebarResource?.rentalManagement
-                          }
-                        });
-                      }}
-                    >
-                      <span>{`Calendar`}</span>
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                </Box>
+                <ToggleButtonGroup size="small">
+                  <ToggleButton
+                    onClick={() => {
+                      history.push({
+                        pathname: routes.planningView.path,
+                        state: {
+                          resource: sidebarResource?.rentalManagement
+                        }
+                      });
+                    }}
+                  >
+                    <span>{`Calendar`}</span>
+                  </ToggleButton>
+                </ToggleButtonGroup>
               )}
             </div>
           </HideWhenOffline>
         )}
         {children}
-      </Grid>
+      </div>
 
-      <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
-            <HideWhenOffline>
-              <SearchBox
-                onChange={onSearch}
-                className={isMobile ? styles.search_box_input : ''}
-                value={searchVal}
+      <div className="flex flex-wrap gap-[8px]  justify-end">
+        <HideWhenOffline>
+          <SearchBox
+            onChange={onSearch}
+            className={isMobile ? styles.search_box_input : ''}
+            value={searchVal}
+            size="small"
+            placeholder={`Search ${routes.rentalManagement.title}`}
+          />
+        </HideWhenOffline>
+        <div className="flex gap-[8px] flex-wrap items-center">
+          <HideWhenOffline>
+            {RentalManagementPermissions?.isCreate && RentalManagementPermissions?.isUpdate && (
+              <Button
+                variant={'contained'}
+                color="primary"
                 size="small"
-                placeholder={`Search ${routes.rentalManagement.title}`}
-                style={isMobile ? { flex: 1 } : {}}
-              />
-            </HideWhenOffline>
-            <Grid style={{ display: 'flex', gap: '5px' }}>
-              <HideWhenOffline>
-                {RentalManagementPermissions?.isCreate && RentalManagementPermissions?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
-                    // className={styles.add_submit_btn}
-                    onClick={onCreate}
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                  >
-                    {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                  </Button>
-                )}
-                {RentalManagementPermissions?.isDelete && (
-                  <>
-                    <Button
-                      //disabled={canDelete}
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
-                      size="small"
-                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                      onClick={openActions}
-                      // className={styles.action_submit_btn}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                    >
-                      {isMobile && !isTablet ? '' : 'Actions'}
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
+                // className={styles.add_submit_btn}
+                onClick={onCreate}
+                className={'no-shadow'}
+                startIcon={<AddOutlined />}
+              >
+                Add
+              </Button>
+            )}
+            {RentalManagementPermissions?.isDelete && (
+              <>
+                <Button
+                  //disabled={canDelete}
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  className={`new-dropdown-v1`}
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
+                >
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {(selectedRecords?.length > 0 && selectedRecords?.filter((e) => e.canDelete === true)?.length) === selectedRecords?.length ? (
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        showConfirmBox(null);
                       }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
                     >
-                      {(selectedRecords?.length > 0 && selectedRecords?.filter((e) => e.canDelete === true)?.length) === selectedRecords?.length ? (
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            showConfirmBox(null);
-                          }}
-                        >
-                          Delete
-                        </MenuItem>
-                      ) : null}
-                      {/* {
+                      Delete
+                    </MenuItem>
+                  ) : null}
+                  {/* {
                         RentalManagementPermissions.isUpdate && <MenuItem
                           disabled={!selectedRecords.length || selectedRecords.find((d) => d.canDelete === false)}
                           onClick={() => {
@@ -324,21 +316,19 @@ function RentalManagementHeader({
                           }}
                         >Transfer Entity</MenuItem>
                       } */}
-                      {
-                        <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-                          Add Offline
-                        </MenuItem>
-                      }
-                      {<MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>}
-                    </Menu>
-                  </>
-                )}
-              </HideWhenOffline>
-            </Grid>
-          </Grid>
-        </Box>
-      </Grid>
-    </Grid>
+                  {
+                    <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
+                      Add Offline
+                    </MenuItem>
+                  }
+                  {<MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>}
+                </Menu>
+              </>
+            )}
+          </HideWhenOffline>
+        </div>
+      </div>
+    </div>
   );
 }
 export default RentalManagementHeader;
