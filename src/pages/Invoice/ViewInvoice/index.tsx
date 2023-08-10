@@ -22,6 +22,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import CommentDialog from 'src/components/CommentDialog';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
 
 const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -225,17 +226,7 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
                   isSendEmail={true}
                 />
               }
-              <Button
-                type="button"
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => {
-                  setCommentDialog(true)
-                }}
-              >
-                Cancel Invoice
-              </Button>
+              <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
             </Box>
             {columns && rowsData ? (
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
@@ -278,7 +269,6 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
       {commentDialog && (
         <CommentDialog
           required={true}
-          label={'cancel Invoice'}
           handleSubmit={(data) => {
             handleCancelInvoice(data)
             setCommentDialog(false)
