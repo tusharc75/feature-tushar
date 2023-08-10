@@ -457,7 +457,9 @@ export const RESOURCE_LABEL = {
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
-  iotDataPoints: 'Iot Data Points',
+  iotDataPoints: 'IoT Data Points',
+  iotChart: 'IoT Chart',
+
 };
 
 export const CHILD_RESOURCE = {
