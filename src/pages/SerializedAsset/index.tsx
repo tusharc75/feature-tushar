@@ -174,23 +174,6 @@ const SerializedAsset = () => {
               if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
                 return { backgroundColor: COLOUR_MASTER.lostAssets.background };
               }
-              // if (params.data?.recertDate) {
-              //   var a = moment(params.data?.recertDate);
-              //   var b = moment();
-              //   const days = a.diff(b, 'days')
-              //   if (days <= 60 && days >= 30) {
-              //     return { backgroundColor: "#ACF1C8" };
-              //   }
-              //   else if (days < 30 && days >= 15) {
-              //     return { backgroundColor: "#FAE498" };
-              //   }
-              //   else if (days < 15 && days >= 0) {
-              //     return { backgroundColor: "#FEB1B1" };
-              //   }
-              //   else if (days < 0) {
-              //     return { backgroundColor: "#FEB1B1" };
-              //   }
-              // }
               return null;
             };
           }
@@ -366,13 +349,14 @@ const SerializedAsset = () => {
       <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data?._id}`}>
         {params.value}
       </Link>
-      {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
-        <Box ml={1} pt={1}>
-          <HtmlTooltip title="Asset needs to be recert">
-            <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
-          </HtmlTooltip>
-        </Box>
-      )}
+      {(params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime())
+        || params.data?.certificateExpireDate && new Date(params.data?.certificateExpireDate)?.getTime() <= new Date()?.getTime() && (
+          <Box ml={1}>
+            <HtmlTooltip title="Asset needs to be recert">
+              <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+            </HtmlTooltip>
+          </Box>
+        )}
     </Fragment>
   );
 
@@ -870,8 +854,8 @@ const SerializedAsset = () => {
               showOnlyShowFilteredRecordSwitch={true}
               rowClassRules={{
                 'light-red-data-row': function (params) {
-                  if (params.data?.recertDate) {
-                    var a = moment(params.data?.recertDate);
+                  if (params.data?.recertDate || params.data?.certificateExpireDate) {
+                    var a = moment(params.data?.recertDate || params.data?.certificateExpireDate);
                     var b = moment();
                     const days = a.diff(b, 'days');
                     if (days < 15 && days >= 0) {
@@ -883,8 +867,8 @@ const SerializedAsset = () => {
                   return false;
                 },
                 'light-yellow-data-row': function (params) {
-                  if (params.data?.recertDate) {
-                    var a = moment(params.data?.recertDate);
+                  if (params.data?.recertDate || params.data?.certificateExpireDate) {
+                    var a = moment(params.data?.recertDate || params.data?.certificateExpireDate);
                     var b = moment();
                     const days = a.diff(b, 'days');
                     if (days < 30 && days >= 15) {
@@ -894,8 +878,8 @@ const SerializedAsset = () => {
                   return false;
                 },
                 'light-green-data-row': function (params) {
-                  if (params.data?.recertDate) {
-                    var a = moment(params.data?.recertDate);
+                  if (params.data?.recertDate || params.data?.certificateExpireDate) {
+                    var a = moment(params.data?.recertDate || params.data?.certificateExpireDate);
                     var b = moment();
                     const days = a.diff(b, 'days');
                     if (days <= 60 && days >= 30) {
@@ -929,9 +913,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

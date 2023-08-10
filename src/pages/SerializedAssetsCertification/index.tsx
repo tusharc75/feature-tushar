@@ -209,13 +209,6 @@ const SerializedAssetsCertification = () => {
   const AssetNumberRenderer = (params) => (
     <Fragment>
       <p className="text-truncate">{params.value}</p>
-      {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
-        <Box ml={1} pt={1}>
-          <HtmlTooltip title="Asset needs to be recert">
-            <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
-          </HtmlTooltip>
-        </Box>
-      )}
     </Fragment>
   );
 
