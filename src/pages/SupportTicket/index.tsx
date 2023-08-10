@@ -30,10 +30,25 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import ManageSupportTicket from './ManageSupportTicket';
 import styles from '../Leads/Header.module.scss';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { useHistory } from 'react-router-dom';
+
 
 const SupportTicket = () => {
+  const SupportTicketType = [
+    {
+      key: `My ${routes.supportTicket.title}`,
+      value: 1
+    },
+    {
+      key: `All ${routes.supportTicket.title}`,
+      value: 2
+    }
+  ];
+
   const renderedFrom = camelCase(routes?.supportTicket.title);
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
@@ -47,6 +62,7 @@ const SupportTicket = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
+  const [selectedType, setSelectedType] = useState(1);
   const [gridApi, setGridApi] = useState(null);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const { getColumnData } = useColumns();
@@ -90,7 +106,7 @@ const SupportTicket = () => {
         let count = data?.count;
         let rows = data?.data.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.supportTicket?.isDelete && finalObject?.ownerId === user?.user?._id;
+          finalObject['canDelete'] = permissions?.supportTicket?.isDelete && finalObject?.ownerId === user?.user?._id && finalObject?.status === "Pending" ;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.supportTicket?.isUpdate;
 
@@ -122,6 +138,11 @@ const SupportTicket = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -234,13 +255,25 @@ const SupportTicket = () => {
       });
   };
 
+  const handleSupportTicketTypeSel = (filterValues) => {
+    setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`);
+  };
+
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      handleSupportTicketTypeSel(SupportTicketType.find((d) => d.key === newFilter).value);
+    }
+  };
+
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
     fetchSupportTicketData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
 
   return (
     <Fragment>
@@ -275,7 +308,21 @@ const SupportTicket = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+            <div className={`align-items-center gap-1 layout-for-mobile `}>
+                  {SupportTicketType && (
+                    <ToggleButtonGroup size="small" className="ml-2" value={SupportTicketType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                      {SupportTicketType.map((k, index) => {
+                        return (
+                          <ToggleButton value={k.key} key={index}>
+                            {k.key}
+                          </ToggleButton>
+                        );
+                      })}
+                    </ToggleButtonGroup>
+                  )}
+                </div>
+            </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Grid>
