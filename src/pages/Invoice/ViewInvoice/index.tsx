@@ -7,7 +7,7 @@ import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, Menu
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, INVOICE_STATUS, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -197,7 +197,7 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
 
   const handleCancelInvoice = async (data) => {
     axiosInstance().patch(`${routes?.fieldTicketInvoice.path}/status`, {
-      status: 'Cancelled',
+      status: INVOICE_STATUS.cancelled,
       invoice: invoiceData?._id,
       fieldTicket: invoiceData?.id,
       message: data

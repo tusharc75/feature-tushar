@@ -2504,7 +2504,8 @@ export const INVOICE_STATUS = {
   inProgress: 'In-Progress',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
-  closed: 'Closed'
+  closed: 'Closed',
+  cancelled: 'Cancelled',
 };
 
 export const SALES_ORDER_STATUS = {
