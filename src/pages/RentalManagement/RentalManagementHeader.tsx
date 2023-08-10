@@ -147,14 +147,13 @@ function RentalManagementHeader({
         </div>
         {isMobile && !isTablet ? (
           <>
-            <div className="">
+            <div className="d-flex flex-wrap">
               <Button
                 onClick={handleClickOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
                 // aria-expanded={open ? 'true' : undefined}
-                color="secondary"
                 variant="text"
                 disableElevation
                 startIcon={<MdSort />}
@@ -177,7 +176,6 @@ function RentalManagementHeader({
                 aria-haspopup="true"
                 // aria-expanded={open ? 'true' : undefined}
                 variant="text"
-                color="secondary"
                 disableElevation
                 className={'sort-filter-tablet'}
                 startIcon={<MdFilterList />}
