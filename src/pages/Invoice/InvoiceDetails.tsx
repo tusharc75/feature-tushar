@@ -128,7 +128,7 @@ const InvoiceDetails = () => {
       let data;
       const response: any = await axiosInstance().get(`${invoice.api}/${id}`);
       data = response?.data?.data;
-      if ([INVOICE_STATUS.invoiced, INVOICE_STATUS.closed]?.includes(data?.status)) {
+      if ([INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(data?.status)) {
         setCurrentStep(invoiceProcessSteps?.length - 1);
       }
       else {
@@ -193,7 +193,7 @@ const InvoiceDetails = () => {
             {invoiceData ? (
               <>
                 {permissions?.invoice?.isUpdate && allowedToEdit &&
-                  ![INVOICE_STATUS.invoiced, INVOICE_STATUS.closed].includes(invoiceData?.status) && (
+                  ![INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       className={'btn-outline-v1'}
@@ -203,7 +203,7 @@ const InvoiceDetails = () => {
                       {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   )}
-                {permissions?.invoice?.isDelete && ![INVOICE_STATUS.invoiced, INVOICE_STATUS.closed].includes(invoiceData?.status) && (
+                {permissions?.invoice?.isDelete && ![INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
                 {permissions?.invoice?.isUpdate &&
@@ -312,7 +312,7 @@ const InvoiceDetails = () => {
             steps={invoiceProcessSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={[INVOICE_STATUS.invoiced, INVOICE_STATUS.closed].includes(invoiceData?.status)}
+            isStepEnded={[INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
           />
           <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && invoiceData && (
