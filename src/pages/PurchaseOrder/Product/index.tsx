@@ -771,12 +771,13 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           onSuccess={handleAddProduct}
           productId={null}
           assignedProducts={[]}
-          extraDeepFilter={[{
-            field: 'expenseItem',
-            term: purchaseOrderData?.expenseItem
-              ? 'Yes' : 'No'
-          }
-          ]}
+          extraDeepFilter={purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false ?
+            [{
+              field: 'expenseItem',
+              term: purchaseOrderData?.expenseItem
+                ? 'Yes' : 'No'
+            }
+            ] : []}
         />
       )}
       {showProductDialog.open && (
