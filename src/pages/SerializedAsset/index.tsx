@@ -486,7 +486,7 @@ const SerializedAsset = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[4fr_3fr] gap-4 items-start">
             <div className={'flex flex-wrap align-items-center gap-[8px]'}>
               <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
               <span className="listingHeader">{routes.serializedAsset?.title} </span>
@@ -537,7 +537,7 @@ const SerializedAsset = () => {
                 <Fragment>
                   {permissions?.productCategory?.isRead && (
                     <Autocomplete
-                      className={`xl:w-[250px] w-full`}
+                      className={`lg:w-[230px] w-full`}
                       options={productCategoryList}
                       getOptionLabel={(option: any) => (option ? option.name : '')}
                       getOptionSelected={(option: any, val) => option._id === val}
@@ -577,7 +577,7 @@ const SerializedAsset = () => {
                   )}
                   {productCategory && (
                     <Autocomplete
-                      className={`xl:w-[250px] w-full`}
+                      className={`lg:w-[230px] w-full`}
                       options={productFilterList}
                       size="small"
                       getOptionLabel={(option: any) => (option ? option.productName : '')}
@@ -596,7 +596,7 @@ const SerializedAsset = () => {
                     />
                   )}
                   <Autocomplete
-                    className={`xl:w-[250px] w-full`}
+                    className={`lg:w-[230px] w-full`}
                     options={warehouseOptions}
                     getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                     getOptionSelected={(option: any, val) => option.optionValue === val}

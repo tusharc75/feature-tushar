@@ -346,7 +346,7 @@ function CalendarView() {
     <div>
       <Box display="flex" flexDirection={selectedRentalPlanningCalendarType === 'Assets' ? 'row' : 'column'}>
         <Box display="flex" flexDirection="row">
-          <Box ml={1}>
+          <Box>
             <ButtonGroup
               id="approveDisapprove"
               size="small"
