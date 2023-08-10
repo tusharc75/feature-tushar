@@ -227,6 +227,7 @@ import AzureSSOError from './pages/Auth/AzureSSOError';
 import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
 import IotDataPoints from './pages/IotDataPoints';
 import IotDataPointsDetail from './pages/IotDataPoints/IotDataPointsDetail';
+import IotChart from './pages/IotChart';
 
 var notificationInterval: any = null;
 
@@ -1002,6 +1003,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.iotDataPointsDetail.path}/:id`}>
               <IotDataPointsDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.iotChart.path}`}>
+              <IotChart />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
