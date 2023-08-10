@@ -409,7 +409,9 @@ const SerializedAssetDetailsPage = () => {
         <TabPanel value={tabValue} index={2}>
           <CertificationHistory
             id={id}
-            canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate} />
+            canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
+            supplierAccount={null}
+          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

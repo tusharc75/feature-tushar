@@ -2515,6 +2515,11 @@ export const SALES_ORDER_STATUS = {
   closed: 'Closed'
 };
 
+export const PRICING_TYPE = [
+  { optionLabel: 'Rent', optionValue: 'Rent' },
+  { optionLabel: 'Sell', optionValue: 'Price' }
+]
+
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
     num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;

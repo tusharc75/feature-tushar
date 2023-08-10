@@ -355,9 +355,9 @@ const DeliveryTicket = () => {
         {/* Tables Begins Here */}
         <CustomContainer>
           <div className="header-panel">
-            <Grid container className={isMobile ? styles.mobile_filter_side_container_delivery_ticket : styles.filter_side_container_delivery_ticket}>
-              <Grid item xs={isMobile && !isTablet ? 12 : 6} className="d-flex align-items-center gap-1">
-                <Grid>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={'d-flex align-items-center gap-1'}>
+                <div className="flex flex-wrap">
                   <GiAbstract055 className="headerLogo" />
                   <span className="listingHeader">{routes.deliveryTicket.title} </span>
                   {fromRental && (
@@ -370,7 +370,7 @@ const DeliveryTicket = () => {
                       }}
                     />
                   )}
-                </Grid>
+                </div>
                 <HideWhenOffline>
                   <div className={`align-items-center gap-1 layout-for-mobile `}>
                     {DeliveryTicketType && (
@@ -392,25 +392,15 @@ const DeliveryTicket = () => {
                     )}
                   </div>
                 </HideWhenOffline>
-              </Grid>
-              <Grid item xs={isMobile && !isTablet ? 12 : 6} container className={isMobile ? styles.filter_side : styles.filter_side_deck}>
-                <Box className={isMobile && !isTablet ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                  <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile && !isTablet ? styles.content_box : ''}>
-                    <SearchBox
-                      onChange={handleSearch}
-                      className={isMobile ? styles.search_box_input : ''}
-                      width="242px"
-                      size="small"
-                      value={search}
-                      style={isMobile ? { flex: 1 } : {}}
-                    />
-                  </Grid>
-                  {/* {deliveryPermissions?.isCreate &&
-                    <Button className={styles.add_submit_btn}
+              </div>
+              <div className="flex flex-wrap gap-[8px]  justify-end">
+                <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
+                {/* {deliveryPermissions?.isCreate &&
+                    <Button className={'no-shadow'}
                       onClick={() => setShowManageDeliveryTicket(true)}
                       variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                   } */}
-                  {/* {deliveryPermissions?.isDelete &&
+                {/* {deliveryPermissions?.isDelete &&
                     <Button
                       className={styles.action_submit_btn}
                       variant="outlined"
@@ -440,9 +430,8 @@ const DeliveryTicket = () => {
                       closeActions()
                     }}>Delete</MenuItem>
                   </Menu> */}
-                </Box>
-              </Grid>
-            </Grid>
+              </div>
+            </div>
           </div>
 
           {isMobile && !isTablet ? (
