@@ -243,32 +243,32 @@ const PricingConditions = () => {
             additionalParams={getQueryString(true)}
             extraImportExportLinks={[
               {
-                title: 'Child Product Template',
+                title: 'Product Template',
                 api: `${pricingCondition.api}/template?conditionType=product`,
                 type: 'download'
               },
               {
-                title: 'Child Product Export',
+                title: 'Product Export',
                 api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ""}&conditionType=product`,
                 type: 'export'
               },
               {
-                title: 'Child Package Template',
+                title: 'Package Template',
                 api: `${pricingCondition.api}/template?conditionType=package`,
                 type: 'download'
               },
               {
-                title: 'Child Package Export',
+                title: 'Package Export',
                 api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ""}&conditionType=package`,
                 type: 'export'
               },
               {
-                title: 'Child Service Template',
+                title: 'Service Template',
                 api: `${pricingCondition.api}/template?conditionType=service`,
                 type: 'download'
               },
               {
-                title: 'Child Service Export',
+                title: 'Service Export',
                 api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ""}&conditionType=service`,
                 type: 'export'
               },
