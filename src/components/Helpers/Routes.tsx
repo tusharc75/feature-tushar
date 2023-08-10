@@ -1019,6 +1019,11 @@ const routes = {
         : RESOURCE_LABEL.iotDataPoints,
     path: '/iot-data-points/detail'
   },
+  iotChart: {
+    title: storedRoutes && storedRoutes.iotChart && storedRoutes.iotChart?.title ? storedRoutes.iotDataPoints?.title
+      : RESOURCE_LABEL.iotChart,
+    path: '/iot-chart'
+  },
 };
 
 export default routes;

@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export default function CommentDialog({ required = false, label, handleSubmit, handleClose }) {
+export default function CommentDialog({ required = false, handleSubmit, handleClose }) {
     const classes = useStyles();
 
     const [comment, setComment] = useState(null)
@@ -30,7 +30,7 @@ export default function CommentDialog({ required = false, label, handleSubmit, h
         onClose={handleClose}
     >
         <CustomDialogHeader
-            title="Are you sure ?"
+            title="Comment"
             showRequiredLabel={false}
             onClose={handleClose}
         />
@@ -38,7 +38,7 @@ export default function CommentDialog({ required = false, label, handleSubmit, h
             <Box className="my-2">
                 <TextField
                     id="outlined-multiline-static"
-                    label={`Please enter the reason for ${label}`}
+                    label='Comment'
                     multiline
                     required={required}
                     fullWidth

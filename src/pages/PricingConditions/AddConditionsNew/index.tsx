@@ -182,7 +182,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const columns = [
     { field: 'detail', headerName: 'Detail', show: true, cellRenderer: 'detailRenderer' },
     { field: 'materialType', headerName: 'Type', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'conditionType', headerName: 'Condition Type', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'conditionType', headerName: 'Pricing Type', show: true, cellRenderer: 'commonRenderer' },
     { field: 'unit', headerName: 'Unit', show: true, cellRenderer: 'commonRenderer' },
     { field: 'pricingMethod', headerName: 'Pricing Method', show: true, cellRenderer: 'commonRenderer' }
   ];

@@ -19,37 +19,38 @@ const viewTypes = [
 ];
 
 const PlanningCalendar = () => {
-
   const [viewType, setViewType] = useState(1);
 
-  return (<>
-    <Grid container className="headerbox">
-      <Grid item md={10} sm={9} xs={8}>
-        <CustomBreadCrumbs routes={[{ title: routes.planningCalendar.title, path: routes.planningCalendar.path }]} />
+  return (
+    <>
+      <Grid container className="headerbox">
+        <Grid item md={10} sm={9} xs={8}>
+          <CustomBreadCrumbs routes={[{ title: routes.planningCalendar.title, path: routes.planningCalendar.path }]} />
+        </Grid>
+        <Grid container justify="flex-end" md={2} sm={3} xs={4}>
+          <ToggleButtonGroup
+            size="small"
+            value={viewType}
+            exclusive
+            onChange={(event, newFilter) => {
+              setViewType(newFilter);
+            }}
+          >
+            {viewTypes.map((k, index) => {
+              return (
+                <ToggleButton size="small" value={k.value} key={index} style={{ minWidth: 'max-content' }}>
+                  {k.key}
+                </ToggleButton>
+              );
+            })}
+          </ToggleButtonGroup>
+        </Grid>
       </Grid>
-      <Grid container justify="flex-end" md={2} sm={3} xs={4} >
-        <ToggleButtonGroup
-          size="small"
-          value={viewType}
-          exclusive
-          onChange={(event, newFilter) => { setViewType(newFilter) }}>
-          {viewTypes.map((k, index) => {
-            return (<ToggleButton
-              size="small"
-              value={k.value}
-              key={index}>
-              {k.key}
-            </ToggleButton>
-            );
-          })}
-        </ToggleButtonGroup>
-      </Grid>
-    </Grid>
-    <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>
-      {viewType === 1 && <Roadmap />}
-      {viewType === 2 && <CalendarView />}
-    </CustomContainer>
-  </>
+      <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>
+        {viewType === 1 && <Roadmap />}
+        {viewType === 2 && <CalendarView />}
+      </CustomContainer>
+    </>
   );
 };
 

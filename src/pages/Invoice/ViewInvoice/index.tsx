@@ -7,7 +7,7 @@ import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, Menu
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, INVOICE_STATUS, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -22,6 +22,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import CommentDialog from 'src/components/CommentDialog';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
 
 const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -196,7 +197,7 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
 
   const handleCancelInvoice = async (data) => {
     axiosInstance().patch(`${routes?.fieldTicketInvoice.path}/status`, {
-      status: 'Cancelled',
+      status: INVOICE_STATUS.cancelled,
       invoice: invoiceData?._id,
       fieldTicket: invoiceData?.id,
       message: data
@@ -225,17 +226,7 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
                   isSendEmail={true}
                 />
               }
-              <Button
-                type="button"
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => {
-                  setCommentDialog(true)
-                }}
-              >
-                Cancel Invoice
-              </Button>
+              <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
             </Box>
             {columns && rowsData ? (
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
@@ -278,7 +269,6 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
       {commentDialog && (
         <CommentDialog
           required={true}
-          label={'cancel Invoice'}
           handleSubmit={(data) => {
             handleCancelInvoice(data)
             setCommentDialog(false)
