@@ -38,6 +38,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import styles from '../../Leads/Header.module.scss';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
   const renderFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
@@ -415,7 +416,70 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             </MenuItem>
           </Menu>
           <Box ml={2}>
-            <ImportExportMenu
+            <ImportExportLinks
+              permissions={permissions.pricingCondition}
+              module="pricingCondition(s)"
+              api={pricingCondition.api}
+              afterImportCompleted={() => {
+                fetchCondition();
+              }}
+              isExportAllOrSomeFeature={true}
+              total={rowCount}
+              recordsToExport={selectedRecords.length}
+              onExportToExcelSuccess={() => {
+                if (gridApi) gridApi.deselectAll();
+                else fetchCondition();
+              }}
+              hideDefaultImportExport={true}
+              extraImportExportLinks={[
+                {
+                  title: 'Product Template',
+                  api: `${pricingCondition.api}/template?conditionType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'download'
+                },
+                {
+                  title: 'Product Export',
+                  api: `${pricingCondition.api}/template?export=true&conditionType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'export'
+                },
+                {
+                  title: 'Product Import',
+                  api: `${pricingCondition.api}/import?conditionType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'import'
+                },
+                {
+                  title: 'Package Template',
+                  api: `${pricingCondition.api}/template?conditionType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'download'
+                },
+                {
+                  title: 'Package Export',
+                  api: `${pricingCondition.api}/template?export=true&conditionType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'export'
+                },
+                {
+                  title: 'Package Import',
+                  api: `${pricingCondition.api}/import?conditionType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'import'
+                },
+                {
+                  title: 'Service Template',
+                  api: `${pricingCondition.api}/template?conditionType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'download'
+                },
+                {
+                  title: 'Service Export',
+                  api: `${pricingCondition.api}/template?export=true&conditionType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'export'
+                },
+                {
+                  title: 'Service Import',
+                  api: `${pricingCondition.api}/import?conditionType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'import'
+                },
+              ]}
+            />
+            {/* <ImportExportMenu
               permissions={permissions?.pricingCondition}
               module="packages-products"
               api={`${pricingCondition.api}/condition/template/${pricingConditionId}`}
@@ -425,7 +489,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               isExportAllOrSomeFeature={true}
               ids={[]}
               additionalParams={``}
-            />
+            /> */}
           </Box>
         </Box>
       </Box>
