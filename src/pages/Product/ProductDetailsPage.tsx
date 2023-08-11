@@ -43,6 +43,7 @@ import Package from './Package';
 import ServicePackage from './ServicePackage';
 import Digital from './Digital';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -52,6 +53,7 @@ interface TabPanelProps {
 const minHeight = '250px';
 
 const ProductDetailsPage = () => {
+  const [themeColor] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.product.title);
   const { id } = useParams();
@@ -273,11 +275,7 @@ const ProductDetailsPage = () => {
             {permissions?.product?.isDelete && (
               <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
-            <ActivityButton 
-              referenceId={productData?._id} 
-              resource={ACTIVITY_RESOURCE.product} 
-              resourceLabel={productData?.productName}
-              />
+            <ActivityButton referenceId={productData?._id} resource={ACTIVITY_RESOURCE.product} resourceLabel={productData?.productName} />
           </Box>
         </Box>
       </Box>
@@ -573,7 +571,7 @@ const ProductDetailsPage = () => {
                                             </Grid>
                                           </Grid>
                                         </Box>
-                                        <Box p={1}>
+                                        <Box p={1} className="flex flex-wrap gap-2">
                                           {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? (
                                             inventoriesWarehouseLoading ? (
                                               <Typography
@@ -610,11 +608,13 @@ const ProductDetailsPage = () => {
                                                       <Chip
                                                         label={i?.assetNumber}
                                                         style={{
-                                                          marginRight: '2px',
-                                                          background: ['New', 'Available'].indexOf(i?.status) >= 0 ? '#b9ffce' : '#ffb4b4'
+                                                          background:
+                                                            ['New', 'Available'].indexOf(i?.status) >= 0
+                                                              ? `${themeColor === 'light' ? '#b9ffce' : '#c70000'}`
+                                                              : `${themeColor === 'light' ? '#ffb4b4' : '#a1784f'}`
                                                         }}
                                                         onClick={() => {
-                                                          window.open(`${routes.serializedAssetDetail.path}/${i._id}`)
+                                                          window.open(`${routes.serializedAssetDetail.path}/${i._id}`);
                                                         }}
                                                       />
                                                     )
