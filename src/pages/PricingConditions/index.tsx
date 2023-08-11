@@ -253,6 +253,11 @@ const PricingConditions = () => {
                 type: 'export'
               },
               {
+                title: 'Product Import',
+                api: `${pricingCondition.api}/import&conditionType=product`,
+                type: 'import'
+              },
+              {
                 title: 'Package Template',
                 api: `${pricingCondition.api}/template?conditionType=package`,
                 type: 'download'
@@ -263,6 +268,11 @@ const PricingConditions = () => {
                 type: 'export'
               },
               {
+                title: 'Package Import',
+                api: `${pricingCondition.api}/import&conditionType=package`,
+                type: 'import'
+              },
+              {
                 title: 'Service Template',
                 api: `${pricingCondition.api}/template?conditionType=service`,
                 type: 'download'
@@ -271,6 +281,11 @@ const PricingConditions = () => {
                 title: 'Service Export',
                 api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ""}&conditionType=service`,
                 type: 'export'
+              },
+              {
+                title: 'Service Import',
+                api: `${pricingCondition.api}/import&conditionType=service`,
+                type: 'import'
               },
             ]}
           />
