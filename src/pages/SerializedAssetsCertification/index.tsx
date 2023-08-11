@@ -283,8 +283,9 @@ const SerializedAssetsCertification = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label={'Asset Number'}
+                    label={'Asset'}
                     variant="outlined"
+                    size='small'
                     InputProps={{
                       ...params.InputProps,
                       endAdornment: (

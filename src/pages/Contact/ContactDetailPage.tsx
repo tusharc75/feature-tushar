@@ -559,22 +559,22 @@ const ContactDetailsPage = (props) => {
           <Box className="control-buttons-v1">
             {permissions?.eCommercePolicy?.isRead && contactResource === customerContact.contactResource && (
               <Button
-                color="primary"
                 size="small"
                 variant={isMobile ? 'text' : 'contained'}
                 disabled={contactData.relatedUser?.eCommerceAccess}
                 onClick={handleEcommerceAccess}
+                className={'btn-outline-v1'}
               >
                 E-Commerce Access
               </Button>
             )}
-            {permissions?.eCommercePolicy?.isRead && user.user?.userType === userType.brandAdmin && (
+            {contactPermissions?.isUpdate && contactData?.owner?.optionValue === user?.user?._id && (
               <Button
-                color="primary"
                 size="small"
                 variant={isMobile ? 'text' : 'contained'}
                 disabled={contactData?.isUserExist}
                 onClick={handlePortalAccess}
+                className={'btn-outline-v1'}
               >
                 Give Portal Access
               </Button>

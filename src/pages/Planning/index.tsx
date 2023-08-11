@@ -363,7 +363,7 @@ const Planning = () => {
             <div className={'d-flex align-items-center gap-1'}>
               <ToggleButtonGroup
                 size="small"
-                className="align-items-center gap-1 layout-for-mobile "
+                className="align-items-center gap-1"
                 value={PlanningType[selectedType - 1].key}
                 exclusive
                 onChange={onTypeChange}

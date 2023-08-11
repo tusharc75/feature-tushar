@@ -344,9 +344,9 @@ function CalendarView() {
 
   return (
     <div>
-      <Box display="flex" flexDirection={selectedRentalPlanningCalendarType === 'Assets' ? 'row' : 'column'}>
-        <Box display="flex" flexDirection="row">
-          <Box>
+      <section>
+        <div className="flex flex-wrap gap-[8px] max-w-full">
+          <>
             <ButtonGroup
               id="approveDisapprove"
               size="small"
@@ -408,9 +408,9 @@ function CalendarView() {
                 </Grow>
               )}
             </Popper>
-          </Box>
+          </>
           {selectedRentalPlanningCalendarType === rentalPlanningCalendarType[0] && (
-            <Box ml={1}>
+            <>
               <ButtonGroup
                 id="approveDisapprove"
                 size="small"
@@ -464,12 +464,12 @@ function CalendarView() {
                   </Grow>
                 )}
               </Popper>
-            </Box>
+            </>
           )}
           {selectedRentalPlanningCalendarType === rentalPlanningCalendarType[0] && (
-            <Box ml={1}>
+            <>
               <Autocomplete
-                style={{ width: '350px' }}
+                style={{ flexGrow: 1, maxWidth: 350 }}
                 multiple
                 options={Object.keys(FILTERS)?.map((key) => key) || []}
                 disableCloseOnSelect
@@ -487,65 +487,58 @@ function CalendarView() {
                   setFilterToKeep(newValue);
                 }}
               />
-            </Box>
+            </>
           )}
-        </Box>
-        <Box display="flex" flexDirection="row" marginTop={selectedRentalPlanningCalendarType === 'Assets' ? '0px' : '15px'} ml={1}>
-          <Grid container spacing={2}>
-            {filterToKeep?.includes('warehouse') && (
-              <Grid item xs={12} sm={6} md={4} lg={4}>
-                <Autocomplete
-                  options={warehouse}
-                  // style={{ width: "250px" }}
-                  multiple
-                  disableCloseOnSelect
-                  getOptionLabel={(option: any) => option.optionLabel}
-                  value={selectedWarehouse}
-                  onChange={(event, newValue) => {
-                    setSelectedWarehouse(newValue);
-                  }}
-                  size="small"
-                  renderInput={(params) => <TextField size={'small'} {...params} label={`Select Plant`} variant="outlined" />}
-                />
-              </Grid>
-            )}
-            {filterToKeep?.includes('product') && (
-              <Grid item xs={12} sm={6} md={4} lg={4}>
-                <Autocomplete
-                  options={product}
-                  // style={{ width: "250px" }}
-                  multiple
-                  disableCloseOnSelect
-                  getOptionLabel={(option: any) => option.optionLabel}
-                  value={selectedProduct}
-                  onChange={(event, newValue) => {
-                    setSelectedProduct(newValue);
-                  }}
-                  size="small"
-                  renderInput={(params) => <TextField size={'small'} {...params} label={`Select Product`} variant="outlined" />}
-                />
-              </Grid>
-            )}
-            {(filterToKeep?.includes('asset') || selectedRentalPlanningCalendarType === 'Assets') && (
-              <Grid item xs={12} sm={6} md={4} lg={4}>
-                <Autocomplete
-                  options={asset}
-                  style={{ minWidth: selectedRentalPlanningCalendarType === 'Assets' && '350px' }}
-                  multiple
-                  disableCloseOnSelect
-                  getOptionLabel={(option: any) => option.optionLabel}
-                  value={selectedAsset}
-                  onChange={(event, newValue) => {
-                    setSelectedAsset(newValue);
-                  }}
-                  size="small"
-                  renderInput={(params) => <TextField size={'small'} {...params} label={`Select Asset`} variant="outlined" />}
-                />
-              </Grid>
-            )}
-          </Grid>
-        </Box>
-      </Box>
+          {filterToKeep?.includes('warehouse') && (
+            <Autocomplete
+              style={{ flexGrow: 1, maxWidth: 350 }}
+              options={warehouse}
+              // style={{ width: "250px" }}
+              multiple
+              disableCloseOnSelect
+              getOptionLabel={(option: any) => option.optionLabel}
+              value={selectedWarehouse}
+              onChange={(event, newValue) => {
+                setSelectedWarehouse(newValue);
+              }}
+              size="small"
+              renderInput={(params) => <TextField size={'small'} {...params} label={`Select Plant`} variant="outlined" />}
+            />
+          )}
+          {filterToKeep?.includes('product') && (
+            <Autocomplete
+              style={{ flexGrow: 1, maxWidth: 350 }}
+              options={product}
+              // style={{ width: "250px" }}
+              multiple
+              disableCloseOnSelect
+              getOptionLabel={(option: any) => option.optionLabel}
+              value={selectedProduct}
+              onChange={(event, newValue) => {
+                setSelectedProduct(newValue);
+              }}
+              size="small"
+              renderInput={(params) => <TextField size={'small'} {...params} label={`Select Product`} variant="outlined" />}
+            />
+          )}
+          {(filterToKeep?.includes('asset') || selectedRentalPlanningCalendarType === 'Assets') && (
+            <Autocomplete
+              style={{ flexGrow: 1, maxWidth: 350 }}
+              options={asset}
+              fullWidth
+              multiple
+              disableCloseOnSelect
+              getOptionLabel={(option: any) => option.optionLabel}
+              value={selectedAsset}
+              onChange={(event, newValue) => {
+                setSelectedAsset(newValue);
+              }}
+              size="small"
+              renderInput={(params) => <TextField size={'small'} {...params} label={`Select Asset`} variant="outlined" />}
+            />
+          )}
+        </div>
+      </section>
       <DragAndDropCalendar
         style={{ height: 'calc(100vh - 260px)' }}
         defaultDate={defaultDate}
