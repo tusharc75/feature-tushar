@@ -95,6 +95,7 @@ const CustomGridFilterHeader = (props) => {
                 style={{ marginRight: buttonGap, color: '#424242' }}
                 startIcon={<BiFilterAlt />}
                 size={'small'}
+                variant="outlined"
                 className="btn-outline-v1 light "
                 onClick={handleFilterOpen}
               >
@@ -166,8 +167,8 @@ const DisplyaFilters = (props) => {
             element.filter.from && element.filter.to
               ? `${element.filter.from ? element.filter.from : null} - ${element.filter.to ? element.filter.to : null}`
               : element.filter.from || element.filter.to
-                ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
-                : null;
+              ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
+              : null;
           const data = { title: currentColumn?.headerName || _.startCase(keys[i]), value: dateValue, name: keys[i] };
           filterData.push(data);
         } else if (element.operator && element.condition1) {

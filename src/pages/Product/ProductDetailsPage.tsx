@@ -610,8 +610,8 @@ const ProductDetailsPage = () => {
                                                         style={{
                                                           background:
                                                             ['New', 'Available'].indexOf(i?.status) >= 0
-                                                              ? `${themeColor === 'light' ? '#b9ffce' : '#c70000'}`
-                                                              : `${themeColor === 'light' ? '#ffb4b4' : '#a1784f'}`
+                                                              ? `${themeColor === 'light' ? '#b9ffce' : 'rgb(70, 100, 79)'}`
+                                                              : `${themeColor === 'light' ? '#ffb4b4' : 'rgb(144, 86, 86)'}`
                                                         }}
                                                         onClick={() => {
                                                           window.open(`${routes.serializedAssetDetail.path}/${i._id}`);
