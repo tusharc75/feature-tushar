@@ -540,7 +540,7 @@ function CalendarView() {
         </div>
       </section>
       <DragAndDropCalendar
-        style={{ height: 'calc(100vh - 260px)' }}
+        // style={{ height: 'calc(100vh - 260px)' }}
         defaultDate={defaultDate}
         defaultView={'day'}
         events={events}
