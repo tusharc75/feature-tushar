@@ -60,8 +60,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
     const filterById: any = [];
     const chipData: any = [];
 
-    for (let i = 0; i < field.length; i++) {
-      const col = field[i];
+    field.forEach(col => {
       const fieldName = col?.fieldName;
       if (['date'].includes(col.type)) {
         const from = `from_${fieldName}`;
@@ -80,14 +79,12 @@ const CustomFilter = ({ field, setFilterQuery }) => {
           });
           const dateValue =
             fromDate && toDate
-              ? `${fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null} - ${
-                  toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
-                }`
+              ? `${fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null} - ${toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
+              }`
               : fromDate || toDate
-              ? `${fromDate ? `${moment(new Date(fromDate)).format('MM/DD/YYYY')} (From Date)` : ''} ${
-                  toDate ? `${moment(new Date(toDate)).format('MM/DD/YYYY')} (To Date)` : ''
+                ? `${fromDate ? `${moment(new Date(fromDate)).format('MM/DD/YYYY')} (From Date)` : ''} ${toDate ? `${moment(new Date(toDate)).format('MM/DD/YYYY')} (To Date)` : ''
                 }`
-              : null;
+                : null;
           chipData.push({
             title: col?.fieldLabel,
             name: fieldName,
@@ -107,7 +104,8 @@ const CustomFilter = ({ field, setFilterQuery }) => {
           });
         }
       }
-    }
+    });
+
     setFilterQuery({
       filterById,
       deepFilter
@@ -192,20 +190,17 @@ const CustomFilter = ({ field, setFilterQuery }) => {
         </Box>
         <HtmlTooltip title="Apply Filters" placement="top" arrow>
           <Button
-            style={{ color: '#424242' }}
             startIcon={<BiFilterAlt />}
-            size={'small'}
-            variant="outlined"
-            className="btn-outline-v1 light "
+            size='small'
+            className="yellow-button"
             onClick={() => {
               setIsFilterOpen(true);
             }}
           >
-            Filter
+            Filters
           </Button>
         </HtmlTooltip>
       </Box>
-
       {isFilterOpen && (
         <Dialog
           maxWidth={'md'}
@@ -224,10 +219,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
               <Grid container spacing={2}>
                 {field ? (
                   field?.map((field: any, i: number) => {
-                    if (
-                      !statusTimeFrame[field.fieldName] &&
-                      field.type === 'date' &&
-                      !formValues[`from_${field.fieldName}`] &&
+                    if (!statusTimeFrame[field.fieldName] && field.type === 'date' && !formValues[`from_${field.fieldName}`] &&
                       formValues[`to_${field.fieldName}`]
                     ) {
                       handleDuration('custom', field);
@@ -301,35 +293,54 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                                   betweenDate && betweenDate[`from_${field.fieldName}`]
                                     ? betweenDate[`from_${field.fieldName}`]
                                     : formValues[`from_${field.fieldName}`]
-                                    ? formValues[`from_${field.fieldName}`]
-                                    : new Date()
+                                      ? formValues[`from_${field.fieldName}`]
+                                      : new Date()
                                 }
                               />
                             </Grid>
                           </>
-                        ) : (
-                          <Grid item xs={12} sm={6} md={6} key={i}>
-                            <Autocomplete
-                              onOpen={() => {
-                                setOptions([]);
-                                setLoading(true);
-                                fetchOptions(field?.resource, '');
-                              }}
-                              onInputChange={(event, value) => fetchOptions(field?.resource, value)}
-                              options={options}
-                              fullWidth
-                              loading={loading}
-                              getOptionLabel={(option: any) => option.optionLabel ?? ''}
-                              getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
-                              value={!isEmpty(formValues) && formValues[field?.fieldName]}
-                              onChange={(e, val) => {
-                                handleSelectFilter(field?.fieldName, val);
-                              }}
-                              size="small"
-                              renderInput={(params) => <TextField {...params} label={field?.fieldLabel} variant="outlined" name={field?.fieldName} />}
-                            />
-                          </Grid>
-                        )}
+                        ) :
+                          field?.type === 'dropDown' && field?.options ?
+                            <Grid item xs={12} sm={6} md={6} key={i}>
+                              <Autocomplete
+                                options={field?.options}
+                                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                getOptionSelected={(option: any, val) => option.optionValue === val}
+                                value={!isEmpty(formValues) && formValues[field?.fieldName]}
+                                onChange={(e, val) => {
+                                  handleSelectFilter(field?.fieldName, val);
+                                }}
+                                fullWidth
+                                renderInput={(params) =>
+                                  <TextField {...params}
+                                    label={field?.fieldLabel}
+                                    variant="outlined"
+                                    size='small'
+                                    name={field?.fieldName} />}
+                              />
+                            </Grid>
+                            : <Grid item xs={12} sm={6} md={6} key={i}>
+                              <Autocomplete
+                                onOpen={() => {
+                                  setOptions([]);
+                                  setLoading(true);
+                                  fetchOptions(field?.resource, '');
+                                }}
+                                onInputChange={(event, value) => fetchOptions(field?.resource, value)}
+                                options={options}
+                                fullWidth
+                                loading={loading}
+                                getOptionLabel={(option: any) => option.optionLabel ?? ''}
+                                getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
+                                value={!isEmpty(formValues) && formValues[field?.fieldName]}
+                                onChange={(e, val) => {
+                                  handleSelectFilter(field?.fieldName, val);
+                                }}
+                                size="small"
+                                renderInput={(params) => <TextField {...params} label={field?.fieldLabel} variant="outlined" name={field?.fieldName} />}
+                              />
+                            </Grid>
+                        }
                       </>
                     );
                   })
