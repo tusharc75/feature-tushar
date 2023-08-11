@@ -53,6 +53,8 @@ import Consumables from './Consumables';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { IoMdDownload } from 'react-icons/io';
 import Steps, { getIndex } from 'src/components/Steps';
+import EditIcon from '@material-ui/icons/Edit';
+import CloseIcon from '@material-ui/icons/Close';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -214,7 +216,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -243,8 +245,7 @@ const RentalManagementDetailsPage = () => {
       setRentalSteps(steps);
       if (data?.status === RENTAL_STATUS.closed) {
         setCurrentStep(steps?.length - 1);
-      }
-      else {
+      } else {
         setCurrentStep(getIndex(data?.processStatus, steps));
       }
       setLoadingDetails(false);
@@ -338,8 +339,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -428,7 +429,7 @@ const RentalManagementDetailsPage = () => {
               <>
                 <Fragment>
                   <Button
-                    variant={'outlined'}
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     className="btn-outline-v1"
                     type="button"
                     size="small"
@@ -460,8 +461,12 @@ const RentalManagementDetailsPage = () => {
                     [RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) &&
                     allowedToEdit && (
                       <Fragment>
-                        <Button variant={'contained'} className={'btn-outline-v1'} onClick={() => updateJobStatus(RENTAL_STATUS.closed)}>
-                          Close
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                          className={'btn-outline-v1'}
+                          onClick={() => updateJobStatus(RENTAL_STATUS.closed)}
+                        >
+                          {isMobile && !isTablet ? <CloseIcon /> : 'Close'}
                         </Button>
                         {/* <Button
                           variant="outlined"
@@ -528,17 +533,7 @@ const RentalManagementDetailsPage = () => {
                     ) && (
                       <Fragment>
                         <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
-                          Edit
-                        </Button>
-                        <Button
-                          className="buttonStyleSmallScreen"
-                          variant="text"
-                          color="primary"
-                          size="small"
-                          onClick={handleOpenUpdateDialog}
-                          style={isMobile ? { color: '#43aeaa' } : {}}
-                        >
-                          <BiEdit size={20} />
+                          {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                         </Button>
                       </Fragment>
                     )}
