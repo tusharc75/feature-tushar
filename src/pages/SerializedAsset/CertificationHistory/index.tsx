@@ -19,7 +19,6 @@ import AttachFileIcon from '@material-ui/icons/AttachFile';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 
 const CertificationHistory = ({ id, canIssueCertificate, supplierAccount }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -40,15 +39,16 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount }) => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    var api = `${serializedAsset.api}/${id}/certificate`
+    var api = `${serializedAsset.api}/${id}/certificate`;
     if (supplierAccount) {
-      api = api + `?supplierAccount=${supplierAccount}`
+      api = api + `?supplierAccount=${supplierAccount}`;
     }
-    axiosInstance().get(api)
+    axiosInstance()
+      .get(api)
       .then(({ data: { data } }) => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject.attachmentId = u?.attachmentId
+          finalObject.attachmentId = u?.attachmentId;
           return {
             ...finalObject
           };
@@ -71,19 +71,19 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount }) => {
 
   const ActionsRenderer = (params) => (
     <>
-      {params.data.attachmentId &&
+      {params.data.attachmentId && (
         <HtmlTooltip title="View Attachment">
           <IconButton
             size="small"
             aria-label="Issue"
             onClick={() => {
-              setOpenAttachment({ open: true, attachmentId: params.data.attachmentId })
+              setOpenAttachment({ open: true, attachmentId: params.data.attachmentId });
             }}
           >
-            <AttachFileIcon color='primary' />
+            <AttachFileIcon color="primary" />
           </IconButton>
         </HtmlTooltip>
-      }
+      )}
     </>
   );
 
@@ -109,21 +109,21 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount }) => {
 
   return (
     <>
-      {canIssueCertificate &&
+      {canIssueCertificate && (
         <Grid item xs={12} sm={12} md={6}>
           <Button
-            variant={isMobile && !isTablet ? 'text' : 'contained'}
+            variant={'contained'}
             color="primary"
             size="small"
             onClick={() => {
               setOpenDialog({ open: true, id: id });
             }}
-            className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+            // className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
           >
             {'Issue Certificate'}
           </Button>
         </Grid>
-      }
+      )}
       <Box>
         {columns ? (
           <CustomAgGrid
@@ -160,7 +160,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount }) => {
           assetId={openDialog?.id}
         />
       )}
-      {openAttachment.open &&
+      {openAttachment.open && (
         <Dialog
           open={true}
           aria-labelledby="customized-dialog-title"
@@ -168,7 +168,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount }) => {
           onClose={(e, reason) => {
             if (reason !== 'backdropClick') {
               setFullScreen(false);
-              setOpenAttachment({ open: false, attachmentId: null })
+              setOpenAttachment({ open: false, attachmentId: null });
             }
           }}
           fullWidth
@@ -179,7 +179,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount }) => {
             attachmentId={openAttachment.attachmentId?._id}
             handleClose={() => {
               setFullScreen(false);
-              setOpenAttachment({ open: false, attachmentId: null })
+              setOpenAttachment({ open: false, attachmentId: null });
             }}
             relatedTo={openAttachment.attachmentId?.relatedTo}
             isMinimized={!fullScreen}
@@ -191,7 +191,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount }) => {
             type={openAttachment.attachmentId?.type}
           />
         </Dialog>
-      }
+      )}
     </>
   );
 };

@@ -20,7 +20,8 @@ import ReasonDialog from './ReasonDialog';
 import { ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
 import { isMobile, isTablet } from 'react-device-detect';
-import { GiAutoRepair, GrStatusInfo } from 'react-icons/all';
+import { GiAutoRepair } from 'react-icons/all';
+import { MdChangeCircle } from 'react-icons/Md';
 import { MdEdit } from 'react-icons/md';
 import { startCase } from 'lodash';
 import moment from 'moment';
@@ -205,7 +206,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -305,9 +306,9 @@ const SerializedAssetDetailsPage = () => {
                           className="btn-outline-v1"
                           disabled={updateLoading}
                           aria-controls="action-menu"
-                          endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                          endIcon={<ExpandMore />}
                         >
-                          {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
+                          {isMobile && !isTablet ? <MdChangeCircle size={20} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
                         </Button>
                       )
                     ) : null}
