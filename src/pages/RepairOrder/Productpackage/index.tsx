@@ -98,7 +98,20 @@ const Productpackage = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p className="text-truncate">{row.original.detail}</p>
+            {!(allowedToEdit && (row.original.type === 'product' || row.original.type === 'package')) ? (
+              <p className="text-truncate"> {row.original.detail}</p>
+            ) : (
+              <p
+                onClick={() => {
+                  setIsProductEdit({ open: true, isBulkedit: false });
+                  setRecordToUpdate(row.original)
+                }}
+                className="link text-truncate"
+                title={row.original.detail}
+              >
+                {row.original.detail}
+              </p>
+            )}
             <Box ml={1} className="d-flex align-items-center">
               <IconButton
                 size="small"
@@ -170,6 +183,14 @@ const Productpackage = ({
         )
       },
       {
+        accessor: 'qty',
+        Header: 'Qty',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
+        }
+      },
+      {
         accessor: 'description',
         Header: 'Description',
         width: 200,
@@ -239,12 +260,12 @@ const Productpackage = ({
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail.assetNumber
-              : parent.packageDetail?.packageName
+        ? parent.serviceDetail?.serviceName
+        : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'serializedAsset'
+            ? parent.serializedAssetDetail.assetNumber
+            : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'service'
@@ -296,12 +317,12 @@ const Productpackage = ({
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
       _subRow.detail = `${_subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow.serializedAssetDetail.assetNumber
-              : _subRow.packageDetail?.packageName
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+            ? _subRow.serializedAssetDetail.assetNumber
+            : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
         _subRow.type === 'service'
