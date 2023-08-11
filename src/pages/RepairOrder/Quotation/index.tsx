@@ -33,7 +33,6 @@ const Quotation = ({
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
-  allowedToDelete,
   setQuotationVersionData,
   updateOrderStatus,
   invoiceStep
