@@ -2976,6 +2976,7 @@ svg.MuiSvgIcon-root {
 
   .control-buttons-v1 {
     display: flex;
+    flex-wrap: wrap;
     gap: 15px;
 
     @media all and (max-width: 708px) {
@@ -3232,7 +3233,11 @@ body {
     line-height: 17px !important;
     color: #424242;
     &.MuiButton-text {
+      color: var(--primary-text) !important;
       padding: 6px !important;
+      height: 32px;
+      border: none !important;
+      width: 34px;
     }
 
     & > span {
@@ -3268,6 +3273,9 @@ body {
       .btn-outline-v1 {
         background-color: var(--dark-primary) !important;
         color: white !important;
+        &.MuiButton-text {
+          border: none !important;
+        }
       }
     }
   }

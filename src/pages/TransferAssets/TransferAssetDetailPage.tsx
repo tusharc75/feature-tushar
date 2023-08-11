@@ -16,8 +16,8 @@ import AssetsGrid from './AssetGrid';
 import LoadingTicketGrid from './LoadingTicket';
 import ReceivingTicketGrid from './ReceivingTicket';
 import TabPanel from 'src/components/TabPanel';
-import { BiSolidPencil, BiFoodMenu } from 'react-icons/bi';
-
+import { BiFoodMenu } from 'react-icons/bi';
+import EditIcon from '@material-ui/icons/Edit';
 import { FaWpforms } from 'react-icons/fa';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -313,7 +313,7 @@ const TransferAssetDetailPage = () => {
           <Box className="control-buttons-v1">
             {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
-                {isMobile && !isTablet ? <BiSolidPencil size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
               </Button>
             )}
             <ActivityButton
