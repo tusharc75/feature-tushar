@@ -317,8 +317,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
   return (
     <Fragment>
       {allowedToEdit && permissions?.bulkAssetCreation?.isUpdate && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex" alignItems="center">
+        <Box className="flex flex-wrap gap-2 justify-between">
+          <Box>
             <Button
               variant={'contained'}
               color="primary"
@@ -330,66 +330,64 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
               {`Add Products`}
             </Button>
           </Box>
-          <div className="d-flex gap-2">
-            <Box display={'flex'} justifyContent="flex-end">
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                color="default"
-                size="small"
-                onClick={openActions}
-                className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                aria-controls="action-menu"
-                endIcon={<ExpandMore />}
-              >
-                {isMobile && !isTablet ? '' : 'Actions'}
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
+          <Box display={'flex'} justifyContent="flex-end">
+            <Button
+              variant={'outlined'}
+              color="default"
+              size="small"
+              onClick={openActions}
+              className={`new-dropdown-v1`}
+              aria-controls="action-menu"
+              endIcon={<ExpandMore />}
+            >
+              Actions
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                color="primary"
+                disabled={selectedRecords.length === 0}
+                onClick={() => {
+                  setIsBulkEdit(true);
+                  setShowProductDialog(true);
+                  closeActions();
                 }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
               >
-                <MenuItem
-                  color="primary"
-                  disabled={selectedRecords.length === 0}
-                  onClick={() => {
-                    setIsBulkEdit(true);
-                    setShowProductDialog(true);
-                    closeActions();
-                  }}
-                >
-                  Bulk Edit
-                </MenuItem>
-                <MenuItem
-                  color="primary"
-                  disabled={selectedRecords.length === 0 || loadingButton}
-                  onClick={() => {
-                    setShowDeleteConfirmBox(true);
-                    setDeleteBulkAssetCreationProduct(selectedRecords.map((d) => d._id));
-                    closeActions();
-                  }}
-                >
-                  Delete
-                </MenuItem>
-                <MenuItem
-                  color="primary"
-                  disabled={selectedRecords.length === 0 || loadingButton}
-                  onClick={() => {
-                    createAsset();
-                    closeActions();
-                  }}
-                >
-                  {`Create ${routes.serializedAsset.title}`}
-                </MenuItem>
-              </Menu>
-            </Box>
-          </div>
+                Bulk Edit
+              </MenuItem>
+              <MenuItem
+                color="primary"
+                disabled={selectedRecords.length === 0 || loadingButton}
+                onClick={() => {
+                  setShowDeleteConfirmBox(true);
+                  setDeleteBulkAssetCreationProduct(selectedRecords.map((d) => d._id));
+                  closeActions();
+                }}
+              >
+                Delete
+              </MenuItem>
+              <MenuItem
+                color="primary"
+                disabled={selectedRecords.length === 0 || loadingButton}
+                onClick={() => {
+                  createAsset();
+                  closeActions();
+                }}
+              >
+                {`Create ${routes.serializedAsset.title}`}
+              </MenuItem>
+            </Menu>
+          </Box>
         </Box>
       )}
       {columns && frameWorkComponent ? (

@@ -330,7 +330,6 @@ const BulkAssetCreation = () => {
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      color="secondary"
                       variant="text"
                       disableElevation
                       startIcon={<MdSort />}
@@ -354,7 +353,6 @@ const BulkAssetCreation = () => {
                       aria-haspopup="true"
                       aria-expanded={'true'}
                       variant="text"
-                      color="secondary"
                       disableElevation
                       className={'sort-filter-tablet'}
                       startIcon={<MdFilterList />}

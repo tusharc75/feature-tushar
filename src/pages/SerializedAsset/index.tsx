@@ -349,14 +349,14 @@ const SerializedAsset = () => {
       <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data?._id}`}>
         {params.value}
       </Link>
-      {(params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime())
-        || params.data?.certificateExpireDate && new Date(params.data?.certificateExpireDate)?.getTime() <= new Date()?.getTime() && (
+      {(params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime()) ||
+        (params.data?.certificateExpireDate && new Date(params.data?.certificateExpireDate)?.getTime() <= new Date()?.getTime() && (
           <Box ml={1}>
             <HtmlTooltip title="Asset needs to be recert">
               <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
             </HtmlTooltip>
           </Box>
-        )}
+        ))}
     </Fragment>
   );
 
@@ -533,30 +533,17 @@ const SerializedAsset = () => {
                       onChange={(e, val) => {
                         setProductCategory(val && val._id ? val._id : '');
                       }}
-                      renderInput={(params) =>
-                        isMobile && !isTablet ? (
-                          <TextField
-                            {...params}
-                            margin="none"
-                            size="small"
-                            name="productCategory"
-                            placeholder="Product Category"
-                            variant="standard"
-                            fullWidth
-                            className={isMobile ? 'serchBox' : ''}
-                          />
-                        ) : (
-                          <TextField
-                            {...params}
-                            size="small"
-                            margin="none"
-                            name="productCategory"
-                            label="Product Category"
-                            variant="outlined"
-                            fullWidth
-                          />
-                        )
-                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          size="small"
+                          margin="none"
+                          name="productCategory"
+                          label="Product Category"
+                          variant="outlined"
+                          fullWidth
+                        />
+                      )}
                     />
                   )}
                   {productCategory && (
@@ -592,22 +579,9 @@ const SerializedAsset = () => {
                     onChange={(e, val) => {
                       setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
                     }}
-                    renderInput={(params) =>
-                      isMobile && !isTablet ? (
-                        <TextField
-                          {...params}
-                          margin="none"
-                          name="plant"
-                          placeholder={routes.warehouse.title}
-                          variant="standard"
-                          size="small"
-                          fullWidth
-                          className={isMobile ? 'serchBox' : ''}
-                        />
-                      ) : (
-                        <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-                      )
-                    }
+                    renderInput={(params) => (
+                      <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                    )}
                   />
                   {permissions?.sublease && (
                     <FormControlLabel
@@ -913,8 +887,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
