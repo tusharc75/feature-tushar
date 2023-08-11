@@ -60,7 +60,7 @@ const SerializedAssetsCertification = () => {
   });
 
   const {
-    state: { permissions, user }
+    state: { permissions, user, selectedEntity }
   }: any = useData();
   const { getColumnData } = useColumns();
 
@@ -69,12 +69,12 @@ const SerializedAssetsCertification = () => {
   }, []);
 
   useEffect(() => {
-    fetchProductInventory(true);
+    fetchData(true);
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration]);
+    fetchData();
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -114,7 +114,7 @@ const SerializedAssetsCertification = () => {
       });
   };
 
-  const fetchProductInventory = (forAutocomplete = false, assetTerm = '') => {
+  const fetchData = (forAutocomplete = false, assetTerm = '') => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
@@ -272,10 +272,10 @@ const SerializedAssetsCertification = () => {
             <Grid item xs={2} sm={2} md={2}>
               <Autocomplete
                 onInputChange={(event, value) => {
-                  fetchProductInventory(true, value);
+                  fetchData(true, value);
                 }}
                 onChange={(event, value) => {
-                  fetchProductInventory(true, value);
+                  fetchData(true, value);
                 }}
                 options={assetOptions.map((option) => option.assetNumber)}
                 loading={loadingAssets}
@@ -336,7 +336,7 @@ const SerializedAssetsCertification = () => {
               actionWidth={150}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchProductInventory}
+              refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={false}
               showFilters={true}
               resource={sidebarResource.serializedAsset}
@@ -354,7 +354,7 @@ const SerializedAssetsCertification = () => {
           onClose={() => setIssueCertificateDialog({ open: false, id: null })}
           onSuccess={() => {
             setIssueCertificateDialog({ open: false, id: null });
-            fetchProductInventory();
+            fetchData();
           }}
           assetId={issueCertificateDialog?.id}
         />
