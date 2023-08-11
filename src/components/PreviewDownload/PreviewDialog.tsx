@@ -59,9 +59,9 @@ export const PreviewDialog = ({
             .get(`/pdf/view?resource=${resource}`)
             .then(({ data: { data } }) => {
                 setViews(data);
-                if (data?.length && !selectedView) {
-                    handleSelectView(data[0])
-                }
+                // if (data?.length && !selectedView) {
+                //     handleSelectView(data[0])
+                // }
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
