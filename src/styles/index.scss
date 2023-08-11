@@ -1011,9 +1011,9 @@ body::-webkit-scrollbar-thumb {
 }
 
 .mobile_button {
-  border: 2px solid var(--secondary) !important;
-  border-radius: 20px !important;
-  color: var(--secondary) !important;
+  border: 1px solid var(--common-border-color) !important;
+  border-radius: 5px !important;
+  color: var(--primary-text) !important;
 }
 
 .search-input-icon {
@@ -1082,7 +1082,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .MobileStep-next-back-button {
-  color: var(--primary-light) !important;
+  color: var(--primary-text) !important;
   &:disabled {
     opacity: 0.7;
     pointer-events: none;
@@ -1908,7 +1908,7 @@ body::-webkit-scrollbar-thumb {
 
   .form-label-style {
     color: var(--secondary);
-    font-size: 0.6rem;
+    // font-size: 0.6rem;
     padding: 0 4px 0 6px;
     text-align: left;
     //padding-bottom: 6px;
@@ -1933,8 +1933,8 @@ body::-webkit-scrollbar-thumb {
     justify-content: center;
     margin: 0 auto;
     border-radius: 5px !important;
-    background-color: white;
-    border: 1px solid lightgray;
+    background-color: var(--dark-primary, white);
+    border: 1px solid var(--common-border-color);
   }
 
   .quote-name {
@@ -2003,7 +2003,7 @@ body::-webkit-scrollbar-thumb {
 
   &__item {
     background-color: var(--primary-light);
-    border: 2px solid white;
+    border: 2px solid var(--dark-mode-border-color, white);
     border-radius: 100%;
     color: #ffffff;
     display: block;
@@ -3231,6 +3231,9 @@ body {
     font-size: 14.7483px !important;
     line-height: 17px !important;
     color: #424242;
+    &.MuiButton-text {
+      padding: 6px !important;
+    }
 
     & > span {
       line-height: 16px;
@@ -3980,6 +3983,9 @@ body {
     [data-mode='dark'] & {
       background-color: var(--dark-primary);
       color: white;
+      svg {
+        color: white !important;
+      }
     }
   }
 }

@@ -469,6 +469,10 @@ Button.MuiButtonBase-root:not(.MuiFab-root) {
   & .MuiChip-deleteIcon {
     width: 16px;
   }
+  [data-mode='dark'] & {
+    background-color: var(--dark-secondary);
+    color: white;
+  }
 }
 .MuiButton-containedPrimary {
   background-color: var(--new_theme_color) !important;

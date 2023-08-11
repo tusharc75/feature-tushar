@@ -142,8 +142,8 @@ const RoadMap = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between">
-        <div className="grid md:grid-cols-2 md:max-w-[calc(100%-161px)] xl:grid-cols-4 gap-4">
+      <div className="flex flex-wrap justify-between">
+        <div className="grid md:grid-cols-2 w-full md:max-w-[calc(100%-161px)] xl:grid-cols-4 gap-4">
           <MuiPickersUtilsProvider utils={MomentUtils}>
             <Autocomplete
               fullWidth
@@ -222,7 +222,7 @@ const RoadMap = () => {
             </Button>
           </Box>
         </Box>
-      </Box>
+      </div>
       <Box pt={2}>
         <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
           <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
