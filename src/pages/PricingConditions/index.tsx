@@ -254,7 +254,7 @@ const PricingConditions = () => {
               },
               {
                 title: 'Product Import',
-                api: `${pricingCondition.api}/import&conditionType=product`,
+                api: `${pricingCondition.api}/import?conditionType=product`,
                 type: 'import'
               },
               {
@@ -269,7 +269,7 @@ const PricingConditions = () => {
               },
               {
                 title: 'Package Import',
-                api: `${pricingCondition.api}/import&conditionType=package`,
+                api: `${pricingCondition.api}/import?conditionType=package`,
                 type: 'import'
               },
               {
@@ -284,7 +284,7 @@ const PricingConditions = () => {
               },
               {
                 title: 'Service Import',
-                api: `${pricingCondition.api}/import&conditionType=service`,
+                api: `${pricingCondition.api}/import?conditionType=service`,
                 type: 'import'
               },
             ]}
