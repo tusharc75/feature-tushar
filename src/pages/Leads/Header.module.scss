@@ -9,11 +9,14 @@
   -webkit-gap: 0.5rem;
   align-items: center;
 }
+
 .sort_title {
-  background-color: white !important;
+  background-color: var(--dark-primary, white) !important;
   padding: 8px 24px !important;
   font-weight: 700;
-  color: #757575;
+  color: var(--primary-text);
+  @apply rounded-t-[20px];
+  border-bottom: 1px solid var(--common-border-color);
 }
 .inner_content_sort {
   padding: 0px !important;

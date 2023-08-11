@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { Box, Button, Chip, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
+import { Box, CircularProgress, IconButton, TextField } from '@material-ui/core';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
@@ -31,9 +31,9 @@ import styles from '../Leads/Header.module.scss';
 import DurationFilter from 'src/components/DurationFilter';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import HistoryIcon from '@material-ui/icons/History';
+import { Autocomplete } from '@material-ui/lab';
 
 const SerializedAssetsCertification = () => {
-
   const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -46,6 +46,8 @@ const SerializedAssetsCertification = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
+  const [assetOptions, setAssetOptions] = useState([]);
+  const [loadingAssets, setLoadingAssets] = useState(false);
 
   const [issueDuration, setIssueDuration] = useState({
     from: null,
@@ -67,9 +69,12 @@ const SerializedAssetsCertification = () => {
   }, []);
 
   useEffect(() => {
+    fetchProductInventory(true);
+  }, []);
+
+  useEffect(() => {
     fetchProductInventory();
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration]);
-
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -109,15 +114,18 @@ const SerializedAssetsCertification = () => {
       });
   };
 
-  const fetchProductInventory = () => {
+  const fetchProductInventory = (forAutocomplete = false, assetTerm = '') => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    const queryString = getQueryString();
+    const queryString = getQueryString(forAutocomplete, assetTerm);
     axiosInstance()
       .get(`${serializedAssetsCertification.api}${queryString}`)
       .then(({ data }) => {
+        if (forAutocomplete) {
+          setAssetOptions(data.data);
+        }
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
           const dateToQuery = moment().add(30, 'days').toDate();
@@ -153,7 +161,7 @@ const SerializedAssetsCertification = () => {
       });
   };
 
-  const getQueryString = () => {
+  const getQueryString = (forAutocomplete = false, assetTerm = '') => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -184,6 +192,12 @@ const SerializedAssetsCertification = () => {
           from: moment(expireDuration?.from).format('MM/DD/YYYY'),
           to: moment(expireDuration?.to).format('MM/DD/YYYY')
         }
+      });
+    }
+    if (forAutocomplete && assetTerm) {
+      updatedFilters.push({
+        field: 'assetNumber',
+        term: assetTerm
       });
     }
     if (updatedFilters?.length > 0) {
@@ -223,7 +237,7 @@ const SerializedAssetsCertification = () => {
               setIssueCertificateDialog({ open: true, id: params?.data?._id });
             }}
           >
-            <NoteAddIcon color='primary' />
+            <NoteAddIcon color="primary" />
           </IconButton>
         </HtmlTooltip>
       )}
@@ -235,7 +249,7 @@ const SerializedAssetsCertification = () => {
             setCertificateHistoryDialog({ open: true, id: params?.data?._id });
           }}
         >
-          <HistoryIcon color='primary' />
+          <HistoryIcon color="primary" />
         </IconButton>
       </HtmlTooltip>
     </>
@@ -251,26 +265,47 @@ const SerializedAssetsCertification = () => {
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[routes.serializedAssetsCertification]} />
         </Grid>
-        <Grid item md={8} sm={1} xs={2}></Grid>
       </Grid>
       <div className="main-container">
         <div className="header-panel">
           <Grid container spacing={2} className={styles.filter_side_container}>
-            <Grid item xs={12} sm={12} md={5} >
-              <DurationFilter
-                label={"Issue Date"}
-                duration={issueDuration}
-                setDuration={setIssueDuration}
-                defaultTimeFrame='custom' />
+            <Grid item xs={2} sm={2} md={2}>
+              <Autocomplete
+                onInputChange={(event, value) => {
+                  fetchProductInventory(true, value);
+                }}
+                onChange={(event, value) => {
+                  fetchProductInventory(true, value);
+                }}
+                options={assetOptions.map((option) => option.assetNumber)}
+                loading={loadingAssets}
+                getOptionLabel={(option) => option || ''}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={'Asset'}
+                    variant="outlined"
+                    size='small'
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <Fragment>
+                          {loadingAssets ? <CircularProgress color="inherit" size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </Fragment>
+                      )
+                    }}
+                  />
+                )}
+              />
             </Grid>
-            <Grid item xs={12} sm={12} md={5} >
-              <DurationFilter
-                label={"Expire Date"}
-                duration={expireDuration}
-                setDuration={setExpireDuration}
-                defaultTimeFrame='custom' />
+            <Grid item xs={4} sm={4} md={4}>
+              <DurationFilter label={'Issue Date'} duration={issueDuration} setDuration={setIssueDuration} defaultTimeFrame="custom" />
             </Grid>
-            <Grid sm={12} xs={12} md={2} container className={`${styles.filter_side} align-items-center`}>
+            <Grid item xs={4} sm={4} md={4}>
+              <DurationFilter label={'Expire Date'} duration={expireDuration} setDuration={setExpireDuration} defaultTimeFrame="custom" />
+            </Grid>
+            <Grid sm={2} xs={2} md={2} container className={`${styles.filter_side} align-items-center`}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                 <Box style={{ flexGrow: '1' }}>
                   <SearchBox

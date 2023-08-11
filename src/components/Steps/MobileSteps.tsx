@@ -2,11 +2,12 @@ import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(() => ({
   mobileStep: {
-    backgroundColor: '#DEE2E6'
+    backgroundColor: 'var(--dark-primary, #f1f5ff)'
   },
   createLayout: {
     minHeight: '45px',
-    backgroundColor: '#DEE2E6',
+    backgroundColor: 'var(--dark-primary, #f1f5ff)',
+    borderTop: '1px solid var(--common-border-color)',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -22,7 +23,7 @@ const useStyles = makeStyles(() => ({
   stepLayout: {
     paddingTop: '3px',
     fontWeight: 600,
-    color: 'var(--primary-light)'
+    color: 'var(--primary-text)'
   }
 }));
 

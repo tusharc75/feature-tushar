@@ -324,7 +324,6 @@ const Sublease = () => {
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      color="secondary"
                       variant="text"
                       disableElevation
                       startIcon={<MdSort />}
@@ -348,7 +347,6 @@ const Sublease = () => {
                       aria-haspopup="true"
                       aria-expanded={'true'}
                       variant="text"
-                      color="secondary"
                       disableElevation
                       className={'sort-filter-tablet'}
                       startIcon={<MdFilterList />}
