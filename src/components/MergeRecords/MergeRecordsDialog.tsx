@@ -100,7 +100,7 @@ const MergeRecordsDialog = ({ ids, onClose, resource, onSuccess }) => {
                 }}
                 isExportAllOrSomeFeature={true}
                 ids={[]}
-                additionalParams={`?resource=${resource}`}
+                additionalParams={`resource=${resource}`}
               />
             </Box>
             <Box py={2}>
