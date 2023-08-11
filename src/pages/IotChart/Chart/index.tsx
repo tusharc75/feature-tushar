@@ -86,9 +86,15 @@ function Index() {
                         let dataValues = generateRandomValues(3);
                         let dataArr = []
                         dataValues.map((d) => {
+                            const randomDay = Math.floor(Math.random() * 31) + 1;
+                            const randomMonth = Math.floor(Math.random() * 12) + 1;
+                            const randomHour = Math.floor(Math.random() * 24);
+                            const randomMinute = Math.floor(Math.random() * 60);
+                            const randomSecond = Math.floor(Math.random() * 60);
+                            const randomDate = new Date(2023, randomMonth - 1, randomDay, randomHour, randomMinute, randomSecond);
                             dataArr.push({
                                 data: d,
-                                date: `${Math.floor(Math.random() * 31) + 1}/${Math.floor(Math.random() * 12) + 1}/2023`
+                                date: randomDate
                             })
                         })
                         const newObj = {

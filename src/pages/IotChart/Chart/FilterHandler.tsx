@@ -3,12 +3,12 @@ import { Popover, Box, Button } from '@material-ui/core';
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { BsFilter } from 'react-icons/bs';
-import { Grid, FormControl, InputLabel, Select, MenuItem, AppBar, makeStyles } from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import { Grid, makeStyles } from '@material-ui/core';
 import moment from 'moment';
-import { dateFormatForInputControl } from '../../../constants/helpers';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
+import { KeyboardDateTimePicker } from '@material-ui/pickers';
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -31,59 +31,6 @@ export function FilterHandler({ handleChange, particularCategory, tempDataVal, d
     const classes = useStyles();
 
     const [filterAnchorEl, setFilterAnchorEl] = useState(null);
-    const [timeFrame, setTimeFrame] = React.useState<any>('current-year');
-
-
-    React.useEffect(() => {
-        switch (timeFrame) {
-            case '1-month':
-                setDateFilters({
-
-                    from: new Date(moment().subtract('1', 'month').calendar()),
-                    to: new Date()
-
-                });
-                break;
-
-            case '3-months':
-                setDateFilters({
-                    from: new Date(moment().subtract('3', 'months').calendar()),
-                    to: new Date()
-
-                });
-                break;
-
-            case '6-months':
-                setDateFilters({
-
-
-                    from: new Date(moment().subtract('6', 'months').calendar()),
-                    to: new Date()
-                });
-                break;
-
-            case '1-year':
-                setDateFilters({
-
-                    from: new Date(moment().subtract('1', 'year').calendar()),
-                    to: new Date()
-
-                });
-                break;
-            case 'current-year':
-                setDateFilters({
-
-                    from: new Date(moment().startOf('year').calendar()),
-                    to: new Date(moment().endOf('year').calendar()),
-
-                });
-                break;
-
-            default:
-                break;
-        }
-    }, [timeFrame]);
-
 
     const handleFilterOpen = (event) => {
         setFilterAnchorEl(event.currentTarget);
@@ -154,38 +101,18 @@ export function FilterHandler({ handleChange, particularCategory, tempDataVal, d
             </Popover>
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <Grid container spacing={2}>
-                    <Grid item xs={12} sm={4}>
-                        <FormControl fullWidth size="small" variant="outlined">
-                            <InputLabel id="duration">Select Duration</InputLabel>
-                            <Select
-                                labelId="duration"
-                                id="time-duration"
-                                value={timeFrame}
-                                onChange={(e) => setTimeFrame(e.target.value)}
-                                label="Select Duration"
-                                MenuProps={{ anchorOrigin: { vertical: 'bottom', horizontal: 'left' }, transformOrigin: { vertical: 'top', horizontal: 'left' }, getContentAnchorEl: null }}
-                            >
-                                <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                                <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                                <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                                <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                                <MenuItem value={'current-year'}>Current Year</MenuItem>
-                                <MenuItem value={'custom'}>Custom</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
                     <Grid item xs={6} sm={4}>
-                        <KeyboardDatePicker
+                        <KeyboardDateTimePicker
                             //   disabled={timeFrame !== 'custom' || disabled}
                             inputVariant="outlined"
                             variant="inline"
                             fullWidth
                             size="small"
                             openTo="year"
-                            format={dateFormatForInputControl}
+                            format="dd/MM/yyyy HH:mm"
                             maxDate={dateFilters.to}
                             label="From"
-                            views={['year', 'month', 'date']}
+                            views={['year', 'month', 'date', 'hours', 'minutes']}
                             value={dateFilters.from}
                             onChange={(date) => {
                                 setDateFilters({ ...dateFilters, from: date });
@@ -193,7 +120,7 @@ export function FilterHandler({ handleChange, particularCategory, tempDataVal, d
                         />
                     </Grid>
                     <Grid item xs={6} sm={4}>
-                        <KeyboardDatePicker
+                        <KeyboardDateTimePicker
                             //   disabled={timeFrame !== 'custom' || disabled}
                             inputVariant="outlined"
                             variant="inline"
@@ -201,9 +128,9 @@ export function FilterHandler({ handleChange, particularCategory, tempDataVal, d
                             size="small"
                             minDate={dateFilters.from}
                             openTo="year"
-                            format={dateFormatForInputControl}
+                            format="dd/MM/yyyy HH:mm"
                             label="To"
-                            views={['year', 'month', 'date']}
+                            views={['year', 'month', 'date', 'hours', 'minutes']}
                             value={dateFilters.to}
                             onChange={(date) => {
                                 setDateFilters({ ...dateFilters, to: date });

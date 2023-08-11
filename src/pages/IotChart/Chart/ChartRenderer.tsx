@@ -22,15 +22,15 @@ export function ChartRenderer({ dataVal, particularCategory, chart }) {
             })
         })
 
-        const dateObjects = labels?.map((dateString) => {
+        // const dateObjects = labels?.map((dateString) => {
 
-            const [day, month, year] = dateString.split("/");
+        //     const [day, month, year] = dateString.split("/");
 
-            // Creating a new Date object using the parsed values
-            return new Date(`${year}-${month}-${day}`);
-        });
-        return dateObjects;
-
+        //     // Creating a new Date object using the parsed values
+        //     return new Date(`${year}-${month}-${day}`);
+        // });
+        // return dateObjects;
+        return labels;
     }
 
     const returnDates = myDates()
@@ -72,29 +72,11 @@ export function ChartRenderer({ dataVal, particularCategory, chart }) {
                 labels.push(m?.date);
             })
         })
-        const filteredLabels = labels.filter(label => {
-            const [day, month, year] = label.split('/').map(Number);
-            const date = new Date(year, month - 1, day); // Months are 0-based in Date
-            return date >= fromDate && date <= toDate;
-        });
+        // Filtering
+        const filteredLabels = labels.filter(date => date >= fromDate && date <= toDate);
 
-       filteredLabels.sort((a, b) => {
-            const [dayA, monthA, yearA] = a.split('/').map(Number);
-            const [dayB, monthB, yearB] = b.split('/').map(Number);
-            
-            // Compare years first
-            if (yearA !== yearB) {
-                return yearA - yearB;
-            }
-            
-            // If years are the same, compare months
-            if (monthA !== monthB) {
-                return monthA - monthB;
-            }
-            
-            // If months are the same, compare days
-            return dayA - dayB;
-        });
+        // Sorting
+        filteredLabels.sort((a, b) => a - b);
         
         let datasets = []
         subcategories?.map(cat => (
@@ -109,7 +91,17 @@ export function ChartRenderer({ dataVal, particularCategory, chart }) {
 
         // Assuming data is in line chart format
         return {
-            labels: filteredLabels,
+            labels: filteredLabels.map(randomDate=>{
+            const day = randomDate.getDate();
+            const month = randomDate.getMonth() + 1; // Months are 0-based
+            const year = randomDate.getFullYear();
+            const hours = randomDate.getHours();
+            const minutes = randomDate.getMinutes();
+
+            // Create a formatted string
+            const formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}`;
+            return formattedDateTime
+            }),
             datasets: datasets
            
         };
