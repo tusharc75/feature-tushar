@@ -54,13 +54,13 @@ const ReportMaster = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Link to="/custom-report">
-              <Button className="btn-outline-v1" size="small" endIcon={<AiFillCalendar />}>
+              <Button variant="outlined" className="btn-outline-v1" size="small" endIcon={<AiFillCalendar />}>
                 Custom Report
               </Button>
             </Link>
             {permissions?.scheduleReport?.isRead && (
               <Link to={`/schedule-report`}>
-                <Button className="btn-outline-v1" size="small" endIcon={<AiFillCalendar />}>
+                <Button variant="outlined" className="btn-outline-v1" size="small" endIcon={<AiFillCalendar />}>
                   Schedule Report
                 </Button>
               </Link>
