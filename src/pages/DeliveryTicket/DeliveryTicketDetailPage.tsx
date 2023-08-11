@@ -24,7 +24,8 @@ import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
 import { FaFileSignature, FaMailchimp, FaSignature, FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { BiFoodMenu } from 'react-icons/bi';
+import EditIcon from '@material-ui/icons/Edit';
 import {
   prepareDataForGrid,
   DELIVERY_TICKET_MAPPED_STATUS,
@@ -593,18 +594,19 @@ export default function DeliveryTicketDetail(props) {
                 ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
+                    className="btn-outline-v1"
                     size="small"
                     onClick={handleOpenUpdateDialog}
                     style={isMobile && !isTablet ? { color: 'var(--teal)' } : {}}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                   </Button>
                 )}
 
               {deliveryTicketData?.signatures?.length > 0 ? (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className="btn-outline-v1"
                   color="primary"
                   size="small"
                   onClick={() => setOpenSigns(true)}
@@ -616,6 +618,7 @@ export default function DeliveryTicketDetail(props) {
               {permissions?.deliveryTicket?.isRead && !isMobile && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                  className="btn-outline-v1"
                   color="primary"
                   type="button"
                   size="small"
@@ -634,6 +637,7 @@ export default function DeliveryTicketDetail(props) {
                   variant={isMobile && !isTablet ? 'text' : 'outlined'}
                   color="primary"
                   type="button"
+                  className="btn-outline-v1"
                   size="small"
                   style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
                   startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
@@ -645,11 +649,11 @@ export default function DeliveryTicketDetail(props) {
                   {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? 'Please wait...' : 'Download'}
                 </Button>
               )}
-              <ActivityButton 
-                referenceId={deliveryTicketData?._id} 
-                resource={ACTIVITY_RESOURCE.deliveryTicket} 
+              <ActivityButton
+                referenceId={deliveryTicketData?._id}
+                resource={ACTIVITY_RESOURCE.deliveryTicket}
                 resourceLabel={deliveryTicketData?.ticketName}
-                />
+              />
             </Box>
           </Box>
         </Box>
