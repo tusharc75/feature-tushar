@@ -14,12 +14,18 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import { set, startCase } from 'lodash';
 import ManageSubmit from './ManageSubmit';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CommentDialog from 'src/components/CommentDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import HistoryIcon from '@material-ui/icons/History';
+import ViewLogs from './ViewLogs';
 
 const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, fetchData }) => {
     const toastConfig = useContext(CustomToastContext);
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState([]);
     const [submitDialog, setSubmitDialog] = useState(false);
+    const [commentDialog, setCommentDialog] = useState(false)
+    const [viewLogsDialog, setViewLogsDialog] = useState(false)
 
     useEffect(() => {
         fetchFields();
@@ -122,9 +128,10 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
         setRowsData([...material, ...costs]);
     };
 
-    const handleReOpen = async () => {
+    const handleReOpen = async (data: any) => {
         await axiosInstance().patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, {
-            status: FIELD_TICKET_STATUS.inProgress
+            status: FIELD_TICKET_STATUS.inProgress,
+            comment: data
         }).then(({ data }) => {
             toastConfig.setToastConfig({
                 open: true,
@@ -159,10 +166,20 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                         variant="contained"
                         color="primary"
                         size='small'
-                        onClick={handleReOpen}
+                        onClick={() => setCommentDialog(true)}
                     >
                         Re-Open
                     </Button>}
+                    <Box ml={1}></Box>
+                    <HtmlTooltip title="View Logs">
+                        <IconButton
+                            size="small"
+                            aria-label="Delete"
+                            onClick={() => setViewLogsDialog(true)}
+                        >
+                            <HistoryIcon />
+                        </IconButton>
+                    </HtmlTooltip>
                 </Box>
             </Box>
             {columns && rowsData ? (
@@ -198,6 +215,28 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                     }}
                 />
             }
+            {commentDialog && (
+                <CommentDialog
+                    required={true}
+                    handleSubmit={(data) => {
+                        handleReOpen(data)
+                        setCommentDialog(false)
+                    }}
+                    handleClose={() => {
+                        setCommentDialog(false)
+                    }}
+                />
+            )}
+
+            {viewLogsDialog && (
+                <ViewLogs
+                    id={id}
+                    fieldTicketName={fieldTicketData?.fieldTicketNumber}
+                    handleClose={() => {
+                        setViewLogsDialog(false)
+                    }}
+                />
+            )}
         </>
     );
 };

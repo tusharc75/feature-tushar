@@ -23,7 +23,7 @@ import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { pricingCondition, gridLoadingTimeout, downloadExcel, removeLocalStorage, getLocalStorageArrayData } from '../../../constants/helpers';
+import { pricingCondition, gridLoadingTimeout, downloadExcel, removeLocalStorage, getLocalStorageArrayData, PRICING_TYPE } from '../../../constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
@@ -37,6 +37,8 @@ import { ExpandMore } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import styles from '../../Leads/Header.module.scss';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
   const renderFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
@@ -74,17 +76,16 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(({ data: { data } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${
-            element.materialType === 'product'
-              ? element.productDetail?.productName
-              : element.materialType === 'service'
+          element.detail = `${element.materialType === 'product'
+            ? element.productDetail?.productName
+            : element.materialType === 'service'
               ? element.serviceDetail?.serviceName
               : element.packageDetail?.packageName
-          }`;
+            }`;
           element.materialType = startCase(element.materialType);
-          element.conditionType = element.conditionType?.join(',');
-          element.unit = element.unit?.join(',');
-          element.pricingMethod = element.pricingMethod?.join(',');
+          element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))?.map((e) => e.optionLabel)?.toString();
+          element.unit = element.unit?.toString();
+          element.pricingMethod = element.pricingMethod?.toString();
         });
         dispatch({ type: 'initialize', data: data, count: data.length });
         setTimeout(() => {
@@ -166,17 +167,16 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           size="small"
           onClick={() => {
             window.open(
-              `${
-                params.data.materialType === 'Product'
-                  ? routes.productDetail.path
-                  : params.data.materialType === 'Service'
+              `${params.data.materialType === 'Product'
+                ? routes.productDetail.path
+                : params.data.materialType === 'Service'
                   ? routes.serviceMasterDetail.path
                   : routes.packagesDetail.path
               }/${params.data.materialId}`
             );
           }}
         >
-          <OpenInNewIcon fontSize="small"  color="primary"/>
+          <OpenInNewIcon fontSize="small" color="primary" />
         </IconButton>
       </Box>
     </Fragment>
@@ -200,7 +200,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         ownerId={user?.user?._id}
         userId={user?.user?._id}
         onDelete={() => {
-          // handleDelete([params.data._id]);
           setDeleteRecord(params.data);
           setShowDeleteConfirmBox(true);
         }}
@@ -218,7 +217,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const columns = [
     { field: 'detail', headerName: 'Detail', show: true, disabled: true, cellRenderer: 'detailRenderer' },
     { field: 'materialType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'conditionType', headerName: 'Condition Type', disabled: true, show: true, cellRenderer: 'commonRenderer' },
+    { field: 'conditionType', headerName: 'Pricing Type', disabled: true, show: true, cellRenderer: 'commonRenderer' },
     { field: 'unit', headerName: 'Unit', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'pricingMethod', headerName: 'Pricing Method', show: true, disabled: true, cellRenderer: 'commonRenderer' }
   ];
@@ -276,11 +275,10 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       type: 'info',
       message: `Your file will be downloaded/uploaded in a matter of seconds`
     });
-    let exportApi = `${pricingCondition.api}/condition/template/${pricingConditionId}${
-      getLocalStorageArrayData(localStorageSelectedRecords).length
-        ? `?ids=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((e) => e?.materialId) || [])}`
-        : ''
-    }`;
+    let exportApi = `${pricingCondition.api}/condition/template/${pricingConditionId}${getLocalStorageArrayData(localStorageSelectedRecords).length
+      ? `?ids=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((e) => e?.materialId) || [])}`
+      : ''
+      }`;
 
     axiosInstance()
       .get(exportApi, {
@@ -319,6 +317,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       type="file"
     />
   );
+
   const openAddActions = (event) => {
     setAddAnchorEl(event.currentTarget);
   };
@@ -373,7 +372,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             </MenuItem>
           </Menu>
         </Box>
-       
         <Box display="flex">
           <Button
             variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -382,6 +380,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
             onClick={openActions}
             aria-controls="action-menu"
+            disabled={selectedRecords.length ? false : true}
             endIcon={<ExpandMore />}
           >
             {isMobile && !isTablet ? '' : 'Actions'}
@@ -415,21 +414,83 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             >
               Delete
             </MenuItem>
-            <MenuItem
-              disabled={!Boolean(dataRows?.length)}
-              onClick={() => {
-                exportToExcel();
-              }}
-            >
-              Export to Excel{' '}
-              {getLocalStorageArrayData(localStorageSelectedRecords).length
-                ? `(${getLocalStorageArrayData(localStorageSelectedRecords).length})`
-                : '(All)'}
-            </MenuItem>
-            <MenuItem onClick={() => {}}>
-              <label htmlFor="importFromExcel">{ImportInput}Import from Excel</label>
-            </MenuItem>
           </Menu>
+          <Box ml={2}>
+            <ImportExportLinks
+              permissions={permissions.pricingCondition}
+              module="pricingCondition(s)"
+              api={pricingCondition.api}
+              afterImportCompleted={() => {
+                fetchCondition();
+              }}
+              isExportAllOrSomeFeature={true}
+              total={rowCount}
+              recordsToExport={selectedRecords.length}
+              onExportToExcelSuccess={() => {
+                if (gridApi) gridApi.deselectAll();
+                else fetchCondition();
+              }}
+              hideDefaultImportExport={true}
+              extraImportExportLinks={[
+                {
+                  title: 'Product Template',
+                  api: `${pricingCondition.api}/template?conditionType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'download'
+                },
+                {
+                  title: 'Product Export',
+                  api: `${pricingCondition.api}/template?export=true&conditionType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'export'
+                },
+                {
+                  title: 'Product Import',
+                  api: `${pricingCondition.api}/import?conditionType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'import'
+                },
+                {
+                  title: 'Package Template',
+                  api: `${pricingCondition.api}/template?conditionType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'download'
+                },
+                {
+                  title: 'Package Export',
+                  api: `${pricingCondition.api}/template?export=true&conditionType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'export'
+                },
+                {
+                  title: 'Package Import',
+                  api: `${pricingCondition.api}/import?conditionType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'import'
+                },
+                {
+                  title: 'Service Template',
+                  api: `${pricingCondition.api}/template?conditionType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'download'
+                },
+                {
+                  title: 'Service Export',
+                  api: `${pricingCondition.api}/template?export=true&conditionType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'export'
+                },
+                {
+                  title: 'Service Import',
+                  api: `${pricingCondition.api}/import?conditionType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  type: 'import'
+                },
+              ]}
+            />
+            {/* <ImportExportMenu
+              permissions={permissions?.pricingCondition}
+              module="packages-products"
+              api={`${pricingCondition.api}/condition/template/${pricingConditionId}`}
+              afterImportCompleted={() => {
+                fetchCondition();
+              }}
+              isExportAllOrSomeFeature={true}
+              ids={[]}
+              additionalParams={``}
+            /> */}
+          </Box>
         </Box>
       </Box>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
@@ -485,9 +546,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete pricing setup condition  ${
-            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
-          } ?`}
+          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

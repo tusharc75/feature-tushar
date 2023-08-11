@@ -85,7 +85,7 @@ function QuotationHeader(props) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div className={'d-flex align-items-center gap-1'}>
         {isMobile && !isTablet ? (
-          <div className="d-flex ">
+          <div className="d-flex flex-wrap">
             <Button
               onClick={handleClickOpen}
               id="demo-customized-button"

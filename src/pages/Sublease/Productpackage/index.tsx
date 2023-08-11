@@ -24,6 +24,7 @@ import { flattenArray, generateCustomTableColumns } from 'src/constants/columns'
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
+import AddIcon from '@material-ui/icons/Add';
 
 const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -150,9 +151,9 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
       width: 50,
       sticky: 'right',
       disableFilters: true,
-      Cell: ({ row }) =>
-      <>
-       <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
+      Cell: ({ row }) => (
+        <>
+          <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
             <IconButton
               size="small"
               aria-label="Delete"
@@ -163,27 +164,26 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
             >
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
-       </HtmlTooltip>
-      {!row.original.hideSelection &&
-        allowedToEdit && (
-          <IconButton
-            size="small"
-            aria-label="Details"
-            onClick={() => {
-              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-              if (row.original?.type === 'package' && row.original?.subRows?.length) {
-                row.original?.subRows.forEach((element) => {
-                  obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-                });
-              }
-              setDeleteData(obj);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        )}
-      </>
-
+          </HtmlTooltip>
+          {!row.original.hideSelection && allowedToEdit && (
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                if (row.original?.type === 'package' && row.original?.subRows?.length) {
+                  row.original?.subRows.forEach((element) => {
+                    obj.push({ id: element._id, type: element.type, materialId: element.materialId });
+                  });
+                }
+                setDeleteData(obj);
+              }}
+            >
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          )}
+        </>
+      )
     });
     coloum.forEach((element) => {
       if (element.accessor === 'qtyDisplay') {
@@ -409,46 +409,47 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex">
+        <div className="my-2 flex flex-wrap justify-between gap-2">
+          <div className="flex flex-wrap gap-2">
             {(!subleaseData.status || subleaseData.status === SUBLEASE_STATUS.new) && (
               <Fragment>
                 {permissions?.product?.isRead && (
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    variant={'contained'}
                     color="primary"
                     size="small"
                     style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
                     }}
+                    startIcon={isMobile && !isTablet ? <AddIcon /> : null}
                   >
                     {isMobile && !isTablet ? `Products` : `Add Products`}
                   </Button>
                 )}
-                <Box mx={1} />
                 {permissions?.packages?.isRead && (
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    variant={'contained'}
                     color="primary"
                     size="small"
                     style={isMobile && !isTablet ? { color: 'var(--colorOpportunity)' } : {}}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                     }}
+                    startIcon={isMobile && !isTablet ? <AddIcon /> : null}
                   >
                     {isMobile && !isTablet ? `${routes.packages.title}` : `Add ${routes.packages.title}`}
                   </Button>
                 )}
               </Fragment>
             )}
-          </Box>
-          <Box display="flex">
+          </div>
+          <div className="flex flex-wrap gap-2">
             {material?.length && !isIssued && !rowsData?.some((f) => !f.isValid) ? (
               <Fragment>
                 <HtmlTooltip title={'Start Sublease'}>
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    variant={'contained'}
                     color="primary"
                     size="small"
                     onClick={() => {
@@ -460,20 +461,19 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                     {isMobile && !isTablet ? <MdDelete size={20} /> : 'Start Sublease'}
                   </Button>
                 </HtmlTooltip>
-                <Box mx={1} />
               </Fragment>
             ) : null}
             <Button
               disabled={selectedProducts?.length ? false : true}
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              variant={'outlined'}
               color="default"
               size="small"
               onClick={openActions}
-              className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
+              className={` new-dropdown-v1`}
               aria-controls="action-menu"
               endIcon={<ExpandMore />}
             >
-              {isMobile && !isTablet ? '' : 'Actions'}
+              Actions
             </Button>
             <Menu
               anchorEl={anchorEl}
@@ -518,8 +518,8 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 {'Delete'}
               </MenuItem>
             </Menu>
-          </Box>
-        </Box>
+          </div>
+        </div>
       )}
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'}>

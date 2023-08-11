@@ -29,7 +29,10 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { Chip } from '@material-ui/core';
+import { Button, Chip } from '@material-ui/core';
+import MobileSortDialog from 'src/components/MobileSortDialog';
+import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import { MdFilterList, MdSort } from 'react-icons/md';
 
 let deliveryTicketTimeout;
 
@@ -70,6 +73,8 @@ const DeliveryTicket = () => {
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  const [sortOpen, setSortOpen] = useState(false);
+  const [isOpenDialog, setisOpenDialog] = useState(false);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -312,6 +317,22 @@ const DeliveryTicket = () => {
     }
   };
 
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClickOpen = () => {
+    setSortOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setSortOpen(false);
+  };
+
+  const handleFilterClose = () => {
+    setisOpenDialog(false);
+  };
+
   return (
     <>
       <Fragment>
@@ -355,9 +376,9 @@ const DeliveryTicket = () => {
         {/* Tables Begins Here */}
         <CustomContainer>
           <div className="header-panel">
-            <Grid container className={isMobile ? styles.mobile_filter_side_container_delivery_ticket : styles.filter_side_container_delivery_ticket}>
-              <Grid item xs={isMobile && !isTablet ? 12 : 6} className="d-flex align-items-center gap-1">
-                <Grid>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={'d-flex align-items-center gap-1'}>
+                <div className="flex flex-wrap">
                   <GiAbstract055 className="headerLogo" />
                   <span className="listingHeader">{routes.deliveryTicket.title} </span>
                   {fromRental && (
@@ -370,47 +391,90 @@ const DeliveryTicket = () => {
                       }}
                     />
                   )}
-                </Grid>
-                <HideWhenOffline>
-                  <div className={`align-items-center gap-1 layout-for-mobile `}>
-                    {DeliveryTicketType && (
-                      <ToggleButtonGroup
-                        size="small"
-                        className="ml-2"
-                        value={DeliveryTicketType[selectedType - 1].key}
-                        exclusive
-                        onChange={handleFilter}
+                </div>
+                {isMobile && !isTablet ? (
+                  <>
+                    <Grid style={{ display: 'inline-flex' }}>
+                      <Button
+                        onClick={handleClickOpen}
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={'true'}
+                        variant="text"
+                        disableElevation
+                        startIcon={<MdSort />}
+                        className={'sort-filter-tablet'}
+                        style={isTablet ? { marginLeft: '50px' } : {}}
                       >
-                        {DeliveryTicketType.map((k, index) => {
-                          return (
-                            <ToggleButton value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    )}
-                  </div>
-                </HideWhenOffline>
-              </Grid>
-              <Grid item xs={isMobile && !isTablet ? 12 : 6} container className={isMobile ? styles.filter_side : styles.filter_side_deck}>
-                <Box className={isMobile && !isTablet ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                  <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile && !isTablet ? styles.content_box : ''}>
-                    <SearchBox
-                      onChange={handleSearch}
-                      className={isMobile ? styles.search_box_input : ''}
-                      width="242px"
-                      size="small"
-                      value={search}
-                      style={isMobile ? { flex: 1 } : {}}
-                    />
-                  </Grid>
-                  {/* {deliveryPermissions?.isCreate &&
-                    <Button className={styles.add_submit_btn}
+                        Sort
+                      </Button>
+                      <MobileSortDialog
+                        isOpen={sortOpen}
+                        handleClose={handleClickClose}
+                        contentPart={null}
+                        secHeading={['Sort Purchase Order']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
+
+                      <Button
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={'true'}
+                        variant="text"
+                        disableElevation
+                        className={'sort-filter-tablet'}
+                        startIcon={<MdFilterList />}
+                        onClick={handleOpen}
+                      >
+                        Filter
+                      </Button>
+
+                      <MobileFilterDialog
+                        isOpen={isOpenDialog}
+                        handleClose={handleFilterClose}
+                        contentPart={null}
+                        columns={columns}
+                        dispatch={dispatch}
+                        title={routes?.deliveryTicket?.title}
+                        filters={filters}
+                      />
+                    </Grid>
+                  </>
+                ) : (
+                  <HideWhenOffline>
+                    <div className={`align-items-center gap-1 layout-for-mobile `}>
+                      {DeliveryTicketType && (
+                        <ToggleButtonGroup
+                          size="small"
+                          className="ml-2"
+                          value={DeliveryTicketType[selectedType - 1].key}
+                          exclusive
+                          onChange={handleFilter}
+                        >
+                          {DeliveryTicketType.map((k, index) => {
+                            return (
+                              <ToggleButton value={k.key} key={index}>
+                                {k.key}
+                              </ToggleButton>
+                            );
+                          })}
+                        </ToggleButtonGroup>
+                      )}
+                    </div>
+                  </HideWhenOffline>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-[8px]  justify-end">
+                <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
+                {/* {deliveryPermissions?.isCreate &&
+                    <Button className={'no-shadow'}
                       onClick={() => setShowManageDeliveryTicket(true)}
                       variant="contained" size="small" color="primary" startIcon={<AddIcon />}>Add</Button>
                   } */}
-                  {/* {deliveryPermissions?.isDelete &&
+                {/* {deliveryPermissions?.isDelete &&
                     <Button
                       className={styles.action_submit_btn}
                       variant="outlined"
@@ -440,9 +504,8 @@ const DeliveryTicket = () => {
                       closeActions()
                     }}>Delete</MenuItem>
                   </Menu> */}
-                </Box>
-              </Grid>
-            </Grid>
+              </div>
+            </div>
           </div>
 
           {isMobile && !isTablet ? (

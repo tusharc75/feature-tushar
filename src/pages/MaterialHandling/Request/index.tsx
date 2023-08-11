@@ -63,7 +63,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
   const fetchData = () => {
     setRowsData(null);
     axiosInstance()
-      .get(`/material-handling/request?referenceId=${referenceId}&referenceType=${referenceType}`)
+      .get(`/material-handling/request?referenceId=${referenceId}&referenceType=${referenceType}&status=Requested`)
       .then(({ data: { data } }) => {
         data?.forEach((e) => {
           e.productName = e.product?.optionLabel;

@@ -10,8 +10,16 @@ import { MdEmail } from 'react-icons/md';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
 
-function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [], hideDetailButton = false,
-  button1Title = 'Regular', button2Title = 'Detail' }) {
+function PreviewDownload({
+  resource,
+  referenceId,
+  columns,
+  isSendEmail = false,
+  defaultColumns = [],
+  hideDetailButton = false,
+  button1Title = 'Regular',
+  button2Title = 'Detail'
+}) {
   const toastConfig = useContext(CustomToastContext);
 
   const allColumn =

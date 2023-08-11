@@ -309,13 +309,13 @@ const Sublease = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex align-items-center gap-1'}>
               <div className="d-flex align-items-center">
                 <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
                 <span className="listingHeader">{routes.sublease?.title} </span>
               </div>
-              {isMobile ? (
+              {isMobile && !isTablet ? (
                 <>
                   <Grid style={{ display: 'inline-flex' }}>
                     <Button
@@ -324,7 +324,6 @@ const Sublease = () => {
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      color="secondary"
                       variant="text"
                       disableElevation
                       startIcon={<MdSort />}
@@ -348,7 +347,6 @@ const Sublease = () => {
                       aria-haspopup="true"
                       aria-expanded={'true'}
                       variant="text"
-                      color="secondary"
                       disableElevation
                       className={'sort-filter-tablet'}
                       startIcon={<MdFilterList />}
@@ -395,62 +393,50 @@ const Sublease = () => {
                   }}
                 />
               )}
-            </Grid>
-            <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={styles.content_box}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={isMobile ? styles.search_box_input : ''}
-                    width="242px"
-                    size="small"
-                    value={search}
-                    style={isMobile ? { flex: 1 } : {}}
-                  />
-                </Grid>
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.sublease?.isCreate && (
-                    <Button
-                      onClick={() => {
-                        setShowManageDialog({ open: true, isClone: false, idToClone: null });
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      color="primary"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    >
-                      {' '}
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                  )}
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.sublease?.isCreate && (
+                  <Button
+                    onClick={() => {
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={'no-shadow'}
+                    startIcon={<AddOutlined />}
                   >
-                    {permissions?.sublease?.isDelete && (
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    )}
-                  </Menu>
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+                    Add
+                  </Button>
+                )}
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {permissions?.sublease?.isDelete && (
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        setShowDeleteConfirmBox(true);
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                  )}
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
         {columns ? (
           Object.keys(frameWorkComponent).length > 0 ? (

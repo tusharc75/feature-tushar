@@ -11,6 +11,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { sidebarResource } from 'src/constants/helpers';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const FIELD_TO_FILTER = [
   {
@@ -58,6 +59,10 @@ const FIELD_TO_FILTER = [
 const MaterialHandling = () => {
   const toastConfig = useContext(CustomToastContext);
 
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
+
   const [filterQuery, setFilterQuery] = useState({
     filterById: [],
     deepFilter: [],
@@ -65,16 +70,46 @@ const MaterialHandling = () => {
 
   const [workOrder, setWorkOrder] = useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
+  const [warehouseOptions, setWarehouseOptions] = useState(null);
+
+  useEffect(() => {
+    axiosInstance()
+      .get('/sa-formbuilder/lookup?lookupResource=Warehouse')
+      .then(({ data: { data } }) => {
+        const warehouses: any = [];
+        if (data['Warehouse'] && data['Warehouse']?.length) {
+          data['Warehouse']?.forEach((ele) => {
+            if (
+              (ele?.manager && ele?.manager?.includes(user?.user?._id)) ||
+              (ele?.materialHandlers && ele?.materialHandlers?.includes(user?.user?._id))
+            ) {
+              warehouses.push(ele);
+            }
+          });
+        }
+        setWarehouseOptions([...warehouses]);
+        setFilterQuery({
+          filterById: [],
+          deepFilter: [],
+        })
+      });
+  }, [selectedEntity]);
 
   useEffect(() => {
     fetchData();
-  }, [filterQuery])
+  }, [filterQuery, warehouseOptions])
 
   const fetchData = () => {
     setWorkOrder(null);
     setSelectedWorkOrder(null);
     let api = `/material-handling`;
-    const { filterById, deepFilter } = filterQuery;
+
+    const { filterById, deepFilter } = { ...filterQuery };
+
+    if (warehouseOptions && !filterById?.find((e) => e.field === 'warehouse')) {
+      filterById.push({ field: 'warehouse', term: { $in: warehouseOptions?.map((e) => e?.optionValue) } });
+    }
+
     if (filterById?.length > 0 || deepFilter?.length > 0) {
       api = `${api}?filterType=and`;
     }
@@ -106,13 +141,17 @@ const MaterialHandling = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <Box display={'flex'} justifyContent={'end'} alignItems={'center'} pb={2}>
-          <Box width={'100%'}>
-            <CustomFilter field={FIELD_TO_FILTER} setFilterQuery={setFilterQuery} />
+          <Box width={'100%'} >
+            <CustomFilter
+              field={FIELD_TO_FILTER?.map((e: any) => { return { ...e, options: e.fieldName === 'warehouse' ? warehouseOptions : null } })}
+              setFilterQuery={setFilterQuery} />
           </Box>
-          <Box mb={1}>
-            <IconButton size="small" onClick={() => fetchData()}>
-              <RefreshIcon />
-            </IconButton>
+          <Box mb={1} ml={1}>
+            <HtmlTooltip title='Refresh'>
+              <IconButton size="small" onClick={() => fetchData()}>
+                <RefreshIcon />
+              </IconButton>
+            </HtmlTooltip>
           </Box>
         </Box>
         {workOrder ? (

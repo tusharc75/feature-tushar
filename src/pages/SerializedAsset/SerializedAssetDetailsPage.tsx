@@ -20,8 +20,8 @@ import ReasonDialog from './ReasonDialog';
 import { ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
 import { isMobile, isTablet } from 'react-device-detect';
-import { GiAutoRepair, GrStatusInfo } from 'react-icons/all';
-import { MdEdit } from 'react-icons/md';
+import { GiAutoRepair } from 'react-icons/all';
+import { MdEdit, MdChangeCircle } from 'react-icons/md';
 import { startCase } from 'lodash';
 import moment from 'moment';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -205,7 +205,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -305,9 +305,9 @@ const SerializedAssetDetailsPage = () => {
                           className="btn-outline-v1"
                           disabled={updateLoading}
                           aria-controls="action-menu"
-                          endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                          endIcon={<ExpandMore />}
                         >
-                          {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
+                          {isMobile && !isTablet ? <MdChangeCircle size={20} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
                         </Button>
                       )
                     ) : null}
@@ -409,7 +409,9 @@ const SerializedAssetDetailsPage = () => {
         <TabPanel value={tabValue} index={2}>
           <CertificationHistory
             id={id}
-            canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate} />
+            canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
+            supplierAccount={null}
+          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

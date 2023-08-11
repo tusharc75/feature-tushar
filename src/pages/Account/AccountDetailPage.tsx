@@ -45,6 +45,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import AddIcon from '@material-ui/icons/Add';
 import { AccountHierarchyIcon, ProjectsIcon, OpportunityIcon, QuoteIcon, AccountsTeamsIcon, ContactsIcon } from 'src/assets/svg/svgIcons';
 import SupplierItems from './SupplierItems';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 function DisplayData({ label, value, icon, highlightsHead = false }) {
   return (
@@ -886,7 +887,7 @@ export default function AccountDetailPage(props) {
                     <h3 className="form-label-style-v1">Related Contacts & Leads</h3>
                     {permissions[contactResource].isCreate && (
                       <span style={{ position: 'absolute', right: 15 }}>
-                        <Tooltip title="Add Customer Contact" placement="top">
+                        <HtmlTooltip title={`Add ${routes[contactResource]?.title || ''}`} placement="top">
                           <IconButton
                             onClick={() => {
                               setShowCreateContactDialog(true);
@@ -896,7 +897,7 @@ export default function AccountDetailPage(props) {
                           >
                             <AddIcon />
                           </IconButton>
-                        </Tooltip>
+                        </HtmlTooltip>
                       </span>
                     )}
                   </div>
