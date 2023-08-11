@@ -37,7 +37,7 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({
   isBulkedit,
   loading
 }) => {
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
@@ -53,24 +53,7 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({
     var data = await fetch_repair_order_product_fields(repairOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
-      let unitArray: any = [];
-      let pricingMethodArray: any = [];
-      selectedProducts?.forEach((element) => {
-        if (element?.[`${element.type}Detail`]?.unit) {
-          unitArray.push([...element?.[`${element?.type}Detail`]?.unit]);
-        }
-      });
-      let unit: any = unitArray?.shift()?.filter(function (v) {
-        return unitArray?.every(function (a) {
-          return a.indexOf(v) !== -1;
-        });
-      });
-
-      const unitOptions: any = arrayToDropwdownOption(unit);
       data.forEach((element) => {
-        if (element.fieldName === 'unit') {
-          element.option = unitOptions;
-        }
         element.required = false;
       });
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
@@ -79,19 +62,6 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({
         values: { ...getObjKeys('', data) }
       });
     } else {
-      let unitOptions: any = [];
-      if (rowData?.[`${rowData.type}Detail`]?.unit) {
-        unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
-      }
-      data.forEach((element) => {
-        if (element.fieldName === 'unit') {
-          element.option = unitOptions;
-        }
-
-        if (element.fieldName === 'qty' && rowData?.serializedProduct === false && rowData?.hideSelection) {
-          element.isUneditable = true;
-        }
-      });
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(rowData, data)
@@ -112,11 +82,7 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({
 
   const getTitle = () => {
     if (rowData) {
-      let editTitle = `Edit - [${rowData.detail}]`;
-      if (rowData.subRows && rowData.subRows?.length > 0) {
-        editTitle = `Edit - [${rowData.detail}(${rowData.subRows.length})]`;
-      }
-      return editTitle;
+      return `Edit - ${rowData.detail}`;
     } else {
       return 'Bulk Edit';
     }
@@ -140,16 +106,10 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({
           rows.push(element);
         });
       }
-
       handleSaveData(rows);
     } else {
-      if (rowData.type === 'package' && !showConfirmationDialog) {
-        setShowConfirmationDialog(true);
-      } else {
-        let rows: any = [{ ...rowData, ...values }];
-        handleSaveData(rows);
-        setShowConfirmationDialog(false);
-      }
+      let rows: any = [{ ...rowData, ...values }];
+      handleSaveData(rows);
     }
   };
 
@@ -283,18 +243,6 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({
                   Save
                 </CustomButton>
               </CustomDialogFooter>
-              {showConfirmationDialog && (
-                <ConfirmationDialog
-                  open={showConfirmationDialog}
-                  message="Would you prefer to override the product-level  configuration?"
-                  onOk={() => {
-                    submitForm();
-                  }}
-                  onClose={() => {
-                    setShowConfirmationDialog(false);
-                  }}
-                />
-              )}
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
                   close={() => setShowConfirmDialog(false)}
