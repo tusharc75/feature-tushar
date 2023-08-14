@@ -21,7 +21,7 @@ import { ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
 import { isMobile, isTablet } from 'react-device-detect';
 import { GiAutoRepair } from 'react-icons/all';
-import { MdEdit, MdChangeCircle } from 'react-icons/md';
+import { MdEdit } from 'react-icons/md';
 import { startCase } from 'lodash';
 import moment from 'moment';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -29,6 +29,7 @@ import CertificationHistory from './CertificationHistory';
 import AssetHistory from './AssetHistory';
 import queryString from 'query-string';
 import TabPanel from 'src/components/TabPanel';
+import SyncIcon from '@material-ui/icons/Sync';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -307,7 +308,7 @@ const SerializedAssetDetailsPage = () => {
                           aria-controls="action-menu"
                           endIcon={<ExpandMore />}
                         >
-                          {isMobile && !isTablet ? <MdChangeCircle size={20} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
+                          {isMobile && !isTablet ? <SyncIcon style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
                         </Button>
                       )
                     ) : null}
