@@ -1,6 +1,7 @@
 import { AiFillAccountBook } from 'react-icons/ai';
 import { SVGImages, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/dashboard_images';
 import DashboardIcons from 'src/assets/dashboard_images/icons';
+import { CollaborationToolsIcon } from 'src/assets/sidebar_assets/icons';
 
 import {
   ProductSetup,
@@ -28,7 +29,8 @@ import {
   GiCircuitry,
   AiOutlineDatabase,
   HiOutlineWrenchScrewdriver,
-  MdOutlineEventAvailable
+  MdOutlineEventAvailable,
+  PiUsersThree
 } from 'react-icons/all';
 
 // CREATE OBJECT FROM LIST GROUPED BY KEYGETTER
@@ -137,7 +139,7 @@ export const setDataBySectionName = (secName, index = 0) => {
   } else if (['Setups & Administration'].includes(secName)) {
     sideBarIcon = <BiCog size={20} />;
   } else if (['Activities', 'Collaboration Tools'].includes(secName)) {
-    sideBarIcon = <IoPeopleOutline size={20} />;
+    sideBarIcon = <CollaborationToolsIcon size={20} />;
   }
 
   return {

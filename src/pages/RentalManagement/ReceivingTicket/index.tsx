@@ -1574,7 +1574,7 @@ const ReceivingTicket = ({
               aria-controls="action-menu"
               endIcon={<ExpandMore fontSize="inherit" />}
             >
-              Tickets
+              Order(s)
             </Button>
           )}
           <Menu
