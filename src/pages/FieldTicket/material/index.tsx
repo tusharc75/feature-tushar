@@ -239,8 +239,8 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       }
       material.push(element);
     });
-    const priceData: any = await calculatePrice(fieldTicketData, material);
-    AddMaterial(material, priceData);
+    //const priceData: any = await calculatePrice(fieldTicketData, material);
+    AddMaterial(material, null);
   };
 
   const AddMaterial = async (material, priceData) => {

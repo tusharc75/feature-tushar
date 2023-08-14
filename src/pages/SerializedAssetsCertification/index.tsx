@@ -229,7 +229,7 @@ const SerializedAssetsCertification = () => {
   const ActionsRenderer = (params) => (
     <>
       {params?.data?.canIssueCertificate && (
-        <HtmlTooltip title="Issue Certificate">
+        <HtmlTooltip title="Attach Certificate">
           <IconButton
             size="small"
             aria-label="Issue"

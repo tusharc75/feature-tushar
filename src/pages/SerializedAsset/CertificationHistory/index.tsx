@@ -13,7 +13,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import styles from '../../Leads/Header.module.scss';
-import IssueCertificateDialog from '../IssueCertificate';
+import IssueCertificateDialog from '../../SerializedAssetsCertification/IssueCertificateDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
@@ -118,9 +118,8 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount }) => {
             onClick={() => {
               setOpenDialog({ open: true, id: id });
             }}
-            // className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
           >
-            {'Issue Certificate'}
+            Attach Certificate
           </Button>
         </Grid>
       )}
