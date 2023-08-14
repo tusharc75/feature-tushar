@@ -10,7 +10,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { REPAIR_ORDER_TYPE, repairOrder, serializedAsset } from '../../../constants/helpers';
+import { MATERIAL_TYPE, REPAIR_ORDER_TYPE, repairOrder, serializedAsset } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
@@ -24,8 +24,6 @@ import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
-const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-
 const Productpackage = ({
   fetchRepairOrderData,
   repairOrderData,
@@ -33,7 +31,6 @@ const Productpackage = ({
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
-  allowedToDelete,
   setHasAssetsAdded
 }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -61,7 +58,7 @@ const Productpackage = ({
 
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
-  
+
 
   useEffect(() => {
     fetchFields();
@@ -98,7 +95,20 @@ const Productpackage = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p className="text-truncate">{row.original.detail}</p>
+            {!(allowedToEdit && (row.original.type === 'product' || row.original.type === 'package')) ? (
+              <p className="text-truncate"> {row.original.detail}</p>
+            ) : (
+              <p
+                onClick={() => {
+                  setIsProductEdit({ open: true, isBulkedit: false });
+                  setRecordToUpdate(row.original)
+                }}
+                className="link text-truncate"
+                title={row.original.detail}
+              >
+                {row.original.detail}
+              </p>
+            )}
             <Box ml={1} className="d-flex align-items-center">
               <IconButton
                 size="small"
@@ -117,23 +127,25 @@ const Productpackage = ({
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
             </Box>
-             <Box ml={1} className="d-flex align-items-center">
+            <Box ml={1} className="d-flex align-items-center">
               <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
               </span>
               {allowedToEdit && row.original.type !== 'serializedAsset' && (
-                <HtmlTooltip title={ row.original.type === 'package' ? `Add Product` : `Add` }>
-                  <IconButton
-                    onClick={(event) => {
-                      row.original.type === 'product'
-                        ? setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX, productId: row?.original?.productDetail._id, productCategory: row?.original?.productDetail?.productCategory })
-                        : setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id, existing: false, productId: null, productCategory: null });
-                    }}
-                    size="small"
-                  >
-                    <Add color="disabled" fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
+                <Box ml={1}>
+                  <HtmlTooltip title={row.original.type === 'package' ? `Add Product` : `Add`}>
+                    <IconButton
+                      onClick={(event) => {
+                        row.original.type === 'product'
+                          ? setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX, productId: row?.original?.productDetail._id, productCategory: row?.original?.productDetail?.productCategory })
+                          : setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id, existing: false, productId: null, productCategory: null });
+                      }}
+                      size="small"
+                    >
+                      <Add color="disabled" fontSize="small" />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
               )}
             </Box>
           </div>
@@ -170,6 +182,14 @@ const Productpackage = ({
         )
       },
       {
+        accessor: 'qtyDisplay',
+        Header: 'Qty',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['qtyDisplay'] ? <p className="text-truncate">{row.original.qtyDisplay}</p> : <NoDataCell />;
+        }
+      },
+      {
         accessor: 'description',
         Header: 'Description',
         width: 200,
@@ -194,18 +214,19 @@ const Productpackage = ({
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          <HtmlTooltip title={allowedToDelete && row.original?.canDelete ? 'Deletion not allowed - Work Order Created' : 'Delete'}>
+          <HtmlTooltip title={row.original?.canDelete ? 'Delete' : 'Deletion not allowed - Work Order Created'}>
             <span>
               <IconButton
                 size="small"
                 aria-label="Details"
                 onClick={() => {
-                  const obj: any = [row.original._id];
+                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  getNestedSubRows(obj, row.original);
                   setDeleteData(obj);
                 }}
-                disabled={allowedToDelete && row.original?.canDelete}
+                disabled={row.original?.canDelete ? false : true}
               >
-                <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.canDelete ? 'disabled' : 'error'} />
+                <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>
@@ -238,46 +259,35 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'product'
+      parent.detail = `${parent.type === MATERIAL_TYPE.package
+        ? parent.packageDetail?.packageName
+        : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.assetNumber
-          : parent.packageDetail?.packageName
-      }`;
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent.serializedAssetDetail.assetNumber
+            : ''
+        }`;
       parent.description =
-        parent.type === 'service'
-          ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
+        parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+          : parent.type === MATERIAL_TYPE.package
+            ? parent?.packageDetail?.packageDescription || ''
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent?.serializedAssetDetail?.product?.productDescription || ''
+              : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.canDelete = parent.workOrder ? true : false;
+      parent.canDelete = parent.workOrder ? false : true;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.status =
-        parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
-          ? parent?.productDetail?.status
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.status
-          : parent.type === 'package'
-          ? parent.packageDetail?.status
-          : '';
+      parent.status = parent?.serializedAssetDetail?.status || null;
     });
 
     if (rows.length !== 0) {
       setHasAssetsAdded(true);
-      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
+      if (rows.filter((_rows) => _rows.isValid === false).length > 0 ||
+        !data.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length) {
         setNextStep(false);
       } else {
         setNextStep(true);
@@ -291,45 +301,38 @@ const Productpackage = ({
   };
 
   const generateNestedData = (material, parent) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
-    let productIndex = 0;
-    let serviceIndex = 0;
+    let subRows: any = material.filter((e) => e.parentId === parent._id);
+    let canDelete = subRows?.find((e) => e.workOrder) ? false : true;
     subRows.forEach((_subRow, j) => {
-      _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'product'
+      _subRow.index = parent.index + '.' + (j + 1);
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.package
+        ? _subRow.packageDetail?.packageName
+        : _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.packageDetail?.packageName
-      }`;
+          : _subRow.type === MATERIAL_TYPE.serializedAsset
+            ? _subRow.serializedAssetDetail.assetNumber
+            : ''
+        }`;
       _subRow.description =
-        _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription || ''
+            : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.qtyDisplay = _subRow.type === MATERIAL_TYPE.serializedAsset ? 1 : `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
+      _subRow.status = _subRow?.serializedAssetDetail?.status || null
+      _subRow.canDelete = _subRow.type === MATERIAL_TYPE.serializedAsset ?
+        _subRow.workOrder ? false : true : canDelete;
       _subRow.subRows = generateNestedData(material, _subRow);
-      _subRow.type === 'service' ? serviceIndex++ : productIndex++;
-      _subRow.status =
-        _subRow.type === 'service'
-          ? _subRow.serviceDetail?.status
-          : _subRow.type === 'product'
-          ? _subRow.productDetail?.status
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.status
-          : _subRow.packageDetail?.status;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
+    }
+    if (subRows.length) {
+      parent.canDelete = subRows?.filter((e) => e.canDelete)?.length === subRows?.length ? true : false;
     }
     return sortBy(subRows, ['type']);
   };
@@ -361,21 +364,13 @@ const Productpackage = ({
   };
 
   const handleSaveData = async (rows: any) => {
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.serializedProduct;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.subRows;
-    });
+    const data = []
+    rows?.forEach((element) => {
+      data.push({ _id: element._id, qty: element.qty })
+    })
     setUpdating(true);
     axiosInstance()
-      .put(`${repairOrder.api}/${repairOrderData._id}/product-package`, { material: rows })
+      .put(`${repairOrder.api}/${repairOrderData._id}/product-package`, { material: data })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
@@ -391,7 +386,7 @@ const Productpackage = ({
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${repairOrder.api}/${repairOrderData?._id}/product-package/delete`, { ids: rows })
+      .put(`${repairOrder.api}/${repairOrderData?._id}/product-package/delete`, { ids: rows?.map((e) => e.id) })
       .then(() => {
         setDeleting(false);
         fetchData();
@@ -409,7 +404,7 @@ const Productpackage = ({
     const obj: any = [];
     const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
     dataToDelete?.forEach((ele) => {
-      obj.push(ele._id);
+      obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
     });
     dataToDelete?.forEach((ele) => {
       getNestedSubRows(obj, ele);
@@ -475,7 +470,7 @@ const Productpackage = ({
                       {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add New Customer Assets` : `Add New ${routes.serializedAsset.title}`}
                     </MenuItem>
                   )}
-                  {/* <MenuItem
+                  <MenuItem
                     onClick={() => {
                       closeAddActions();
                       setAddExistingProductDialog({ open: true, type: 'product', parentId: null, existing: false, productId: null, productCategory: null });
@@ -490,7 +485,7 @@ const Productpackage = ({
                     }}
                   >
                     Add Packages
-                  </MenuItem> */}
+                  </MenuItem>
                 </Menu>
               </Fragment>
             )}
@@ -521,9 +516,7 @@ const Productpackage = ({
               onClose={closeActions}
             >
               <MenuItem
-                disabled={
-                  allowedToDelete ? (selectedProducts?.filter((e) => !e.canDelete)?.length === selectedProducts?.length ? false : true) : true
-                }
+                disabled={selectedProducts?.filter((e) => e.canDelete)?.length === selectedProducts?.length ? false : true}
                 onClick={() => {
                   closeActions();
                   handleDeleteMultiple();
@@ -547,7 +540,7 @@ const Productpackage = ({
             uniqueKey="_id"
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
-            renderedFrom="repair_order_product_package"
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
             hideExpander={false}
           />
@@ -583,21 +576,21 @@ const Productpackage = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
         <AssignProductDialog
-        reference="repairOrder"
-        serialized={true}
-        productsDialogOpen={addExistingProductDialog.open}
-        productId={null}
-        handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null})}
-        assignedProducts={[]}
-        onSuccess={(d) => {
-          handleAdd(d);
-        }}
-      />
+          reference="repairOrder"
+          serialized={true}
+          productsDialogOpen={addExistingProductDialog.open}
+          productId={null}
+          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })}
+          assignedProducts={[]}
+          onSuccess={(d) => {
+            handleAdd(d);
+          }}
+        />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
           referenceType="repairOrder"
-          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null})}
+          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })}
           ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
@@ -656,7 +649,7 @@ const Productpackage = ({
             <MenuItem
               disabled={rowsData ? false : true}
               onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId, existing: true , productId: addchildDialog.productId, productCategory: addchildDialog.productCategory});
+                setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId, existing: true, productId: addchildDialog.productId, productCategory: addchildDialog.productCategory });
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, productId: null, productCategory: null });
               }}
             >
@@ -665,7 +658,7 @@ const Productpackage = ({
             {permissions?.serializedAsset?.isCreate && (
               <MenuItem
                 onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId, existing: false, productId: addchildDialog.productId, productCategory: addchildDialog.productCategory});
+                  setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId, existing: false, productId: addchildDialog.productId, productCategory: addchildDialog.productCategory });
                   setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, productId: null, productCategory: null });
                 }}
               >

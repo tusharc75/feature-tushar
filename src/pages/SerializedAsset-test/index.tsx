@@ -150,7 +150,7 @@ const SerializedAssetTest = () => {
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => (
-        <>
+        <div className="flex">
           {permissions?.serializedAsset?.isCreate && (
             <HtmlTooltip title="Clone">
               <IconButton
@@ -178,7 +178,7 @@ const SerializedAssetTest = () => {
               </IconButton>
             </HtmlTooltip>
           )}
-        </>
+        </div>
       )
     }
   ];
@@ -568,6 +568,7 @@ const SerializedAssetTest = () => {
                   />
                   {permissions?.sublease && (
                     <FormControlLabel
+                      style={{ margin: 0 }}
                       control={
                         <Checkbox
                           name="subleaseAsset"
@@ -575,7 +576,6 @@ const SerializedAssetTest = () => {
                           onChange={(e) => {
                             setSubleaseAsset(e.target.checked);
                           }}
-                          color="primary"
                         />
                       }
                       label="Sublease Assets"
@@ -770,6 +770,7 @@ const SerializedAssetTest = () => {
               limit={limit}
               customFilters={filters}
               sorting={sorting}
+              refreshGrid={fetchProductInventory}
               loading={loading}
             />
           )

@@ -241,6 +241,53 @@ const PricingConditions = () => {
               else fetchPriceConditionList();
             }}
             additionalParams={getQueryString(true)}
+            extraImportExportLinks={[
+              {
+                title: 'Product Template',
+                api: `${pricingCondition.api}/template?conditionType=product`,
+                type: 'download'
+              },
+              {
+                title: 'Product Export',
+                api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ""}&conditionType=product`,
+                type: 'export'
+              },
+              {
+                title: 'Product Import',
+                api: `${pricingCondition.api}/import?conditionType=product`,
+                type: 'import'
+              },
+              {
+                title: 'Package Template',
+                api: `${pricingCondition.api}/template?conditionType=package`,
+                type: 'download'
+              },
+              {
+                title: 'Package Export',
+                api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ""}&conditionType=package`,
+                type: 'export'
+              },
+              {
+                title: 'Package Import',
+                api: `${pricingCondition.api}/import?conditionType=package`,
+                type: 'import'
+              },
+              {
+                title: 'Service Template',
+                api: `${pricingCondition.api}/template?conditionType=service`,
+                type: 'download'
+              },
+              {
+                title: 'Service Export',
+                api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ""}&conditionType=service`,
+                type: 'export'
+              },
+              {
+                title: 'Service Import',
+                api: `${pricingCondition.api}/import?conditionType=service`,
+                type: 'import'
+              },
+            ]}
           />
         </Grid>
       </Grid>
@@ -399,7 +446,7 @@ const PricingConditions = () => {
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
-              onClone={(data) => {}}
+              onClone={(data) => { }}
               renderedFrom={renderedFrom}
             />
           ) : (

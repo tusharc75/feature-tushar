@@ -80,8 +80,8 @@ function SalesOrderHeader(props) {
   );
 
   return (
-    <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className={'d-flex align-items-center gap-1'}>
         <div className="d-flex align-items-center">
           {icon} <span className="listingHeader">{heading}</span>
         </div>
@@ -93,7 +93,6 @@ function SalesOrderHeader(props) {
               aria-controls="demo-customized-menu"
               aria-haspopup="true"
               // aria-expanded={open ? 'true' : undefined}
-              color="secondary"
               variant="text"
               disableElevation
               startIcon={<MdSort />}
@@ -116,7 +115,6 @@ function SalesOrderHeader(props) {
               aria-haspopup="true"
               // aria-expanded={open ? 'true' : undefined}
               variant="text"
-              color="secondary"
               disableElevation
               startIcon={<MdFilterList />}
               onClick={handleOpen}
@@ -147,69 +145,51 @@ function SalesOrderHeader(props) {
           )
         )}
         {children}
-      </Grid>
-      <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
-        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: 'flex', flex: 1 }}>
-            <SearchBox
-              onChange={onSearch}
-              className={styles.search_box_input}
-              value={searchVal}
-              size="small"
-              width="200px"
-              placeholder="Search Sales Orders"
-              style={isMobile ? { flex: 1 } : {}}
-            />
-          </Grid>
+      </div>
+      <div className="flex flex-wrap gap-[8px]  justify-end">
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Sales Orders" />
 
-          <Grid style={{ display: 'flex', gap: '5px' }}>
-            {SalesOrderPermissions?.isCreate && SalesOrderPermissions?.isUpdate && (
+        <div className="flex gap-[8px] flex-wrap items-center">
+          {SalesOrderPermissions?.isCreate && SalesOrderPermissions?.isUpdate && (
+            <Button variant={'contained'} color="primary" size="small" className={'no-shadow'} onClick={onCreate} startIcon={<AddOutlined />}>
+              Add
+            </Button>
+          )}
+          {SalesOrderPermissions?.isDelete && (
+            <>
               <Button
-                variant={isMobile ? 'text' : 'contained'}
-                color="primary"
+                disabled={canDelete}
+                variant={'outlined'}
+                color="default"
                 size="small"
-                className={isMobile ? 'mobile_button' : styles.add_submit_btn}
-                onClick={onCreate}
-                startIcon={isMobile ? null : <AddOutlined />}
+                onClick={openActions}
+                className={`new-dropdown-v1`}
+                aria-controls="action-menu"
+                endIcon={<ExpandMore />}
               >
-                {isMobile ? <MdAdd size={23} /> : 'Add'}
+                Actions
               </Button>
-            )}
-            {SalesOrderPermissions?.isDelete && (
-              <>
-                <Button
-                  disabled={canDelete}
-                  variant={isMobile ? 'text' : 'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={`${isMobile ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                >
-                  {isMobile ? '' : 'Actions'}
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    showConfirmBox(null);
                   }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
                 >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      showConfirmBox(null);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                  {/* {SalesOrderPermissions.isUpdate && (
+                  Delete
+                </MenuItem>
+                {/* {SalesOrderPermissions.isUpdate && (
                   <MenuItem
                     disabled={selectedRecords.find((d) => d.canDelete === false)}
                     onClick={() => {
@@ -220,7 +200,7 @@ function SalesOrderHeader(props) {
                     Transfer Entity
                   </MenuItem>
                 )} */}
-                  {/* <MenuItem
+                {/* <MenuItem
                   disabled={selectedRecords.length !== 1}
                   onClick={() => {
                     closeActions();
@@ -229,13 +209,12 @@ function SalesOrderHeader(props) {
                 >
                   Clone
                 </MenuItem> */}
-                </Menu>
-              </>
-            )}
-          </Grid>
-        </Box>
-      </Grid>
-    </Grid>
+              </Menu>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 export default SalesOrderHeader;

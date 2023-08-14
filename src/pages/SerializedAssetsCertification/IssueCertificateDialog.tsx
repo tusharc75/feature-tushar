@@ -16,6 +16,7 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { CustomDialogTransition, getObjKeys, serializedAssetsCertification, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
 
 const IssueCertificateDialog = ({ onClose, onSuccess, assetId }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -94,7 +95,7 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId }) => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={'Issue Certificate'}
+                title={'Attach Certificate'}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -214,7 +215,7 @@ const fields = [
     order: 0,
     fieldName: 'issueDate',
     resource: 'Serialized Asset',
-    sectionName: 'Issue Certificate Information',
+    sectionName: 'Information',
     roleType: 0
   },
   {
@@ -230,7 +231,7 @@ const fields = [
     order: 1,
     fieldName: 'expiryDate',
     resource: 'Serialized Asset',
-    sectionName: 'Issue Certificate Information',
+    sectionName: 'Information',
     roleType: 0
   },
   {
@@ -246,7 +247,7 @@ const fields = [
     order: 2,
     fieldName: 'attachments',
     resource: 'Serialized Asset',
-    sectionName: 'Issue Certificate Information',
+    sectionName: 'Information',
     roleType: 0
   }
 ];

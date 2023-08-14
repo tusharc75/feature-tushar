@@ -84,7 +84,8 @@ const ManageSerializedAsset = ({
             .get(`${serializedAsset.api}/` + productInventoryId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, createdBy, updatedBy, assetNumber, mtrAttached, mtrAttachedBy, mtrAttachedDate, ...rest } = data;
+                const { _id, createdBy, updatedBy, assetNumber, mtrAttached, mtrAttachedBy, mtrAttachedDate,
+                  certificateAttached, certificateIssueDate, certificateExpireDate, ...rest } = data;
                 setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
                 oldValues.status = fieldsDataForUpdate?.find((e) => e.fieldName === 'status')?.defaultValue || ASSET_STATUS.new;
@@ -117,12 +118,12 @@ const ManageSerializedAsset = ({
           if (productCategory && fieldsDataForCreate.some((e) => e.fieldName === 'productCategory')) {
             createValues['productCategory'] = productCategory;
           }
-          if (fieldsDataForCreate.some((e) => e.fieldName === 'recertDate')) {
-            createValues['recertDate'] = '';
-          }
-          if (fieldsDataForCreate.some((e) => e.fieldName === 'mtrAttachedDate')) {
-            createValues['mtrAttachedDate'] = '';
-          }
+          const keyClear = ['recertDate', 'mtrAttachedDate', 'certificateIssueDate', 'certificateExpireDate']
+          keyClear?.forEach((key) => {
+            if (fieldsDataForCreate.some((e) => e.fieldName === key)) {
+              createValues[key] = '';
+            }
+          })
           if (referenceType === 'repairOrder') {
             if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount') && referenceData?.customerAccount) {
               createValues['customerAccount'] = referenceData?.customerAccount;

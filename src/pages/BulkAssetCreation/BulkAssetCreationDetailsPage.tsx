@@ -34,6 +34,7 @@ import SerializedAsset from './SerializedAsset';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
+import EditIcon from '@material-ui/icons/Edit';
 
 const BulkAssetCreationDetailsPage = () => {
   const renderedFrom = camelCase(routes?.bulkAssetCreation.title);
@@ -190,14 +191,14 @@ const BulkAssetCreationDetailsPage = () => {
             <>
               {permissions?.bulkAssetCreation?.isUpdate && allowedToEdit && !['Completed']?.includes(bulkAssetCreationData?.status) && (
                 <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                 </Button>
               )}
-              <ActivityButton 
-               referenceId={bulkAssetCreationData?._id} 
-               resource={ACTIVITY_RESOURCE.bulkAssetCreation} 
-               resourceLabel={bulkAssetCreationData?.baNumber}
-               />
+              <ActivityButton
+                referenceId={bulkAssetCreationData?._id}
+                resource={ACTIVITY_RESOURCE.bulkAssetCreation}
+                resourceLabel={bulkAssetCreationData?.baNumber}
+              />
             </>
           </Box>
         </Box>

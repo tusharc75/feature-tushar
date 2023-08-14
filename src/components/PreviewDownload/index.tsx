@@ -1,67 +1,64 @@
-import { Box, Button, Checkbox, Dialog, FormControl, Grid, TextField } from '@material-ui/core';
-import React, { useContext, useEffect, useState } from 'react';
+import { Box, Button, Dialog } from '@material-ui/core';
+import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition } from 'src/constants/helpers';
-import CustomButton from '../Helpers/CustomButton';
-import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-import { Autocomplete } from '@material-ui/lab';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { MdEmail } from 'react-icons/md';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
+import { PreviewDialog } from './PreviewDialog';
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
-
-function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, defaultColumns = [], hideDetailButton = false }) {
-
+function PreviewDownload({
+  resource,
+  referenceId,
+  columns,
+  isSendEmail = false,
+  defaultColumns = [],
+  hideDetailButton = false,
+  button1Title = 'Regular',
+  button2Title = 'Detail'
+}) {
   const toastConfig = useContext(CustomToastContext);
 
-  const allColumn = columns?.filter((d) => !['Actions'].includes(d?.Header || d?.headerName))?.map((d) => {
-    return {
-      fieldLabel: (d?.Header || d?.headerName),
-      fieldName: (d?.accessor || d?.field),
-    }
-  }) || [];
+  const allColumn =
+    columns
+      ?.filter((d) => !['Actions'].includes(d?.Header || d?.headerName))
+      ?.map((d) => {
+        return {
+          fieldLabel: d?.Header || d?.headerName,
+          fieldName: d?.accessor || d?.field
+        };
+      }) || [];
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [sendEmail, setSendEmail] = useState(false);
   const [downlodingFile, setDownlodingFile] = useState(null);
-
-  const [visibleColumnsPdf, setVisibleColumnsPdf] = useState([]);
   const [showColumnsDialog, setShowColumnsDialog] = useState({ open: false, type: '' });
   const [loadingType, setLoadingType] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const [emailAttachments, setEmailAttachments] = useState([]);
 
-  useEffect(() => {
-    const temp = defaultColumns?.length > 0 ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName))?.map((e) => e.fieldLabel)
-      : allColumn?.map((e) => e.fieldLabel);
-    setVisibleColumnsPdf([...temp]);
-  }, [columns]);
-
   const handleViewPdf = (type, pdfType, visibleColumns) => {
-    let showColumns = allColumn?.filter((d) => visibleColumns?.includes(d?.fieldLabel)).map((d) => {
-      let k = d?.fieldName;
-      if (k === 'qtyDisplay') {
-        return 'qty';
-      }
-      return k;
-    });
+    let showColumns = allColumn
+      ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
+      .map((d) => {
+        let k = d?.fieldName;
+        if (k === 'qtyDisplay') {
+          return 'qty';
+        }
+        return k;
+      });
     setLoadingType(pdfType);
-    axiosInstance().get(
-      pdfType === 'Detail'
-        ? `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`
-        : `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`
-    )
+    axiosInstance()
+      .get(
+        pdfType === 'Detail'
+          ? `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`
+          : `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`
+      )
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -176,110 +173,26 @@ function PreviewDownload({ resource, referenceId, columns, isSendEmail = false, 
         </Box>
       </Box>
       {showColumnsDialog.open && (
-        <Dialog
-          open={showColumnsDialog.open}
-          aria-labelledby="customized-dialog-title"
-          maxWidth="sm"
-          onClose={(e, reason) => {
-            if (reason !== 'backdropClick') {
-              setShowColumnsDialog({ open: false, type: '' });
-            }
+        <PreviewDialog
+          type={showColumnsDialog.type}
+          handleClose={() => {
+            setShowColumnsDialog({ open: false, type: '' });
           }}
-          fullWidth
-          fullScreen={fullScreen || isMobile || isTablet}
-          TransitionComponent={CustomDialogTransition}
-        >
-          <CustomDialogHeader
-            title={`Visible Columns in ${showColumnsDialog.type}`}
-            onClose={() => {
-              setShowColumnsDialog({ open: false, type: '' });
-            }}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-              setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-            showRequiredLabel={false}
-          />
-          <CustomDialogContent>
-            <Grid container justify="space-between" alignItems="center">
-              <Grid item style={{ padding: 5, marginTop: 10 }} xs={12} md={12} sm={12}>
-                <FormControl fullWidth>
-                  <Autocomplete
-                    id="demo-mutiple-chip"
-                    fullWidth
-                    size="small"
-                    multiple
-                    value={visibleColumnsPdf}
-                    onChange={(e, val) => {
-                      if (val.includes('Select All') && ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() !== val.sort().toString()) {
-                        setVisibleColumnsPdf(allColumn?.map((e) => e?.fieldLabel));
-                      } else if (['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() === val.sort().toString()) {
-                        setVisibleColumnsPdf([]);
-                      } else {
-                        setVisibleColumnsPdf(allColumn?.map((e) => e?.fieldLabel)?.filter((d) => val.includes(d)));
-                      }
-                    }}
-                    options={['Select All', ...allColumn?.map((e) => e?.fieldLabel)]}
-                    disableCloseOnSelect
-                    getOptionLabel={(option) => option}
-                    renderOption={(option, { selected }) => (
-                      <React.Fragment>
-                        <Checkbox
-                          icon={icon}
-                          checkedIcon={checkedIcon}
-                          style={{ marginRight: 8 }}
-                          checked={
-                            showColumnsDialog &&
-                              ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() === ['Select All', ...visibleColumnsPdf].sort().toString()
-                              ? true
-                              : selected
-                          }
-                        />
-                        {option}
-                      </React.Fragment>
-                    )}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        variant="outlined"
-                        label={`Visible Columns in ${showColumnsDialog.type}`}
-                        placeholder="Select" />
-                    )}
-                  />
-                </FormControl>
-              </Grid>
-            </Grid>
-          </CustomDialogContent>
-          <CustomDialogFooter>
-            <CustomButton
-              variant="contained"
-              color="primary"
-              size="small"
-              loading={loadingType === 'Regular' || loading}
-              disabled={loadingType || visibleColumnsPdf?.length === 0}
-              onClick={(e) => {
-                handleViewPdf(downlodingFile, 'Regular', visibleColumnsPdf);
-              }}
-            >
-              Regular
-            </CustomButton>
-            {hideDetailButton ? null :
-              <CustomButton
-                variant="contained"
-                color="primary"
-                size="small"
-                loading={loadingType === 'Detail' || loading}
-                disabled={loadingType || visibleColumnsPdf?.length === 0}
-                onClick={(e) => {
-                  handleViewPdf(downlodingFile, 'Detail', visibleColumnsPdf);
-                }}
-              >
-                Detail
-              </CustomButton>}
-          </CustomDialogFooter>
-        </Dialog>
+          handleViewPdf={(type, visibleColumnsPdf) => {
+            handleViewPdf(downlodingFile, type, visibleColumnsPdf);
+          }}
+          loadingType={loadingType}
+          loading={loading}
+          hideDetailButton={hideDetailButton}
+          allColumn={allColumn}
+          resource={resource}
+          defaultColumns={defaultColumns}
+          columns={columns}
+          button1Title={button1Title}
+          button2Title={button2Title}
+        />
       )}
+
       {sendEmail && (
         <Dialog
           open={sendEmail}

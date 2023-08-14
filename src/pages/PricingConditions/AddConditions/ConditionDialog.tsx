@@ -8,12 +8,9 @@ import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../../components/Helpers/CustomButton';
-import routes from '../../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, getUniqueCurrencies } from './../../../constants/helpers';
-import InputField from '../../../components/Helpers/InputField';
-import { getObjKeysWithValues, getObjKeys, yupSchema, pricingCondition } from '../../../constants/helpers';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { CustomDialogTransition, PRICING_TYPE, getUniqueCurrencies } from './../../../constants/helpers';
+import { pricingCondition } from '../../../constants/helpers';
 import { Box, Grid, TextField, InputAdornment, Chip, Badge, Select, FormControl, InputLabel, IconButton } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
@@ -27,8 +24,8 @@ import { object, array, string } from 'yup';
 import _ from 'lodash';
 
 const pricingConditionSchema = object().shape({
-  conditionType: array().of(string()).required().min(1, 'Condition type is required'),
-  unit: array().of(string()).required().min(1, 'Condition type is required')
+  conditionType: array().of(string()).required().min(1, 'Pricing type is required'),
+  unit: array().of(string()).required().min(1, 'Unit is required')
 });
 
 const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit }) => {
@@ -40,7 +37,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
   const {
     state: { permissions }
   }: any = useData();
-  const [conditionType, setConditionType] = useState(['Rent', 'Price']);
+
   const [currency, setCurrency] = useState([detailData.currency]);
   const [unit, setUnits] = useState([]);
   const [pricingMethod, setPricingMethod] = useState([]);
@@ -290,22 +287,20 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                   <Fragment>
                     <div className={'detail-box-content'}>
                       <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                      <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Condition</h2>
+                      <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Pricing</h2>
                     </div>
                     <Box marginTop={1} marginBottom={1}>
                       <Grid spacing={3} container>
                         <Grid item xs={12} sm={6} md={6}>
                           <Autocomplete
                             multiple
-                            //disableCloseOnSelect={true}
                             id="conditionType"
-                            options={conditionType}
-                            value={values['conditionType'] ? values['conditionType'] : []}
-                            renderTags={(value: string[], getTagProps) =>
-                              value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
-                            }
-                            onChange={(e, value) => {
-                              setFieldValue('conditionType', value);
+                            options={PRICING_TYPE}
+                            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                            getOptionSelected={(option: any, val) => option.optionValue === val}
+                            value={PRICING_TYPE.filter((data) => values['conditionType']?.includes(data.optionValue))}
+                            onChange={(e, val) => {
+                              setFieldValue('conditionType', val?.map((e) => e.optionValue));
                             }}
                             renderInput={(params) => (
                               <TextField
@@ -313,12 +308,12 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                 margin="dense"
                                 name="conditionType"
                                 variant="outlined"
-                                label="Condition Type"
+                                label="Pricing Type"
+                                required
                                 error={touched['conditionType'] && Boolean(errors['conditionType'])}
                                 helperText={touched['conditionType'] && errors['conditionType']}
                               />
-                            )}
-                          />
+                            )} />
                         </Grid>
                         <Grid item xs={12} sm={6} md={6}>
                           <Autocomplete
@@ -340,6 +335,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                 name="unit"
                                 variant="outlined"
                                 label="Unit"
+                                required
                                 error={touched['unit'] && Boolean(errors['unit'])}
                                 helperText={touched['unit'] && errors['unit']}
                               />
@@ -354,7 +350,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                     <Fragment>
                       <div className={'detail-box-content'}>
                         <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                        <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Price</h2>
+                        <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Sell</h2>
                       </div>
                       <Box marginTop={1} marginBottom={1}>
                         <Grid spacing={3} container>

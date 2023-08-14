@@ -70,6 +70,26 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
                     "isCreate": true,
                     "isRead": true,
                     "isUpdate": true
+                },
+                {
+                    "fieldData": {
+                        "fieldLabel": "Comment",
+                        "type": "multiLine",
+                        "option": [],
+                        "required": false,
+                        "isTooltip": false,
+                        "tooltipMessage": "",
+                        "editAble": true,
+                        "deletAble": true,
+                        "order": 19,
+                        "sectionName": "Submit Field Ticket",
+                        "fieldName": "comment",
+                        "roleType": 0,
+                        "resource": "Field Ticket"
+                    },
+                    "isCreate": true,
+                    "isRead": true,
+                    "isUpdate": true
                 }
             ]
             let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -90,7 +110,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
     const handleSubmit = async (values) => {
         setSubmitting(true);
         const obj: any = {
-            processStatus: fieldTicketSteps[2].name,
+            comment: values?.comment
         }
         if (values.file && values.file !== "") {
             obj.file = values.file

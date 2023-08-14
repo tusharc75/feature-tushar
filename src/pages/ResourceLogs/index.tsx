@@ -118,14 +118,12 @@ const ResourceLogs = () => {
                   operations.push(e);
                 }
               });
-            }
-            else {
+            } else {
               operations.push({ ...u?.changes });
             }
             if (changeString?.length) {
               u.changeString = changeString?.toString();
-            }
-            else {
+            } else {
               u.changeString = 'Click View for check changes';
             }
             u.changes = changes;
@@ -203,9 +201,7 @@ const ResourceLogs = () => {
     return (
       <>
         <HtmlTooltip title="View Changes">
-          <IconButton
-            onClick={() => setOpenDialog({ open: true, changes: params?.data?.changes || [], operations: params?.data?.operations || [] })}
-          >
+          <IconButton onClick={() => setOpenDialog({ open: true, changes: params?.data?.changes || [], operations: params?.data?.operations || [] })}>
             <VisibilityIcon color="primary" fontSize="small" />
           </IconButton>
         </HtmlTooltip>
@@ -229,38 +225,35 @@ const ResourceLogs = () => {
       </Grid>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container spacing={2} alignItems="center">
-            <Grid xs={12} sm={6} md={4} lg={4}>
+          {/* xs={12} sm={6} md={4} lg={4} */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[8px]">
+            <Autocomplete
+              fullWidth
+              options={resourceOptions}
+              getOptionLabel={(option) => option.optionLabel}
+              value={selectedResource}
+              onChange={(event, newValue) => {
+                setSelectedResource(newValue);
+                setSelectedOption(null);
+              }}
+              size="small"
+              renderInput={(params) => <TextField {...params} label="Select Resource" variant="outlined" />}
+            />
+            {selectedResource && (
               <Autocomplete
+                options={option}
                 fullWidth
-                options={resourceOptions}
-                getOptionLabel={(option) => option.optionLabel}
-                value={selectedResource}
+                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                value={selectedOption}
                 onChange={(event, newValue) => {
-                  setSelectedResource(newValue);
-                  setSelectedOption(null);
+                  setSelectedOption(newValue);
                 }}
                 size="small"
-                renderInput={(params) => <TextField {...params} label="Select Resource" variant="outlined" />}
+                renderInput={(params) => <TextField {...params} label={`Select ${selectedResource?.optionLabel}`} variant="outlined" />}
               />
-            </Grid>
-            {selectedResource && (
-              <Grid item xs={12} sm={6} md={4} lg={4}>
-                <Autocomplete
-                  options={option}
-                  fullWidth
-                  getOptionLabel={(option: any) => option.optionLabel}
-                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                  value={selectedOption}
-                  onChange={(event, newValue) => {
-                    setSelectedOption(newValue);
-                  }}
-                  size="small"
-                  renderInput={(params) => <TextField {...params} label={`Select ${selectedResource?.optionLabel}`} variant="outlined" />}
-                />
-              </Grid>
             )}
-          </Grid>
+          </div>
         </div>
         <CustomAgGrid
           columns={columns}

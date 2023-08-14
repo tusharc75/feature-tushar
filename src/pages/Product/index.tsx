@@ -96,7 +96,7 @@ const Product = () => {
           setProductCategoryList(data);
         });
     }
-  }, []);
+  }, [selectedEntity]);
 
   useEffect(() => {
     if (isProductTemplate) {

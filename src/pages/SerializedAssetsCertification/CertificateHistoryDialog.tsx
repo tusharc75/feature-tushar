@@ -5,7 +5,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CertificationHistory from '../SerializedAsset/CertificationHistory';
 
-const CertificateHistoryDialog = ({ onClose, id }) => {
+const CertificateHistoryDialog = ({ onClose, id, supplierAccount }) => {
 
   const [fullScreen, setFullScreen] = useState(true);
 
@@ -34,6 +34,7 @@ const CertificateHistoryDialog = ({ onClose, id }) => {
         <CertificationHistory
           id={id}
           canIssueCertificate={false}
+          supplierAccount={supplierAccount}
         />
       </CustomDialogContent>
     </Dialog>

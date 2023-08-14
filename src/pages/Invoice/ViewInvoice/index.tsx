@@ -3,11 +3,11 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, INVOICE_STATUS, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -21,15 +21,17 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
+import CommentDialog from 'src/components/CommentDialog';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
 
 const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const renderedFrom = 'view_invoice';
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
+  const [commentDialog, setCommentDialog] = useState(false)
 
   useEffect(() => {
     fetchFields();
@@ -55,19 +57,19 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
           sticky: isMobile ? 'none' : 'left',
           Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
           Footer: () => {
-              return <>Total</>;
+            return <>Total</>;
           }
-      },
-      {
+        },
+        {
           accessor: 'type',
           Header: 'Type',
           sticky: isMobile ? 'none' : 'left',
           Cell: ({ row }) => (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <p>{`${startCase(row.original?.type)} `}</p>
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p>{`${startCase(row.original?.type)} `}</p>
+            </div>
           )
-      },
+        },
         {
           accessor: 'detail',
           Header: 'Details',
@@ -193,6 +195,22 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
     return subRows;
   };
 
+  const handleCancelInvoice = async (data) => {
+    axiosInstance().patch(`${routes?.fieldTicketInvoice.path}/status`, {
+      status: INVOICE_STATUS.cancelled,
+      invoice: invoiceData?._id,
+      fieldTicket: invoiceData?.id,
+      message: data
+    })
+      .then(({ data }) => {
+        onSuccess();
+        toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
@@ -208,6 +226,7 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
                   isSendEmail={true}
                 />
               }
+              <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
             </Box>
             {columns && rowsData ? (
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
@@ -246,6 +265,19 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
           </Button>
         </CustomDialogFooter>
       </Dialog>
+
+      {commentDialog && (
+        <CommentDialog
+          required={true}
+          handleSubmit={(data) => {
+            handleCancelInvoice(data)
+            setCommentDialog(false)
+          }}
+          handleClose={() => {
+            setCommentDialog(false)
+          }}
+        />
+      )}
     </Fragment>
   );
 };

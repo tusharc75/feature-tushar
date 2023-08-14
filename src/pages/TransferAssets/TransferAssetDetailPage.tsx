@@ -16,7 +16,8 @@ import AssetsGrid from './AssetGrid';
 import LoadingTicketGrid from './LoadingTicket';
 import ReceivingTicketGrid from './ReceivingTicket';
 import TabPanel from 'src/components/TabPanel';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { BiFoodMenu } from 'react-icons/bi';
+import EditIcon from '@material-ui/icons/Edit';
 import { FaWpforms } from 'react-icons/fa';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -60,7 +61,6 @@ const TransferAssetDetailPage = () => {
   const [canReceive, setCanReceive] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-
 
   const [stepNames, setStepNames] = useState([]);
   const [stepList, setStepList] = useState([]);
@@ -181,8 +181,8 @@ const TransferAssetDetailPage = () => {
           data?.transferType === 'Internal'
             ? data?.transfertoPlant?.entity
             : data?.transferType === 'External Customer'
-              ? data?.transfertoCustomer?.entity
-              : data?.transfertoSupplier?.entity;
+            ? data?.transfertoCustomer?.entity
+            : data?.transfertoSupplier?.entity;
 
         if (warehouseEntity?.length) {
           const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;
@@ -313,14 +313,14 @@ const TransferAssetDetailPage = () => {
           <Box className="control-buttons-v1">
             {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
               </Button>
             )}
-            <ActivityButton 
-              referenceId={transferAssetData?._id} 
-              resource={ACTIVITY_RESOURCE.transferAsset} 
+            <ActivityButton
+              referenceId={transferAssetData?._id}
+              resource={ACTIVITY_RESOURCE.transferAsset}
               resourceLabel={transferAssetData?.transferAssetNumber}
-              />
+            />
           </Box>
         </Box>
       </Box>

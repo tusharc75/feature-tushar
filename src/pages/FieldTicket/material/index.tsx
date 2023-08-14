@@ -21,6 +21,8 @@ import { calculatePrice } from 'src/components/RentalManagment/helper';
 import Consumables from './Consumables';
 import { fieldTicket } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
+import { Add, ExpandMore } from '@material-ui/icons';
+import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 
 const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, setNextStep, refreshFieldTicket }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,13 +30,14 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
-  const [addExistingServiceDialog, setAddExistingServiceDialog] = useState(false);
+  const [serviceDialog, setServiceDialog] = useState({ open: false, type: '' });
   const [allFields, setAllFields] = useState([]);
   const [isServiceEdit, setIsServiceEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
 
   const fetchFields = async () => {
     setColumns(null);
@@ -236,8 +239,8 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       }
       material.push(element);
     });
-    const priceData: any = await calculatePrice(fieldTicketData, material);
-    AddMaterial(material, priceData);
+    //const priceData: any = await calculatePrice(fieldTicketData, material);
+    AddMaterial(material, null);
   };
 
   const AddMaterial = async (material, priceData) => {
@@ -266,7 +269,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
     await axiosInstance()
       .post(`${fieldTicket.api}/${id}/material`, { material: tempMaterial })
       .then(() => {
-        setAddExistingServiceDialog(false);
+        setServiceDialog({ open: false, type: '' });
         fetchMaterial();
       })
       .catch((error) => {
@@ -320,21 +323,52 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       });
   };
 
+  const openAddActions = (event) => {
+    setAddAnchorEl(event.currentTarget);
+  };
+
+  const closeAddActions = () => {
+    setAddAnchorEl(null);
+  };
+
   return (
     <>
       {allowedToEdit && (
         <Box display="flex" justifyContent="space-between" m={1}>
           <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            <Button
-              size="small"
-              variant={'contained'}
-              color="primary"
-              onClick={() => {
-                setAddExistingServiceDialog(true);
-              }}
-            >
-              {isMobile && !isTablet ? 'Service' : `Add Service`}
+            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
+              {'Add'}
+              <ExpandMore fontSize="small" />
             </Button>
+            <Menu
+              anchorEl={addAnchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="add-menu"
+              open={Boolean(addAnchorEl)}
+              onClose={closeAddActions}
+            >
+              <MenuItem
+                onClick={() => {
+                  setServiceDialog({ open: true, type: 'service' });
+                  closeAddActions()
+                }}
+              >
+                Add Service
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setServiceDialog({ open: true, type: 'newService' });
+                  closeAddActions();
+                }}
+              >
+                Add New Service
+              </MenuItem>
+            </Menu>
           </Box>
           <Box display="flex" ml={1}>
             <Button
@@ -424,15 +458,31 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
         <Consumables stepFullScreen={stepFullScreen} id={id} allowedToEdit={allowedToEdit} services={rowsData} fieldTicketData={fieldTicketData} renderedFrom={renderedFrom} />
       </Box>
 
-      {addExistingServiceDialog && (
+      {serviceDialog?.open && serviceDialog?.type === 'service' && (
         <AssignServiceDialog
           reference={'fieldTicket'}
           referenceId={id}
           onSuccess={handleAdd}
           handleClose={() => {
-            setAddExistingServiceDialog(false);
+            setServiceDialog({ open: false, type: '' });
           }}
           ids={rowsData?.map((row) => row?.materialId)}
+        />
+      )}
+
+      {serviceDialog.open && serviceDialog.type === 'newService' && (
+        <ManageServiceMaster
+          isClone={false}
+          serviceMasterId={null}
+          onClose={() => setServiceDialog({ open: false, type: '' })}
+          onSuccess={(data) => {
+            const row = data?.data
+            row.unitMain = row?.unit;
+            row.pricingMethodMain = row?.pricingMethod;
+            handleAdd([row]);
+            setServiceDialog({ open: false, type: '' });
+          }}
+          isRedirectToDetailPage={false}
         />
       )}
 

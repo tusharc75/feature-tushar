@@ -7,7 +7,15 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { repairOrder, REPAIR_ORDER_TYPE, workOrder, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, CHILD_RESOURCE, MATERIAL_TYPE } from '../../../constants/helpers';
+import {
+  repairOrder,
+  REPAIR_ORDER_TYPE,
+  workOrder,
+  WORKORDER_SERVICE_STATUS,
+  WORK_ORDER_STATUS,
+  CHILD_RESOURCE,
+  MATERIAL_TYPE
+} from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { Delete, ExpandMore, CheckCircleOutline } from '@material-ui/icons';
@@ -23,6 +31,7 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import { MdAssignmentTurnedIn } from 'react-icons/md';
 import EditIcon from '@material-ui/icons/Edit';
+import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({
@@ -30,7 +39,6 @@ const WorkOrder = ({
   setNextStep,
   stepFullScreen,
   allowedToEdit,
-  allowedToDelete,
   isPostWorkService,
   setCurrentStep,
   createNewVersionQuote
@@ -61,7 +69,6 @@ const WorkOrder = ({
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
-
 
   useEffect(() => {
     fetchFields();
@@ -268,7 +275,7 @@ const WorkOrder = ({
                   }}
                   disabled={row?.original?.status === WORKORDER_SERVICE_STATUS?.completed ? true : false}
                 >
-                  <EditIcon color={row?.original?.status === WORKORDER_SERVICE_STATUS?.completed ? "disabled" : "primary"} />
+                  <EditIcon color={row?.original?.status === WORKORDER_SERVICE_STATUS?.completed ? 'disabled' : 'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -278,7 +285,7 @@ const WorkOrder = ({
                   disabled={
                     row?.original?.type === 'package' && row?.original?.subRows?.length === 0
                       ? false
-                      : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
+                      : row?.original?.status === WORKORDER_SERVICE_STATUS.pending
                         ? false
                         : true
                   }
@@ -294,7 +301,7 @@ const WorkOrder = ({
                     color={
                       row?.original?.type === 'package' && row?.original?.subRows?.length === 0
                         ? 'error'
-                        : row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete
+                        : row?.original?.status === WORKORDER_SERVICE_STATUS.pending
                           ? 'error'
                           : 'disabled'
                     }
@@ -327,8 +334,7 @@ const WorkOrder = ({
                   }}
                   disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
                 >
-
-                  <MdAssignmentTurnedIn fontSize="20" />
+                  <AutoCompleteIcon size={18} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -345,7 +351,7 @@ const WorkOrder = ({
       data: row.original
     });
     setIsBulkEdit(false);
-  }
+  };
 
   const handleWorkOrderDelete = (ids) => {
     axiosInstance()
@@ -493,7 +499,7 @@ const WorkOrder = ({
         parent.serviceStatus = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new && parent?.subRows?.some(obj => obj.type === "service")) {
+      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new && parent?.subRows?.some((obj) => obj.type === 'service')) {
         parent.canAutoCompleteWorkOrder = true;
       }
     });
@@ -651,7 +657,7 @@ const WorkOrder = ({
           type: 'success',
           message: data.message
         });
-        setIsBulkEdit(false)
+        setIsBulkEdit(false);
         setUpdateDialog({ open: false, data: null });
       })
       .catch((error) => {
@@ -663,7 +669,14 @@ const WorkOrder = ({
   const checkUniqWorkOrder = () => {
     if (selectedProducts.length === 0) {
       return false;
-    } else if (uniq(map(selectedProducts?.filter((e: any) => e.type === 'service'), 'workOrder')).length === 1) {
+    } else if (
+      uniq(
+        map(
+          selectedProducts?.filter((e: any) => e.type === 'service'),
+          'workOrder'
+        )
+      ).length === 1
+    ) {
       return true;
     } else {
       return false;
@@ -735,18 +748,18 @@ const WorkOrder = ({
                 }}
                 disabled={selectedProducts.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
               >
-                Auto Complete Work Order
+                Auto Complete Work Order(s)
               </MenuItem>
               <MenuItem
                 onClick={() => {
-                  setIsBulkEdit(true)
+                  setIsBulkEdit(true);
                   setUpdateDialog({
                     open: true,
-                    data: selectedProducts.filter((e) => e.type === "service")
+                    data: selectedProducts.filter((e) => e.type === 'service')
                   });
-                  closeActions()
+                  closeActions();
                 }}
-                disabled={((selectedProducts.filter((e) => e.type === "service")).length > 0 && checkUniqWorkOrder()) ? false : true}
+                disabled={selectedProducts.filter((e) => e.type === 'service').length > 0 && checkUniqWorkOrder() ? false : true}
               >
                 Bulk Edit
               </MenuItem>
@@ -829,7 +842,7 @@ const WorkOrder = ({
                     workOrderId: d?.workOrder?._id
                   };
                 })}
-              reference='service'
+              reference="service"
               assignedUsers={allAssignedUsers}
               handleClose={() => {
                 setUserAssignDialog(false);
