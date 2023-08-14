@@ -46,7 +46,7 @@ const Quotation = ({
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false, showSaveAndNext: false });
 
   const [recordToUpdate, setRecordToUpdate] = useState(null);
 
@@ -361,7 +361,7 @@ const Quotation = ({
     setAnchorEl(null);
   };
 
-  const handleSaveData = async (rows: any) => {
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
       delete element.srno;
       delete element.detail;
@@ -382,9 +382,15 @@ const Quotation = ({
     axiosInstance()
       .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
       .then(() => {
-        setUpdating(false);
-        setIsProductEdit({ open: false, isBulkedit: false });
         fetchData();
+        if (saveAndNext) {
+          const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
+          setIsProductEdit({ open: true, isBulkedit: false, showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+          setRecordToUpdate(rowsData[rowIndex + 1])
+        } else {
+          setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
+        }
+        setUpdating(false);
       })
       .catch((error) => {
         setUpdating(false);
@@ -409,7 +415,7 @@ const Quotation = ({
   };
 
   const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
+    setIsProductEdit({ open: true, isBulkedit: false, showSaveAndNext: true });
     setRecordToUpdate(rowData);
   };
 
@@ -646,7 +652,7 @@ const Quotation = ({
                 <MenuItem
                   onClick={() => {
                     closeActions();
-                    setIsProductEdit({ open: true, isBulkedit: true });
+                    setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
                   }}
                 >
                   Bulk Edit
@@ -718,7 +724,7 @@ const Quotation = ({
         <QuotationQtyDialog
           calculatePrice={calculatePrice}
           onClose={() => {
-            setIsProductEdit({ open: false, isBulkedit: false });
+            setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
             setRecordToUpdate(null);
             if (isInlineEdit) {
               setIsInlineEdit(false);
@@ -731,6 +737,7 @@ const Quotation = ({
           material={material}
           selectedProducts={selectedProducts}
           isInlineEdit={isInlineEdit}
+          showSaveAndNext={isProductEdit.showSaveAndNext}
         />
       )}
       {leadTimeDialog.open && (
