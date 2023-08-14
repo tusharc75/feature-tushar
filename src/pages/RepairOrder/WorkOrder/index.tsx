@@ -748,7 +748,7 @@ const WorkOrder = ({
                 }}
                 disabled={selectedProducts.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
               >
-                Auto Complete Work Order
+                Auto Complete Work Order(s)
               </MenuItem>
               <MenuItem
                 onClick={() => {
