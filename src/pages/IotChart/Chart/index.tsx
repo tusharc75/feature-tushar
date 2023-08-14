@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { gridFilterParser } from '../../../constants/useColumns';
+import { Box, Grid, Typography } from '@material-ui/core';
+import placeholder_img from 'src/assets/PerformanceTuning.png';
 import {
     prepareDataForGrid,
 } from 'src/constants/helpers';
-import {ChartRenderer} from './ChartRenderer'
+import { ChartRenderer } from './ChartRenderer';
+import Loader from 'src/components/Loader';
 
 
 function Index() {
@@ -24,51 +26,20 @@ function Index() {
 
 
     const {
-        state: { permissions, selectedEntity, user }
+        state: { userLoading }
     }: any = useData();
 
     const [dataVal, setDataVal] = useState({});
     const [loading, setLoading] = useState(false);
 
-    const getQueryString = (isExport = false) => {
-        let page = 0, limit = 25;
-        let filters = {}
-        let deepFilter = `?page=${page}&limit=${limit}`;
-
-        if (isExport) {
-            deepFilter = `?`;
-        }
-
-        if (selectedEntity) {
-            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-        }
-
-        const { filterByIds, deepFilters } = gridFilterParser(filters);
-
-        if (filterByIds?.length) {
-            deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
-        }
-        if (deepFilters?.length) {
-            deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
-        }
-        if (filterByIds?.length || deepFilters?.length) {
-            deepFilter = `${deepFilter}&filterType=and`;
-        }
-
-        return deepFilter;
-    };
-
     const fetchIotDataPointsData = () => {
         setLoading(true);
-        const queryString = getQueryString();
         axiosInstance()
-            .get(`${routes?.iotDataPoints?.path}${queryString}`)
+            .get(`${routes?.iotDataPoints?.path}`)
             .then(({ data: { data } }) => {
                 let count = data?.count;
                 let rows = data?.data?.map((u: any) => {
                     let finalObject: any = prepareDataForGrid(u);
-                    finalObject['canDelete'] = permissions?.iotDataPoints?.isDelete;
-                    finalObject['allowedToEdit'] = permissions?.iotDataPoints?.isUpdate;
 
                     return {
                         ...finalObject
@@ -138,24 +109,63 @@ function Index() {
 
 
     return (
-        <div style={{overflowY: 'auto', padding: '16px' }}>
-            {loading ? (
-                <div className="loader">
-                    <h3>Loading</h3>
-                </div>
-            ) : (
-                Object.keys(dataVal).length !== 0 && (
-                    Object.keys(dataVal).map((particularCategory) => (
-                       
-                        <ChartRenderer
-                            key={particularCategory}
-                            dataVal={dataVal}
-                            particularCategory={particularCategory}
-                            chart={chart}
-                        />
-                    ))
+        <div>
+            {!userLoading ? (
+                <>
+                <Box pt={1}>
+                    {loading ? (
+                        <Loader minHeight="100%" height="calc(100vh - 200px)" noLoader={false} text="Loading Data..." />
+
+                    ) : (
+                        Object.keys(dataVal).length === 0 ? (
+                            <Box
+                                style={{ height: 'calc(100vh - 256px)', minHeight: '400px' }}
+                                width={'100%'}
+                                display={'flex'}
+                                flexDirection="column"
+                                justifyContent={'center'}
+                                alignItems={'center'}
+                                className="asdfkasjhdfkjsdh"
+                            >
+                                <img width={400} height={340} src={placeholder_img} alt="dashboard" />
+                                <Typography color="textSecondary" variant="h5">
+                                    No charts to display
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <Grid
+                                container
+                                spacing={1}
+                                justifyContent="space-between"
+                                alignItems="stretch"
+                                // style={{ height: 'calc(100vh - 256px)', minHeight: '600px', overflow: 'auto', display: 'flex', flexDirection: 'column' }}
+                                style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'auto' }}
+                            >
+                                {Object.keys(dataVal).length !== 0 && (
+                                    Object.keys(dataVal).map((particularCategory) => (
+
+                                        <ChartRenderer
+                                            key={particularCategory}
+                                            dataVal={dataVal}
+                                            particularCategory={particularCategory}
+                                            chart={chart}
+                                        />
+                                    ))
+                                )}
+                            </Grid>
+                        )
+                    )}
+
+                </Box>
+                </>
+            ) :
+                (
+                    <Loader minHeight="100%" noLoader={false} text="Loading Data..." />
                 )
-            )}
+            }
+
+
+
         </div>
     );
 }
