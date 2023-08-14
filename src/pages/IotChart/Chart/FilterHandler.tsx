@@ -1,15 +1,14 @@
 import React, { useState } from 'react'
-import { Popover, Box, Button } from '@material-ui/core';
+import { Popover, Box, Button, IconButton } from '@material-ui/core';
+import { FiMaximize2 } from 'react-icons/fi';
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { BsFilter } from 'react-icons/bs';
 import { Grid, makeStyles } from '@material-ui/core';
-import moment from 'moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
-import { KeyboardDateTimePicker } from '@material-ui/pickers';
-
-
+import { KeyboardDateTimePicker} from '@material-ui/pickers';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const useStyles = makeStyles((theme) => ({
     button: {
@@ -18,15 +17,15 @@ const useStyles = makeStyles((theme) => ({
         alignItems: 'center',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
-        marginRight:'10px',
+        marginRight: '10px',
         textOverflow: 'ellipsis',
         [theme.breakpoints.down('xs')]: {
             maxWidth: '80%',
         },
-    },
+    }
 }));
 
-export function FilterHandler({ handleChange, particularCategory, tempDataVal, dateFilters, setDateFilters }) {
+export function FilterHandler({ fullScreen, setOpenFullScreen, handleChange, particularCategory, tempDataVal, dateFilters, setDateFilters }) {
 
     const classes = useStyles();
 
@@ -44,21 +43,77 @@ export function FilterHandler({ handleChange, particularCategory, tempDataVal, d
 
     return (
 
-        <Grid item xs={12} sm={12} md={12} style={{ display: 'flex', flexDirection: 'row', marginTop: '10px', maxWidth:'80%' }}>
-            <Button
-                onClick={handleFilterOpen}
-                startIcon={<BsFilter fontSize={10} />}
-                disableElevation
-                color="primary"
-                variant="outlined"
-                size="small"
-                // style={{ whiteSpace: 'nowrap', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                className={classes.button}
-            >
-                Category Filters
-            </Button>
+        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center">
+            <Box display="flex">
+                <Button
+                    onClick={handleFilterOpen}
+                    startIcon={<BsFilter fontSize={10} />}
+                    disableElevation
+                    color="primary"
+                    size="small"
+                    className={classes.button}
+                    style={{ fontSize: '16px' }}
+                >
+                    {particularCategory}
+                </Button>
+            </Box>
 
-            <Popover
+            <Box display="flex">
+                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                
+                    <Grid container spacing={2}>
+                        <Grid item xs={6} sm={4}>
+                        
+                            <KeyboardDateTimePicker
+                                //   disabled={timeFrame !== 'custom' || disabled}
+                                inputVariant="outlined"
+                                variant="inline"
+                                fullWidth
+                                size="small"
+                                // openTo="year"
+                                format="dd/MM/yyyy HH:mm"
+                                maxDate={dateFilters.to}
+                                label="From"
+                                views={['year', 'month', 'date', 'hours', 'minutes']}
+                                value={dateFilters.from}
+                                onChange={(date) => {
+                                    setDateFilters({ ...dateFilters, from: date });
+                                }}
+                            />
+                            
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                            <KeyboardDateTimePicker
+                                //   disabled={timeFrame !== 'custom' || disabled}
+                                inputVariant="outlined"
+                                variant="inline"
+                                fullWidth
+                                size="small"
+                                minDate={dateFilters.from}
+                                // openTo="year"
+                                format="dd/MM/yyyy HH:mm"
+                                label="To"
+                                views={['year', 'month', 'date', 'hours', 'minutes']}
+                                value={dateFilters.to}
+                                onChange={(date) => {
+                                    setDateFilters({ ...dateFilters, to: date });
+                                }}
+                            />
+                        </Grid>
+                    </Grid>
+                </MuiPickersUtilsProvider>
+                {
+                    !fullScreen && (
+                        <HtmlTooltip title="Open Chart In Full Screen">
+                        <IconButton size="small" color="primary" onClick={() => setOpenFullScreen(true)}>
+                            <FiMaximize2 fontSize="16px" />
+                        </IconButton>
+                        </HtmlTooltip>
+                    )
+                }
+
+            </Box>
+             <Popover
                 open={isFilterOpen}
                 anchorEl={filterAnchorEl}
                 onClose={handleFilterClose}
@@ -99,47 +154,7 @@ export function FilterHandler({ handleChange, particularCategory, tempDataVal, d
                     ))}
                 </Box>
             </Popover>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                <Grid container spacing={2}>
-                    <Grid item xs={6} sm={4}>
-                        <KeyboardDateTimePicker
-                            //   disabled={timeFrame !== 'custom' || disabled}
-                            inputVariant="outlined"
-                            variant="inline"
-                            fullWidth
-                            size="small"
-                            openTo="year"
-                            format="dd/MM/yyyy HH:mm"
-                            maxDate={dateFilters.to}
-                            label="From"
-                            views={['year', 'month', 'date', 'hours', 'minutes']}
-                            value={dateFilters.from}
-                            onChange={(date) => {
-                                setDateFilters({ ...dateFilters, from: date });
-                            }}
-                        />
-                    </Grid>
-                    <Grid item xs={6} sm={4}>
-                        <KeyboardDateTimePicker
-                            //   disabled={timeFrame !== 'custom' || disabled}
-                            inputVariant="outlined"
-                            variant="inline"
-                            fullWidth
-                            size="small"
-                            minDate={dateFilters.from}
-                            openTo="year"
-                            format="dd/MM/yyyy HH:mm"
-                            label="To"
-                            views={['year', 'month', 'date', 'hours', 'minutes']}
-                            value={dateFilters.to}
-                            onChange={(date) => {
-                                setDateFilters({ ...dateFilters, to: date });
-                            }}
-                        />
-                    </Grid>
-                </Grid>
-            </MuiPickersUtilsProvider>
-        </Grid>
+        </Box>
 
     )
 
