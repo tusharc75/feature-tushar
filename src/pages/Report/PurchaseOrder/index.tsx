@@ -624,7 +624,7 @@ const Report = () => {
             show: true,
             disabled: false,
             cellRenderer: cellRenderer,
-            filter: false,
+            filter: e.fieldName === 'assetNumber' ? true : false,
             sortable: false,
           })
         })
