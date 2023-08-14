@@ -243,18 +243,6 @@ const AddSerializedAsset = ({
         });
       });
     }
-    if (referenceType === 'Transfer Asset') {
-      updatedFilters.push({
-        field: 'status',
-        term: [
-          ASSET_STATUS.new,
-          ASSET_STATUS.available,
-          ASSET_STATUS.scrap,
-          ASSET_STATUS.needRecert,
-          ASSET_STATUS.needRepair
-        ]
-      });
-    }
     if (updatedFilters.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
@@ -263,9 +251,6 @@ const AddSerializedAsset = ({
     }
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
-    }
-    if (referenceType === 'Transfer Asset') {
-      return deepFilter;
     }
     //  To fetch the remaining unassigned assets of that rental management
     if (rentalId) {
