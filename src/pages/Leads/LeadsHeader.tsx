@@ -87,8 +87,8 @@ function LeadsHeader(props) {
   );
 
   return (
-    <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className={'d-flex align-items-center gap-1'}>
         {isMobile && !isTablet ? (
           <div className="d-flex ">
             <Button
@@ -97,7 +97,6 @@ function LeadsHeader(props) {
               aria-controls="demo-customized-menu"
               aria-haspopup="true"
               // aria-expanded={open ? 'true' : undefined}
-              color="secondary"
               variant="text"
               disableElevation
               startIcon={<MdSort />}
@@ -120,7 +119,6 @@ function LeadsHeader(props) {
               aria-haspopup="true"
               // aria-expanded={open ? 'true' : undefined}
               variant="text"
-              color="secondary"
               disableElevation
               startIcon={<MdFilterList />}
               onClick={handleOpen}
@@ -152,128 +150,109 @@ function LeadsHeader(props) {
         )}
 
         {children}
-      </Grid>
-      <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
-        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: 'flex', flex: 1 }}>
-            <SearchBox
-              onChange={onSearch}
-              className={styles.search_box_input}
-              value={searchVal}
-              size="small"
-              placeholder="Search Leads"
-              width={isMobile && !isTablet ? '200px' : '242px'}
-              style={isMobile && !isTablet ? { flex: 1 } : {}}
-            />
-          </Grid>
+      </div>
+      <div className="flex flex-wrap gap-[8px] justify-end">
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Leads" />
 
-          <Grid style={{ display: 'flex', gap: '5px' }}>
-            {leadPermissions.isCreate && (
+        <div className="flex gap-[8px] flex-wrap items-center">
+          {leadPermissions.isCreate && (
+            <Button variant={'contained'} color="primary" size="small" onClick={onCreate} startIcon={<AddOutlined />} className={`no-shadow`}>
+              Add
+            </Button>
+          )}
+
+          {(leadPermissions.isDelete || allowToConvertLeadToOpportunity) && (
+            <>
               <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                color="primary"
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
                 size="small"
-                // className={styles.add_submit_btn}
-                onClick={onCreate}
-                // startIcon={<AddOutlined />}
-                className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                onClick={openActions}
+                aria-controls="action-menu"
+                className={`new-dropdown-v1 `}
+                disabled={selectedLeads.length === 0}
+                endIcon={<ExpandMore />}
               >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                Actions
               </Button>
-            )}
 
-            {(leadPermissions.isDelete || allowToConvertLeadToOpportunity) && (
-              <>
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  className={`${isMobile && !isTablet ? 'mobile_button' : ''} new-dropdown-v1 `}
-                  disabled={selectedLeads.length === 0}
-                >
-                  {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                </Button>
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                {leadPermissions.isDelete && (
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      showConfirmBox(null);
+                    }}
+                    disabled={selectedLeads.length === 0 || selectedLeads.some((d) => d.ownerId !== userId)}
+                  >
+                    Delete
+                  </MenuItem>
+                )}
 
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  {leadPermissions.isDelete && (
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        showConfirmBox(null);
-                      }}
-                      disabled={selectedLeads.length === 0 || selectedLeads.some((d) => d.ownerId !== userId)}
-                    >
-                      Delete
-                    </MenuItem>
-                  )}
-
-                  {allowToConvertLeadToOpportunity && (
-                    <MenuItem
-                      disabled={selectedLeads.length === 0}
-                      onClick={() => {
-                        closeActions();
-                        if (selectedLeads.some((d) => d.convertedToOpportunity)) {
+                {allowToConvertLeadToOpportunity && (
+                  <MenuItem
+                    disabled={selectedLeads.length === 0}
+                    onClick={() => {
+                      closeActions();
+                      if (selectedLeads.some((d) => d.convertedToOpportunity)) {
+                        setMessageDialog({
+                          open: true,
+                          message: `You are trying to convert already converted lead, Please unselect those records and try again.`
+                        });
+                      } else if (selectedLeads.some((d) => !d[processFieldName] || d[processFieldName].toLowerCase() !== 'qualified')) {
+                        setMessageDialog({
+                          open: true,
+                          message: `You have selected lead(s) which are not qualified yet to be converted into opportunity`
+                        });
+                      } else {
+                        if (selectedLeads.some((d) => d.isAllowedToUpdate === false)) {
                           setMessageDialog({
                             open: true,
-                            message: `You are trying to convert already converted lead, Please unselect those records and try again.`
-                          });
-                        } else if (selectedLeads.some((d) => !d[processFieldName] || d[processFieldName].toLowerCase() !== 'qualified')) {
-                          setMessageDialog({
-                            open: true,
-                            message: `You have selected lead(s) which are not qualified yet to be converted into opportunity`
+                            message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.`
                           });
                         } else {
-                          if (selectedLeads.some((d) => d.isAllowedToUpdate === false)) {
-                            setMessageDialog({
-                              open: true,
-                              message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.`
-                            });
-                          } else {
-                            showLeadToOpportunityConfirmationDialog();
-                          }
+                          showLeadToOpportunityConfirmationDialog();
                         }
-                      }}
-                    >
-                      Convert To Opportunity
-                    </MenuItem>
-                  )}
-                  {leadPermissions.isUpdate && (
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        showTransferEntityDialog();
-                      }}
-                      disabled={selectedLeads.length === 0 || selectedLeads.some((d) => d.ownerId !== userId)}
-                    >
-                      Transfer Entity
-                    </MenuItem>
-                  )}
-                </Menu>
-              </>
-            )}
-            {messageDialog.open ? (
-              <MessageDialog
-                open={messageDialog.open}
-                message={messageDialog.message}
-                onClose={() => setMessageDialog({ open: false, message: null })}
-              />
-            ) : null}
-          </Grid>
-        </Box>
-      </Grid>
-    </Grid>
+                      }
+                    }}
+                  >
+                    Convert To Opportunity
+                  </MenuItem>
+                )}
+                {leadPermissions.isUpdate && (
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      showTransferEntityDialog();
+                    }}
+                    disabled={selectedLeads.length === 0 || selectedLeads.some((d) => d.ownerId !== userId)}
+                  >
+                    Transfer Entity
+                  </MenuItem>
+                )}
+              </Menu>
+            </>
+          )}
+          {messageDialog.open ? (
+            <MessageDialog
+              open={messageDialog.open}
+              message={messageDialog.message}
+              onClose={() => setMessageDialog({ open: false, message: null })}
+            />
+          ) : null}
+        </div>
+      </div>
+    </div>
   );
 }
 export default LeadsHeader;

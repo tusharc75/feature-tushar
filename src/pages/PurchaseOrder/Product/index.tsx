@@ -14,7 +14,6 @@ import { generateCustomTableColumns } from 'src/constants/columns';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { fetch_po_cost_fields, fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
-import SendEmail from './../SendEmail';
 import InventoryStatesDialog from './InventoryStatesDialog';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -650,11 +649,13 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             </Menu>
           </Box>
           <div className="d-flex gap-2">
-            {/* <PreviewDownload
+            <PreviewDownload
               resource={sidebarResource.purchaseOrder}
               referenceId={purchaseOrderData?._id}
               columns={columns?.map((e) => { return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor } })}
               isSendEmail={true}
+              button1Title='Ordered'
+              button2Title='Received'
               defaultColumns={[
                 'index',
                 'type',
@@ -665,8 +666,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
                 `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
                 `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
-              ]} /> */}
-            <SendEmail purchaseOrderData={purchaseOrderData} />
+              ]} />
             <HtmlTooltip title="Please select some product">
               <Button
                 variant={'outlined'}
@@ -763,7 +763,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {addProductDialog && (
+      {addProductDialog && purchaseOrderData && (
         <AssignProductDialog
           productsDialogOpen={addProductDialog}
           handleCloseDialog={() => setAddProductDialog(false)}
@@ -771,6 +771,13 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           onSuccess={handleAddProduct}
           productId={null}
           assignedProducts={[]}
+          extraDeepFilter={purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false ?
+            [{
+              field: 'expenseItem',
+              term: purchaseOrderData?.expenseItem
+                ? 'Yes' : 'No'
+            }
+            ] : []}
         />
       )}
       {showProductDialog.open && (

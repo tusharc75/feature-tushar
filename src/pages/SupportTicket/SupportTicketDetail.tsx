@@ -42,7 +42,7 @@ const SupportTicketDetail = () => {
     axiosInstance()
       .get('/field?resource=Support Ticket')
       .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
+        setFields(data.data?.filter((field) => field.isRead && field?.fieldData?.sectionName !== "Internal Information"));
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -57,7 +57,7 @@ const SupportTicketDetail = () => {
       } = await axiosInstance().get(`/support-ticket/${id}`);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
-      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id && data?.status === "Pending");
       setSupportTicketData(data);
       setCustomizedRoutes([routes.supportTicket, { title: data?.supportTicketNumber }]);
       setLoading(false);

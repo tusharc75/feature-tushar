@@ -1011,9 +1011,9 @@ body::-webkit-scrollbar-thumb {
 }
 
 .mobile_button {
-  border: 2px solid var(--secondary) !important;
-  border-radius: 20px !important;
-  color: var(--secondary) !important;
+  border: 1px solid var(--common-border-color) !important;
+  border-radius: 5px !important;
+  color: var(--primary-text) !important;
 }
 
 .search-input-icon {
@@ -1082,7 +1082,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .MobileStep-next-back-button {
-  color: var(--primary-light) !important;
+  color: var(--primary-text) !important;
   &:disabled {
     opacity: 0.7;
     pointer-events: none;
@@ -1908,7 +1908,7 @@ body::-webkit-scrollbar-thumb {
 
   .form-label-style {
     color: var(--secondary);
-    font-size: 0.6rem;
+    // font-size: 0.6rem;
     padding: 0 4px 0 6px;
     text-align: left;
     //padding-bottom: 6px;
@@ -1933,8 +1933,8 @@ body::-webkit-scrollbar-thumb {
     justify-content: center;
     margin: 0 auto;
     border-radius: 5px !important;
-    background-color: white;
-    border: 1px solid lightgray;
+    background-color: var(--dark-primary, white);
+    border: 1px solid var(--common-border-color);
   }
 
   .quote-name {
@@ -2003,7 +2003,7 @@ body::-webkit-scrollbar-thumb {
 
   &__item {
     background-color: var(--primary-light);
-    border: 2px solid white;
+    border: 2px solid var(--dark-mode-border-color, white);
     border-radius: 100%;
     color: #ffffff;
     display: block;
@@ -2976,6 +2976,7 @@ svg.MuiSvgIcon-root {
 
   .control-buttons-v1 {
     display: flex;
+    flex-wrap: wrap;
     gap: 15px;
 
     @media all and (max-width: 708px) {
@@ -3231,6 +3232,13 @@ body {
     font-size: 14.7483px !important;
     line-height: 17px !important;
     color: #424242;
+    &.MuiButton-text {
+      color: var(--primary-text) !important;
+      padding: 6px !important;
+      height: 32px;
+      border: none !important;
+      width: 34px;
+    }
 
     & > span {
       line-height: 16px;
@@ -3265,6 +3273,9 @@ body {
       .btn-outline-v1 {
         background-color: var(--dark-primary) !important;
         color: white !important;
+        &.MuiButton-text {
+          border: none !important;
+        }
       }
     }
   }
@@ -3352,6 +3363,7 @@ body {
   border: 1px solid var(--dark-mode-border-color, #ececec);
   box-shadow: 0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03);
   border-radius: 0px 0px 4.04585px 4.04585px;
+  background: var(--dark-primary, white);
 }
 
 .formdata-title-v1 {
@@ -3681,12 +3693,12 @@ body {
       flex-wrap: wrap;
     }
   }
-  .table .td:last-of-type,
-  .table .th:last-of-type {
-    // min-width: var(--last-child-width, var(--last-child-fallback-width)) !important;
-    min-width: unset !important;
-    margin-right: 45px !important;
-  }
+  // .table .td:last-of-type,
+  // .table .th:last-of-type {
+  //   // min-width: var(--last-child-width, var(--last-child-fallback-width)) !important;
+  //   min-width: unset !important;
+  //   margin-right: 45px !important;
+  // }
   .table tfoot .tr {
     background-color: white;
     border-bottom: 0;
@@ -3800,13 +3812,27 @@ body {
 .new-dropdown-v1,
 [data-mode='dark'] .new-dropdown-v1 {
   background-color: var(--new_theme_secondary_color) !important;
-  border-color: var(--new_theme_secondary_border_color) !important;
-  border-width: 1px !important;
-  border-style: solid;
+  box-shadow: inset 0px 0px 0px 1px var(--new_theme_secondary_border_color) !important;
   color: #2a3042 !important;
   font-weight: 600 !important;
-  min-height: 100% !important;
-  padding: 2px 9px !important;
+  @media all and (min-width: 600px) {
+    min-height: 100% !important;
+    padding: 2px 9px !important;
+  }
+  @media all and (max-width: 600px) {
+    padding: 3px 9px !important;
+  }
+  &:disabled {
+    background-color: var(--new_theme_secondary_color) !important;
+    opacity: 0.7 !important;
+  }
+}
+[data-mode='dark'] .yellow-button,
+.yellow-button {
+  background-color: var(--new_theme_secondary_color) !important;
+  color: #2a3042 !important;
+  font-weight: 600 !important;
+  box-shadow: inset 0px 0px 0px 1px var(--new_theme_secondary_border_color) !important;
   &:disabled {
     background-color: var(--new_theme_secondary_color) !important;
     opacity: 0.7 !important;
@@ -3965,6 +3991,13 @@ body {
     [data-mode='dark'] & {
       background-color: var(--dark-primary);
       color: white;
+      svg {
+        color: white !important;
+      }
     }
   }
+}
+
+.MuiCheckbox-root {
+  color: var(--dark-primary-text, #2a3042) !important;
 }

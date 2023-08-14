@@ -18,6 +18,11 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
         errors['qty'] = 'Insufficient Quantity !';
       }
     }
+    if (status === MATERIAL_REQUEST_STATUS.closed) {
+      if (!values.comment) {
+        errors['comment'] = 'Comment is required';
+      }
+    }
     return errors;
   }
 
@@ -27,9 +32,9 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
         onClose={onClose}
         title={`${status === MATERIAL_REQUEST_STATUS.processed ? 'Process' : 'Close'}${data ? ' - ' : ''}${data?.productName || ''}`}
         showManimizeMaximize={false}
-        showRequiredLabel={false}
+        showRequiredLabel={true}
       />
-      <Formik initialValues={{ qty: parseInt(data?.qty) - parseInt(data?.processedQty || 0) }} onSubmit={onSuccess} validateOnMount validate={validate}>
+      <Formik initialValues={{ qty: parseInt(data?.qty) - parseInt(data?.processedQty || 0), comment: '' }} onSubmit={onSuccess} validateOnMount validate={validate}>
         {({ touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <CustomDialogContent>
@@ -59,6 +64,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                 fullWidth
                 multiline
                 rows={2}
+                required={status === MATERIAL_REQUEST_STATUS.processed ? false : true}
                 variant="outlined"
                 value={values['comment']}
                 error={touched['comment'] && Boolean(errors['comment'])}

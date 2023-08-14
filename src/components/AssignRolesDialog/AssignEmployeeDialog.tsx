@@ -124,7 +124,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
           type: 'selection',
           selectedRecords: savedRecords
         });
-        dispatch({ type: 'initialize', data: rows, count: data.count });
+        dispatch({ type: 'initialize', data: rows, count: data?.data?.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);

@@ -142,87 +142,79 @@ const RoadMap = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between">
-        <Box display="flex">
+      <div className="flex flex-wrap justify-between">
+        <div className="grid md:grid-cols-2 w-full md:max-w-[calc(100%-161px)] xl:grid-cols-4 gap-4">
           <MuiPickersUtilsProvider utils={MomentUtils}>
-            <Box>
-              <Autocomplete
-                style={{ width: '300px' }}
-                options={products}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={
-                  products.filter((data) => data.optionValue === selectedProduct).length
-                    ? products.filter((data) => data.optionValue === selectedProduct)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setSelectedProduct(val && val.optionValue ? val.optionValue : '');
-                }}
-                renderInput={(params) => <TextField {...params} margin="dense" name="product" label="Product" variant="outlined" fullWidth />}
-              />
-            </Box>
-            <Box ml={2}>
-              <Autocomplete
-                style={{ width: '300px' }}
-                options={warehouse}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
-                value={
-                  warehouse.filter((data) => data.optionValue === selectedWarehouse).length
-                    ? warehouse.filter((data) => data.optionValue === selectedWarehouse)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-                )}
-              />
-            </Box>
-            <Box ml={2}>
-              <KeyboardDatePicker
-                autoOk
-                fullWidth
-                size="small"
-                variant="inline"
-                inputVariant="outlined"
-                value={new Date(startDate)}
-                name="startDate"
-                label="Start Date"
-                onChange={(date: any) => {
-                  setStartDate(moment(date).format('YYYY-MM-DD'));
-                }}
-                format={dateFormat}
-                InputLabelProps={{
-                  shrink: true
-                }}
-                margin="dense"
-              />
-            </Box>
-            <Box ml={2}>
-              <KeyboardDatePicker
-                autoOk
-                fullWidth
-                size="small"
-                variant="inline"
-                inputVariant="outlined"
-                value={new Date(endDate)}
-                name="endDate"
-                label="End Date"
-                onChange={(date: any) => {
-                  setEndDate(moment(date).format('YYYY-MM-DD'));
-                }}
-                format={dateFormat}
-                InputLabelProps={{
-                  shrink: true
-                }}
-                margin="dense"
-              />
-            </Box>
+            <Autocomplete
+              fullWidth
+              options={products}
+              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+              getOptionSelected={(option: any, val) => option.optionValue === val}
+              value={
+                products.filter((data) => data.optionValue === selectedProduct).length
+                  ? products.filter((data) => data.optionValue === selectedProduct)[0]
+                  : ''
+              }
+              onChange={(e, val) => {
+                setSelectedProduct(val && val.optionValue ? val.optionValue : '');
+              }}
+              renderInput={(params) => <TextField {...params} margin="dense" name="product" label="Product" variant="outlined" fullWidth />}
+            />
+            <Autocomplete
+              fullWidth
+              options={warehouse}
+              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+              getOptionSelected={(option: any, val) => option.optionValue === val}
+              value={
+                warehouse.filter((data) => data.optionValue === selectedWarehouse).length
+                  ? warehouse.filter((data) => data.optionValue === selectedWarehouse)[0]
+                  : ''
+              }
+              onChange={(e, val) => {
+                setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+              }}
+              renderInput={(params) => (
+                <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+              )}
+            />
+            <KeyboardDatePicker
+              autoOk
+              fullWidth
+              size="small"
+              variant="inline"
+              inputVariant="outlined"
+              value={new Date(startDate)}
+              name="startDate"
+              label="Start Date"
+              onChange={(date: any) => {
+                setStartDate(moment(date).format('YYYY-MM-DD'));
+              }}
+              format={dateFormat}
+              InputLabelProps={{
+                shrink: true
+              }}
+              margin="dense"
+            />
+            <KeyboardDatePicker
+              autoOk
+              fullWidth
+              size="small"
+              variant="inline"
+              inputVariant="outlined"
+              value={new Date(endDate)}
+              name="endDate"
+              label="End Date"
+              onChange={(date: any) => {
+                setEndDate(moment(date).format('YYYY-MM-DD'));
+              }}
+              format={dateFormat}
+              InputLabelProps={{
+                shrink: true
+              }}
+              margin="dense"
+            />
           </MuiPickersUtilsProvider>
-        </Box>
+        </div>
         <Box display="flex">
           <Box pt={1}>
             <Button variant="contained" size="small" className={'btn-outline-v1'} onClick={handleExport}>
@@ -230,7 +222,7 @@ const RoadMap = () => {
             </Button>
           </Box>
         </Box>
-      </Box>
+      </div>
       <Box pt={2}>
         <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
           <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>

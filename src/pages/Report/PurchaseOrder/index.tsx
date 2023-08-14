@@ -605,6 +605,71 @@ const Report = () => {
           numberRenderer: NumberRenderer
         });
       }
+      if (resourceCamelCase === 'assetUtilization') {
+        let { data } = await axiosInstance().get(`/serialized-asset/report/assets-utilization/column`);
+        data?.data?.forEach((e) => {
+          var cellRenderer = 'commonRenderer'
+          if (e.fieldName === 'assetNumber') {
+            cellRenderer = 'assetRenderer'
+          }
+          if (e.fieldName === 'product') {
+            cellRenderer = 'productRenderer'
+          }
+          if (e.fieldName === 'inUseDays') {
+            cellRenderer = 'numberRenderer'
+          }
+          columns.push({
+            field: e.fieldName,
+            headerName: e.fieldLabel,
+            show: true,
+            disabled: false,
+            cellRenderer: cellRenderer,
+            filter: e.fieldName === 'assetNumber' ? true : false,
+            sortable: false,
+          })
+        })
+
+        let fieldOptionResponce = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Product,Warehouse`);
+        const fieldOption = fieldOptionResponce?.data?.data;
+        resourceFieldData.push({
+          isCreate: true,
+          isRead: true,
+          isUpdate: true,
+          fieldData: {
+            _id: '63f71ce5b17c69a1ab7e4c01',
+            fieldLabel: columns?.find((e) => e.field === 'productName')?.headerName || 'Product Name',
+            fieldName: 'product',
+            type: 'dropDown',
+            lookup: true,
+            option: fieldOption["Product"],
+            filter: false,
+            sortable: false,
+          }
+        });
+        resourceFieldData.push({
+          isCreate: true,
+          isRead: true,
+          isUpdate: true,
+          fieldData: {
+            _id: '63f71ce5b17c69a1ab7e4c06',
+            fieldLabel: columns?.find((e) => e.field === 'warehouse')?.headerName || 'Warehouse',
+            fieldName: 'warehouse',
+            type: 'dropDown',
+            lookup: true,
+            option: fieldOption["Warehouse"],
+            filter: false,
+            sortable: false,
+          }
+        });
+
+
+        setFrameWorkComponent({
+          productRenderer: ProductRenderer,
+          assetRenderer: AssetRenderer,
+          commonRenderer: CommonRenderer,
+          numberRenderer: NumberRenderer
+        });
+      }
 
       setResourceColumns(resourceFieldData);
       setColumns(columns);
@@ -721,6 +786,12 @@ const Report = () => {
     </Link>
   );
 
+  const AssetRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data._id}`} target="_blank" >
+      {params.value}
+    </Link>
+  );
+
   const ProductCategoryRenderer = (params: any) => (
     <Link className="link" title={params.value} to={`${routes.productCategoryDetail.path}/${params.data.productCategoryId}`} target="_blank" >
       {params.value}
@@ -793,6 +864,9 @@ const Report = () => {
     }
     if (resourceCamelCase === 'numberOfAssetsByStatus') {
       api = `/serialized-asset/report/assets-number-by-status`;
+    }
+    if (resourceCamelCase === 'assetUtilization') {
+      api = `/serialized-asset/report/assets-utilization`;
     }
 
     axiosInstance()
@@ -951,6 +1025,9 @@ const Report = () => {
     }
     if (resourceCamelCase === 'numberOfAssetsByStatus') {
       api = `/serialized-asset/report/assets-number-by-status/export`;
+    }
+    if (resourceCamelCase === 'assetUtilization') {
+      api = `/serialized-asset/report/assets-utilization/export`;
     }
 
     axiosInstance()

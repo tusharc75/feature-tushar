@@ -21,6 +21,8 @@ const ImportExportMenu = ({
   isDownloadExcel = true,
   ...others
 }) => {
+
+
   const toastConfig = useContext(CustomToastContext);
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -52,7 +54,6 @@ const ImportExportMenu = ({
       if (additionalParams) {
         importApi = `${importApi}?${additionalParams}`;
       }
-
       axiosInstance()
         .post(importApi, formData, {
           responseType: 'blob',
@@ -149,8 +150,8 @@ const ImportExportMenu = ({
   const ImportInput = (
     <input
       onClick={(e: any) => (e.target.value = null)}
-      id="importFromExcel"
-      name="importFromExcel"
+      id="importFromExcelMenu"
+      name="importFromExcelMenu"
       onChange={uploadData}
       accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
       style={{
@@ -193,22 +194,22 @@ const ImportExportMenu = ({
       >
         {permissions?.isCreate && !onlyExport && (
           <MenuItem  >
-            <label htmlFor="importFromExcel" style={{ cursor: "pointer" }}>
+            <label htmlFor="importFromExcelMenu" style={{ cursor: "pointer" }}>
               {ImportInput}
               Import from Excel
             </label>
           </MenuItem>
         )}
-
-        <MenuItem
-          onClick={() => {
-            exportToExcel();
-            handleClose();
-          }}
-        >
-          Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
-        </MenuItem>
-
+        {permissions?.isRead &&
+          <MenuItem
+            onClick={() => {
+              exportToExcel();
+              handleClose();
+            }}
+          >
+            Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
+          </MenuItem>
+        }
         {isDownloadExcel && !onlyExport && (
           <MenuItem
             onClick={() => {

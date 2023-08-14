@@ -1005,6 +1005,25 @@ const routes = {
         : RESOURCE_LABEL.trailerMaster,
     path: '/trailer-master/detail'
   },
+  iotDataPoints: {
+    title:
+      storedRoutes && storedRoutes.iotDataPoints && storedRoutes.iotDataPoints.title
+        ? storedRoutes.iotDataPoints?.title
+        : RESOURCE_LABEL.iotDataPoints,
+    path: '/iot-data-points'
+  },
+  iotDataPointsDetail: {
+    title:
+      storedRoutes && storedRoutes.iotDataPoints && storedRoutes.iotDataPoints.title
+        ? storedRoutes.iotDataPoints?.title
+        : RESOURCE_LABEL.iotDataPoints,
+    path: '/iot-data-points/detail'
+  },
+  iotChart: {
+    title: storedRoutes && storedRoutes.iotChart && storedRoutes.iotChart?.title ? storedRoutes.iotDataPoints?.title
+      : RESOURCE_LABEL.iotChart,
+    path: '/iot-chart'
+  },
 };
 
 export default routes;

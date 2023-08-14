@@ -13,7 +13,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { sublease, SUBLEASE_STATUS, subleaseSteps, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManageSublease from './ManageSublease';
 import { FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { BiFoodMenu } from 'react-icons/bi';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -25,6 +25,7 @@ import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
+import EditIcon from '@material-ui/icons/Edit';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -165,15 +166,11 @@ const SubleaseDetailsPage = () => {
             {permissions?.sublease?.isUpdate && subleaseData?.status !== SUBLEASE_STATUS.completed && allowedToEdit && (
               <>
                 <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={() => setOpenUpdateDialog(true)} className={'btn-outline-v1'}>
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                 </Button>
               </>
             )}
-            <ActivityButton 
-              referenceId={subleaseData?._id} 
-              resource={ACTIVITY_RESOURCE.sublease} 
-              resourceLabel={subleaseData?.subleaseName}
-              />
+            <ActivityButton referenceId={subleaseData?._id} resource={ACTIVITY_RESOURCE.sublease} resourceLabel={subleaseData?.subleaseName} />
           </Box>
         </Box>
       </Box>

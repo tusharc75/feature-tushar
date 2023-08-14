@@ -508,7 +508,6 @@ const RepairOrderDetails = () => {
                     ? false
                     : allowedToEdit
                 }
-                allowedToDelete={allowedToDelete}
               />
             )}
             {(stepNames[currentStep] === 'Work Order' || stepNames[currentStep] === 'Execute') && repairOrderData && (
@@ -525,7 +524,6 @@ const RepairOrderDetails = () => {
                       ? false
                       : allowedToEdit
                 }
-                allowedToDelete={allowedToDelete}
                 isPostWorkService={Boolean(currentStep === 3)}
                 setCurrentStep={setCurrentStep}
                 createNewVersionQuote={createNewVersionQuote}
@@ -538,7 +536,6 @@ const RepairOrderDetails = () => {
                 renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
-                allowedToDelete={allowedToDelete}
                 setQuotationVersionData={setQuotationVersionData}
                 invoiceStep={false}
                 updateOrderStatus={updateOrderStatus}
@@ -559,7 +556,6 @@ const RepairOrderDetails = () => {
                 renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={false}
-                allowedToDelete={false}
                 invoiceStep={true}
                 setQuotationVersionData={setQuotationVersionData}
                 updateOrderStatus={updateOrderStatus}

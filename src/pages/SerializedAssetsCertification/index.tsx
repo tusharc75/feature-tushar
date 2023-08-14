@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { Box, Button, Chip, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
+import { Box, CircularProgress, IconButton, TextField } from '@material-ui/core';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
@@ -31,9 +31,9 @@ import styles from '../Leads/Header.module.scss';
 import DurationFilter from 'src/components/DurationFilter';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import HistoryIcon from '@material-ui/icons/History';
+import { Autocomplete } from '@material-ui/lab';
 
 const SerializedAssetsCertification = () => {
-
   const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -46,6 +46,8 @@ const SerializedAssetsCertification = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
+  const [assetOptions, setAssetOptions] = useState([]);
+  const [loadingAssets, setLoadingAssets] = useState(false);
 
   const [issueDuration, setIssueDuration] = useState({
     from: null,
@@ -58,7 +60,7 @@ const SerializedAssetsCertification = () => {
   });
 
   const {
-    state: { permissions, user }
+    state: { permissions, user, selectedEntity }
   }: any = useData();
   const { getColumnData } = useColumns();
 
@@ -67,9 +69,12 @@ const SerializedAssetsCertification = () => {
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration]);
+    fetchData(true);
+  }, []);
 
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -109,15 +114,18 @@ const SerializedAssetsCertification = () => {
       });
   };
 
-  const fetchProductInventory = () => {
+  const fetchData = (forAutocomplete = false, assetTerm = '') => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    const queryString = getQueryString();
+    const queryString = getQueryString(forAutocomplete, assetTerm);
     axiosInstance()
       .get(`${serializedAssetsCertification.api}${queryString}`)
       .then(({ data }) => {
+        if (forAutocomplete) {
+          setAssetOptions(data.data);
+        }
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
           const dateToQuery = moment().add(30, 'days').toDate();
@@ -153,7 +161,7 @@ const SerializedAssetsCertification = () => {
       });
   };
 
-  const getQueryString = () => {
+  const getQueryString = (forAutocomplete = false, assetTerm = '') => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -186,6 +194,12 @@ const SerializedAssetsCertification = () => {
         }
       });
     }
+    if (forAutocomplete && assetTerm) {
+      updatedFilters.push({
+        field: 'assetNumber',
+        term: assetTerm
+      });
+    }
     if (updatedFilters?.length > 0) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
@@ -209,20 +223,13 @@ const SerializedAssetsCertification = () => {
   const AssetNumberRenderer = (params) => (
     <Fragment>
       <p className="text-truncate">{params.value}</p>
-      {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
-        <Box ml={1} pt={1}>
-          <HtmlTooltip title="Asset needs to be recert">
-            <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
-          </HtmlTooltip>
-        </Box>
-      )}
     </Fragment>
   );
 
   const ActionsRenderer = (params) => (
     <>
       {params?.data?.canIssueCertificate && (
-        <HtmlTooltip title="Issue Certificate">
+        <HtmlTooltip title="Attach Certificate">
           <IconButton
             size="small"
             aria-label="Issue"
@@ -230,7 +237,7 @@ const SerializedAssetsCertification = () => {
               setIssueCertificateDialog({ open: true, id: params?.data?._id });
             }}
           >
-            <NoteAddIcon color='primary' />
+            <NoteAddIcon color="primary" />
           </IconButton>
         </HtmlTooltip>
       )}
@@ -242,7 +249,7 @@ const SerializedAssetsCertification = () => {
             setCertificateHistoryDialog({ open: true, id: params?.data?._id });
           }}
         >
-          <HistoryIcon color='primary' />
+          <HistoryIcon color="primary" />
         </IconButton>
       </HtmlTooltip>
     </>
@@ -258,40 +265,49 @@ const SerializedAssetsCertification = () => {
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[routes.serializedAssetsCertification]} />
         </Grid>
-        <Grid item md={8} sm={1} xs={2}></Grid>
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container spacing={2} className={styles.filter_side_container}>
-            <Grid item xs={12} sm={12} md={5} >
-              <DurationFilter
-                label={"Issue Date"}
-                duration={issueDuration}
-                setDuration={setIssueDuration}
-                defaultTimeFrame='custom' />
-            </Grid>
-            <Grid item xs={12} sm={12} md={5} >
-              <DurationFilter
-                label={"Expire Date"}
-                duration={expireDuration}
-                setDuration={setExpireDuration}
-                defaultTimeFrame='custom' />
-            </Grid>
-            <Grid sm={12} xs={12} md={2} container className={`${styles.filter_side} align-items-center`}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Box style={{ flexGrow: '1' }}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={styles.search_box_input}
-                    width={isMobile ? '200px' : '210px'}
-                    style={{ width: '100%', maxWidth: 250, display: 'flex' }}
+          <div className="flex justify-between mb-4 sm:mb-5 flex-wrap gap-4">
+            <div className="w-full min-[600px]:w-[250px]">
+              <Autocomplete
+                onInputChange={(event, value) => {
+                  fetchData(true, value);
+                }}
+                onChange={(event, value) => {
+                  fetchData(true, value);
+                }}
+                fullWidth
+                options={assetOptions.map((option) => option.assetNumber)}
+                loading={loadingAssets}
+                getOptionLabel={(option) => option || ''}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={'Asset'}
+                    variant="outlined"
                     size="small"
-                    value={search}
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <Fragment>
+                          {loadingAssets ? <CircularProgress color="inherit" size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </Fragment>
+                      )
+                    }}
                   />
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
+                )}
+                style={{ minWidth: 250 }}
+              />
+            </div>
+
+            <SearchBox onChange={handleSearch} className={styles.search_box_input} width={isMobile ? '200px' : '210px'} size="small" value={search} />
+          </div>
+          <div className="grid lg:grid-cols-2 gap-4">
+            <DurationFilter label={'Issue Date'} duration={issueDuration} setDuration={setIssueDuration} defaultTimeFrame="custom" />
+            <DurationFilter label={'Expire Date'} duration={expireDuration} setDuration={setExpireDuration} defaultTimeFrame="custom" />
+          </div>
         </div>
         {columns ? (
           Object.keys(frameWorkComponent).length > 0 && columns ? (
@@ -308,10 +324,11 @@ const SerializedAssetsCertification = () => {
               actionWidth={150}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchProductInventory}
-              showOnlyShowFilteredRecordSwitch={true}
+              refreshGrid={fetchData}
+              showOnlyShowFilteredRecordSwitch={false}
               showFilters={true}
               resource={sidebarResource.serializedAsset}
+              allowSelection={false}
             />
           ) : null
         ) : (
@@ -325,7 +342,7 @@ const SerializedAssetsCertification = () => {
           onClose={() => setIssueCertificateDialog({ open: false, id: null })}
           onSuccess={() => {
             setIssueCertificateDialog({ open: false, id: null });
-            fetchProductInventory();
+            fetchData();
           }}
           assetId={issueCertificateDialog?.id}
         />
@@ -333,7 +350,9 @@ const SerializedAssetsCertification = () => {
       {certificateHistoryDialog?.open && (
         <CertificateHistoryDialog
           onClose={() => setCertificateHistoryDialog({ open: false, id: null })}
-          id={certificateHistoryDialog?.id} />
+          id={certificateHistoryDialog?.id}
+          supplierAccount={user?.user?.supplierAccountId}
+        />
       )}
     </Fragment>
   );

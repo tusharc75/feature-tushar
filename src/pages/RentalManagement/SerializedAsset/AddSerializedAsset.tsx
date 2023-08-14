@@ -43,6 +43,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { useAppTheme } from 'src/constants/AppConfig';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
 
 let searchTimeout;
 
@@ -73,7 +74,7 @@ const AddSerializedAsset = ({
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const {
-    state: { permissions }
+    state: { permissions, user }
   }: any = useData();
 
   const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
@@ -89,6 +90,7 @@ const AddSerializedAsset = ({
   const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
 
   const [inuseAssetConfirmBox, setInuseAssetConfirmBox] = useState(false);
+  const [certificateExpireAlert, setCertificateExpireAlert] = useState({ open: false, asset: '' });
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 600;
@@ -265,7 +267,11 @@ const AddSerializedAsset = ({
       }
       if (referenceType === 'Repair Job') {
         deepFilter = `${deepFilter}&repairable=true`;
-      } else if (referenceType === 'Rental Job') {
+      }
+      if (referenceType === 'Transfer Asset') {
+        deepFilter = `${deepFilter}&transferable=true`;
+      }
+      else if (referenceType === 'Rental Job') {
         const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
         deepFilter = `${deepFilter}&rental=true&date=${JSON.stringify(dateFilter)}`;
       } else {
@@ -499,32 +505,32 @@ const AddSerializedAsset = ({
                   <Box style={{ display: 'inline' }}>
                     {serializedProducts.length > 0
                       ? serializedProducts.map((d) => (
-                          <Box
-                            m={0.5}
-                            p={1}
-                            border={1}
-                            className="cursor-pointer"
-                            borderColor="var(--common-border-color)"
-                            onClick={() => {
-                              if (selectedProduct === d.id) {
-                                setSelectedProduct(null);
-                              } else {
-                                setSelectedProduct(d.id);
-                              }
-                            }}
-                            style={{ display: 'inline-block' }}
-                            bgcolor={d.id === selectedProduct ? 'var(--dark-primary, var(--primary))' : 'var(--dark-secondary, transparent)'}
-                            color={d.id === selectedProduct && 'white'}
-                          >
-                            {d?.qty < 0 ? (
-                              <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                            ) : d?.qty === 0 ? (
-                              <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                            ) : (
-                              <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                            )}
-                          </Box>
-                        ))
+                        <Box
+                          m={0.5}
+                          p={1}
+                          border={1}
+                          className="cursor-pointer"
+                          borderColor="var(--common-border-color)"
+                          onClick={() => {
+                            if (selectedProduct === d.id) {
+                              setSelectedProduct(null);
+                            } else {
+                              setSelectedProduct(d.id);
+                            }
+                          }}
+                          style={{ display: 'inline-block' }}
+                          bgcolor={d.id === selectedProduct ? 'var(--dark-primary, var(--primary))' : 'var(--dark-secondary, transparent)'}
+                          color={d.id === selectedProduct && 'white'}
+                        >
+                          {d?.qty < 0 ? (
+                            <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                          ) : d?.qty === 0 ? (
+                            <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                          ) : (
+                            <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                          )}
+                        </Box>
+                      ))
                       : null}
                   </Box>
                 </Box>
@@ -629,7 +635,7 @@ const AddSerializedAsset = ({
                               }}
                               variant={isMobile && !isTablet ? 'text' : 'contained'}
                               disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
-                              className={`${isMobile && !isTablet ? 'mobile_button' : ''} new-dropdown-v1 `}
+                              className={`${isMobile && !isTablet ? 'mobile_button' : ''} yellow-button `}
                               endIcon={isAdding && <CircularProgress size={20} />}
                             >
                               {'Transfer to Job Plant'}
@@ -645,10 +651,10 @@ const AddSerializedAsset = ({
                             getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()
                               ? 'Direct transfer to customer location'
                               : referenceType === 'Rental Job'
-                              ? 'Add to Job'
-                              : referenceType === 'ReplaceAsset'
-                              ? 'Replace'
-                              : 'Add'
+                                ? 'Add to Job'
+                                : referenceType === 'ReplaceAsset'
+                                  ? 'Replace'
+                                  : 'Add'
                           }
                         >
                           <Button
@@ -656,10 +662,24 @@ const AddSerializedAsset = ({
                             size="small"
                             style={{ minWidth: 'max-content' }}
                             onClick={() => {
-                              if (referenceType === 'Rental Job' && checkMTRValidation) {
-                                if ([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.mtrAttached !== true)) {
-                                  setMtrConfirmBox(true);
-                                } else {
+                              if (referenceType === 'Rental Job') {
+                                if (user?.user?.brandPolicy?.serializedAssetCertification &&
+                                  [...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.certificateExpireDate
+                                    && new Date(e.certificateExpireDate)?.getTime() <= new Date()?.getTime())) {
+                                  setCertificateExpireAlert({
+                                    open: true,
+                                    asset: [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.certificateExpireDate
+                                      && new Date(e.certificateExpireDate)?.getTime() <= new Date()?.getTime())?.map((e) => e.assetNumber)?.toString()
+                                  })
+                                }
+                                else if (checkMTRValidation) {
+                                  if ([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.mtrAttached !== true)) {
+                                    setMtrConfirmBox(true);
+                                  } else {
+                                    addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+                                  }
+                                }
+                                else {
                                   addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                                 }
                               } else {
@@ -749,52 +769,58 @@ const AddSerializedAsset = ({
           </Box>
         </CustomDialogContent>
       </Dialog>
-      {showTransferAssetDialog && (
-        <ManageTransferAsset
-          isClone={false}
-          transferAssetId={null}
-          onClose={() => setShowTransferAssetDialog(false)}
-          onSuccess={(data) => {
-            handleAddAssetToTransferAsset(data?._id);
-          }}
-          referenceId={referenceData._id}
-          referenceType={referenceType}
-          referenceData={{
-            transferFromPlant: getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0]?.warehouseId,
-            transferToPlant: referenceData?.warehouse,
-            wellName: referenceData?.wellName,
-            wellNumber: referenceData?.wellNumber,
-            afeNumber: referenceData?.afeNumber
-          }}
-        />
-      )}
-      {showTicketDialog.open && (
-        <ManageDeliveryTicket
-          ticketType={DELIVERY_TICKET_TYPE.receiving}
-          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
-          referenceData={showTicketDialog.data}
-          productInventory={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
-          products={[]}
-          onClose={() => setShowTicketDialog({ open: false, data: {}, assets: [] })}
-          onSuccess={(data) => {
-            handleCreateLoadingTicketAddAsstes(data);
-          }}
-        />
-      )}
-      {mtrConfirmBox && (
-        <ConfirmationDialog
-          open={mtrConfirmBox}
-          okBtnLoading={isAdding}
-          message={`MTR(s) missing for some or all line items.`}
-          onClose={() => {
-            setMtrConfirmBox(false);
-          }}
-          onOk={() => {
-            addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
-            setMtrConfirmBox(false);
-          }}
-        />
-      )}
+      {
+        showTransferAssetDialog && (
+          <ManageTransferAsset
+            isClone={false}
+            transferAssetId={null}
+            onClose={() => setShowTransferAssetDialog(false)}
+            onSuccess={(data) => {
+              handleAddAssetToTransferAsset(data?._id);
+            }}
+            referenceId={referenceData._id}
+            referenceType={referenceType}
+            referenceData={{
+              transferFromPlant: getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0]?.warehouseId,
+              transferToPlant: referenceData?.warehouse,
+              wellName: referenceData?.wellName,
+              wellNumber: referenceData?.wellNumber,
+              afeNumber: referenceData?.afeNumber
+            }}
+          />
+        )
+      }
+      {
+        showTicketDialog.open && (
+          <ManageDeliveryTicket
+            ticketType={DELIVERY_TICKET_TYPE.receiving}
+            referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
+            referenceData={showTicketDialog.data}
+            productInventory={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
+            products={[]}
+            onClose={() => setShowTicketDialog({ open: false, data: {}, assets: [] })}
+            onSuccess={(data) => {
+              handleCreateLoadingTicketAddAsstes(data);
+            }}
+          />
+        )
+      }
+      {
+        mtrConfirmBox && (
+          <ConfirmationDialog
+            open={mtrConfirmBox}
+            okBtnLoading={isAdding}
+            message={`MTR(s) missing for some or all line items.`}
+            onClose={() => {
+              setMtrConfirmBox(false);
+            }}
+            onOk={() => {
+              addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+              setMtrConfirmBox(false);
+            }}
+          />
+        )
+      }
       {inuseAssetConfirmBox && (
         <ConfirmationDialog
           open={inuseAssetConfirmBox}
@@ -809,7 +835,15 @@ const AddSerializedAsset = ({
           }}
         />
       )}
-    </Fragment>
+      {certificateExpireAlert.open && (
+        <MessageDialog
+          open={true}
+          header='Certification Information'
+          message={`Certification has expired for asset(s) - ${certificateExpireAlert.asset}`}
+          onClose={() => setCertificateExpireAlert({ open: false, asset: '' })}
+        />
+      )}
+    </Fragment >
   );
 };
 

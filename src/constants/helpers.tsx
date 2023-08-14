@@ -334,7 +334,8 @@ export const sidebarResource = {
   competencies: 'Competencies',
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
-  trailerMaster: 'Trailer Master'
+  trailerMaster: 'Trailer Master',
+  iotDataPoints: 'Iot Data Points',
 };
 
 export const primaryFields = {
@@ -455,7 +456,10 @@ export const RESOURCE_LABEL = {
   materialHandling: 'Material Handling',
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
-  trailerMaster: 'Trailer Master'
+  trailerMaster: 'Trailer Master',
+  iotDataPoints: 'IoT Data Points',
+  iotChart: 'IoT Chart',
+
 };
 
 export const CHILD_RESOURCE = {
@@ -2187,6 +2191,12 @@ export const REPORT_LIST = [
     key: 'purchaseOrderType',
     type: 'numberOfAssetsByStatus',
   },
+  {
+    title: 'Asset Utilization',
+    permission: 'serializedAsset',
+    key: 'purchaseOrderType',
+    type: 'assetUtilization',
+  },
 ];
 
 export const RESOURCE_CALENDAR = [
@@ -2496,7 +2506,8 @@ export const INVOICE_STATUS = {
   inProgress: 'In-Progress',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
-  closed: 'Closed'
+  closed: 'Closed',
+  cancelled: 'Cancelled',
 };
 
 export const SALES_ORDER_STATUS = {
@@ -2506,6 +2517,11 @@ export const SALES_ORDER_STATUS = {
   invoiced: 'Invoiced',
   closed: 'Closed'
 };
+
+export const PRICING_TYPE = [
+  { optionLabel: 'Rent', optionValue: 'Rent' },
+  { optionLabel: 'Sell', optionValue: 'Price' }
+]
 
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {

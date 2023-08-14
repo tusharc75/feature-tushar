@@ -20,7 +20,7 @@ import ReasonDialog from './ReasonDialog';
 import { ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
 import { isMobile, isTablet } from 'react-device-detect';
-import { GiAutoRepair, GrStatusInfo } from 'react-icons/all';
+import { GiAutoRepair } from 'react-icons/all';
 import { MdEdit } from 'react-icons/md';
 import { startCase } from 'lodash';
 import moment from 'moment';
@@ -29,6 +29,7 @@ import CertificationHistory from './CertificationHistory';
 import AssetHistory from './AssetHistory';
 import queryString from 'query-string';
 import TabPanel from 'src/components/TabPanel';
+import SyncIcon from '@material-ui/icons/Sync';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -205,7 +206,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -305,9 +306,9 @@ const SerializedAssetDetailsPage = () => {
                           className="btn-outline-v1"
                           disabled={updateLoading}
                           aria-controls="action-menu"
-                          endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                          endIcon={<ExpandMore />}
                         >
-                          {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
+                          {isMobile && !isTablet ? <SyncIcon style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
                         </Button>
                       )
                     ) : null}
@@ -409,7 +410,9 @@ const SerializedAssetDetailsPage = () => {
         <TabPanel value={tabValue} index={2}>
           <CertificationHistory
             id={id}
-            canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate} />
+            canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
+            supplierAccount={null}
+          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

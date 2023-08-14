@@ -10,30 +10,10 @@ type SerachBoxProps = Omit<TextFieldProps, 'variant' | 'type' | 'InputProps'> & 
 };
 
 function SearchBox({ onChange, value, size, width, placeholder, style, className, ...otherProps }: SerachBoxProps) {
-  return isMobile && !isTablet ? (
+  return (
     <TextField
       {...otherProps}
-      style={{ minWidth: width || '200px', ...style }}
-      variant="standard"
-      placeholder={placeholder || 'Search'}
-      type="search"
-      size={size || 'small'}
-      value={value}
-      className={isMobile ? 'serchBox' : className}
-      onChange={onChange}
-      InputProps={{
-        disableUnderline: true,
-        endAdornment: (
-          <InputAdornment position="start" className="search-input-icon">
-            <FiSearch style={{ color: '#737373' }} />
-          </InputAdornment>
-        )
-      }}
-    />
-  ) : (
-    <TextField
-      {...otherProps}
-      style={{ minWidth: width || '258px', ...style }}
+      style={{ minWidth: width || '200px', flexGrow: 1, maxWidth: 300, ...style }}
       variant="outlined"
       placeholder={placeholder || 'Search'}
       type="search"
@@ -51,19 +31,5 @@ function SearchBox({ onChange, value, size, width, placeholder, style, className
     />
   );
 }
-// <TextField
-//     style={{ width: width || "200px", ...style , borderRadius:"20px" , backgroundColor:"#C8E9CE" , padding: "2px 14px"  }}
-//     variant="standard"
-//     placeholder={placeholder || "Search"}
-//     type="search"
-//     size={size || "small"}
-//     value={value}
-//     className={`${searchbox} ${"serchBox"}`}
-//     onChange={onSearch}
-//     InputProps={{
-//
-//     }}
-//
-// />
 
 export default memo(SearchBox);

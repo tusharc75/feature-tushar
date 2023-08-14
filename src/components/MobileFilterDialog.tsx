@@ -9,8 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { makeStyles } from '@material-ui/core/styles';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { CustomToastContext } from '../StateProvider/CustomToastContext/CustomToastContext';
-import { isObjectEmpty } from "../constants/helpers";
-import { Box } from "@material-ui/core";
+import { isObjectEmpty } from '../constants/helpers';
+import { Box } from '@material-ui/core';
 import Card from '@material-ui/core/Card';
 
 const Transition = React.forwardRef(function Transition(
@@ -23,7 +23,6 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function MobileFilterDialog({ isOpen, handleClose, contentPart, columns, dispatch, filters, title }) {
-
   const toastConfig = React.useContext(CustomToastContext);
   const [inputFields, setInputFields] = React.useState(null);
 
@@ -34,13 +33,12 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
         data.push({
           id: uuidv4(),
           fieldName: field,
-          fieldValue: filters[field].filter,
+          fieldValue: filters[field].filter
         });
       });
-      setInputFields(data)
-    }
-    else {
-      setInputFields([])
+      setInputFields(data);
+    } else {
+      setInputFields([]);
     }
   }, [filters, isOpen]);
 
@@ -48,10 +46,10 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
     e.preventDefault();
     var result = {};
     inputFields?.forEach((v) => {
-      if (v.fieldValue && v.fieldValue !== "") {
+      if (v.fieldValue && v.fieldValue !== '') {
         result[v.fieldName] = { filter: v.fieldValue };
       }
-    })
+    });
     dispatch({ type: 'filter', filters: result });
     toastConfig.setToastConfig({
       open: true,
@@ -65,7 +63,7 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
   const handleChangeInput = (id, event) => {
     const newInputFields = inputFields?.map((i) => {
       if (id === i.id) {
-        i["fieldValue"] = event.target.value;
+        i['fieldValue'] = event.target.value;
       }
       return i;
     });
@@ -95,93 +93,81 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
     setInputFields(values);
   };
 
-  return (<Dialog
-    open={isOpen}
-    TransitionComponent={Transition}
-    keepMounted
-    onClose={handleClose}
-    aria-describedby="alert-dialog-slide-description"
-    className="mobile-filter-root"
-  >
-    <DialogContent className="mobile-filter-content">
-      <div className='d-flex justify-content-space-between align-items-center pb-3'>
-        <h3 className=" sub-filter-heading">{title ? `Filter ${title}` : `Filter`}</h3>
-        <MdClose size={20} style={{ color: "rgb(244, 67, 54)" }} onClick={handleClose} />
-      </div>
-      {contentPart}
-      <form onSubmit={handleSubmit}>
-        {inputFields?.map((field) => (
-          <Box mt={1} key={field.id}>
-            <Card variant="outlined" >
-              <Box p={1}>
-                <Box display="flex">
-                  <Box flexGrow={1}>
-                    <Autocomplete
-                      id={`fieldName_${field.id}`}
-                      options={columns}
-                      autoHighlight
-                      getOptionLabel={(option: any) => option?.headerName}
-                      renderOption={(option) => option?.headerName}
-                      onChange={(event, value) => {
-                        if (value !== null) {
-                          handleChangeAutocomplete(field.id, value);
-                        } else {
-                          handleChangeAutocomplete(field.id, '');
-                        }
-                      }}
-                      value={columns?.find(v => v.field === field?.fieldName) || {}}
-                      renderInput={(params) => <TextField
-                        {...params}
-                        name={`fieldName_${field.id}`}
-                        label="Select Field"
-                        margin='dense'
-                        variant="outlined"
-                      />}
-                    />
+  return (
+    <Dialog
+      open={isOpen}
+      TransitionComponent={Transition}
+      keepMounted
+      onClose={handleClose}
+      aria-describedby="alert-dialog-slide-description"
+      className="mobile-filter-root"
+    >
+      <DialogContent className="mobile-filter-content rounded-t-[20px] " style={{ border: '1px solid var(--common-border-color)' }}>
+        <div
+          className="d-flex justify-content-space-between align-items-center pb-3 mb-3"
+          style={{ borderBottom: '1px solid var(--common-border-color)' }}
+        >
+          <h3 className=" sub-filter-heading">{title ? `Filter ${title}` : `Filter`}</h3>
+          <MdClose size={20} style={{ color: 'var(--text-primary)' }} onClick={handleClose} />
+        </div>
+        {contentPart}
+        <form onSubmit={handleSubmit}>
+          {inputFields?.map((field) => (
+            <Box mt={1} key={field.id}>
+              <Card variant="outlined">
+                <Box p={1}>
+                  <Box display="flex">
+                    <Box flexGrow={1}>
+                      <Autocomplete
+                        id={`fieldName_${field.id}`}
+                        options={columns}
+                        autoHighlight
+                        getOptionLabel={(option: any) => option?.headerName}
+                        renderOption={(option) => option?.headerName}
+                        onChange={(event, value) => {
+                          if (value !== null) {
+                            handleChangeAutocomplete(field.id, value);
+                          } else {
+                            handleChangeAutocomplete(field.id, '');
+                          }
+                        }}
+                        value={columns?.find((v) => v.field === field?.fieldName) || {}}
+                        renderInput={(params) => (
+                          <TextField {...params} name={`fieldName_${field.id}`} label="Select Field" margin="dense" variant="outlined" />
+                        )}
+                      />
+                    </Box>
+                    <Box ml={1}>
+                      <IconButton aria-label="delete" onClick={() => handleRemoveFields(field.id)}>
+                        <Delete color="error" />
+                      </IconButton>
+                    </Box>
                   </Box>
-                  <Box ml={1}>
-                    <IconButton aria-label="delete" onClick={() => handleRemoveFields(field.id)}>
-                      <Delete color="error" />
-                    </IconButton>
-                  </Box>
+                  <TextField
+                    name={`fieldValue_${field.id}`}
+                    label="Filter Text"
+                    variant="outlined"
+                    margin="dense"
+                    fullWidth
+                    value={field.fieldValue}
+                    onChange={(event) => handleChangeInput(field.id, event)}
+                  />
                 </Box>
-                <TextField
-                  name={`fieldValue_${field.id}`}
-                  label="Filter Text"
-                  variant="outlined"
-                  margin='dense'
-                  fullWidth
-                  value={field.fieldValue}
-                  onChange={(event) => handleChangeInput(field.id, event)}
-                />
-              </Box>
-            </Card>
+              </Card>
+            </Box>
+          ))}
+          <Box display="flex" mt={2} justifyContent="center">
+            <Button variant="text" color="primary" size="small" className="mobile_button" onClick={handleAddFields}>
+              Add Filter
+            </Button>
           </Box>
-        ))}
-        <Box display="flex" mt={2} justifyContent="center">
-          <Button
-            variant="text"
-            color="primary"
-            size="small"
-            className="mobile_button"
-            onClick={handleAddFields}
-          >
-            Add Filter
-          </Button>
-        </Box>
-        <Box display="flex" mt={2} justifyContent="center">
-          <Button
-            type="submit"
-            color="primary"
-            size="large"
-            className="mobile_button"
-            variant="text"
-            onClick={handleSubmit}>
-            Submit
-          </Button>
-        </Box>
-      </form>
-    </DialogContent>
-  </Dialog>
+          <Box display="flex" mt={2} justifyContent="center">
+            <Button type="submit" color="primary" size="small" className="mobile_button min-w-[60px]" variant="text" onClick={handleSubmit}>
+              Submit
+            </Button>
+          </Box>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
