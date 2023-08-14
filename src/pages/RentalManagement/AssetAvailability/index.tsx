@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Typography } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ACTIVITY_RESOURCE, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -127,7 +127,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       .then(({ data: { data } }) => {
         const rows: any = data;
         setProducts(rows);
-        if (rows?.length > 0 && rows?.filter((e) => e.baseWarehouse)?.length === rows?.filter((e) => e.baseWarehouse && e.qty <= e.assetAvailable)?.length) {
+        if ((rows?.length > 0 && rows?.filter((e) => e.baseWarehouse)?.length === rows?.filter((e) => e.baseWarehouse && e.qty <= e.assetAvailable)?.length) || rows?.length === 0) {
           setCanFulfil(true);
         }
       })
@@ -141,6 +141,11 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       setModalContent({
         title: `${routes.serializedAsset.title} Available`,
         icon: <CheckCircleIcon color="secondary" />
+      });
+    } else if (!canFulfil) {
+      setModalContent({
+        title: ``,
+        icon: null
       });
     } else {
       setModalContent({
