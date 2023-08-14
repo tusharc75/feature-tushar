@@ -4,7 +4,27 @@ interface svgInterface extends React.SVGProps<SVGSVGElement> {
   size?: number;
   color?: string;
 }
-
+export const CollaborationToolsIcon: React.FC<svgInterface> = ({ width = null, height = null, size = 15, color = 'currentcolor', ...others }) => {
+  const style = { fill: 'none', stroke: 'currentcolor', strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: '2px' } as React.CSSProperties;
+  return (
+    <svg
+      {...others}
+      xmlns="http://www.w3.org/2000/svg"
+      width={width ? width : size + 'px'}
+      height={height ? height : size + 'px'}
+      viewBox="0 0 32 32"
+    >
+      <g data-name="79-users">
+        <circle cx="16" cy="13" r="5" style={style} className="cls-1"></circle>
+        <path
+          style={style}
+          d="M23 28a7 7 0 00-14 0zM24 14a5 5 0 10-4-8M25 24h6a7 7 0 00-7-7M12 6a5 5 0 10-4 8M8 17a7 7 0 00-7 7h6"
+          className="cls-1"
+        ></path>
+      </g>
+    </svg>
+  );
+};
 export const ProductSetup: React.FC<svgInterface> = ({ width = null, height = null, size = 15, color = 'currentcolor', ...others }) => {
   return (
     <svg
