@@ -140,7 +140,7 @@ const Quotation = ({
         Header: 'Details',
         width: 250,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
+        Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
               quotationInfo?.versions[tempCurrentVersion]?.status
@@ -149,7 +149,7 @@ const Quotation = ({
             ) : (
               <p
                 onClick={() => {
-                  handleOpen(row.original);
+                  handleOpen(row, rows);
                 }}
                 className="link text-truncate"
                 title={row.original?.detail}
@@ -231,28 +231,28 @@ const Quotation = ({
       disableFilters: true,
       canDrag: false,
       Cell: ({ row, rows }) => {
-        return  (
+        return (
           <>
-          {allowedToEdit && (
-            <HtmlTooltip title="Edit">
-            <IconButton
-              size="small"
-              disabled={([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                quotationInfo?.versions[tempCurrentVersion]?.status
-              ) || invoiceStep)}
-              aria-label="Edit"
-              onClick={() => {
-                handleOpen(row.original);
-              }}
-            >
-              <EditIcon color={([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                quotationInfo?.versions[tempCurrentVersion]?.status
-              ) || invoiceStep) ? "disabled" : "primary"} />
-            </IconButton>
-          </HtmlTooltip>
-          )}
+            {allowedToEdit && (
+              <HtmlTooltip title="Edit">
+                <IconButton
+                  size="small"
+                  disabled={([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    quotationInfo?.versions[tempCurrentVersion]?.status
+                  ) || invoiceStep)}
+                  aria-label="Edit"
+                  onClick={() => {
+                    handleOpen(row, rows);
+                  }}
+                >
+                  <EditIcon color={([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    quotationInfo?.versions[tempCurrentVersion]?.status
+                  ) || invoiceStep) ? "disabled" : "primary"} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
           </>
-        ) 
+        )
       }
     });
 
@@ -362,6 +362,7 @@ const Quotation = ({
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
+    console.log('rowsData', rowsData, rows)
     rows.forEach((element) => {
       delete element.srno;
       delete element.detail;
@@ -384,9 +385,16 @@ const Quotation = ({
       .then(() => {
         fetchData();
         if (saveAndNext) {
-          const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
-          setIsProductEdit({ open: true, isBulkedit: false, showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
-          setRecordToUpdate(rowsData[rowIndex + 1])
+          let data = rowsData;
+          let rowIndex;
+          if (rows[0].parentId) {
+            data = data?.filter((d) => d._id === rows[0]?.parentId)[0].subRows;
+            rowIndex = data?.findIndex((d) => d._id === rows[0]?._id);
+          } else {
+            rowIndex = data?.findIndex((d) => d._id === rows[0]?._id);
+          }
+          setIsProductEdit({ open: true, isBulkedit: false, showSaveAndNext: rowIndex + 1 < data?.length - 1 ? true : false });
+          setRecordToUpdate(data[rowIndex + 1])
         } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
@@ -414,9 +422,19 @@ const Quotation = ({
       });
   };
 
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false, showSaveAndNext: true });
-    setRecordToUpdate(rowData);
+  const handleOpen = (rowData, rows) => {
+    let saveAndNext = true;
+    if (rowData.depth === 0) {
+      saveAndNext = rowData?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && rowData?.depth === 0 ? true : false
+    } else if (rowData.depth === 1) {
+      saveAndNext = rowData?.index < rows?.filter((e) => e?.depth === 1 && e.original.parentId === rowData.original.parentId)?.length - 1 && rowData?.depth === 1 ? true : false
+    }
+    setIsProductEdit({
+      open: true,
+      isBulkedit: false,
+      showSaveAndNext: saveAndNext
+    });
+    setRecordToUpdate(rowData?.original);
   };
 
   const calculatePrice = (arr: any[]) => {
@@ -499,7 +517,7 @@ const Quotation = ({
       handleOpen({
         ...updatedData,
         detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName
-      });
+      }, []);
     } else {
       onConfirmSave(inputField, updatedData);
     }
