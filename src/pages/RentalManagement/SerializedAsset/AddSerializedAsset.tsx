@@ -267,7 +267,11 @@ const AddSerializedAsset = ({
       }
       if (referenceType === 'Repair Job') {
         deepFilter = `${deepFilter}&repairable=true`;
-      } else if (referenceType === 'Rental Job') {
+      }
+      if (referenceType === 'Transfer Asset') {
+        deepFilter = `${deepFilter}&transferable=true`;
+      }
+      else if (referenceType === 'Rental Job') {
         const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
         deepFilter = `${deepFilter}&rental=true&date=${JSON.stringify(dateFilter)}`;
       } else {
