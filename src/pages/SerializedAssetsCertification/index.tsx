@@ -229,7 +229,7 @@ const SerializedAssetsCertification = () => {
   const ActionsRenderer = (params) => (
     <>
       {params?.data?.canIssueCertificate && (
-        <HtmlTooltip title="Issue Certificate">
+        <HtmlTooltip title="Attach Certificate">
           <IconButton
             size="small"
             aria-label="Issue"
@@ -268,8 +268,8 @@ const SerializedAssetsCertification = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container spacing={2} className={styles.filter_side_container}>
-            <Grid item xs={2} sm={2} md={2}>
+          <div className="flex justify-between mb-4 sm:mb-5 flex-wrap gap-4">
+            <div className="w-full min-[600px]:w-[250px]">
               <Autocomplete
                 onInputChange={(event, value) => {
                   fetchData(true, value);
@@ -277,6 +277,7 @@ const SerializedAssetsCertification = () => {
                 onChange={(event, value) => {
                   fetchData(true, value);
                 }}
+                fullWidth
                 options={assetOptions.map((option) => option.assetNumber)}
                 loading={loadingAssets}
                 getOptionLabel={(option) => option || ''}
@@ -285,7 +286,7 @@ const SerializedAssetsCertification = () => {
                     {...params}
                     label={'Asset'}
                     variant="outlined"
-                    size='small'
+                    size="small"
                     InputProps={{
                       ...params.InputProps,
                       endAdornment: (
@@ -297,29 +298,16 @@ const SerializedAssetsCertification = () => {
                     }}
                   />
                 )}
+                style={{ minWidth: 250 }}
               />
-            </Grid>
-            <Grid item xs={4} sm={4} md={4}>
-              <DurationFilter label={'Issue Date'} duration={issueDuration} setDuration={setIssueDuration} defaultTimeFrame="custom" />
-            </Grid>
-            <Grid item xs={4} sm={4} md={4}>
-              <DurationFilter label={'Expire Date'} duration={expireDuration} setDuration={setExpireDuration} defaultTimeFrame="custom" />
-            </Grid>
-            <Grid sm={2} xs={2} md={2} container className={`${styles.filter_side} align-items-center`}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Box style={{ flexGrow: '1' }}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={styles.search_box_input}
-                    width={isMobile ? '200px' : '210px'}
-                    style={{ width: '100%', maxWidth: 250, display: 'flex' }}
-                    size="small"
-                    value={search}
-                  />
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
+            </div>
+
+            <SearchBox onChange={handleSearch} className={styles.search_box_input} width={isMobile ? '200px' : '210px'} size="small" value={search} />
+          </div>
+          <div className="grid lg:grid-cols-2 gap-4">
+            <DurationFilter label={'Issue Date'} duration={issueDuration} setDuration={setIssueDuration} defaultTimeFrame="custom" />
+            <DurationFilter label={'Expire Date'} duration={expireDuration} setDuration={setExpireDuration} defaultTimeFrame="custom" />
+          </div>
         </div>
         {columns ? (
           Object.keys(frameWorkComponent).length > 0 && columns ? (
