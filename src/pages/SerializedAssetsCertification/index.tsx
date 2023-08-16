@@ -50,6 +50,7 @@ const SerializedAssetsCertification = () => {
     state;
 
   const [assetOptions, setAssetOptions] = useState([]);
+  const [selectedAssetOption, setSelectedAssetOption] = useState(null);
   const [loadingAssets, setLoadingAssets] = useState(false);
 
   const [issueDuration, setIssueDuration] = useState({
@@ -71,13 +72,24 @@ const SerializedAssetsCertification = () => {
     fetchGridColumns();
   }, []);
 
+  const fetchAssetsOption = () => {
+    axiosInstance().get(`${serializedAssetsCertification.api}/asset`)
+      .then(({ data }) => {
+        setAssetOptions(data?.data)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   useEffect(() => {
+    fetchAssetsOption()
     fetchData();
-  }, []);
+  }, [])
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity, selectedAssetOption]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -197,6 +209,12 @@ const SerializedAssetsCertification = () => {
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
+    if (selectedAssetOption) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify([{
+        field: 'assetNumber',
+        term: selectedAssetOption.optionLabel
+      }]))}&filterType=and`;
+    }
     if (showFilteredRecordsOnly) {
       const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
@@ -263,17 +281,19 @@ const SerializedAssetsCertification = () => {
             <Grid item md={9}>
               <Grid container spacing={1}>
                 <Grid item md={3}>
+                  {console.log('assetOptions', assetOptions)}
                   <Autocomplete
-                    onInputChange={(event, value) => {
-                      fetchData();
-                    }}
+                    // onInputChange={(event, value) => {
+                    //   fetchData();
+                    // }}
                     onChange={(event, value) => {
-                      fetchData();
+                      setSelectedAssetOption(value)
                     }}
                     fullWidth
-                    options={assetOptions.map((option) => option.assetNumber)}
+                    options={assetOptions}
+                    getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
+                    getOptionLabel={(option) => option.optionLabel}
                     loading={loadingAssets}
-                    getOptionLabel={(option) => option || ''}
                     renderInput={(params) => (
                       <TextField
                         {...params}
