@@ -350,7 +350,7 @@ const SerializedAsset = () => {
         {params.value}
       </Link>
       {(params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime()) ||
-        (params.data?.certificateExpireDate && new Date(params.data?.certificateExpireDate)?.getTime() <= new Date()?.getTime() && (
+        (params.data?.certificateExpiryDate && new Date(params.data?.certificateExpiryDate)?.getTime() <= new Date()?.getTime() && (
           <Box ml={1}>
             <HtmlTooltip title="Asset needs to be recert">
               <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
@@ -828,8 +828,8 @@ const SerializedAsset = () => {
               showOnlyShowFilteredRecordSwitch={true}
               rowClassRules={{
                 'light-red-data-row': function (params) {
-                  if (params.data?.recertDate || params.data?.certificateExpireDate) {
-                    var a = moment(params.data?.recertDate || params.data?.certificateExpireDate);
+                  if (params.data?.recertDate || params.data?.certificateExpiryDate) {
+                    var a = moment(params.data?.recertDate || params.data?.certificateExpiryDate);
                     var b = moment();
                     const days = a.diff(b, 'days');
                     if (days < 15 && days >= 0) {
@@ -841,8 +841,8 @@ const SerializedAsset = () => {
                   return false;
                 },
                 'light-yellow-data-row': function (params) {
-                  if (params.data?.recertDate || params.data?.certificateExpireDate) {
-                    var a = moment(params.data?.recertDate || params.data?.certificateExpireDate);
+                  if (params.data?.recertDate || params.data?.certificateExpiryDate) {
+                    var a = moment(params.data?.recertDate || params.data?.certificateExpiryDate);
                     var b = moment();
                     const days = a.diff(b, 'days');
                     if (days < 30 && days >= 15) {
@@ -852,8 +852,8 @@ const SerializedAsset = () => {
                   return false;
                 },
                 'light-green-data-row': function (params) {
-                  if (params.data?.recertDate || params.data?.certificateExpireDate) {
-                    var a = moment(params.data?.recertDate || params.data?.certificateExpireDate);
+                  if (params.data?.recertDate || params.data?.certificateExpiryDate) {
+                    var a = moment(params.data?.recertDate || params.data?.certificateExpiryDate);
                     var b = moment();
                     const days = a.diff(b, 'days');
                     if (days <= 60 && days >= 30) {
