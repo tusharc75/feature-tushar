@@ -29,7 +29,6 @@ import CertificateHistoryDialog from './CertificateHistoryDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
-import DurationFilter from 'src/components/DurationFilter';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import HistoryIcon from '@material-ui/icons/History';
 import { Autocomplete } from '@material-ui/lab';
@@ -41,7 +40,7 @@ const SerializedAssetsCertification = () => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
-  const [issueCertificateDialog, setIssueCertificateDialog] = useState({ open: false, id: null });
+  const [issueCertificateDialog, setIssueCertificateDialog] = useState({ open: false, id: null, certificateExpiryDate: null });
   const [certificateHistoryDialog, setCertificateHistoryDialog] = useState({ open: false, id: null });
   const [gridApi, setGridApi] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -49,6 +48,7 @@ const SerializedAssetsCertification = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
+
   const [assetOptions, setAssetOptions] = useState([]);
   const [loadingAssets, setLoadingAssets] = useState(false);
 
@@ -72,7 +72,7 @@ const SerializedAssetsCertification = () => {
   }, []);
 
   useEffect(() => {
-    fetchData(true);
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -97,12 +97,6 @@ const SerializedAssetsCertification = () => {
         columns?.forEach((e) => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
-            e.cellStyle = (params) => {
-              if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
-                return { backgroundColor: COLOUR_MASTER.lostAssets.background };
-              }
-              return null;
-            };
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
@@ -117,23 +111,20 @@ const SerializedAssetsCertification = () => {
       });
   };
 
-  const fetchData = (forAutocomplete = false, assetTerm = '') => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    const queryString = getQueryString(forAutocomplete, assetTerm);
+    const queryString = getQueryString();
     axiosInstance()
       .get(`${serializedAssetsCertification.api}${queryString}`)
       .then(({ data }) => {
-        if (forAutocomplete) {
-          setAssetOptions(data.data);
-        }
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
           const dateToQuery = moment().add(30, 'days').toDate();
-          const certificateExpireDate = u.certificateExpireDate ? moment(u.certificateExpireDate).toDate() : null;
-          finalObject['canIssueCertificate'] = !certificateExpireDate || certificateExpireDate <= dateToQuery;
+          const certificateExpiryDate = u.certificateExpiryDate ? moment(u.certificateExpiryDate).toDate() : null;
+          finalObject['canIssueCertificate'] = !certificateExpiryDate || certificateExpiryDate <= dateToQuery;
           finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
           return {
             ...finalObject
@@ -164,7 +155,7 @@ const SerializedAssetsCertification = () => {
       });
   };
 
-  const getQueryString = (forAutocomplete = false, assetTerm = '') => {
+  const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -190,23 +181,16 @@ const SerializedAssetsCertification = () => {
     }
     if (expireDuration?.from && expireDuration?.from) {
       updatedFilters.push({
-        field: 'certificateExpireDate',
+        field: 'certificateExpiryDate',
         term: {
           from: moment(expireDuration?.from).format('MM/DD/YYYY'),
           to: moment(expireDuration?.to).format('MM/DD/YYYY')
         }
       });
     }
-    if (forAutocomplete && assetTerm) {
-      updatedFilters.push({
-        field: 'assetNumber',
-        term: assetTerm
-      });
-    }
     if (updatedFilters?.length > 0) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -237,7 +221,11 @@ const SerializedAssetsCertification = () => {
             size="small"
             aria-label="Issue"
             onClick={() => {
-              setIssueCertificateDialog({ open: true, id: params?.data?._id });
+              setIssueCertificateDialog({
+                open: true,
+                id: params?.data?._id,
+                certificateExpiryDate: params?.data?.certificateExpiryDate || null
+              });
             }}
           >
             <NoteAddIcon color="primary" />
@@ -277,10 +265,10 @@ const SerializedAssetsCertification = () => {
                 <Grid item md={3}>
                   <Autocomplete
                     onInputChange={(event, value) => {
-                      fetchData(true, value);
+                      fetchData();
                     }}
                     onChange={(event, value) => {
-                      fetchData(true, value);
+                      fetchData();
                     }}
                     fullWidth
                     options={assetOptions.map((option) => option.assetNumber)}
@@ -303,7 +291,6 @@ const SerializedAssetsCertification = () => {
                         }}
                       />
                     )}
-                  // style={{ minWidth: 250 }}
                   />
                 </Grid>
                 <Grid item md={9}>
@@ -428,12 +415,13 @@ const SerializedAssetsCertification = () => {
       {
         issueCertificateDialog?.open && (
           <IssueCertificateDialog
-            onClose={() => setIssueCertificateDialog({ open: false, id: null })}
+            onClose={() => setIssueCertificateDialog({ open: false, id: null, certificateExpiryDate: null })}
             onSuccess={() => {
-              setIssueCertificateDialog({ open: false, id: null });
+              setIssueCertificateDialog({ open: false, id: null, certificateExpiryDate: null });
               fetchData();
             }}
             assetId={issueCertificateDialog?.id}
+            certificateExpiryDate={issueCertificateDialog.certificateExpiryDate}
           />
         )
       }
