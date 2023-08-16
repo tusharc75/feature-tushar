@@ -147,7 +147,7 @@ const WorkOrderSupervisor = () => {
         </Grid>
         <div className="main-container">
           <div className="header-panel">
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 align-items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3 align-items-center">
               <Autocomplete
                 fullWidth
                 options={usersOption}
