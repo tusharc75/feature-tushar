@@ -24,7 +24,6 @@ import {
   sidebarResource
 } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from '../ReportFilters';
@@ -666,6 +665,56 @@ const Report = () => {
           numberRenderer: NumberRenderer
         });
       }
+      if (resourceCamelCase === 'userSession') {
+        let { data } = await axiosInstance().get(`/report/user/user-session/column`);
+        data?.data?.forEach((e) => {
+          columns.push({
+            field: e.fieldName,
+            headerName: e.fieldLabel,
+            show: true,
+            disabled: false,
+            cellRenderer:  'numberRenderer',
+            filter: false,
+            sortable: false,
+          })
+        })
+
+        let fieldOptionResponce = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=User`);
+        const fieldOption = fieldOptionResponce?.data?.data;
+        resourceFieldData.push({
+          isCreate: true,
+          isRead: true,
+          isUpdate: true,
+          fieldData: {
+            _id: '63f71ce5b17c69a1ab7e4c01',
+            fieldLabel: 'User',
+            fieldName: 'user',
+            type: 'dropDown',
+            lookup: true,
+            option: fieldOption["User"],
+            filter: false,
+            sortable: false,
+          }
+        });
+        resourceFieldData.push({
+          isCreate: true,
+          isRead: true,
+          isUpdate: true,
+          fieldData: {
+            _id: '63f71ce5b17c69a1ab7e4c02',
+            fieldLabel: 'Date',
+            fieldName: 'date',
+            type: 'date',
+            filter: false,
+            sortable: false,
+          }
+        });
+
+        setFrameWorkComponent({
+          commonRenderer: CommonRenderer,
+          numberRenderer: NumberRenderer
+        });
+      }
 
       setResourceColumns(resourceFieldData);
       setColumns(columns);
@@ -864,6 +913,9 @@ const Report = () => {
     if (resourceCamelCase === 'assetUtilization') {
       api = `/serialized-asset/report/assets-utilization`;
     }
+    if (resourceCamelCase === 'userSession') {
+      api = `/report/user/user-session`;
+    }
 
     axiosInstance()
       .get(`${api}${filterQuery}`, {
@@ -1024,6 +1076,9 @@ const Report = () => {
     }
     if (resourceCamelCase === 'assetUtilization') {
       api = `/serialized-asset/report/assets-utilization/export`;
+    }
+    if (resourceCamelCase === 'userSession') {
+      api = `/report/user/user-session/export`;
     }
 
     axiosInstance()
