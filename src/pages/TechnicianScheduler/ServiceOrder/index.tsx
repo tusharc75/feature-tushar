@@ -12,7 +12,6 @@ import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import { Link } from 'react-router-dom';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
-
 function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selectedRecords, setSelectedRecords }) {
   const toastConfig = useContext(CustomToastContext);
   const [rowsData, setRowsData] = useState(null);
@@ -63,11 +62,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
       width: 200,
       Cell: ({ row }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <p
-            title={row.original.fieldServiceOrder}
-          >
-            {row.original.fieldServiceOrder}
-          </p>
+          <p title={row.original.fieldServiceOrder}>{row.original.fieldServiceOrder}</p>
           <Box ml={1}>
             <IconButton
               size="small"
@@ -85,14 +80,10 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
       accessor: 'fieldTicketNumber',
       Header: 'Field Ticket',
       width: 200,
-      Cell: ({ row }) => (
+      Cell: ({ row }) =>
         row.original['fieldTicketNumber'] ? (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p
-              title={row.original.fieldTicketNumber}
-            >
-              {row.original.fieldTicketNumber}
-            </p>
+            <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -104,21 +95,18 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
               </IconButton>
             </Box>
           </div>
-        ) : (<NoDataCell />)
-      )
+        ) : (
+          <NoDataCell />
+        )
     },
     {
       accessor: 'serviceName',
       Header: 'Service Name',
       width: 250,
-      Cell: ({ row }) => (
+      Cell: ({ row }) =>
         row.original.serviceName && row.original.serviceId ? (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p
-              title={row.original.serviceName}
-            >
-              {row.original.serviceName}
-            </p>
+            <p title={row.original.serviceName}>{row.original.serviceName}</p>
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -130,8 +118,9 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
               </IconButton>
             </Box>
           </div>
-        ) : (<NoDataCell />)
-      )
+        ) : (
+          <NoDataCell />
+        )
     },
     {
       accessor: 'competencyType',
@@ -152,11 +141,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
       Cell: ({ row }) =>
         row.original['customerAccount'] ? (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p
-              title={row.original['customerAccount']}
-            >
-              {row.original['customerAccount']}
-            </p>
+            <p title={row.original['customerAccount']}>{row.original['customerAccount']}</p>
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -168,7 +153,9 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
               </IconButton>
             </Box>
           </div>
-        ) : (<NoDataCell />)
+        ) : (
+          <NoDataCell />
+        )
     },
     {
       accessor: 'estimateStartDate',
@@ -194,12 +181,12 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
     }
   ];
 
-  const height = window.innerHeight / 2 - 200;
+  const height = 400;
 
   return (
-    <Box pt={3} style={{ height: height }}>
+    <Box pt={3}>
       {columns && rowsData ? (
-        <Box zIndex={5} width={'100%'} height={height}>
+        <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             height={`${height}px`}
             columns={columns}
