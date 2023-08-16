@@ -664,12 +664,12 @@ const AddSerializedAsset = ({
                             onClick={() => {
                               if (referenceType === 'Rental Job') {
                                 if (user?.user?.brandPolicy?.serializedAssetCertification &&
-                                  [...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.certificateExpireDate
-                                    && new Date(e.certificateExpireDate)?.getTime() <= new Date()?.getTime())) {
+                                  [...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.certificateExpiryDate
+                                    && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())) {
                                   setCertificateExpireAlert({
                                     open: true,
-                                    asset: [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.certificateExpireDate
-                                      && new Date(e.certificateExpireDate)?.getTime() <= new Date()?.getTime())?.map((e) => e.assetNumber)?.toString()
+                                    asset: [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.certificateExpiryDate
+                                      && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())?.map((e) => e.assetNumber)?.toString()
                                   })
                                 }
                                 else if (checkMTRValidation) {

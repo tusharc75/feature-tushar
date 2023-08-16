@@ -7,8 +7,8 @@ import Chart from './Chart'
 
 function IotChart() {
     return (
-        <Fragment>
-            <Grid container className="headerbox">
+        <div className="main-container-v1">
+            <Grid container className="headerbox-v1">
                 <Grid item md={4} sm={11} xs={10}>
                     <CustomBreadCrumbs routes={[routes.iotChart]} />
                 </Grid>
@@ -16,7 +16,7 @@ function IotChart() {
             <CustomContainer>
                 <Chart />
             </CustomContainer>
-        </Fragment>
+        </div>
     )
 }
 

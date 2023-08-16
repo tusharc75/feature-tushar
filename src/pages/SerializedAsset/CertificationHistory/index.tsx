@@ -18,13 +18,13 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 
-const CertificationHistory = ({ id, canIssueCertificate, supplierAccount }) => {
+const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetDetails = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
-  const [openDialog, setOpenDialog] = useState({ open: false, id: null });
+  const [openDialog, setOpenDialog] = useState({ open: false });
   const [openAttachment, setOpenAttachment] = useState({ open: false, attachmentId: null });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -116,7 +116,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount }) => {
             color="primary"
             size="small"
             onClick={() => {
-              setOpenDialog({ open: true, id: id });
+              setOpenDialog({ open: true });
             }}
           >
             Attach Certificate
@@ -151,12 +151,13 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount }) => {
       </Box>
       {openDialog?.open && (
         <IssueCertificateDialog
-          onClose={() => setOpenDialog({ open: false, id: null })}
+          onClose={() => setOpenDialog({ open: false })}
           onSuccess={() => {
-            setOpenDialog({ open: false, id: null });
+            setOpenDialog({ open: false });
             fetchData();
           }}
-          assetId={openDialog?.id}
+          assetId={id}
+          certificateExpiryDate={assetDetails?.certificateExpiryDate || null}
         />
       )}
       {openAttachment.open && (
