@@ -1,13 +1,4 @@
-import {
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  Grid,
-  IconButton,
-  makeStyles,
-  TextField,
-} from '@material-ui/core';
+import { Box, Button, Checkbox, Chip, Grid, IconButton, makeStyles, TextField } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -31,7 +22,6 @@ const useStyles = makeStyles(() => ({
 }));
 
 const WorkOrderTechnician = () => {
-
   const classes = useStyles();
 
   const [serviceOpen, setServiceOpen] = useState(false);
@@ -74,15 +64,13 @@ const WorkOrderTechnician = () => {
 
   const fetchData = () => {
     setLoading(true);
-    let api = `/work-order-technician`
+    let api = `/work-order-technician`;
     if (selectedWorkOrder && selectedRepairOrder) {
-      api = api + `?workOrder=${selectedWorkOrder.optionValue}&repairOrder=${selectedRepairOrder.optionValue}`
-    }
-    else if (selectedWorkOrder) {
-      api = api + `?workOrder=${selectedWorkOrder.optionValue}`
-    }
-    else if (selectedRepairOrder) {
-      api = api + `?repairOrder=${selectedRepairOrder.optionValue}`
+      api = api + `?workOrder=${selectedWorkOrder.optionValue}&repairOrder=${selectedRepairOrder.optionValue}`;
+    } else if (selectedWorkOrder) {
+      api = api + `?workOrder=${selectedWorkOrder.optionValue}`;
+    } else if (selectedRepairOrder) {
+      api = api + `?repairOrder=${selectedRepairOrder.optionValue}`;
     }
     axiosInstance()
       .get(api)
@@ -92,13 +80,18 @@ const WorkOrderTechnician = () => {
           const repairOrderOption = [];
           data?.forEach((item: any) => {
             if (item?.workOrderDetail && !workOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?._id)) {
-              workOrderOption.push({ optionValue: item?.workOrderDetail?._id, optionLabel: item?.workOrderDetail?.workOrderNumber })
+              workOrderOption.push({ optionValue: item?.workOrderDetail?._id, optionLabel: item?.workOrderDetail?.workOrderNumber });
             }
-            if (item?.workOrderDetail?.repairOrder
-              && !repairOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?.repairOrder?.optionValue)) {
-              repairOrderOption.push({ optionValue: item?.workOrderDetail?.repairOrder?.optionValue, optionLabel: item?.workOrderDetail?.repairOrder?.optionLabel })
+            if (
+              item?.workOrderDetail?.repairOrder &&
+              !repairOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?.repairOrder?.optionValue)
+            ) {
+              repairOrderOption.push({
+                optionValue: item?.workOrderDetail?.repairOrder?.optionValue,
+                optionLabel: item?.workOrderDetail?.repairOrder?.optionLabel
+              });
             }
-          })
+          });
           setWorkOrderOptions(workOrderOption);
           setRepairOrderOptions(repairOrderOption);
         }
@@ -138,85 +131,78 @@ const WorkOrderTechnician = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} gridGap={8}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={3}>
-              {workOrderOptions && (
-                <Box className={classes.inputs}>
-                  <Autocomplete
-                    options={workOrderOptions}
-                    fullWidth
-                    getOptionLabel={(option: any) => option.optionLabel}
-                    getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                    value={selectedWorkOrder}
-                    onChange={(event, newValue) => {
-                      setSelectedWorkOrder(newValue);
-                    }}
-                    size="small"
-                    renderInput={(params) => <TextField {...params} label={`Select Work Order`} variant="outlined" />}
-                  />
-                </Box>
+        <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[4fr_4fr_6fr_auto] xl:grid-cols-[1fr_1fr_1fr_auto] items-start gap-4">
+          {workOrderOptions && (
+            <Box className={classes.inputs}>
+              <Autocomplete
+                options={workOrderOptions}
+                fullWidth
+                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                value={selectedWorkOrder}
+                onChange={(event, newValue) => {
+                  setSelectedWorkOrder(newValue);
+                }}
+                size="small"
+                renderInput={(params) => <TextField {...params} label={`Select Work Order`} variant="outlined" />}
+              />
+            </Box>
+          )}
+
+          {repairOrderOptions && (
+            <Box className={classes.inputs}>
+              <Autocomplete
+                options={repairOrderOptions}
+                fullWidth
+                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                value={selectedRepairOrder}
+                onChange={(event, newValue) => {
+                  setSelectedRepairOrder(newValue);
+                }}
+                size="small"
+                renderInput={(params) => <TextField {...params} label={`Select Repair Order`} variant="outlined" />}
+              />
+            </Box>
+          )}
+
+          <Box className={classes.inputs}>
+            <Autocomplete
+              fullWidth
+              multiple
+              options={WORKORDER_TECHNICIAN_SERVICE_STATUS || []}
+              disableCloseOnSelect
+              getOptionLabel={(option) => option}
+              renderOption={(option: any) => (
+                <React.Fragment>
+                  <Checkbox checked={selectedServiceStatus?.includes(option)} />
+                  {option}
+                </React.Fragment>
               )}
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              {repairOrderOptions && (
-                <Box className={classes.inputs}>
-                  <Autocomplete
-                    options={repairOrderOptions}
-                    fullWidth
-                    getOptionLabel={(option: any) => option.optionLabel}
-                    getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                    value={selectedRepairOrder}
-                    onChange={(event, newValue) => {
-                      setSelectedRepairOrder(newValue);
-                    }}
-                    size="small"
-                    renderInput={(params) => <TextField {...params} label={`Select Repair Order`} variant="outlined" />}
-                  />
-                </Box>
-              )}
-            </Grid>
-            <Grid item xs={12} sm={6} md={5}>
-              <Box className={classes.inputs}>
-                <Autocomplete
-                  fullWidth
-                  multiple
-                  options={WORKORDER_TECHNICIAN_SERVICE_STATUS || []}
-                  disableCloseOnSelect
-                  getOptionLabel={(option) => option}
-                  renderOption={(option: any) => (
-                    <React.Fragment>
-                      <Checkbox checked={selectedServiceStatus?.includes(option)} />
-                      {option}
-                    </React.Fragment>
-                  )}
-                  size="small"
-                  renderInput={(params) => <TextField {...params} label="Status" variant="outlined" />}
-                  value={selectedServiceStatus}
-                  renderTags={(value, getTagProps) =>
-                    value.map((option, index) => {
-                      return (
-                        <Chip
-                          style={{ fontWeight: 600 } as React.CSSProperties}
-                          label={option}
-                          deleteIcon={<CloseIcon style={{ color: '#000000', width: '14px' }} />}
-                          {...getTagProps({ index })}
-                        />
-                      );
-                    })
-                  }
-                  onChange={(event: any, newValue: any) => {
-                    setSelectedServiceStatus(newValue);
-                  }}
-                />
-              </Box>
-            </Grid>
-          </Grid>
-          <Box>
-            <IconButton size="small" onClick={() => fetchData()}>
-              <RefreshIcon />
-            </IconButton>
+              size="small"
+              renderInput={(params) => <TextField {...params} label="Status" variant="outlined" />}
+              value={selectedServiceStatus}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => {
+                  return (
+                    <Chip
+                      style={{ fontWeight: 600 } as React.CSSProperties}
+                      label={option}
+                      deleteIcon={<CloseIcon style={{ color: '#000000', width: '14px' }} />}
+                      {...getTagProps({ index })}
+                    />
+                  );
+                })
+              }
+              onChange={(event: any, newValue: any) => {
+                setSelectedServiceStatus(newValue);
+              }}
+            />
           </Box>
+          <IconButton size="small" onClick={() => fetchData()} style={{ display: 'flex', marginTop: '4px', marginLeft: 'auto' }}>
+            <RefreshIcon />
+          </IconButton>
+          <Box></Box>
         </Box>
         {cardData && (
           <CardColTimeline
@@ -240,21 +226,20 @@ const WorkOrderTechnician = () => {
               tempServiceData['warehouse'] = data?.workOrderDetail?.warehouse;
               setSelectedService(tempServiceData);
               setServiceOpen(true);
-
             }}
           />
         )}
       </Box>
-      {serviceOpen &&
+      {serviceOpen && (
         <TechnicianDialog
           handleClose={() => {
             setServiceOpen(false);
             setSelectedService(null);
-            fetchData()
+            fetchData();
           }}
           selectedService={selectedService}
         />
-      }
+      )}
     </Box>
   );
 };
