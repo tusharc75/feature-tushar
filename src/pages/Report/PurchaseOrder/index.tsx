@@ -292,10 +292,7 @@ const Report = () => {
         }
 
         columns?.forEach((e) => {
-          if (
-            ['productName', 'productDescription', 'productCategory', 'productCondition', 'totalQty', 'averagePrice', 'totalPrice', 'margin'].includes(
-              e.field
-            )
+          if (['productName', 'productDescription', 'productNumber', 'productCategory', 'productCondition', 'totalQty', 'averagePrice', 'totalPrice', 'margin'].includes(e.field)
           ) {
             e.show = true;
           } else {
@@ -367,22 +364,21 @@ const Report = () => {
           });
         }
 
-        productFields
-          .filter((field) => ['productName'].includes(field?.fieldData.fieldName))
+        productFields.filter((field) => ['productName', 'productDescription', 'productNumber'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
             if (field?.fieldData.fieldName === 'productName') {
               resourceFieldData.push({
                 ...field,
                 fieldData: { ...field.fieldData, fieldName: 'product', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
               });
-              columns.push({
-                field: 'product',
-                headerName: field?.fieldData?.fieldLabel,
-                show: true,
-                disabled: false,
-                cellRenderer: 'productRenderer'
-              });
             }
+            columns.push({
+              field: field?.fieldData.fieldName === 'productName' ? 'product' : field?.fieldData.fieldName,
+              headerName: field?.fieldData?.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: field?.fieldData.fieldName === 'productName' ? 'productRenderer' : 'commonRenderer'
+            });
           });
 
         columns = [
