@@ -1,13 +1,13 @@
 .bottomBar {
   position: fixed;
-  background: #ffffff;
+  background: var(--dark-primary, #fff);
   padding: 10px 20px;
   bottom: -60px;
   left: 0;
   right: 0;
   z-index: 5;
   transition: bottom 0.3s;
-  border: 1px solid lightgray;
+  border: 1px solid var(--common-border-color);
   border-bottom: 0;
   .control {
     position: absolute;
@@ -17,7 +17,7 @@
       background-color: var(--primary-light);
       border-radius: 6px 6px 0 0;
       color: white;
-      border: 1px solid lightgray;
+      border: 1px solid var(--common-border-color);
       border-bottom: 0;
       width: 30px;
       height: 20px;
