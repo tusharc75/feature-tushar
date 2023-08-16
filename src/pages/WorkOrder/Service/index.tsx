@@ -354,6 +354,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   }, [mobScreen]);
 
   const stylesForEveryTab = (selectedService, data, index, mobScreen): React.CSSProperties => {
+    const commonStyle: React.CSSProperties = { overflow: 'hidden' };
     if (data?.type === 'quotation' && selectedService?.type !== 'quotation') {
       return {
         borderColor: 'var(--dark-mode-border-color, rgb(224, 224, 224))',
@@ -362,7 +363,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderRightWidth: '1px',
         borderStyle: 'solid',
         cursor: 'pointer',
-        borderTopWidth: index !== 0 && !mobScreen ? 0 : 1
+        borderTopWidth: index !== 0 && !mobScreen ? 0 : 1,
+        ...commonStyle
       };
     } else if (data?.type === 'quotation' && selectedService?.type === 'quotation') {
       return {
@@ -372,7 +374,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderLeftWidth: '1px',
         borderRightWidth: '1px',
         borderStyle: 'solid',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        ...commonStyle
       };
     } else if (!data?.clickable) {
       return {
@@ -385,7 +388,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         // pointerEvents: 'none',
         opacity: '.5',
         filter: 'grayscale(1)',
-        borderTopWidth: index !== 0 && !mobScreen ? 0 : 1
+        borderTopWidth: index !== 0 && !mobScreen ? 0 : 1,
+        ...commonStyle
       };
     }
     if (selectedService?.uniqueId == data?.uniqueId) {
@@ -396,7 +400,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderLeftWidth: '1px',
         borderRightWidth: '1px',
         borderStyle: 'solid',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        ...commonStyle
       };
     } else {
       return {
@@ -406,7 +411,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
         borderStyle: 'solid',
         borderColor: 'var(--dark-mode-border-color, rgb(224, 224, 224))',
         cursor: 'pointer',
-        borderTopWidth: index !== 0 && !mobScreen ? 0 : 1
+        borderTopWidth: index !== 0 && !mobScreen ? 0 : 1,
+        ...commonStyle
       };
     }
   };
