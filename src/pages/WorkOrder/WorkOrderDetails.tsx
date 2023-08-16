@@ -25,6 +25,8 @@ import { RiFlowChart } from 'react-icons/ri';
 import PreviewDownload from 'src/components/PreviewDownload';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import EditIcon from '@material-ui/icons/Edit';
+import CloseIcon from '@material-ui/icons/Close';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -226,12 +228,12 @@ const WorkOrderDetails = () => {
                       </span>
                       <HtmlTooltip title="Complete Work Order" placement="top" arrow>
                         <Button
-                          variant={'contained'}
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
                           size="small"
                           onClick={() => updateJobStatus(WORK_ORDER_STATUS.completed)}
                           className={'btn-outline-v1 '}
                         >
-                          Close
+                          {isMobile && !isTablet ? <CloseIcon /> : 'Close'}
                         </Button>
                       </HtmlTooltip>
                     </div>
@@ -245,11 +247,11 @@ const WorkOrderDetails = () => {
                 {permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && !completed && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    className={'btn-outline-v1'}
                     size="small"
                     onClick={() => setOpenUpdateDialog(true)}
-                    className={'btn-outline-v1'}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.workOrder?.isDelete && allowedToEdit && workOrderData?.canDelete && !workOrderData?.deleted && (
@@ -259,11 +261,7 @@ const WorkOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="40px" />
             )}
-            <ActivityButton 
-              referenceId={workOrderData?._id} 
-              resource={ACTIVITY_RESOURCE.workOrder} 
-              resourceLabel={workOrderData?.workOrderNumber}
-              />
+            <ActivityButton referenceId={workOrderData?._id} resource={ACTIVITY_RESOURCE.workOrder} resourceLabel={workOrderData?.workOrderNumber} />
           </Box>
         </Box>
       </Box>

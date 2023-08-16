@@ -85,7 +85,7 @@ const ManageSerializedAsset = ({
             .then(({ data: { data } }) => {
               if (isClone) {
                 const { _id, createdBy, updatedBy, assetNumber, mtrAttached, mtrAttachedBy, mtrAttachedDate,
-                  certificateAttached, certificateIssueDate, certificateExpireDate, ...rest } = data;
+                  certificateAttached, certificateIssueDate, certificateExpiryDate, ...rest } = data;
                 setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
                 oldValues.status = fieldsDataForUpdate?.find((e) => e.fieldName === 'status')?.defaultValue || ASSET_STATUS.new;
@@ -118,7 +118,7 @@ const ManageSerializedAsset = ({
           if (productCategory && fieldsDataForCreate.some((e) => e.fieldName === 'productCategory')) {
             createValues['productCategory'] = productCategory;
           }
-          const keyClear = ['recertDate', 'mtrAttachedDate', 'certificateIssueDate', 'certificateExpireDate']
+          const keyClear = ['recertDate', 'mtrAttachedDate', 'certificateIssueDate', 'certificateExpiryDate']
           keyClear?.forEach((key) => {
             if (fieldsDataForCreate.some((e) => e.fieldName === key)) {
               createValues[key] = '';

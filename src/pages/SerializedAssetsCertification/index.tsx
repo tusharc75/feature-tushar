@@ -13,7 +13,8 @@ import {
   ASSET_STATUS,
   COLOUR_MASTER,
   getLocalStorageArrayData,
-  sidebarResource
+  sidebarResource,
+  dateFormatForInputControl
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -21,24 +22,25 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { camelCase } from 'lodash';
-import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
 import IssueCertificateDialog from './IssueCertificateDialog';
 import CertificateHistoryDialog from './CertificateHistoryDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
-import DurationFilter from 'src/components/DurationFilter';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import HistoryIcon from '@material-ui/icons/History';
 import { Autocomplete } from '@material-ui/lab';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
 
 const SerializedAssetsCertification = () => {
+
   const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
-  const [issueCertificateDialog, setIssueCertificateDialog] = useState({ open: false, id: null });
+  const [issueCertificateDialog, setIssueCertificateDialog] = useState({ open: false, id: null, certificateExpiryDate: null });
   const [certificateHistoryDialog, setCertificateHistoryDialog] = useState({ open: false, id: null });
   const [gridApi, setGridApi] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -46,8 +48,9 @@ const SerializedAssetsCertification = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
+
   const [assetOptions, setAssetOptions] = useState([]);
-  const [loadingAssets, setLoadingAssets] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState(null);
 
   const [issueDuration, setIssueDuration] = useState({
     from: null,
@@ -68,13 +71,25 @@ const SerializedAssetsCertification = () => {
     fetchGridColumns();
   }, []);
 
+  const fetchAssetsOption = () => {
+    axiosInstance().get(`${serializedAssetsCertification.api}/asset`)
+      .then(({ data }) => {
+        setAssetOptions(data?.data)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   useEffect(() => {
-    fetchData(true);
-  }, []);
+    fetchAssetsOption()
+    fetchData();
+  }, [])
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly,
+    issueDuration, expireDuration, selectedEntity, selectedAsset]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -94,12 +109,6 @@ const SerializedAssetsCertification = () => {
         columns?.forEach((e) => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
-            e.cellStyle = (params) => {
-              if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
-                return { backgroundColor: COLOUR_MASTER.lostAssets.background };
-              }
-              return null;
-            };
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
@@ -114,23 +123,20 @@ const SerializedAssetsCertification = () => {
       });
   };
 
-  const fetchData = (forAutocomplete = false, assetTerm = '') => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    const queryString = getQueryString(forAutocomplete, assetTerm);
+    const queryString = getQueryString();
     axiosInstance()
       .get(`${serializedAssetsCertification.api}${queryString}`)
       .then(({ data }) => {
-        if (forAutocomplete) {
-          setAssetOptions(data.data);
-        }
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
           const dateToQuery = moment().add(30, 'days').toDate();
-          const certificateExpireDate = u.certificateExpireDate ? moment(u.certificateExpireDate).toDate() : null;
-          finalObject['canIssueCertificate'] = !certificateExpireDate || certificateExpireDate <= dateToQuery;
+          const certificateExpiryDate = u.certificateExpiryDate ? moment(u.certificateExpiryDate).toDate() : null;
+          finalObject['canIssueCertificate'] = !certificateExpiryDate || certificateExpiryDate <= dateToQuery;
           finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
           return {
             ...finalObject
@@ -161,9 +167,35 @@ const SerializedAssetsCertification = () => {
       });
   };
 
-  const getQueryString = (forAutocomplete = false, assetTerm = '') => {
+  const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (issueDuration?.from && issueDuration?.from) {
+      deepFilters.push({
+        field: 'certificateIssueDate',
+        term: {
+          from: moment(issueDuration?.from).format('MM/DD/YYYY'),
+          to: moment(issueDuration?.to).format('MM/DD/YYYY')
+        }
+      });
+    }
+    if (expireDuration?.from && expireDuration?.from) {
+      deepFilters.push({
+        field: 'certificateExpiryDate',
+        term: {
+          from: moment(expireDuration?.from).format('MM/DD/YYYY'),
+          to: moment(expireDuration?.to).format('MM/DD/YYYY')
+        }
+      });
+    }
+    if (selectedAsset) {
+      deepFilters.push({
+        field: 'assetNumber',
+        term: selectedAsset.optionLabel
+      });
+    }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -175,48 +207,20 @@ const SerializedAssetsCertification = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    const updatedFilters = [];
-    if (issueDuration?.from && issueDuration?.from) {
-      updatedFilters.push({
-        field: 'certificateIssueDate',
-        term: {
-          from: moment(issueDuration?.from).format('MM/DD/YYYY'),
-          to: moment(issueDuration?.to).format('MM/DD/YYYY')
-        }
-      });
-    }
-    if (expireDuration?.from && expireDuration?.from) {
-      updatedFilters.push({
-        field: 'certificateExpireDate',
-        term: {
-          from: moment(expireDuration?.from).format('MM/DD/YYYY'),
-          to: moment(expireDuration?.to).format('MM/DD/YYYY')
-        }
-      });
-    }
-    if (forAutocomplete && assetTerm) {
-      updatedFilters.push({
-        field: 'assetNumber',
-        term: assetTerm
-      });
-    }
-    if (updatedFilters?.length > 0) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
-    }
 
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
+
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
+
     if (showFilteredRecordsOnly) {
       const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-    if (deepFilter !== '') {
-      deepFilter = `${deepFilter}&filterType=and&filterByIdType=and`;
-    }
+
     return deepFilter;
   };
 
@@ -234,7 +238,11 @@ const SerializedAssetsCertification = () => {
             size="small"
             aria-label="Issue"
             onClick={() => {
-              setIssueCertificateDialog({ open: true, id: params?.data?._id });
+              setIssueCertificateDialog({
+                open: true,
+                id: params?.data?._id,
+                certificateExpiryDate: params?.data?.certificateExpiryDate || null
+              });
             }}
           >
             <NoteAddIcon color="primary" />
@@ -268,46 +276,119 @@ const SerializedAssetsCertification = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <div className="flex justify-between mb-4 sm:mb-5 flex-wrap gap-4">
-            <div className="w-full min-[600px]:w-[250px]">
-              <Autocomplete
-                onInputChange={(event, value) => {
-                  fetchData(true, value);
-                }}
-                onChange={(event, value) => {
-                  fetchData(true, value);
-                }}
-                fullWidth
-                options={assetOptions.map((option) => option.assetNumber)}
-                loading={loadingAssets}
-                getOptionLabel={(option) => option || ''}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label={'Asset'}
-                    variant="outlined"
-                    size="small"
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <Fragment>
-                          {loadingAssets ? <CircularProgress color="inherit" size={20} /> : null}
-                          {params.InputProps.endAdornment}
-                        </Fragment>
-                      )
+          <Grid container justifyContent='space-between' spacing={2}>
+            <Grid item md={10}>
+              <Grid container spacing={1}>
+                <Grid item md={3}>
+                  <Autocomplete
+                    onChange={(event, value) => {
+                      setSelectedAsset(value)
                     }}
+                    fullWidth
+                    options={assetOptions}
+                    getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
+                    getOptionLabel={(option) => option.optionLabel}
+                    size="small"
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label={'Asset'}
+                        variant="outlined"
+                        size="small"
+                      />
+                    )}
                   />
-                )}
-                style={{ minWidth: 250 }}
-              />
-            </div>
-
-            <SearchBox onChange={handleSearch} className={styles.search_box_input} width={isMobile ? '200px' : '210px'} size="small" value={search} />
-          </div>
-          <div className="grid lg:grid-cols-2 gap-4">
-            <DurationFilter label={'Issue Date'} duration={issueDuration} setDuration={setIssueDuration} defaultTimeFrame="custom" />
-            <DurationFilter label={'Expire Date'} duration={expireDuration} setDuration={setExpireDuration} defaultTimeFrame="custom" />
-          </div>
+                </Grid>
+                <Grid item md={9}>
+                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                    <Grid container spacing={1}>
+                      <Grid item md={3}>
+                        <KeyboardDatePicker
+                          inputVariant="outlined"
+                          variant="inline"
+                          fullWidth
+                          size="small"
+                          format={dateFormatForInputControl}
+                          maxDate={issueDuration.to}
+                          label="From (Issue Date)"
+                          autoOk
+                          InputLabelProps={{
+                            shrink: true
+                          }}
+                          views={['year', 'month', 'date']}
+                          value={issueDuration.from}
+                          onChange={(date) => {
+                            setIssueDuration({ to: issueDuration.to, from: date });
+                          }}
+                        />
+                      </Grid>
+                      <Grid item md={3}>
+                        <KeyboardDatePicker
+                          inputVariant="outlined"
+                          variant="inline"
+                          fullWidth
+                          size="small"
+                          format={dateFormatForInputControl}
+                          label="To (Issue Date)"
+                          autoOk
+                          InputLabelProps={{
+                            shrink: true
+                          }}
+                          views={['year', 'month', 'date']}
+                          value={issueDuration.to}
+                          onChange={(date) => {
+                            setIssueDuration({ from: issueDuration.from, to: date });
+                          }}
+                        />
+                      </Grid>
+                      <Grid item md={3}>
+                        <KeyboardDatePicker
+                          inputVariant="outlined"
+                          variant="inline"
+                          fullWidth
+                          size="small"
+                          format={dateFormatForInputControl}
+                          maxDate={expireDuration.to}
+                          label="From (Expiry Date)"
+                          autoOk
+                          InputLabelProps={{
+                            shrink: true
+                          }}
+                          views={['year', 'month', 'date']}
+                          value={expireDuration.from}
+                          onChange={(date) => {
+                            setExpireDuration({ to: expireDuration.to, from: date });
+                          }}
+                        />
+                      </Grid>
+                      <Grid item md={3}>
+                        <KeyboardDatePicker
+                          inputVariant="outlined"
+                          variant="inline"
+                          fullWidth
+                          size="small"
+                          format={dateFormatForInputControl}
+                          label="To (Expiry Date)"
+                          autoOk
+                          InputLabelProps={{
+                            shrink: true
+                          }}
+                          views={['year', 'month', 'date']}
+                          value={expireDuration.to}
+                          onChange={(date) => {
+                            setExpireDuration({ from: expireDuration.from, to: date });
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </MuiPickersUtilsProvider>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item md={2} style={{ display: 'flex', justifyContent: 'flex-end' }} >
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} width={isMobile ? '200px' : '210px'} size="small" value={search} />
+            </Grid>
+          </Grid>
         </div>
         {columns ? (
           Object.keys(frameWorkComponent).length > 0 && columns ? (
@@ -337,23 +418,28 @@ const SerializedAssetsCertification = () => {
           </Box>
         )}
       </div>
-      {issueCertificateDialog?.open && (
-        <IssueCertificateDialog
-          onClose={() => setIssueCertificateDialog({ open: false, id: null })}
-          onSuccess={() => {
-            setIssueCertificateDialog({ open: false, id: null });
-            fetchData();
-          }}
-          assetId={issueCertificateDialog?.id}
-        />
-      )}
-      {certificateHistoryDialog?.open && (
-        <CertificateHistoryDialog
-          onClose={() => setCertificateHistoryDialog({ open: false, id: null })}
-          id={certificateHistoryDialog?.id}
-          supplierAccount={user?.user?.supplierAccountId}
-        />
-      )}
+      {
+        issueCertificateDialog?.open && (
+          <IssueCertificateDialog
+            onClose={() => setIssueCertificateDialog({ open: false, id: null, certificateExpiryDate: null })}
+            onSuccess={() => {
+              setIssueCertificateDialog({ open: false, id: null, certificateExpiryDate: null });
+              fetchData();
+            }}
+            assetId={issueCertificateDialog?.id}
+            certificateExpiryDate={issueCertificateDialog.certificateExpiryDate}
+          />
+        )
+      }
+      {
+        certificateHistoryDialog?.open && (
+          <CertificateHistoryDialog
+            onClose={() => setCertificateHistoryDialog({ open: false, id: null })}
+            id={certificateHistoryDialog?.id}
+            supplierAccount={user?.user?.supplierAccountId}
+          />
+        )
+      }
     </Fragment>
   );
 };

@@ -14,9 +14,9 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageDynamicForm from './ManageDynamicForm';
 import { camelCase, startCase } from 'lodash';
+import EditIcon from '@material-ui/icons/Edit';
 
 const DynamicFormDetail = () => {
-
   const { route, id } = useParams();
   const resource = startCase(route?.replace(/-/g, ' '));
   const renderedFrom = camelCase(resource);
@@ -49,9 +49,9 @@ const DynamicFormDetail = () => {
       .get(`/field?resource=${resource}`)
       .then(({ data: { data } }) => {
         setFields(data?.filter((field) => field.isRead));
-        const primaryField = data?.find((e) => e?.fieldData?.primaryField)
+        const primaryField = data?.find((e) => e?.fieldData?.primaryField);
         if (primaryField) {
-          setPrimaryFieldName(primaryField?.fieldData?.fieldName)
+          setPrimaryFieldName(primaryField?.fieldData?.fieldName);
         }
       })
       .catch((err) => {
@@ -118,20 +118,20 @@ const DynamicFormDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: resource, path: `/${route}` }, {
-            title: primaryFieldName && detailData && detailData[primaryFieldName] ?
-              detailData[primaryFieldName] : resource
-          }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { title: resource, path: `/${route}` },
+              {
+                title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resource
+              }
+            ]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions[renderedFrom]?.isUpdate && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                className="btn-outline-v1"
-                onClick={handleOpenUpdateDialog}
-              >
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
               </Button>
             )}
             {permissions[renderedFrom]?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
