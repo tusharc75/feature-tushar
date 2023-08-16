@@ -71,7 +71,18 @@ const SerializedAssetsCertification = () => {
     fetchGridColumns();
   }, []);
 
+  const fetchAssetsOption = () => {
+    axiosInstance().get(`${serializedAssetsCertification.api}/asset`)
+      .then(({ data }) => {
+        setAssetOptions(data?.data)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   useEffect(() => {
+    fetchAssetsOption()
     fetchData(true);
   }, []);
 
@@ -126,9 +137,6 @@ const SerializedAssetsCertification = () => {
     axiosInstance()
       .get(`${serializedAssetsCertification.api}${queryString}`)
       .then(({ data }) => {
-        if (forAutocomplete) {
-          setAssetOptions(data.data);
-        }
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
           const dateToQuery = moment().add(30, 'days').toDate();
@@ -275,17 +283,22 @@ const SerializedAssetsCertification = () => {
             <Grid item md={9}>
               <Grid container spacing={1}>
                 <Grid item md={3}>
+                  {console.log('assetOptions', assetOptions)}
                   <Autocomplete
-                    onInputChange={(event, value) => {
-                      fetchData(true, value);
-                    }}
-                    onChange={(event, value) => {
-                      fetchData(true, value);
+                    // onInputChange={(event, value) => {
+                    //   fetchData(true, value);
+                    // }}
+                    // onChange={(event, value) => {
+                    //   fetchData(true, value);
+                    // }}
+                    onChange={(e, value) => {
+                      fetchData(true, value.optionLabel);
                     }}
                     fullWidth
-                    options={assetOptions.map((option) => option.assetNumber)}
+                    options={assetOptions}
+                    getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
+                    getOptionLabel={(option) => option.optionLabel}
                     loading={loadingAssets}
-                    getOptionLabel={(option) => option || ''}
                     renderInput={(params) => (
                       <TextField
                         {...params}
