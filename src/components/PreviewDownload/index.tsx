@@ -121,7 +121,7 @@ function PreviewDownload({
       <Box display="flex" alignItems="center">
         <Box display="flex" flexWrap={'wrap'} gridGap={8}>
           <Button
-            variant="outlined"
+            variant={isMobile && !isTablet ? 'text' : 'outlined'}
             className="btn-outline-v1"
             color="primary"
             type="button"
@@ -137,7 +137,7 @@ function PreviewDownload({
           </Button>
           <Button
             className="btn-outline-v1"
-            variant="outlined"
+            variant={isMobile && !isTablet ? 'text' : 'outlined'}
             color="primary"
             type="button"
             size="small"
@@ -152,7 +152,7 @@ function PreviewDownload({
           </Button>
           {isSendEmail && (
             <Button
-              variant="outlined"
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="primary"
               size="small"
               className="btn-outline-v1"

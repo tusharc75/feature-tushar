@@ -30,6 +30,9 @@ import { Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import { MdFilterList, MdSort } from 'react-icons/md';
+import MobileSortDialog from 'src/components/MobileSortDialog';
 
 let workOrderTimeout;
 
@@ -192,7 +195,7 @@ const WorkOrder = () => {
         </HtmlTooltip>
       ) : (
         <HtmlTooltip className="cursor-stop" title={`You do not have permission to delete `}>
-          <IconButton aria-label="Delete" size='small'>
+          <IconButton aria-label="Delete" size="small">
             <DeleteIcon />
           </IconButton>
         </HtmlTooltip>
@@ -291,6 +294,36 @@ const WorkOrder = () => {
   const closeActions = () => {
     setAnchorEl(null);
   };
+  const [isOpenDialog, setisOpenDialog] = useState(false);
+
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClose = () => {
+    setisOpenDialog(false);
+  };
+
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setOpen(false);
+  };
+  let toggleInner = WorkOrderType && (
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
+      {WorkOrderType.map((k, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+        );
+      })}
+    </ToggleButtonGroup>
+  );
 
   return (
     <Fragment>
@@ -331,9 +364,60 @@ const WorkOrder = () => {
       </Grid>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container className={isMobile ? styles.mobile_filter_side_container_workOrder_ticket : styles.filter_side_container_workOrder_ticket}>
-            <Grid item xs={isMobile && !isTablet ? 12 : 6} className="d-flex align-items-center gap-1">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex align-items-center gap-1'}>
               <HideWhenOffline>
+                {isMobile && !isTablet && (
+                  <>
+                    <div className="flex">
+                      <Button
+                        onClick={handleClickOpen}
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        // aria-expanded={open ? 'true' : undefined}
+                        variant="text"
+                        disableElevation
+                        startIcon={<MdSort />}
+                        className={'sort-filter-tablet'}
+                      >
+                        Sort
+                      </Button>
+
+                      <MobileSortDialog
+                        isOpen={open}
+                        handleClose={handleClickClose}
+                        contentPart={toggleInner}
+                        secHeading={['Sort Repair Order']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
+
+                      <Button
+                        onClick={handleOpen}
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        // aria-expanded={open ? 'true' : undefined}
+                        variant="text"
+                        disableElevation
+                        className={'sort-filter-tablet'}
+                        startIcon={<MdFilterList />}
+                      >
+                        Filter
+                      </Button>
+                      <MobileFilterDialog
+                        isOpen={isOpenDialog}
+                        handleClose={handleClose}
+                        contentPart={toggleInner}
+                        columns={columns}
+                        dispatch={dispatch}
+                        title={routes?.repairOrder?.title}
+                        filters={filters}
+                      />
+                    </div>
+                  </>
+                )}
                 <div className={`align-items-center gap-1 layout-for-mobile `}>
                   {WorkOrderType && (
                     <ToggleButtonGroup size="small" className="ml-2" value={WorkOrderType[selectedType - 1].key} exclusive onChange={handleFilter}>
@@ -348,32 +432,13 @@ const WorkOrder = () => {
                   )}
                 </div>
               </HideWhenOffline>
-            </Grid>
-            <Grid item xs={isMobile && !isTablet ? 12 : 6} container className={isMobile ? styles.filter_side : styles.filter_side_deck}>
-              <Box className={isMobile && !isTablet ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile && !isTablet ? styles.content_box : ''}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={isMobile ? styles.search_box_input : ''}
-                    width="242px"
-                    size="small"
-                    value={search}
-                    style={isMobile ? { flex: 1 } : {}}
-                  />
-                </Grid>
-                {/* {permissions?.workOrder?.isCreate &&
-                <Button
-                  className={styles.add_submit_btn}
-                  onClick={() => setShowManageWorkOrder({ open: true, isClone: false, idToClone: null })}
-                  variant="contained"
-                  size="small"
-                  color="primary"
-                  startIcon={<AddOutlined />}>
-                  Add</Button>
-              } */}
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
+              <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.workOrder?.isDelete && (
                   <Button
-                    className={`${styles.action_submit_btn} new-dropdown-v1`}
+                    className={` new-dropdown-v1`}
                     variant="outlined"
                     color="default"
                     size="small"
@@ -415,9 +480,9 @@ const WorkOrder = () => {
                     Delete
                   </MenuItem>
                 </Menu>
-              </Box>
-            </Grid>
-          </Grid>
+              </div>
+            </div>
+          </div>
         </div>
         {isMobile && !isTablet ? (
           <CustomSwipableList
@@ -431,9 +496,9 @@ const WorkOrder = () => {
             dataRows={dataRows}
             selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
             dispatch={dispatch}
-            onEdit={() => { }}
+            onEdit={() => {}}
             extraParamsToCheckDelete={true}
-            onDelete={() => { }}
+            onDelete={() => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -445,7 +510,7 @@ const WorkOrder = () => {
             ]}
             onCreate={null}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -485,8 +550,9 @@ const WorkOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${deleteRecord?.workOrderName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
+              deleteRecord?.workOrderName || ''
+            }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

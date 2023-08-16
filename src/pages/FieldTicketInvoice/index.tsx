@@ -1,5 +1,5 @@
 import { Box, Grid, IconButton, Typography } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useCallback, useContext, useEffect, useReducer, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { camelCase } from 'lodash';
@@ -19,6 +19,10 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
+import { isMobile, isTablet, isDesktop } from 'react-device-detect';
+import Collapse from '@material-ui/core/Collapse';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 
 const style = {
   date: {
@@ -131,6 +135,7 @@ const FieldTicketInvoice = () => {
   const { getColumnData } = useColumns();
   const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null });
   const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
+  const [open, setOpen] = useState<string | false>(false);
 
   const [filterQuery, setFilterQuery] = useState({
     filterById: [],
@@ -310,6 +315,30 @@ const FieldTicketInvoice = () => {
     fetchFieldTicketData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedFieldServiceOrder]);
 
+  const handleChange = (index: string) => {
+    const newIndex = `${index}_mobileCollapse`;
+    setOpen((prev) => (!prev ? newIndex : prev === newIndex ? false : newIndex));
+  };
+  const compareCollapse = (index: number) => {
+    const newIndex = `${index}_mobileCollapse`;
+    return open === newIndex;
+  };
+
+  const GridProps = {
+    frameWorkComponent: frameWorkComponent,
+    columns: columns,
+    dataRows: dataRows,
+    setGridApi: setGridApi,
+    dispatch: dispatch,
+    rowCount: rowCount,
+    limit: limit,
+    pageSizes: pageSizes,
+    page: page,
+    loading: loading,
+    renderedFrom: renderedFrom,
+    fetchFieldTicketData: fetchFieldTicketData
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -331,7 +360,11 @@ const FieldTicketInvoice = () => {
                           <Box
                             mb={2}
                             key={index}
-                            onClick={() => {
+                            onClick={(e) => {
+                              if (isMobile && !isTablet) {
+                                e.stopPropagation();
+                                handleChange(index);
+                              }
                               setSelectedFieldServiceOrder(data);
                             }}
                             style={{
@@ -344,10 +377,10 @@ const FieldTicketInvoice = () => {
                           >
                             <Box className="px-[18px] py-[24px]">
                               <Box sx={{ ...style.serviceItem, ...style.title }}>
-                                <Box style={{ display: 'flex' }}>
-                                  <Typography>{data?.fieldServiceOrderNumber}</Typography>
+                                <Box className="flex flex-wrap gap-2 w-full">
+                                  <Typography className="flex-grow">{data?.fieldServiceOrderNumber}</Typography>
                                   {permissions?.fieldServiceOrder?.isRead && (
-                                    <Box ml={1}>
+                                    <Box className="max-w-max flex gap-2 flex-wrap ml-auto">
                                       <IconButton
                                         size="small"
                                         onClick={(e) => {
@@ -357,6 +390,19 @@ const FieldTicketInvoice = () => {
                                       >
                                         <OpenInNewIcon fontSize="small" color="primary" />
                                       </IconButton>
+                                      {isMobile && !isTablet && (
+                                        <>
+                                          <IconButton
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleChange(index);
+                                              setSelectedFieldServiceOrder(data);
+                                            }}
+                                          >
+                                            {compareCollapse(index) ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                          </IconButton>
+                                        </>
+                                      )}
                                     </Box>
                                   )}
                                 </Box>
@@ -385,6 +431,13 @@ const FieldTicketInvoice = () => {
                                 </Typography>
                               </Box>
                             </Box>
+                            {isMobile && !isTablet && (
+                              <Collapse in={compareCollapse(index)}>
+                                <div className="py-2 px-1">
+                                  <RenderGrid {...GridProps} />
+                                </div>
+                              </Collapse>
+                            )}
                           </Box>
                         );
                       })}
@@ -392,39 +445,20 @@ const FieldTicketInvoice = () => {
                   </Box>
                 </Grid>
               )}
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                md={filterQuery?.filterById?.findIndex((f) => f?.field === '_id') === -1 ? 8 : 12}
-                xl={filterQuery?.filterById?.findIndex((f) => f?.field === '_id') === -1 ? 9 : 12}
-                lg={filterQuery?.filterById?.findIndex((f) => f?.field === '_id') === -1 ? 8 : 12}
-              >
-                <Box p={2} className="container-with-border">
-                  {Object.keys(frameWorkComponent).length > 0 ? (
-                    <CustomAgGrid
-                      columns={columns}
-                      dataRows={dataRows}
-                      frameworkComponents={frameWorkComponent}
-                      setGridApi={setGridApi}
-                      dispatch={dispatch}
-                      rowCount={rowCount}
-                      limit={limit}
-                      pageSizes={pageSizes}
-                      page={page}
-                      allowAction={true}
-                      loading={loading}
-                      renderedFrom={renderedFrom}
-                      refreshGrid={fetchFieldTicketData}
-                      showOnlyShowFilteredRecordSwitch={false}
-                      showFilters={false}
-                      actionWidth={80}
-                      resource={sidebarResource.fieldTicket}
-                      allowSelection={false}
-                    />
-                  ) : null}
-                </Box>
-              </Grid>
+              {(isTablet || isDesktop) && (
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  md={filterQuery?.filterById?.findIndex((f) => f?.field === '_id') === -1 ? 8 : 12}
+                  xl={filterQuery?.filterById?.findIndex((f) => f?.field === '_id') === -1 ? 9 : 12}
+                  lg={filterQuery?.filterById?.findIndex((f) => f?.field === '_id') === -1 ? 8 : 12}
+                >
+                  <Box p={2} className="container-with-border">
+                    <RenderGrid {...GridProps} />
+                  </Box>
+                </Grid>
+              )}
             </Grid>
           ) : (
             <Box style={{ minHeight: 'calc(100vh - 349px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -461,6 +495,50 @@ const FieldTicketInvoice = () => {
         />
       )}
     </Box>
+  );
+};
+
+const RenderGrid = ({
+  frameWorkComponent,
+  columns,
+  dataRows,
+  setGridApi,
+  dispatch,
+  rowCount,
+  limit,
+  pageSizes,
+  page,
+  loading,
+  renderedFrom,
+  fetchFieldTicketData,
+  ...otherProps
+}) => {
+  return (
+    <>
+      {Object.keys(frameWorkComponent).length > 0 ? (
+        <CustomAgGrid
+          {...otherProps}
+          columns={columns}
+          dataRows={dataRows}
+          frameworkComponents={frameWorkComponent}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          allowAction={true}
+          loading={loading}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchFieldTicketData}
+          showOnlyShowFilteredRecordSwitch={false}
+          showFilters={false}
+          actionWidth={80}
+          resource={sidebarResource.fieldTicket}
+          allowSelection={false}
+        />
+      ) : null}
+    </>
   );
 };
 

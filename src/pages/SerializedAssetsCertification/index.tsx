@@ -22,7 +22,6 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { camelCase } from 'lodash';
-import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
 import IssueCertificateDialog from './IssueCertificateDialog';
 import CertificateHistoryDialog from './CertificateHistoryDialog';
@@ -36,6 +35,7 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import DateFnsUtils from '@date-io/date-fns';
 
 const SerializedAssetsCertification = () => {
+
   const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -50,7 +50,7 @@ const SerializedAssetsCertification = () => {
     state;
 
   const [assetOptions, setAssetOptions] = useState([]);
-  const [loadingAssets, setLoadingAssets] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState(null);
 
   const [issueDuration, setIssueDuration] = useState({
     from: null,
@@ -71,13 +71,25 @@ const SerializedAssetsCertification = () => {
     fetchGridColumns();
   }, []);
 
+  const fetchAssetsOption = () => {
+    axiosInstance().get(`${serializedAssetsCertification.api}/asset`)
+      .then(({ data }) => {
+        setAssetOptions(data?.data)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   useEffect(() => {
+    fetchAssetsOption()
     fetchData();
-  }, []);
+  }, [])
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly,
+    issueDuration, expireDuration, selectedEntity, selectedAsset]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -157,7 +169,33 @@ const SerializedAssetsCertification = () => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (issueDuration?.from && issueDuration?.from) {
+      deepFilters.push({
+        field: 'certificateIssueDate',
+        term: {
+          from: moment(issueDuration?.from).format('MM/DD/YYYY'),
+          to: moment(issueDuration?.to).format('MM/DD/YYYY')
+        }
+      });
+    }
+    if (expireDuration?.from && expireDuration?.from) {
+      deepFilters.push({
+        field: 'certificateExpiryDate',
+        term: {
+          from: moment(expireDuration?.from).format('MM/DD/YYYY'),
+          to: moment(expireDuration?.to).format('MM/DD/YYYY')
+        }
+      });
+    }
+    if (selectedAsset) {
+      deepFilters.push({
+        field: 'assetNumber',
+        term: selectedAsset.optionLabel
+      });
+    }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -169,41 +207,20 @@ const SerializedAssetsCertification = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    const updatedFilters = [];
-    if (issueDuration?.from && issueDuration?.from) {
-      updatedFilters.push({
-        field: 'certificateIssueDate',
-        term: {
-          from: moment(issueDuration?.from).format('MM/DD/YYYY'),
-          to: moment(issueDuration?.to).format('MM/DD/YYYY')
-        }
-      });
-    }
-    if (expireDuration?.from && expireDuration?.from) {
-      updatedFilters.push({
-        field: 'certificateExpiryDate',
-        term: {
-          from: moment(expireDuration?.from).format('MM/DD/YYYY'),
-          to: moment(expireDuration?.to).format('MM/DD/YYYY')
-        }
-      });
-    }
-    if (updatedFilters?.length > 0) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
-    }
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
+
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
+
     if (showFilteredRecordsOnly) {
       const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-    if (deepFilter !== '') {
-      deepFilter = `${deepFilter}&filterType=and&filterByIdType=and`;
-    }
+
     return deepFilter;
   };
 
@@ -260,35 +277,24 @@ const SerializedAssetsCertification = () => {
       <div className="main-container">
         <div className="header-panel">
           <Grid container justifyContent='space-between' spacing={2}>
-            <Grid item md={9}>
+            <Grid item md={10}>
               <Grid container spacing={1}>
                 <Grid item md={3}>
                   <Autocomplete
-                    onInputChange={(event, value) => {
-                      fetchData();
-                    }}
                     onChange={(event, value) => {
-                      fetchData();
+                      setSelectedAsset(value)
                     }}
                     fullWidth
-                    options={assetOptions.map((option) => option.assetNumber)}
-                    loading={loadingAssets}
-                    getOptionLabel={(option) => option || ''}
+                    options={assetOptions}
+                    getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
+                    getOptionLabel={(option) => option.optionLabel}
+                    size="small"
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         label={'Asset'}
                         variant="outlined"
                         size="small"
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <Fragment>
-                              {loadingAssets ? <CircularProgress color="inherit" size={20} /> : null}
-                              {params.InputProps.endAdornment}
-                            </Fragment>
-                          )
-                        }}
                       />
                     )}
                   />
@@ -379,7 +385,7 @@ const SerializedAssetsCertification = () => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item md={3} style={{ display: 'flex', justifyContent: 'flex-end' }} >
+            <Grid item md={2} style={{ display: 'flex', justifyContent: 'flex-end' }} >
               <SearchBox onChange={handleSearch} className={styles.search_box_input} width={isMobile ? '200px' : '210px'} size="small" value={search} />
             </Grid>
           </Grid>
