@@ -311,7 +311,8 @@ const WorkOrder = ({
             ) : row?.original?.type === 'serializedAsset' ? (
               <>
                 <IconButton
-                  disabled={row.original?.subRows?.length === 0 ? false : true}
+                  disabled={row.original?.subRows?.length === 0
+                    && row.original?.serviceStatus !== WORK_ORDER_STATUS.completed ? false : true}
                   size="small"
                   aria-label="Details"
                   onClick={() => {
@@ -319,7 +320,8 @@ const WorkOrder = ({
                     setShowConfirmBox(true);
                   }}
                 >
-                  <Delete fontSize="small" color={row.original?.subRows?.length === 0 ? 'error' : 'disabled'} />
+                  <Delete fontSize="small" color={row.original?.subRows?.length === 0
+                    && row.original?.serviceStatus !== WORK_ORDER_STATUS.completed ? 'error' : 'disabled'} />
                 </IconButton>
               </>
             ) : null}
@@ -410,8 +412,9 @@ const WorkOrder = ({
           toastConfig.setToastConfig(err);
         });
     } else {
-      if (deleteData?.filter((e: any) => !e?.subRows?.length)?.length) {
-        handleWorkOrderDelete(deleteData?.filter((e: any) => !e?.subRows?.length)?.map((e) => e.workOrder?._id));
+      if (deleteData?.filter((e: any) => !e?.subRows?.length && e?.serviceStatus !== WORK_ORDER_STATUS.completed)?.length) {
+        handleWorkOrderDelete(deleteData?.filter((e: any) => !e?.subRows?.length
+          && e?.serviceStatus !== WORK_ORDER_STATUS.completed)?.map((e) => e.workOrder?._id));
       }
     }
   };
