@@ -13,7 +13,8 @@ import {
   ASSET_STATUS,
   COLOUR_MASTER,
   getLocalStorageArrayData,
-  sidebarResource
+  sidebarResource,
+  dateFormatForInputControl
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -32,6 +33,8 @@ import DurationFilter from 'src/components/DurationFilter';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import HistoryIcon from '@material-ui/icons/History';
 import { Autocomplete } from '@material-ui/lab';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
 
 const SerializedAssetsCertification = () => {
   const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
@@ -268,46 +271,131 @@ const SerializedAssetsCertification = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <div className="flex justify-between mb-4 sm:mb-5 flex-wrap gap-4">
-            <div className="w-full min-[600px]:w-[250px]">
-              <Autocomplete
-                onInputChange={(event, value) => {
-                  fetchData(true, value);
-                }}
-                onChange={(event, value) => {
-                  fetchData(true, value);
-                }}
-                fullWidth
-                options={assetOptions.map((option) => option.assetNumber)}
-                loading={loadingAssets}
-                getOptionLabel={(option) => option || ''}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label={'Asset'}
-                    variant="outlined"
-                    size="small"
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <Fragment>
-                          {loadingAssets ? <CircularProgress color="inherit" size={20} /> : null}
-                          {params.InputProps.endAdornment}
-                        </Fragment>
-                      )
+          <Grid container justifyContent='space-between' spacing={2}>
+            <Grid item md={9}>
+              <Grid container spacing={1}>
+                <Grid item md={3}>
+                  <Autocomplete
+                    onInputChange={(event, value) => {
+                      fetchData(true, value);
                     }}
+                    onChange={(event, value) => {
+                      fetchData(true, value);
+                    }}
+                    fullWidth
+                    options={assetOptions.map((option) => option.assetNumber)}
+                    loading={loadingAssets}
+                    getOptionLabel={(option) => option || ''}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label={'Asset'}
+                        variant="outlined"
+                        size="small"
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <Fragment>
+                              {loadingAssets ? <CircularProgress color="inherit" size={20} /> : null}
+                              {params.InputProps.endAdornment}
+                            </Fragment>
+                          )
+                        }}
+                      />
+                    )}
+                  // style={{ minWidth: 250 }}
                   />
-                )}
-                style={{ minWidth: 250 }}
-              />
-            </div>
-
-            <SearchBox onChange={handleSearch} className={styles.search_box_input} width={isMobile ? '200px' : '210px'} size="small" value={search} />
-          </div>
-          <div className="grid lg:grid-cols-2 gap-4">
-            <DurationFilter label={'Issue Date'} duration={issueDuration} setDuration={setIssueDuration} defaultTimeFrame="custom" />
-            <DurationFilter label={'Expire Date'} duration={expireDuration} setDuration={setExpireDuration} defaultTimeFrame="custom" />
-          </div>
+                </Grid>
+                <Grid item md={9}>
+                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                    <Grid container spacing={1}>
+                      <Grid item md={3}>
+                        <KeyboardDatePicker
+                          inputVariant="outlined"
+                          variant="inline"
+                          fullWidth
+                          size="small"
+                          format={dateFormatForInputControl}
+                          maxDate={issueDuration.to}
+                          label="From (Issue Date)"
+                          autoOk
+                          InputLabelProps={{
+                            shrink: true
+                          }}
+                          views={['year', 'month', 'date']}
+                          value={issueDuration.from}
+                          onChange={(date) => {
+                            setIssueDuration({ to: issueDuration.to, from: date });
+                          }}
+                        />
+                      </Grid>
+                      <Grid item md={3}>
+                        <KeyboardDatePicker
+                          inputVariant="outlined"
+                          variant="inline"
+                          fullWidth
+                          size="small"
+                          format={dateFormatForInputControl}
+                          label="To (Issue Date)"
+                          autoOk
+                          InputLabelProps={{
+                            shrink: true
+                          }}
+                          views={['year', 'month', 'date']}
+                          value={issueDuration.to}
+                          onChange={(date) => {
+                            setIssueDuration({ from: issueDuration.from, to: date });
+                          }}
+                        />
+                      </Grid>
+                      <Grid item md={3}>
+                        <KeyboardDatePicker
+                          inputVariant="outlined"
+                          variant="inline"
+                          fullWidth
+                          size="small"
+                          format={dateFormatForInputControl}
+                          maxDate={expireDuration.to}
+                          label="From (Expiry Date)"
+                          autoOk
+                          InputLabelProps={{
+                            shrink: true
+                          }}
+                          views={['year', 'month', 'date']}
+                          value={expireDuration.from}
+                          onChange={(date) => {
+                            setExpireDuration({ to: expireDuration.to, from: date });
+                          }}
+                        />
+                      </Grid>
+                      <Grid item md={3}>
+                        <KeyboardDatePicker
+                          inputVariant="outlined"
+                          variant="inline"
+                          fullWidth
+                          size="small"
+                          format={dateFormatForInputControl}
+                          label="To (Expiry Date)"
+                          autoOk
+                          InputLabelProps={{
+                            shrink: true
+                          }}
+                          views={['year', 'month', 'date']}
+                          value={expireDuration.to}
+                          onChange={(date) => {
+                            setExpireDuration({ from: expireDuration.from, to: date });
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </MuiPickersUtilsProvider>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item md={3} style={{ display: 'flex', justifyContent: 'flex-end' }} >
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} width={isMobile ? '200px' : '210px'} size="small" value={search} />
+            </Grid>
+          </Grid>
         </div>
         {columns ? (
           Object.keys(frameWorkComponent).length > 0 && columns ? (
@@ -337,23 +425,27 @@ const SerializedAssetsCertification = () => {
           </Box>
         )}
       </div>
-      {issueCertificateDialog?.open && (
-        <IssueCertificateDialog
-          onClose={() => setIssueCertificateDialog({ open: false, id: null })}
-          onSuccess={() => {
-            setIssueCertificateDialog({ open: false, id: null });
-            fetchData();
-          }}
-          assetId={issueCertificateDialog?.id}
-        />
-      )}
-      {certificateHistoryDialog?.open && (
-        <CertificateHistoryDialog
-          onClose={() => setCertificateHistoryDialog({ open: false, id: null })}
-          id={certificateHistoryDialog?.id}
-          supplierAccount={user?.user?.supplierAccountId}
-        />
-      )}
+      {
+        issueCertificateDialog?.open && (
+          <IssueCertificateDialog
+            onClose={() => setIssueCertificateDialog({ open: false, id: null })}
+            onSuccess={() => {
+              setIssueCertificateDialog({ open: false, id: null });
+              fetchData();
+            }}
+            assetId={issueCertificateDialog?.id}
+          />
+        )
+      }
+      {
+        certificateHistoryDialog?.open && (
+          <CertificateHistoryDialog
+            onClose={() => setCertificateHistoryDialog({ open: false, id: null })}
+            id={certificateHistoryDialog?.id}
+            supplierAccount={user?.user?.supplierAccountId}
+          />
+        )
+      }
     </Fragment>
   );
 };
