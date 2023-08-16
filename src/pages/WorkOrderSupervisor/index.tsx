@@ -307,7 +307,6 @@ const WorkOrderSupervisor = () => {
               cardDataRows={cardDataRows}
               passFailStatus={true}
               passFailAccessor="serviceStatus"
-              px={2}
             />
           ) : (
             <Box p={2} height={500}>
