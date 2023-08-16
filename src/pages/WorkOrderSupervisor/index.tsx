@@ -97,7 +97,7 @@ const WorkOrderSupervisor = () => {
       data?.forEach((ele) => {
         ele['serviceName'] = ele?.service?.optionLabel;
         ele['assignedUser'] = ele?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
-      })
+      });
       setServiceData({
         Pending: { data: data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.pending), color: '#F8A300' },
         'In-Progress': { data: data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.inProgress), color: '#F16A9A' },
@@ -147,9 +147,9 @@ const WorkOrderSupervisor = () => {
         </Grid>
         <div className="main-container">
           <div className="header-panel">
-            <Box flexWrap={'wrap'} className="d-flex align-items-center gap-1">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 align-items-center">
               <Autocomplete
-                style={{ width: '200px' }}
+                fullWidth
                 options={usersOption}
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                 getOptionSelected={(option: any, val) => {
@@ -165,11 +165,20 @@ const WorkOrderSupervisor = () => {
                 }}
                 // disableClearable
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="user" placeholder="Technician" label="Technician" variant="outlined" fullWidth />
+                  <TextField
+                    {...params}
+                    margin="none"
+                    size="small"
+                    name="user"
+                    placeholder="Technician"
+                    label="Technician"
+                    variant="outlined"
+                    fullWidth
+                  />
                 )}
               />
               <Autocomplete
-                style={{ width: '200px' }}
+                fullWidth
                 options={workOrderOption}
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                 getOptionSelected={(option: any, val) => {
@@ -184,11 +193,20 @@ const WorkOrderSupervisor = () => {
                   setSelectedWorkOrder(val && val.optionValue ? val.optionValue : '');
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="workOrder" placeholder="Work Order" label="Work Order" variant="outlined" fullWidth />
+                  <TextField
+                    {...params}
+                    margin="none"
+                    size="small"
+                    name="workOrder"
+                    placeholder="Work Order"
+                    label="Work Order"
+                    variant="outlined"
+                    fullWidth
+                  />
                 )}
               />
               <Autocomplete
-                style={{ width: '200px' }}
+                fullWidth
                 options={repairOrderOption}
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                 getOptionSelected={(option: any, val) => {
@@ -205,7 +223,8 @@ const WorkOrderSupervisor = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    margin="dense"
+                    margin="none"
+                    size="small"
                     name="repairOrder"
                     placeholder="Repair Order"
                     label="Repair Order"
@@ -215,7 +234,7 @@ const WorkOrderSupervisor = () => {
                 )}
               />
               <Autocomplete
-                style={{ width: '200px' }}
+                fullWidth
                 options={serviceMasterOption}
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                 getOptionSelected={(option: any, val) => {
@@ -230,10 +249,10 @@ const WorkOrderSupervisor = () => {
                   setSelectedService(val && val.optionValue ? val.optionValue : '');
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="user" placeholder="Service" label="Service" variant="outlined" fullWidth />
+                  <TextField {...params} margin="none" size="small" name="user" placeholder="Service" label="Service" variant="outlined" fullWidth />
                 )}
               />
-              <FormControl style={{ width: '150px' }} size="medium" margin="dense" variant="outlined">
+              <FormControl fullWidth size="small" margin="none" variant="outlined">
                 <InputLabel id="duration">Select Duration</InputLabel>
                 <Select
                   labelId="duration"
@@ -241,6 +260,7 @@ const WorkOrderSupervisor = () => {
                   value={timeFrame}
                   onChange={(e) => setTimeFrame(e.target.value)}
                   label="Select Duration"
+                  fullWidth
                 >
                   <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                   <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
@@ -253,7 +273,6 @@ const WorkOrderSupervisor = () => {
                 disabled={timeFrame !== 'custom'}
                 inputVariant="outlined"
                 variant="inline"
-                style={{ width: '150px' }}
                 size="small"
                 autoOk
                 format={dateFormatForInputControl}
@@ -269,7 +288,6 @@ const WorkOrderSupervisor = () => {
                 inputVariant="outlined"
                 variant="inline"
                 autoOk
-                style={{ width: '150px' }}
                 size="small"
                 minDate={globalFilters.from}
                 format={dateFormatForInputControl}
@@ -279,7 +297,7 @@ const WorkOrderSupervisor = () => {
                   setGlobalFilters({ ...globalFilters, to: date });
                 }}
               />
-            </Box>
+            </div>
           </div>
           {serviceData ? (
             <CardColTimeline
