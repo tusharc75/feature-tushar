@@ -23,6 +23,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import { flattenArray } from 'src/constants/columns';
 
 const Productpackage = ({
   fetchRepairOrderData,
@@ -58,6 +59,9 @@ const Productpackage = ({
 
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
+  const [isInlineEdit, setIsInlineEdit] = useState(false);
+
+
 
 
   useEffect(() => {
@@ -185,6 +189,7 @@ const Productpackage = ({
         accessor: 'qtyDisplay',
         Header: 'Qty',
         width: 200,
+        editable: true,
         Cell: ({ row }) => {
           return row.original['qtyDisplay'] ? <p className="text-truncate">{row.original.qtyDisplay}</p> : <NoDataCell />;
         }
@@ -321,7 +326,7 @@ const Productpackage = ({
             : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
-      _subRow.qtyDisplay = _subRow.type === MATERIAL_TYPE.serializedAsset ? 1 : `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.qtyDisplay = _subRow.qty || 1;
       _subRow.isValid = true;
       _subRow.status = _subRow?.serializedAssetDetail?.status || null
       _subRow.canDelete = _subRow.type === MATERIAL_TYPE.serializedAsset ?
@@ -363,11 +368,23 @@ const Productpackage = ({
       });
   };
 
-  const handleSaveData = async (rows: any) => {
+  const handleSaveData = async (rows: any, inline = false) => {
     const data = []
     rows?.forEach((element) => {
-      data.push({ _id: element._id, qty: element.qty })
+      data.push({ _id: element._id, qty: element?.qty })
     })
+    if (rowsData?.length && rows) {
+      rows?.map((r) => {
+        const row = rowsData?.find((e) => e._id === r._id);
+        const subRows = row?.subRows?.length ? row?.subRows : null;
+        if (subRows?.length) {
+          subRows?.forEach((sr) => {
+            data.push({ _id: sr._id, qty: r?.qty })
+          })
+        }
+      });
+    }
+    console.log(rowsData, 'rowsData')
     setUpdating(true);
     axiosInstance()
       .put(`${repairOrder.api}/${repairOrderData._id}/product-package`, { material: data })
@@ -426,6 +443,31 @@ const Productpackage = ({
 
   const closeAddActions = () => {
     setAddAnchorEl(null);
+  };
+
+
+  const onSaveInlineEdit = (inputField, updatedData) => {
+    setIsInlineEdit(true);
+    onConfirmSave(inputField, updatedData);
+  };
+
+  const onConfirmSave = async (inputField, updatedData) => {
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      inputField['qty'] = inputField['qtyDisplay'];
+      if (rowData.hideSelection && inputField['qty'] < rowData?.assetQty) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'The quantity is less than what was assigned.'
+        });
+        return;
+      }
+    }
+    updatedData['qty'] = updatedData['qtyDisplay'];
+    let rows: any = [{ ...rowData, ...updatedData }];
+    handleSaveData(rows);
   };
 
   return (
@@ -542,7 +584,7 @@ const Productpackage = ({
             hideAction={!allowedToEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            hideExpander={false}
+            onSaveEdit={onSaveInlineEdit}
           />
         </Box>
       ) : (
