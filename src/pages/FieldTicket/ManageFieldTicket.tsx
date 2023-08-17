@@ -235,6 +235,18 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
   }, [initialData.fields]);
 
+
+  function validate(values) {
+    const errors = {};
+    let estimateStartDate = moment(values?.estimateStartDate);
+    let estimateEndDate = moment(values?.estimateEndDate);
+    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+      errors['estimateEndDate'] = 'Please enter valid end date';
+    }
+    return errors;
+  }
+
+
   return (
     <Dialog
       maxWidth="md"
@@ -250,7 +262,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
+        <Formik validate={validate} initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
