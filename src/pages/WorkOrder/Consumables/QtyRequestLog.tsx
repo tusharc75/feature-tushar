@@ -270,7 +270,8 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
             setWithdrawalQtyDialog({ open: false, data: null })
           }}
           data={withdrawalQtyDialog.data}
-          workOrderId={referenceId}
+          referenceId={referenceId}
+          referenceType={referenceType}
         />}
     </>
   );
