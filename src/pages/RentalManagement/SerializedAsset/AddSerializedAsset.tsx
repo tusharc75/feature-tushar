@@ -730,7 +730,7 @@ const AddSerializedAsset = ({
                 </Box>
               </Grid>
             </Grid>
-            {referenceType === 'Rental Job' && (
+            {['Rental Job', 'Repair Job'].includes(referenceType) && (
               <Grid container spacing={2}>
                 <Grid item>
                   <CustomTabs value={tabValue} onChange={handleMainTabChange}>
