@@ -2,22 +2,28 @@ import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { isEqual } from 'lodash';
+import { isEqual, map, orderBy, uniq } from 'lodash';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import InputField from 'src/components/Helpers/InputField';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import FormTypes from 'src/components/Helpers/FormTypes';
+import { FaDiceOne } from 'react-icons/fa';
 
 const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
+  const [fields, setFields] = useState([]);
+
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,6 +49,17 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
         values: getObjKeys('', data)
       });
     }
+    EvaluteproductFields(data);
+  };
+
+  const EvaluteproductFields = (fields) => {
+    const sections = uniq(map(fields, 'sectionName'));
+    const customData = sections.map((name) => {
+      let sectionFields = fields.filter((field) => field.sectionName === name);
+      sectionFields = orderBy(sectionFields, 'order', 'asc');
+      return { name, sectionFields };
+    });
+    setFields(customData);
   };
 
   const handleSubmit = (values) => {
@@ -118,15 +135,71 @@ const AddCostDialog = ({ costData, onClose, onSuccess, fieldTicketData }) => {
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <InputField
-                    errors={errors}
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    touched={touched}
-                    fieldsData={initialData.fields}
-                    size="small"
-                    fullWidth
-                  />
+                  {fields &&
+                    fields.map((section, i) => (
+                      <div key={i}>
+                        <div className={'detail-box-content detail-product-box'}>
+                          <div className={'product-form-layout'}>
+                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                            <h2 className={`${'form-label-style'} ${'form-label-product'}`}>{section.name}</h2>
+                          </div>
+                        </div>
+                        <Box marginY={2}>
+                          <Grid spacing={3} container>
+                            {section.sectionFields &&
+                              section.sectionFields.map((field) =>
+                                field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter ? (
+                                  <FormTypes
+                                    fields={initialData.fields}
+                                    fieldData={{ ...field, hideConverter: true }}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field.isTooltip}
+                                    tooltipMessage={field.tooltipMessage}
+                                    size="small"
+                                  />
+                                ) :
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Box display="flex">
+                                      <Box flexGrow={1}>
+                                        <FormTypes
+                                          {...field}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
+                                          fields={initialData.fields}
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Grid>
+                              )}
+                          </Grid>
+                        </Box>
+                      </div>
+                    ))}
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
