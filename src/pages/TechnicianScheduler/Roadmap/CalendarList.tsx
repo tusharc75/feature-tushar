@@ -1,89 +1,9 @@
-import { makeStyles } from '@material-ui/core/styles';
-import { Box, Tooltip, Typography } from '@material-ui/core';
-// import { TreeView, TreeItem } from '@material-ui/lab';
-import moment from 'moment';
-import { displayDate } from 'src/constants/helpers';
+import { Tooltip, Typography } from '@material-ui/core';
 import styles from './roadmap.module.scss';
-
-// const useStyles = makeStyles((theme) => ({
-//   label: {
-//     paddingLeft: 0
-//   },
-//   iconContainer: {
-//     display: 'none'
-//   },
-//   group: {
-//     marginLeft: 0
-//   },
-//   calenderHighlights: {
-//     color: 'white',
-//     background: 'red',
-//     borderRadius: '4px',
-//     padding: '2px 5px',
-//     display: 'flex',
-//     alignItems: 'center',
-//     overflow: 'hidden'
-//   }
-// }));
+import { getPriority, getColorFromPriority, getPositionOfDate } from './helperFunctions';
 
 export default function CalendarList(props) {
-  const { activity, expanded, selected, handleSelect, startDate, endDate, totalDay, calendarType } = props;
-  // const classes = useStyles();
-
-  // const getTreeNodes = (activity) => {
-  //   return activity.map((data, index) => {
-  //     let children = [];
-  //     if (data.child && data.child.length) {
-  //       children = getTreeNodes(data.child);
-  //       children.push(<div></div>);
-  //     }
-
-  //     let label = (
-  //       <Box width={'100%'} height={50} className="d-flex align-items-center">
-  //         <Tooltip title={data.firstName + ' ' + data.lastName + ' - ' + displayDate(data.createDate)} placement="right">
-  //           <Box
-  //             minWidth={calendarType !== 'week' ? '100px' : ''}
-  //             height={45}
-  //             borderRadius="borderRadius"
-  //             display="flex"
-  //             style={{
-  //               position: 'absolute',
-  //               left: (100 * moment(data.startDate).diff(startDate, 'days')) / totalDay + '%',
-  //               right: (100 * endDate.diff(moment(data.dueDate), 'days')) / totalDay + '%'
-  //             }}
-  //             bgcolor="secondary.main"
-  //             color="white"
-  //           ></Box>
-  //         </Tooltip>
-  //       </Box>
-  //     );
-
-  //     return (
-  //       <TreeItem
-  //         key={index}
-  //         nodeId={data._id.toString()}
-  //         label={label}
-  //         children={children}
-  //         classes={{
-  //           group: classes.group,
-  //           iconContainer: classes.iconContainer,
-  //           label: classes.label
-  //         }}
-  //       />
-  //     );
-  //   });
-  // };
-
-  // let TreeNodes = getTreeNodes(activity);
-  // return (
-  //   <>
-  //     <TreeView expanded={expanded} selected={selected} onNodeSelect={handleSelect}>
-  //       {TreeNodes.map((node) => {
-  //         return node;
-  //       })}
-  //     </TreeView>
-  //   </>
-  // );
+  const { activity, handleSelect, startDate, endDate, totalDay, calendarType } = props;
 
   return (
     <>
@@ -111,38 +31,13 @@ export default function CalendarList(props) {
   );
 }
 
-const getPos = (taskStartDate, taskEndDate, startDate, endDate, totalDay) => {
-  return {
-    left: (100 * moment(taskStartDate).diff(startDate, 'days')) / totalDay + '%',
-    right: (100 * endDate.diff(moment(taskEndDate), 'days')) / totalDay + '%'
-  } as React.CSSProperties;
-};
-
 const RenderServices = ({ name, startDate, endDate, services, handleSelect, totalDay, calendarType, createDate }) => {
-  const getPriority = () => {
-    const priority = ['low', 'medium', 'high'];
-    return priority[Math.floor(Math.random() * priority.length)];
-  };
-
-  const getColorFromPriority = (priority) => {
-    let color = { backgroundColor: '#EFF8FF' } as React.CSSProperties;
-    if (priority === 'low') {
-      color = { backgroundColor: '#EFF8FF' } as React.CSSProperties;
-    }
-    if (priority === 'medium') {
-      color = { backgroundColor: '#FEF5D6' } as React.CSSProperties;
-    }
-    if (priority === 'high') {
-      color = { backgroundColor: '#FFEEF3' } as React.CSSProperties;
-    }
-    return color;
-  };
   return (
     <>
       {services?.map((service) => {
-        const priority = getPriority();
+        const priority = getPriority(service.status);
         const bgColor = getColorFromPriority(priority);
-        const pos = getPos(service.estimateStartDate, service.estimateEndDate, startDate, endDate, totalDay);
+        const pos = getPositionOfDate(service.estimateStartDate, service.estimateEndDate, startDate, endDate, totalDay);
         return (
           <div
             className={`${styles.singleService} singlePriority`}
@@ -152,8 +47,7 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
             <Tooltip
               title={
                 <>
-                  <p>{service?.fieldTicket[0]?.fieldTicketNumber
-                  }</p>
+                  <p>{service?.fieldTicket[0]?.fieldTicketNumber}</p>
                 </>
               }
               placement="top"
@@ -163,11 +57,8 @@ const RenderServices = ({ name, startDate, endDate, services, handleSelect, tota
                   <span>{service?.serviceDetail?.serviceName}</span>
                 </Typography>
                 <span className={`${styles.chip} ${styles[priority]}`}>
-                  <Typography component={'span'}>{priority}</Typography>
+                  <Typography component={'span'}>{service.status}</Typography>
                 </span>
-                {/* <span className={`${styles.chip} ${styles.success}`}>
-                  <Typography component={'span'}>{service?.status}</Typography>
-                </span> */}
               </div>
             </Tooltip>
           </div>
