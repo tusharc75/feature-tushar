@@ -2068,15 +2068,16 @@ const FormTypes = (props) => {
     ) : type === 'fileUpload' ? (
       <Fragment>
         <Box display="flex" alignItems="center">
-          {/* <Typography color="textSecondary">{label}</Typography> */}
           {isTooltip && Boolean(tooltipMessage) && (
-            <IconButton size="small">
-              <HtmlTooltip title={tooltipMessage}>
-                <InfoIcon color="disabled" />
-              </HtmlTooltip>
-            </IconButton>
+            <Fragment>
+              <IconButton size="small">
+                <HtmlTooltip title={tooltipMessage}>
+                  <InfoIcon color="disabled" />
+                </HtmlTooltip>
+              </IconButton>
+              <Box mr={1} />
+            </Fragment>
           )}
-          <Box mr={1} />
           <input
             disabled={isFileUploading || !canEdit}
             id={name}
