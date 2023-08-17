@@ -27,6 +27,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
+import { RiFileShredFill } from 'react-icons/ri';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -213,8 +214,13 @@ const WorkOrderDetails = () => {
             {workOrderData ? (
               <>
                 {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
-                  <Button variant={'contained'} size="small" onClick={() => setShowConfirmBoxScrap(true)} className={'btn-outline-v1'}>
-                    {`${ASSET_STATUS.scrap} Asset`}
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    size="small"
+                    onClick={() => setShowConfirmBoxScrap(true)}
+                    className={'btn-outline-v1'}
+                  >
+                    {isMobile && !isTablet ? <RiFileShredFill /> : `${ASSET_STATUS.scrap} Asset`}
                   </Button>
                 )}
                 {permissions?.workOrder?.isUpdate &&

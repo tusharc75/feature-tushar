@@ -621,7 +621,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                   {data?.type === 'service' ? (
                                     <Box
                                       style={{
-                                        backgroundColor: 'var(--dark-secondary, var(--primary))',
+                                        backgroundColor: 'var(--dark-primary, var(--primary))',
                                         color: 'white',
                                         width: '20px',
                                         height: '20px',
