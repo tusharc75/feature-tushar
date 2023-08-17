@@ -192,10 +192,10 @@ const CustomFilter = ({ field, setFilterQuery }) => {
           <Button
             startIcon={<BiFilterAlt />}
             size='small'
-            className="yellow-button"
             onClick={() => {
               setIsFilterOpen(true);
             }}
+            variant='outlined'
           >
             Filters
           </Button>
