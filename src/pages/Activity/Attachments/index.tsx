@@ -597,6 +597,11 @@ export default function Attachment() {
       });
   };
 
+  const fetchChildAttachment = async (id) => {
+    const attachment = await axiosInstance().get(`/attachment/child/${id}`)
+    return attachment?.data?.data
+  }
+
   const generateNestedData = (data, parent) => {
     const childRow = data
       ?.filter((e) => e?.parentFolder === parent?._id)
@@ -822,6 +827,7 @@ export default function Attachment() {
               customFilters={filters}
               sorting={sorting}
               loading={loading}
+              fetchChildAttachment={fetchChildAttachment}
             />
           ) : (
             <Box p={2} height={500}>
