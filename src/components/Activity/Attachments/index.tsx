@@ -75,7 +75,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
 
   const fetchAttachment = async () => {
     setLoading(true);
-    let api = `/attachment?relatedTo=${JSON.stringify(relatedTo)}`;
+    let api = `/attachment?graphLookup=1&relatedTo=${JSON.stringify(relatedTo)}`;
     axiosInstance()
       .get(api)
       .then(
