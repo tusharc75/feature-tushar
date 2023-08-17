@@ -2529,6 +2529,11 @@ export const PRICING_TYPE = [
   { optionLabel: 'Sell', optionValue: 'Price' }
 ]
 
+export const SERVICE_TYPE = {
+  shopService: 'Shop Service',
+  fieldService: 'Field Service'
+}
+
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
     num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;

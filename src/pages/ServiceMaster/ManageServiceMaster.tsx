@@ -21,7 +21,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 
-const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose, onSuccess, isRedirectToDetailPage = true }) => {
+const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose, onSuccess, isRedirectToDetailPage = true, referenceData = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -67,6 +67,15 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
             });
         } else {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
+          if (referenceData?.serviceType) {
+            fieldsDataForCreate?.forEach((e) => {
+              if (e.fieldName === 'serviceType') {
+                createValues.serviceType = referenceData?.serviceType;
+                e.disableOnEdit = true;
+                e.isUneditable = true;
+              }
+            });
+          }
           setInitialData({
             fields: fieldsDataForCreate,
             values: createValues
