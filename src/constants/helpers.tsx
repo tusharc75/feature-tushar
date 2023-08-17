@@ -44,11 +44,11 @@ export const documentUploadSupportExtensions =
   '.odp,.ods,.odt,.docx,.doc,.csv,.pot,.pps,.ppt,.pptx,.pdf,.xls,.xlsx,.ico,.tif,.tiff,.jpe,.png,.jpg,.jpeg,.gif,.txt,.jflsn';
 
 //  1048576 = 1 MB
-export const imageUploadMaxSize = { size: 1048576 * 2, text: '2 MB' };
-export const documentUploadMaxSize = { size: 1048576 * 10, text: '10 MB' };
+export const imageUploadMaxSize = { size: 1048576 * 10, text: '10 MB' };
+export const documentUploadMaxSize = { size: 1048576 * 50, text: '50 MB' };
 export const termsAndConditionDocumentUploadMaxSize = {
-  size: 1048576 * 2,
-  text: '2 MB'
+  size: 1048576 * 10,
+  text: '10 MB'
 };
 
 export const rentalManagementSteps: stepInterface[] = [
@@ -2528,6 +2528,11 @@ export const PRICING_TYPE = [
   { optionLabel: 'Rent', optionValue: 'Rent' },
   { optionLabel: 'Sell', optionValue: 'Price' }
 ]
+
+export const SERVICE_TYPE = {
+  shopService: 'Shop Service',
+  fieldService: 'Field Service'
+}
 
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {

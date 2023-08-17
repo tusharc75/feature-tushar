@@ -19,7 +19,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { calculatePrice } from 'src/components/RentalManagment/helper';
 import Consumables from './Consumables';
-import { fieldTicket } from 'src/constants/helpers';
+import { SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
@@ -467,6 +467,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
             setServiceDialog({ open: false, type: '' });
           }}
           ids={rowsData?.map((row) => row?.materialId)}
+          extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
         />
       )}
 
@@ -483,6 +484,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
             setServiceDialog({ open: false, type: '' });
           }}
           isRedirectToDetailPage={false}
+          referenceData={{ serviceType: SERVICE_TYPE.fieldService }}
         />
       )}
 
