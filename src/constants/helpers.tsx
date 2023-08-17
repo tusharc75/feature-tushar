@@ -2197,12 +2197,12 @@ export const REPORT_LIST = [
     key: 'purchaseOrderType',
     type: 'assetUtilization',
   },
-  // {
-  //   title: 'User Session',
-  //   permission: 'user',
-  //   key: 'purchaseOrderType',
-  //   type: 'userSession',
-  // },
+  {
+    title: 'User Session',
+    permission: 'user',
+    key: 'purchaseOrderType',
+    type: 'userSession',
+  },
 ];
 
 export const RESOURCE_CALENDAR = [
