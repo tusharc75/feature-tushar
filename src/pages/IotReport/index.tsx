@@ -1,7 +1,5 @@
-import { Grid, Box, Typography } from '@material-ui/core';
-import React, { Fragment } from 'react'
+import { Box, Typography } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import { IOT_REPORT_LIST } from './../../constants/helpers';
 import { getColors } from '../Home/helpers';
@@ -9,7 +7,6 @@ import styles from './index.module.scss';
 import { ReportIcon } from 'src/assets/svg/svgIcons';
 import { HiArrowRight } from 'react-icons/hi';
 import DashBoardCardShell from 'src/components/DashBoardCardShell';
-import { kebabCase } from 'lodash';
 import { Link } from 'react-router-dom';
 
 function IotReportList() {
@@ -38,7 +35,7 @@ function IotReportList() {
                                         minHeight={false}
                                     >
                                         <ReportIcon colors={colors.iconGradient} className={styles.floatIcon} />
-                                        <Typography variant="h6">{report.type === 'dynamic' ? routes[report.key]?.title : report.title}</Typography>
+                                        <Typography variant="h6">{report.title}</Typography>
                                         <Typography variant="body2">{/* {report.text} */}</Typography>
                                         <Link
                                             to={`/iot-report${routes[report.key]?.path}`}

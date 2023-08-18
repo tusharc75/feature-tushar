@@ -2112,6 +2112,26 @@ export const IOT_REPORT_LIST = [{
   title : sidebarResource.iotDataPoints,
   key : 'iotDataPoints',
   api : '/report/iot/data-points',
+  filters: [{
+     fieldLabel: 'All', 
+     fieldName: 'all', 
+     _id: '0' 
+  },
+    {
+    fieldName: 'iotDataPoints',
+    fieldLabel: 'Iot Data Points',
+    resource: sidebarResource.iotDataPoints,
+    lookup : true,
+    type: 'dropDown',
+    _id:'1'
+
+  }, {
+    fieldName: 'date',
+    fieldLabel: 'Date',
+    type: 'date',
+    _id:'2'
+
+  }]
 }]
 
 export const REPORT_LIST = [
