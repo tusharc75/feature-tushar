@@ -8,3 +8,9 @@ export const fetch_field_ticket_material_fields = async (currency) => {
     data = CURReplaceByCurrencySingle(data, currency ? currency : "USD");
     return data;
 }
+
+export const fetch_field_ticket_submit_fields = async () => {
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketSubmit}`);
+    const data = response?.data?.data;
+    return data;
+}
