@@ -23,6 +23,7 @@ import { SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
+import { useData } from 'src/StateProvider/Provider';
 
 const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, setNextStep, refreshFieldTicket }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -38,6 +39,10 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
+
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const fetchFields = async () => {
     setColumns(null);
@@ -360,14 +365,16 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
               >
                 Add Service
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setServiceDialog({ open: true, type: 'newService' });
-                  closeAddActions();
-                }}
-              >
-                Add New Service
-              </MenuItem>
+              {permissions?.serviceMaster?.isCreate &&
+                <MenuItem
+                  onClick={() => {
+                    setServiceDialog({ open: true, type: 'newService' });
+                    closeAddActions();
+                  }}
+                >
+                  Add New Service
+                </MenuItem>
+              }
             </Menu>
           </Box>
           <Box display="flex" ml={1}>
