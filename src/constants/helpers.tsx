@@ -459,6 +459,7 @@ export const RESOURCE_LABEL = {
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
+  iotReport : 'IoT Report'
 
 };
 
@@ -2105,6 +2106,12 @@ export const LOG_RESOURCE = {
   salesOrder: sidebarResource.salesOrder,
   transferInventory: sidebarResource.transferInventory
 };
+
+export const IOT_REPORT_LIST = [{
+  title : sidebarResource.iotDataPoints,
+  key : 'iotDataPoints',
+  api : '/report/iot/data-points',
+}]
 
 export const REPORT_LIST = [
   {
