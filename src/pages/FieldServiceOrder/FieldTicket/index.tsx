@@ -219,6 +219,19 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
           <EditIcon color={params?.data?.allowedToEdit ? "primary" : "disabled"} fontSize="small" />
         </IconButton>
       </HtmlTooltip>
+      {allowedToEdit &&
+        <HtmlTooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setOpenDialog({ open: true, isClone: true, id: params.data._id });
+            }}
+          >
+            <FileCopyIcon color={"primary"} fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+      }
       {params?.data?.canDelete ? (
         <HtmlTooltip title="Delete">
           <IconButton
@@ -239,18 +252,6 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
           </IconButton>
         </HtmlTooltip>
       )}
-      <HtmlTooltip title="Clone">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setOpenDialog({ open: true, isClone: true, id: params.data._id });
-          }}
-          disabled={params?.data?.allowedToEdit ? false : true}
-        >
-          <FileCopyIcon color={params?.data?.allowedToEdit ? "primary" : "disabled"} fontSize="small" />
-        </IconButton>
-      </HtmlTooltip>
     </>
   );
 
