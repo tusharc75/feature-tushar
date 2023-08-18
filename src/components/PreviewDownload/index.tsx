@@ -190,6 +190,7 @@ function PreviewDownload({
           columns={columns}
           button1Title={button1Title}
           button2Title={button2Title}
+          downlodingFile={downlodingFile}
         />
       )}
 

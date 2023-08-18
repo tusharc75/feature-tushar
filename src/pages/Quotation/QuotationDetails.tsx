@@ -10,7 +10,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { quotation, ACTIVITY_RESOURCE, quotationProcessSteps, QUOTATION_STATUS, QUOTATION_TYPE } from '../../constants/helpers';
+import { quotation, ACTIVITY_RESOURCE, quotationProcessSteps, QUOTATION_STATUS, QUOTATION_TYPE, RENTAL_STATUS } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
@@ -29,10 +29,12 @@ import {
   MdDeleteSweep,
   RiFlowChart,
   VscVersions,
-  FcApproval
+  FcApproval,
+  MdAutorenew,
+  SiSemanticrelease
 } from 'react-icons/all';
 import { HiPencil } from 'react-icons/hi';
-import { camelCase } from 'lodash';
+import { camelCase, set } from 'lodash';
 import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -85,6 +87,8 @@ const QuotationDetails = () => {
   const [versionStatus, setVersionStatus] = useState(QUOTATION_STATUS.acceptByCustomer);
 
   const [convertConfirmBox, setConvertConfirmBox] = useState(false);
+  const [renewal, setRenewal] = useState(false);
+  const [releaseConfirm, setReleaseConfirm] = useState(false)
 
   const [stepList, setStepList] = useState(quotationProcessSteps);
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
@@ -317,6 +321,34 @@ const QuotationDetails = () => {
           <Box className="control-buttons-v1">
             {quotationData ? (
               <>
+                {quotationData.rentalJob && quotationData.rentalJob.status === RENTAL_STATUS.jobStarted && <><HtmlTooltip title="Renewal">
+                  <Button
+                    onClick={() => {
+                      setRenewal(true)
+                    }}
+                    variant="outlined"
+                    size="small"
+                    className="mx-1 btn-outline-v1"
+                    startIcon={<MdAutorenew />}
+                    color="primary"
+                  >
+                    Renewal
+                  </Button>
+                </HtmlTooltip>
+                  <HtmlTooltip title="Release">
+                    <Button
+                      onClick={() => {
+                        setReleaseConfirm(true)
+                      }}
+                      variant="outlined"
+                      size="small"
+                      className="mx-1 btn-outline-v1"
+                      startIcon={<SiSemanticrelease />}
+                      color="primary"
+                    >
+                      Release
+                    </Button>
+                  </HtmlTooltip></>}
                 <HtmlTooltip title="Quote Summary">
                   <Button
                     onClick={() => {
@@ -668,6 +700,25 @@ const QuotationDetails = () => {
           onOk={handleDelete}
         />
       )}
+      {renewal && (
+        <ManageQuotationDialog
+          isClone={true}
+          open={renewal}
+          quotationId={id}
+          quotationData={quotationData}
+          onClose={() => {
+            setRenewal(false);
+          }}
+          onSuccess={(data) => {
+            const prevVersion = quotationData?.versions[currentVersion];
+            axiosInstance().put(`${quotation.api}/version-to-clone/${prevVersion._id}/${data._id}`).then((data: any) => {
+              history.push(`${routes.quotationDetail.path}/${data._id}`);
+            })
+            // fetchQuotationData();
+            setRenewal(false);
+          }}
+        />
+      )}
       {openUpdateDialog && (
         <ManageQuotationDialog
           isClone={false}
@@ -702,6 +753,22 @@ const QuotationDetails = () => {
           setCurrentStep={setCurrentStep}
           updateStatus={updateProcessStatus}
           setCustomerAcceptable={setCustomerAcceptable}
+        />
+      )}
+      {releaseConfirm && (
+        <ConfirmationDialog
+          open={releaseConfirm}
+          message={`Are you sure you want to release quotation : ${quotationData?.quotationNumber} ?`}
+          onClose={() => {
+            axiosInstance().put(`${quotation.api}/quotation-release/${id}`).then((data) => {
+              fetchQuotationData();
+              setConvertConfirmBox(false);
+            }).catch((err) => {
+              toastConfig.setToastConfig(err);
+              setConvertConfirmBox(false);
+            })
+          }}
+          onOk={handleConvert}
         />
       )}
       {convertConfirmBox && (
