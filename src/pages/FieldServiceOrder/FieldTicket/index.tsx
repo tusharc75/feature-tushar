@@ -10,6 +10,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
@@ -20,7 +21,7 @@ import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, refreshFieldServiceOrder }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
-  const [openDialog, setOpenDialog] = useState({ open: false, id: null });
+  const [openDialog, setOpenDialog] = useState({ open: false, isClone: false, id: null });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -50,7 +51,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
         <span
           className="link"
           onClick={() => {
-            setOpenDialog({ open: true, id: params.data._id });
+            setOpenDialog({ open: true, isClone: false, id: params.data._id });
           }}
         >
           <CustomRenderCell value={params?.value} />
@@ -211,7 +212,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
           size="small"
           aria-label="Edit"
           onClick={() => {
-            setOpenDialog({ open: true, id: params.data._id });
+            setOpenDialog({ open: true, isClone: false, id: params.data._id });
           }}
           disabled={params?.data?.allowedToEdit ? false : true}
         >
@@ -238,6 +239,18 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
           </IconButton>
         </HtmlTooltip>
       )}
+      <HtmlTooltip title="Clone">
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setOpenDialog({ open: true, isClone: true, id: params.data._id });
+          }}
+          disabled={params?.data?.allowedToEdit ? false : true}
+        >
+          <FileCopyIcon color={params?.data?.allowedToEdit ? "primary" : "disabled"} fontSize="small" />
+        </IconButton>
+      </HtmlTooltip>
     </>
   );
 
@@ -259,7 +272,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
               variant="contained"
               color="primary"
               onClick={() => {
-                setOpenDialog({ open: true, id: null });
+                setOpenDialog({ open: true, isClone: false, id: null });
               }}
               startIcon={<AddOutlined />}
             >
@@ -330,7 +343,8 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
       {openDialog.open && (
         <ManageFieldTicket
           id={openDialog.id}
-          onClose={() => setOpenDialog({ open: false, id: null })}
+          isClone={openDialog.isClone}
+          onClose={() => setOpenDialog({ open: false, isClone: false, id: null })}
           referenceData={{
             fieldServiceOrder: serviceOrderData?._id,
             warehouse: serviceOrderData?.warehouse?.optionValue || '',
@@ -345,7 +359,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || [],
           }}
           onSuccess={() => {
-            setOpenDialog({ open: false, id: null });
+            setOpenDialog({ open: false, isClone: false, id: null });
             fetchData();
             refreshFieldServiceOrder();
           }}
