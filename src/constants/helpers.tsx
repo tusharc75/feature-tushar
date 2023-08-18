@@ -485,6 +485,7 @@ export const CHILD_RESOURCE = {
   fieldServiceOrderDetails: 'Field Service Order Detail',
   fieldServiceOrderAddon: 'Field Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',
+  fieldTicketSubmit: 'Field Ticket Submit',
   fieldTicketMateial: 'Field Ticket Material',
   jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
@@ -2224,12 +2225,12 @@ export const REPORT_LIST = [
     key: 'purchaseOrderType',
     type: 'assetUtilization',
   },
-  // {
-  //   title: 'User Session',
-  //   permission: 'user',
-  //   key: 'purchaseOrderType',
-  //   type: 'userSession',
-  // },
+  {
+    title: 'User Session',
+    permission: 'user',
+    key: 'purchaseOrderType',
+    type: 'userSession',
+  },
 ];
 
 export const RESOURCE_CALENDAR = [

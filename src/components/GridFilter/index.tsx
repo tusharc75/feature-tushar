@@ -188,7 +188,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
         continue;
       }
 
-      if (['singleLine', 'multiLine', 'email', 'mobileNumber', 'currency']?.includes(col.type) && formValues[fieldName]) {
+      if (['singleLine', 'multiLine', 'email', 'mobileNumber', 'currency', 'lookUpDisplay']?.includes(col.type) && formValues[fieldName]) {
         filterModel[fieldName] = {
           filterType: 'text',
           type: 'contains',
