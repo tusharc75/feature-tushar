@@ -916,7 +916,7 @@ const Report = () => {
               headerName: e.fieldLabel,
               show: true,
               disabled: false,
-              cellRenderer:  'numberRenderer',
+              cellRenderer:  'commonRenderer',
               filter: false,
               sortable: false,
             })
