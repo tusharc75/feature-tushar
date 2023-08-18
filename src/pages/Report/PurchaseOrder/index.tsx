@@ -666,19 +666,6 @@ const Report = () => {
         });
       }
       if (resourceCamelCase === 'userSession') {
-        let { data } = await axiosInstance().get(`/report/user/user-session/column`);
-        data?.data?.forEach((e) => {
-          columns.push({
-            field: e.fieldName,
-            headerName: e.fieldLabel,
-            show: true,
-            disabled: false,
-            cellRenderer:  'numberRenderer',
-            filter: false,
-            sortable: false,
-          })
-        })
-
         let fieldOptionResponce = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=User`);
         const fieldOption = fieldOptionResponce?.data?.data;
         resourceFieldData.push({
@@ -920,7 +907,23 @@ const Report = () => {
     axiosInstance()
       .get(`${api}${filterQuery}`, {
         cancelToken: cancelTokenSource.token
-      }).then(({ data: { data, count } }) => {
+      }).then(({ data: { data, count, columns } }) => {
+        if(resourceCamelCase === 'userSession') {
+          setLoadingColumns(true);
+          columns = columns?.map((e) => {
+            return({
+              field: e.fieldName,
+              headerName: e.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer:  'numberRenderer',
+              filter: false,
+              sortable: false,
+            })
+          })
+          setColumns(columns);
+          setLoadingColumns(false);
+        }
         data = data.map((u: any) => {
           if (resourceCamelCase === 'purchaseOrderDetails') {
             if (u?.productLedger?.type === 'credit') {
@@ -1038,6 +1041,9 @@ const Report = () => {
           filterQuery = `${filterQuery}${field}=${moment(statusPeriodDate[field]).format('MM/DD/YYYY')}& `;
         }
       });
+    }
+    if (resourceCamelCase === 'userSession') {
+      return `?column=true&${filterQuery}`;
     }
 
     return `?${filterQuery}`;
