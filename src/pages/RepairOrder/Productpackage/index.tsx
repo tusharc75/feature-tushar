@@ -667,14 +667,14 @@ const Productpackage = ({
       {addExistingProductDialog.open && addExistingProductDialog.existing && addExistingProductDialog.type === 'serializedAsset' && (
         <AddSerializedAsset
           addSerializedAsset={(d) => {
+            console.log(d)
             const dataToAddFormat = d?.map(d => {
               const p = products?.find(p => p.id === d.productId);
               return {
                 ...d,
-                parentId: p._id
+                parentId: p?._id || null
               }
             })
-
             handleAdd([...dataToAddFormat])
           }}
           handleSerializedAssetClose={() => {

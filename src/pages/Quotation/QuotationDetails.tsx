@@ -10,7 +10,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { quotation, ACTIVITY_RESOURCE, quotationProcessSteps, QUOTATION_STATUS, QUOTATION_TYPE } from '../../constants/helpers';
+import { quotation, ACTIVITY_RESOURCE, quotationProcessSteps, QUOTATION_STATUS, QUOTATION_TYPE, RENTAL_STATUS } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
@@ -34,7 +34,7 @@ import {
   SiSemanticrelease
 } from 'react-icons/all';
 import { HiPencil } from 'react-icons/hi';
-import { camelCase } from 'lodash';
+import { camelCase, set } from 'lodash';
 import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -88,6 +88,7 @@ const QuotationDetails = () => {
 
   const [convertConfirmBox, setConvertConfirmBox] = useState(false);
   const [renewal, setRenewal] = useState(false);
+  const [releaseConfirm, setReleaseConfirm] = useState(false)
 
   const [stepList, setStepList] = useState(quotationProcessSteps);
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
@@ -320,7 +321,7 @@ const QuotationDetails = () => {
           <Box className="control-buttons-v1">
             {quotationData ? (
               <>
-                {quotationData.rentalJob && quotationData.status === QUOTATION_TYPE.rentalJob && <><HtmlTooltip title="Renewal">
+                {quotationData.rentalJob && quotationData.rentalJob.status === RENTAL_STATUS.jobStarted && <><HtmlTooltip title="Renewal">
                   <Button
                     onClick={() => {
                       setRenewal(true)
@@ -337,11 +338,7 @@ const QuotationDetails = () => {
                   <HtmlTooltip title="Release">
                     <Button
                       onClick={() => {
-                        axiosInstance().put(`${quotation.api}/quotation-release/${id}`).then((data) => {
-                          fetchQuotationData();
-                        }).catch((err) => {
-                          toastConfig.setToastConfig(err);
-                        })
+                        setReleaseConfirm(true)
                       }}
                       variant="outlined"
                       size="small"
@@ -714,8 +711,10 @@ const QuotationDetails = () => {
           }}
           onSuccess={(data) => {
             const prevVersion = quotationData?.versions[currentVersion];
-            axiosInstance().put(`${quotation.api}/version-to-clone/${prevVersion._id}/${data._id}`)
-            fetchQuotationData();
+            axiosInstance().put(`${quotation.api}/version-to-clone/${prevVersion._id}/${data._id}`).then((data: any) => {
+              history.push(`${routes.quotationDetail.path}/${data._id}`);
+            })
+            // fetchQuotationData();
             setRenewal(false);
           }}
         />
@@ -754,6 +753,22 @@ const QuotationDetails = () => {
           setCurrentStep={setCurrentStep}
           updateStatus={updateProcessStatus}
           setCustomerAcceptable={setCustomerAcceptable}
+        />
+      )}
+      {releaseConfirm && (
+        <ConfirmationDialog
+          open={releaseConfirm}
+          message={`Are you sure you want to release quotation : ${quotationData?.quotationNumber} ?`}
+          onClose={() => {
+            axiosInstance().put(`${quotation.api}/quotation-release/${id}`).then((data) => {
+              fetchQuotationData();
+              setConvertConfirmBox(false);
+            }).catch((err) => {
+              toastConfig.setToastConfig(err);
+              setConvertConfirmBox(false);
+            })
+          }}
+          onOk={handleConvert}
         />
       )}
       {convertConfirmBox && (
