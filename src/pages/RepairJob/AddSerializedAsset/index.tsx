@@ -223,116 +223,112 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   return (
     <Fragment>
       {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
-        <Box display="flex" flexWrap={'wrap'} justifyContent="space-between" m={1}>
-          <Box display="flex">
-            <Button
-              variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-              color="primary"
-              type="button"
-              style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-              size="small"
-              onClick={() => {
-                setAddSerializedAssetDialog(true);
-              }}
-            >
-              {isMobile && !isTablet ? `Add  ${routes.serializedAsset.title}` : `Add ${routes.serializedAsset.title}`}
-            </Button>
-          </Box>
-          <Box display="flex" className="gap-2">
-            {repairJobData && repairJobData['status'] !== REPAIR_JOB_STATUS.completed && (
-              <Button
-                variant={'outlined'}
-                color="primary"
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                disabled={selectedRecords.length === 0 || !allowUpdateStatus}
-                size="small"
-                onClick={handleClick}
-                endIcon={<ArrowDropDownIcon />}
-              >
-                {'Change Status'}
-              </Button>
-            )}
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
-              }}
-            >
-              <MenuItem
-                onClick={() => {
-                  setAnchorEl(null);
-                  setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
-                }}
-              >
-                {ASSET_STATUS.scrap}
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setAnchorEl(null);
-                  setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
-                }}
-              >
-                {ASSET_STATUS.lost}
-              </MenuItem>
-            </Menu>
-
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+            color="primary"
+            type="button"
+            style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+            size="small"
+            onClick={() => {
+              setAddSerializedAssetDialog(true);
+            }}
+          >
+            {isMobile && !isTablet ? `Add  ${routes.serializedAsset.title}` : `Add ${routes.serializedAsset.title}`}
+          </Button>
+          {repairJobData && repairJobData['status'] !== REPAIR_JOB_STATUS.completed && (
             <Button
               variant={'outlined'}
               color="primary"
-              disabled={selectedRecords.length === 0}
+              aria-controls="simple-menu"
+              aria-haspopup="true"
+              disabled={selectedRecords.length === 0 || !allowUpdateStatus}
               size="small"
-              onClick={handleClickAction}
+              onClick={handleClick}
               endIcon={<ArrowDropDownIcon />}
-              className="new-dropdown-v1"
             >
-              Actions
+              {'Change Status'}
             </Button>
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorElAction}
-              keepMounted
-              open={Boolean(anchorElAction)}
-              onClose={handleCloseAction}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
+          )}
+          <Menu
+            id="simple-menu"
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
+            }}
+          >
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null);
+                setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
               }}
             >
-              <MenuItem
-                disabled={selectedRecords.length === 0}
-                onClick={() => {
-                  setShowEditAssetDialog({ open: true, isBulkedit: true, inventory: null, selectedRecords: selectedRecords });
-                }}
-              >
-                {'Bulk Edit'}
-              </MenuItem>
-              <MenuItem
-                disabled={selectedRecords.length === 0 || selectedRecords.some((s) => s.status !== ASSET_STATUS.reserved)}
-                onClick={() => {
-                  setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: selectedRecords.map((m) => m._id) });
-                }}
-              >
-                {'Delete'}
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
+              {ASSET_STATUS.scrap}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAnchorEl(null);
+                setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
+              }}
+            >
+              {ASSET_STATUS.lost}
+            </MenuItem>
+          </Menu>
+          <div className="ml-auto"></div>
+          <Button
+            variant={'outlined'}
+            color="primary"
+            disabled={selectedRecords.length === 0}
+            size="small"
+            onClick={handleClickAction}
+            endIcon={<ArrowDropDownIcon />}
+            className="new-dropdown-v1"
+          >
+            Actions
+          </Button>
+          <Menu
+            id="simple-menu"
+            anchorEl={anchorElAction}
+            keepMounted
+            open={Boolean(anchorElAction)}
+            onClose={handleCloseAction}
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
+            }}
+          >
+            <MenuItem
+              disabled={selectedRecords.length === 0}
+              onClick={() => {
+                setShowEditAssetDialog({ open: true, isBulkedit: true, inventory: null, selectedRecords: selectedRecords });
+              }}
+            >
+              {'Bulk Edit'}
+            </MenuItem>
+            <MenuItem
+              disabled={selectedRecords.length === 0 || selectedRecords.some((s) => s.status !== ASSET_STATUS.reserved)}
+              onClick={() => {
+                setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: selectedRecords.map((m) => m._id) });
+              }}
+            >
+              {'Delete'}
+            </MenuItem>
+          </Menu>
+        </div>
       )}
       <Grid item xs={12} md={12} sm={12}>
         {columns && Object.keys(frameWorkComponent).length > 0 ? (
