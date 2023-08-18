@@ -38,6 +38,7 @@ import Quotation from './Quotation';
 import WorkOrder from './WorkOrder';
 import LoadingTicket from './LoadingTicket';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import EditIcon from '@material-ui/icons/Edit';
 
 function a11yProps(index: any) {
   return {
@@ -167,8 +168,7 @@ const RepairOrderDetails = () => {
         setStepNames(steps.map((item) => item.name));
         if (data?.status === REPAIR_ORDER_STATUS.completed) {
           setCurrentStep(steps?.length - 1);
-        }
-        else {
+        } else {
           setCurrentStep(
             steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
           );
@@ -226,8 +226,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -393,7 +393,7 @@ const RepairOrderDetails = () => {
                       onClick={() => setOpenUpdateDialog(true)}
                       className={'btn-outline-v1'}
                     >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                      {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                     </Button>
                   )}
                 {permissions?.repairOrder?.isDelete && allowedToDelete && repairOrderData?.canDelete && (
@@ -517,10 +517,10 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
-                      ? false
-                      : allowedToEdit
+                        quotationVersionData?.status
+                      )
+                    ? false
+                    : allowedToEdit
                 }
                 isPostWorkService={Boolean(currentStep === 3)}
                 setCurrentStep={setCurrentStep}

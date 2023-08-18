@@ -15,7 +15,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { CustomDialogTransition, getObjKeys, serializedAssetsCertification, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
 
-const IssueCertificateDialog = ({ onClose, onSuccess, assetId }) => {
+const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiryDate }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -24,7 +24,7 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId }) => {
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const [formsData, setFormsData] = useState([]);
-  
+
   useEffect(() => {
     fetchFields();
   }, []);
@@ -32,6 +32,8 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId }) => {
   const fetchFields = async () => {
     try {
       const tempInitialData: any = getObjKeys('', fields);
+      tempInitialData['issueDate'] = null;
+      tempInitialData['expiryDate'] = null;
       setInitialData({
         fields: fields,
         values: tempInitialData
@@ -141,6 +143,7 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId }) => {
                                       }
                                       : null
                                   }
+                                  {...(certificateExpiryDate && field.fieldName === 'issueDate' ? { minDate: new Date(certificateExpiryDate) } : {})}
                                 />
                               </Grid>
                             ))}

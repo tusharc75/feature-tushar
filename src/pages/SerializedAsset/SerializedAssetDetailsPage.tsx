@@ -115,7 +115,7 @@ const SerializedAssetDetailsPage = () => {
         routes.serializedAsset,
         { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
       ]);
-      if (data.certificateExpireDate && new Date(data.certificateExpireDate) > new Date()) {
+      if (data.certificateExpiryDate && new Date(data.certificateExpiryDate) > new Date()) {
         data.certificateAttached = true;
       }
       setAssetDetails({ ...data, currentOwner: data?.currentOwner?.optionLabel });
@@ -206,7 +206,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -412,6 +412,7 @@ const SerializedAssetDetailsPage = () => {
             id={id}
             canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
             supplierAccount={null}
+            assetDetails={assetDetails}
           />
         </TabPanel>
       </Box>

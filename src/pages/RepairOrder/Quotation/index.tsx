@@ -362,7 +362,6 @@ const Quotation = ({
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    console.log('rowsData', rowsData, rows)
     rows.forEach((element) => {
       delete element.srno;
       delete element.detail;

@@ -42,7 +42,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
                         "editAble": true,
                         "deletAble": true,
                         "order": 1,
-                        "sectionName": "Submit Field Ticket",
+                        "sectionName": "Submit Information",
                         "fieldName": "signature",
                         "roleType": 0,
                         "resource": "Field Ticket"
@@ -62,7 +62,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
                         "editAble": true,
                         "deletAble": true,
                         "order": 18,
-                        "sectionName": "Submit Field Ticket",
+                        "sectionName": "Submit Information",
                         "fieldName": "file",
                         "roleType": 0,
                         "resource": "Field Ticket"
@@ -82,7 +82,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
                         "editAble": true,
                         "deletAble": true,
                         "order": 19,
-                        "sectionName": "Submit Field Ticket",
+                        "sectionName": "Submit Information",
                         "fieldName": "comment",
                         "roleType": 0,
                         "resource": "Field Ticket"
@@ -175,10 +175,10 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
                                                             <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                                                             <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
                                                         </div>
-                                                        <Box marginY={2}>
-                                                            <Grid spacing={3} container>
+                                                        <Box padding={2}>
+                                                            <Grid spacing={5} container>
                                                                 {form.sectionFields.map((field) => (
-                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                                                         <FormTypes
                                                                             {...field}
                                                                             fieldData={field}
