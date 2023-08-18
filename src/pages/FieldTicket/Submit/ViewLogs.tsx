@@ -14,6 +14,7 @@ import { CustomDialogTransition, dateTimeFormat, fieldTicket } from "src/constan
 import { useData } from 'src/StateProvider/Provider';
 import ManageAttachment from "src/components/Activity/Attachments/ManageAttachment";
 import { isMobile, isTablet } from "react-device-detect";
+import { fetch_field_ticket_submit_fields } from "../helper";
 
 function ViewLogs({ id, fieldTicketName, handleClose }) {
 
@@ -32,6 +33,8 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
     }, []);
 
     const fetchColumn = async () => {
+        setColumns(null);
+        const fields = await fetch_field_ticket_submit_fields();
         const column: any = [
             {
                 accessor: 'date',
@@ -82,16 +85,23 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
                         <NoDataCell />
                     );
                 }
-            },
-            {
-                accessor: 'comment',
-                Header: 'Comment',
-                width: 200,
-                Cell: ({ row }) => {
-                    return row?.original['comment'] ? <p className="text-truncate">{row?.original['comment']}</p> : <NoDataCell />;
-                }
             }
         ];
+
+        fields.forEach(field => {
+            if (field.type !== "multiFileUpload") {
+                column.push({
+                    accessor: field.fieldName,
+                    Header: field.fieldLabel,
+                    width: 200,
+                    disableFilters: field.type === 'signature' ? true : false,
+                    Cell: ({ row }) => {
+                        return row?.original[field.fieldName] ? <p className="text-truncate">{row?.original[field.fieldName]}</p> : <NoDataCell />;
+                    }
+                })
+            }
+        });
+
         column.push({
             accessor: 'action',
             Header: 'Actions',
