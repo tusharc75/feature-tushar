@@ -298,7 +298,7 @@ const IotReport = () => {
             </div>
            
               <CustomFilter
-                field={refObj?.filters?.map((e: any) => { return { ...e, options: null } })}
+                field={[{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...refObj?.filters].map((e: any) => ({ ...e, options: null }))}
                 setFilterQuery={setFilterQuery}
                 showGrid={showGrid}
                 loadingData = {loadingData}
