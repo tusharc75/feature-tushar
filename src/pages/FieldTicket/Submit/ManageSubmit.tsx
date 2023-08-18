@@ -73,6 +73,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
             aria-labelledby="customized-dialog-title"
             open={true}
             fullWidth
+            fullScreen={fullScreen || isMobile || isTablet}
             onClose={(e, reason) => {
                 if (reason !== 'backdropClick') {
                     setShowConfirmDialog(true);
@@ -114,7 +115,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
                                                         <Box padding={2}>
                                                             <Grid spacing={5} container>
                                                                 {form.sectionFields.map((field) => (
-                                                                    <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                                                         <FormTypes
                                                                             {...field}
                                                                             fieldData={field}
