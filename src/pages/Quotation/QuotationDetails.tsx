@@ -29,7 +29,9 @@ import {
   MdDeleteSweep,
   RiFlowChart,
   VscVersions,
-  FcApproval
+  FcApproval,
+  MdAutorenew,
+  SiSemanticrelease
 } from 'react-icons/all';
 import { HiPencil } from 'react-icons/hi';
 import { camelCase } from 'lodash';
@@ -85,6 +87,7 @@ const QuotationDetails = () => {
   const [versionStatus, setVersionStatus] = useState(QUOTATION_STATUS.acceptByCustomer);
 
   const [convertConfirmBox, setConvertConfirmBox] = useState(false);
+  const [renewal, setRenewal] = useState(false);
 
   const [stepList, setStepList] = useState(quotationProcessSteps);
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
@@ -317,6 +320,38 @@ const QuotationDetails = () => {
           <Box className="control-buttons-v1">
             {quotationData ? (
               <>
+                {quotationData.rentalJob && quotationData.status === QUOTATION_TYPE.rentalJob && <><HtmlTooltip title="Renewal">
+                  <Button
+                    onClick={() => {
+                      setRenewal(true)
+                    }}
+                    variant="outlined"
+                    size="small"
+                    className="mx-1 btn-outline-v1"
+                    startIcon={<MdAutorenew />}
+                    color="primary"
+                  >
+                    Renewal
+                  </Button>
+                </HtmlTooltip>
+                  <HtmlTooltip title="Release">
+                    <Button
+                      onClick={() => {
+                        axiosInstance().put(`${quotation.api}/quotation-release/${id}`).then((data) => {
+                          fetchQuotationData();
+                        }).catch((err) => {
+                          toastConfig.setToastConfig(err);
+                        })
+                      }}
+                      variant="outlined"
+                      size="small"
+                      className="mx-1 btn-outline-v1"
+                      startIcon={<SiSemanticrelease />}
+                      color="primary"
+                    >
+                      Release
+                    </Button>
+                  </HtmlTooltip></>}
                 <HtmlTooltip title="Quote Summary">
                   <Button
                     onClick={() => {
@@ -666,6 +701,23 @@ const QuotationDetails = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {renewal && (
+        <ManageQuotationDialog
+          isClone={true}
+          open={renewal}
+          quotationId={id}
+          quotationData={quotationData}
+          onClose={() => {
+            setRenewal(false);
+          }}
+          onSuccess={(data) => {
+            const prevVersion = quotationData?.versions[currentVersion];
+            axiosInstance().put(`${quotation.api}/version-to-clone/${prevVersion._id}/${data._id}`)
+            fetchQuotationData();
+            setRenewal(false);
+          }}
         />
       )}
       {openUpdateDialog && (
