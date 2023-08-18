@@ -2112,11 +2112,7 @@ export const IOT_REPORT_LIST = [{
   title : sidebarResource.iotDataPoints,
   key : 'iotDataPoints',
   api : '/report/iot/data-points',
-  filters: [{
-     fieldLabel: 'All', 
-     fieldName: 'all', 
-     _id: '0' 
-  },
+  filters: [
     {
     fieldName: 'iotDataPoints',
     fieldLabel: 'Iot Data Points',
