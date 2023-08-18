@@ -1,10 +1,9 @@
-import React from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
-import { camelCase, startCase } from 'lodash';
+import { camelCase } from 'lodash';
 import axios from 'axios';
-import moment from 'moment';
-import { MdDescription, MdChevronLeft, MdFilterList } from 'react-icons/md';
+import { MdDescription, MdFilterList } from 'react-icons/md';
 import styles from '../../Leads/Header.module.scss';
 import routes from '../../../components/Helpers/Routes';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -13,54 +12,43 @@ import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import { useData } from '../../../StateProvider/Provider';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
-import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from '../../../constants/helpers';
+import { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
+import { prepareDataForGrid, gridLoadingTimeout, downloadExcel } from '../../../constants/helpers';
 import Loader from '../../../components/Loader';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import ReportFilters from './ReportFilter';
-
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import DialogContent from '@material-ui/core/DialogContent';
-import Dialog from '@material-ui/core/Dialog';
 import { IOT_REPORT_LIST } from '../../../constants/helpers';
+import CustomFilter from './CustomFilter'
 
 let cancelTokenSource = null;
 
 const IotReport = () => {
-  const history = useHistory();
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
-  const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
     state: { permissions, selectedEntity }
   } = useData();
   let { resource } = useParams();
   let resourceCamelCase = camelCase(resource);
-  let resourceStartCase = startCase(resource);
   const renderedFrom = `${resource}_report`;
 
   const [showGrid, setShowGrid] = React.useState(false);
-  const [selectedData, setSelectedData] = React.useState(null);
-  const [betweenDate, setBetweenDate] = React.useState(null);
-  const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
-  const [filterOptions, setFilterOptions] = React.useState([]);
-  const [selectedResources, setSelectedResources] = React.useState([]);
-  const [resourceOptions, setResourceOptions] = React.useState(null);
-  const [formValues, setFormValues] = React.useState({});
-  const [resourceColumns, setResourceColumns] = React.useState([]);
+
+  const [loadingData, setLoadingData] = React.useState(false);
   const [isExporting, setExporting] = React.useState(false);
-  const [loadingColumns, setLoadingColumns] = React.useState(false);
-  const [statusPeriod, setStatusPeriod] = React.useState(false);
   const [reportList, setReportList] = React.useState([]);
   const [selectedReportView, setSelectedReportView] = React.useState(null);
-  const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
+
+  //filter handling new...
+  const [filterQuery, setFilterQuery] = useState({
+    filterById: [],
+    deepFilter: [],
+  })
 
   // Grid Configs
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
-  const { getColumnData } = useColumns();
   const [columns, setColumns] = React.useState(null);
   const [gridApi, setGridApi] = React.useState(null);
   const [state, dispatch] = React.useReducer(reducer, intialState);
@@ -68,68 +56,19 @@ const IotReport = () => {
 
   //setup columns and filter options
 
-  const fetchReportObj = () =>{
+  const fetchReportObj = () => {
     for (const key in routes) {
       if (routes.hasOwnProperty(key)) {
         const item = routes[key];
-        if (item.path ===  "/"+resource) {
+        if (item.path === "/" + resource) {
           return key;
         }
       }
     }
     return null; // Return null if no match is found
   }
-  
+
   const refObj = IOT_REPORT_LIST?.find(m => m?.key === fetchReportObj());
-  
-  const fetchGridColumns = async () => {
-
-    setLoadingColumns(true);
-
-    let resourceFieldData = [];
-    const {
-      data: { data }
-    }: any = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Iot Data Points`);
-    resourceFieldData.push({
-        isCreate: true,
-        isRead: true,
-        isUpdate: true,
-        fieldData: {
-          _id: '1',
-          fieldLabel: 'Data Points',
-          fieldName: 'dataPoints',
-          type: 'dropDown',
-          lookup: true,
-          option: data["Iot Data Points"],
-          filter: false,
-          sortable: false,
-        }
-    })
-    resourceFieldData.push({
-      isCreate: true,
-      isRead: true,
-      isUpdate: true,
-      fieldData: {
-        _id: '2',
-        fieldLabel: 'Date',
-        fieldName: 'date',
-        type: 'date',
-        lookup: true,
-        filter: false,
-        sortable: false,
-      }
-  })
-    setResourceColumns(resourceFieldData);
-
-    setLoadingColumns(false);
-  };
-
-  React.useEffect(() => {
-    if (initialRender.current) {
-      fetchGridColumns();
-      initialRender.current = false;
-    }
-  }, []);
 
   React.useEffect(() => {
     axiosInstance()
@@ -148,28 +87,9 @@ const IotReport = () => {
     }
   }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
-  //selectedResources represents the main filter array
-  //selectedData is an object with keys as the filter and value as the sub filter values
-
-  React.useEffect(() => {
-    if (!selectedData) return;
-    setSelectedData((prevState: any) => {
-      const dataKeys = Object.keys(prevState);
-      const selectedKeys = Object.keys(selectedResources);
-
-      if (selectedResources.length > 0 && dataKeys.length > 0) {
-        dataKeys.forEach((key) => {
-          if (selectedKeys.includes(key) && prevState?.hasOwnProperty(key)) {
-            delete prevState[key];
-          }
-        });
-      }
-      return prevState;
-    });
-  }, [selectedData, selectedResources]);
 
   //this function sets columns for the ag grid using the columns returned from the api
-  const handleColumns = (cols) =>{
+  const handleColumns = (cols) => {
     let columns = [];
     let rendererNames = ['commonRenderer', 'dateTimeRenderer'];
 
@@ -179,7 +99,7 @@ const IotReport = () => {
         headerName: e.fieldLabel,
         show: true,
         disabled: false,
-        cellRenderer: e.fieldName!='date'?'commonRenderer':'dateTimeRenderer',
+        cellRenderer: e.fieldName != 'date' ? 'commonRenderer' : 'dateTimeRenderer',
         filter: true,
         sortable: false,
       })
@@ -196,10 +116,15 @@ const IotReport = () => {
     setColumns([...columns]);
   }
 
+  React.useEffect(() => {
+    if (showGrid) {
+      fetchResourceData();
+    }
+  }, [filterQuery])
 
   const fetchResourceData = () => {
-    setShowGrid(true);
-
+    // setShowGrid(true);
+    setLoadingData(true)
     let filterQuery = getFilter();
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
@@ -209,10 +134,7 @@ const IotReport = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    let api = null;
-    const endpoint = refObj?.api + '?column=true&' + filterQuery;
-    
-    api = endpoint;
+    let api = refObj?.api + '?column=true&'+filterQuery;;
     axiosInstance()
       .get(api, {
         cancelToken: cancelTokenSource.token
@@ -224,9 +146,11 @@ const IotReport = () => {
           const finalObject = prepareDataForGrid(item);
           return finalObject;
         });
-       
+
 
         dispatch({ type: 'initialize', data: processedData, count: count });
+        setLoadingData(false);
+        setShowGrid(true);
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -243,89 +167,32 @@ const IotReport = () => {
 
   // Create and return query for filters
   const getFilter = (isExport = false) => {
-    let filterQuery = `page=${page}&`;
-    let deepFilter = [];
-
+    let returnQuery = `page=${page}&`;
+    
+    const { filterById, deepFilter } = { ...filterQuery };
+    
     if (!isExport) {
-      filterQuery = `${filterQuery}limit=${limit}&`;
+      returnQuery = `${returnQuery}limit=${limit}&`;
     }
     if (sorting.length > 0) {
-      filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
+      returnQuery = `${returnQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
+      returnQuery = `${returnQuery}search=${encodeURIComponent(search)}&`;
     }
 
-    if (selectedResources.length > 0) {
-      if (selectedData) {
-        const keys = selectedData ? Object.keys(selectedData) : [];
-        const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
-        const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
-
-        let filterById = idFilter.map((key) => {
-          const options = selectedData[key]?.value;
-          return {
-            field: key,
-            term: {
-              $in: options.map((d: any) => d.optionValue)
-            }
-          };
-        });
-
-        forDeepFilter.forEach((key) => {
-          if (selectedData[key].type === 'checkBox') {
-            deepFilter.push({
-              field: key,
-              term: selectedData[key].value ? 'Yes' : 'No'
-            });
-          } else {
-            deepFilter.push({
-              field: key,
-              term: selectedData[key].value?.map((d: any) => d.optionValue)
-            });
-          }
-        });
-
-        if (filterById.length > 0) {
-          filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
-        }
-      }
-
-      if (betweenDate) {
-        const fields = Object.keys(betweenDate);
-        fields.forEach((field) => {
-          if (betweenDate[field]) {
-            deepFilter.push({
-              field,
-              term: moment(betweenDate[field]).format('MM/DD/YYYY')
-            });
-          }
-        });
-      }
+    if (filterById?.length > 0 || deepFilter?.length > 0) {
+      returnQuery = `${returnQuery}?filterType=and`;
     }
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        deepFilter.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
+    if (filterById?.length > 0) {
+      returnQuery = `${returnQuery}&filterById=${JSON.stringify(filterById)}`;
+    }
+    if (deepFilter?.length > 0) {
+      returnQuery = `${returnQuery}&deepFilter=${JSON.stringify(deepFilter)}`;
     }
 
-    if (deepFilter && deepFilter.length > 0) {
-      filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
-    }
 
-    if (statusPeriod && statusPeriodDate) {
-      const fields = Object.keys(statusPeriodDate);
-      fields.forEach((field) => {
-        if (statusPeriodDate[field]) {
-          filterQuery = `${filterQuery}${field}=${moment(statusPeriodDate[field]).format('MM/DD/YYYY')}&`;
-        }
-      });
-    }
-
-    return `?${filterQuery}`;
+    return `?${returnQuery}`;
   };
 
   const exportData = () => {
@@ -343,13 +210,6 @@ const IotReport = () => {
     setExporting(true);
     let filterQuery = getFilter(true);
     let api = null;
-    if (resourceCamelCase === 'workOrder') {
-      api = `${routes[resourceCamelCase].path}/template/${filterQuery}export=true&report=1`;
-    } else if (resourceCamelCase === 'quotes') {
-      api = `quote-builder/report/export?exportColumn=${JSON.stringify(columns)}&export=1&${filterQuery}`;
-    } else {
-      api = `${routes[resourceCamelCase].path}/report/export?exportColumn=${JSON.stringify(columns)}&export=1&${filterQuery}`;
-    }
 
     axiosInstance()
       .get(api, {
@@ -436,123 +296,77 @@ const IotReport = () => {
                 </Grid>
               </Grid>
             </div>
-            {!showGrid && (
-              <Dialog
-                open={true}
-                maxWidth="md"
-                fullWidth
-                onClose={(e, reason) => {
-                  if (reason !== 'backdropClick') {
-                    history.push(routes.iotReport.path);
-                    setShowGrid(true);
-                    dispatch({ type: 'onlyFilter', filters: {} });
-                  }
-                }}
-              >
-                <CustomDialogHeader
-                  title={`Set Filters`}
-                  onClose={() => {
-                    history.push(routes.iotReport.path);
-                    setShowGrid(true);
-                    dispatch({ type: 'onlyFilter', filters: {} });
-                  }}
-                />
-                <DialogContent>
-                  <div className="p-4 pt-5 min-h-[350px]">
-                    <ReportFilters
-                      resourceColumns={resourceColumns}
-                      betweenDate={betweenDate}
-                      setBetweenDate={setBetweenDate}
-                      resource={sidebarResource[resourceCamelCase]}
-                      setSelectedData={setSelectedData}
+           
+              <CustomFilter
+                field={refObj?.filters?.map((e: any) => { return { ...e, options: null } })}
+                setFilterQuery={setFilterQuery}
+                showGrid={showGrid}
+                loadingData = {loadingData}
+                setShowGrid = {setShowGrid}
+              />
+             
+              <div>
+                {Object.keys(frameWorkComponent).length > 0 && columns ? (
+                  isSmall ? (
+                    <CustomSwipableList
+                      allowSelection={false}
+                      allowSwipe={false}
+                      permissions={permissions[resourceCamelCase]}
+                      primaryField={columns?.find((d) => d.primaryField)}
+                      onClick={(data) => {
+                        // history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
+                      }}
+                      selectedRecords={[]}
+                      dataRows={dataRows}
+                      dispatch={dispatch}
+                      onEdit={() => { }}
+                      extraParamsToCheckDelete={false}
+                      rowCount={rowCount}
+                      page={page}
                       loading={loading}
-                      fetchReportData={fetchResourceData}
-                      filterOptions={filterOptions}
-                      setFilterOptions={setFilterOptions}
-                      selectedResources={selectedResources}
-                      setSelectedResources={setSelectedResources}
-                      resourceOptions={resourceOptions}
-                      setResourceOptions={setResourceOptions}
-                      formValues={formValues}
-                      setFormValues={setFormValues}
-                      loadingColumns={loadingColumns}
+                      chips={columns
+                        .filter((col) => col.hasOwnProperty('cellRendererParams'))
+                        .map((col) => ({
+                          field: col.field,
+                          label: col.headerName
+                        }))}
+                      additionalDetails={[]}
+                      owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                      onCreate={false}
+                      showClone={false}
+                      onDelete={(data) => { }}
+                      onClone={(data) => { }}
+                      renderedFrom={routes.transferAsset?.title}
+                    />
+                  ) : (
+                    <CustomAgGrid
                       setSelectedReportView={setSelectedReportView}
                       selectedReportView={selectedReportView}
-                      reportList={reportList}
-                      setReportList={setReportList}
-                      statusPeriod={statusPeriod}
-                      setStatusPeriod={setStatusPeriod}
-                      statusPeriodDate={statusPeriodDate}
-                      setStatusPeriodDate={setStatusPeriodDate}
-                      statusTimeFrame={statusTimeFrame}
-                      setStatusTimeFrame={setStatusTimeFrame}
-                      selectedData={selectedData}
+                      reportSave={true}
+                      columns={columns}
+                      dataRows={dataRows}
+                      frameworkComponents={frameWorkComponent}
+                      setGridApi={setGridApi}
+                      dispatch={dispatch}
+                      rowCount={rowCount}
+                      limit={limit}
+                      pageSizes={pageSizes}
+                      page={page}
+                      actionWidth={100}
+                      loading={loading}
+                      renderedFrom={renderedFrom}
+                      allowSelection={false}
+                      allowAction={false}
+                      refreshGrid={fetchResourceData}
+                      showOnlyShowFilteredRecordSwitch={false}
                     />
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
-
-            <div>
-              {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                isSmall ? (
-                  <CustomSwipableList
-                    allowSelection={false}
-                    allowSwipe={false}
-                    permissions={permissions[resourceCamelCase]}
-                    primaryField={columns?.find((d) => d.primaryField)}
-                    onClick={(data) => {
-                      // history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
-                    }}
-                    selectedRecords={[]}
-                    dataRows={dataRows}
-                    dispatch={dispatch}
-                    onEdit={() => { }}
-                    extraParamsToCheckDelete={false}
-                    rowCount={rowCount}
-                    page={page}
-                    loading={loading}
-                    chips={columns
-                      .filter((col) => col.hasOwnProperty('cellRendererParams'))
-                      .map((col) => ({
-                        field: col.field,
-                        label: col.headerName
-                      }))}
-                    additionalDetails={[]}
-                    owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                    onCreate={false}
-                    showClone={false}
-                    onDelete={(data) => { }}
-                    onClone={(data) => { }}
-                    renderedFrom={routes.transferAsset?.title}
-                  />
+                  )
                 ) : (
-                  <CustomAgGrid
-                    setSelectedReportView={setSelectedReportView}
-                    selectedReportView={selectedReportView}
-                    reportSave={true}
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={100}
-                    loading={loading}
-                    renderedFrom={renderedFrom}
-                    allowSelection={false}
-                    allowAction={false}
-                    refreshGrid={fetchResourceData}
-                    showOnlyShowFilteredRecordSwitch={false}
-                  />
-                )
-              ) : (
-                <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
-              )}
-            </div>
+                 showGrid && (<Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />)
+                )}
+              </div>
+            
+
           </>
         </CustomContainer>
       </div>
