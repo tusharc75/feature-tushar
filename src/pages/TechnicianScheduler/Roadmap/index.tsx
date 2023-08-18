@@ -9,6 +9,7 @@ import Calendar from './Calendar';
 import CalendarList from './CalendarList';
 import MapView from '../Map';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import MobileRoadmap from './MobileRoadmap';
 
 function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
   const scrollRef = React.useRef(null);
@@ -100,145 +101,153 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
     }
   };
 
-  return !loadingRoadmap ? (
+  if (loadingRoadmap) {
+    return (
+      <Box p={2} height={height} bgcolor="white">
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>
+    );
+  }
+
+  return (
     <Box bgcolor="var(--dark-secondary, white)">
-      <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
-        <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
-          <Box
-            minWidth={isMobile && !isTablet ? 110 : 300}
-            border={1}
-            borderColor="var(--common-border-color)"
-            style={{ position: 'relative', overflow: 'hidden' }}
-          >
-            <Box height={60} bgcolor="var(--dark-secondary, grey.200)" display="flex" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
-              <Box p={2} display="flex" alignItems="center">
-                <Map />
-                <Box mr={1} />
-                <Typography variant="body1" display="block">
-                  Technician
-                </Typography>
-              </Box>
-            </Box>
-            <div
-              ref={taskScroolRef}
-              style={{
-                position: 'relative',
-                width: '100%',
-                height: '100%',
-                overflow: 'hidden'
-              }}
-            >
-              <Box>
-                <ActivityList
-                  fetchRoadmap={fetchRoadmap}
-                  activity={
-                    selectedRecords?.length === 1
-                      ? activity.filter(
-                        (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
-                      )
-                      : activity
-                  }
-                  treeList={treeList}
-                  expanded={expanded}
-                  selected={selected}
-                  handleToggle={handleToggle}
-                  handleSelect={handleSelect}
-                />
-                <Box height={70}></Box>
-              </Box>
-            </div>
-          </Box>
-          {!selected ? (
+      {isMobile && !isTablet ? (
+        <MobileRoadmap
+          activity={
+            selectedRecords?.length === 1
+              ? activity.filter(
+                  (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
+                )
+              : activity
+          }
+          expanded={expanded}
+          selected={selected}
+          handleToggle={handleToggle}
+          handleSelect={handleSelect}
+          setSelected={setSelected}
+        />
+      ) : (
+        <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
+          <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
             <Box
-              id="scrollDayLiner"
-              onScroll={onscroll}
+              minWidth={isMobile && !isTablet ? 300 : 300}
               border={1}
               borderColor="var(--common-border-color)"
-              style={{ position: 'relative', overflow: 'auto' }}
+              style={{ position: 'relative', overflow: 'hidden' }}
             >
-              <Calendar calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
-              <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
-                <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
-                  <CalendarList
-                    fetchRoadmap={fetchRoadmap}
+              <Box height={60} bgcolor="var(--dark-secondary, grey.200)" display="flex" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+                <Box p={2} display="flex" alignItems="center">
+                  <Map />
+                  <Box mr={1} />
+                  <Typography variant="body1" display="block">
+                    Technician
+                  </Typography>
+                </Box>
+              </Box>
+              <div
+                ref={taskScroolRef}
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  height: '100%',
+                  overflow: 'hidden'
+                }}
+              >
+                <Box>
+                  <ActivityList
                     activity={
                       selectedRecords?.length === 1
                         ? activity.filter(
-                          (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
-                        )
+                            (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
+                          )
                         : activity
                     }
+                    treeList={treeList}
                     expanded={expanded}
                     selected={selected}
+                    handleToggle={handleToggle}
                     handleSelect={handleSelect}
-                    startDate={startDate}
-                    endDate={endDate}
-                    totalDay={totalDay}
-                    calendarType={calendarType}
                   />
+                  <Box height={70}></Box>
+                </Box>
+              </div>
+            </Box>
+
+            {!selected ? (
+              <Box
+                id="scrollDayLiner"
+                onScroll={onscroll}
+                border={1}
+                borderColor="var(--common-border-color)"
+                style={{ position: 'relative', overflow: 'auto' }}
+              >
+                <Calendar calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
+                <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
+                  <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
+                    <CalendarList
+                      fetchRoadmap={fetchRoadmap}
+                      activity={
+                        selectedRecords?.length === 1
+                          ? activity.filter(
+                              (item) =>
+                                !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
+                            )
+                          : activity
+                      }
+                      expanded={expanded}
+                      selected={selected}
+                      handleSelect={handleSelect}
+                      startDate={startDate}
+                      endDate={endDate}
+                      totalDay={totalDay}
+                      calendarType={calendarType}
+                    />
+                  </Box>
+                </Box>
+                <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
+                  <div ref={scrollRef}>
+                    <Box
+                      id="dayLiner"
+                      height={'100%'}
+                      style={{
+                        position: 'absolute',
+                        left: (100 * moment().diff(startDate, 'days')) / totalDay + '%',
+                        width: dayPixel
+                      }}
+                    >
+                      <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="secondary.main" height={'100%'}></Box>
+                    </Box>
+                  </div>
                 </Box>
               </Box>
-              <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
-                <div ref={scrollRef}>
-                  <Box
-                    id="dayLiner"
-                    height={'100%'}
-                    style={{
-                      position: 'absolute',
-                      left: (100 * moment().diff(startDate, 'days')) / totalDay + '%',
-                      width: dayPixel
-                    }}
-                  >
-                    <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="secondary.main" height={'100%'}></Box>
-                  </Box>
-                </div>
-              </Box>
-            </Box>
-          ) : (
-            <Box
-              border={1}
-              width={'100%'}
-              height={'100%'}
-              borderColor="var(--common-border-color)"
-              style={{ position: 'relative', overflow: 'auto' }}
-            >
-              <MapView technician={selected} />
-              <IconButton
-                onClick={() => {
-                  setSelected(null);
-                  setTimeout(() => executeScroll(), 500);
-                }}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  zIndex: 1
-                }}
+            ) : (
+              <Box
+                border={1}
+                width={'100%'}
+                height={'100%'}
+                borderColor="var(--common-border-color)"
+                style={{ position: 'relative', overflow: 'auto' }}
               >
-                <Close />
-              </IconButton>
-            </Box>
-          )}
+                <MapView technician={selected} />
+                <IconButton
+                  onClick={() => {
+                    setSelected(null);
+                    setTimeout(() => executeScroll(), 500);
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    zIndex: 1
+                  }}
+                >
+                  <Close />
+                </IconButton>
+              </Box>
+            )}
+          </Box>
         </Box>
-      </Box>
-      {/* {!selected &&
-        <Box display="flex" justifyContent="flex-end" className="mt-2">
-          <ButtonGroup disableElevation color="primary">
-            <Button size="small" variant={calendarType === 'week' ? 'contained' : 'outlined'} onClick={() => handelChangeCalendarType('week')}>
-              Weeks
-            </Button>
-            <Button size="small" variant={calendarType === 'month' ? 'contained' : 'outlined'} onClick={() => handelChangeCalendarType('month')}>
-              Months
-            </Button>
-            <Button size="small" variant={calendarType === 'quater' ? 'contained' : 'outlined'} onClick={() => handelChangeCalendarType('quater')}>
-              Quaters
-            </Button>
-          </ButtonGroup>
-        </Box>} */}
-    </Box>
-  ) : (
-    <Box p={2} height={height} bgcolor="white">
-      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      )}
     </Box>
   );
 }

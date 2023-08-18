@@ -46,6 +46,7 @@ import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AssignUserDialog from './AssignUserDialog';
 import PeopleIcon from '@material-ui/icons/People';
+import { isDesktop, isMobile, isTablet } from 'react-device-detect';
 
 interface StepInterface {
   _id: string;
@@ -835,24 +836,75 @@ const Steps = ({
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      flexWrap: 'wrap',
-                      flexBasis: 'calc(100% - 155px)'
+                      flexWrap: 'wrap'
                     }}
-                    className="mr-auto"
+                    className="mr-auto basis-[calc(100%-56px)] sm:basis-[calc(100%-155px)]"
                     gridGap={'8px'}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center' }} gridGap={'8px'}>
+                    <Box className="flex items-center gap-2 flex-grow">
                       <Box>
-                        <Chip
-                          color="primary"
-                          label={referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
-                        />
+                        <span className="bg-[var(--primary)] dark:bg-[var(--dark-primary)] rounded-full text-white text-[13px] px-[12px] py-[1px]">
+                          {referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
+                        </span>
                       </Box>
-                      <Box>
-                        <Typography className={classes.heading} style={{ fontWeight: '600' }}>
+                      <div className="flex items-start gap-2 w-full">
+                        <Typography className={`${classes.heading} flex-grow`} style={{ fontWeight: '600' }}>
                           {step.stepName}
                         </Typography>
-                      </Box>
+                        {isMobile && !isTablet && (
+                          <div className="flex flex-wrap md:gap-2 items-center">
+                            {stepData?.status && (
+                              <IconButton
+                                aria-label="info"
+                                size="small"
+                                color="primary"
+                                disabled={stepData?.status ? false : true}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedStep(step);
+                                  setFieldDialog(true);
+                                  setStepState(stepData);
+                                  setIsFieldDialogEditable(false);
+                                }}
+                              >
+                                <InfoIcon fontSize="inherit" />
+                              </IconButton>
+                            )}
+
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              aria-label="delete"
+                              disabled={!allowedToEdit}
+                              onClick={(event) => {
+                                handleOpenMenu(event);
+                                setSelectedStep(step);
+                              }}
+                            >
+                              <MoreHorizIcon />
+                            </IconButton>
+                            <HtmlTooltip title="Delete" placement="top" arrow>
+                              <IconButton
+                                size="small"
+                                color="inherit"
+                                style={{ color: 'red' }}
+                                aria-label="delete"
+                                disabled={
+                                  !allowedToEdit ||
+                                  [
+                                    WORKORDER_SERVICE_STEP_STATUS.passed,
+                                    WORKORDER_SERVICE_STEP_STATUS.failed,
+                                    WORKORDER_SERVICE_STEP_STATUS.completed
+                                  ].includes(stepData?.passFailStatus)
+                                }
+                                onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
+                              >
+                                <DeleteOutlineIcon style={{ fontSize: '20px' }} />
+                              </IconButton>
+                            </HtmlTooltip>
+                          </div>
+                        )}
+                      </div>
                       {step?.assignedUsers?.length > 0 && (
                         <Box ml={1}>
                           <HtmlTooltip title={step?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
@@ -1022,57 +1074,59 @@ const Steps = ({
                       )}
                     </Box>
                   </Box>
-                  <Box display={'flex'} alignItems={'center'} gridGap={8}>
-                    {stepData?.status && (
+                  {(isTablet || isDesktop) && (
+                    <div className="flex flex-wrap md:gap-2 items-center">
+                      {stepData?.status && (
+                        <IconButton
+                          aria-label="info"
+                          size="small"
+                          color="primary"
+                          disabled={stepData?.status ? false : true}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedStep(step);
+                            setFieldDialog(true);
+                            setStepState(stepData);
+                            setIsFieldDialogEditable(false);
+                          }}
+                        >
+                          <InfoIcon fontSize="inherit" />
+                        </IconButton>
+                      )}
+
                       <IconButton
-                        aria-label="info"
                         size="small"
                         color="primary"
-                        disabled={stepData?.status ? false : true}
-                        onClick={(e) => {
-                          e.stopPropagation();
+                        aria-label="delete"
+                        disabled={!allowedToEdit}
+                        onClick={(event) => {
+                          handleOpenMenu(event);
                           setSelectedStep(step);
-                          setFieldDialog(true);
-                          setStepState(stepData);
-                          setIsFieldDialogEditable(false);
                         }}
                       >
-                        <InfoIcon fontSize="inherit" />
+                        <MoreHorizIcon />
                       </IconButton>
-                    )}
-
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      aria-label="delete"
-                      disabled={!allowedToEdit}
-                      onClick={(event) => {
-                        handleOpenMenu(event);
-                        setSelectedStep(step);
-                      }}
-                    >
-                      <MoreHorizIcon />
-                    </IconButton>
-                    <HtmlTooltip title="Delete" placement="top" arrow>
-                      <IconButton
-                        size="small"
-                        color="inherit"
-                        style={{ color: 'red' }}
-                        aria-label="delete"
-                        disabled={
-                          !allowedToEdit ||
-                          [
-                            WORKORDER_SERVICE_STEP_STATUS.passed,
-                            WORKORDER_SERVICE_STEP_STATUS.failed,
-                            WORKORDER_SERVICE_STEP_STATUS.completed
-                          ].includes(stepData?.passFailStatus)
-                        }
-                        onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
-                      >
-                        <DeleteOutlineIcon style={{ fontSize: '20px' }} />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </Box>
+                      <HtmlTooltip title="Delete" placement="top" arrow>
+                        <IconButton
+                          size="small"
+                          color="inherit"
+                          style={{ color: 'red' }}
+                          aria-label="delete"
+                          disabled={
+                            !allowedToEdit ||
+                            [
+                              WORKORDER_SERVICE_STEP_STATUS.passed,
+                              WORKORDER_SERVICE_STEP_STATUS.failed,
+                              WORKORDER_SERVICE_STEP_STATUS.completed
+                            ].includes(stepData?.passFailStatus)
+                          }
+                          onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
+                        >
+                          <DeleteOutlineIcon style={{ fontSize: '20px' }} />
+                        </IconButton>
+                      </HtmlTooltip>
+                    </div>
+                  )}
                 </Box>
               </Box>
             );

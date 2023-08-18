@@ -1,4 +1,4 @@
-import { Box, } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import { useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -6,7 +6,6 @@ import Roadmap from './Roadmap';
 import ServiceOrder from './ServiceOrder';
 
 function TechnicianScheduler() {
-
   const [filter, setFilter] = useState({ view: 'Technician View', resource: '', fieldTicket: '' });
 
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, data: null });
@@ -28,13 +27,14 @@ function TechnicianScheduler() {
           refresh={refresh}
           handleAssignTechnician={(data) => {
             setAssignTechnicianDialog({ open: true, data: data });
-          }} />
+          }}
+        />
         <ServiceOrder
           setSelectedRecords={setSelectedRecords}
           selectedRecords={selectedRecords}
           assignTechnicianDialog={assignTechnicianDialog}
           handleSucess={() => {
-            setRefresh(!refresh)
+            setRefresh(!refresh);
             setAssignTechnicianDialog({ open: false, data: null });
           }}
           handleClose={() => {

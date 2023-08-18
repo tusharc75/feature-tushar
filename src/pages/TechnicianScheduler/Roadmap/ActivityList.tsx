@@ -47,7 +47,7 @@ export default function ActivityList(props) {
           height={99}
           className="d-flex align-items-center"
           onClick={(event) => {
-            handleSelect(event, data, "technician");
+            handleSelect(event, data, 'technician');
           }}
         >
           <Box width={'80%'} className="d-flex align-items-center">
@@ -63,7 +63,7 @@ export default function ActivityList(props) {
               style={{ padding: 0 }}
               onClick={(event) => {
                 event.stopPropagation();
-                handleSelect(event, data, "map");
+                handleSelect(event, data, 'map');
               }}
             >
               <Map fontSize="medium" />
@@ -78,7 +78,7 @@ export default function ActivityList(props) {
           nodeId={data._id.toString()}
           label={label}
           children={children}
-          style={{ borderBottom: '1px solid lightgray' }}
+          style={{ borderBottom: '1px solid var(--common-border-color)' }}
           classes={{
             root: classes.root
           }}
@@ -96,7 +96,7 @@ export default function ActivityList(props) {
         expanded={expanded}
         selected={selected}
         onNodeToggle={handleToggle}
-      // onNodeSelect={handleSelect}
+        // onNodeSelect={handleSelect}
       >
         {TreeNodes.map((node) => {
           return node;
