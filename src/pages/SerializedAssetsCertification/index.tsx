@@ -35,7 +35,6 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import DateFnsUtils from '@date-io/date-fns';
 
 const SerializedAssetsCertification = () => {
-
   const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -72,24 +71,24 @@ const SerializedAssetsCertification = () => {
   }, []);
 
   const fetchAssetsOption = () => {
-    axiosInstance().get(`${serializedAssetsCertification.api}/asset`)
+    axiosInstance()
+      .get(`${serializedAssetsCertification.api}/asset`)
       .then(({ data }) => {
-        setAssetOptions(data?.data)
+        setAssetOptions(data?.data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   useEffect(() => {
-    fetchAssetsOption()
+    fetchAssetsOption();
     fetchData();
-  }, [])
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly,
-    issueDuration, expireDuration, selectedEntity, selectedAsset]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity, selectedAsset]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -276,119 +275,114 @@ const SerializedAssetsCertification = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container justifyContent='space-between' spacing={2}>
-            <Grid item md={10}>
-              <Grid container spacing={1}>
-                <Grid item md={3}>
-                  <Autocomplete
-                    onChange={(event, value) => {
-                      setSelectedAsset(value)
-                    }}
-                    fullWidth
-                    options={assetOptions}
-                    getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
-                    getOptionLabel={(option) => option.optionLabel}
-                    size="small"
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label={'Asset'}
-                        variant="outlined"
-                        size="small"
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item md={9}>
-                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    <Grid container spacing={1}>
-                      <Grid item md={3}>
-                        <KeyboardDatePicker
-                          inputVariant="outlined"
-                          variant="inline"
-                          fullWidth
-                          size="small"
-                          format={dateFormatForInputControl}
-                          maxDate={issueDuration.to}
-                          label="From (Issue Date)"
-                          autoOk
-                          InputLabelProps={{
-                            shrink: true
-                          }}
-                          views={['year', 'month', 'date']}
-                          value={issueDuration.from}
-                          onChange={(date) => {
-                            setIssueDuration({ to: issueDuration.to, from: date });
-                          }}
-                        />
-                      </Grid>
-                      <Grid item md={3}>
-                        <KeyboardDatePicker
-                          inputVariant="outlined"
-                          variant="inline"
-                          fullWidth
-                          size="small"
-                          format={dateFormatForInputControl}
-                          label="To (Issue Date)"
-                          autoOk
-                          InputLabelProps={{
-                            shrink: true
-                          }}
-                          views={['year', 'month', 'date']}
-                          value={issueDuration.to}
-                          onChange={(date) => {
-                            setIssueDuration({ from: issueDuration.from, to: date });
-                          }}
-                        />
-                      </Grid>
-                      <Grid item md={3}>
-                        <KeyboardDatePicker
-                          inputVariant="outlined"
-                          variant="inline"
-                          fullWidth
-                          size="small"
-                          format={dateFormatForInputControl}
-                          maxDate={expireDuration.to}
-                          label="From (Expiry Date)"
-                          autoOk
-                          InputLabelProps={{
-                            shrink: true
-                          }}
-                          views={['year', 'month', 'date']}
-                          value={expireDuration.from}
-                          onChange={(date) => {
-                            setExpireDuration({ to: expireDuration.to, from: date });
-                          }}
-                        />
-                      </Grid>
-                      <Grid item md={3}>
-                        <KeyboardDatePicker
-                          inputVariant="outlined"
-                          variant="inline"
-                          fullWidth
-                          size="small"
-                          format={dateFormatForInputControl}
-                          label="To (Expiry Date)"
-                          autoOk
-                          InputLabelProps={{
-                            shrink: true
-                          }}
-                          views={['year', 'month', 'date']}
-                          value={expireDuration.to}
-                          onChange={(date) => {
-                            setExpireDuration({ from: expireDuration.from, to: date });
-                          }}
-                        />
-                      </Grid>
-                    </Grid>
-                  </MuiPickersUtilsProvider>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item md={2} style={{ display: 'flex', justifyContent: 'flex-end' }} >
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} width={isMobile ? '200px' : '210px'} size="small" value={search} />
-            </Grid>
-          </Grid>
+          <div className="grid gap-x-2 gap-y-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+            <Autocomplete
+              onChange={(event, value) => {
+                setSelectedAsset(value);
+              }}
+              fullWidth
+              options={assetOptions}
+              getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
+              getOptionLabel={(option) => option.optionLabel}
+              size="small"
+              renderInput={(params) => <TextField {...params} label={'Asset'} variant="outlined" size="small" />}
+            />
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+              <KeyboardDatePicker
+                inputVariant="outlined"
+                variant="inline"
+                fullWidth
+                size="small"
+                format={dateFormatForInputControl}
+                maxDate={issueDuration.to}
+                label="From (Issue Date)"
+                autoOk
+                InputLabelProps={{
+                  shrink: true
+                }}
+                views={['year', 'month', 'date']}
+                value={issueDuration.from}
+                onChange={(date) => {
+                  setIssueDuration({ to: issueDuration.to, from: date });
+                }}
+                InputProps={{
+                  style: { minHeight: '38px' }
+                }}
+              />
+              <KeyboardDatePicker
+                inputVariant="outlined"
+                variant="inline"
+                fullWidth
+                size="small"
+                format={dateFormatForInputControl}
+                label="To (Issue Date)"
+                autoOk
+                InputLabelProps={{
+                  shrink: true
+                }}
+                views={['year', 'month', 'date']}
+                value={issueDuration.to}
+                onChange={(date) => {
+                  setIssueDuration({ from: issueDuration.from, to: date });
+                }}
+                InputProps={{
+                  style: { minHeight: '38px' }
+                }}
+              />
+              <KeyboardDatePicker
+                inputVariant="outlined"
+                variant="inline"
+                fullWidth
+                size="small"
+                format={dateFormatForInputControl}
+                maxDate={expireDuration.to}
+                label="From (Expiry Date)"
+                autoOk
+                InputLabelProps={{
+                  shrink: true
+                }}
+                views={['year', 'month', 'date']}
+                value={expireDuration.from}
+                onChange={(date) => {
+                  setExpireDuration({ to: expireDuration.to, from: date });
+                }}
+                InputProps={{
+                  style: { minHeight: '38px' }
+                }}
+              />
+              <KeyboardDatePicker
+                inputVariant="outlined"
+                variant="inline"
+                fullWidth
+                size="small"
+                format={dateFormatForInputControl}
+                label="To (Expiry Date)"
+                autoOk
+                InputLabelProps={{
+                  shrink: true
+                }}
+                views={['year', 'month', 'date']}
+                value={expireDuration.to}
+                onChange={(date) => {
+                  setExpireDuration({ from: expireDuration.from, to: date });
+                }}
+                InputProps={{
+                  style: { minHeight: '38px' }
+                }}
+              />
+            </MuiPickersUtilsProvider>
+
+            <SearchBox
+              InputProps={{
+                style: { minHeight: '38px' }
+              }}
+              onChange={handleSearch}
+              className={styles.search_box_input}
+              width={'150px'}
+              size="small"
+              value={search}
+            />
+          </div>
         </div>
         {columns ? (
           Object.keys(frameWorkComponent).length > 0 && columns ? (
@@ -418,28 +412,24 @@ const SerializedAssetsCertification = () => {
           </Box>
         )}
       </div>
-      {
-        issueCertificateDialog?.open && (
-          <IssueCertificateDialog
-            onClose={() => setIssueCertificateDialog({ open: false, id: null, certificateExpiryDate: null })}
-            onSuccess={() => {
-              setIssueCertificateDialog({ open: false, id: null, certificateExpiryDate: null });
-              fetchData();
-            }}
-            assetId={issueCertificateDialog?.id}
-            certificateExpiryDate={issueCertificateDialog.certificateExpiryDate}
-          />
-        )
-      }
-      {
-        certificateHistoryDialog?.open && (
-          <CertificateHistoryDialog
-            onClose={() => setCertificateHistoryDialog({ open: false, id: null })}
-            id={certificateHistoryDialog?.id}
-            supplierAccount={user?.user?.supplierAccountId}
-          />
-        )
-      }
+      {issueCertificateDialog?.open && (
+        <IssueCertificateDialog
+          onClose={() => setIssueCertificateDialog({ open: false, id: null, certificateExpiryDate: null })}
+          onSuccess={() => {
+            setIssueCertificateDialog({ open: false, id: null, certificateExpiryDate: null });
+            fetchData();
+          }}
+          assetId={issueCertificateDialog?.id}
+          certificateExpiryDate={issueCertificateDialog.certificateExpiryDate}
+        />
+      )}
+      {certificateHistoryDialog?.open && (
+        <CertificateHistoryDialog
+          onClose={() => setCertificateHistoryDialog({ open: false, id: null })}
+          id={certificateHistoryDialog?.id}
+          supplierAccount={user?.user?.supplierAccountId}
+        />
+      )}
     </Fragment>
   );
 };
