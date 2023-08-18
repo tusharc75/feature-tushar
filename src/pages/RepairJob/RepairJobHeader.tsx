@@ -86,18 +86,17 @@ function RepairJobHeader(props) {
   );
 
   return (
-    <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet">
-        {isMobile && (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div className={'d-flex flex-wrap align-items-center gap-1'}>
+        {isMobile && !isTablet && (
           <>
-            <Grid style={{ display: 'inline-flex' }}>
+            <div className="d-flex flex-wrap">
               <Button
                 onClick={handleClickOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
                 // aria-expanded={open ? 'true' : undefined}
-                color="secondary"
                 variant="text"
                 disableElevation
                 startIcon={<MdSort />}
@@ -123,7 +122,6 @@ function RepairJobHeader(props) {
                 aria-haspopup="true"
                 // aria-expanded={open ? 'true' : undefined}
                 variant="text"
-                color="secondary"
                 disableElevation
                 className={'sort-filter-tablet'}
                 startIcon={<MdFilterList />}
@@ -139,7 +137,7 @@ function RepairJobHeader(props) {
                 title={routes?.repairJob?.title}
                 filters={filters}
               />
-            </Grid>
+            </div>
           </>
         )}
 
@@ -161,74 +159,19 @@ function RepairJobHeader(props) {
           </ToggleButtonGroup>
         )}
         {children}
-      </Grid>
-      <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: 'flex', flex: 1 }}>
-            <SearchBox
-              onChange={onSearch}
-              className={styles.search_box_input}
-              value={searchVal}
-              size="small"
-              placeholder="Search Repair Jobs"
-              style={isMobile ? { flex: 1 } : {}}
-            />
-          </Grid>
+      </div>
+      <div className="flex flex-wrap gap-[8px]  justify-end">
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Repair Jobs" />
 
-          <Grid style={{ display: 'flex', gap: '5px' }}>
-            {RepairJobPermissions?.isCreate && RepairJobPermissions?.isUpdate && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                color="primary"
-                size="small"
-                // className={styles.add_submit_btn}
-                onClick={onCreate}
-                className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-              >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-              </Button>
-            )}
-            {/* {RepairJobPermissions?.isDelete && (
-                <>
-                  <Button
-                    disabled={canDelete}
-                    variant={isMobile ? "text" : "contained"}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    className={isMobile ? "mobile_button" : styles.action_submit_btn}
-                  >
-                    {isMobile ? "" :  "Actions" } <ExpandMore/>
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        showConfirmBox(null);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </Menu>
-                </>
-              )} */}
-          </Grid>
-        </Box>
-      </Grid>
-    </Grid>
+        <div className="flex gap-[8px] flex-wrap items-center">
+          {RepairJobPermissions?.isCreate && RepairJobPermissions?.isUpdate && (
+            <Button variant={'contained'} color="primary" size="small" onClick={onCreate} className={`no-shadow`} startIcon={<AddOutlined />}>
+              Add
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
