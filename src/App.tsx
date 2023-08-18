@@ -228,6 +228,8 @@ import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
 import IotDataPoints from './pages/IotDataPoints';
 import IotDataPointsDetail from './pages/IotDataPoints/IotDataPointsDetail';
 import IotChart from './pages/IotChart';
+import IotReportList from './pages/IotReport';
+import IotReport from './pages/IotReport/Report';
 
 var notificationInterval: any = null;
 
@@ -1006,6 +1008,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.iotChart.path}`}>
               <IotChart />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.iotReport.path}`}>
+              <IotReportList />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.iotReport.path}/:resource`}>
+              <IotReport />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
