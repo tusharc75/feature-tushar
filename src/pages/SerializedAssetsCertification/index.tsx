@@ -35,7 +35,6 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import DateFnsUtils from '@date-io/date-fns';
 
 const SerializedAssetsCertification = () => {
-
   const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -72,24 +71,24 @@ const SerializedAssetsCertification = () => {
   }, []);
 
   const fetchAssetsOption = () => {
-    axiosInstance().get(`${serializedAssetsCertification.api}/asset`)
+    axiosInstance()
+      .get(`${serializedAssetsCertification.api}/asset`)
       .then(({ data }) => {
-        setAssetOptions(data?.data)
+        setAssetOptions(data?.data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   useEffect(() => {
-    fetchAssetsOption()
+    fetchAssetsOption();
     fetchData();
-  }, [])
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly,
-    issueDuration, expireDuration, selectedEntity, selectedAsset]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity, selectedAsset]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -276,27 +275,20 @@ const SerializedAssetsCertification = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container justifyContent='space-between' spacing={2}>
+          <Grid container justifyContent="space-between" spacing={2}>
             <Grid item md={10}>
               <Grid container spacing={1}>
                 <Grid item md={3}>
                   <Autocomplete
                     onChange={(event, value) => {
-                      setSelectedAsset(value)
+                      setSelectedAsset(value);
                     }}
                     fullWidth
                     options={assetOptions}
                     getOptionSelected={(option, val) => (option ? option.optionLabel === val.optionLabel : false)}
                     getOptionLabel={(option) => option.optionLabel}
                     size="small"
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label={'Asset'}
-                        variant="outlined"
-                        size="small"
-                      />
-                    )}
+                    renderInput={(params) => <TextField {...params} label={'Asset'} variant="outlined" size="small" />}
                   />
                 </Grid>
                 <Grid item md={9}>
@@ -385,8 +377,14 @@ const SerializedAssetsCertification = () => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item md={2} style={{ display: 'flex', justifyContent: 'flex-end' }} >
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} width={isMobile ? '200px' : '210px'} size="small" value={search} />
+            <Grid item md={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <SearchBox
+                onChange={handleSearch}
+                className={styles.search_box_input}
+                width={isMobile ? '200px' : '210px'}
+                size="small"
+                value={search}
+              />
             </Grid>
           </Grid>
         </div>
@@ -418,28 +416,24 @@ const SerializedAssetsCertification = () => {
           </Box>
         )}
       </div>
-      {
-        issueCertificateDialog?.open && (
-          <IssueCertificateDialog
-            onClose={() => setIssueCertificateDialog({ open: false, id: null, certificateExpiryDate: null })}
-            onSuccess={() => {
-              setIssueCertificateDialog({ open: false, id: null, certificateExpiryDate: null });
-              fetchData();
-            }}
-            assetId={issueCertificateDialog?.id}
-            certificateExpiryDate={issueCertificateDialog.certificateExpiryDate}
-          />
-        )
-      }
-      {
-        certificateHistoryDialog?.open && (
-          <CertificateHistoryDialog
-            onClose={() => setCertificateHistoryDialog({ open: false, id: null })}
-            id={certificateHistoryDialog?.id}
-            supplierAccount={user?.user?.supplierAccountId}
-          />
-        )
-      }
+      {issueCertificateDialog?.open && (
+        <IssueCertificateDialog
+          onClose={() => setIssueCertificateDialog({ open: false, id: null, certificateExpiryDate: null })}
+          onSuccess={() => {
+            setIssueCertificateDialog({ open: false, id: null, certificateExpiryDate: null });
+            fetchData();
+          }}
+          assetId={issueCertificateDialog?.id}
+          certificateExpiryDate={issueCertificateDialog.certificateExpiryDate}
+        />
+      )}
+      {certificateHistoryDialog?.open && (
+        <CertificateHistoryDialog
+          onClose={() => setCertificateHistoryDialog({ open: false, id: null })}
+          id={certificateHistoryDialog?.id}
+          supplierAccount={user?.user?.supplierAccountId}
+        />
+      )}
     </Fragment>
   );
 };
