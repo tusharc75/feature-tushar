@@ -2511,6 +2511,7 @@ export const FIELD_TICKET_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   submitted: 'Submitted',
+  readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced'
 };
 

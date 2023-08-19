@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -35,7 +35,7 @@ const FieldTicketInvoice = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [gridApi, setGridApi] = useState(null);
   const { getColumnData } = useColumns();
-  const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null });
+  const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, isBulkCreate: false, data: null });
   const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
 
   const fetchGridColumns = async () => {
@@ -111,7 +111,7 @@ const FieldTicketInvoice = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    deepFilters.push({ field: 'status', term: [FIELD_TICKET_STATUS.submitted, FIELD_TICKET_STATUS.invoiced] });
+    deepFilters.push({ field: 'status', term: [FIELD_TICKET_STATUS.readyToInvoice, FIELD_TICKET_STATUS.invoiced] });
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -144,7 +144,7 @@ const FieldTicketInvoice = () => {
           <IconButton
             size="small"
             onClick={() => {
-              setCreateInvoiceDialog({ open: true, data: params.data });
+              setCreateInvoiceDialog({ open: true, isBulkCreate: false, data: params.data });
             }}
           >
             <NoteAddIcon fontSize="small" color="primary" />
@@ -185,6 +185,29 @@ const FieldTicketInvoice = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
+  const isSelectedInvoiceEqual = (arr) => {
+
+    if (arr?.length <= 1) {
+      return true
+    }
+
+    const customerAccountId = arr[0]?.customerAccountId;
+    const warehouseId = arr[0]?.warehouseId;
+    const wellNameId = arr[0]?.wellNameId;
+
+    let count = 0;
+
+    for (let i = 1; i < arr.length; i++) {
+      const data = arr[i]
+      if (data?.customerAccountId === customerAccountId && data?.warehouseId === warehouseId && data?.wellNameId === wellNameId) {
+        count++;
+      }
+      if (count === arr?.length - 1) return true
+    }
+
+    return false;
+  }
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -206,18 +229,42 @@ const FieldTicketInvoice = () => {
                   size="small"
                   value={search}
                 />
-                <Button
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  disabled={selectedRecords.length ? false : true}
-                  aria-controls="action-menu"
-                  className={`new-dropdown-v1`}
-                  endIcon={<ExpandMore />}
-                >
-                  Actions
-                </Button>
+                <>
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    disabled={selectedRecords.length ? false : true}
+                    aria-controls="action-menu"
+                    className={`new-dropdown-v1`}
+                    endIcon={<ExpandMore />}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      disabled={!isSelectedInvoiceEqual(selectedRecords)}
+                      onClick={() => {
+                        setCreateInvoiceDialog({ open: true, isBulkCreate: true, data: null })
+                        closeActions();
+                      }}
+                    >
+                      Create Invoice
+                    </MenuItem>
+                  </Menu>
+                </>
               </Box>
             </Grid>
           </Grid>
@@ -247,9 +294,11 @@ const FieldTicketInvoice = () => {
         {createInvoiceDialog.open && (
           <CreateInvoiceDialog
             fieldTicketData={createInvoiceDialog.data}
-            onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
+            isBulkCreate={createInvoiceDialog.isBulkCreate}
+            selectedData={createInvoiceDialog.isBulkCreate ? selectedRecords : []}
+            onClose={() => setCreateInvoiceDialog({ open: false, isBulkCreate: false, data: null })}
             onSuccess={() => {
-              setCreateInvoiceDialog({ open: false, data: null });
+              setCreateInvoiceDialog({ open: false, isBulkCreate: false, data: null });
               fetchFieldTicketData();
             }}
           />
