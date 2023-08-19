@@ -2112,6 +2112,22 @@ export const IOT_REPORT_LIST = [{
   title : sidebarResource.iotDataPoints,
   key : 'iotDataPoints',
   api : '/report/iot/data-points',
+  filters: [
+    {
+    fieldName: 'iotDataPoints',
+    fieldLabel: 'Iot Data Points',
+    resource: sidebarResource.iotDataPoints,
+    lookup : true,
+    type: 'dropDown',
+    _id:'1'
+
+  }, {
+    fieldName: 'date',
+    fieldLabel: 'Date',
+    type: 'date',
+    _id:'2'
+
+  }]
 }]
 
 export const REPORT_LIST = [
@@ -2205,12 +2221,12 @@ export const REPORT_LIST = [
     key: 'purchaseOrderType',
     type: 'assetUtilization',
   },
-  // {
-  //   title: 'User Session',
-  //   permission: 'user',
-  //   key: 'purchaseOrderType',
-  //   type: 'userSession',
-  // },
+  {
+    title: 'User Session',
+    permission: 'user',
+    key: 'purchaseOrderType',
+    type: 'userSession',
+  },
 ];
 
 export const RESOURCE_CALENDAR = [
