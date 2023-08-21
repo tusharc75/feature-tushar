@@ -171,6 +171,7 @@ const CageManagement = () => {
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
               <Autocomplete
                 style={{ minWidth: '200px', flexGrow: 1 }}
+                className="md:max-w-[250px]"
                 options={plantOptions}
                 getOptionLabel={(option: any) => option.warehouseName}
                 disableClearable
@@ -192,6 +193,7 @@ const CageManagement = () => {
               />
               <Autocomplete
                 style={{ minWidth: '200px', flexGrow: 1 }}
+                className="md:max-w-[250px]"
                 options={productCategoryList}
                 getOptionLabel={(option: any) => (option ? option.name : '')}
                 getOptionSelected={(option: any, val) => option._id === val}
