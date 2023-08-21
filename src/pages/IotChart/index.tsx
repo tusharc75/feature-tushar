@@ -102,7 +102,7 @@ function IotChart() {
                             <ToggleButton value="dataPoint">Data Point</ToggleButton>
                         </ToggleButtonGroup> */}
         </div>
-        <div className=" max-h-[calc(100vh-200px)] min-h-[600px] overflow-y-auto -mx-5 px-5 pb-5">
+        <div className=" max-h-[calc(100vh-200px)] min-h-[600px] overflow-y-auto -mx-3 px-3 pb-5">
           <Chart serializedAssets={serializedAssets?.map((s) => s?.optionValue)} type={typeAlignment} />
         </div>
       </CustomContainer>
