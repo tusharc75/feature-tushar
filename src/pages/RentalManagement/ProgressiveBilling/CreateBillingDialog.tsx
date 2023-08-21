@@ -80,11 +80,11 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -442,7 +442,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   const initializeTable = (material) => {
     const rows = material?.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
+      parent.index = i + 1;
       parent.detail =
         parent.type === 'product'
           ? parent.productDetail?.productName
@@ -477,7 +477,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
@@ -642,7 +642,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
   const handleCreateBill = () => {
     rowsApplied?.forEach((element) => {
-      delete element?.srno;
+      delete element?.index;
       delete element?.detail;
       delete element?.qtyDisplay;
       delete element?.hideSelection;

@@ -22,111 +22,110 @@ export function FilterHandler({ fullScreen, setOpenFullScreen, handleChange, par
     setFilterAnchorEl(null);
   };
 
-  const intervals = [{
-    optionValue: 'minute',
-    optionLabel: 'Minute'
-  },
-  {
-    optionValue: '30minutes',
-    optionLabel: '30 Minute'
-  }, {
-    optionValue: '5hours',
-    optionLabel: '5 Hour'
-  }, {
-    optionValue: 'day',
-    optionLabel: 'Day'
-  }, {
-    optionValue: 'week',
-    optionLabel: 'Week'
-  }, {
-    optionValue: 'month',
-    optionLabel: 'Month'
-  }, {
-    optionValue: '6months',
-    optionLabel: '6 Month'
-  }, {
-    optionValue: 'quarter',
-    optionLabel: 'Quarter'
-  }, {
-    optionValue: 'year',
-    optionLabel: 'Year'
-  }]
+  const intervals = [
+    {
+      optionValue: 'minute',
+      optionLabel: 'Minute'
+    },
+    {
+      optionValue: '30minutes',
+      optionLabel: '30 Minute'
+    },
+    {
+      optionValue: '5hours',
+      optionLabel: '5 Hour'
+    },
+    {
+      optionValue: 'day',
+      optionLabel: 'Day'
+    },
+    {
+      optionValue: 'week',
+      optionLabel: 'Week'
+    },
+    {
+      optionValue: 'month',
+      optionLabel: 'Month'
+    },
+    {
+      optionValue: '6months',
+      optionLabel: '6 Month'
+    },
+    {
+      optionValue: 'quarter',
+      optionLabel: 'Quarter'
+    },
+    {
+      optionValue: 'year',
+      optionLabel: 'Year'
+    }
+  ];
 
   const isFilterOpen = Boolean(filterAnchorEl);
 
   return (
     <>
       <Box display={'flex'} justifyContent={'space-between'}>
-        <div>
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <Grid container spacing={1} alignItems='center'>
-              <Grid item xs={3} sm={3} md={3} lg={3}>
-                <Button
-                  onClick={handleFilterOpen}
-                  startIcon={<BsFilter fontSize={10} />}
-                  disableElevation
-                  color="primary"
-                  size="small"
-                  style={{ fontSize: '16px' }}
-                >
-                  {particularCategory}
-                </Button>
-              </Grid>
-              <Grid item xs={3} sm={3} md={3} lg={3}>
-                <KeyboardDateTimePicker
-                  //   disabled={timeFrame !== 'custom' || disabled}
-                  inputVariant="outlined"
-                  variant="inline"
-                  fullWidth
-                  size="small"
-                  // openTo="year"
-                  format="dd/MM/yyyy HH:mm"
-                  maxDate={dateFilters.to}
-                  label="From"
-                  views={['year', 'month', 'date', 'hours', 'minutes']}
-                  value={dateFilters.from}
-                  onChange={(date) => {
-                    setDateFilters({ ...dateFilters, from: date });
-                  }}
-                />
-              </Grid>
-              <Grid item xs={3} sm={3} md={3} lg={3}>
-                <KeyboardDateTimePicker
-                  //   disabled={timeFrame !== 'custom' || disabled}
-                  inputVariant="outlined"
-                  variant="inline"
-                  fullWidth
-                  size="small"
-                  minDate={dateFilters.from}
-                  // openTo="year"
-                  format="dd/MM/yyyy HH:mm"
-                  label="To"
-                  views={['year', 'month', 'date', 'hours', 'minutes']}
-                  value={dateFilters.to}
-                  onChange={(date) => {
-                    setDateFilters({ ...dateFilters, to: date });
-                  }}
-                />
-              </Grid>
-              <Grid item xs={3} sm={3} md={3} lg={3}>
-                <Autocomplete
-                  id={`interval`}
-                  options={intervals}
-                  autoHighlight
-                  getOptionLabel={(option: any) => option?.optionLabel}
-                  renderOption={(option) => option?.optionLabel}
-                  onChange={(event, value) => {
-                    setDateFilters({ ...dateFilters, intervals: value?.optionValue || null })
-                  }}
-                  value={intervals.find((v) => v.optionValue === dateFilters.intervals) || {}}
-                  renderInput={(params) => (
-                    <TextField {...params} name={`interval`} label="Interval" margin="dense" variant="outlined" />
-                  )}
-                />
-              </Grid>
-            </Grid>
-          </MuiPickersUtilsProvider>
-        </div>
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <div className="grid grid-cols-1  sm:grid-cols-[1fr_1fr] md:grid-cols-[1Fr_1fr_1fr] lg:grid-cols-[auto_1fr_1fr_1fr] gap-2 flex-grow -mr-[40px] sm:mr-[0] max-w-[850px] ">
+            <Button
+              onClick={handleFilterOpen}
+              startIcon={<BsFilter fontSize={10} />}
+              disableElevation
+              color="primary"
+              size="small"
+              style={{ fontSize: '16px' }}
+            >
+              {particularCategory}
+            </Button>
+            <KeyboardDateTimePicker
+              //   disabled={timeFrame !== 'custom' || disabled}
+              inputVariant="outlined"
+              variant="inline"
+              fullWidth
+              size="small"
+              margin="none"
+              // openTo="year"
+              format="dd/MM/yyyy HH:mm"
+              maxDate={dateFilters.to}
+              label="From"
+              views={['year', 'month', 'date', 'hours', 'minutes']}
+              value={dateFilters.from}
+              onChange={(date) => {
+                setDateFilters({ ...dateFilters, from: date });
+              }}
+            />
+            <KeyboardDateTimePicker
+              //   disabled={timeFrame !== 'custom' || disabled}
+              inputVariant="outlined"
+              variant="inline"
+              fullWidth
+              size="small"
+              margin="none"
+              minDate={dateFilters.from}
+              // openTo="year"
+              format="dd/MM/yyyy HH:mm"
+              label="To"
+              views={['year', 'month', 'date', 'hours', 'minutes']}
+              value={dateFilters.to}
+              onChange={(date) => {
+                setDateFilters({ ...dateFilters, to: date });
+              }}
+            />
+            <Autocomplete
+              id={`interval`}
+              options={intervals}
+              autoHighlight
+              getOptionLabel={(option: any) => option?.optionLabel}
+              renderOption={(option) => option?.optionLabel}
+              onChange={(event, value) => {
+                setDateFilters({ ...dateFilters, intervals: value?.optionValue || null });
+              }}
+              value={intervals.find((v) => v.optionValue === dateFilters.intervals) || {}}
+              renderInput={(params) => <TextField {...params} name={`interval`} label="Interval" size="small" margin="none" variant="outlined" />}
+            />
+          </div>
+        </MuiPickersUtilsProvider>
         {!fullScreen && (
           <div className="">
             <HtmlTooltip title="Open Chart In Full Screen">
@@ -137,8 +136,6 @@ export function FilterHandler({ fullScreen, setOpenFullScreen, handleChange, par
           </div>
         )}
       </Box>
-
-
 
       {/* <div className="grid gap-4 grid-cols-1 md:grid-cols-[auto_1fr_auto] items-center justify-between">
         <div className="">

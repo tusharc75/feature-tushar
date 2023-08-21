@@ -139,7 +139,7 @@ const FieldTicketInvoice = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      {!params.data.invoice ? (
+      {params.data.status === FIELD_TICKET_STATUS.readyToInvoice ? (
         <HtmlTooltip title="Create Invoice">
           <IconButton
             size="small"
