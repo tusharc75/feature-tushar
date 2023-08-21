@@ -122,17 +122,15 @@ const InventoryCycleDetailPage = () => {
       <Box className={`detail-container-v1`}>
         <Grid container spacing={1}>
           <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
-            <Paper>
-              <Box>
-                {loading || !formsData.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <DetailsPage data={inventoryCycleData} fields={formsData} />
-                )}
-              </Box>
-            </Paper>
+            <Box>
+              {loading || !formsData.length ? (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              ) : (
+                <DetailsPage data={inventoryCycleData} fields={formsData} />
+              )}
+            </Box>
           </Grid>
         </Grid>
       </Box>

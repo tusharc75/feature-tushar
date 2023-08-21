@@ -225,14 +225,15 @@ const ConvertInventory = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+            <div className={'d-flex flex-wrap align-items-center gap-1'}>
               <div className="d-flex align-items-center">
-                <SiConvertio size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-                <span className="listingHeader">{routes.inventoryToAsset?.title} </span>
+                {/* <SiConvertio size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
+                <span className="listingHeader">{routes.inventoryToAsset?.title} </span> */}
               </div>
               <Autocomplete
-                style={{ width: '250px' }}
+                style={{ minWidth: '200px', flexGrow: 1 }}
+                className="md:max-w-[250px]"
                 options={warehouseOptions}
                 getOptionLabel={(option: any) => option.optionLabel}
                 disableClearable
@@ -249,12 +250,13 @@ const ConvertInventory = () => {
                   }
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                  <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
                 )}
               />
               {user?.user?.brandPolicy?.storageLocation && (
                 <Autocomplete
-                  style={{ width: '250px' }}
+                  style={{ minWidth: '200px', flexGrow: 1 }}
+                  className="md:max-w-[250px]"
                   options={storageLocationOptions.filter((item) => item.warehouse === warehouseId)}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -267,66 +269,57 @@ const ConvertInventory = () => {
                     setStorageLocationId(val?.optionValue);
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+                    <TextField {...params} margin="none" size="small" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
                   )}
                 />
               )}
-            </Grid>
-            <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1 }}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={styles.search_box_input}
-                    width={isMobile ? '200px' : '242px'}
-                    style={isMobile ? { flex: 1 } : {}}
-                    size="small"
-                    value={search}
-                  />
-                </Grid>
-              </Box>
-              {permissions?.inventoryToAsset?.isUpdate ? (
-                <Box ml={1}>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="default"
-                    size="small"
-                    disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
-                    className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                  >
-                    {isMobile && !isTablet ? '' : 'Actions'}
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        setInventory({
-                          open: true,
-                          product: getLocalStorageArrayData(`${localStorageSelectedRecords}`)
-                        });
-                      }}
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.inventoryToAsset?.isUpdate ? (
+                  <>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
+                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
                     >
-                      Convert
-                    </MenuItem>
-                  </Menu>
-                </Box>
-              ) : null}
-            </Grid>
-          </Grid>
+                      Actions
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          closeActions();
+                          setInventory({
+                            open: true,
+                            product: getLocalStorageArrayData(`${localStorageSelectedRecords}`)
+                          });
+                        }}
+                      >
+                        Convert
+                      </MenuItem>
+                    </Menu>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          </div>
         </div>
         {columns && warehouseId ? (
           Object.keys(frameworkComponents).length > 0 ? (
