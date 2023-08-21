@@ -67,7 +67,7 @@ export function FilterHandler({ fullScreen, setOpenFullScreen, handleChange, par
     <>
       <Box display={'flex'} justifyContent={'space-between'}>
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1Fr_1fr_1fr] lg:grid-cols-[auto_1fr_1fr_1fr] gap-2 flex-grow -mr-[40px] sm:mr-[0] max-w-[850px] ">
+          <div className="grid grid-cols-1  sm:grid-cols-[1fr_1fr] md:grid-cols-[1Fr_1fr_1fr] lg:grid-cols-[auto_1fr_1fr_1fr] gap-2 flex-grow -mr-[40px] sm:mr-[0] max-w-[850px] ">
             <Button
               onClick={handleFilterOpen}
               startIcon={<BsFilter fontSize={10} />}
