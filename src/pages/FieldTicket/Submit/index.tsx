@@ -162,7 +162,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                     >
                         Submit
                     </Button>}
-                    {fieldTicketData.status === FIELD_TICKET_STATUS.submitted && <Button
+                    {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && <Button
                         variant="contained"
                         color="primary"
                         size='small'
