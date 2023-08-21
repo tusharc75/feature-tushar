@@ -258,7 +258,7 @@ export const CreateEmail = ({
   const handleSendQuoteEmail = async (values) => {
     setSending(true);
     const body = {
-      email: [values.to.slice(-1)[0]],
+      email: values.to,
       version: version,
       emailBody: values.content.toString('html'),
       emailSubject: values.subject,
@@ -290,17 +290,6 @@ export const CreateEmail = ({
     }
   };
 
-  // const handleToCcChange = (value) => {
-  //   let val = [];
-  //   value.map((currentEmail) => {
-  //     let email =
-  //       typeof currentEmail === "object" ? currentEmail?.email : currentEmail;
-  //     if (/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
-  //       val.push(email);
-  //     }
-  //   });
-  //   return val;
-  // };
 
   const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
