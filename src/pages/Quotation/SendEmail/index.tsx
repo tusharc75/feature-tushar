@@ -107,6 +107,7 @@ const SendEmail = ({
               referenceId={quotationData?._id}
               columns={columns}
               isSendEmail={true}
+              subject={`${user?.user?.brandName} Offer - ${quotationData?.quotationNumber}`}
               extraQueryParams={{ uniqueId: versionId }}
               defaultColumns={[
                 'index',
