@@ -55,7 +55,6 @@ function Index({ serializedAssets = [], type }) {
       }`
     );
     const reportData = data?.data?.data?.data;
-    console.log('report', reportData);
     axiosInstance()
       .get(`${routes?.iotDataPoints?.path}`)
       .then(({ data: { data } }) => {
@@ -90,15 +89,12 @@ function Index({ serializedAssets = [], type }) {
                   });
                 }
               });
-              console.log('dataArr', dataArr);
-
               const newObj = {
                 fieldLabel: fieldLabel,
                 dataPoints: dataArr,
                 hide: false,
                 fill: false
               };
-
               result[fieldLabel][fieldName] = newObj;
             }
           } else {
@@ -115,7 +111,6 @@ function Index({ serializedAssets = [], type }) {
                   });
                 }
               });
-              console.log('dataArr', dataArr);
               const newObj = {
                 fieldLabel: fieldLabel,
                 dataPoints: dataArr,
