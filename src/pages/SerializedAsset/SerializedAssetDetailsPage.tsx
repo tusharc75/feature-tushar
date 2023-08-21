@@ -30,6 +30,8 @@ import AssetHistory from './AssetHistory';
 import queryString from 'query-string';
 import TabPanel from 'src/components/TabPanel';
 import SyncIcon from '@material-ui/icons/Sync';
+import BuildIcon from '@material-ui/icons/Build';
+import { RiExchangeBoxFill } from 'react-icons/ri';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -206,7 +208,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -279,8 +281,14 @@ const SerializedAssetDetailsPage = () => {
                       [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
                         assetDetails.status
                       ) && (
-                        <Button variant="outlined" color="default" size="small" onClick={() => setShowRepairJobDialog(true)}>
-                          {isMobile && !isTablet ? <GiAutoRepair size={20} /> : 'Create Repair Job'}
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                          color="default"
+                          className="btn-outline-v1"
+                          size="small"
+                          onClick={() => setShowRepairJobDialog(true)}
+                        >
+                          {isMobile && !isTablet ? <BuildIcon /> : 'Create Repair Job'}
                         </Button>
                       )}
                     {allowUpdateStatus ? (
@@ -299,7 +307,7 @@ const SerializedAssetDetailsPage = () => {
                         </Button>
                       ) : (
                         <Button
-                          variant="outlined"
+                          variant={'outlined'}
                           color="default"
                           size="small"
                           onClick={openActions}
@@ -308,7 +316,7 @@ const SerializedAssetDetailsPage = () => {
                           aria-controls="action-menu"
                           endIcon={<ExpandMore />}
                         >
-                          {isMobile && !isTablet ? <SyncIcon style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
+                          {isMobile && !isTablet ? <RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} /> : 'Change Status'}
                         </Button>
                       )
                     ) : null}
