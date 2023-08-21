@@ -2227,6 +2227,12 @@ export const REPORT_LIST = [
     key: 'purchaseOrderType',
     type: 'userSession',
   },
+  {
+    title: "InUse " + sidebarResource.serializedAsset,
+    permission: 'serializedAsset',
+    key: 'InUseSerializedAsset',
+    type: null,
+  },
 ];
 
 export const RESOURCE_CALENDAR = [
