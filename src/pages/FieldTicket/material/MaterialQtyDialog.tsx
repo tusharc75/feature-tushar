@@ -361,7 +361,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                     {({ values, errors, touched, setFieldValue, submitForm }) => (
                         <Fragment>
                             <CustomDialogHeader
-                                title={isBulkedit ? `Bulk Edit` : `Edit - ${rowData.srno} (${referenceType === 'consumables' ? rowData?.productName || '' : rowData?.detail || ''})`}
+                                title={isBulkedit ? `Bulk Edit` : `Edit - ${rowData.index} (${referenceType === 'consumables' ? rowData?.productName || '' : rowData?.detail || ''})`}
                                 onClose={() => {
                                     if (!isEqual(ref?.current?.values, initialData.values)) {
                                         setShowConfirmDialog(true);

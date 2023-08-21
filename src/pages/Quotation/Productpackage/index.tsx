@@ -84,11 +84,11 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     }
     let column: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -235,7 +235,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
+      parent.index = i + 1;
       parent.detail = `${parent.type === 'serializedAsset'
         ? parent.serializedAssetDetail?.assetNumber
         : parent.type === 'product'
@@ -271,7 +271,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
-      _subRow.srno = parent.srno + '.' + `${index + 1}`;
+      _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = `${_subRow.type === 'serializedAsset'
         ? _subRow.serializedAssetDetail?.assetNumber
         : _subRow.type === 'product'
@@ -356,7 +356,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
-      delete element.srno;
+      delete element.index;
       delete element.detail;
       delete element.qtyDisplay;
       delete element.isValid;

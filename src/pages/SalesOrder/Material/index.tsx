@@ -334,7 +334,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
-      delete element.srno;
+      delete element.index;
       delete element.detail;
       delete element.qtyDisplay;
       delete element.isValid;
