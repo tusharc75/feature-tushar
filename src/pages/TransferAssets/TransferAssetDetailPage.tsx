@@ -48,7 +48,6 @@ const TransferAssetDetailPage = () => {
   const [isNextStep, setNextStep] = useState(true);
   const [isPrevStep, setPrevStep] = useState(true);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [fileDownloading, setFileDownloading] = useState(false);
   const [transferAssetFields, setTransferAssetFields] = useState([]);
   const [existingAssets, setExistingAssets] = useState([]);
   const [loadingTickets, setLoadingTickets] = useState([]);
@@ -266,43 +265,6 @@ const TransferAssetDetailPage = () => {
       });
   };
 
-  const handleViewPdf = (download) => {
-    setFileDownloading(true);
-    axiosInstance()
-      .get(`${transferAsset.api}/${id}/pdf`)
-      .then(({ data: { data } }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.fileName}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            if (download) {
-              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-              const link = document.createElement('a');
-              link.href = url;
-              link.setAttribute('download', `TransferAsset-${transferAssetData.transferAssetNumber}.pdf`);
-              document.body.appendChild(link);
-              link.click();
-            } else {
-              const file = new Blob([data], { type: 'application/pdf' });
-              const fileURL = URL.createObjectURL(file);
-              const pdfWindow = window.open();
-              pdfWindow.location.href = fileURL;
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-            }
-            setFileDownloading(false);
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-            setFileDownloading(false);
-          });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setFileDownloading(false);
-      });
-  };
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -397,8 +359,6 @@ const TransferAssetDetailPage = () => {
                   setNextStep={setNextStep}
                   updateTransferStatus={updateTransferStatus}
                   transferAssetData={transferAssetData}
-                  handleViewPdf={handleViewPdf}
-                  fileDownloading={fileDownloading}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   allowedToEdit={allowedToEdit}
                 />
@@ -415,8 +375,6 @@ const TransferAssetDetailPage = () => {
                   setExistingAssets={setExistingAssets}
                   setTransferIsEnded={setTransferIsEnded}
                   updateTransferStatus={updateTransferStatus}
-                  handleViewPdf={handleViewPdf}
-                  fileDownloading={fileDownloading}
                   isTransferEnded={isTransferEnded}
                   renderedFrom={`${renderedFrom}_grid-2`}
                   allowedToEdit={allowedToEdit || isProcessor}
@@ -435,8 +393,6 @@ const TransferAssetDetailPage = () => {
                   setNextStep={setNextStep}
                   setTransferIsEnded={setTransferIsEnded}
                   updateTransferStatus={updateTransferStatus}
-                  handleViewPdf={handleViewPdf}
-                  fileDownloading={fileDownloading}
                   isTransferEnded={isTransferEnded}
                   renderedFrom={`${renderedFrom}_grid-3`}
                   allowedToEdit={allowedToEdit || isProcessor}
