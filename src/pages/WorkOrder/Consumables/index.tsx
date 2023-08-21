@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { sidebarResource, workOrder } from 'src/constants/helpers';
+import { MATERIAL_SUB_TYPE, sidebarResource, workOrder } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton } from '@material-ui/core';
@@ -21,7 +21,7 @@ import History from '../../ProductInventory/LedgerHistory';
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
-const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
+const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName, materialSubType = MATERIAL_SUB_TYPE.consumable }) => {
 
 
   const toastConfig = useContext(CustomToastContext);
@@ -234,7 +234,13 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
     axiosInstance()
       .get(`${workOrder.api}/${workOrderId}/consumable${query}`)
       .then(({ data: { data } }) => {
-        let rows = data.map((u) => {
+        if (materialSubType === MATERIAL_SUB_TYPE.bom) {
+          data = data?.filter((e) => e?.subType === materialSubType)
+        }
+        else {
+          data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.bom)
+        }
+        let rows = data?.map((u) => {
           let res: any = {
             ...prepareDataForGrid(u)
           };
