@@ -187,6 +187,8 @@ const FieldTicketInvoice = () => {
 
   const isSelectedInvoiceEqual = (arr) => {
 
+    if(arr.some(k => 'invoiceId' in k)) return false
+
     if (arr?.length <= 1) {
       return true
     }
