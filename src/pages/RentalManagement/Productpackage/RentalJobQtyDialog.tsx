@@ -252,9 +252,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       return 'Bulk Edit';
     }
     if (rowData) {
-      let editTitle = `Edit ${showSaveAndNext ? `-${rowData.srno}` : ''} -${rowData.detail}`;
+      let editTitle = `Edit ${showSaveAndNext ? `-${rowData.index}` : ''} -${rowData.detail}`;
       if (rowData.subRows && rowData.subRows?.length > 0) {
-        editTitle = `Edit ${showSaveAndNext ? `-${rowData.srno}` : ''} -${rowData.detail}`;
+        editTitle = `Edit ${showSaveAndNext ? `-${rowData.index}` : ''} -${rowData.detail}`;
       }
       return editTitle;
     } else {
