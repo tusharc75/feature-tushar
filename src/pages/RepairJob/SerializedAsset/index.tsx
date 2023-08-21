@@ -53,7 +53,6 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
-  const [downlodingFile, setDownlodingFile] = useState(false);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
 

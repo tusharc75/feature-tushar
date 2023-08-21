@@ -262,7 +262,7 @@ const FieldTicketInvoice = ({fieldServiceOrderData, renderedFrom}) => {
   return (
     <>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
-        <Box display="flex" alignItems="center" justifyContent={'flex-end'} mr={1}>
+        {/* <Box display="flex" alignItems="center" justifyContent={'flex-end'} mr={1}>
           <Button
             variant="outlined"
             color="default"
@@ -296,7 +296,7 @@ const FieldTicketInvoice = ({fieldServiceOrderData, renderedFrom}) => {
               Consolidate
             </MenuItem>
           </Menu>
-        </Box>
+        </Box> */}
         {columns?.length ? (
           <CustomAgGrid
             columns={columns}
@@ -311,7 +311,7 @@ const FieldTicketInvoice = ({fieldServiceOrderData, renderedFrom}) => {
             actionWidth={100}
             loading={loading}
             renderedFrom={renderedFrom}
-            allowSelection={true}
+            allowSelection={false}
             onSelection={(data) => {
               setSelectedInvoices(data);
             }}

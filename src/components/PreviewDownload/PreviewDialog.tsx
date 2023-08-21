@@ -31,7 +31,8 @@ export const PreviewDialog = ({
     defaultColumns,
     columns,
     button1Title,
-    button2Title
+    button2Title,
+    downlodingFile
 }) => {
     const toastConfig = useContext(CustomToastContext);
 
@@ -217,7 +218,7 @@ export const PreviewDialog = ({
                             handleViewPdf('Regular', visibleColumnsPdf);
                         }}
                     >
-                        {button1Title}
+                        {hideDetailButton ? `${downlodingFile}` : `${button1Title} ${downlodingFile}`}
                     </CustomButton>
                     {hideDetailButton ? null : (
                         <CustomButton
@@ -231,7 +232,7 @@ export const PreviewDialog = ({
                                 handleViewPdf('Detail', visibleColumnsPdf);
                             }}
                         >
-                            {button2Title}
+                            {`${button2Title} ${downlodingFile}`}
                         </CustomButton>
                     )}
                 </CustomDialogFooter>

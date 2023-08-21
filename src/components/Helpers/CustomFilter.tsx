@@ -6,7 +6,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { debounce, isEmpty } from 'lodash';
+import { debounce, isArray, isEmpty } from 'lodash';
 import { Autocomplete } from '@material-ui/lab';
 import axiosInstance from 'src/axios/axiosInstance';
 import CloseIcon from '@material-ui/icons/Close';
@@ -91,8 +91,8 @@ const CustomFilter = ({ field, setFilterQuery }) => {
             value: dateValue
           });
         }
-      } else if (['dropDown'].includes(col.type)) {
-        if (formValues[fieldName]) {
+      } else if (['dropDown'].includes(col.type) && !isEmpty(formValues[fieldName])) {
+        if (formValues[fieldName] && !isArray(formValues[fieldName])) {
           filterById.push({
             field: fieldName,
             term: formValues[fieldName]?.optionValue
@@ -101,6 +101,16 @@ const CustomFilter = ({ field, setFilterQuery }) => {
             title: col?.fieldLabel,
             name: fieldName,
             value: formValues[fieldName]?.optionLabel
+          });
+        } else {
+          filterById.push({
+            field: fieldName,
+            term: formValues[fieldName]?.map((item) => item.optionValue)
+          });
+          chipData.push({
+            title: col?.fieldLabel,
+            name: fieldName,
+            value: formValues[fieldName]?.map((item) => item?.optionLabel)?.join(', ')
           });
         }
       }
@@ -192,10 +202,10 @@ const CustomFilter = ({ field, setFilterQuery }) => {
           <Button
             startIcon={<BiFilterAlt />}
             size='small'
-            className="yellow-button"
             onClick={() => {
               setIsFilterOpen(true);
             }}
+            variant='outlined'
           >
             Filters
           </Button>
@@ -321,6 +331,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                             </Grid>
                             : <Grid item xs={12} sm={6} md={6} key={i}>
                               <Autocomplete
+                                multiple
                                 onOpen={() => {
                                   setOptions([]);
                                   setLoading(true);
@@ -332,7 +343,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                                 loading={loading}
                                 getOptionLabel={(option: any) => option.optionLabel ?? ''}
                                 getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
-                                value={!isEmpty(formValues) && formValues[field?.fieldName]}
+                                value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
                                 onChange={(e, val) => {
                                   handleSelectFilter(field?.fieldName, val);
                                 }}

@@ -44,11 +44,11 @@ export const documentUploadSupportExtensions =
   '.odp,.ods,.odt,.docx,.doc,.csv,.pot,.pps,.ppt,.pptx,.pdf,.xls,.xlsx,.ico,.tif,.tiff,.jpe,.png,.jpg,.jpeg,.gif,.txt,.jflsn';
 
 //  1048576 = 1 MB
-export const imageUploadMaxSize = { size: 1048576 * 2, text: '2 MB' };
-export const documentUploadMaxSize = { size: 1048576 * 10, text: '10 MB' };
+export const imageUploadMaxSize = { size: 1048576 * 10, text: '10 MB' };
+export const documentUploadMaxSize = { size: 1048576 * 50, text: '50 MB' };
 export const termsAndConditionDocumentUploadMaxSize = {
-  size: 1048576 * 2,
-  text: '2 MB'
+  size: 1048576 * 10,
+  text: '10 MB'
 };
 
 export const rentalManagementSteps: stepInterface[] = [
@@ -459,6 +459,7 @@ export const RESOURCE_LABEL = {
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
+  iotReport: 'IoT Report'
 
 };
 
@@ -484,6 +485,7 @@ export const CHILD_RESOURCE = {
   fieldServiceOrderDetails: 'Field Service Order Detail',
   fieldServiceOrderAddon: 'Field Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',
+  fieldTicketSubmit: 'Field Ticket Submit',
   fieldTicketMateial: 'Field Ticket Material',
   jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
@@ -2106,6 +2108,28 @@ export const LOG_RESOURCE = {
   transferInventory: sidebarResource.transferInventory
 };
 
+export const IOT_REPORT_LIST = [{
+  title: sidebarResource.iotDataPoints,
+  key: 'iotDataPoints',
+  api: '/report/iot/data-points',
+  filters: [
+    {
+      fieldName: 'iotDataPoints',
+      fieldLabel: 'Iot Data Points',
+      resource: sidebarResource.iotDataPoints,
+      lookup: true,
+      type: 'dropDown',
+      _id: '1'
+
+    }, {
+      fieldName: 'date',
+      fieldLabel: 'Date',
+      type: 'date',
+      _id: '2'
+
+    }]
+}]
+
 export const REPORT_LIST = [
   {
     title: sidebarResource.rentalManagement,
@@ -2197,12 +2221,12 @@ export const REPORT_LIST = [
     key: 'purchaseOrderType',
     type: 'assetUtilization',
   },
-  // {
-  //   title: 'User Session',
-  //   permission: 'user',
-  //   key: 'purchaseOrderType',
-  //   type: 'userSession',
-  // },
+  {
+    title: 'User Session',
+    permission: 'user',
+    key: 'purchaseOrderType',
+    type: 'userSession',
+  },
 ];
 
 export const RESOURCE_CALENDAR = [
@@ -2465,6 +2489,12 @@ export const WORK_ORDER_STATUS = {
   completed: 'Completed'
 };
 
+export const WORK_ORDER_TYPE = {
+  repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
+};
+
+
 export const IRT_APPROVER_STATUS = {
   send: 'Email Sent',
   approved: 'Approved',
@@ -2498,11 +2528,16 @@ export const MATERIAL_TYPE = {
   serializedAsset: 'serializedAsset'
 };
 
+export const MATERIAL_SUB_TYPE = {
+  consumable: 'consumable',
+  bom: 'bom',
+};
 
 export const FIELD_TICKET_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   submitted: 'Submitted',
+  readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced'
 };
 
@@ -2528,6 +2563,11 @@ export const PRICING_TYPE = [
   { optionLabel: 'Rent', optionValue: 'Rent' },
   { optionLabel: 'Sell', optionValue: 'Price' }
 ]
+
+export const SERVICE_TYPE = {
+  shopService: 'Shop Service',
+  fieldService: 'Field Service'
+}
 
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {

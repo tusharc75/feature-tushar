@@ -10,7 +10,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, GenerateResourceLineNumber, RESOURCE_LABEL, serviceMaster, setFieldsInAscendingOrder, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, FIELD_TICKET_STATUS, GenerateResourceLineNumber, RESOURCE_LABEL, serviceMaster, setFieldsInAscendingOrder, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
@@ -87,6 +87,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           fields = fieldsDataForCreate;
           const { fieldTicketNumber, ...rest } = mainData;
           rest.fieldTicketNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+          rest.status = FIELD_TICKET_STATUS.new;
           setCloneHeading(fieldTicketNumber);
           tempData = rest;
         } else {
@@ -235,6 +236,18 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
   }, [initialData.fields]);
 
+
+  function validate(values) {
+    const errors = {};
+    let estimateStartDate = moment(values?.estimateStartDate);
+    let estimateEndDate = moment(values?.estimateEndDate);
+    if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+      errors['estimateEndDate'] = 'Please enter valid end date';
+    }
+    return errors;
+  }
+
+
   return (
     <Dialog
       maxWidth="md"
@@ -250,7 +263,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
+        <Formik validate={validate} initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader

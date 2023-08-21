@@ -149,7 +149,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
         <>
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
-                    <PreviewDownload resource={sidebarResource.fieldTicket} referenceId={id} columns={columns} isSendEmail={true} />
+                    <PreviewDownload hideDetailButton={true} resource={sidebarResource.fieldTicket} referenceId={id} columns={columns} isSendEmail={true} />
                 </Box>
                 <Box display="flex">
                     {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && <Button
@@ -162,7 +162,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
                     >
                         Submit
                     </Button>}
-                    {fieldTicketData.status === FIELD_TICKET_STATUS.submitted && <Button
+                    {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && <Button
                         variant="contained"
                         color="primary"
                         size='small'

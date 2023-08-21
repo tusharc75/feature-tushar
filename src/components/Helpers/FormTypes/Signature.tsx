@@ -97,7 +97,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
 
   return (
     <Dialog open={open} onClose={close}>
-      <CustomDialogHeader title="Singature Pad" onClose={close} />
+      <CustomDialogHeader title="Signature Pad" onClose={close} />
       <CustomDialogContent>
         {usePad ? (
           <SignaturePad ref={signCanvas} canvasProps={{ minWidth: 500, width: 500, height: 400 }} />

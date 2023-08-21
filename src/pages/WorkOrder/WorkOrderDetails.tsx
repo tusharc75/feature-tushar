@@ -10,7 +10,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORK_ORDER_STATUS, ASSET_STATUS } from 'src/constants/helpers';
+import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORK_ORDER_STATUS, ASSET_STATUS, WORK_ORDER_TYPE, MATERIAL_SUB_TYPE } from 'src/constants/helpers';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -27,6 +27,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
+import { RiFileShredFill } from 'react-icons/ri';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -213,8 +214,13 @@ const WorkOrderDetails = () => {
             {workOrderData ? (
               <>
                 {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
-                  <Button variant={'contained'} size="small" onClick={() => setShowConfirmBoxScrap(true)} className={'btn-outline-v1'}>
-                    {`${ASSET_STATUS.scrap} Asset`}
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    size="small"
+                    onClick={() => setShowConfirmBoxScrap(true)}
+                    className={'btn-outline-v1'}
+                  >
+                    {isMobile && !isTablet ? <RiFileShredFill /> : `${ASSET_STATUS.scrap} Asset`}
                   </Button>
                 )}
                 {permissions?.workOrder?.isUpdate &&
@@ -267,16 +273,21 @@ const WorkOrderDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} {...a11yProps(0)}>
+          <CustomTab index={0} value={0} {...a11yProps(0)}>
             <FaWpforms className="mr-1" fontSize="inherit" /> Header
           </CustomTab>
-          <CustomTab index={1} {...a11yProps(1)}>
+          <CustomTab index={1} value={1} {...a11yProps(1)}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Services
           </CustomTab>
-          <CustomTab index={2} className={'tabLayout'} {...a11yProps(2)}>
+          <CustomTab index={2} value={2} className={'tabLayout'} {...a11yProps(2)}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
           </CustomTab>
-          <CustomTab index={3} className={'tabLayout'} {...a11yProps(3)}>
+          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder &&
+            <CustomTab index={3} value={3} className={'tabLayout'} {...a11yProps(3)}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> BOM
+            </CustomTab>
+          }
+          <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
             <RiFlowChart className="mr-1" fontSize="inherit" /> Views
           </CustomTab>
         </CustomTabs>
@@ -313,15 +324,30 @@ const WorkOrderDetails = () => {
               uniqueId={null}
               stepId={null}
               serviceName={null}
+              materialSubType={MATERIAL_SUB_TYPE.consumable}
             />
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
+          {workOrderData && (
+            <Consumables
+              allowedToEdit={allowedToEdit && !completed}
+              isCreate={false}
+              workOrderId={id}
+              warehouse={workOrderData?.warehouse}
+              service={null}
+              uniqueId={null}
+              stepId={null}
+              serviceName={null}
+              materialSubType={MATERIAL_SUB_TYPE.bom}
+            />
+          )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={4}>
           <Box>
             <View workOrderName={workOrderData?.workOrderNumber || ''} workOrderId={id} workOrderStatus={workOrderData?.status} />
           </Box>
         </TabPanel>
-
         <Box my={1} />
       </Box>
       {showConfirmBox && (

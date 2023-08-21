@@ -19,7 +19,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { startCase } from 'lodash';
 import { fetch_field_ticket_material_fields } from 'src/pages/FieldTicket/helper';
 
-const CreateInvoiceDialog = ({ fieldTicketData, onSuccess, onClose }) => {
+const CreateInvoiceDialog = ({ fieldTicketData, isBulkCreate = false, selectedData = [], onSuccess, onClose }) => {
 
     const toastConfig = useContext(CustomToastContext);
 
@@ -35,8 +35,9 @@ const CreateInvoiceDialog = ({ fieldTicketData, onSuccess, onClose }) => {
 
     const fetchFields = async () => {
         setColumns(null);
-        var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
-        const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
+        const currency = fieldTicketData?.currency || selectedData[0]?.currency;
+        var fields = await fetch_field_ticket_material_fields(currency);
+        const newColumns = generateCustomTableColumns(fields, currency, renderedFrom);
         let column: any = [
             {
                 accessor: 'index',
@@ -48,6 +49,19 @@ const CreateInvoiceDialog = ({ fieldTicketData, onSuccess, onClose }) => {
                     return <>Total</>;
                 }
             },
+            ...(isBulkCreate
+                ?
+                [
+                    {
+                        accessor: 'fieldTicketNumber',
+                        Header: 'Field Ticket',
+                        sticky: isMobile ? 'none' : 'left',
+                        Cell: ({ row }) => <p className="text-truncate">{row.original.fieldTicketNumber}</p>,
+                    }
+                ]
+                :
+                []
+            ),
             {
                 accessor: 'type',
                 Header: 'Type',
@@ -102,11 +116,21 @@ const CreateInvoiceDialog = ({ fieldTicketData, onSuccess, onClose }) => {
 
     const fetchData = async () => {
         let data = [];
-        const materialResponce = await axiosInstance().get(`/field-ticket/${fieldTicketData._id}/material`);
-        const material = materialResponce?.data?.data?.material
+        let material = []
+        let cost = []
+        if (!isBulkCreate) {
+            const materialResponce = await axiosInstance().get(`/field-ticket/${fieldTicketData._id}/material`);
+            material = materialResponce?.data?.data?.material
 
-        const costResponce = await axiosInstance().get(`/field-ticket/${fieldTicketData._id}/cost`);
-        const cost = costResponce?.data?.data || [];
+            const costResponce = await axiosInstance().get(`/field-ticket/${fieldTicketData._id}/cost`);
+            cost = costResponce?.data?.data || [];
+        } else {
+            const fieldTicketId = selectedData?.map(d => d.id);
+            const { data: { data: data } } = await axiosInstance().get(`${routes?.fieldTicketInvoice.path}/material?fieldTicketId=${JSON.stringify(fieldTicketId)}`);
+            material = data?.material || []
+            cost = data?.cost || []
+
+        }
 
         material?.forEach((parent, i) => {
             parent.index = i + 1;
@@ -147,22 +171,81 @@ const CreateInvoiceDialog = ({ fieldTicketData, onSuccess, onClose }) => {
             delete element?.estimateStartDate;
             delete element?.estimateEndDate;
             delete element?.estimateJobDuration;
+            delete element?.fieldTicketNumber;
         });
-        axiosInstance().post(`${routes.fieldTicketInvoice.path}/${fieldTicketData._id}/invoice`, {
-            material: rowsData.filter((d) => d.type !== 'manualEntry'),
-            additionalCost: rowsData.filter((d) => d.type === 'manualEntry')
-        })
-            .then(({ data }) => {
-                toastConfig.setToastConfig({
-                    open: true,
-                    message: data.message,
-                    severity: 'success'
-                })
-                onSuccess();
-            })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
+        if (isBulkCreate) {
+
+            const totalWellNumber: any = []
+            const totalCollaborator: any = []
+            const fieldTicket: any = []
+
+            selectedData.forEach(d => {
+                d.id && fieldTicket.push(d.id)
+                d.wellNumberId && totalWellNumber.push(d.wellNumberId)
+                d?.restwellNumber?.forEach(r => {
+                    totalWellNumber.push(r.optionValue)
+                });
+                d.collaboratorId && totalCollaborator.push(d.collaboratorId)
+                d?.restcollaborator?.forEach(r => {
+                    totalCollaborator.push(r.optionValue)
+                });
             });
+
+            const wellNumber = [...new Set(totalWellNumber)];
+            const collaborator = [...new Set(totalCollaborator)];
+
+            const data = {
+                customerAccount: selectedData[0]?.customerAccountId || '',
+                fieldTicket,
+                wellName: selectedData[0]?.wellNameId || '',
+                wellNumber,
+                numberOfWells: wellNumber?.length,
+                warehouse: selectedData[0]?.warehouseId || "",
+                customerContact: selectedData[0]?.customerAccountId || "",
+                billingAddress: selectedData[0]?.billingAddressId || "",
+                shippingAddress: selectedData[0]?.shippingAddressId || "",
+                currency: selectedData[0]?.currency || "",
+                owner: selectedData[0]?.ownerId || "",
+                collaborator,
+                fieldServiceOrder: selectedData[0]?.fieldServiceOrderId || "",
+                material: rowsData.filter((d) => d.type !== 'manualEntry'),
+                additionalCost: rowsData.filter((d) => d.type === 'manualEntry')
+            }
+
+            axiosInstance().post(`${routes.fieldTicketInvoice.path}/invoice`, {
+                material: rowsData.filter((d) => d.type !== 'manualEntry'),
+                additionalCost: rowsData.filter((d) => d.type === 'manualEntry'),
+                ...data
+            })
+                .then(({ data }) => {
+                    toastConfig.setToastConfig({
+                        open: true,
+                        message: data.message,
+                        severity: 'success'
+                    })
+                    onSuccess();
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+
+        } else {
+            axiosInstance().post(`${routes.fieldTicketInvoice.path}/${fieldTicketData._id}/invoice`, {
+                material: rowsData.filter((d) => d.type !== 'manualEntry'),
+                additionalCost: rowsData.filter((d) => d.type === 'manualEntry')
+            })
+                .then(({ data }) => {
+                    toastConfig.setToastConfig({
+                        open: true,
+                        message: data.message,
+                        severity: 'success'
+                    })
+                    onSuccess();
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+        }
     };
 
     return (<Dialog

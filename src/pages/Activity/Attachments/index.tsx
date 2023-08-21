@@ -38,6 +38,8 @@ import FolderIcon from '@material-ui/icons/Folder';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import SendIcon from '@material-ui/icons/Send';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+
 function reducer(state, action) {
   switch (action.type) {
     case 'loading':
@@ -223,10 +225,15 @@ export default function Attachment() {
           {row.original.relatedTo && row.original.relatedTo?.length > 0 ? (
             row.original.relatedTo.map((d) => {
               return (
-                <div>
-                  <Link className="link text-truncate" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
-                    {d.name}
-                  </Link>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p>{d.name}</p>
+                  <IconButton
+                    className="ml-3"
+                    size="small"
+                    onClick={() => redirectToResource(d?.type, d?.referenceId)}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
                   <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
                 </div>
               );
@@ -381,7 +388,7 @@ export default function Attachment() {
   }, [resource]);
 
   const redirectToResource = (type, id) => {
-    history.push(type === 'quote' ? `${routes['quoteBuilder'].path}/detail/${id}` : `${routes[type].path}/detail/${id}`);
+    window.open(type === 'quote' ? `${routes['quoteBuilder'].path}/detail/${id}` : `${routes[type].path}/detail/${id}`);
   };
 
   const downloadFile = (data1) => {
@@ -565,7 +572,7 @@ export default function Attachment() {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    let api = `/attachment?relatedTo=${JSON.stringify(filter)}${queryString}`;
+    let api = `/attachment?graphLookup=0&relatedTo=${JSON.stringify(filter)}${queryString}`;
     axiosInstance()
       .get(api)
       .then(
@@ -596,6 +603,11 @@ export default function Attachment() {
         dispatch({ type: 'loading', loading: false });
       });
   };
+
+  const fetchChildAttachment = async (id) => {
+    const attachment = await axiosInstance().get(`/attachment/child/${id}`)
+    return attachment?.data?.data
+  }
 
   const generateNestedData = (data, parent) => {
     const childRow = data
@@ -680,7 +692,7 @@ export default function Attachment() {
                   permissions={permissions?.attachment}
                   module="Attachment"
                   api={`/attachment`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   total={rowCount}
                   onlyExport={true}
                   additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -814,7 +826,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => {}}
+              setWholeRowsCellColor={() => { }}
               renderedFrom={'attachment_render'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -822,6 +834,7 @@ export default function Attachment() {
               customFilters={filters}
               sorting={sorting}
               loading={loading}
+              fetchChildAttachment={fetchChildAttachment}
             />
           ) : (
             <Box p={2} height={500}>
@@ -903,8 +916,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                    ? selectedResourceData.optionValue
-                    : user?.user?._id,
+                      ? selectedResourceData.optionValue
+                      : user?.user?._id,
                   access: true
                 }
               ]}
