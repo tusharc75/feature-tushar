@@ -18,10 +18,10 @@ export function ChartRenderer({ dataVal, particularCategory, chart }) {
     let subcategories =
       Object.keys(tempDataVal).length !== 0
         ? Object.keys(tempDataVal[particularCategory]).filter((item) => {
-            if (tempDataVal[particularCategory][item]['hide'] === false) {
-              return item;
-            }
-          })
+          if (tempDataVal[particularCategory][item]['hide'] === false) {
+            return item;
+          }
+        })
         : [];
 
     let labels = [];
@@ -48,7 +48,8 @@ export function ChartRenderer({ dataVal, particularCategory, chart }) {
   const toDate = new Date(Math.max(...returnDates));
   const [dateFilters, setDateFilters] = useState({
     from: fromDate,
-    to: toDate
+    to: toDate,
+    intervals: null
   });
 
   // Function to align data with labels
@@ -68,8 +69,8 @@ export function ChartRenderer({ dataVal, particularCategory, chart }) {
     let subcategories =
       Object.keys(tempDataVal).length !== 0
         ? Object.keys(tempDataVal[particularCategory]).filter((item) => {
-            return tempDataVal[particularCategory][item]['hide'] === false;
-          })
+          return tempDataVal[particularCategory][item]['hide'] === false;
+        })
         : [];
 
     let labels = [];
@@ -96,22 +97,22 @@ export function ChartRenderer({ dataVal, particularCategory, chart }) {
         label: tempDataVal[particularCategory][cat].fieldLabel,
         data: alignDataWithLabels(tempDataVal[particularCategory][cat]?.dataPoints, filteredLabels),
         backgroundColor: `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 1)`,
-        borderColor: `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 1)`
+        borderColor: `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 1)`,
+        type: 'line',
       })
     );
 
     // Assuming data is in line chart format
     return {
-      labels: filteredLabels.map((randomDate) => {
-        const day = randomDate.getDate();
-        const month = randomDate.getMonth() + 1; // Months are 0-based
-        const year = randomDate.getFullYear();
-        const hours = randomDate.getHours();
-        const minutes = randomDate.getMinutes();
+      labels: filteredLabels?.map(date => {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        // Create a formatted string
-        const formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}`;
-        return formattedDateTime;
+        let day = date.getDate();
+        let month = date.getMonth();
+        let year = date.getFullYear();
+        let hour = date.getHours();
+        let minute = date.getMinutes();
+        return `${day}/${month}/${year} ${hour}:${minute}`;
       }),
       datasets: datasets
     };
@@ -138,7 +139,7 @@ export function ChartRenderer({ dataVal, particularCategory, chart }) {
   return (
     <>
       <Box
-        className="max-w-full m-2"
+        className="max-w-full"
         sx={{
           border: '1px solid var(--common-border-color)',
           boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)'
@@ -163,18 +164,19 @@ export function ChartRenderer({ dataVal, particularCategory, chart }) {
             options={{
               maintainAspectRatio: false,
               animation: false,
+              fill: false,
               indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
               ...(chart.stack &&
                 !generateChartData(particularCategory).datasets.some((d) => d?.stack === 'stacked') && {
-                  scales: {
-                    x: {
-                      stacked: true
-                    },
-                    y: {
-                      stacked: true
-                    }
+                scales: {
+                  x: {
+                    stacked: true
+                  },
+                  y: {
+                    stacked: true
                   }
-                })
+                }
+              })
             }}
           />
         </Box>
@@ -205,15 +207,15 @@ export function ChartRenderer({ dataVal, particularCategory, chart }) {
                   indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
                   ...(chart.stack &&
                     !generateChartData(particularCategory).datasets.some((d) => d?.stack === 'stacked') && {
-                      scales: {
-                        x: {
-                          stacked: true
-                        },
-                        y: {
-                          stacked: true
-                        }
+                    scales: {
+                      x: {
+                        stacked: true
+                      },
+                      y: {
+                        stacked: true
                       }
-                    })
+                    }
+                  })
                 }}
               />
             </Box>
