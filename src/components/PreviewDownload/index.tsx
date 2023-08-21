@@ -19,7 +19,8 @@ function PreviewDownload({
   hideDetailButton = false,
   button1Title = 'Regular',
   button2Title = 'Detail',
-  extraQueryParams = null
+  extraQueryParams = null,
+  subject = ''
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -195,7 +196,6 @@ function PreviewDownload({
           downlodingFile={downlodingFile}
         />
       )}
-
       {sendEmail && (
         <Dialog
           open={sendEmail}
@@ -205,6 +205,7 @@ function PreviewDownload({
           maxWidth="md"
           onClose={() => {
             setSendEmail(false);
+            setEmailAttachments([])
             setFullScreen(false);
           }}
           fullWidth
@@ -213,16 +214,18 @@ function PreviewDownload({
             generatingFile={false}
             handleClose={() => {
               setSendEmail(false);
+              setEmailAttachments([])
               setFullScreen(false);
             }}
             fetchData={() => {
               setSendEmail(false);
+              setEmailAttachments([])
             }}
             id={referenceId}
             isQuoteBuilder={true}
             emailId={null}
             qouteBuilderAttachments={emailAttachments}
-            subject={``}
+            subject={subject}
             fromQuote={true}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
