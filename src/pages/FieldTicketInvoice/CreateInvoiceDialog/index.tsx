@@ -7,7 +7,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, FIELD_TICKET_STATUS } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -232,7 +232,8 @@ const CreateInvoiceDialog = ({ fieldTicketData, isBulkCreate = false, selectedDa
         } else {
             axiosInstance().post(`${routes.fieldTicketInvoice.path}/${fieldTicketData._id}/invoice`, {
                 material: rowsData.filter((d) => d.type !== 'manualEntry'),
-                additionalCost: rowsData.filter((d) => d.type === 'manualEntry')
+                additionalCost: rowsData.filter((d) => d.type === 'manualEntry'),
+                invoiceId: fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice ? fieldTicketData.invoiceId : null
             })
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
