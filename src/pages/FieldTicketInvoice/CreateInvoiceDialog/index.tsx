@@ -35,8 +35,9 @@ const CreateInvoiceDialog = ({ fieldTicketData, isBulkCreate = false, selectedDa
 
     const fetchFields = async () => {
         setColumns(null);
-        var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
-        const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
+        const currency = fieldTicketData?.currency || selectedData[0]?.currency;
+        var fields = await fetch_field_ticket_material_fields(currency);
+        const newColumns = generateCustomTableColumns(fields, currency, renderedFrom);
         let column: any = [
             {
                 accessor: 'index',
@@ -170,12 +171,12 @@ const CreateInvoiceDialog = ({ fieldTicketData, isBulkCreate = false, selectedDa
             delete element?.estimateStartDate;
             delete element?.estimateEndDate;
             delete element?.estimateJobDuration;
-            delete element?.fieldTicketId;
             delete element?.fieldTicketNumber;
         });
         if (isBulkCreate) {
 
             const totalWellNumber: any = []
+            const totalCollaborator: any = []
             const fieldTicket: any = []
 
             selectedData.forEach(d => {
@@ -184,9 +185,14 @@ const CreateInvoiceDialog = ({ fieldTicketData, isBulkCreate = false, selectedDa
                 d?.restwellNumber?.forEach(r => {
                     totalWellNumber.push(r.optionValue)
                 });
+                d.collaboratorId && totalCollaborator.push(d.collaboratorId)
+                d?.restcollaborator?.forEach(r => {
+                    totalCollaborator.push(r.optionValue)
+                });
             });
 
             const wellNumber = [...new Set(totalWellNumber)];
+            const collaborator = [...new Set(totalCollaborator)];
 
             const data = {
                 customerAccount: selectedData[0]?.customerAccountId || '',
@@ -195,6 +201,13 @@ const CreateInvoiceDialog = ({ fieldTicketData, isBulkCreate = false, selectedDa
                 wellNumber,
                 numberOfWells: wellNumber?.length,
                 warehouse: selectedData[0]?.warehouseId || "",
+                customerContact: selectedData[0]?.customerAccountId || "",
+                billingAddress: selectedData[0]?.billingAddressId || "",
+                shippingAddress: selectedData[0]?.shippingAddressId || "",
+                currency: selectedData[0]?.currency || "",
+                owner: selectedData[0]?.ownerId || "",
+                collaborator,
+                fieldServiceOrder: selectedData[0]?.fieldServiceOrderId || "",
                 material: rowsData.filter((d) => d.type !== 'manualEntry'),
                 additionalCost: rowsData.filter((d) => d.type === 'manualEntry')
             }
