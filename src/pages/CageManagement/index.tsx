@@ -167,14 +167,15 @@ const CageManagement = () => {
       </Grid>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container>
-            <Grid item xs={12} sm={12} md={6} className={isMobile ? styles2.mobile_panel : 'd-flex align-items-center gap-1'}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+            <div className={'d-flex flex-wrap align-items-center gap-2'}>
               <Autocomplete
-                style={{ width: '250px' }}
+                style={{ minWidth: '200px', flexGrow: 1 }}
                 options={plantOptions}
                 getOptionLabel={(option: any) => option.warehouseName}
                 disableClearable
                 getOptionSelected={(option: any, val) => option.warehouseId === val}
+                size={'small'}
                 value={
                   plantOptions.filter((data) => data.warehouseId === plantId).length
                     ? plantOptions.filter((data) => data.warehouseId === plantId)[0]
@@ -185,24 +186,12 @@ const CageManagement = () => {
                     setPlantId(val && val.warehouseId ? val.warehouseId : '');
                   }
                 }}
-                renderInput={(params) =>
-                  isMobile && !isTablet ? (
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="plant"
-                      placeholder={routes.warehouse.title}
-                      variant="standard"
-                      fullWidth
-                      className={isMobile ? 'serchBox' : ''}
-                    />
-                  ) : (
-                    <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-                  )
-                }
+                renderInput={(params) => (
+                  <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                )}
               />
               <Autocomplete
-                style={{ width: '250px' }}
+                style={{ minWidth: '200px', flexGrow: 1 }}
                 options={productCategoryList}
                 getOptionLabel={(option: any) => (option ? option.name : '')}
                 getOptionSelected={(option: any, val) => option._id === val}
@@ -214,61 +203,45 @@ const CageManagement = () => {
                 onChange={(e, val) => {
                   setProductCategory(val && val._id ? val._id : '');
                 }}
-                renderInput={(params) =>
-                  isMobile && !isTablet ? (
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="productCategory"
-                      placeholder="Product Category"
-                      variant="standard"
-                      fullWidth
-                      className={isMobile ? 'serchBox' : ''}
-                    />
-                  ) : (
-                    <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
-                  )
-                }
+                renderInput={(params) => (
+                  <TextField {...params} margin="none" size="small" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+                )}
               />
-            </Grid>
-            <Grid md={6} sm={12} xs={12} container className={styles2.filter_side}>
-              <Box className={isMobile ? styles2.mobile_filter_side_header : styles2.filter_side_header} component="div">
-                <SearchBox
-                  onChange={(e) => {
-                    setSearchVal(e.target.value);
-                  }}
-                  className={styles2.search_box_input}
-                  value={searchVal}
-                  size="small"
-                  width="350px"
-                  placeholder="Search Product"
-                  style={isMobile ? { flex: 1 } : {}}
-                />
-                <IconButton
-                  onClick={() => {
-                    setScanDialog(true);
-                  }}
-                  size="small"
-                  color="secondary"
-                  aria-label="open drawer"
-                >
-                  <CropFreeIcon />
-                </IconButton>
-                <IconButton
-                  id="History"
-                  aria-label="History"
-                  color="primary"
-                  title="History"
-                  size={isMobile ? 'small' : 'medium'}
-                  onClick={() => {
-                    setHistoryDialog(true);
-                  }}
-                >
-                  <HistoryIcon />
-                </IconButton>
-              </Box>
-            </Grid>
-          </Grid>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox
+                onChange={(e) => {
+                  setSearchVal(e.target.value);
+                }}
+                className={styles2.search_box_input}
+                value={searchVal}
+                size="small"
+                placeholder="Search Product"
+              />
+              <IconButton
+                onClick={() => {
+                  setScanDialog(true);
+                }}
+                size="small"
+                color="primary"
+                aria-label="open drawer"
+              >
+                <CropFreeIcon />
+              </IconButton>
+              <IconButton
+                id="History"
+                aria-label="History"
+                color="primary"
+                title="History"
+                size={isMobile ? 'small' : 'medium'}
+                onClick={() => {
+                  setHistoryDialog(true);
+                }}
+              >
+                <HistoryIcon />
+              </IconButton>
+            </div>
+          </div>
         </div>
         {
           <ProductGridLayout
