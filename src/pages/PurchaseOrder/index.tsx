@@ -418,6 +418,7 @@ const PurchaseOrder = () => {
               )}
               <Autocomplete
                 style={{ minWidth: '200px', flexGrow: 1 }}
+                className="md:max-w-[250px]"
                 options={warehouseOptions}
                 getOptionLabel={(option: any) => option.optionLabel}
                 getOptionSelected={(option: any, val) => option.optionValue === val}

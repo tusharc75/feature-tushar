@@ -547,6 +547,7 @@ const InventoryProduct = () => {
               </div> */}
               <Autocomplete
                 style={{ minWidth: '200px', flexGrow: 1 }}
+                className="md:max-w-[250px]"
                 options={plantOptions}
                 getOptionLabel={(option: any) => option.optionLabel}
                 disableClearable
@@ -570,6 +571,7 @@ const InventoryProduct = () => {
               {user?.user?.brandPolicy?.storageLocation && (
                 <Autocomplete
                   style={{ minWidth: '200px', flexGrow: 1 }}
+                  className="md:max-w-[250px]"
                   options={storageLocationOptions.filter((item) => item.warehouse === plantId)}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => option.optionValue === val}
