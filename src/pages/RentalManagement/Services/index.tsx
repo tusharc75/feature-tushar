@@ -80,11 +80,11 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
     }
     let column: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -268,7 +268,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
     rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
 
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
+      parent.index = i + 1;
       parent.detail =
         parent.type === 'product'
           ? parent?.productDetail?.productName
@@ -310,7 +310,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
   const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
@@ -412,7 +412,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
       element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
-      delete element.srno;
+      delete element.index;
       delete element.detail;
       delete element.serializedProduct;
       delete element.qtyDisplay;

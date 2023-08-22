@@ -230,6 +230,7 @@ import IotDataPointsDetail from './pages/IotDataPoints/IotDataPointsDetail';
 import IotChart from './pages/IotChart';
 import IotReportList from './pages/IotReport';
 import IotReport from './pages/IotReport/Report';
+import InUseSerializedAsset from './pages/Report/SerializedAsset/InUseSerializedAsset'
 
 var notificationInterval: any = null;
 
@@ -284,7 +285,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -705,6 +706,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}`}>
               <ReportMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.reports.path}/in-use-serialized-asset`}>
+              <InUseSerializedAsset />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
               <Report />

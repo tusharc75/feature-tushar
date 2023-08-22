@@ -157,7 +157,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
           let res: any = {
             ...prepareDataForGrid(item)
           };
-          res.srno = index + 1;
+          res.index = index + 1;
           res.detail = item?.productName ?? item?.serviceName;
           return res;
         });
@@ -165,7 +165,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
         let columns = [];
         columns = [
           {
-            field: 'srno',
+            field: 'index',
             headerName: 'Index',
             width: 150,
             show: true,
