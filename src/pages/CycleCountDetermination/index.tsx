@@ -1,5 +1,4 @@
 import { useState, useContext, Fragment, useEffect, useReducer } from 'react';
-import { useHistory } from 'react-router-dom';
 import { Grid, Box, Button, TextField } from '@material-ui/core';
 import { BiNetworkChart } from 'react-icons/all';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -23,7 +22,6 @@ import { Link } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 
 const CycleCountDetermination = () => {
-  const history = useHistory();
   const renderedFrom = camelCase(`${routes.cycleCountDetermination.title}`);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -232,7 +230,8 @@ const CycleCountDetermination = () => {
                 permissions={permissions.cycleCountDetermination}
                 primaryField={columns?.find((d) => d.primaryField)}
                 onClick={(data) => {
-                  history.push(`${routes.productCategoryDetail.path}/${data._id}`);
+                  const win = window.open(`${routes.productCategoryDetail.path}/${data._id}`, '_blank');
+                  win.focus();
                 }}
                 dataRows={dataRows}
                 selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
