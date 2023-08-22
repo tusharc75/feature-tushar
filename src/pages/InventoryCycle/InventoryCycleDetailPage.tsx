@@ -15,6 +15,7 @@ import ManageInventoryCycle from './ManageInventoryCycle';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import { BiEdit } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
+import { Edit } from '@material-ui/icons';
 
 const InventoryCycleDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -108,7 +109,7 @@ const InventoryCycleDetailPage = () => {
                     size="small"
                     onClick={handleOpenUpdateDialog}
                   >
-                    {isMobile ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile ? <Edit /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.inventoryCycle?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}

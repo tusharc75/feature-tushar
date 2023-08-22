@@ -24,6 +24,7 @@ import { camelCase } from 'lodash';
 import ContentFullScreen from '../../components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { isMobile, isTablet } from 'react-device-detect';
+import { Edit } from '@material-ui/icons';
 
 const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
@@ -201,7 +202,7 @@ const TransferInventoryDetailPage = () => {
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
         processStatus: stepNames[step]
       })
-      .then(() => { })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -222,14 +223,14 @@ const TransferInventoryDetailPage = () => {
                 size="small"
                 onClick={handleOpenUpdateDialog}
               >
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
-            <ActivityButton 
-              referenceId={transferInventoryData?._id} 
-              resource={ACTIVITY_RESOURCE.transferInventory} 
+            <ActivityButton
+              referenceId={transferInventoryData?._id}
+              resource={ACTIVITY_RESOURCE.transferInventory}
               resourceLabel={transferInventoryData?.transferNumber}
-              />
+            />
           </Box>
         </Box>
       </Box>

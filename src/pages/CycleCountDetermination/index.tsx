@@ -229,7 +229,10 @@ const CycleCountDetermination = () => {
                 allowSwipe={true}
                 permissions={permissions.cycleCountDetermination}
                 primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {}}
+                onClick={(data) => {
+                  const win = window.open(`${routes.productCategoryDetail.path}/${data._id}`, '_blank');
+                  win.focus();
+                }}
                 dataRows={dataRows}
                 selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                 dispatch={dispatch}
