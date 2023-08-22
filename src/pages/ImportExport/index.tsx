@@ -184,7 +184,7 @@ const BrandBackup = () => {
       .then((response) => {
         setDownloading({ loading: false, type: null });
         const fileName = response.headers['content-disposition'].split('filename=')[1];
-        downloadExcel(response, fileName);
+        downloadExcel(response.data, fileName);
 
         toastConfig.setToastConfig({
           open: true,
@@ -233,7 +233,7 @@ const BrandBackup = () => {
           color="inherit"
           onClick={() => {
             if (params?.value === 'Complete') {
-              setFileName(params.data._id);
+                            setFileName(params.data._id);
               handleDownloadFile(params.data._id);
             }
           }}
@@ -271,7 +271,7 @@ const BrandBackup = () => {
       headerName: 'Status',
       width: 200,
       cellRenderer: 'CommonRenderer'
-    }
+        }
   ];
 
   const handleDownloadFile = (fileId) => {
