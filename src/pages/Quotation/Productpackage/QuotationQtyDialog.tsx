@@ -13,7 +13,7 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { uniq, map, orderBy, isEqual, unionBy } from 'lodash';
+import { uniq, map, orderBy, isEqual, unionBy, uniqBy } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
@@ -33,7 +33,7 @@ interface EditDialogProps {
   loadingEdit?: Boolean;
 }
 
-const rateChangeFields = ['unit', 'pricingMethod'];
+const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
 
 const QuotationQtyDialog: FC<EditDialogProps> = ({
   calculatePrice,
@@ -57,6 +57,11 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const ref = useRef(null);
+  const [priceConditionList, setPriceConditionList] = useState([]);
+  const [priceConditionListConst, setPriceConditionListConst] = useState([]);
+
+
+  const [priceMethodList, setPriceMethodList] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -118,7 +123,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       });
       setInitialData({
         fields: data,
-        values: { ...getObjKeys('', data), estimateStartDate: '', estimateEndDate: '', actualStartDate: '', actualEndDate: '', tenure: '' }
+        values: { ...getObjKeys('', data), estimateStartDate: quotationData.estimateStartDate, estimateEndDate: '', actualStartDate: '', actualEndDate: '', tenure: '' }
       });
     } else {
       let unitOptions: any = [];
@@ -129,6 +134,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
+      setPriceMethodList(pricingMethodOptions);
+      let pricingConditionOptions = await getPricing(rowData, pricingMethodOptions);
       data.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
@@ -136,7 +143,15 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
         }
+        if (element.fieldName === 'pricingCondition') {
+          if (Array.isArray(pricingConditionOptions)) {
+            element.option = pricingConditionOptions;
+          }
+        }
       });
+      if (rowData?.actualStartDate === '' || rowData?.actualStartDate === '') {
+        data = data.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
+      }
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(rowData, data)
@@ -144,6 +159,66 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
     }
     EvaluteproductFields(data);
   };
+
+
+  async function getPricing(values: any, pricingMethodOptions: any = null) {
+    if (rowData) {
+      if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
+        const priceData: any = await calculatePrice([
+          {
+            materialId: rowData.materialId,
+            type: rowData.type,
+            qty: values.qty,
+            pricingMethod: pricingMethodOptions ? pricingMethodOptions.map((d) => d.optionLabel).join() : values?.pricingMethod,
+            unit: values.unit
+          }
+        ]);
+        let tempPriceData = priceData?.filter((d) => d.mrp !== undefined && d.mrp !== null && d.mrp !== 0);
+        setPriceConditionList(
+          uniqBy(
+            tempPriceData.map((d) => {
+              return {
+                optionLabel: d?.conditionName,
+                optionValue: d?.conditionId
+              };
+            }),
+            'optionValue'
+          )
+        );
+        if (pricingMethodOptions) {
+          setPriceConditionListConst(tempPriceData || []);
+          setPriceMethodList(
+            tempPriceData
+              .filter((d) => d.conditionId === rowData['pricingCondition']?.optionValue)
+              .map((d) => {
+                return {
+                  optionLabel: d?.pricingMethod,
+                  optionValue: d?.pricingMethod
+                };
+              })
+          );
+          return uniqBy(
+            tempPriceData.map((d) => {
+              return {
+                optionLabel: d?.conditionName,
+                optionValue: d?.conditionId
+              };
+            }),
+            'optionValue'
+          );
+        }
+        if (priceData && priceData.length) {
+          let pricingConditionIndex = priceData.findIndex((d) => d?.conditionId === values?.pricingCondition);
+          let price: any = pricingConditionIndex > -1 ? priceData[pricingConditionIndex]?.mrp : 0;
+          return price;
+        }
+        return 0;
+      } else {
+        return 0;
+      }
+    }
+  }
+
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
@@ -182,28 +257,28 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
     }
   };
 
-  const getPricing = async (values: any) => {
-    if (rowData) {
-      if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
-        const priceData = await calculatePrice([
-          {
-            materialId: rowData.materialId,
-            type: rowData.type,
-            qty: values.qty,
-            pricingMethod: values.pricingMethod,
-            unit: values.unit
-          }
-        ]);
-        if (priceData && priceData.length && priceData[0].mrp) {
-          let price: any = priceData[0].mrp;
-          return price;
-        }
-        return 0;
-      } else {
-        return 0;
-      }
-    }
-  };
+  // const getPricing = async (values: any) => {
+  //   if (rowData) {
+  //     if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
+  //       const priceData = await calculatePrice([
+  //         {
+  //           materialId: rowData.materialId,
+  //           type: rowData.type,
+  //           qty: values.qty,
+  //           pricingMethod: values.pricingMethod,
+  //           unit: values.unit
+  //         }
+  //       ]);
+  //       if (priceData && priceData.length && priceData[0].mrp) {
+  //         let price: any = priceData[0].mrp;
+  //         return price;
+  //       }
+  //       return 0;
+  //     } else {
+  //       return 0;
+  //     }
+  //   }
+  // };
 
   function validate(values) {
     const errors = {};
@@ -352,6 +427,35 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                       </Box>
                                     </Box>
                                   </Grid>
+                                ) : ['estimateStartDate', 'estimateEndDate'].includes(field.fieldName) ? (
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Box display="flex">
+                                      <Box flexGrow={1}>
+                                        <FormTypes
+                                          {...field}
+                                          fields={initialData.fields}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
+                                          minDate={quotationData?.estimateStartDate}
+                                          maxDate={quotationData?.estimateEndDate}
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Grid>
                                 ) : (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                     <Box display="flex">
@@ -470,3 +574,4 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
 };
 
 export default QuotationQtyDialog;
+
