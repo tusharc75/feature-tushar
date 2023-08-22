@@ -311,6 +311,16 @@ const QuotationDetails = () => {
       });
   };
 
+  const handleRelease = () => {
+    axiosInstance().put(`${quotation.api}/quotation-release/${id}`).then((data) => {
+      fetchQuotationData();
+      setReleaseConfirm(false);
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+      setReleaseConfirm(false);
+    })
+  }
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -452,7 +462,7 @@ const QuotationDetails = () => {
                           size="small"
                           startIcon={<CachedIcon />}
                         >
-                          Convert to Order
+                          Convert to {quotationData?.type || ""}
                         </Button>
                       </MenuItem>
                     )}
@@ -760,15 +770,9 @@ const QuotationDetails = () => {
           open={releaseConfirm}
           message={`Are you sure you want to release quotation : ${quotationData?.quotationNumber} ?`}
           onClose={() => {
-            axiosInstance().put(`${quotation.api}/quotation-release/${id}`).then((data) => {
-              fetchQuotationData();
-              setConvertConfirmBox(false);
-            }).catch((err) => {
-              toastConfig.setToastConfig(err);
-              setConvertConfirmBox(false);
-            })
+            setReleaseConfirm(false);
           }}
-          onOk={handleConvert}
+          onOk={handleRelease}
         />
       )}
       {convertConfirmBox && (
