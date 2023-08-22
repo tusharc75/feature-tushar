@@ -54,7 +54,8 @@ const CycleCountDetermination = () => {
   }, [warehouse]);
 
   const getWarehouse = () => {
-    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Warehouse`)
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=Warehouse`)
       .then(({ data: { data } }) => {
         setWarehouseOption([...data['Warehouse']]);
         if (data['Warehouse']?.length) {
@@ -184,47 +185,41 @@ const CycleCountDetermination = () => {
       </Grid>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+            <div className={'d-flex flex-wrap align-items-center gap-1'}>
               <Autocomplete
-                style={{ width: '250px' }}
+                style={{ minWidth: 200, flexGrow: 1 }}
+                className="md:max-w-[250px]"
                 options={warehouseOption}
                 getOptionLabel={(option: any) => option?.optionLabel}
                 disableClearable
-                value={warehouseOption.filter((data) => data.optionValue === warehouse).length ?
-                  warehouseOption.filter((data) => data.optionValue === warehouse)[0] : ''
+                value={
+                  warehouseOption.filter((data) => data.optionValue === warehouse).length
+                    ? warehouseOption.filter((data) => data.optionValue === warehouse)[0]
+                    : ''
                 }
                 onChange={(e, val) => {
                   setWarehouse(val && val.optionValue ? val.optionValue : null);
                 }}
-                renderInput={(params) =>
-                  <TextField {...params}
-                    margin="dense"
-                    name="plant"
-                    label={routes.warehouse.title}
-                    variant="outlined"
-                    fullWidth />
-                }
+                renderInput={(params) => (
+                  <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                )}
               />
-            </Grid>
-            <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  <Button
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                    onClick={() => {
-                      setOpen(true);
-                    }}
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    color="primary"
-                  >
-                    Edit
-                  </Button>
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <Button
+                className={'no-shadow'}
+                onClick={() => {
+                  setOpen(true);
+                }}
+                variant={'contained'}
+                size="small"
+                color="primary"
+              >
+                Edit
+              </Button>
+            </div>
+          </div>
         </div>
         {columns ? (
           Object.keys(frameworkComponent).length > 0 ? (
@@ -234,13 +229,16 @@ const CycleCountDetermination = () => {
                 allowSwipe={true}
                 permissions={permissions.cycleCountDetermination}
                 primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => { }}
+                onClick={(data) => {
+                  const win = window.open(`${routes.productCategoryDetail.path}/${data._id}`, '_blank');
+                  win.focus();
+                }}
                 dataRows={dataRows}
                 selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                 dispatch={dispatch}
-                onEdit={(data) => { }}
+                onEdit={(data) => {}}
                 extraParamsToCheckDelete={true}
-                onDelete={(data) => { }}
+                onDelete={(data) => {}}
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
@@ -248,7 +246,7 @@ const CycleCountDetermination = () => {
                 chips={[]}
                 onCreate={false}
                 showClone={true}
-                onClone={(data) => { }}
+                onClone={(data) => {}}
                 renderedFrom={renderedFrom}
               />
             ) : (

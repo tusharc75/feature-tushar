@@ -64,11 +64,11 @@ const Consumables = ({ rentalManagementData, setNextStep, currencySymbol, render
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
       {
-        accessor: 'srno',
-        Header: '#',
+        accessor: 'index',
+        Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       {
         accessor: 'detail',
@@ -267,7 +267,7 @@ const Consumables = ({ rentalManagementData, setNextStep, currencySymbol, render
     rows = rows.filter((e) => e.type === 'product' && e?.isConsumbale);
 
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
+      parent.index = i + 1;
       parent.detail = `${parent.productDetail?.productName}`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
@@ -292,7 +292,7 @@ const Consumables = ({ rentalManagementData, setNextStep, currencySymbol, render
   const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = _subRow.productDetail?.productName;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -370,7 +370,7 @@ const Consumables = ({ rentalManagementData, setNextStep, currencySymbol, render
 
   const handleSaveData = async (rows: any) => {
     rows.forEach((element) => {
-      delete element.srno;
+      delete element.index;
       delete element.detail;
       delete element.serializedProduct;
       delete element.qtyDisplay;

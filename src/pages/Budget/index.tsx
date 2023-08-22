@@ -370,7 +370,6 @@ function Budget() {
                     className={styles.search_box_input}
                     value={search}
                     size="small"
-                    placeholder="Search Budget"
                     width="242px"
                     style={isMobile ? { flex: 1 } : {}}
                   />

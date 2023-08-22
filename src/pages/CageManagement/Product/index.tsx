@@ -38,9 +38,9 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
           onClick={() => {
             setAssignHistoryProductQty(params.data);
           }}
-          color={params?.data?.inventory ? 'secondary' : 'inherit'}
+          color={params?.data?.inventory ? 'primary' : 'inherit'}
         >
-          <AddToPhotosOutlinedIcon fontSize="small" />
+          <AddToPhotosOutlinedIcon fontSize="small" color={'primary'} />
         </IconButton>
       </span>
     </HtmlTooltip>

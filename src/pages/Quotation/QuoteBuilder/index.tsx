@@ -68,11 +68,11 @@ const QuoteBuilder = ({
     }
     let column: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -160,7 +160,7 @@ const QuoteBuilder = ({
     data = response?.data?.data;
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
+      parent.index = i + 1;
       parent.detail = `${
         parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
@@ -188,7 +188,7 @@ const QuoteBuilder = ({
     if (additionalCostResponce?.data?.data?.length) {
       cost = additionalCostResponce?.data?.data?.map((item, index) => {
         let finalObject = prepareDataForGrid(item);
-        finalObject['srno'] = rows?.length + (index + 1);
+        finalObject['index'] = rows?.length + (index + 1);
         finalObject['detail'] = item?.detail;
         finalObject['description'] = item?.description;
         finalObject['qtyDisplay'] = item?.qty;
@@ -237,7 +237,7 @@ const QuoteBuilder = ({
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
-      _subRow.srno = parent.srno + '.' + `${index + 1}`;
+      _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = `${
         _subRow.type === 'serializedAsset'
           ? _subRow.serializedAssetDetail?.assetNumber

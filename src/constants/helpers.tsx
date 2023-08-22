@@ -459,7 +459,7 @@ export const RESOURCE_LABEL = {
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
-  iotReport : 'IoT Report'
+  iotReport: 'IoT Report'
 
 };
 
@@ -2109,25 +2109,25 @@ export const LOG_RESOURCE = {
 };
 
 export const IOT_REPORT_LIST = [{
-  title : sidebarResource.iotDataPoints,
-  key : 'iotDataPoints',
-  api : '/report/iot/data-points',
+  title: sidebarResource.iotDataPoints,
+  key: 'iotDataPoints',
+  api: '/report/iot/data-points',
   filters: [
     {
-    fieldName: 'iotDataPoints',
-    fieldLabel: 'Iot Data Points',
-    resource: sidebarResource.iotDataPoints,
-    lookup : true,
-    type: 'dropDown',
-    _id:'1'
+      fieldName: 'iotDataPoints',
+      fieldLabel: 'Iot Data Points',
+      resource: sidebarResource.iotDataPoints,
+      lookup: true,
+      type: 'dropDown',
+      _id: '1'
 
-  }, {
-    fieldName: 'date',
-    fieldLabel: 'Date',
-    type: 'date',
-    _id:'2'
+    }, {
+      fieldName: 'date',
+      fieldLabel: 'Date',
+      type: 'date',
+      _id: '2'
 
-  }]
+    }]
 }]
 
 export const REPORT_LIST = [
@@ -2226,6 +2226,12 @@ export const REPORT_LIST = [
     permission: 'user',
     key: 'purchaseOrderType',
     type: 'userSession',
+  },
+  {
+    title: "In Used Serialized Asset",
+    permission: 'serializedAsset',
+    key: 'purchaseOrderType',
+    type: 'InUseSerializedAsset',
   },
 ];
 
@@ -2489,6 +2495,12 @@ export const WORK_ORDER_STATUS = {
   completed: 'Completed'
 };
 
+export const WORK_ORDER_TYPE = {
+  repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
+};
+
+
 export const IRT_APPROVER_STATUS = {
   send: 'Email Sent',
   approved: 'Approved',
@@ -2522,6 +2534,10 @@ export const MATERIAL_TYPE = {
   serializedAsset: 'serializedAsset'
 };
 
+export const MATERIAL_SUB_TYPE = {
+  consumable: 'consumable',
+  bom: 'bom',
+};
 
 export const FIELD_TICKET_STATUS = {
   new: 'New',

@@ -147,7 +147,7 @@ function SalesOrderHeader(props) {
         {children}
       </div>
       <div className="flex flex-wrap gap-[8px]  justify-end">
-        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Sales Orders" />
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" />
 
         <div className="flex gap-[8px] flex-wrap items-center">
           {SalesOrderPermissions?.isCreate && SalesOrderPermissions?.isUpdate && (

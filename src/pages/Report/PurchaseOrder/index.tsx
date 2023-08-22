@@ -702,6 +702,143 @@ const Report = () => {
           numberRenderer: NumberRenderer
         });
       }
+      if (resourceCamelCase === 'inUseSerializedAsset') {
+        const {
+          data: { data }
+        }: any = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`);
+        const fieldData = data?.filter((e) => e?.fieldData?.fieldName !== 'status');
+
+        const {
+          data: { data: lookupResource }
+        } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+        if (lookupResource) {
+          data?.forEach((e) => {
+            if (e?.fieldData?.fieldName === 'currentOwner') {
+              e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
+            }
+          });
+        }
+
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "rentalJob",
+            "fieldLabel": "Rental Job",
+            "lookup": true,
+            "lookupResource": sidebarResource.rentalManagement,
+            "order": fieldData?.length + 1,
+            filter: false,
+            sortable: false
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "customerAccount",
+            "fieldLabel": "Customer Account",
+            "lookup": true,
+            "lookupResource": sidebarResource.customerAccount,
+            "sectionName": "",
+            "order": fieldData?.length + 1,
+            filter: false
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "billingAddress",
+            "fieldLabel": "Billing Address",
+            "lookup": true,
+            "lookupResource": sidebarResource.address,
+            "sectionName": "",
+            "order": fieldData?.length + 1,
+            filter: false
+
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "shippingAddress",
+            "fieldLabel": "Shipping Address",
+            "lookup": true,
+            "lookupResource": sidebarResource.address,
+            "sectionName": "",
+            "order": fieldData?.length + 1,
+            filter: false
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "rate",
+            "fieldLabel": "Rental Rate",
+            "order": fieldData?.length + 1,
+            filter: false
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "startDate",
+            "fieldLabel": "Start Date",
+            type: 'date',
+            "order": fieldData?.length + 1,
+            filter: false
+
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "endDate",
+            "fieldLabel": "End Date",
+            type: 'date',
+            "order": fieldData?.length + 1,
+            filter: false
+
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+        const fieldWithoutFilter = ["rentalJob", "customerAccount", "billingAddress", "shippingAddress", "rate", "startDate", "endDate"];
+        fieldData.forEach((o) => {
+          let currentColumn: any = getColumnData(
+            routes.serializedAsset?.title,
+            o?.fieldData,
+            routes.serializedAssetDetail.path
+          );
+          if (fieldWithoutFilter.includes(currentColumn?.columnData?.field)) {
+            currentColumn.columnData.filter = false;
+            currentColumn.columnData.sortable = false;
+          }
+          if (currentColumn !== null) {
+            columns = [...columns, { ...currentColumn?.columnData }];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
+            }
+          }
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
+      }
 
       setResourceColumns(resourceFieldData);
       setColumns(columns);
@@ -903,20 +1040,24 @@ const Report = () => {
     if (resourceCamelCase === 'userSession') {
       api = `/report/user/user-session`;
     }
+    if (resourceCamelCase === 'inUseSerializedAsset') {
+      api = `/serialized-asset/report/in-use-assets/`;
+    }
 
     axiosInstance()
       .get(`${api}${filterQuery}`, {
         cancelToken: cancelTokenSource.token
       }).then(({ data: { data, count, columns } }) => {
-        if(resourceCamelCase === 'userSession') {
+        console.log(data, count, columns)
+        if (resourceCamelCase === 'userSession') {
           setLoadingColumns(true);
           columns = columns?.map((e) => {
-            return({
+            return ({
               field: e.fieldName,
               headerName: e.fieldLabel,
               show: true,
               disabled: false,
-              cellRenderer:  'commonRenderer',
+              cellRenderer: 'commonRenderer',
               filter: false,
               sortable: false,
             })
@@ -1085,6 +1226,9 @@ const Report = () => {
     }
     if (resourceCamelCase === 'userSession') {
       api = `/report/user/user-session/export`;
+    }
+    if (resourceCamelCase === 'inUseSerializedAsset') {
+      api = `/serialized-asset/report/in-use-assets/export/`;
     }
 
     axiosInstance()

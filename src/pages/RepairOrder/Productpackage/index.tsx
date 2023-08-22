@@ -666,8 +666,8 @@ const Productpackage = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.existing && addExistingProductDialog.type === 'serializedAsset' && (
         <AddSerializedAsset
+          renderedFrom='repairOrder_asset_assign'
           addSerializedAsset={(d) => {
-            console.log(d)
             const dataToAddFormat = d?.map(d => {
               const p = products?.find(p => p.id === d.productId);
               return {
