@@ -401,9 +401,9 @@ const InventoryProduct = () => {
                 color={
                   permissions?.productInventory?.isUpdate && params?.data?.plantId !== 'All'
                     ? user?.user?.brandPolicy?.allowNegativeInventory
-                      ? 'primary'
+                      ? 'error'
                       : params?.data?.availableInventory
-                      ? 'primary'
+                      ? 'error'
                       : 'disabled'
                     : 'disabled'
                 }

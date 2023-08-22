@@ -362,7 +362,6 @@ const PricingConditions = () => {
                     className={styles.search_box_input}
                     value={search}
                     size="small"
-                    placeholder="Search"
                     width={isMobile ? '200px' : '242px'}
                     style={isMobile ? { flex: 1 } : {}}
                   />

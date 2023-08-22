@@ -25,6 +25,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, updateJobStatus, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -164,7 +165,15 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
             </Box>
           </div>
         )
-      }
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
+      },
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
@@ -234,7 +243,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, upda
           : parent.type === 'package'
             ? parent?.packageDetail?.packageDescription
             : parent.type === 'serializedAsset'
-              ? parent?.description
+              ? parent?.serializedAssetDetail?.product?.productDescription
               : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;

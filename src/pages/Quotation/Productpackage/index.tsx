@@ -9,7 +9,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
-import { quotation, pricingCondition, supplierContact } from '../../../constants/helpers';
+import { quotation, pricingCondition, supplierContact, QUOTATION_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -319,6 +319,18 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       element.materialId = d._id;
       element.type = addDialog.type;
       element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : '';
+      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+      if (quotationData?.estimateStartDate) {
+        element.estimateStartDate = quotationData?.estimateStartDate;
+      }
+      if (quotationData?.estimateEndDate) {
+        element.estimateEndDate = quotationData?.estimateEndDate;
+      }
+      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+      element.estimateJobDuration = 1;
+      if (calValues && calValues['estimateJobDuration']) {
+        element.estimateJobDuration = calValues['estimateJobDuration'];
+      }
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addDialog.parentId;
       material.push(element);
@@ -426,13 +438,13 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
   const calculatePrice = (arr: any[]) => {
     if (quotationData) {
       const data: any = {};
-      data.conditionType = ['Price'];
+      data.conditionType = quotationData.type === QUOTATION_TYPE.salesOrder ? ['Sell'] : ['Rent'];
       data.material = arr.map((ele) => ({
         materialId: ele?.materialId,
         materialType: ele?.type,
         qty: ele?.qty,
         pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
+        unit: [ele?.unit].flat(1).pop(),
         currency: quotationData?.currency
       }));
       data.supplier = [];
@@ -442,6 +454,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
         axiosInstance()
           .post(pricingCondition.api + `/calculatePrice`, data)
           .then(({ data: { data } }) => {
+            console.log(data)
             resolve(data);
           })
           .catch((err) => {
