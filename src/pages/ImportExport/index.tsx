@@ -1,100 +1,46 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import Layout from '../../components/Layout';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { Box, Container, Grid, Paper, Button, CircularProgress, Card, Typography, Tabs, Tab, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Grid, Button, CircularProgress, Typography, IconButton, Tooltip } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import axiosInstance from '../../axios/axiosInstance';
-import { DataGrid } from '@material-ui/data-grid';
-import { AiOutlineExport, AiOutlineImport, AiOutlineUpload, BiExport, BiImport } from 'react-icons/all';
+import { AiOutlineExport, AiOutlineImport } from 'react-icons/all';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { documentUploadMaxSize, downloadExcel, sidebarResource } from '../../constants/helpers';
+import { downloadExcel, sidebarResource } from '../../constants/helpers';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, DateTimeRenderer, NumberRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import { CommonRenderer, DateTimeRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import { GetApp } from '@material-ui/icons';
-// import { TabPanel } from '@material-ui/lab';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
+const ImportExport = () => {
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-      {children}
-    </div>
-  );
-}
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
-const BrandBackup = () => {
-  const [brandOptions, setBrandOptions] = useState([]);
-  const [rowsExport, setRowsExport] = useState([]);
-  const [rowsImport, setRowsImport] = useState([]);
-  const [rows, setRows] = useState([]);
-  const [rowsRestore, setRowsRestore] = useState([]);
   const toastConfig = useContext(CustomToastContext);
   const { setToastConfig } = useContext(CustomToastContext);
+
+  const [dataRows, setDataRows] = useState([]);
+
   const [excelUploadProgress, setExcelUploadProgress] = useState(0);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
-  const [selectedBrand, setSelectedBrand] = useState<any>({});
-  const [sending, setSending] = useState(false);
+
   const [isImgUploading, setImgUploading] = useState(false);
-  const [isRestoring, setRestoring] = useState(false);
-  const [fileName, setFileName] = useState('');
   const [downloading, setDownloading] = useState({ loading: false, type: null });
-  const [excelUploadUrl, setExcelUploadUrl] = useState(null);
   const [selectResource, setSelectResource] = useState(null);
-  const fileUploadMaxSize = { ...documentUploadMaxSize };
   const [loading, setLoading] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
 
-
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setTabValue(newValue);
-  };
-
   useEffect(() => {
-    tabValue === 0 ? fetchAllImportHistory() : fetchAllExportHistory();
-  }, [selectResource, tabValue]);
+    fetchLogs();
+  }, [selectResource]);
 
-  const fetchAllExportHistory = async () => {
+  const fetchLogs = async () => {
     setLoading(true);
     axiosInstance()
-      .get(`/import-export/all-export-data${selectResource ? `?resource=${selectResource}` : ''}`)
-      .then((data) => {
-        setRowsExport(data?.data?.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'error',
-          message: err?.error || 'Something went wrong'
-        });
-        setLoading(false);
-      });
-  };
-  const fetchAllImportHistory = async () => {
-    setLoading(true);
-    axiosInstance()
-      .get(`/import-export/all-import-data${selectResource ? `?resource=${selectResource}` : ''}`)
-      .then((data) => {
-        setRowsImport(data?.data?.data);
+      .get(`/import-export/logs${selectResource ? `?resource=${selectResource}` : ''}`)
+      .then(({ data: { data } }) => {
+        setDataRows(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -137,14 +83,13 @@ const BrandBackup = () => {
         }
       })
       .then(({ data }) => {
-        setExcelUploadUrl(data?.url);
         setImgUploading(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: 'File uploaded successfully'
         });
-        fetchAllImportHistory();
+        fetchLogs();
       })
       .catch((err) => {
         setImgUploading(false);
@@ -162,7 +107,7 @@ const BrandBackup = () => {
       .get(`/import-export/export${selectResource ? `?resource=${selectResource}` : ''}`)
       .then((data) => {
         setDownloading({ loading: false, type: null });
-        fetchAllExportHistory();
+        fetchLogs();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -185,7 +130,6 @@ const BrandBackup = () => {
         setDownloading({ loading: false, type: null });
         const fileName = response.headers['content-disposition'].split('filename=')[1];
         downloadExcel(response.data, fileName);
-
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -198,81 +142,52 @@ const BrandBackup = () => {
       });
   };
 
-
-  const exportColumn = [
+  const column = [
+    {
+      field: 'type',
+      headerName: 'Type',
+      cellRenderer: 'commonRenderer'
+    },
     {
       field: 'resource',
       headerName: 'Resource',
-      width: 200,
-      cellRenderer: 'NumberRenderer'
+      cellRenderer: 'commonRenderer'
     },
     {
       field: 'date',
       headerName: 'Date & Time',
-      width: 200,
-      cellRenderer: 'DateTimeRenderer'
+      cellRenderer: 'dateTimeRenderer'
     },
     {
       field: 'status',
       headerName: 'Status',
-      width: 200,
-      cellRenderer: 'CommonRenderer'
-    },
-    {
-      field: 'status',
-      headerName: 'Action',
-      width: 170,
-      cellRenderer: 'actionRenderer'
+      cellRenderer: 'commonRenderer'
     }
   ];
+
   const ActionRenderer = (params) => (
     <>
-      <Tooltip title={params?.value === 'Complete' ? 'Download' : 'Download Not available'}>
+      <Tooltip title={params?.data?.status === 'Complete' ? 'Download' : 'Download Not available'}>
         <IconButton
           size="small"
           color="inherit"
           onClick={() => {
-            if (params?.value === 'Complete') {
-                            setFileName(params.data._id);
+            if (params?.data?.status === 'Complete') {
               handleDownloadFile(params.data._id);
             }
           }}
         >
-          <GetApp color={params?.value === 'Complete' ? 'secondary' : 'disabled'} fontSize="small" />
+          <GetApp color={params?.data?.status === 'Complete' ? 'secondary' : 'disabled'} fontSize="small" />
         </IconButton>
       </Tooltip>
     </>
   );
 
   const frameworkComponents = {
-    actionRenderer: ActionRenderer
+    dateTimeRenderer: DateTimeRenderer,
+    commonRenderer: CommonRenderer,
+    actionsRenderer: ActionRenderer
   };
-  const importColumn = [
-    {
-      field: 'resource',
-      headerName: 'Resource',
-      show: true,
-      primaryField: true,
-      disabled: false,
-      width: 200,
-      cellRenderer: 'NumberRenderer'
-      // valueGetter: (params) => {
-      //   return params?.row?.resource;
-      // }
-    },
-    {
-      field: 'date',
-      headerName: 'Date & Time',
-      width: 400,
-      cellRenderer: 'DateTimeRenderer'
-    },
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 200,
-      cellRenderer: 'CommonRenderer'
-        }
-  ];
 
   const handleDownloadFile = (fileId) => {
     setDownloading({ loading: true, type: 'file' });
@@ -324,173 +239,107 @@ const BrandBackup = () => {
           <CustomBreadCrumbs routes={[routes.importExport]} />
         </Grid>
       </Grid>
-      <CustomContainer styles={{ paddingLeft: '0rem' }}>
-        <Box>
-          <Grid container xs={12} lg={5} md={5} style={{ marginBottom: '0.5rem', marginLeft: '0.5rem' }}>
-            <Autocomplete
-              id="export-resources"
-              options={Object.keys(sidebarResource)?.map((key) => sidebarResource[key])}
-              renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
-              getOptionLabel={(option) => option}
-              onChange={(e, val) => {
-                setSelectResource(val);
-              }}
-              fullWidth={true}
+      <CustomContainer>
+        <Box pb={2}>
+          <Autocomplete
+            id="export-resources"
+            style={{ width: '300px' }}
+            options={Object.keys(sidebarResource)?.map((key) => sidebarResource[key])}
+            renderInput={(params) =>
+              <TextField {...params}
+                variant="outlined"
+                label="Resource"
+                margin="dense"
+                required={true} />}
+            getOptionLabel={(option) => option}
+            onChange={(e, val) => {
+              setSelectResource(val);
+            }}
+          />
+        </Box>
+        <Grid container spacing={2} xs={12} lg={12} md={12}>
+          <Grid item>
+            <input
+              id={`file`}
+              name={`file`}
+              onChange={handleImportFile}
+              style={{ display: 'none' }}
+              onClick={(e: any) => (e.target.value = null)}
+              type="file"
+              accept=".xlsx,.csv"
             />
-          </Grid>
-          <Box>
-            <>
-              <Tabs
-                className="quote-tab"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
-                  }
-                }}
+            <label htmlFor={`file`}>
+              <Button
+                size="small"
+                variant="outlined"
+                component="span"
+                disabled={isImgUploading || !selectResource}
+                startIcon={<AiOutlineImport />}
               >
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 1 ? 'white' : '',
-                    color: tabValue === 1 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiImport className="mr-1" fontSize="inherit" />
-                      Import
-                    </div>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 2 ? 'white' : '',
-                    color: tabValue === 2 ? 'blue' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiExport className="mr-1" fontSize="inherit" />
-                      Export
-                    </div>
-                  }
-                  {...a11yProps(1)}
-                />
-              </Tabs>
-              <TabPanel value={tabValue} index={0}>
-                <Box mt={2} className="bg-white">
-                  <Grid container xs={12} lg={5} md={5} style={{ padding: '1rem', paddingTop: 0 }}>
-                    <Box style={{ display: 'flex' }}>
-                      <Box style={{ marginRight: '0.5rem' }}>
-                        <input
-                          id={`file`}
-                          name={`file`}
-                          onChange={handleImportFile}
-                          style={{ display: 'none' }}
-                          onClick={(e: any) => (e.target.value = null)}
-                          type="file"
-                          accept=".xlsx,.csv"
-                        />
-                        <label htmlFor={`file`}>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            component="span"
-                            disabled={isImgUploading || !selectResource}
-                            startIcon={<AiOutlineImport />}
-                          >
-                            Import from Excel
-                          </Button>
-                        </label>
-                      </Box>
-                      {isImgUploading && (
-                        <>
-                          <CircularProgress variant="determinate" value={excelUploadProgress} size={30} />
-                          <Box>
-                            <Typography variant="caption" component="div" color="textSecondary">{`${excelUploadProgress}%`}</Typography>
-                          </Box>
-                        </>
-                      )}
-                    </Box>
-                    <Box>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        component="span"
-                        disabled={isImgUploading || !selectResource}
-                        startIcon={<AiOutlineExport />}
-                        onClick={() => {
-                          handleDownloadTemplate();
-                        }}
-                      >
-                        Download Template {downloading.loading && downloading.type === 'template' && <CircularProgress size={20} />}
-                      </Button>
-                    </Box>
-                  </Grid>
+                Import from Excel
+              </Button>
+            </label>
+            {isImgUploading && (
+              <>
+                <CircularProgress variant="determinate" value={excelUploadProgress} size={30} />
+                <Box>
+                  <Typography variant="caption" component="div" color="textSecondary">{`${excelUploadProgress}%`}</Typography>
                 </Box>
-                <CustomAgGrid
-                  columns={importColumn}
-                  dataRows={rowsImport}
-                  frameworkComponents={frameWorkComponent}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={intialState.rowCount}
-                  limit={intialState.limit}
-                  pageSizes={intialState.pageSizes}
-                  page={intialState.page}
-                  isClientSideGrid={true}
-                  loading={loading}
-                  allowSelection={false}
-                  allowAction={false}
-                  refreshGrid={fetchAllImportHistory}
-                />
-              </TabPanel>
-
-              <TabPanel value={tabValue} index={1}>
-                <Box mt={2} className="bg-white">
-                  <Grid container xs={12} lg={5} md={5} style={{ padding: '1rem', paddingTop: 0 }}>
-                    <Button
-                      type="button"
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                      onClick={handleExportExcel}
-                      startIcon={<AiOutlineExport />}
-                      disabled={selectResource == null}
-                    >
-                      Export to Excel {
-                        downloading.loading && downloading.type === 'export' && <CircularProgress size={20} />
-                      }
-                    </Button>
-                  </Grid>
-                </Box>
-                <CustomAgGrid
-                  columns={exportColumn}
-                  dataRows={rowsExport}
-                  frameworkComponents={frameworkComponents}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={intialState.rowCount}
-                  limit={intialState.limit}
-                  pageSizes={intialState.pageSizes}
-                  page={intialState.page}
-                  isClientSideGrid={true}
-                  allowAction={false}
-                  // actionWidth={150}
-                  loading={loading}
-                  allowSelection={false}
-                  refreshGrid={fetchAllExportHistory}
-                />
-              </TabPanel>
-            </>
-          </Box>
+              </>
+            )}
+          </Grid>
+          <Grid item>
+            <Button
+              size="small"
+              variant="outlined"
+              component="span"
+              disabled={isImgUploading || !selectResource}
+              startIcon={<AiOutlineExport />}
+              onClick={() => {
+                handleDownloadTemplate();
+              }}
+            >
+              Download Template {downloading.loading && downloading.type === 'template' && <CircularProgress size={20} />}
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button
+              type="button"
+              size="small"
+              color="primary"
+              variant="outlined"
+              onClick={handleExportExcel}
+              startIcon={<AiOutlineExport />}
+              disabled={selectResource == null}
+            >
+              Export to Excel {
+                downloading.loading && downloading.type === 'export' && <CircularProgress size={20} />
+              }
+            </Button>
+          </Grid>
+        </Grid>
+        <Box>
+          <CustomAgGrid
+            columns={column}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={intialState.rowCount}
+            limit={intialState.limit}
+            pageSizes={intialState.pageSizes}
+            page={intialState.page}
+            isClientSideGrid={true}
+            allowAction={true}
+            actionWidth={150}
+            loading={loading}
+            allowSelection={false}
+            refreshGrid={fetchLogs}
+          />
         </Box>
       </CustomContainer>
     </Fragment>
   );
 };
 
-export default BrandBackup;
+export default ImportExport;
