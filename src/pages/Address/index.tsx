@@ -283,7 +283,6 @@ const Address = () => {
                     style={isMobile ? { flex: 1 } : {}}
                     size="small"
                     value={search}
-                    placeholder={`Search ${routes.address.title}`}
                   />
                 </Grid>
 
