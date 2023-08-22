@@ -76,7 +76,7 @@ const ReportMaster = () => {
       setReportList(() => REPORT_LIST.filter((f) => f.title.toLowerCase().includes(searchedFor)));
       setFilteredCustomReports((prev) => prev.filter((f) => f.customReportName.toLowerCase().includes(searchedFor)));
       return;
-    }, 300),
+    }, 400),
     []
   );
 
