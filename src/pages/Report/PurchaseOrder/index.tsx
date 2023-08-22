@@ -780,7 +780,7 @@ const Report = () => {
         fieldData.push({
           "fieldData": {
             "fieldName": "rate",
-            "fieldLabel": "Rate",
+            "fieldLabel": "Rental Rate",
             "order": fieldData?.length + 1,
             filter: false
           },
