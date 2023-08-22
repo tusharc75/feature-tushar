@@ -114,7 +114,7 @@ const CycleCountPInventory = () => {
             setProductDialog({ open: true, _id: params?.data?._id, products: params?.data?.products, warehouse: params?.data?.warehouse });
           }}
         >
-          <VisibilityIcon color="secondary" fontSize="small" />
+          <VisibilityIcon color="primary" fontSize="small" />
         </IconButton>
       </HtmlTooltip>
     );
@@ -139,12 +139,12 @@ const CycleCountPInventory = () => {
             <div className={'d-flex flex-wrap align-items-center gap-1'}></div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                variant={'contained'}
                 color="primary"
                 size="small"
                 onClick={() => setCycleCountPInventoryDialog(true)}
                 className={`no-shadow`}
-                startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                startIcon={<AddOutlined />}
               >
                 Add
               </Button>
