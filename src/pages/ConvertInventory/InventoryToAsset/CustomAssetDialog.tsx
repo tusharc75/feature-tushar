@@ -12,28 +12,20 @@ import {
     TableBody,
     TableCell,
     TableRow,
-    Typography,
     FormControl,
-    InputLabel,
     Select,
     MenuItem,
     InputAdornment
 } from '@material-ui/core';
-import { read, utils, writeFile } from 'xlsx';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { makeStyles, createStyles, withStyles } from '@material-ui/styles';
+import { makeStyles} from '@material-ui/styles';
 import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { CircularProgress } from '@material-ui/core';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { useAppTheme } from 'src/constants/AppConfig';
-import { convertInventory, productInventory, sidebarResource } from '../../../constants/helpers';
+import { convertInventory } from '../../../constants/helpers';
 import { Formik, Form, FieldArray, Field } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { FormatTextdirectionLToROutlined } from '@material-ui/icons';
 
 const useClasses = makeStyles(() => ({
     table: {
@@ -46,17 +38,6 @@ const useClasses = makeStyles(() => ({
          maxHeight: 'calc(100vh - 150px)'
     }
 }));
-
-type TableContent = {
-    ['id']: string;
-    ['_id']: string;
-    ['product']: string;
-    ['serializedProduct']: boolean;
-    ['srno']: string;
-    ['Name']: string;
-    ['assetNumber']: string;
-    ['assetNumberType']: 'Auto' | 'Manual';
-};
 
 const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
     const [tableData, setTableData] = useState([]);
