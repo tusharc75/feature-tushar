@@ -149,7 +149,7 @@ function InvoiceHeader(props) {
         {children}
       </div>
       <div className="flex flex-wrap gap-[8px] justify-end">
-        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Sales Orders" />
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small"  />
         <div className="flex gap-[8px] flex-wrap items-center">
           {invoicePermissions?.isCreate && (
             <Button variant={'contained'} className="no-shadow" color="primary" size="small" onClick={onCreate} startIcon={<AddOutlined />}>

@@ -96,7 +96,15 @@ const Invoice = ({ invoiceData, setNextStep, updateJobStatus, statusOptions, ste
             ) : (
               <NoDataCell />
             )
-        }
+        },
+        {
+          accessor: 'description',
+          Header: 'Description',
+          width: 200,
+          Cell: ({ row }) => {
+            return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+          }
+        },
       ];
       coloum = [...coloum, ...newColumns];
       setColumns(coloum);
@@ -128,7 +136,7 @@ const Invoice = ({ invoiceData, setNextStep, updateJobStatus, statusOptions, ste
           : parent.type === 'package'
             ? parent?.packageDetail?.packageDescription
             : parent.type === 'serializedAsset'
-              ? parent?.description
+              ? parent?.serializedAssetDetail?.product?.productDescription
               : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
