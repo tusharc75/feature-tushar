@@ -5,7 +5,7 @@ import { FiMaximize2 } from "react-icons/fi";
 import ContentFullScreen from "src/components/ContentFullScreen";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 
-export default function Chart({ id, data, label }) {
+export default function Chart({ id, data, label = '' }) {
     const theme = useTheme();
 
     const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
