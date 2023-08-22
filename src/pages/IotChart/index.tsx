@@ -97,7 +97,7 @@ function IotChart() {
             )}
           />
         </div>
-        <div className="max-h-[calc(100vh-200px)] min-h-[600px] overflow-y-auto -mx-5 px-5 pb-5">
+        <div className="max-h-[calc(100vh-200px)] min-h-[600px] overflow-y-auto -mx-3 px-3 pb-5">
           <Chart
             filterById={serializedAssets?.length ? [{ field: 'asset', term: { $in: serializedAssets?.map((s) => s?.optionValue) } }] : []}
             dashBoardType={dashBoardType}
