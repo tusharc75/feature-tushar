@@ -270,7 +270,6 @@ const Pos = () => {
                   value={searchVal}
                   size="small"
                   width="350px"
-                  placeholder="Search Product"
                   style={isMobile ? { flex: 1 } : {}}
                 />
                 <IconButton

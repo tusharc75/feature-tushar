@@ -218,7 +218,6 @@ const CageManagement = () => {
                 className={styles2.search_box_input}
                 value={searchVal}
                 size="small"
-                placeholder="Search Product"
               />
               <IconButton
                 onClick={() => {
