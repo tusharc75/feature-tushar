@@ -755,6 +755,7 @@ const AddSerializedAsset = ({
                   page={page}
                   allowAction={false}
                   loading={loading}
+                  isClientSideGrid={false}
                   customGridOptions={{ getRowStyle: getRowStyleScheduled }}
                   renderedFrom={renderedFrom}
                   showOnlyShowFilteredRecordSwitch={true}
