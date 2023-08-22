@@ -136,7 +136,7 @@ const ProjectStrategyHeader = (props) => {
         {children}
       </div>
       <div className="flex flex-wrap gap-[8px]  justify-end">
-        <SearchBox onChange={onSearch} value={searchVal} className={styles.search_box_input} size="small" placeholder="Search Project List" />
+        <SearchBox onChange={onSearch} value={searchVal} className={styles.search_box_input} size="small" />
         <div className="flex gap-[8px] flex-wrap items-center">
           {permissions?.isCreate && permissions?.isUpdate && (
             <Button variant={'contained'} color="primary" size="small" onClick={onCreate} className={'no-shadow'} startIcon={<AddOutlined />}>
