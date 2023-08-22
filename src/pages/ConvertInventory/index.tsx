@@ -207,7 +207,7 @@ const ConvertInventory = () => {
                   setInventory({ open: true, product: [params?.data] });
                 }}
               >
-                <CachedIcon fontSize="small" color="secondary" />
+                <CachedIcon fontSize="small" color="primary" />
               </IconButton>
             </Tooltip>
           </Box>
