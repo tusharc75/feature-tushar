@@ -2228,10 +2228,10 @@ export const REPORT_LIST = [
     type: 'userSession',
   },
   {
-    title: "InUse " + sidebarResource.serializedAsset,
+    title: "In Used Serialized Asset",
     permission: 'serializedAsset',
-    key: 'InUseSerializedAsset',
-    type: null,
+    key: 'purchaseOrderType',
+    type: 'InUseSerializedAsset',
   },
 ];
 
