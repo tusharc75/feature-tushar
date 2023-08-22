@@ -10,7 +10,6 @@ import { debounce } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 
 function IotChart() {
-
   const [serializedAssets, setSerializedAssets] = useState([]);
   const [dashBoardType, setDashBoardType] = useState('dataPoint');
   const [loading, setLoading] = useState(false);
@@ -19,9 +18,11 @@ function IotChart() {
   const [dataPoints, setDataPoints] = useState([]);
 
   useEffect(() => {
-    axiosInstance().get(`${routes?.iotDataPoints?.path}`).then(({ data: { data } }) => {
-      setDataPoints(data?.data)
-    });
+    axiosInstance()
+      .get(`${routes?.iotDataPoints?.path}`)
+      .then(({ data: { data } }) => {
+        setDataPoints(data?.data);
+      });
   }, []);
 
   const fetchOptions = useCallback(
@@ -96,7 +97,7 @@ function IotChart() {
             )}
           />
         </div>
-        <div className="max-h-[calc(100vh-200px)] min-h-[600px] overflow-y-auto -mx-5 px-5 pb-5">
+        <div className="max-h-[calc(100vh-200px)] min-h-[600px] overflow-y-auto -mx-3 px-3 pb-5">
           <Chart
             filterById={serializedAssets?.length ? [{ field: 'asset', term: { $in: serializedAssets?.map((s) => s?.optionValue) } }] : []}
             dashBoardType={dashBoardType}
