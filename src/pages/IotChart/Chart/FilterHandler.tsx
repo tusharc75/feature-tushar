@@ -11,7 +11,16 @@ import { KeyboardDateTimePicker } from '@material-ui/pickers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Autocomplete } from '@material-ui/lab';
 
-export function FilterHandler({ fullScreen, setOpenFullScreen, handleChange, particularCategory, tempDataVal, dateFilters, setDateFilters }) {
+export function FilterHandler({
+  fullScreen,
+  setOpenFullScreen,
+  setDateFilters,
+  dateFilters,
+  dataPoints,
+  selectedDataPoints,
+  handleChange,
+}) {
+
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
 
   const handleFilterOpen = (event) => {
@@ -67,7 +76,8 @@ export function FilterHandler({ fullScreen, setOpenFullScreen, handleChange, par
     <>
       <Box display={'flex'} justifyContent={'space-between'}>
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
-          <div className="grid grid-cols-1  sm:grid-cols-[1fr_1fr] md:grid-cols-[1Fr_1fr_1fr] lg:grid-cols-[auto_1fr_1fr_1fr] gap-2 flex-grow -mr-[40px] sm:mr-[0] max-w-[850px] ">
+          <div className="grid grid-cols-1  sm:grid-cols-[1fr_1fr] md:grid-cols-[1Fr_1fr_1fr]
+           lg:grid-cols-[auto_1fr_1fr_1fr] gap-2 flex-grow -mr-[40px] sm:mr-[0] max-w-[850px] ">
             <Button
               onClick={handleFilterOpen}
               startIcon={<BsFilter fontSize={10} />}
@@ -76,17 +86,16 @@ export function FilterHandler({ fullScreen, setOpenFullScreen, handleChange, par
               size="small"
               style={{ fontSize: '16px' }}
             >
-              {particularCategory}
+              {'Filter'}
             </Button>
             <KeyboardDateTimePicker
-              //   disabled={timeFrame !== 'custom' || disabled}
               inputVariant="outlined"
               variant="inline"
               fullWidth
               size="small"
               margin="none"
-              // openTo="year"
               format="dd/MM/yyyy HH:mm"
+              autoOk
               maxDate={dateFilters.to}
               label="From"
               views={['year', 'month', 'date', 'hours', 'minutes']}
@@ -96,14 +105,13 @@ export function FilterHandler({ fullScreen, setOpenFullScreen, handleChange, par
               }}
             />
             <KeyboardDateTimePicker
-              //   disabled={timeFrame !== 'custom' || disabled}
               inputVariant="outlined"
               variant="inline"
               fullWidth
               size="small"
               margin="none"
+              autoOk
               minDate={dateFilters.from}
-              // openTo="year"
               format="dd/MM/yyyy HH:mm"
               label="To"
               views={['year', 'month', 'date', 'hours', 'minutes']}
@@ -119,7 +127,10 @@ export function FilterHandler({ fullScreen, setOpenFullScreen, handleChange, par
               getOptionLabel={(option: any) => option?.optionLabel}
               renderOption={(option) => option?.optionLabel}
               onChange={(event, value) => {
-                setDateFilters({ ...dateFilters, intervals: value?.optionValue || null });
+                setDateFilters({
+                  ...dateFilters,
+                  intervals: value?.optionValue || null
+                });
               }}
               value={intervals.find((v) => v.optionValue === dateFilters.intervals) || {}}
               renderInput={(params) => <TextField {...params} name={`interval`} label="Interval" size="small" margin="none" variant="outlined" />}
@@ -136,83 +147,6 @@ export function FilterHandler({ fullScreen, setOpenFullScreen, handleChange, par
           </div>
         )}
       </Box>
-
-      {/* <div className="grid gap-4 grid-cols-1 md:grid-cols-[auto_1fr_auto] items-center justify-between">
-        <div className="">
-          <Button
-            onClick={handleFilterOpen}
-            startIcon={<BsFilter fontSize={10} />}
-            disableElevation
-            color="primary"
-            size="small"
-            style={{ fontSize: '16px' }}
-          >
-            {particularCategory}
-          </Button>
-        </div>
-        <div className="">
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-[500px]">
-              <KeyboardDateTimePicker
-                //   disabled={timeFrame !== 'custom' || disabled}
-                inputVariant="outlined"
-                variant="inline"
-                fullWidth
-                size="small"
-                // openTo="year"
-                format="dd/MM/yyyy HH:mm"
-                maxDate={dateFilters.to}
-                label="From"
-                views={['year', 'month', 'date', 'hours', 'minutes']}
-                value={dateFilters.from}
-                onChange={(date) => {
-                  setDateFilters({ ...dateFilters, from: date });
-                }}
-              />
-              <KeyboardDateTimePicker
-                //   disabled={timeFrame !== 'custom' || disabled}
-                inputVariant="outlined"
-                variant="inline"
-                fullWidth
-                size="small"
-                minDate={dateFilters.from}
-                // openTo="year"
-                format="dd/MM/yyyy HH:mm"
-                label="To"
-                views={['year', 'month', 'date', 'hours', 'minutes']}
-                value={dateFilters.to}
-                onChange={(date) => {
-                  setDateFilters({ ...dateFilters, to: date });
-                }}
-              />
-              <Autocomplete
-                id={`interval`}
-                options={intervals}
-                autoHighlight
-                getOptionLabel={(option: any) => option?.optionLabel}
-                renderOption={(option) => option?.optionLabel}
-                onChange={(event, value) => {
-                  setDateFilters({ ...dateFilters, intervals: value?.optionValue || null })
-                }}
-                value={intervals.find((v) => v.optionValue === dateFilters.intervals) || {}}
-                renderInput={(params) => (
-                  <TextField {...params} name={`interval`} label="Interval" margin="dense" variant="outlined" />
-                )}
-              />
-            </div>
-          </MuiPickersUtilsProvider>
-        </div>
-        {!fullScreen && (
-          <div className="">
-            <HtmlTooltip title="Open Chart In Full Screen">
-              <IconButton color="primary" style={{ marginLeft: 'auto', display: 'flex' }} onClick={() => setOpenFullScreen(true)}>
-                <FiMaximize2 fontSize="16px" />
-              </IconButton>
-            </HtmlTooltip>
-          </div>
-        )}
-      </div> */}
-
       <Popover
         open={isFilterOpen}
         anchorEl={filterAnchorEl}
@@ -234,27 +168,28 @@ export function FilterHandler({ fullScreen, setOpenFullScreen, handleChange, par
         }}
       >
         <Box width={200} padding={'8px 16px'}>
-          {tempDataVal[particularCategory] &&
-            Object.keys(tempDataVal[particularCategory])?.map((item) => (
-              <FormControlLabel
-                key={item}
-                control={
-                  <Checkbox checked={!tempDataVal[particularCategory][item]['hide']} onChange={() => handleChange(particularCategory, item)} />
-                }
-                label={
-                  <span
-                    style={{
-                      fontSize: tempDataVal[particularCategory][item]['fieldLabel'].length * 8 > 200 ? '0.8em' : '0.9em',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}
-                  >
-                    {tempDataVal[particularCategory][item]['fieldLabel']}
-                  </span>
-                }
-              />
-            ))}
+          {dataPoints?.map((item) => (
+            <FormControlLabel
+              key={item._id}
+              control={
+                <Checkbox
+                  checked={!selectedDataPoints[item?._id]}
+                  onChange={() => handleChange(item?._id)} />
+              }
+              label={
+                <span
+                  style={{
+                    fontSize: '0.8em',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {item?.fieldLabel}
+                </span>
+              }
+            />
+          ))}
         </Box>
       </Popover>
     </>

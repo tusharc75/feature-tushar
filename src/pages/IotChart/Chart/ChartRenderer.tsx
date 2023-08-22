@@ -1,227 +1,113 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Chart from 'react-chartjs-2';
-
 import { FilterHandler } from './FilterHandler';
-import { Box, Grid, Typography, useMediaQuery, useTheme } from '@material-ui/core';
-import { Dialog } from '@material-ui/core';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import { Box, useMediaQuery, useTheme } from '@material-ui/core';
+import moment from 'moment';
+import axiosInstance from 'src/axios/axiosInstance';
+import ContentFullScreen from 'src/components/ContentFullScreen';
 
-export function ChartRenderer({ dataVal, particularCategory, chart }) {
-  const [tempDataVal, setTempDataVal] = useState(dataVal);
+export function ChartRenderer({ dashBoardType, dataPoints, dataPoint, filterById }) {
+
   const [openFullScreen, setOpenFullScreen] = useState(false);
+  const [chartData, setChartData] = useState(null);
+
+  const [selectedDataPoints, setSelectedDataPoints] = useState([]);
+
   const theme = useTheme();
 
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
 
-  function myDates() {
-    let subcategories =
-      Object.keys(tempDataVal).length !== 0
-        ? Object.keys(tempDataVal[particularCategory]).filter((item) => {
-          if (tempDataVal[particularCategory][item]['hide'] === false) {
-            return item;
-          }
-        })
-        : [];
-
-    let labels = [];
-    subcategories?.map((cat) => {
-      const currentData = tempDataVal[particularCategory][cat]?.dataPoints;
-      currentData?.map((m) => {
-        labels.push(m?.date);
-      });
-    });
-
-    // const dateObjects = labels?.map((dateString) => {
-
-    //     const [day, month, year] = dateString.split("/");
-
-    //     // Creating a new Date object using the parsed values
-    //     return new Date(`${year}-${month}-${day}`);
-    // });
-    // return dateObjects;
-    return labels;
-  }
-
-  const returnDates = myDates();
-  const fromDate = new Date(Math.min(...returnDates));
-  const toDate = new Date(Math.max(...returnDates));
   const [dateFilters, setDateFilters] = useState({
-    from: fromDate,
-    to: toDate,
+    from: new Date(moment().subtract(15, 'days').format('MM-DD-YYYY')),
+    to: new Date(),
     intervals: null
   });
 
-  // Function to align data with labels
-  function alignDataWithLabels(dataSet, labels) {
-    const alignedData = new Array(labels.length).fill(null);
-    dataSet.forEach((item) => {
-      const index = labels.indexOf(item.date);
-      if (index !== -1) {
-        alignedData[index] = item.data;
-      }
+  useEffect(() => {
+    fetchData()
+  }, [dataPoint, dateFilters]);
+
+  const fetchData = async () => {
+
+    const deepFilter: any = []
+    deepFilter.push({
+      field: 'from_date',
+      term: moment(new Date(dateFilters.from)).format('MM/DD/YYYY')
     });
-    return alignedData;
-  }
-
-  const generateChartData = (particularCategory) => {
-    // const subcategories = Object.keys(dataVal).length !== 0 ? Object.keys(dataVal[particularCategory]) : [];
-    let subcategories =
-      Object.keys(tempDataVal).length !== 0
-        ? Object.keys(tempDataVal[particularCategory]).filter((item) => {
-          return tempDataVal[particularCategory][item]['hide'] === false;
-        })
-        : [];
-
-    let labels = [];
-    const { from, to } = dateFilters;
-
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
-
-    subcategories?.map((cat) => {
-      const currentData = tempDataVal[particularCategory][cat]?.dataPoints;
-      currentData?.map((m) => {
-        labels.push(m?.date);
-      });
+    deepFilter.push({
+      field: 'to_date',
+      term: moment(new Date(dateFilters.to)).format('MM/DD/YYYY')
     });
-    // Filtering
-    const filteredLabels = labels.filter((date) => date >= fromDate && date <= toDate);
 
-    // Sorting
-    filteredLabels.sort((a, b) => a - b);
+    let query = `?filterType=and`;
 
-    let datasets = [];
-    subcategories?.map((cat) =>
-      datasets.push({
-        label: tempDataVal[particularCategory][cat].fieldLabel,
-        data: alignDataWithLabels(tempDataVal[particularCategory][cat]?.dataPoints, filteredLabels),
-        backgroundColor: `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 1)`,
-        borderColor: `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 1)`,
-        type: 'line',
+    const newfilterById = [...filterById];
+    newfilterById.push({
+      field: 'dataPoints',
+      term: { $in: [dataPoint?._id] }
+    });
+
+    if (newfilterById?.length > 0) {
+      query = `${query}&filterById=${JSON.stringify(newfilterById)}`;
+    }
+    if (deepFilter?.length > 0) {
+      query = `${query}&deepFilter=${JSON.stringify(deepFilter)}`;
+    }
+
+    axiosInstance().get(`/report/iot/data-points${query}`)
+      .then(({ data: { data } }) => {
+        const labels = data?.data?.map((e) => e.date);
+        const datasets = [{
+          label: dataPoint?.fieldLabel,
+          data: data?.data?.map((e) => e[dataPoint?.fieldName]),
+          borderColor: 'rgb(255, 99, 132)',
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        }]
+        setChartData({ labels, datasets })
       })
-    );
-
-    // Assuming data is in line chart format
-    return {
-      labels: filteredLabels?.map(date => {
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-        let day = date.getDate();
-        let month = date.getMonth();
-        let year = date.getFullYear();
-        let hour = date.getHours();
-        let minute = date.getMinutes();
-        return `${day}/${month}/${year} ${hour}:${minute}`;
-      }),
-      datasets: datasets
-    };
+      .catch((err) => {
+      });
   };
 
-  const handleChange = (category, subcategory) => {
-    setTempDataVal((prevDataVal) => {
+  const handleChange = (_id) => {
+    setSelectedDataPoints((prevDataVal) => {
       const updatedDataVal = {
-        ...prevDataVal,
-        [category]: {
-          ...prevDataVal[category],
-          [subcategory]: {
-            ...prevDataVal[category][subcategory],
-            hide: !prevDataVal[category][subcategory].hide
-          }
-        }
+        ...prevDataVal, _id: !prevDataVal[_id]
       };
       return updatedDataVal;
     });
   };
 
-  const chartData = generateChartData(particularCategory);
-
-  return (
-    <>
-      <Box
-        className="max-w-full"
-        sx={{
-          border: '1px solid var(--common-border-color)',
-          boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)'
-        }}
-      >
-        <Box style={{ padding: '15px 10px' }}>
-          <FilterHandler
-            fullScreen={openFullScreen}
-            setOpenFullScreen={setOpenFullScreen}
-            dateFilters={dateFilters}
-            setDateFilters={setDateFilters}
-            handleChange={handleChange}
-            tempDataVal={tempDataVal}
-            particularCategory={particularCategory}
-          />
-        </Box>
-        <Box height={openFullScreen ? window.innerHeight - 200 : isScreenSmall ? 350 : 500} className="max-w-full overflow-x-auto px-[10px]">
+  return (<Box className="max-w-full">
+    <ContentFullScreen title={'Chart'} fullScreen={openFullScreen} setFullScreen={setOpenFullScreen}>
+      <Box style={{ padding: '15px 10px' }}>
+        <FilterHandler
+          fullScreen={openFullScreen}
+          setOpenFullScreen={setOpenFullScreen}
+          dateFilters={dateFilters}
+          setDateFilters={setDateFilters}
+          dataPoints={dataPoints}
+          selectedDataPoints={selectedDataPoints}
+          handleChange={handleChange}
+        />
+      </Box>
+      <Box height={openFullScreen ? window.innerHeight - 200 : isScreenSmall ? 350 : 500}
+        className="max-w-full overflow-x-auto px-[10px]">
+        {chartData &&
           <Chart
-            id={`${particularCategory}-chart`}
-            type={chart.chartType?.toLowerCase()}
+            id={`${dataPoint?._id}`}
+            type={'line'}
             data={chartData}
             options={{
               maintainAspectRatio: false,
               animation: false,
               fill: false,
-              indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
-              ...(chart.stack &&
-                !generateChartData(particularCategory).datasets.some((d) => d?.stack === 'stacked') && {
-                scales: {
-                  x: {
-                    stacked: true
-                  },
-                  y: {
-                    stacked: true
-                  }
-                }
-              })
             }}
           />
-        </Box>
+        }
       </Box>
-      {openFullScreen && (
-        <Dialog open onClose={() => setOpenFullScreen(false)} fullScreen>
-          <CustomDialogHeader title={'Full Screen Chart'} onClose={() => setOpenFullScreen(false)} showRequiredLabel={false} />
-          <CustomDialogContent style={{ maxHeight: '100%' }}>
-            <Box style={{ padding: '15px 10px' }}>
-              <FilterHandler
-                fullScreen={openFullScreen}
-                setOpenFullScreen={setOpenFullScreen}
-                dateFilters={dateFilters}
-                setDateFilters={setDateFilters}
-                handleChange={handleChange}
-                tempDataVal={tempDataVal}
-                particularCategory={particularCategory}
-              />
-            </Box>
-            <Box height={openFullScreen ? window.innerHeight - 200 : isScreenSmall ? 350 : 500}>
-              <Chart
-                id={`${particularCategory}-chart`}
-                type={chart.chartType?.toLowerCase()}
-                data={chartData}
-                options={{
-                  maintainAspectRatio: false,
-                  animation: false,
-                  indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
-                  ...(chart.stack &&
-                    !generateChartData(particularCategory).datasets.some((d) => d?.stack === 'stacked') && {
-                    scales: {
-                      x: {
-                        stacked: true
-                      },
-                      y: {
-                        stacked: true
-                      }
-                    }
-                  })
-                }}
-              />
-            </Box>
-          </CustomDialogContent>
-        </Dialog>
-      )}
-    </>
+    </ContentFullScreen>
+  </Box>
+
   );
 }
