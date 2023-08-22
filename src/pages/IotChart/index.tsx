@@ -1,23 +1,28 @@
-import { AppBar, Box, FormControl, Grid, InputLabel, MenuItem, Select, TextField, makeStyles } from '@material-ui/core';
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import { Grid, TextField } from '@material-ui/core';
+import { useCallback, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import Chart from './Chart';
-import FormTypes from 'src/components/Helpers/FormTypes';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { RESOURCE_LABEL, dateFormatForInputControl, serializedAsset, sidebarResource } from '../../constants/helpers';
-import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import moment from 'moment';
-import DateFnsUtils from '@date-io/date-fns';
-import { debounce, set } from 'lodash';
+import { sidebarResource } from '../../constants/helpers';
+import { Autocomplete } from '@material-ui/lab';
+import { debounce } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 
 function IotChart() {
+
   const [serializedAssets, setSerializedAssets] = useState([]);
-  const [typeAlignment, setTypeAlignment] = useState('byCategory');
+  const [dashBoardType, setDashBoardType] = useState('dataPoint');
   const [loading, setLoading] = useState(false);
   const [serializedAssetOptions, setSerializedAssetOptions] = useState([]);
+
+  const [dataPoints, setDataPoints] = useState([]);
+
+  useEffect(() => {
+    axiosInstance().get(`${routes?.iotDataPoints?.path}`).then(({ data: { data } }) => {
+      setDataPoints(data?.data)
+    });
+  }, []);
 
   const fetchOptions = useCallback(
     debounce(async (searchKey: string = '') => {
@@ -61,9 +66,9 @@ function IotChart() {
             loading={loading}
             getOptionLabel={(option: any) => option.optionLabel ?? ''}
             getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
-            value={types?.find((t) => t.optionValue === typeAlignment) || {}}
+            value={types?.find((t) => t.optionValue === dashBoardType) || {}}
             onChange={(e, val) => {
-              setTypeAlignment(val?.optionValue);
+              setDashBoardType(val?.optionValue);
             }}
             size="small"
             renderInput={(params) => <TextField {...params} margin="none" size={'small'} label={'Type'} variant="outlined" name={'type'} />}
@@ -90,20 +95,13 @@ function IotChart() {
               <TextField {...params} margin="none" size={'small'} label={'Serialized Assets'} variant="outlined" name={'serializedAssets'} />
             )}
           />
-          {/* <ToggleButtonGroup
-                            color="primary"
-                            value={typeAlignment}
-                            size='small'
-                            exclusive
-                            onChange={handleChange}
-                            aria-label="Type"
-                        >
-                            <ToggleButton color='primary' value="byCategory">By Category</ToggleButton>
-                            <ToggleButton value="dataPoint">Data Point</ToggleButton>
-                        </ToggleButtonGroup> */}
         </div>
-        <div className=" max-h-[calc(100vh-200px)] min-h-[600px] overflow-y-auto -mx-5 px-5 pb-5">
-          <Chart serializedAssets={serializedAssets?.map((s) => s?.optionValue)} type={typeAlignment} />
+        <div className="max-h-[calc(100vh-200px)] min-h-[600px] overflow-y-auto -mx-5 px-5 pb-5">
+          <Chart
+            filterById={serializedAssets?.length ? [{ field: 'asset', term: { $in: serializedAssets?.map((s) => s?.optionValue) } }] : []}
+            dashBoardType={dashBoardType}
+            dataPoints={dataPoints}
+          />
         </div>
       </CustomContainer>
     </div>
