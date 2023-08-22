@@ -7,7 +7,7 @@ import TextField from '@material-ui/core/TextField';
 import axiosInstance from '../../axios/axiosInstance';
 import { AiOutlineExport, AiOutlineImport } from 'react-icons/all';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { downloadExcel, sidebarResource } from '../../constants/helpers';
+import { downloadExcel, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateTimeRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
@@ -17,9 +17,6 @@ const ImportExport = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const { setToastConfig } = useContext(CustomToastContext);
-
-  const [dataRows, setDataRows] = useState([]);
-
   const [excelUploadProgress, setExcelUploadProgress] = useState(0);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
 
@@ -30,17 +27,44 @@ const ImportExport = () => {
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, page, limit, pageSizes, appendRows } = state;
+
 
   useEffect(() => {
     fetchLogs();
-  }, [selectResource]);
+  }, [ selectResource, page, limit ]);
 
   const fetchLogs = async () => {
     setLoading(true);
     axiosInstance()
       .get(`/import-export/logs${selectResource ? `?resource=${selectResource}` : ''}`)
-      .then(({ data: { data } }) => {
-        setDataRows(data);
+      .then(({ data: {data} }) => {
+        const count = data?.count;
+        let rows = data?.data?.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          return {
+            ...finalObject
+          };
+        });
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
+          });
+        }
+        dispatch({ type: 'initialize', data: rows, count: data.count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
         setLoading(false);
       })
       .catch((err) => {
@@ -325,10 +349,10 @@ const ImportExport = () => {
             frameworkComponents={frameworkComponents}
             setGridApi={setGridApi}
             dispatch={dispatch}
-            rowCount={intialState.rowCount}
-            limit={intialState.limit}
-            pageSizes={intialState.pageSizes}
-            page={intialState.page}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
             isClientSideGrid={true}
             allowAction={true}
             actionWidth={150}
