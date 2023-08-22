@@ -7,40 +7,52 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
 
     const intervals = [
         {
-            optionValue: 'minute',
-            optionLabel: 'Minute'
+            optionValue: '1second',
+            optionLabel: '1 Second'
         },
         {
-            optionValue: '30minutes',
-            optionLabel: '30 Minute'
+            optionValue: '5seconds',
+            optionLabel: '5 Seconds'
         },
         {
-            optionValue: '5hours',
-            optionLabel: '5 Hour'
+            optionValue: '10seconds',
+            optionLabel: '10 Seconds'
         },
         {
-            optionValue: 'day',
-            optionLabel: 'Day'
+            optionValue: '30seconds',
+            optionLabel: '30 Seconds'
         },
         {
-            optionValue: 'week',
-            optionLabel: 'Week'
+            optionValue: '1minute',
+            optionLabel: '1 Minute'
         },
         {
-            optionValue: 'month',
-            optionLabel: 'Month'
+            optionValue: '5minutes',
+            optionLabel: '5 Minutes'
         },
         {
-            optionValue: '6months',
-            optionLabel: '6 Month'
+            optionValue: '15minutes',
+            optionLabel: '15 Minutes'
         },
         {
-            optionValue: 'quarter',
-            optionLabel: 'Quarter'
+            optionValue: '1hour',
+            optionLabel: '1 Hour'
         },
         {
-            optionValue: 'year',
-            optionLabel: 'Year'
+            optionValue: '6hours',
+            optionLabel: '6 Hours'
+        },
+        {
+            optionValue: '1day',
+            optionLabel: '1 Day'
+        },
+        {
+            optionValue: '7days',
+            optionLabel: '7 Days'
+        },
+        {
+            optionValue: '30days',
+            optionLabel: '30 Days'
         }
     ];
 
