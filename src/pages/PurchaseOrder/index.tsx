@@ -430,22 +430,7 @@ const PurchaseOrder = () => {
                 onChange={(e, val) => {
                   setWarehouse(val && val.optionValue ? val.optionValue : '');
                 }}
-                renderInput={(params) =>
-                  isMobile && !isTablet ? (
-                    <TextField
-                      {...params}
-                      margin="none"
-                      size="small"
-                      name="plant"
-                      placeholder="Plant"
-                      variant="standard"
-                      fullWidth
-                      className={isMobile ? 'serchBox' : ''}
-                    />
-                  ) : (
-                    <TextField {...params} margin="none" size="small" name="plant" label="Plant" variant="outlined" fullWidth />
-                  )
-                }
+                renderInput={(params) => <TextField {...params} margin="none" size="small" name="plant" label="Plant" variant="outlined" fullWidth />}
               />
               {fromRental && (
                 <Chip

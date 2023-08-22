@@ -360,7 +360,7 @@ const InventoryProduct = () => {
           >
             <AddCircleOutlineIcon
               fontSize="small"
-              color={permissions?.productInventory?.isCreate && params?.data?.plantId !== 'All' ? 'secondary' : 'disabled'}
+              color={permissions?.productInventory?.isCreate && params?.data?.plantId !== 'All' ? 'primary' : 'disabled'}
             />
           </IconButton>
         </span>
@@ -401,9 +401,9 @@ const InventoryProduct = () => {
                 color={
                   permissions?.productInventory?.isUpdate && params?.data?.plantId !== 'All'
                     ? user?.user?.brandPolicy?.allowNegativeInventory
-                      ? 'error'
+                      ? 'primary'
                       : params?.data?.availableInventory
-                      ? 'error'
+                      ? 'primary'
                       : 'disabled'
                     : 'disabled'
                 }
