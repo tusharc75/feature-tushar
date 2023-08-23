@@ -223,7 +223,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   return (
     <Fragment>
       {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 px-2">
           <Button
             variant={isMobile && !isTablet ? 'outlined' : 'contained'}
             color="primary"
