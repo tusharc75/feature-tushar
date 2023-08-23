@@ -71,7 +71,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints }) => {
             <p className=" font-semibold px-4 py-3 text-[16px]" style={{ borderBottom: '1px solid var(--common-border-color)' }}>
               Data Points
             </p>
-            <div className="sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto">
+            <div className="sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
               <FormGroup>
                 {dataPoints?.map((dataPoint) => {
                   return (
