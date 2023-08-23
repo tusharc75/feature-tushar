@@ -24,6 +24,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import CreateProduct from 'src/components/Product/CreateProduct';
 
 const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -246,7 +247,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.type = addDialog.type;
+      element.type = d?.type || addDialog.type;
       element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addDialog.parentId;
@@ -378,6 +379,14 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               <MenuItem
                 onClick={() => {
                   closeAddActions();
+                  setAddDialog({ open: true, type: 'newProduct', parentId: null });
+                }}
+              >
+                Add New Product
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
                   setAddDialog({ open: true, type: 'package', parentId: null });
                 }}
               >
@@ -487,6 +496,23 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           }}
         />
       )}
+      {
+        addDialog.open && addDialog.type === 'newProduct' && (
+          <CreateProduct
+            handleClose={() => {
+              setAddDialog({ open: false, type: '', parentId: null })
+            }}
+            onSuccess={(d) => {
+              handleAdd([{
+                ...d,
+                unitMain: d?.unit,
+                type: 'product'
+              }]);
+            }}
+            isRedirectToDetailPage={false}
+            openFrom="productMaster" />
+        )
+      }
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
           referenceType="productionOrder"
