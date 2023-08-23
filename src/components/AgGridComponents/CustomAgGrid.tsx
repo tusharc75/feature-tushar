@@ -237,20 +237,20 @@ export default function CustomAgGrid({
     setColumnApi(params.columnApi);
     setCurrentGridApi(params.api);
     if (handleGridReady) handleGridReady(params);
-    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+    // localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
 
-    if (!isClientSideGrid) {
-      try {
-        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : [];
-        if (oldSelectedRecords.length > 0) {
-          params.api.forEachNode(function (node) {
-            node.setSelected(oldSelectedRecords.some((o) => o[idProperty] === node.data[idProperty]));
-          });
-        }
-      } catch (ex) {
-        console.error('Error in getting selected records from local storage');
-      }
-    }
+    // if (!isClientSideGrid) {
+    //   try {
+    //     let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : [];
+    //     if (oldSelectedRecords.length > 0) {
+    //       params.api.forEachNode(function (node) {
+    //         node.setSelected(oldSelectedRecords.some((o) => o[idProperty] === node.data[idProperty]));
+    //       });
+    //     }
+    //   } catch (ex) {
+    //     console.error('Error in getting selected records from local storage');
+    //   }
+    // }
   };
 
   const onFirstDataRendered = (e) => {
@@ -265,6 +265,8 @@ export default function CustomAgGrid({
         return;
       }
       const colOrder = gridMetaData[renderedFrom]?.order || []
+      const hiddenColumns = gridMetaData[renderedFrom]?.hide || []
+
       if (colOrder && colOrder?.length) {
         const cols = columnState || columnApi.getColumnState()
         if (colOrder.length === 0) return
@@ -272,7 +274,11 @@ export default function CustomAgGrid({
         for (let i = 0; i < colOrder.length; i++) {
           orderIndices[colOrder[i]] = i;
         }
-        let orderedArr = [...cols].sort((a, b) => orderIndices[a?.colId] - orderIndices[b?.colId]);
+        const colsToView = [...cols]?.map((d) => ({
+          ...d,
+          hide: hiddenColumns?.includes(d?.colId) ? true : false
+        })) || []
+        let orderedArr = [...colsToView].sort((a, b) => orderIndices[a?.colId] - orderIndices[b?.colId]);
         columnState = orderedArr;
         localStorage.setItem(renderedFrom, JSON.stringify(orderedArr));
       }
@@ -317,12 +323,42 @@ export default function CustomAgGrid({
 
     if (!isClientSideGrid && currentGridApi) {
       try {
-        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : [];
-        if (oldSelectedRecords.length > 0) {
-          currentGridApi.forEachNode(function (node) {
-            node.setSelected(oldSelectedRecords.some((o) => o[idProperty] === node.data[idProperty]));
-          });
+        let columnState = JSON.parse(localStorage.getItem(renderedFrom));
+
+        let data = localStorage.getItem('gridMetaData');
+        let gridMetaData = {};
+        if (data && data !== 'undefined') {
+          gridMetaData = JSON.parse(data);
+        } else {
+          return;
         }
+        const colOrder = gridMetaData[renderedFrom]?.order || []
+        const hiddenColumns = gridMetaData[renderedFrom]?.hide || []
+
+        if (colOrder && colOrder?.length) {
+          const cols = columnState || columnApi.getColumnState()
+          if (colOrder.length === 0) return
+          let orderIndices = {};
+          for (let i = 0; i < colOrder.length; i++) {
+            orderIndices[colOrder[i]] = i;
+          }
+          const colsToView = [...cols]?.map((d) => ({
+            ...d,
+            hide: hiddenColumns?.includes(d?.colId) ? true : false
+          })) || []
+          let orderedArr = [...colsToView].sort((a, b) => orderIndices[a?.colId] - orderIndices[b?.colId]);
+          columnState = orderedArr;
+          localStorage.setItem(renderedFrom, JSON.stringify(orderedArr));
+        }
+        setTimeout(() => {
+          if (columnApi) columnApi.setColumnState(columnState);
+        }, 500);
+        // let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : [];
+        // if (oldSelectedRecords.length > 0) {
+        //   currentGridApi.forEachNode(function (node) {
+        //     node.setSelected(oldSelectedRecords.some((o) => o[idProperty] === node.data[idProperty]));
+        //   });
+        // }
       } catch (ex) {
         console.error('Error in getting selected records from local storage');
       }
