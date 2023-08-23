@@ -56,12 +56,18 @@ const ImportExport = () => {
         } else {
           dispatch({
             type: 'initialize',
+            data: [],
+            count: 0,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
+          });
+          dispatch({
+            type: 'initialize',
             data: rows,
             count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-        dispatch({ type: 'initialize', data: rows, count: data.count });
+        // dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -189,23 +195,39 @@ const ImportExport = () => {
     }
   ];
 
-  const ActionRenderer = (params) => (
-    <>
-      <Tooltip title={params?.data?.status === 'Complete' ? 'Download' : 'Download Not available'}>
-        <IconButton
-          size="small"
-          color="inherit"
-          onClick={() => {
-            if (params?.data?.status === 'Complete') {
-              handleDownloadFile(params.data._id);
-            }
-          }}
+  const ActionRenderer = (params) => {  
+    return (
+      <>
+        <Tooltip
+          title={
+            (params?.data?.status === 'Complete' || params?.data?.status === 'Partial Complete')
+              ? 'Download'
+              : 'Download Not available'
+          }
         >
-          <GetApp color={params?.data?.status === 'Complete' ? 'secondary' : 'disabled'} fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    </>
-  );
+          <IconButton
+            size="small"
+            color="inherit"
+            onClick={() => {
+              if (params?.data?.status === 'Complete' || params?.data?.status === 'Partial Complete') {
+                handleDownloadFile(params.data._id);
+              }
+            }}
+          >
+            <GetApp
+              color={
+                (params?.data?.status === 'Complete' || params?.data?.status === 'Partial Complete')
+                  ? 'secondary'
+                  : 'disabled'
+              }
+              fontSize="small"
+            />
+          </IconButton>
+        </Tooltip>
+      </>
+    );
+  };
+  
 
   const frameworkComponents = {
     dateTimeRenderer: DateTimeRenderer,
