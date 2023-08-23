@@ -264,8 +264,8 @@ const AddSerializedAsset = ({
         deepFilter = `${deepFilter}&plant=${selectedWarehouse}`;
       }
 
-      if (referenceType === 'Repair Job' || referenceType === 'Repair Order') {
-        deepFilter = `${deepFilter}&repairable=true`;
+      if (referenceType === 'Repair Job') {
+        deepFilter = `${deepFilter}&repairJob=true`;
       }
       else if (referenceType === 'Transfer Asset') {
         deepFilter = `${deepFilter}&transferable=true`;
