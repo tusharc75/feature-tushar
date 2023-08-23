@@ -114,30 +114,25 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
-        axiosInstance()
-          .get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`)
-          .then((apiResponse) => {
-            const newColumns = apiResponse.data.data.map((item) => {
+
+        const assetColumns: any = []
+        
+        data?.filter((e) => ['assetNumber', 'product', 'productDescription', 'status']?.includes(e.fieldData.fieldName))?.forEach((e) => {
+          assetColumns.push({
+            Header: e.fieldData.fieldLabel,
+            accessor: e.fieldData.fieldName
+          },)
+        })
+
+        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`)
+          .then(({ data: { data } }) => {
+            const repairJobAssetColumns = data?.map((item) => {
               return {
                 Header: item.fieldLabel,
                 accessor: item.fieldName
               };
             });
-            newColumns.push(
-              {
-                Header: 'Asset Number',
-                accessor: 'assetNumber'
-              },
-              {
-                Header: 'Status',
-                accessor: 'status'
-              },
-              {
-                Header: 'Product Description',
-                accessor: 'product'
-              }
-            );
-            setNewColumns(newColumns);
+            setNewColumns([...assetColumns, ...repairJobAssetColumns]);
           });
         fetchRecords();
       });
@@ -283,7 +278,11 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     <>
       <Box display="flex" justifyContent="flex-end" m={1}>
         <Box display="flex" alignItems="center" gridGap={'8px'} className="isolate">
-          <PreviewDownload resource={sidebarResource.repairJob} referenceId={repairJobData?._id} columns={newColumns} hideDetailButton={true} />
+          <PreviewDownload
+            resource={sidebarResource.repairJob}
+            referenceId={repairJobData?._id}
+            columns={newColumns}
+            hideDetailButton={true} />
           {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
             <Fragment>
               <Button
