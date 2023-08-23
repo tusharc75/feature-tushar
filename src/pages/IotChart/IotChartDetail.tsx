@@ -1,28 +1,32 @@
 import { useState, useEffect, useContext } from 'react';
-import { Grid, Box } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { useParams } from 'react-router-dom';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { useData } from '../../StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import Analysis from './Analysis';
 import axiosInstance from 'src/axios/axiosInstance';
 import { serializedAsset } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import PerformanceAnalysis from './PerformanceAnalysis';
 
 const IotChartDetail = () => {
     const toastConfig = useContext(CustomToastContext);
     const { assetId } = useParams();
-    const {
-        state: { user, permissions }
-    }: any = useData();
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [tabValue, setTabValue] = useState(0);
+    const [dataPoints, setDataPoints] = useState([]);
 
     useEffect(() => {
         fetchData()
     }, [assetId])
+
+    useEffect(() => {
+        axiosInstance().get(`${routes?.iotDataPoints?.path}`).then(({ data: { data } }) => {
+            setDataPoints(data?.data)
+        });
+    }, [assetId]);
 
     const fetchData = async () => {
         try {
@@ -81,12 +85,8 @@ const IotChartDetail = () => {
                         Current
                     </Box>
                 )}
-                {tabValue === 1 && <Analysis assetId={assetId} />}
-                {tabValue === 2 && (
-                    <Box>
-                        Performance Analysis
-                    </Box>
-                )}
+                {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />}
+                {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} />}
             </Box>
         </Box>
     );
