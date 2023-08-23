@@ -30,7 +30,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import { prepareDataForGrid } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import { uniq, map } from 'lodash';
+import { uniq, map, camelCase } from 'lodash';
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
 import { Autocomplete } from '@material-ui/lab';
 import TextField from '@material-ui/core/TextField';
@@ -40,15 +40,12 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { Link } from 'react-router-dom';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { useAppTheme } from 'src/constants/AppConfig';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 
 let searchTimeout;
 
 const AddSerializedAsset = ({
-  renderedFrom = 'addSerializedAssets',
   isAdding,
   addSerializedAsset,
   handleSerializedAssetClose,
@@ -62,8 +59,9 @@ const AddSerializedAsset = ({
   filterByPlant = null,
   handleSuccess = null
 }) => {
+
+  const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assign`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
-  const [theme] = useAppTheme();
 
   const toastConfig = useContext(CustomToastContext);
   const [serializedProducts, setSerializedProducts] = useState([]);
