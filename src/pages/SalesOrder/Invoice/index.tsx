@@ -13,6 +13,7 @@ import { startCase } from 'lodash';
 import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import PreviewDownload from 'src/components/PreviewDownload';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, renderedFrom, stepFullScreen }) => {
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -84,6 +85,14 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
         )
       },
       {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
+      },
+      {
         accessor: 'leadTime',
         Header: 'Lead Time (Days)',
         Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
@@ -108,10 +117,10 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
+        ? parent.productDetail?.productName
+        : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'product'
@@ -137,10 +146,10 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.detail = `${_subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
+        ? _subRow.productDetail?.productName
+        : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
         _subRow.type === 'product'
@@ -165,7 +174,9 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
 
   return (
     <Fragment>
-      <PreviewDownload resource={sidebarResource.salesOrder} referenceId={salesOrderData._id} columns={columns} isSendEmail={true} />
+      <Box p={1}>
+        <PreviewDownload resource={sidebarResource.salesOrder} referenceId={salesOrderData._id} columns={columns} isSendEmail={true} />
+      </Box>
       <Grid item xs={12} md={12} sm={12}>
         {columns && rowsData ? (
           <>
