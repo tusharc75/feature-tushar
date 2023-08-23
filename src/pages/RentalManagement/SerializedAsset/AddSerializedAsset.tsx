@@ -263,16 +263,18 @@ const AddSerializedAsset = ({
       } else {
         deepFilter = `${deepFilter}&plant=${selectedWarehouse}`;
       }
-      if (referenceType === 'Repair Job') {
+
+      if (referenceType === 'Repair Job' || referenceType === 'Repair Order') {
         deepFilter = `${deepFilter}&repairable=true`;
       }
-      if (referenceType === 'Transfer Asset') {
+      else if (referenceType === 'Transfer Asset') {
         deepFilter = `${deepFilter}&transferable=true`;
       }
       else if (referenceType === 'Rental Job') {
         const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
         deepFilter = `${deepFilter}&rental=true&date=${JSON.stringify(dateFilter)}`;
-      } else {
+      }
+      else {
         deepFilter = `${deepFilter}&availableAsset=true`;
       }
     }
@@ -541,30 +543,6 @@ const AddSerializedAsset = ({
               <Grid item xs={12} md={3}>
                 {referenceType === 'Rental Job' && (
                   <Grid container>
-                    {/* <Grid item xs={6} justifyContent={'flex-end'}>
-                        {permissions?.sublease && (
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                name="subleaseAsset"
-                                checked={subleaseAsset}
-                                onChange={(e) => {
-                                  dispatch({ type: 'selection', selectedRecords: [] });
-                                  localStorage.removeItem(localStorageSelectedRecords);
-                                  setSubleaseAsset(e.target.checked);
-                                  if (e.target.checked) {
-                                    setSelectedWarehouse(null);
-                                  } else {
-                                    setSelectedWarehouse(filterByPlant);
-                                  }
-                                }}
-                                color="primary"
-                              />
-                            }
-                            label="Sublease Assets"
-                          />
-                        )}
-                      </Grid> */}
                     <Grid item xs={12} justifyContent={'flex-end'}>
                       <Autocomplete
                         fullWidth
@@ -577,18 +555,6 @@ const AddSerializedAsset = ({
                             : ''
                         }
                         onChange={(e, val) => {
-                          // if (selectedRecords.length > 0 && val?.optionValue !== selectedWarehouse) {
-                          //   toastConfig.setToastConfig({
-                          //     open: true,
-                          //     message: 'All pre-selected records will be deselected if you change the plant.',
-                          //     type: 'warning'
-                          //   });
-                          //   dispatch({
-                          //     type: 'selection',
-                          //     selectedRecords: []
-                          //   });
-                          //   localStorage.removeItem(localStorageSelectedRecords);
-                          // }
                           setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
                         }}
                         renderInput={(params) => (
@@ -728,7 +694,7 @@ const AddSerializedAsset = ({
                 </Box>
               </Grid>
             </Grid>
-            {['Rental Job', 'Repair Job'].includes(referenceType) && (
+            {['Rental Job'].includes(referenceType) && (
               <Grid container spacing={2}>
                 <Grid item>
                   <CustomTabs value={tabValue} onChange={handleMainTabChange}>

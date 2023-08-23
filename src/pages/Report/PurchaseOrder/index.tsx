@@ -1048,7 +1048,6 @@ const Report = () => {
       .get(`${api}${filterQuery}`, {
         cancelToken: cancelTokenSource.token
       }).then(({ data: { data, count, columns } }) => {
-        console.log(data, count, columns)
         if (resourceCamelCase === 'userSession') {
           setLoadingColumns(true);
           columns = columns?.map((e) => {
