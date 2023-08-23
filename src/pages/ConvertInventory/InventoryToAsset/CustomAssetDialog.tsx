@@ -2,8 +2,6 @@ import React, { useEffect, useState, useContext } from 'react';
 import {
     Dialog,
     Box,
-    Button,
-    Link,
     TextField,
     Table,
     TableHead,
@@ -15,17 +13,17 @@ import {
     FormControl,
     Select,
     MenuItem,
-    InputAdornment
 } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { makeStyles} from '@material-ui/styles';
+import { makeStyles } from '@material-ui/styles';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { convertInventory } from '../../../constants/helpers';
 import { Formik, Form, FieldArray, Field } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
+import {sidebarResource} from 'src/constants/helpers';
 
 const useClasses = makeStyles(() => ({
     table: {
@@ -35,8 +33,9 @@ const useClasses = makeStyles(() => ({
         display: 'none'
     },
     tableContainer: {
-         maxHeight: 'calc(100vh - 150px)'
-    }
+        maxHeight: 'calc(100vh - 125px)',
+        boxShadow : 'none'
+    },
 }));
 
 const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
@@ -69,11 +68,11 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
     const handleFormSubmit = (values) => {
         const seenAssetNumbers = new Set();
         const duplicates = [];
-    
+
         for (const data of values.tableData) {
             if (data.assetNumber !== '') {
                 const assetNumber = data.assetNumber?.trim();
-    
+
                 if (seenAssetNumbers.has(assetNumber)) {
                     duplicates.push(data);
                 } else {
@@ -81,7 +80,7 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                 }
             }
         }
-    
+
         if (duplicates.length) {
             setToastConfig({
                 open: true,
@@ -95,57 +94,69 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                 products: parsedData.products.map((product) => {
                     const updatedProduct = { ...product };
                     const matchingTableData = values.tableData.find((data) => data._id === product.id);
-        
+
                     if (matchingTableData && matchingTableData.assetNumberType === 'Manual') {
                         if (!updatedProduct.assetNumbers) {
                             updatedProduct.assetNumbers = [];
                         }
                         updatedProduct.assetNumbers.push(matchingTableData.assetNumber);
                     }
-        
+
                     return updatedProduct;
                 }),
             };
             setLoading(true);
+            const allFields = [
+                {
+                    fieldData: { 
+                        resource: sidebarResource.serializedAsset,
+                        unique: true,
+                        fieldName: 'assetNumber',
+                        fieldLabel: 'Asset Number',
+                    },
+                },
+                
+            ];
+            updatedParsedData['allFields']  = allFields
             axiosInstance()
-              .post(`${convertInventory.api}/convert-inventory-to-asset`, updatedParsedData)
-              .then(({ data: { data } }) => {
-                setLoading(false);
-               setToastConfig({
-                  open: true,
-                  type: 'success',
-                  message: `Convert Inventory to Asset Successfully`
+                .post(`${convertInventory.api}/convert-inventory-to-asset`, updatedParsedData)
+                .then(({ data: { data } }) => {
+                    setLoading(false);
+                    setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: `Convert Inventory to Asset Successfully`
+                    });
+                    handleSuccess();
+                    handleClose();
+                })
+                .catch((error) => {
+                    setLoading(false);
+                    setToastConfig(error);
                 });
-                handleSuccess();
-                handleClose();
-              })
-              .catch((error) => {
-                setLoading(false);
-                setToastConfig(error);
-              });
-            
+
         }
     };
-    
+
     const validateForm = (values) => {
         const errors = {};
-    
+
         values.tableData.forEach((data, index) => {
             const assetNumberType = data.assetNumberType;
             const assetNumber = data.assetNumber;
-    
+
             if (assetNumberType === 'Manual' && !assetNumber) {
                 errors[`tableData.${index}.assetNumber`] = 'Asset Number is required';
             }
         });
-    
+
         return errors;
     };
-    
+
 
     return (
         <Dialog open onClose={handleClose} fullScreen>
-            <CustomDialogHeader title={`Assign Asset Numbers`} onClose={handleClose} />
+
             <Formik
                 initialValues={{ tableData }}
                 onSubmit={handleFormSubmit}
@@ -154,8 +165,9 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
             >
                 {({ values, handleSubmit, setFieldValue, errors }) => (
                     <Form onSubmit={handleSubmit}>
+                        <CustomDialogHeader title={`Assign Asset Numbers`} onClose={handleClose} />
                         <CustomDialogContent>
-                            <Box display="flex" flexDirection="column">
+                            <Box display="flex" flexDirection="column" style={{ minHeight: 'calc(100vh - 125px)' }}>
                                 <TableContainer className={classes.tableContainer} component={Paper}>
                                     <Table className={classes.table} aria-label="customized table">
                                         <TableHead>
@@ -171,7 +183,7 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                                                 {({ push }) => (
                                                     <>
                                                         {values.tableData.map((data, index) => (
-                                                            <TableRow key={data.id} style={{ height: '40px' }}>
+                                                            <TableRow key={data.id} style={{ height: '100px' }}>
                                                                 <TableCell component="th" scope="row">
                                                                     {data.srno}
                                                                 </TableCell>
@@ -193,11 +205,23 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                                                                                     );
                                                                                 }
                                                                             }}
-                                                                            style={{height:'40px', width: '250px', backgroundColor: 'white' }}
+                                                                            style={{ height: '40px', width: '250px', }}
+                                                                            MenuProps={{
+                                                                                anchorOrigin: {
+                                                                                    vertical: 'bottom',
+                                                                                    horizontal: 'left',
+                                                                                },
+                                                                                transformOrigin: {
+                                                                                    vertical: 'top',
+                                                                                    horizontal: 'left',
+                                                                                },
+                                                                                getContentAnchorEl: null,
+                                                                            }}
                                                                         >
                                                                             <MenuItem value="Auto">Auto</MenuItem>
                                                                             <MenuItem value="Manual">Manual</MenuItem>
                                                                         </Field>
+
                                                                     </FormControl>
                                                                 </TableCell>
                                                                 <TableCell align="left">
@@ -206,24 +230,15 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                                                                             name={`tableData.${index}.assetNumber`}
                                                                             value={data.assetNumber}
                                                                             fullWidth
-                                                                            // size="small"
                                                                             variant="outlined"
-                                                                            placeholder= {data.assetNumberType === 'Auto' ? 'Auto Generate' : 'Asset Number'}
+                                                                            placeholder={data.assetNumberType === 'Auto' ? 'Auto Generate' : 'Asset Number'}
                                                                             autoComplete="off"
                                                                             disabled={data.assetNumberType === 'Auto'}
                                                                             InputProps={{
                                                                                 style: {
-                                                                                    background: data.assetNumberType === 'Auto' ? '#f0f0f0' : 'white',
+                                                                                    height: '40px',
                                                                                     width: '250px',
-                                                                                    flex: '1',
-                                                                                    borderRadius: 4,
-                                                                                    ...(data.assetNumberType === 'Auto' ? { pointerEvents: 'none' } : {}),
                                                                                 },
-                                                                                startAdornment: (
-                                                                                    <InputAdornment position="start">
-                                                                                        {data.assetNumberType === 'Manual' && <span style={{ color: 'red' }}>*</span>}
-                                                                                    </InputAdornment>
-                                                                                ),
                                                                             }}
                                                                             helperText={errors[`tableData.${index}.assetNumber`]}
                                                                             error={Boolean(errors[`tableData.${index}.assetNumber`])}
@@ -235,7 +250,7 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                                                                                     value
                                                                                 );
                                                                             }}
-                                                                        />
+                                                                        /> 
                                                                     </FormControl>
                                                                 </TableCell>
                                                             </TableRow>
@@ -248,13 +263,15 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                                 </TableContainer>
                             </Box>
                         </CustomDialogContent>
-                        <CustomDialogFooter>
-                            <Box alignSelf="flex-end" mb={2}>
-                                <CustomButton type="submit" variant="contained" size="large" color="primary" disabled={loading} loading={loading}>
+                        <div style={{ marginTop: 'auto' }}>
+                            <CustomDialogFooter >
+
+                                <CustomButton type="submit" variant="contained" color="primary" disabled={loading} loading={loading}>
                                     Convert
                                 </CustomButton>
-                            </Box>
-                        </CustomDialogFooter>
+
+                            </CustomDialogFooter>
+                        </div>
                     </Form>
                 )}
             </Formik>
