@@ -1064,7 +1064,7 @@ const Report = () => {
               headerName: e.fieldLabel,
               show: true,
               disabled: false,
-              cellRenderer: e.fieldName ? 'userRenderer' : 'commonRenderer',
+              cellRenderer: e.fieldName === 'user' ? 'userRenderer' : 'commonRenderer',
               filter: false,
               sortable: false,
             })
