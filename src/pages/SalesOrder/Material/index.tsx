@@ -26,6 +26,7 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AddIcon from '@material-ui/icons/Add';
 import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -138,9 +139,10 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       {
         accessor: 'description',
         Header: 'Description',
-        minWidth: 300,
-        width: 300,
-        Cell: ({ row }) => <p title={row.original?.description}>{row.original?.description}</p>
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
       },
       {
         accessor: 'leadTime',
@@ -214,19 +216,18 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'product'
+      parent.detail = `${parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
+            ? parent?.packageDetail?.packageDescription
+            : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
@@ -245,19 +246,18 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
@@ -336,6 +336,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     rows.forEach((element) => {
       delete element.index;
       delete element.detail;
+      delete element.description;
       delete element.qtyDisplay;
       delete element.isValid;
       delete element.hideSelection;
