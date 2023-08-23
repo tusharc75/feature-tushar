@@ -151,15 +151,15 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     columnApi.setColumnsVisible(nonHiddenColumns, true);
 
     if (!isClientSideGrid || saveColumnOptions) {
-      let tempColumnState = columnApi.getColumnState();
-      let hidedColumns = tempColumnState.filter((o) => o?.hide).map((o) => o?.colId);
+      // let tempColumnState = columnApi.getColumnState();
+      let hidedColumns = hiddenColumns || [];
       const lockedColumns = newColumns?.filter(col => col?.lockPosition)?.map((col) => col?.field) || [];
       const otherColumns = newColumns?.filter(col => !col?.lockPosition)?.map((col) => col?.field) || [];
       const colOrder = [...lockedColumns, ...otherColumns];
       updateGridHiddenColumns(hidedColumns, colOrder);
     }
     const columnState = JSON.stringify(columnApi.getColumnState());
-    localStorage.setItem(renderedFrom, columnState);
+    // localStorage.setItem(renderedFrom, columnState);
     onClose();
   };
 

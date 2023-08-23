@@ -60,6 +60,7 @@ const ArrangeView = ({
           disable: disabledColumns[renderedFrom] ?? []
         };
       }
+      localStorage.setItem('gridMetaData', JSON.stringify(request));
       updateGridMetaData(request);
     }, 600);
   };
