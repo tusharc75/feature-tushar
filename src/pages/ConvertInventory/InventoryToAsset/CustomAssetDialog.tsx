@@ -106,18 +106,7 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                 }),
             };
             setLoading(true);
-            const allFields = [
-                {
-                    fieldData: { 
-                        resource: sidebarResource.serializedAsset,
-                        unique: true,
-                        fieldName: 'assetNumber',
-                        fieldLabel: 'Asset Number',
-                    },
-                },
-                
-            ];
-            updatedParsedData['allFields']  = allFields
+            
             axiosInstance()
                 .post(`${convertInventory.api}/convert-inventory-to-asset`, updatedParsedData)
                 .then(({ data: { data } }) => {
