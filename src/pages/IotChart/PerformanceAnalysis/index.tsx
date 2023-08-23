@@ -1,11 +1,8 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Box, Checkbox, FormControlLabel, FormGroup, Grid, TextField } from '@material-ui/core';
+import { Box, Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
 import moment from 'moment';
 import Chart from '../Chart';
-import { KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DateFnsUtils from '@date-io/date-fns';
-import { Autocomplete } from '@material-ui/lab';
 import { isEmpty } from 'lodash';
 import FilterModel from '../Chart/FilterModel';
 
@@ -18,13 +15,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints }) => {
   const [chartData, setChartData] = useState(null);
   const [selectedDataPoint, setSelectedDataPoint] = useState({});
 
-  useEffect(() => {
-    if (!isEmpty(selectedDataPoint)) {
-      fetchData();
-    }
-  }, [selectedDataPoint, dateFilters]);
-
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     const deepFilter: any = [];
     deepFilter.push({
       field: 'from_date',
@@ -60,7 +51,13 @@ const PerformanceAnalysis = ({ assetId, dataPoints }) => {
         setChartData(data?.data);
       })
       .catch((err) => {});
-  };
+  }, [assetId, dataPoints, dateFilters.from, dateFilters.to, selectedDataPoint]);
+
+  useEffect(() => {
+    if (!isEmpty(selectedDataPoint)) {
+      fetchData();
+    }
+  }, [selectedDataPoint, dateFilters, fetchData]);
 
   return (
     <>
