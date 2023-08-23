@@ -1597,7 +1597,7 @@ const ReceivingTicket = ({
                   });
                 }}
               >
-                {`Created ${routes.repairJob.title}`}
+                {`Created ${routes.repairJob.title}(s)`}
               </MenuItem>
             )}
             {repairOrderCount > 0 && (
@@ -1608,7 +1608,7 @@ const ReceivingTicket = ({
                   });
                 }}
               >
-                {`Created ${routes.repairOrder.title}`}
+                {`Created ${routes.repairOrder.title}(s)`}
               </MenuItem>
             )}
           </Menu>
