@@ -228,6 +228,7 @@ import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
 import IotDataPoints from './pages/IotDataPoints';
 import IotDataPointsDetail from './pages/IotDataPoints/IotDataPointsDetail';
 import IotChart from './pages/IotChart';
+import IotChartDetail from './pages/IotChart/IotChartDetail'
 import IotReportList from './pages/IotReport';
 import IotReport from './pages/IotReport/Report';
 
@@ -284,7 +285,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -1008,6 +1009,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.iotChart.path}`}>
               <IotChart />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.iotChart.path}/:assetId`}>
+              <IotChartDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.iotReport.path}`}>
               <IotReportList />

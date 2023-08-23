@@ -253,6 +253,8 @@ $sizes: 0, 0.25rem, 0.5rem, 0.75rem, 1rem, 1.25rem;
 @include fixed-list-loop('mb-', 'margin-bottom', 'rem');
 @include fixed-list-loop('ml-', 'margin-left', 'rem');
 @include fixed-list-loop('m-', 'margin', 'rem');
+@include fixed-list-loop('mx-', 'margin-inline', 'rem');
+@include fixed-list-loop('my-', 'margin-block', 'rem');
 
 // Paddings
 @include fixed-list-loop('pt-', 'padding-top', 'rem');
@@ -260,6 +262,8 @@ $sizes: 0, 0.25rem, 0.5rem, 0.75rem, 1rem, 1.25rem;
 @include fixed-list-loop('pb-', 'padding-bottom', 'rem');
 @include fixed-list-loop('pl-', 'padding-left', 'rem');
 @include fixed-list-loop('p-', 'padding', 'rem');
+@include fixed-list-loop('px-', 'padding-inline', 'rem');
+@include fixed-list-loop('py-', 'padding-block', 'rem');
 
 // Font size
 @include fixed-list-loop('font-size-', 'font-size', 'rem');
@@ -280,126 +284,6 @@ $sizes: 0, 0.25rem, 0.5rem, 0.75rem, 1rem, 1.25rem;
 }
 
 @include fixed-gap-loop('.gap-', 'gap', 'rem');
-
-// Margin on x axis
-.mx-0 {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-.mx-1 {
-  margin-left: 0.25rem !important;
-  margin-right: 0.25rem !important;
-}
-.mx-2 {
-  margin-left: 0.5rem !important;
-  margin-right: 0.5rem !important;
-}
-
-.mx-3 {
-  margin-left: 1rem !important;
-  margin-right: 1rem !important;
-}
-
-.mx-4 {
-  margin-left: 1.5rem !important;
-  margin-right: 1.5rem !important;
-}
-
-.mx-5 {
-  margin-left: 3rem !important;
-  margin-right: 3rem !important;
-}
-
-// Margin on y axis
-
-.my-0 {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-}
-.my-1 {
-  margin-top: 0.25rem !important;
-  margin-bottom: 0.25rem !important;
-}
-.my-2 {
-  margin-top: 0.5rem !important;
-  margin-bottom: 0.5rem !important;
-}
-
-.my-3 {
-  margin-top: 1rem !important;
-  margin-bottom: 1rem !important;
-}
-
-.my-4 {
-  margin-top: 1.5rem !important;
-  margin-bottom: 1.5rem !important;
-}
-
-.my-5 {
-  margin-top: 3rem !important;
-  margin-bottom: 3rem !important;
-}
-
-// Padding on x axis
-.px-0 {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-
-.px-1 {
-  padding-left: 0.25rem !important;
-  padding-right: 0.25rem !important;
-}
-
-.px-2 {
-  padding-left: 0.5rem !important;
-  padding-right: 0.5rem !important;
-}
-
-.px-3 {
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
-}
-
-.px-4 {
-  padding-left: 1.5rem !important;
-  padding-right: 1.5rem !important;
-}
-
-.px-5 {
-  padding-left: 3rem !important;
-  padding-right: 3rem !important;
-}
-
-// Padding on y axis
-
-.py-0 {
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
-.py-1 {
-  padding-top: 0.25rem !important;
-  padding-bottom: 0.25rem !important;
-}
-.py-2 {
-  padding-top: 0.5rem !important;
-  padding-bottom: 0.5rem !important;
-}
-
-.py-3 {
-  padding-top: 1rem !important;
-  padding-bottom: 1rem !important;
-}
-
-.py-4 {
-  padding-top: 1.5rem !important;
-  padding-bottom: 1.5rem !important;
-}
-
-.py-5 {
-  padding-top: 3rem !important;
-  padding-bottom: 3rem !important;
-}
 
 .light-grey-bg {
   background-color: var(--dark-secondary, var(--lightgrey)) !important;

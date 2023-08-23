@@ -2227,6 +2227,12 @@ export const REPORT_LIST = [
     key: 'purchaseOrderType',
     type: 'userSession',
   },
+  {
+    title: "In Used Serialized Asset",
+    permission: 'serializedAsset',
+    key: 'purchaseOrderType',
+    type: 'InUseSerializedAsset',
+  },
 ];
 
 export const RESOURCE_CALENDAR = [

@@ -9,7 +9,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
-import { quotation, pricingCondition, supplierContact } from '../../../constants/helpers';
+import { quotation, pricingCondition, supplierContact, QUOTATION_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -84,11 +84,11 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     }
     let column: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -235,7 +235,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
+      parent.index = i + 1;
       parent.detail = `${parent.type === 'serializedAsset'
         ? parent.serializedAssetDetail?.assetNumber
         : parent.type === 'product'
@@ -271,7 +271,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
-      _subRow.srno = parent.srno + '.' + `${index + 1}`;
+      _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = `${_subRow.type === 'serializedAsset'
         ? _subRow.serializedAssetDetail?.assetNumber
         : _subRow.type === 'product'
@@ -319,6 +319,18 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       element.materialId = d._id;
       element.type = addDialog.type;
       element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : '';
+      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+      if (quotationData?.estimateStartDate) {
+        element.estimateStartDate = quotationData?.estimateStartDate;
+      }
+      if (quotationData?.estimateEndDate) {
+        element.estimateEndDate = quotationData?.estimateEndDate;
+      }
+      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+      element.estimateJobDuration = 1;
+      if (calValues && calValues['estimateJobDuration']) {
+        element.estimateJobDuration = calValues['estimateJobDuration'];
+      }
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addDialog.parentId;
       material.push(element);
@@ -356,7 +368,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
-      delete element.srno;
+      delete element.index;
       delete element.detail;
       delete element.qtyDisplay;
       delete element.isValid;
@@ -426,13 +438,13 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
   const calculatePrice = (arr: any[]) => {
     if (quotationData) {
       const data: any = {};
-      data.conditionType = ['Price'];
+      data.conditionType = quotationData.type === QUOTATION_TYPE.salesOrder ? ['Sell'] : ['Rent'];
       data.material = arr.map((ele) => ({
         materialId: ele?.materialId,
         materialType: ele?.type,
         qty: ele?.qty,
         pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
+        unit: [ele?.unit].flat(1).pop(),
         currency: quotationData?.currency
       }));
       data.supplier = [];

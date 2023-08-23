@@ -18,7 +18,9 @@ function PreviewDownload({
   defaultColumns = [],
   hideDetailButton = false,
   button1Title = 'Regular',
-  button2Title = 'Detail'
+  button2Title = 'Detail',
+  extraQueryParams = null,
+  subject = ''
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -30,7 +32,7 @@ function PreviewDownload({
           fieldLabel: d?.Header || d?.headerName,
           fieldName: d?.accessor || d?.field
         };
-      }) || [];
+      })?.map((d) => { return { ...d, fieldName: d.fieldName === 'qtyDisplay' ? 'qty' : d.fieldName } }) || [];
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -45,52 +47,53 @@ function PreviewDownload({
   const handleViewPdf = (type, pdfType, visibleColumns) => {
     let showColumns = allColumn
       ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
-      .map((d) => {
-        let k = d?.fieldName;
-        if (k === 'qtyDisplay') {
-          return 'qty';
-        }
-        return k;
-      });
+      .map((d) => { return d?.fieldName; });
     setLoadingType(pdfType);
-    axiosInstance()
-      .get(
-        pdfType === 'Detail'
-          ? `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`
-          : `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`
-      )
-      .then(({ data }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            setLoadingType(null);
-            setLoading(false);
-            setShowColumnsDialog({ open: false, type: '' });
-            if (type === 'Download') {
-              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-              const link = document.createElement('a');
-              link.href = url;
-              link.setAttribute('download', `${resource}.pdf`);
-              document.body.appendChild(link);
-              link.click();
-            } else if (type === 'Preview') {
-              const file = new Blob([data], { type: 'application/pdf' });
-              const fileURL = URL.createObjectURL(file);
-              const pdfWindow = window.open();
-              pdfWindow.location.href = fileURL;
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-            } else {
-              const file = new Blob([data], { type: 'application/pdf' });
-              generateBase64forFile(file, 'pdf', pdfType);
-            }
-          })
-          .catch((err) => {
-            setLoadingType(null);
-            toastConfig.setToastConfig(err);
-          });
-      })
+
+    let api = ''
+    if (pdfType === 'Detail') {
+      api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
+    }
+    else {
+      api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
+    }
+    if (extraQueryParams) {
+      for (const key in extraQueryParams) {
+        api = `${api}&${key}=${extraQueryParams[key]}`
+      }
+    }
+    axiosInstance().get(api).then(({ data }) => {
+      axiosInstance()
+        .get(`user/download?fileName=${data.data.fileName}`, {
+          responseType: 'blob'
+        })
+        .then(({ data }) => {
+          setLoadingType(null);
+          setLoading(false);
+          setShowColumnsDialog({ open: false, type: '' });
+          if (type === 'Download') {
+            const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${resource}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+          } else if (type === 'Preview') {
+            const file = new Blob([data], { type: 'application/pdf' });
+            const fileURL = URL.createObjectURL(file);
+            const pdfWindow = window.open();
+            pdfWindow.location.href = fileURL;
+            toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+          } else {
+            const file = new Blob([data], { type: 'application/pdf' });
+            generateBase64forFile(file, 'pdf', pdfType);
+          }
+        })
+        .catch((err) => {
+          setLoadingType(null);
+          toastConfig.setToastConfig(err);
+        });
+    })
       .catch((err) => {
         setLoadingType(null);
         toastConfig.setToastConfig(err);
@@ -193,7 +196,6 @@ function PreviewDownload({
           downlodingFile={downlodingFile}
         />
       )}
-
       {sendEmail && (
         <Dialog
           open={sendEmail}
@@ -203,6 +205,7 @@ function PreviewDownload({
           maxWidth="md"
           onClose={() => {
             setSendEmail(false);
+            setEmailAttachments([])
             setFullScreen(false);
           }}
           fullWidth
@@ -211,16 +214,18 @@ function PreviewDownload({
             generatingFile={false}
             handleClose={() => {
               setSendEmail(false);
+              setEmailAttachments([])
               setFullScreen(false);
             }}
             fetchData={() => {
               setSendEmail(false);
+              setEmailAttachments([])
             }}
             id={referenceId}
             isQuoteBuilder={true}
             emailId={null}
             qouteBuilderAttachments={emailAttachments}
-            subject={``}
+            subject={subject}
             fromQuote={true}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {

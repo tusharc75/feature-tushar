@@ -162,7 +162,6 @@ function DemandOrderHeader(props) {
               value={searchVal}
               size="small"
               width="200px"
-              placeholder="Search Demand Orders"
               style={isMobile ? { flex: 1 } : {}}
             />
           </Grid>

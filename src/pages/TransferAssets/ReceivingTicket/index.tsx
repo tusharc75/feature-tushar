@@ -23,6 +23,7 @@ import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridCompone
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 interface ReceivingGridProps {
   fetchAssets: any;
@@ -35,8 +36,6 @@ interface ReceivingGridProps {
   currentStep: number;
   setTickets: any;
   updateTransferStatus?: any;
-  handleViewPdf?: any;
-  fileDownloading?: boolean;
   renderedFrom?: string;
   isTransferEnded: boolean;
   allowedToEdit: boolean;
@@ -53,8 +52,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     setNextStep,
     setTransferIsEnded,
     updateTransferStatus,
-    handleViewPdf,
-    fileDownloading,
     isTransferEnded,
     renderedFrom,
     allowedToEdit
@@ -248,40 +245,12 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     <Fragment>
       {allowedToEdit && (
         <Box display="flex" flexDirection={isMobile && !isTablet ? 'column' : 'row'} justifyContent="space-between" mx={1} my={1}>
-          <Box>
-            {permissions?.transferAsset?.isRead && !isMobile && !isMobile && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                color="primary"
-                type="button"
-                size="small"
-                startIcon={<AiFillFilePdf />}
-                disabled={fileDownloading}
-                onClick={() => {
-                  handleViewPdf(false);
-                }}
-              >
-                {fileDownloading ? 'Please wait...' : 'Preview'}
-              </Button>
-            )}
-            <Box component="span" mx={1} />
-            {permissions?.transferAsset?.isRead && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                color="primary"
-                type="button"
-                size="small"
-                style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
-                startIcon={isMobile ? '' : <IoMdDownload />}
-                disabled={fileDownloading}
-                onClick={() => {
-                  handleViewPdf(true);
-                }}
-              >
-                {isMobile && !isTablet ? <IoMdDownload size={20} /> : fileDownloading ? 'Please wait...' : 'Download'}
-              </Button>
-            )}
-          </Box>
+          <PreviewDownload
+            resource={sidebarResource.transferAsset}
+            referenceId={transferAssetId}
+            columns={columns?.filter((e) => ['assetNumber', 'productName', 'productDescription', 'status']?.includes(e.field))}
+            hideDetailButton={true}
+          />
           {!isTransferEnded && (
             <Box marginTop={isMobile && !isTablet ? 2 : 0}>
               {permissions?.transferAsset?.isUpdate && (

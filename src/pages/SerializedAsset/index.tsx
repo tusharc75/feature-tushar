@@ -208,6 +208,7 @@ const SerializedAsset = () => {
           finalObject['canDelete'] = permissions?.serializedAsset?.isDelete;
           finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
+          finalObject['canDelete'] = [ASSET_STATUS.inUse, ASSET_STATUS.reserved, ASSET_STATUS.delivered]?.includes(u?.status) ? false : true;
           return {
             ...finalObject
           };
@@ -381,7 +382,7 @@ const SerializedAsset = () => {
           </IconButton>
         </HtmlTooltip>
       )}
-      {permissions?.serializedAsset?.isDelete ? (
+      {(permissions?.serializedAsset?.isDelete && params.data.canDelete) ? (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -646,7 +647,7 @@ const SerializedAsset = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={!permissions?.serializedAsset?.isDelete}
+                    disabled={!permissions?.serializedAsset?.isDelete || (getLocalStorageArrayData(localStorageSelectedRecords)?.filter((e) => !e.canDelete)?.length > 0)}
                     onClick={() => {
                       closeActions();
                       setShowDeleteConfirmBox(true);
@@ -887,9 +888,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
