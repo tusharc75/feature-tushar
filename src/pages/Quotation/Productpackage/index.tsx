@@ -454,7 +454,6 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
         axiosInstance()
           .post(pricingCondition.api + `/calculatePrice`, data)
           .then(({ data: { data } }) => {
-            console.log(data)
             resolve(data);
           })
           .catch((err) => {
