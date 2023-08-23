@@ -699,7 +699,8 @@ const Report = () => {
 
         setFrameWorkComponent({
           commonRenderer: CommonRenderer,
-          numberRenderer: NumberRenderer
+          numberRenderer: NumberRenderer,
+          userRenderer: UserRenderer
         });
       }
       if (resourceCamelCase === 'inUseSerializedAsset') {
@@ -979,6 +980,12 @@ const Report = () => {
     </Link>
   );
 
+  const UserRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.userDetail.path}/${params.data.userId}`} target="_blank" >
+      {params.value}
+    </Link>
+  );
+
   const ActionsRenderer = (params) => (
     <>
       <Tooltip title="View History">
@@ -1056,7 +1063,7 @@ const Report = () => {
               headerName: e.fieldLabel,
               show: true,
               disabled: false,
-              cellRenderer: 'commonRenderer',
+              cellRenderer: e.fieldName ? 'userRenderer' : 'commonRenderer',
               filter: false,
               sortable: false,
             })
