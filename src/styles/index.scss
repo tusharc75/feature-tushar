@@ -4022,3 +4022,11 @@ body {
     background: var(--dark-secondary, white);
   }
 }
+
+.MuiToggleButtonGroup-root.toggle-button-layout {
+  flex-wrap: wrap;
+  gap: 8px;
+  & > button {
+    margin: 0 !important;
+  }
+}
