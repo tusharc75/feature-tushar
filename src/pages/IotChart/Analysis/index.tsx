@@ -1,19 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Box, Grid, TextField } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import moment from 'moment';
 import Chart from '../Chart';
 import FilterModel from '../Chart/FilterModel';
 import { dateTimeFormat } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const Analysis = ({ assetId, dataPoints }) => {
 
+    const toastConfig = useContext(CustomToastContext);
+
+    const [chartData, setChartData] = useState(null);
     const [dateFilters, setDateFilters] = useState({
         from: new Date(moment().subtract(15, 'days').format('MM-DD-YYYY')),
         to: new Date(),
-        intervals: null
+        intervals: '1minute'
     });
-    const [chartData, setChartData] = useState(null);
 
     useEffect(() => {
         if (dataPoints?.length) {
@@ -22,36 +25,20 @@ const Analysis = ({ assetId, dataPoints }) => {
     }, [dataPoints, dateFilters])
 
     const fetchData = async () => {
-        const deepFilter: any = []
-        deepFilter.push({
-            field: 'from_date',
-            term: moment(new Date(dateFilters.from)).format('MM/DD/YYYY')
-        });
-        deepFilter.push({
-            field: 'to_date',
-            term: moment(new Date(dateFilters.to)).format('MM/DD/YYYY')
-        });
-
-        let query = `?asset=${assetId}&filterType=and`;
-
-        const newfilterById = []
-        newfilterById.push({
-            field: 'dataPoints',
-            term: { $in: dataPoints?.map(d => d?._id) }
-        });
-
-        if (newfilterById?.length > 0) {
-            query = `${query}&filterById=${JSON.stringify(newfilterById)}`;
-        }
-        if (deepFilter?.length > 0) {
-            query = `${query}&deepFilter=${JSON.stringify(deepFilter)}`;
-        }
-
-        axiosInstance().get(`/report/iot/data-points${query}`)
+        axiosInstance().get(`/report/iot/data-points`, {
+            params: {
+                asset: assetId,
+                from_date: new Date(dateFilters.from).toISOString(),
+                to_date: new Date(dateFilters.to).toISOString(),
+                interval: dateFilters.intervals,
+                dataPoints: dataPoints?.map(d => d?._id)?.toString()
+            }
+        })
             .then(({ data: { data } }) => {
                 setChartData(data?.data)
             })
-            .catch((err) => {
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
             });
     };
 
