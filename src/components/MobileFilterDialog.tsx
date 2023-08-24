@@ -1,17 +1,15 @@
-import * as React from 'react';
-import './MobileFilterDialog.scss';
+import { Box, Button, Dialog, DialogContent, IconButton, Slide } from '@material-ui/core';
+import Card from '@material-ui/core/Card';
 import TextField from '@material-ui/core/TextField';
-import { Delete } from '@material-ui/icons';
-import { MdClose } from 'react-icons/all';
-import { Autocomplete } from '@material-ui/lab';
-import { Button, IconButton, Dialog, DialogContent, Slide } from '@material-ui/core';
-import { v4 as uuidv4 } from 'uuid';
-import { makeStyles } from '@material-ui/core/styles';
 import { TransitionProps } from '@material-ui/core/transitions';
+import { Delete } from '@material-ui/icons';
+import { Autocomplete } from '@material-ui/lab';
+import * as React from 'react';
+import { MdClose } from 'react-icons/all';
+import { v4 as uuidv4 } from 'uuid';
 import { CustomToastContext } from '../StateProvider/CustomToastContext/CustomToastContext';
 import { isObjectEmpty } from '../constants/helpers';
-import { Box } from '@material-ui/core';
-import Card from '@material-ui/core/Card';
+import './MobileFilterDialog.scss';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {

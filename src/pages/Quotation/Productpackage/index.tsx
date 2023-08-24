@@ -538,7 +538,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 setAddDialog({ open: true, type: 'product', parentId: null });
               }}
             >
-              Add Products
+              Add Existing Products
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -546,7 +546,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 setAddDialog({ open: true, type: 'package', parentId: null });
               }}
             >
-              Add Packages
+              Add Existing Packages
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -554,7 +554,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 setAddDialog({ open: true, type: 'service', parentId: null });
               }}
             >
-              Add Services
+              Add Existing Services
             </MenuItem>
           </Menu>
         </Box>

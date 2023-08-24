@@ -134,7 +134,7 @@ const Productpackage = ({
               </span>
               {allowedToEdit && row.original.type !== 'serializedAsset' && (
                 <Box ml={1}>
-                  <HtmlTooltip title={row.original.type === 'package' ? `Add Product` : row.subRows?.length !== row.original.qty ? `Add` : `Can't add more asset!`}>
+                  <HtmlTooltip title={row.original.type === 'package' ? `Add Existing Product` : row.subRows?.length !== row.original.qty ? `Add` : `Can't add more asset!`}>
                     <IconButton
                       onClick={(event) => {
                         if (row.original.qty !== row.subRows?.length && row.original.type === 'product') {
@@ -484,7 +484,7 @@ const Productpackage = ({
                       closeAddActions();
                     }}
                   >
-                    {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Customer Assets` : `Add ${routes.serializedAsset.title}`}
+                    {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Existing Customer Assets` : `Add Existing ${routes.serializedAsset.title}`}
                   </MenuItem>
                   {permissions?.serializedAsset?.isCreate && (
                     <MenuItem
@@ -704,7 +704,7 @@ const Productpackage = ({
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, productId: null, productCategory: null });
               }}
             >
-              {`Add ${routes.serializedAsset.title}`}
+              {`Add Existing ${routes.serializedAsset.title}`}
             </MenuItem>
             {permissions?.serializedAsset?.isCreate && (
               <MenuItem
