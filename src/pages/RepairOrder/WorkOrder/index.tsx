@@ -32,6 +32,7 @@ import { generateCustomTableColumns } from 'src/constants/columns';
 import { MdAssignmentTurnedIn } from 'react-icons/md';
 import EditIcon from '@material-ui/icons/Edit';
 import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
+import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({
@@ -59,7 +60,7 @@ const WorkOrder = ({
   const [isCompleting, setCompleting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [completeConfirmBox, setCompleteConfirmBox] = useState(false);
-  const [addServicesDialog, setAddServicesDialog] = useState({ open: false });
+  const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
@@ -718,10 +719,18 @@ const WorkOrder = ({
               <MenuItem
                 onClick={() => {
                   closeActions();
-                  setAddServicesDialog({ open: true });
+                  setAddServicesDialog({ open: true, new: false });
                 }}
               >
                 Add Services
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setAddServicesDialog({ open: true, new: true });
+                }}
+              >
+                Add New Service
               </MenuItem>
               <MenuItem
                 disabled={selectedProducts?.filter((d) => d.type === 'service')?.length > 0 ? false : true}
@@ -823,17 +832,29 @@ const WorkOrder = ({
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
-          {addServicesDialog.open && (
+          {addServicesDialog.open && !addServicesDialog.new  && (
             <AssignServiceDialog
               reference="repairOrder"
-              handleClose={() => setAddServicesDialog({ open: false })}
+              handleClose={() => setAddServicesDialog({ open: false, new: false })}
               ids={[]}
               onSuccess={(data) => {
                 handleAddService(data?.map((e) => e._id));
-                setAddServicesDialog({ open: false });
+                setAddServicesDialog({ open: false, new:false });
               }}
               extraStaticFilter={!isPostWorkService ? [] : [{ field: 'preWork', term: false }]}
             />
+          )}
+          {addServicesDialog.open && addServicesDialog.new && (
+             <ManageServiceMaster
+             isClone={false}
+             serviceMasterId={null}
+             onClose={() => setAddServicesDialog({ open: false, new: false })}
+             onSuccess={({data}) => {
+              handleAddService([data._id]);
+              setAddServicesDialog({ open: false, new:false });
+             }}
+             isRedirectToDetailPage={false}
+           />
           )}
           {userAssignDialog && (
             <AssignUserDialog
