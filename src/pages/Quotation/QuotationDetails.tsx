@@ -213,9 +213,15 @@ const QuotationDetails = () => {
       }
       setCurrentVersion(versionIndex);
       setCurrVersionId(data.versions[versionIndex]?._id);
-      setCurrentStep(getIndex(data.versions[versionIndex]?.processStatus, tempStepList));
       setVersionStatus(data.versions[versionIndex]?.status);
       setSentToCustomer(data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer);
+
+      if (data.versions[versionIndex]?.status === QUOTATION_STATUS.acceptByCustomer) {
+        setCurrentStep(tempStepList?.length - 1)
+      }
+      else {
+        setCurrentStep(getIndex(data.versions[versionIndex]?.processStatus, tempStepList));
+      }
 
       if (data?.doasetup) {
         const doaResponse: any = await axiosInstance().get(`doa-request/doaFlow/${data._id}/${data.versions[versionIndex]?._id}`);
