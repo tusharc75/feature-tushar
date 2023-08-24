@@ -25,11 +25,15 @@ const Analysis = ({ assetId, dataPoints }) => {
     }, [dataPoints, dateFilters])
 
     const fetchData = async () => {
-
-        let query = `?asset=${assetId}&interval=${dateFilters.intervals}&from_date=${new Date(dateFilters.from).toISOString()}
-        &to_date=${new Date(dateFilters.to).toISOString()}&dataPoints=${dataPoints?.map(d => d?._id)?.toString()}`;
-
-        axiosInstance().get(`/report/iot/data-points${query}`)
+        axiosInstance().get(`/report/iot/data-points`, {
+            params: {
+                asset: assetId,
+                from_date: new Date(dateFilters.from).toISOString(),
+                to_date: new Date(dateFilters.to).toISOString(),
+                interval: dateFilters.intervals,
+                dataPoints: dataPoints?.map(d => d?._id)?.toString()
+            }
+        })
             .then(({ data: { data } }) => {
                 setChartData(data?.data)
             })

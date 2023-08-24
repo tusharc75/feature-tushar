@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Divider, IconButton, makeStyles, useMediaQuery, Menu, MenuItem, Button } from '@material-ui/core';
+import { IconButton, Menu, MenuItem, makeStyles, useMediaQuery } from '@material-ui/core';
+import { useContext, useState } from 'react';
 import { IoIosArrowDropdown } from 'react-icons/io';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
-import { ImportIcon, ExportIcon, DownloadIcon } from 'src/assets/svg/svgIcons';
+import { DownloadIcon, ExportIcon, ImportIcon, MobileDownloadIcon, MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -36,7 +36,7 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => { },
+  onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -328,30 +328,6 @@ export default function ImportExportLinks({
             horizontal: 'right'
           }}
         >
-          {permissions?.isCreate && !onlyExport && !hideDefaultImportExport && (
-            <MenuItem>
-              {ImportInput}
-              <label htmlFor="importFromExcel">{title !== '' ? `Import ${title}` : `Import from Excel`}</label>
-            </MenuItem>
-          )}
-          <MenuItem
-            onClick={() => {
-              exportToExcel();
-              handleClose();
-            }}
-          >
-            {title !== '' ? `Export ${title}` : `Export to Excel`}({recordsToExport === 0 ? 'All' : `(${recordsToExport})`})
-          </MenuItem>
-          {isDownloadExcel && !onlyExport && !hideDefaultImportExport && (
-            <MenuItem
-              onClick={() => {
-                downloadTemplate();
-                handleClose();
-              }}
-            >
-              {title !== '' ? `${title} Template` : `Download Template`}
-            </MenuItem>
-          )}
           {extraImportExportLinks?.map((d, idx) => {
             if (d.type === 'import') {
               return (
@@ -454,9 +430,43 @@ export default function ImportExportLinks({
       {isMobile && (
         <>
           <RenderMobileMenu />
-          <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
-            <IoIosArrowDropdown />
-          </IconButton>
+          <div className="flex items-center gap-[6px] flex-wrap">
+            {isDownloadExcel && !onlyExport && !hideDefaultImportExport && (
+              <IconButton
+                size="small"
+                className=" mobileIconButton primary border"
+                onClick={() => {
+                  downloadTemplate();
+                  handleClose();
+                }}
+              >
+                <MobileDownloadIcon size={18} color={'var(--primary-text)'} />
+              </IconButton>
+            )}
+            <IconButton
+              size="small"
+              className=" mobileIconButton primary border"
+              onClick={() => {
+                exportToExcel();
+                handleClose();
+              }}
+            >
+              <MobileExportIcon size={18} color={'var(--primary-text)'} />
+            </IconButton>
+            {permissions?.isCreate && !onlyExport && !hideDefaultImportExport && (
+              <IconButton size="small" className="relative mobileIconButton primary border">
+                {ImportInput}
+                <label htmlFor="importFromExcel" className="absolute inset-0 grid place-items-center">
+                  <MobileImportIcon size={18} color={'var(--primary-text)'} />
+                </label>
+              </IconButton>
+            )}
+            {extraImportExportLinks.length > 0 ? (
+              <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
+                <IoIosArrowDropdown />
+              </IconButton>
+            ) : null}
+          </div>
         </>
       )}
       {imptExptDnldMenuDta.open && <RenderButtonMenu />}

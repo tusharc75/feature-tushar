@@ -23,15 +23,21 @@ const PerformanceAnalysis = ({ assetId, dataPoints }) => {
 
   const fetchData = () => {
     const dataPointsSend = Object.keys(selectedDataPoint).filter((_k) => selectedDataPoint[_k])?.map((k) => dataPoints.find((d) => d.fieldName === k)?._id);
-    let query = `?asset=${assetId}&interval=${dateFilters.intervals}&from_date=${new Date(dateFilters.from).toISOString()}
-    &to_date=${new Date(dateFilters.to).toISOString()}&dataPoints=${dataPointsSend?.toString()}`;
-    
+
     axiosInstance()
-      .get(`/report/iot/data-points${query}`)
+      .get(`/report/iot/data-points`, {
+        params: {
+          asset: assetId,
+          from_date: new Date(dateFilters.from).toISOString(),
+          to_date: new Date(dateFilters.to).toISOString(),
+          interval: dateFilters.intervals,
+          dataPoints: dataPointsSend?.toString()
+        }
+      })
       .then(({ data: { data } }) => {
         setChartData(data?.data);
       })
-      .catch((error) => { 
+      .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   }
