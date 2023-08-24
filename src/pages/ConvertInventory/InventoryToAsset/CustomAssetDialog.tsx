@@ -13,6 +13,7 @@ import {
     FormControl,
     Select,
     MenuItem,
+    Link
 } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -23,7 +24,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { convertInventory } from '../../../constants/helpers';
 import { Formik, Form, FieldArray, Field } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import {sidebarResource} from 'src/constants/helpers';
+import { read, utils, writeFile } from 'xlsx';
 
 const useClasses = makeStyles(() => ({
     table: {
@@ -34,7 +35,7 @@ const useClasses = makeStyles(() => ({
     },
     tableContainer: {
         maxHeight: 'calc(100vh - 125px)',
-        boxShadow : 'none'
+        boxShadow: 'none'
     },
 }));
 
@@ -68,7 +69,6 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
     const handleFormSubmit = (values) => {
         const seenAssetNumbers = new Set();
         const duplicates = [];
-
         for (const data of values.tableData) {
             if (data.assetNumber !== '') {
                 const assetNumber = data.assetNumber?.trim();
@@ -106,7 +106,7 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                 }),
             };
             setLoading(true);
-            
+
             axiosInstance()
                 .post(`${convertInventory.api}/convert-inventory-to-asset`, updatedParsedData)
                 .then(({ data: { data } }) => {
@@ -142,6 +142,88 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
         return errors;
     };
 
+    const handleExport = (values) => {
+        const errors = validateForm(values);
+        if(Object.keys(errors)?.length >= 1){
+            setToastConfig({
+                open: true,
+                type: 'error',
+                message: `Please fill all the fields`
+            });
+        }
+        else{
+            let json_data = [
+              ...values.tableData.map((data) => ({
+                'Index': data['srno'],
+                Name: data['Name'],
+                'Asset Number Type' : data.assetNumberType,
+                'Asset Number': data.assetNumberType === 'Auto' ? 'Auto Generated' : data.assetNumber,
+              }))
+            ];
+            const header = ['Index', 'Name', 'Asset Number Type', 'Asset Number'];
+        
+            const ws = utils.json_to_sheet(json_data);
+            if (header.length) {
+              utils.sheet_add_aoa(ws, [header]);
+            }
+            const wb = utils.book_new();
+            utils.book_append_sheet(wb, ws, 'Sheet1');
+            writeFile(wb, 'Inventory to Asset.xlsx');
+        }
+      };
+    
+    
+    const handleImport = (e: React.ChangeEvent<HTMLInputElement>, setValues, values) => {
+        e.preventDefault();
+        const files = e.target.files,
+          f = files[0];
+        let reader = new FileReader();
+        reader.onload = function (e) {
+          const data = e.target.result;
+          let readedData = read(data, { type: 'binary' });
+          const wsname = readedData.SheetNames[0];
+          const ws = readedData.Sheets[wsname];
+          const dataParse = utils.sheet_to_json(ws, { header: 1 });
+          if (dataParse.length > 1) {
+            dataParse.splice(0, 1);
+            let option = [];
+            dataParse?.forEach((row) => {
+              let rowInsert = {};
+              if (row[0] && row[1] && row[2]) {
+                rowInsert['srno'] = row[0]?.toString();
+                rowInsert['product'] = row[1]?.toString();
+                rowInsert['assetNumberType'] = row[2]?.toString();
+                rowInsert['assetNumber'] = row[2]?.toString() === "Manual" ? row[3]?.toString() : '';
+                option.push(rowInsert);
+              }
+            });
+            const updatedTableData = values.tableData.map((existingData) => {
+                const matchingRow = option.find((foundRows) => 
+                    existingData.srno === foundRows.srno && existingData.Name === foundRows.product
+                );
+            
+                if (matchingRow) {
+                    return {
+                        ...existingData,
+                        assetNumber: matchingRow.assetNumber,
+                        assetNumberType: matchingRow.assetNumberType,
+                    };
+                }
+            
+                return existingData; // Preserve rows where there is no matchingRow
+            });
+            
+            setValues((prevState) => ({
+                ...prevState,
+                tableData: updatedTableData,
+            }));
+
+          }
+        };
+        reader.readAsBinaryString(f);
+        e.target.value = null;
+      };
+      
 
     return (
         <Dialog open onClose={handleClose} fullScreen>
@@ -152,11 +234,26 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                 validate={validateForm}
                 validateOnMount
             >
-                {({ values, handleSubmit, setFieldValue, errors }) => (
+                {({ values, handleSubmit, setFieldValue, errors, setValues }) => (
                     <Form onSubmit={handleSubmit}>
                         <CustomDialogHeader title={`Assign Asset Numbers`} onClose={handleClose} />
                         <CustomDialogContent>
                             <Box display="flex" flexDirection="column" style={{ minHeight: 'calc(100vh - 125px)' }}>
+                                <Box display="flex" justifyContent="space-between" alignItems="center" style={{marginTop : '20px'}}>
+                                    <Box mb={1} display="flex">
+                                        <Box>
+                                            <Link className="cursor-pointer" onClick={()=>handleExport(values)}>
+                                                Export to excel
+                                            </Link>
+                                        </Box>
+                                        <Box ml={2}>
+                                            <input accept="xlsx" className={classes.input} onChange={(e)=>handleImport(e, setValues, values)} id="import-file" multiple type="file" />
+                                            <label htmlFor="import-file">
+                                                <Link className="cursor-pointer">Import from excel</Link>
+                                            </label>
+                                        </Box>
+                                    </Box>
+                                </Box>
                                 <TableContainer className={classes.tableContainer} component={Paper}>
                                     <Table className={classes.table} aria-label="customized table">
                                         <TableHead>
@@ -239,7 +336,7 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                                                                                     value
                                                                                 );
                                                                             }}
-                                                                        /> 
+                                                                        />
                                                                     </FormControl>
                                                                 </TableCell>
                                                             </TableRow>
