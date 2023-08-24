@@ -5,6 +5,7 @@ import moment from 'moment';
 import Chart from '../Chart';
 import { isEmpty } from 'lodash';
 import FilterModel from '../Chart/FilterModel';
+import { dateTimeFormat } from 'src/constants/helpers';
 
 const PerformanceAnalysis = ({ assetId, dataPoints }) => {
   const [dateFilters, setDateFilters] = useState({
@@ -26,9 +27,9 @@ const PerformanceAnalysis = ({ assetId, dataPoints }) => {
       term: moment(new Date(dateFilters.to)).format('MM/DD/YYYY')
     });
 
-    let query = `?filterType=and`;
+    let query = `?asset=${assetId}&filterType=and`;
 
-    const newfilterById = [{ field: 'asset', term: { $in: [assetId] } }];
+    const newfilterById = [];
     newfilterById.push({
       field: 'dataPoints',
       term: {
@@ -50,7 +51,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints }) => {
       .then(({ data: { data } }) => {
         setChartData(data?.data);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   }, [assetId, dataPoints, dateFilters.from, dateFilters.to, selectedDataPoint]);
 
   useEffect(() => {
@@ -96,7 +97,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints }) => {
               <Chart
                 id={`${Date.now()}`}
                 data={{
-                  labels: chartData?.map((e) => e.date),
+                  labels: chartData?.map((e) => moment(e?.time).format(dateTimeFormat)),
                   datasets: Object.keys(selectedDataPoint)
                     .filter((_k) => selectedDataPoint[_k])
                     .map((_d, i) => ({
