@@ -7,12 +7,15 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { convertInventory, productInventory, sidebarResource } from '../../../constants/helpers';
+import { productInventory, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomAssetDialog from './CustomAssetDialog';
+import {
+  serializedAsset
+} from '../../../constants/helpers';
 
 const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, storageLocation = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -108,17 +111,32 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
   }, [selectedStorageLocation]);
 
   const handleSubmit = (values) => {
+    setLoading(true);
     const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers'].indexOf(item?.serialNumber) > -1);
-  
-    setParsedData({
-      products: product?.map((e) => {
-        return { id: e.id, productName : e.productName, productCategory: e.productCategoryId, serialNumberIds: product > 1 ? [] : serialNumberIds.map((item) => item?._id) };
-      }),
-      qty: parseInt(values.qty),
-      warehouse: warehouse,
-      storageLocation: values?.storageLocation ? values?.storageLocation : null
-    });
-     setOpenCustomDialog(true);
+
+    axiosInstance()
+    .get(`/field?resource=${serializedAsset.resource}`)
+    .then(({ data: { data } }) => {
+
+      const foundData = data.find((d)=>d?.fieldData?.fieldName === "assetNumberType");
+
+      setParsedData({
+        products: product?.map((e) => {
+          return { id: e.id, productName : e.productName, productCategory: e.productCategoryId, serialNumberIds: product > 1 ? [] : serialNumberIds.map((item) => item?._id) };
+        }),
+        qty: parseInt(values.qty),
+        warehouse: warehouse,
+        storageLocation: values?.storageLocation ? values?.storageLocation : null,
+        isAssetTypePresent : foundData ? true : false
+      });
+
+      setLoading(false);
+      setOpenCustomDialog(true);
+
+    }).catch((err)=>{
+      setLoading(false);
+      toastConfig.setToastConfig(err);
+    })  
   };
 
   function validate(values) {

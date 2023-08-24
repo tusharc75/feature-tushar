@@ -49,7 +49,7 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
     useEffect(() => {
         if (!parsedData || parsedData == null) return;
 
-        const { products, qty } = parsedData;
+        const { products, qty, isAssetTypePresent } = parsedData;
 
         const mappedTable = products.flatMap((p, index_1) =>
             [...Array(qty).keys()].map((_, index_2) => ({
@@ -58,7 +58,7 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                 srno: `${index_1 + 1}.${index_2 + 1}`,
                 Name: p?.productName,
                 assetNumber: '',
-                assetNumberType: 'Auto'
+                assetNumberType: !isAssetTypePresent ? 'Manual' : 'Auto'
             }))
         );
 
@@ -105,6 +105,11 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                     return updatedProduct;
                 }),
             };
+
+            // Delete the 'isAssetTypePresent' key from updatedParsedData
+            if ('isAssetTypePresent' in updatedParsedData) {
+                delete updatedParsedData.isAssetTypePresent;
+            }
             setLoading(true);
 
             axiosInstance()
@@ -152,16 +157,39 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
             });
         }
         else{
-            let json_data = [
-              ...values.tableData.map((data) => ({
-                'Index': data['srno'],
-                Name: data['Name'],
-                'Asset Number Type' : data.assetNumberType,
-                'Asset Number': data.assetNumberType === 'Auto' ? 'Auto Generated' : data.assetNumber,
-              }))
-            ];
-            const header = ['Index', 'Name', 'Asset Number Type', 'Asset Number'];
-        
+            const {isAssetTypePresent } = parsedData;
+
+            let json_data = values.tableData.map((data) => {
+                const rowData = {
+                    'Index': data['srno'],
+                    Name: data['Name'],
+                    'Asset Number': data.assetNumberType === 'Auto' ? 'Auto Generated' : data.assetNumber,
+                };
+            
+                if (isAssetTypePresent) {
+                    rowData['Asset Number Type'] = data.assetNumberType;
+                }
+            
+                return isAssetTypePresent
+                    ? {
+                          'Index': rowData['Index'],
+                          Name: rowData['Name'],
+                          'Asset Number Type': rowData['Asset Number Type'],
+                          'Asset Number': rowData['Asset Number'],
+                      }
+                    : rowData;
+            });
+            
+            
+            let header = [];
+
+            if(isAssetTypePresent) {
+                header = ['Index', 'Name', 'Asset Number Type','Asset Number'];
+            }
+            else {
+                header = ['Index', 'Name', 'Asset Number'];
+            }
+
             const ws = utils.json_to_sheet(json_data);
             if (header.length) {
               utils.sheet_add_aoa(ws, [header]);
@@ -174,6 +202,9 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
     
     
     const handleImport = (e: React.ChangeEvent<HTMLInputElement>, setValues, values) => {
+
+        const { isAssetTypePresent } = parsedData;
+
         e.preventDefault();
         const files = e.target.files,
           f = files[0];
@@ -189,12 +220,23 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
             let option = [];
             dataParse?.forEach((row) => {
               let rowInsert = {};
-              if (row[0] && row[1] && row[2]) {
-                rowInsert['srno'] = row[0]?.toString();
-                rowInsert['product'] = row[1]?.toString();
-                rowInsert['assetNumberType'] = row[2]?.toString();
-                rowInsert['assetNumber'] = row[2]?.toString() === "Manual" ? row[3]?.toString() : '';
-                option.push(rowInsert);
+              if(isAssetTypePresent) {
+
+                  if (row[0] && row[1] && row[2]) {
+                    rowInsert['srno'] = row[0]?.toString();
+                    rowInsert['product'] = row[1]?.toString();
+                    rowInsert['assetNumberType'] = row[2]?.toString();
+                    rowInsert['assetNumber'] = row[2]?.toString() === "Manual" ? row[3]?.toString() : '';
+                    option.push(rowInsert);
+                  }
+              }
+              else {
+                if (row[0] && row[1] && row[2]) {
+                    rowInsert['srno'] = row[0]?.toString();
+                    rowInsert['product'] = row[1]?.toString();
+                    rowInsert['assetNumber'] = row[2]?.toString();
+                    option.push(rowInsert);
+                  }
               }
             });
             const updatedTableData = values.tableData.map((existingData) => {
@@ -202,11 +244,18 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                     existingData.srno === foundRows.srno && existingData.Name === foundRows.product
                 );
             
-                if (matchingRow) {
+                if (matchingRow && isAssetTypePresent) {
                     return {
                         ...existingData,
                         assetNumber: matchingRow.assetNumber,
                         assetNumberType: matchingRow.assetNumberType,
+                    };
+                }
+
+                else if(matchingRow){
+                    return {
+                        ...existingData,
+                        assetNumber: matchingRow.assetNumber
                     };
                 }
             
@@ -260,7 +309,7 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                                             <TableRow>
                                                 <TableCell>Index</TableCell>
                                                 <TableCell align="left">Product Name</TableCell>
-                                                <TableCell>Asset Number Type</TableCell>
+                                                {(parsedData && parsedData?.isAssetTypePresent) && ( <TableCell>Asset Number Type</TableCell>)}
                                                 <TableCell align="left">{'Asset Number'}</TableCell>
                                             </TableRow>
                                         </TableHead>
@@ -274,7 +323,7 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                                                                     {data.srno}
                                                                 </TableCell>
                                                                 <TableCell align="left">{data.Name}</TableCell>
-                                                                <TableCell align="left">
+                                                                {(parsedData && parsedData?.isAssetTypePresent) && ( <TableCell align="left">
                                                                     <FormControl variant="outlined">
                                                                         <Field
                                                                             name={`tableData.${index}.assetNumberType`}
@@ -309,7 +358,7 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                                                                         </Field>
 
                                                                     </FormControl>
-                                                                </TableCell>
+                                                                </TableCell>)}
                                                                 <TableCell align="left">
                                                                     <FormControl fullWidth>
                                                                         <TextField
