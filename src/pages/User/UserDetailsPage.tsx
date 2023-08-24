@@ -347,7 +347,7 @@ const UserDetailsPage = () => {
 
         data.forEach((obj) => {
           labels.push(moment(obj?.date).format('DD/MMM'));
-          dataSets.push(Math.ceil(obj?.totalDuration / time));
+          dataSets.push(obj?.totalDuration / time);
         });
         setUserTrackingData({
           labels: labels,
