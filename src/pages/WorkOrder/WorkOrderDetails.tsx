@@ -213,16 +213,17 @@ const WorkOrderDetails = () => {
           <Box className="control-buttons-v1 items-center">
             {workOrderData ? (
               <>
-                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    onClick={() => setShowConfirmBoxScrap(true)}
-                    className={'btn-outline-v1'}
-                  >
-                    {isMobile && !isTablet ? <RiFileShredFill /> : `${ASSET_STATUS.scrap} Asset`}
-                  </Button>
-                )}
+                {permissions?.workOrder?.isUpdate &&
+                  workOrderData?.serializedAsset && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      size="small"
+                      onClick={() => setShowConfirmBoxScrap(true)}
+                      className={'btn-outline-v1'}
+                    >
+                      {isMobile && !isTablet ? <RiFileShredFill /> : `${ASSET_STATUS.scrap} Asset`}
+                    </Button>
+                  )}
                 {permissions?.workOrder?.isUpdate &&
                   allowedToEdit &&
                   workOrderData?.canComplete &&
