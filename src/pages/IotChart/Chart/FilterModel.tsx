@@ -2,59 +2,9 @@ import DateFnsUtils from '@date-io/date-fns';
 import { Box, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { INTERVALS } from '../../../constants/helpers'
 
 export default function FilterModel({ dateFilters, setDateFilters }) {
-  
-  const intervals = [
-    {
-      optionValue: '1second',
-      optionLabel: '1 Second'
-    },
-    {
-      optionValue: '5seconds',
-      optionLabel: '5 Seconds'
-    },
-    {
-      optionValue: '10seconds',
-      optionLabel: '10 Seconds'
-    },
-    {
-      optionValue: '30seconds',
-      optionLabel: '30 Seconds'
-    },
-    {
-      optionValue: '1minute',
-      optionLabel: '1 Minute'
-    },
-    {
-      optionValue: '5minutes',
-      optionLabel: '5 Minutes'
-    },
-    {
-      optionValue: '15minutes',
-      optionLabel: '15 Minutes'
-    },
-    {
-      optionValue: '1hour',
-      optionLabel: '1 Hour'
-    },
-    {
-      optionValue: '6hours',
-      optionLabel: '6 Hours'
-    },
-    {
-      optionValue: '1day',
-      optionLabel: '1 Day'
-    },
-    {
-      optionValue: '7days',
-      optionLabel: '7 Days'
-    },
-    {
-      optionValue: '30days',
-      optionLabel: '30 Days'
-    }
-  ];
 
   return (
     <Box display="flex" justifyContent="end">
@@ -95,7 +45,7 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
           <Autocomplete
             id={`interval`}
             style={{ minWidth: '260px' }}
-            options={intervals}
+            options={INTERVALS}
             autoHighlight
             getOptionLabel={(option: any) => option?.optionLabel}
             renderOption={(option) => option?.optionLabel}
@@ -105,7 +55,7 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
                 intervals: value?.optionValue || null
               });
             }}
-            value={intervals.find((v) => v.optionValue === dateFilters.intervals) || {}}
+            value={INTERVALS.find((v) => v.optionValue === dateFilters.intervals) || {}}
             renderInput={(params) => <TextField {...params} name={`interval`} label="Interval" size="small" margin="none" variant="outlined" />}
           />
         </div>

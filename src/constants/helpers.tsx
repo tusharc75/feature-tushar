@@ -2108,26 +2108,101 @@ export const LOG_RESOURCE = {
   transferInventory: sidebarResource.transferInventory
 };
 
+export const INTERVALS = [
+  {
+    optionValue: '1second',
+    optionLabel: '1 Second'
+  },
+  {
+    optionValue: '5seconds',
+    optionLabel: '5 Seconds'
+  },
+  {
+    optionValue: '10seconds',
+    optionLabel: '10 Seconds'
+  },
+  {
+    optionValue: '30seconds',
+    optionLabel: '30 Seconds'
+  },
+  {
+    optionValue: '1minute',
+    optionLabel: '1 Minute'
+  },
+  {
+    optionValue: '5minutes',
+    optionLabel: '5 Minutes'
+  },
+  {
+    optionValue: '15minutes',
+    optionLabel: '15 Minutes'
+  },
+  {
+    optionValue: '1hour',
+    optionLabel: '1 Hour'
+  },
+  {
+    optionValue: '6hours',
+    optionLabel: '6 Hours'
+  },
+  {
+    optionValue: '1day',
+    optionLabel: '1 Day'
+  },
+  {
+    optionValue: '7days',
+    optionLabel: '7 Days'
+  },
+  {
+    optionValue: '30days',
+    optionLabel: '30 Days'
+  }
+];
+
 export const IOT_REPORT_LIST = [{
   title: sidebarResource.iotDataPoints,
   key: 'iotDataPoints',
   api: '/report/iot/data-points',
   filters: [
     {
-      fieldName: 'iotDataPoints',
+      fieldName: 'dataPoints',
       fieldLabel: 'Iot Data Points',
       resource: sidebarResource.iotDataPoints,
       lookup: true,
       type: 'dropDown',
+      multiple: true,
+      options: null,
       _id: '1'
 
-    }, {
+    },
+    {
       fieldName: 'date',
       fieldLabel: 'Date',
       type: 'date',
+      options: null,
       _id: '2'
 
-    }]
+    },
+    {
+      fieldName: 'asset',
+      fieldLabel: 'Serialized Asset',
+      resource: sidebarResource.serializedAsset,
+      lookup: true,
+      type: 'dropDown',
+      multiple: false,
+      options: null,
+      _id: '3'
+
+    },
+    {
+      fieldName: 'interval',
+      fieldLabel: 'Interval',
+      type: 'dropDown',
+      options: INTERVALS,
+      _id: '4'
+
+    },
+  ]
 }]
 
 export const REPORT_LIST = [
