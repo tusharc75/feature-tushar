@@ -234,7 +234,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               setAddSerializedAssetDialog(true);
             }}
           >
-            {isMobile && !isTablet ? `Add  ${routes.serializedAsset.title}` : `Add ${routes.serializedAsset.title}`}
+            {isMobile && !isTablet ? `Add Existing  ${routes.serializedAsset.title}` : `Add Existing ${routes.serializedAsset.title}`}
           </Button>
           <div className="ml-auto"></div>
           {repairJobData && repairJobData['status'] !== REPAIR_JOB_STATUS.completed && (

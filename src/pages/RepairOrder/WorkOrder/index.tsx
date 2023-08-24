@@ -721,7 +721,7 @@ const WorkOrder = ({
                   setAddServicesDialog({ open: true });
                 }}
               >
-                Add Services
+                Add Existing Services
               </MenuItem>
               <MenuItem
                 disabled={selectedProducts?.filter((d) => d.type === 'service')?.length > 0 ? false : true}
