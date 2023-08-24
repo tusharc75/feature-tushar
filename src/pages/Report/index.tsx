@@ -79,6 +79,7 @@ const Report = () => {
       if (lookupResource) {
         data?.forEach((e) => {
           if (e?.fieldData?.fieldName === 'currentOwner') {
+            e.fieldData.lookup = true;
             e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
           }
         });

@@ -647,7 +647,7 @@ const Report = () => {
           isUpdate: true,
           fieldData: {
             _id: '63f71ce5b17c69a1ab7e4c06',
-            fieldLabel: columns?.find((e) => e.field === 'warehouse')?.headerName || 'Warehouse',
+            fieldLabel: columns?.find((e) => e.field === 'warehouse')?.headerName || routes.warehouse?.title,
             fieldName: 'warehouse',
             type: 'dropDown',
             lookup: true,
@@ -699,7 +699,8 @@ const Report = () => {
 
         setFrameWorkComponent({
           commonRenderer: CommonRenderer,
-          numberRenderer: NumberRenderer
+          numberRenderer: NumberRenderer,
+          userRenderer: UserRenderer
         });
       }
       if (resourceCamelCase === 'inUseSerializedAsset') {
@@ -714,6 +715,7 @@ const Report = () => {
         if (lookupResource) {
           data?.forEach((e) => {
             if (e?.fieldData?.fieldName === 'currentOwner') {
+              e.fieldData.lookup = true;
               e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
             }
           });
@@ -979,6 +981,12 @@ const Report = () => {
     </Link>
   );
 
+  const UserRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.userDetail.path}/${params.data.userId}`} target="_blank" >
+      {params.value}
+    </Link>
+  );
+
   const ActionsRenderer = (params) => (
     <>
       <Tooltip title="View History">
@@ -1056,7 +1064,7 @@ const Report = () => {
               headerName: e.fieldLabel,
               show: true,
               disabled: false,
-              cellRenderer: 'commonRenderer',
+              cellRenderer: e.fieldName === 'user' ? 'userRenderer' : 'commonRenderer',
               filter: false,
               sortable: false,
             })

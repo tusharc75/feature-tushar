@@ -142,7 +142,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
                 {!isOffline && allowedToEdit && (
-                  <HtmlTooltip title="Add Service">
+                  <HtmlTooltip title="Add Existing Service">
                     <IconButton
                       onClick={() => setAddExistingProductDialog({ open: true, type: 'service', parentId: row.original?._id })}
                       size="small"
@@ -539,7 +539,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                     setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
                   }}
                 >
-                  Add Services
+                  Add Existing Services
                 </MenuItem>
               )}
               {permissions?.packages?.isRead && (
@@ -549,7 +549,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                     setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                   }}
                 >
-                  {`Add Service Packages`}
+                  {`Add Existing Service Packages`}
                 </MenuItem>
               )}
               <MenuItem
