@@ -929,7 +929,7 @@ const UserDetailsPage = () => {
                             ) : userPermissions ? (
                               Object.keys(userPermissions).map((key) => (
                                 <Tooltip
-                                  title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${startCase(key)}` : ''}
+                                  title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${key === 'doaSetup' ? 'DOA Setup' : startCase(key)}` : ''}
                                 >
                                   <FormControlLabel
                                     key={key}
