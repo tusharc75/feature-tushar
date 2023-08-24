@@ -42,10 +42,7 @@ const IotReport = () => {
   const [selectedReportView, setSelectedReportView] = React.useState(null);
 
   //filter handling new...
-  const [filterQuery, setFilterQuery] = useState({
-    filterById: [],
-    deepFilter: [],
-  })
+  const [filterQuery, setFilterQuery] = useState({})
 
   // Grid Configs
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
@@ -134,7 +131,7 @@ const IotReport = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    let api = refObj?.api + '?column=true&'+filterQuery;;
+    let api = refObj?.api + '?column=true&' + filterQuery;;
     axiosInstance()
       .get(api, {
         cancelToken: cancelTokenSource.token
@@ -168,9 +165,9 @@ const IotReport = () => {
   // Create and return query for filters
   const getFilter = (isExport = false) => {
     let returnQuery = `page=${page}&`;
-    
-    const { filterById, deepFilter } = { ...filterQuery };
-    
+
+    // const { filterById, deepFilter } = { ...filterQuery };
+
     if (!isExport) {
       returnQuery = `${returnQuery}limit=${limit}&`;
     }
@@ -181,15 +178,21 @@ const IotReport = () => {
       returnQuery = `${returnQuery}search=${encodeURIComponent(search)}&`;
     }
 
-    if (filterById?.length > 0 || deepFilter?.length > 0) {
-      returnQuery = `${returnQuery}?filterType=and`;
+    if (Object.keys(filterQuery)?.length > 0) {
+      Object.keys(filterQuery).forEach(_k => {
+        returnQuery = `${returnQuery}${_k}=${filterQuery[_k]}&`;
+      });
     }
-    if (filterById?.length > 0) {
-      returnQuery = `${returnQuery}&filterById=${JSON.stringify(filterById)}`;
-    }
-    if (deepFilter?.length > 0) {
-      returnQuery = `${returnQuery}&deepFilter=${JSON.stringify(deepFilter)}`;
-    }
+
+    // if (filterById?.length > 0 || deepFilter?.length > 0) {
+    //   returnQuery = `${returnQuery}?filterType=and`;
+    // }
+    // if (filterById?.length > 0) {
+    //   returnQuery = `${returnQuery}&filterById=${JSON.stringify(filterById)}`;
+    // }
+    // if (deepFilter?.length > 0) {
+    //   returnQuery = `${returnQuery}&deepFilter=${JSON.stringify(deepFilter)}`;
+    // }
 
 
     return `?${returnQuery}`;
@@ -296,76 +299,76 @@ const IotReport = () => {
                 </Grid>
               </Grid>
             </div>
-           
-              <CustomFilter
-                field={[{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...refObj?.filters].map((e: any) => ({ ...e, options: null }))}
-                setFilterQuery={setFilterQuery}
-                showGrid={showGrid}
-                loadingData = {loadingData}
-                setShowGrid = {setShowGrid}
-              />
-             
-              <div>
-                {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                  isSmall ? (
-                    <CustomSwipableList
-                      allowSelection={false}
-                      allowSwipe={false}
-                      permissions={permissions[resourceCamelCase]}
-                      primaryField={columns?.find((d) => d.primaryField)}
-                      onClick={(data) => {
-                        // history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
-                      }}
-                      selectedRecords={[]}
-                      dataRows={dataRows}
-                      dispatch={dispatch}
-                      onEdit={() => { }}
-                      extraParamsToCheckDelete={false}
-                      rowCount={rowCount}
-                      page={page}
-                      loading={loading}
-                      chips={columns
-                        .filter((col) => col.hasOwnProperty('cellRendererParams'))
-                        .map((col) => ({
-                          field: col.field,
-                          label: col.headerName
-                        }))}
-                      additionalDetails={[]}
-                      owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                      onCreate={false}
-                      showClone={false}
-                      onDelete={(data) => { }}
-                      onClone={(data) => { }}
-                      renderedFrom={routes.transferAsset?.title}
-                    />
-                  ) : (
-                    <CustomAgGrid
-                      setSelectedReportView={setSelectedReportView}
-                      selectedReportView={selectedReportView}
-                      reportSave={true}
-                      columns={columns}
-                      dataRows={dataRows}
-                      frameworkComponents={frameWorkComponent}
-                      setGridApi={setGridApi}
-                      dispatch={dispatch}
-                      rowCount={rowCount}
-                      limit={limit}
-                      pageSizes={pageSizes}
-                      page={page}
-                      actionWidth={100}
-                      loading={loading}
-                      renderedFrom={renderedFrom}
-                      allowSelection={false}
-                      allowAction={false}
-                      refreshGrid={fetchResourceData}
-                      showOnlyShowFilteredRecordSwitch={false}
-                    />
-                  )
+
+            <CustomFilter
+              field={[{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...refObj?.filters]}
+              setFilterQuery={setFilterQuery}
+              showGrid={showGrid}
+              loadingData={loadingData}
+              setShowGrid={setShowGrid}
+            />
+
+            <div>
+              {Object.keys(frameWorkComponent).length > 0 && columns ? (
+                isSmall ? (
+                  <CustomSwipableList
+                    allowSelection={false}
+                    allowSwipe={false}
+                    permissions={permissions[resourceCamelCase]}
+                    primaryField={columns?.find((d) => d.primaryField)}
+                    onClick={(data) => {
+                      // history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
+                    }}
+                    selectedRecords={[]}
+                    dataRows={dataRows}
+                    dispatch={dispatch}
+                    onEdit={() => { }}
+                    extraParamsToCheckDelete={false}
+                    rowCount={rowCount}
+                    page={page}
+                    loading={loading}
+                    chips={columns
+                      .filter((col) => col.hasOwnProperty('cellRendererParams'))
+                      .map((col) => ({
+                        field: col.field,
+                        label: col.headerName
+                      }))}
+                    additionalDetails={[]}
+                    owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                    onCreate={false}
+                    showClone={false}
+                    onDelete={(data) => { }}
+                    onClone={(data) => { }}
+                    renderedFrom={routes.transferAsset?.title}
+                  />
                 ) : (
-                 showGrid && (<Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />)
-                )}
-              </div>
-            
+                  <CustomAgGrid
+                    setSelectedReportView={setSelectedReportView}
+                    selectedReportView={selectedReportView}
+                    reportSave={true}
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameWorkComponent}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    actionWidth={100}
+                    loading={loading}
+                    renderedFrom={renderedFrom}
+                    allowSelection={false}
+                    allowAction={false}
+                    refreshGrid={fetchResourceData}
+                    showOnlyShowFilteredRecordSwitch={false}
+                  />
+                )
+              ) : (
+                showGrid && (<Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />)
+              )}
+            </div>
+
 
           </>
         </CustomContainer>
