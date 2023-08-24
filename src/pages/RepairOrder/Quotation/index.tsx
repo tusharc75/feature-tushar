@@ -35,8 +35,7 @@ const Quotation = ({
   allowedToEdit,
   setQuotationVersionData,
   updateOrderStatus,
-  invoiceStep,
-  createNewVersionQuote
+  invoiceStep
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -470,6 +469,18 @@ const Quotation = ({
     setShowAllVersionStatus(false);
   };
 
+  const cloneVersion = () => {
+    const versionId = quotationData?.versions[currentVersion]?._id;
+    axiosInstance()
+      .post(`/quotation/clone-version/${quotationData._id}/${versionId}`)
+      .then(() => {
+        fetchFields();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleSendToCustomer = () => {
     axiosInstance()
       .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
@@ -617,8 +628,7 @@ const Quotation = ({
               ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(quotationData?.versions[currentVersion]?.status) ? (
                 <Button
                   onClick={() => {
-                    createNewVersionQuote();
-                    // cloneVersion();
+                    cloneVersion();
                   }}
                   variant="contained"
                   size="small"
