@@ -601,7 +601,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                   setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
                 }}
               >
-                Add Products
+                Add Existing Products
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -609,7 +609,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                   setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                 }}
               >
-                Add Packages
+                Add Existing Packages
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -810,7 +810,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
               }}
             >
-              Add Products
+              Add Existing Products
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -818,7 +818,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
               }}
             >
-              Add Packages
+              Add Existing Packages
             </MenuItem>
             {/* <MenuItem
               onClick={() => {

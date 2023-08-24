@@ -625,7 +625,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                     setAddProductDialog(true);
                   }}
                 >
-                  Add Products
+                  Add Existing Products
                 </MenuItem>
               )}
               {permissions?.serviceMaster?.isRead && (
@@ -635,7 +635,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                     setAddServiceDialog(true);
                   }}
                 >
-                  Add Services
+                  Add Existing Services
                 </MenuItem>
               )}
               <MenuItem
