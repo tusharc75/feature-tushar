@@ -80,13 +80,21 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         )
       },
       {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
+      },
+      {
         accessor: 'workOrder',
         Header: 'Work Order',
         Cell: ({ row }) =>
           row.original.workOrder ? (
             <div className="d-flex gap-2 align-items-center">
               <p className="text-truncate">
-              {row.original.workOrder?.optionLabel}
+                {row.original.workOrder?.optionLabel}
               </p>
               <IconButton
                 size="small"
@@ -100,14 +108,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           ) : (
             <NoDataCell />
           )
-      },
-      {
-        accessor: 'description',
-        Header: 'Description',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
-        }
       }
     ];
     coloum = [...coloum, ...newColumns];
@@ -163,7 +163,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={() => {}}
+              onSelect={() => { }}
               childrenProperty="subRows"
               uniqueKey="_id"
               renderedFrom={renderedFrom}

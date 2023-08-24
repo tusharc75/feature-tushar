@@ -1,14 +1,16 @@
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import { startCase } from "lodash";
+import moment from "moment";
 import { useContext, useEffect, useState } from "react";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "src/axios/axiosInstance";
-import { displayDate } from "src/constants/helpers";
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import { dateTimeFormat } from "src/constants/helpers";
 
 export default function Current({ assetId }) {
     const toastConfig = useContext(CustomToastContext);
 
-    const [dataPointData, setDataPointData] = useState([])
+    const [dataPointData, setDataPointData] = useState(null)
 
     useEffect(() => {
         fetchData()
@@ -20,7 +22,7 @@ export default function Current({ assetId }) {
             let tableData = data?.dataPointData?.map((data) => {
                 const obj = {
                     ...data,
-                    time: displayDate(data?.time)
+                    time: moment(data?.time).format(dateTimeFormat)
                 }
                 return obj;
             });
@@ -31,29 +33,37 @@ export default function Current({ assetId }) {
     }
 
     return (
-        <TableContainer id={'1'} style={{ height: 'calc(100vh - 200px)', width: 'auto' }}>
-            <Table stickyHeader id={'table_' + '1'} aria-label="simple table">
-                <TableHead>
-                    <TableRow>
-                        {['fieldLabel', 'date', 'fieldValue'].map((_k: any, index) => (
-                            <TableCell style={{ minWidth: '200px' }} key={_k + ' ' + index + 1} align='left'>
-                                {startCase(_k)}
-                            </TableCell>
-                        ))}
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {dataPointData?.map((data: any, index) => (
-                        <TableRow key={'row ' + index + 1}>
-                            {['fieldLabel', 'time', 'value'].map((k, i) => (
-                                <TableCell key={k} align='left'>
-                                    {data[k]}
-                                </TableCell>
+        <>
+            {dataPointData && dataPointData?.length ?
+                <TableContainer id={`${Date.now()}`} style={{ height: 'calc(100vh - 200px)', width: 'auto' }}>
+                    <Table stickyHeader id={'table_' + '1'} aria-label="simple table">
+                        <TableHead>
+                            <TableRow>
+                                {['fieldLabel', 'date', 'value'].map((_k: any, index) => (
+                                    <TableCell style={{ minWidth: '200px' }} key={_k + ' ' + index + 1} align='left'>
+                                        {startCase(_k)}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {dataPointData?.map((data: any, index) => (
+                                <TableRow key={'row ' + index + 1}>
+                                    {['fieldLabel', 'time', 'value'].map((k, i) => (
+                                        <TableCell key={k} align='left'>
+                                            {data[k]}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
                             ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </TableContainer>
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                :
+                <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
+            }
+        </>
     )
 }
