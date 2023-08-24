@@ -496,22 +496,29 @@ const Productpackage = ({
                       {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add New Customer Assets` : `Add New ${routes.serializedAsset.title}`}
                     </MenuItem>
                   )}
-                  <MenuItem
-                    onClick={() => {
-                      closeAddActions();
-                      setAddExistingProductDialog({ open: true, type: 'product', parentId: null, existing: false, productId: null, productCategory: null });
-                    }}
-                  >
-                    Add Products
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      closeAddActions();
-                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null, existing: false, productId: null, productCategory: null });
-                    }}
-                  >
-                    Add Packages
-                  </MenuItem>
+
+                  {user?.user?.brandPolicy?.repairOrderAddProductPackage &&
+                    <>
+                      {permissions?.product?.isCreate &&
+                        <MenuItem
+                          onClick={() => {
+                            closeAddActions();
+                            setAddExistingProductDialog({ open: true, type: 'product', parentId: null, existing: false, productId: null, productCategory: null });
+                          }}
+                        >
+                          Add New Products
+                        </MenuItem>}
+                      {permissions?.packages?.isCreate &&
+                        <MenuItem
+                          onClick={() => {
+                            closeAddActions();
+                            setAddExistingProductDialog({ open: true, type: 'package', parentId: null, existing: false, productId: null, productCategory: null });
+                          }}
+                        >
+                          Add New Packages
+                        </MenuItem>}
+                    </>
+                  }
                 </Menu>
               </Fragment>
             )}
