@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Box, Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
 import moment from 'moment';
@@ -6,59 +6,41 @@ import Chart from '../Chart';
 import { isEmpty } from 'lodash';
 import FilterModel from '../Chart/FilterModel';
 import { dateTimeFormat } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const PerformanceAnalysis = ({ assetId, dataPoints }) => {
+
+  const toastConfig = useContext(CustomToastContext);
+
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(15, 'days').format('MM-DD-YYYY')),
     to: new Date(),
-    intervals: null
+    intervals: '1minute'
   });
+
   const [chartData, setChartData] = useState(null);
   const [selectedDataPoint, setSelectedDataPoint] = useState({});
 
-  const fetchData = React.useCallback(async () => {
-    const deepFilter: any = [];
-    deepFilter.push({
-      field: 'from_date',
-      term: moment(new Date(dateFilters.from)).format('MM/DD/YYYY')
-    });
-    deepFilter.push({
-      field: 'to_date',
-      term: moment(new Date(dateFilters.to)).format('MM/DD/YYYY')
-    });
-
-    let query = `?asset=${assetId}&filterType=and`;
-
-    const newfilterById = [];
-    newfilterById.push({
-      field: 'dataPoints',
-      term: {
-        $in: Object.keys(selectedDataPoint)
-          .filter((_k) => selectedDataPoint[_k])
-          ?.map((k) => dataPoints.find((d) => d.fieldName === k)?._id)
-      }
-    });
-
-    if (newfilterById?.length > 0) {
-      query = `${query}&filterById=${JSON.stringify(newfilterById)}`;
-    }
-    if (deepFilter?.length > 0) {
-      query = `${query}&deepFilter=${JSON.stringify(deepFilter)}`;
-    }
-
+  const fetchData = () => {
+    const dataPointsSend = Object.keys(selectedDataPoint).filter((_k) => selectedDataPoint[_k])?.map((k) => dataPoints.find((d) => d.fieldName === k)?._id);
+    let query = `?asset=${assetId}&interval=${dateFilters.intervals}&fromDate=${new Date(dateFilters.from).toISOString()}
+    &toDate=${new Date(dateFilters.to).toISOString()}&dataPoints=${dataPointsSend?.toString()}`;
+    
     axiosInstance()
       .get(`/report/iot/data-points${query}`)
       .then(({ data: { data } }) => {
         setChartData(data?.data);
       })
-      .catch((err) => { });
-  }, [assetId, dataPoints, dateFilters.from, dateFilters.to, selectedDataPoint]);
+      .catch((error) => { 
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   useEffect(() => {
     if (!isEmpty(selectedDataPoint)) {
       fetchData();
     }
-  }, [selectedDataPoint, dateFilters, fetchData]);
+  }, [assetId, dataPoints, dateFilters, selectedDataPoint]);
 
   return (
     <>
