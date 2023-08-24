@@ -363,7 +363,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
                   closeAddActions()
                 }}
               >
-                Add Service
+                Add Existing Service
               </MenuItem>
               {permissions?.serviceMaster?.isCreate &&
                 <MenuItem
