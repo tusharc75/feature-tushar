@@ -5,10 +5,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
 
-import { BiDownload, BiExport } from 'react-icons/bi';
-import { BsArrowDownSquare } from 'react-icons/bs';
-import { DownloadIcon, ExportIcon, ImportIcon } from 'src/assets/svg/svgIcons';
-import { MobileDownloadIcon, MobileImportIcon, MobileExportIcon } from 'src/assets/svg/svgIcons';
+import { DownloadIcon, ExportIcon, ImportIcon, MobileDownloadIcon, MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -437,13 +434,7 @@ export default function ImportExportLinks({
             {isDownloadExcel && !onlyExport && !hideDefaultImportExport && (
               <IconButton
                 size="small"
-                style={{
-                  background: 'var(--dark-secondary, white)',
-                  border: '1px solid var(--common-border-color)',
-                  width: 26,
-                  height: 26,
-                  borderRadius: 4
-                }}
+                className=" mobileIconButton primary border"
                 onClick={() => {
                   downloadTemplate();
                   handleClose();
@@ -454,13 +445,7 @@ export default function ImportExportLinks({
             )}
             <IconButton
               size="small"
-              style={{
-                background: 'var(--dark-secondary, white)',
-                border: '1px solid var(--common-border-color)',
-                width: 26,
-                height: 26,
-                borderRadius: 4
-              }}
+              className=" mobileIconButton primary border"
               onClick={() => {
                 exportToExcel();
                 handleClose();
@@ -469,17 +454,7 @@ export default function ImportExportLinks({
               <MobileExportIcon size={18} color={'var(--primary-text)'} />
             </IconButton>
             {permissions?.isCreate && !onlyExport && !hideDefaultImportExport && (
-              <IconButton
-                size="small"
-                className="relative"
-                style={{
-                  background: 'var(--dark-secondary, white)',
-                  border: '1px solid var(--common-border-color)',
-                  width: 26,
-                  height: 26,
-                  borderRadius: 4
-                }}
-              >
+              <IconButton size="small" className="relative mobileIconButton primary border">
                 {ImportInput}
                 <label htmlFor="importFromExcel" className="absolute inset-0 grid place-items-center">
                   <MobileImportIcon size={18} color={'var(--primary-text)'} />
