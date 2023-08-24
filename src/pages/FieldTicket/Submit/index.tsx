@@ -149,7 +149,26 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
         <>
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
-                    <PreviewDownload hideDetailButton={true} resource={sidebarResource.fieldTicket} referenceId={id} columns={columns} isSendEmail={true} />
+                    <PreviewDownload
+                        hideDetailButton={true}
+                        resource={sidebarResource.fieldTicket}
+                        referenceId={id}
+                        columns={columns}
+                        isSendEmail={true}
+                        defaultColumns={[
+                            'index',
+                            'type',
+                            'detail',
+                            'description',
+                            'qty',
+                            'unit',
+                            'estimateStartDate',
+                            'estimateEndDate',
+                            'estimateJobDuration',
+                            `price_${fieldTicketData?.currency?.toLowerCase()}`,
+                            `finalPrice_${fieldTicketData?.currency?.toLowerCase()}`
+                        ]}
+                    />
                 </Box>
                 <Box display="flex">
                     {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && <Button

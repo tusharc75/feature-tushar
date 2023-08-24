@@ -143,9 +143,6 @@ const AssignSerializedAssetDialog = ({
       if (referenceData?.warehouse) {
         deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
       }
-      if (referenceData.product) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: 'product', term: referenceData.product }])}&filterByIdType=or`;
-      }
     }
     if (reference === 'planning') {
       deepFilter = `${deepFilter}&planning=true`;

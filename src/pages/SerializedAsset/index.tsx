@@ -208,6 +208,7 @@ const SerializedAsset = () => {
           finalObject['canDelete'] = permissions?.serializedAsset?.isDelete;
           finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
+          finalObject['canDelete'] = [ASSET_STATUS.inUse, ASSET_STATUS.reserved, ASSET_STATUS.delivered]?.includes(u?.status) ? false : true;
           return {
             ...finalObject
           };
@@ -381,7 +382,7 @@ const SerializedAsset = () => {
           </IconButton>
         </HtmlTooltip>
       )}
-      {permissions?.serializedAsset?.isDelete && ![ASSET_STATUS.inUse, ASSET_STATUS.reserved, ASSET_STATUS.delivered].includes(params.data.status) ? (
+      {(permissions?.serializedAsset?.isDelete && params.data.canDelete) ? (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -646,14 +647,10 @@ const SerializedAsset = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={!permissions?.serializedAsset?.isDelete ||
-                      (getLocalStorageArrayData(localStorageSelectedRecords)?.filter((o) =>
-                        [ASSET_STATUS.inUse, ASSET_STATUS.reserved, ASSET_STATUS.delivered].includes(o.status)
-                      )?.length > 0)}
+                    disabled={!permissions?.serializedAsset?.isDelete || (getLocalStorageArrayData(localStorageSelectedRecords)?.filter((e) => !e.canDelete)?.length > 0)}
                     onClick={() => {
-                      console.log(selectedRecords, 'selectedRecords')
-                      // closeActions();
-                      // setShowDeleteConfirmBox(true);
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
                     }}
                   >
                     Delete

@@ -10,6 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { serializedAsset } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import PerformanceAnalysis from './PerformanceAnalysis';
+import Current from './Current';
 
 const IotChartDetail = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -80,11 +81,7 @@ const IotChartDetail = () => {
                     <Tab className={'tabLayout'} value={1} label={<div className="d-flex align-items-center tab-font">Analysis</div>} {...a11yProps(1)} />
                     <Tab className={'tabLayout'} value={2} label={<div className="d-flex align-items-center tab-font">Performance Analysis</div>} {...a11yProps(2)} />
                 </Tabs>
-                {tabValue === 0 && (
-                    <Box>
-                        Current
-                    </Box>
-                )}
+                {tabValue === 0 && <Current assetId={assetId} />}
                 {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />}
                 {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} />}
             </Box>

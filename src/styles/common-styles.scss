@@ -270,21 +270,6 @@ $sizes: 0, 0.25rem, 0.5rem, 0.75rem, 1rem, 1.25rem;
 
 @include fixed-list-loop('border-radius-', 'border-radius', 'rem');
 
-// Gap
-
-@mixin fixed-gap-loop($className, $styleName, $unit) {
-  $i: 0;
-  @each $size in $sizes {
-    #{$className + $i} {
-      #{$styleName}: #{$size} !important;
-      #{"-webkit-" + $styleName}: #{$size} !important;
-    }
-    $i: $i + $offset;
-  }
-}
-
-@include fixed-gap-loop('.gap-', 'gap', 'rem');
-
 .light-grey-bg {
   background-color: var(--dark-secondary, var(--lightgrey)) !important;
 }

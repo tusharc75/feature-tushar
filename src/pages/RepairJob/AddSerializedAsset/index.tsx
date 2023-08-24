@@ -236,6 +236,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
           >
             {isMobile && !isTablet ? `Add  ${routes.serializedAsset.title}` : `Add ${routes.serializedAsset.title}`}
           </Button>
+          <div className="ml-auto"></div>
           {repairJobData && repairJobData['status'] !== REPAIR_JOB_STATUS.completed && (
             <Button
               variant={'outlined'}
@@ -283,7 +284,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               {ASSET_STATUS.lost}
             </MenuItem>
           </Menu>
-          <div className="ml-auto"></div>
+
           <Button
             variant={'outlined'}
             color="primary"

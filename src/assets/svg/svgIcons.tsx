@@ -59,7 +59,11 @@ export const PostWorkIcon = ({ className = '', width = '', height = '', size = 1
   );
 };
 
-export const ReportIcon = ({ width = 43, height = 49, colors = ['#577BFC', '#1608BD', '#ABB6EF'], ...other }) => {
+type TIconWithColors = {
+  colors: string[];
+} & svgInterfaceWithSize;
+
+export const ReportIcon: React.FC<TIconWithColors> = ({ width = 43, height = 49, colors = ['#577BFC', '#1608BD'], ...other }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 43 49" fill="none" {...other}>
       <path
@@ -121,6 +125,34 @@ export const ReportIcon = ({ width = 43, height = 49, colors = ['#577BFC', '#160
           <stop stop-color={colors[0]} />
           <stop offset="1" stop-color={colors[1]} />
         </linearGradient>
+      </defs>
+    </svg>
+  );
+};
+export const DataPointsIcon: React.FC<TIconWithColors> = ({ width = 54, size = 54, height = 54, colors = ['#577BFC', '#1608BD'], ...other }) => {
+  return (
+    <svg {...other} xmlns="http://www.w3.org/2000/svg" width={size || width} height={size || height} fill="none" viewBox="0 0 55 55">
+      <g clipPath="url(#clip0_5107_48752)">
+        <path
+          fill={`url(#paint0_linear_5107_48752${colors[0]}${colors[1]})`}
+          d="M27.248 7.32a.9.9 0 01-.9-.9V1.695a.9.9 0 011.8 0V6.42a.9.9 0 01-.9.9zm-8.1-.9V1.695a.9.9 0 10-1.8 0V6.42a.9.9 0 001.8 0zm18 0V1.695a.9.9 0 10-1.8 0V6.42a.9.9 0 001.8 0zm-9 47.475V49.17a.9.9 0 10-1.8 0v4.725a.9.9 0 001.8 0zm9 0V49.17a.9.9 0 10-1.8 0v4.725a.9.9 0 001.8 0zm-18 0V49.17a.9.9 0 10-1.8 0v4.725a.9.9 0 001.8 0zm35.1-26.1a.9.9 0 00-.9-.9h-4.725a.9.9 0 100 1.8h4.725a.9.9 0 00.9-.9zm0-9a.9.9 0 00-.9-.9h-4.725a.9.9 0 100 1.8h4.725a.9.9 0 00.9-.9zm0 18a.9.9 0 00-.9-.9h-4.725a.9.9 0 100 1.8h4.725a.9.9 0 00.9-.9zm-47.475-9a.9.9 0 00-.9-.9H1.148a.9.9 0 100 1.8h4.725a.9.9 0 00.9-.9zm0 9a.9.9 0 00-.9-.9H1.148a.9.9 0 100 1.8h4.725a.9.9 0 00.9-.9zm0-18a.9.9 0 00-.9-.9H1.148a.9.9 0 100 1.8h4.725a.9.9 0 00.9-.9zm38.25-4.275v26.55c0 2.482-2.018 4.5-4.5 4.5h-26.55a4.504 4.504 0 01-4.5-4.5V14.52c0-2.482 2.018-4.5 4.5-4.5h26.55c2.482 0 4.5 2.018 4.5 4.5zM28.441 31.046a1.686 1.686 0 00-2.386 0c-.66.659-.66 1.726 0 2.386a1.686 1.686 0 102.386-2.387zm2.944-2.944a5.847 5.847 0 00-8.274 0 .9.9 0 101.273 1.273 4.047 4.047 0 015.728 0 .9.9 0 001.273-1.273zm3.34-3.341a10.57 10.57 0 00-14.955 0 .9.9 0 101.273 1.273 8.77 8.77 0 0112.41 0 .9.9 0 101.273-1.273z"
+        ></path>
+      </g>
+      <defs>
+        <linearGradient
+          id={`paint0_linear_5107_48752${colors[0]}${colors[1]}`}
+          x1="8.264"
+          x2="54.248"
+          y1="0.795"
+          y2="54.795"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor={colors[0]}></stop>
+          <stop offset="1" stopColor={colors[1]}></stop>
+        </linearGradient>
+        <clipPath id="clip0_5107_48752">
+          <path fill="#fff" d="M0 0H54V54H0z" transform="translate(.248 .795)"></path>
+        </clipPath>
       </defs>
     </svg>
   );

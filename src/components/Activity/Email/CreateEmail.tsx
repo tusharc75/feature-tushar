@@ -257,6 +257,13 @@ export const CreateEmail = ({
 
   const handleSendQuoteEmail = async (values) => {
     setSending(true);
+    relatedTo=[
+      {
+        'type': referenceType,
+        'referenceId': id,
+        'access': true
+      }
+    ]
     const body = {
       email: values.to,
       version: version,
@@ -264,6 +271,7 @@ export const CreateEmail = ({
       emailSubject: values.subject,
       cc: values.cc,
       id: id,
+      relatedTo: relatedTo,
       attachments: [...stateQuoteBuilderAttachments, ...quoteBuilderOtherAttachments],
       eSign: toogle['e-Sign']
     };
