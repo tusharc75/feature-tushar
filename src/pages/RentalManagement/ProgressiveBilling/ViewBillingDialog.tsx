@@ -212,7 +212,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : parent.type === 'serializedAsset'
-                ? parent.serializedAssetDetail?.product?.productDescription || ''
+                ? `${parent.serializedAssetDetail?.product?.optionLabel}-${parent.serializedAssetDetail?.product?.productDescription || ''}`
                 : '';
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
       parent.qtyDisplay = parent.qty;
