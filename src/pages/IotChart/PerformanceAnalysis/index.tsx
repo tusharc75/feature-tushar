@@ -52,10 +52,11 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
       .get(`/report/iot/data-points`, {
         params: {
           asset: assetId,
-          from_date: new Date(from).toISOString(),
-          to_date: new Date(to).toISOString(),
-          interval: interval,
-          dataPoints: dataPointsSend?.toString()
+          from_date: new Date(dateFilters.from).toISOString(),
+          to_date: new Date(dateFilters.to).toISOString(),
+          interval: dateFilters.intervals,
+          dataPoints: dataPointsSend?.toString(),
+          timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone
         }
       })
       .then(({ data: { data } }) => {
