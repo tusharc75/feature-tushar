@@ -934,6 +934,10 @@ const Report = () => {
         <Link className="link" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
+      ) : params.data.referenceType === 'Field Ticket' ? (
+        <Link className="link" title={params.value} to={`${routes.fieldTicketDetail.path}/${params.data.referenceId}`} target="_blank">
+          {params.value}
+        </Link>
       ) : (
         params.value
       )
