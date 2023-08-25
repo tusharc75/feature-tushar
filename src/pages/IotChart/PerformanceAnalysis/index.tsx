@@ -31,7 +31,8 @@ const PerformanceAnalysis = ({ assetId, dataPoints }) => {
           from_date: new Date(dateFilters.from).toISOString(),
           to_date: new Date(dateFilters.to).toISOString(),
           interval: dateFilters.intervals,
-          dataPoints: dataPointsSend?.toString()
+          dataPoints: dataPointsSend?.toString(),
+          timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone
         }
       })
       .then(({ data: { data } }) => {

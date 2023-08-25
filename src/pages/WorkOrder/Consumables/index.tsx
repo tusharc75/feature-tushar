@@ -403,7 +403,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               <MenuItem
                 disabled={selectedRecords?.find(s => s?.consumedQty || s?.requestedQty) ? true : false}
                 onClick={() => {
-                  handleDelete(selectedRecords)
+                  handleDelete(selectedRecords?.filter(s => !s?.consumedQty && !s?.requestedQty))
                   handleCloseAction();
                 }}
               >
