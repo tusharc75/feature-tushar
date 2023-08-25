@@ -1,17 +1,13 @@
-import { useContext, useState, useEffect, Fragment } from 'react';
-import { Grid, Typography, Box, Divider, Button } from '@material-ui/core';
-import styles from '../Leads/Header.module.scss';
-import routes from './../../components/Helpers/Routes';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import { MdDescription } from 'react-icons/md';
-import { Link } from 'react-router-dom';
-import { camelCase } from 'lodash';
-import axiosInstance from '../../axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import DetailsDialog from './DetailsDialog';
-import { isMobile, isTablet } from 'react-device-detect';
+import { Box, Button } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
+import { useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import axiosInstance from '../../axios/axiosInstance';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import DetailsDialog from './DetailsDialog';
 
 const EcommercePolicy = () => {
   const [details, setDetails] = useState({});
