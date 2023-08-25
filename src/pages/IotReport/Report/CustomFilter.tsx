@@ -304,7 +304,6 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
                         <div className="p-4 pt-5 min-h-[200px]">
                             <Container maxWidth="sm">
                                 <Box textAlign="center" mb={2}>
-
                                     <Autocomplete
                                         loadingText="Please wait..."
                                         options={field}
