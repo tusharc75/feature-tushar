@@ -69,8 +69,8 @@ const InventoryProduct = () => {
 
   const [settingDialogOpen, setSettingDialogOpen] = useState(false);
 
-  const [showExpenseItem, setShowExpenseItem] = useState(false)
-  const [expenseItemValue, setExpenseItemValue] = useState(false)
+  const [showExpenseItem, setShowExpenseItem] = useState(false);
+  const [expenseItemValue, setExpenseItemValue] = useState(false);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -111,7 +111,19 @@ const InventoryProduct = () => {
     searchTimeout = setTimeout(() => {
       fetchProductInventory();
     }, millisec);
-  }, [plantId, storageLocationId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, fromProductMaster, expenseItemValue]);
+  }, [
+    plantId,
+    storageLocationId,
+    page,
+    limit,
+    filters,
+    sorting,
+    search,
+    selectedEntity,
+    showFilteredRecordsOnly,
+    fromProductMaster,
+    expenseItemValue
+  ]);
 
   const getPlants = () => {
     axiosInstance()
@@ -131,13 +143,12 @@ const InventoryProduct = () => {
     const productFields = await axiosInstance().get('/field?resource=Product&view=true');
     const productInventoryFields = await axiosInstance().get('/field?resource=Product Inventory&view=true');
 
-
     let columns = [];
     let rendererNames = [];
 
     productFields?.data?.data?.forEach((o) => {
       if (o.fieldData.fieldName === 'expenseItem') {
-        setShowExpenseItem(true)
+        setShowExpenseItem(true);
       }
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
       if (currentColumn !== null) {
@@ -179,7 +190,6 @@ const InventoryProduct = () => {
           }
         }
       });
-
     }
 
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
@@ -191,10 +201,20 @@ const InventoryProduct = () => {
     });
 
     const defaultColumns = [
-      ...(!user?.user?.brandPolicy?.hideInventoryCount ?
-        [{ field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' },
-        { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },
-        { field: 'purchaseOrderQty', headerName: 'On PO', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }] : []),
+      ...(!user?.user?.brandPolicy?.hideInventoryCount
+        ? [
+            {
+              field: 'availableInventory',
+              headerName: 'Available Inventory',
+              filter: false,
+              sortable: false,
+              show: true,
+              cellRenderer: 'numberRenderer'
+            },
+            { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },
+            { field: 'purchaseOrderQty', headerName: 'On PO', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }
+          ]
+        : [])
     ];
     setColumns([...columns, ...defaultColumns]);
   };
@@ -238,9 +258,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-          .filter((d) => d.optionValue !== 'All')
-          .map((d) => d.optionValue)
-          .toString()
+            .filter((d) => d.optionValue !== 'All')
+            .map((d) => d.optionValue)
+            .toString()
         : plantId;
 
     let deepFilter = '';
@@ -340,7 +360,7 @@ const InventoryProduct = () => {
           >
             <AddCircleOutlineIcon
               fontSize="small"
-              color={permissions?.productInventory?.isCreate && params?.data?.plantId !== 'All' ? 'secondary' : 'disabled'}
+              color={permissions?.productInventory?.isCreate && params?.data?.plantId !== 'All' ? 'primary' : 'disabled'}
             />
           </IconButton>
         </span>
@@ -351,20 +371,27 @@ const InventoryProduct = () => {
             !permissions?.productInventory?.isUpdate
               ? TOOLTIP_MESSAGE.remove
               : params?.data?.plantId === 'All'
-                ? 'Select Plant'
-                : user?.user?.brandPolicy?.allowNegativeInventory ? 'Remove' :
-                  !params?.data?.availableInventory
-                    ? 'Inventory not available'
-                    : 'Remove'
+              ? 'Select Plant'
+              : user?.user?.brandPolicy?.allowNegativeInventory
+              ? 'Remove'
+              : !params?.data?.availableInventory
+              ? 'Inventory not available'
+              : 'Remove'
           }
         >
           <span>
             <IconButton
               size="small"
               aria-label="Clone"
-              disabled={permissions?.productInventory?.isUpdate && params?.data?.plantId !== 'All' ?
-                user?.user?.brandPolicy?.allowNegativeInventory ? false :
-                  params?.data?.availableInventory ? false : true : true}
+              disabled={
+                permissions?.productInventory?.isUpdate && params?.data?.plantId !== 'All'
+                  ? user?.user?.brandPolicy?.allowNegativeInventory
+                    ? false
+                    : params?.data?.availableInventory
+                    ? false
+                    : true
+                  : true
+              }
               onClick={() => {
                 setInventory({ open: true, product: [params?.data], type: 'remove' });
               }}
@@ -373,8 +400,12 @@ const InventoryProduct = () => {
                 fontSize="small"
                 color={
                   permissions?.productInventory?.isUpdate && params?.data?.plantId !== 'All'
-                    ? user?.user?.brandPolicy?.allowNegativeInventory ? 'error' :
-                      params?.data?.availableInventory ? 'error' : 'disabled' : 'disabled'
+                    ? user?.user?.brandPolicy?.allowNegativeInventory
+                      ? 'error'
+                      : params?.data?.availableInventory
+                      ? 'error'
+                      : 'disabled'
+                    : 'disabled'
                 }
               />
             </IconButton>
@@ -431,7 +462,7 @@ const InventoryProduct = () => {
     }
     axiosInstance()
       .get(api)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -508,14 +539,15 @@ const InventoryProduct = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
-              <div className="d-flex align-items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+            <div className={'d-flex flex-wrap align-items-center gap-1'}>
+              {/* <div className="d-flex align-items-center">
                 <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
                 <span className="listingHeader">{routes.productInventory?.title} </span>
-              </div>
+              </div> */}
               <Autocomplete
-                style={{ width: '250px' }}
+                style={{ minWidth: '200px', flexGrow: 1 }}
+                className="md:max-w-[250px]"
                 options={plantOptions}
                 getOptionLabel={(option: any) => option.optionLabel}
                 disableClearable
@@ -531,25 +563,15 @@ const InventoryProduct = () => {
                     setStorageLocationId(null);
                   }
                 }}
-                renderInput={(params) =>
-                  isMobile && !isTablet ? (
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="plant"
-                      placeholder={routes.warehouse.title}
-                      variant="standard"
-                      fullWidth
-                      className={isMobile ? 'serchBox' : ''}
-                    />
-                  ) : (
-                    <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-                  )
-                }
+                size="small"
+                renderInput={(params) => (
+                  <TextField {...params} margin="none" size="small" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                )}
               />
               {user?.user?.brandPolicy?.storageLocation && (
                 <Autocomplete
-                  style={{ width: '250px' }}
+                  style={{ minWidth: '200px', flexGrow: 1 }}
+                  className="md:max-w-[250px]"
                   options={storageLocationOptions.filter((item) => item.warehouse === plantId)}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -561,39 +583,28 @@ const InventoryProduct = () => {
                   onChange={(e, val) => {
                     setStorageLocationId(val?.optionValue);
                   }}
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name="storageLocation"
-                        placeholder="Storage Location"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
-                    )
-                  }
+                  size="small"
+                  renderInput={(params) => (
+                    <TextField {...params} margin="none" size="small" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+                  )}
                 />
               )}
-              {
-                showExpenseItem && (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={expenseItemValue}
-                        onChange={(e) => {
-                          setExpenseItemValue(e.target.checked)
-                        }}
-                        name="expenseItem"
-                        color="primary"
-                      />
-                    }
-                    label="Expense Item"
-                  />
-                )}
+              {showExpenseItem && (
+                <FormControlLabel
+                  style={{ margin: 0 }}
+                  control={
+                    <Checkbox
+                      checked={expenseItemValue}
+                      onChange={(e) => {
+                        setExpenseItemValue(e.target.checked);
+                      }}
+                      name="expenseItem"
+                      color="primary"
+                    />
+                  }
+                  label="Expense Item"
+                />
+              )}
               {fromProductMaster?.product && (
                 <Chip
                   className="ml-3"
@@ -604,99 +615,88 @@ const InventoryProduct = () => {
                   }}
                 />
               )}
-            </Grid>
-            <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1 }}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={styles.search_box_input}
-                    width={isMobile ? '200px' : '242px'}
-                    style={isMobile ? { flex: 1 } : {}}
-                    size="small"
-                    value={search}
-                  />
-                </Grid>
-              </Box>
-              {permissions?.productInventory?.isUpdate ? (
-                <Box ml={1}>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="default"
-                    size="small"
-                    disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length && plantId !== 'All' ? false : true}
-                    className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                  >
-                    {isMobile && !isTablet ? '' : 'Actions'}
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      disabled={permissions?.productInventory?.isCreate ? false : true}
-                      onClick={() => {
-                        closeActions();
-                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: 'add' });
-                      }}
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.productInventory?.isUpdate ? (
+                  <Box ml={1}>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length && plantId !== 'All' ? false : true}
+                      className={`new-dropdown-v1`}
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
                     >
-                      Add
-                    </MenuItem>
-                    <MenuItem
-                      disabled={permissions?.productInventory?.isUpdate ? false : true}
-                      onClick={() => {
-                        closeActions();
-                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: 'remove' });
+                      Actions
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
                       }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
                     >
-                      Remove
-                    </MenuItem>
-                    <MenuItem
-                      disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
-                      style={{ display: 'none' }}
-                      onClick={() => {
-                        closeActions();
-                        checkReport();
-                      }}
-                    >
-                      Check Report
-                    </MenuItem>
-                    <MenuItem
-                      disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
-                      style={{ display: 'none' }}
-                      onClick={() => {
-                        closeActions();
-                        handleRemap();
-                      }}
-                    >
-                      Remap
-                    </MenuItem>
-                    <MenuItem
-                      disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
-                      style={{ display: 'none' }}
-                      onClick={() => {
-                        closeActions();
-                        handleRemapPurchaseOrder();
-                      }}
-                    >
-                      Remap Purchase Order
-                    </MenuItem>
-                  </Menu>
-                </Box>
-              ) : null}
-              {user?.role?.selectedEntity?.policy?.isProductInventorySettings && (
-                <Box ml={1}>
+                      <MenuItem
+                        disabled={permissions?.productInventory?.isCreate ? false : true}
+                        onClick={() => {
+                          closeActions();
+                          setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: 'add' });
+                        }}
+                      >
+                        Add
+                      </MenuItem>
+                      <MenuItem
+                        disabled={permissions?.productInventory?.isUpdate ? false : true}
+                        onClick={() => {
+                          closeActions();
+                          setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: 'remove' });
+                        }}
+                      >
+                        Remove
+                      </MenuItem>
+                      <MenuItem
+                        disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
+                        style={{ display: 'none' }}
+                        onClick={() => {
+                          closeActions();
+                          checkReport();
+                        }}
+                      >
+                        Check Report
+                      </MenuItem>
+                      <MenuItem
+                        disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
+                        style={{ display: 'none' }}
+                        onClick={() => {
+                          closeActions();
+                          handleRemap();
+                        }}
+                      >
+                        Remap
+                      </MenuItem>
+                      <MenuItem
+                        disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
+                        style={{ display: 'none' }}
+                        onClick={() => {
+                          closeActions();
+                          handleRemapPurchaseOrder();
+                        }}
+                      >
+                        Remap Purchase Order
+                      </MenuItem>
+                    </Menu>
+                  </Box>
+                ) : null}
+                {user?.role?.selectedEntity?.policy?.isProductInventorySettings && (
                   <HtmlTooltip title={plantId === 'All' ? 'Select Plant' : 'Setting'}>
                     <span>
                       <IconButton
@@ -710,10 +710,10 @@ const InventoryProduct = () => {
                       </IconButton>
                     </span>
                   </HtmlTooltip>
-                </Box>
-              )}
-            </Grid>
-          </Grid>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
         {columns && plantId ? (
           Object.keys(frameworkComponents).length > 0 ? (
@@ -749,9 +749,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                    .filter((d) => d.optionValue !== 'All')
+                    .map((d) => d.optionValue)
+                    .toString()
                 : plantId
             }
           />
@@ -767,9 +767,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                    .filter((d) => d.optionValue !== 'All')
+                    .map((d) => d.optionValue)
+                    .toString()
                 : plantId
             }
             storageLocation={storageLocationId}
@@ -785,9 +785,9 @@ const InventoryProduct = () => {
             warehouse={
               plantId === 'All'
                 ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                    .filter((d) => d.optionValue !== 'All')
+                    .map((d) => d.optionValue)
+                    .toString()
                 : plantId
             }
           />

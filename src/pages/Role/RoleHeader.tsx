@@ -153,7 +153,6 @@ const RoleHeader = (props) => {
               className={styles.search_box_input}
               value={searchVal}
               size="small"
-              placeholder="Search Role"
               width={isMobile && !isTablet ? '200px' : '242px'}
               style={isMobile && !isTablet ? { flex: 1 } : {}}
             />

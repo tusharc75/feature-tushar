@@ -251,7 +251,6 @@ function RentalManagementHeader({
             className={isMobile ? styles.search_box_input : ''}
             value={searchVal}
             size="small"
-            placeholder={`Search ${routes.rentalManagement.title}`}
           />
         </HideWhenOffline>
         <div className="flex gap-[8px] flex-wrap items-center">

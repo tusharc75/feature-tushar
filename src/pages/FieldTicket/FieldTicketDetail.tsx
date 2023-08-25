@@ -85,7 +85,7 @@ const FieldTicketDetail = () => {
         data = response?.data?.data;
       }
       setFieldTicketData(data);
-      if ([FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.submitted]?.includes(data?.status)) {
+      if ([FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.readyToInvoice]?.includes(data?.status)) {
         setCurrentStep(fieldTicketSteps?.length - 1);
       }
       else {
@@ -225,7 +225,7 @@ const FieldTicketDetail = () => {
           <Steps
             isNextStep={false}
             nextStep={nextStep}
-            isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.submitted ? false : true}
+            isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.readyToInvoice ? false : true}
             steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}

@@ -456,6 +456,9 @@ export default function CustomAgGrid({
     );
   });
 
+
+  let searchTimeout;
+
   return (
     <>
       <div className="ag-grid-main custom-react-table-v1 ">
@@ -555,7 +558,13 @@ export default function CustomAgGrid({
                     });
                     dispatch({ type: 'pageChange', page: 0 });
                   } else {
-                    dispatch({ type: 'filter', filters: e.api.getFilterModel() });
+                    let millisec = 600;
+                    if (searchTimeout) {
+                      clearTimeout(searchTimeout);
+                    }
+                    searchTimeout = setTimeout(() => {
+                      dispatch({ type: 'filter', filters: e.api.getFilterModel() });
+                    }, millisec);
                   }
                 }}
                 enableCellTextSelection={true}

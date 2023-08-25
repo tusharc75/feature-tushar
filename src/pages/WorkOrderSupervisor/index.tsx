@@ -260,6 +260,9 @@ const WorkOrderSupervisor = () => {
                   value={timeFrame}
                   onChange={(e) => setTimeFrame(e.target.value)}
                   label="Select Duration"
+                  SelectDisplayProps={{
+                    style: { minHeight: 22.5 }
+                  }}
                   fullWidth
                 >
                   <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
@@ -274,6 +277,9 @@ const WorkOrderSupervisor = () => {
                 inputVariant="outlined"
                 variant="inline"
                 size="small"
+                InputProps={{
+                  style: { minHeight: '38px' }
+                }}
                 autoOk
                 format={dateFormatForInputControl}
                 maxDate={globalFilters.to}
@@ -289,6 +295,9 @@ const WorkOrderSupervisor = () => {
                 variant="inline"
                 autoOk
                 size="small"
+                InputProps={{
+                  style: { minHeight: '38px' }
+                }}
                 minDate={globalFilters.from}
                 format={dateFormatForInputControl}
                 label="To"

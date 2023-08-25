@@ -22,7 +22,6 @@ interface EditDialogProps {
   repairOrderData: any;
   rowData?: object | any;
   material: any[];
-  selectedProducts: any[];
   isBulkedit: any;
   loading: any;
 }
@@ -33,7 +32,6 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({
   repairOrderData,
   rowData,
   material,
-  selectedProducts,
   isBulkedit,
   loading
 }) => {
@@ -89,42 +87,23 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({
   };
 
   const handleSubmit = async (values) => {
-    if (isBulkedit) {
-      for (const x in values) {
-        if (values[x] === '' || (Array.isArray(values[x]) && values[x].length === 0)) {
-          delete values[x];
-        }
-      }
-      let rows: any = [];
-      if (values['unit'] || values['qty']) {
-        selectedProducts.forEach((d) => {
-          const element: any = {};
-          element.materialId = d.materialId;
-          element.type = d.type;
-          element.unit = values['unit'] || d.unit;
-          element.qty = values['qty'] || d.qty;
-          rows.push(element);
-        });
-      }
-      handleSaveData(rows);
-    } else {
-      let rows: any = [{ ...rowData, ...values }];
-      handleSaveData(rows);
-    }
+    let rows: any = [{ ...rowData, ...values }];
+    handleSaveData(rows);
   };
 
   function validate(values) {
     const errors = {};
-    if (rowData && rowData.hideSelection) {
+
+    if (rowData) {
       if (rowData.parentId) {
         const _package = material?.filter((e) => e._id === rowData.parentId);
         if (_package.length) {
-          if (values.qty * _package[0].qty < rowData.assetQty) {
+          if (values.qty * _package[0].qty < rowData.subRows?.length) {
             errors['qty'] = 'The quantity is less than what was assigned.';
           }
         }
       } else {
-        if (values.qty < rowData.assetQty) {
+        if (values.qty < rowData.subRows?.length) {
           errors['qty'] = 'The quantity is less than what was assigned.';
         }
       }

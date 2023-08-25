@@ -79,11 +79,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, '');
     let coloum: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -331,7 +331,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
 
       rows.forEach((parent, i) => {
-        parent.srno = i + 1;
+        parent.index = i + 1;
         parent.detail = `${parent.type === 'service'
           ? parent?.serviceDetail?.serviceName
           : parent.type === 'product'
@@ -447,7 +447,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       }
       subRows.push({
         ..._inventory,
-        srno: `${parent.srno}.${k + 1}`,
+        index: `${parent.index}.${k + 1}`,
         detail: _inventory?.assetNumber ? _inventory?.assetNumber : _inventory.inventoryDetail?.assetNumber,
         description: parent?.description,
         type: 'asset',
@@ -470,7 +470,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       subRows.push({
         _id: _inventory.id,
         inventory: _inventory.id,
-        srno: `${parent.srno}.${k + 1}`,
+        index: `${parent.index}.${k + 1}`,
         detail: _inventory?.assetNumber,
         description: parent?.description,
         type: 'asset',
@@ -486,7 +486,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     var assetQtySUM = 0;
     var assetAssignedQtySUM = 0;
     childProduct.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName

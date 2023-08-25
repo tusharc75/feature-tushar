@@ -209,7 +209,6 @@ function JobHeader(props) {
               className={styles.search_box_input}
               value={searchVal}
               size="small"
-              placeholder="Search Job"
               style={isMobile ? { flex: 1 } : {}}
             />
           </Grid>

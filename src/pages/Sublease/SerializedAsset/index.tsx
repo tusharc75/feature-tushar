@@ -50,7 +50,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
   const [isCompleteing, setIsCompleteing] = useState(false);
   const [isCompleteEnable, setIsCompleteEnable] = useState(false);
 
-  const [downlodingFile, setDownlodingFile] = useState(false);
   const { setToastConfig } = useContext(CustomToastContext);
 
   useEffect(() => {

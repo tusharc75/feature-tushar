@@ -124,7 +124,6 @@ const EntityHeader = (props) => {
               value={searchVal}
               className={styles.search_box_input}
               size="small"
-              placeholder="Search Entities"
               width={isMobile && !isTablet ? '200px' : '242px'}
               style={isMobile && !isTablet ? { flex: 1 } : {}}
             />

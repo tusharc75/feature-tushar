@@ -146,7 +146,6 @@ const Header = (props) => {
               className={styles.search_box_input}
               value={searchVal}
               size="small"
-              placeholder="Search Users"
               width={isMobile && !isTablet ? '200px' : '242px'}
               style={isMobile && !isTablet ? { flex: 1 } : {}}
             />
@@ -204,7 +203,7 @@ const Header = (props) => {
                   )}
 
                   {isAssignBrandAdmin && selectedRecordsLength > 0 && <MenuItem onClick={handleAssignBrandAdmin}>Assign Brand Admin</MenuItem>}
-                  {isUnAssignBrandAdmin && <MenuItem onClick={handleUnAssignBrandAdmin}>Unassign Brand Admin</MenuItem>}
+                  {/* {isUnAssignBrandAdmin && <MenuItem onClick={handleUnAssignBrandAdmin}>Unassign Brand Admin</MenuItem>} */}
 
                   {userPermissions.isUpdate && (
                     <MenuItem

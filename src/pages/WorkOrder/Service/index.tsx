@@ -540,7 +540,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                             closeAddServiceActions();
                           }}
                         >
-                          Add Services
+                          Add Existing Services
                         </MenuItem>
                         <MenuItem
                           onClick={() => {
@@ -621,7 +621,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                   {data?.type === 'service' ? (
                                     <Box
                                       style={{
-                                        backgroundColor: 'var(--dark-secondary, var(--primary))',
+                                        backgroundColor: 'var(--dark-primary, var(--primary))',
                                         color: 'white',
                                         width: '20px',
                                         height: '20px',
@@ -1038,7 +1038,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                         size="small"
                         onClick={() => setServiceDialog({ open: true, type: 'service', uniqueId: null, preWork: null })}
                       >
-                        Add Services
+                        Add Existing Services
                       </Button>
                     </Box>
                     {serviceSteps?.length > 0 && (
@@ -1074,7 +1074,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   setAnchorEl(null);
                 }}
               >
-                Add Services
+                Add Existing Services
               </MenuItem>
               <MenuItem
                 disabled={

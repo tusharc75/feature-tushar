@@ -11,6 +11,8 @@ import CalendarList from './CalendarList';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import routes from 'src/components/Helpers/Routes';
+import MobileRoadmap from './MobileRoadmap';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const RoadMap = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -59,8 +61,9 @@ const RoadMap = () => {
   };
 
   const executeScroll = () => {
+    if (isMobile && !isTablet) return;
     var pageElement = document.getElementById('dayLiner');
-    var LeftPos = pageElement.offsetLeft;
+    var LeftPos = pageElement?.offsetLeft;
     document.getElementById('scrollDayLiner').scrollLeft = LeftPos - 200;
   };
 
@@ -223,94 +226,105 @@ const RoadMap = () => {
           </Box>
         </Box>
       </div>
-      <Box pt={2}>
-        <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
-          <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
-            <Box minWidth={300} border={1} borderColor="var(--common-border-color)" style={{ position: 'relative', overflow: 'hidden' }}>
-              <Box height={60} bgcolor="var(--dark-secondary, grey.200)" display="flex" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
-                <Box p={2} display="flex" alignItems="center">
-                  <Typography variant="body1" display="block">
-                    Products
-                  </Typography>
+      {isMobile && !isTablet ? (
+        <MobileRoadmap
+          activity={activity}
+          expanded={expanded}
+          selected={selected}
+          setSelected={setSelected}
+          handleToggle={handleToggle}
+          handleSelect={handleSelect}
+        />
+      ) : (
+        <Box pt={2}>
+          <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
+            <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
+              <Box minWidth={300} border={1} borderColor="var(--common-border-color)" style={{ position: 'relative', overflow: 'hidden' }}>
+                <Box height={60} bgcolor="var(--dark-secondary, grey.200)" display="flex" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+                  <Box p={2} display="flex" alignItems="center">
+                    <Typography variant="body1" display="block">
+                      Products
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-              <div
-                ref={taskScroolRef}
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  height: '100%',
-                  overflow: 'hidden'
-                }}
-              >
-                <Box>
-                  <ActivityList
-                    fetchRoadmap={fetchRoadmap}
-                    activity={activity}
-                    expanded={expanded}
-                    selected={selected}
-                    handleToggle={handleToggle}
-                    handleSelect={handleSelect}
-                  />
-                  <Box height={70}></Box>
-                </Box>
-              </div>
-            </Box>
-            <Box
-              id="scrollDayLiner"
-              onScroll={onscroll}
-              border={1}
-              borderColor="var(--common-border-color)"
-              style={{ position: 'relative', overflow: 'auto' }}
-            >
-              <Calendar calendarType={calendarType} dayPixel={dayPixel} startDate={moment(startDate)} endDate={moment(endDate)} />
-              <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
-                <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
-                  <CalendarList
-                    fetchRoadmap={fetchRoadmap}
-                    activity={activity}
-                    expanded={expanded}
-                    selected={selected}
-                    handleSelect={handleSelect}
-                    startDate={moment(startDate)}
-                    endDate={moment(endDate)}
-                    totalDay={totalDay}
-                    calendarType={calendarType}
-                  />
-                </Box>
-              </Box>
-              <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
-                <div ref={scrollRef}>
-                  {day?.map((day) => {
-                    return (
-                      <Box
-                        height={'100%'}
-                        style={{
-                          position: 'absolute',
-                          left: day * dayPixel,
-                          width: dayPixel,
-                          background: day % 2 === 0 ? 'var(--dark-primary-light, #f8fffe)' : 'var(--dark-secondary, white)'
-                        }}
-                      ></Box>
-                    );
-                  })}
-                  <Box
-                    id="dayLiner"
-                    height={'100%'}
-                    style={{
-                      position: 'absolute',
-                      left: (100 * moment().diff(moment(startDate), 'days')) / totalDay + '%',
-                      width: dayPixel
-                    }}
-                  >
-                    <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="var(--common-border-color)" height={'100%'}></Box>
+                <div
+                  ref={taskScroolRef}
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '100%',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <Box>
+                    <ActivityList
+                      fetchRoadmap={fetchRoadmap}
+                      activity={activity}
+                      expanded={expanded}
+                      selected={selected}
+                      handleToggle={handleToggle}
+                      handleSelect={handleSelect}
+                    />
+                    <Box height={70}></Box>
                   </Box>
                 </div>
+              </Box>
+              <Box
+                id="scrollDayLiner"
+                onScroll={onscroll}
+                border={1}
+                borderColor="var(--common-border-color)"
+                style={{ position: 'relative', overflow: 'auto' }}
+              >
+                <Calendar calendarType={calendarType} dayPixel={dayPixel} startDate={moment(startDate)} endDate={moment(endDate)} />
+                <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
+                  <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
+                    <CalendarList
+                      fetchRoadmap={fetchRoadmap}
+                      activity={activity}
+                      expanded={expanded}
+                      selected={selected}
+                      handleSelect={handleSelect}
+                      startDate={moment(startDate)}
+                      endDate={moment(endDate)}
+                      totalDay={totalDay}
+                      calendarType={calendarType}
+                    />
+                  </Box>
+                </Box>
+                <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
+                  <div ref={scrollRef}>
+                    {day?.map((day) => {
+                      return (
+                        <Box
+                          height={'100%'}
+                          style={{
+                            position: 'absolute',
+                            left: day * dayPixel,
+                            width: dayPixel,
+                            background: day % 2 === 0 ? 'var(--dark-primary-light, #f8fffe)' : 'var(--dark-secondary, white)'
+                          }}
+                        ></Box>
+                      );
+                    })}
+                    <Box
+                      id="dayLiner"
+                      height={'100%'}
+                      style={{
+                        position: 'absolute',
+                        left: (100 * moment().diff(moment(startDate), 'days')) / totalDay + '%',
+                        width: dayPixel
+                      }}
+                    >
+                      <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="var(--common-border-color)" height={'100%'}></Box>
+                    </Box>
+                  </div>
+                </Box>
               </Box>
             </Box>
           </Box>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 };

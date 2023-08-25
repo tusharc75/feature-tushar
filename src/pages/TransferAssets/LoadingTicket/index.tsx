@@ -41,8 +41,6 @@ interface LoadingGridProps {
   setExistingAssets?: any;
   setTransferIsEnded?: any;
   updateTransferStatus?: any;
-  handleViewPdf?: any;
-  fileDownloading?: boolean;
   isTransferEnded: boolean;
   renderedFrom?: string;
   allowedToEdit: boolean;
@@ -59,8 +57,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     setExistingAssets,
     setTransferIsEnded,
     updateTransferStatus,
-    handleViewPdf,
-    fileDownloading,
     isTransferEnded,
     renderedFrom,
     allowedToEdit,

@@ -276,6 +276,7 @@ const FormTypes = (props) => {
     showErrorMessage = false,
     selectedCurrencyCode = null,
     setFields,
+    fromFilter = false,
     ...rest
   } = props;
 
@@ -697,7 +698,7 @@ const FormTypes = (props) => {
 
   return (!fieldData || !fieldData?.isShowFieldDependentOn || (fieldData?.isShowFieldDependentOn
     && fieldData?.showFieldDependentOn && values[fieldData?.showFieldDependentOn])) ?
-    type === 'singleLine' ? (
+    type === 'singleLine' || type === 'lookUpDisplay' ? (
       <InfoLabel
         info={tooltipMessage}
         isTooltip={isTooltip}
@@ -708,7 +709,7 @@ const FormTypes = (props) => {
           {...rest}
           disabled={fieldData?.isUneditable || rest?.disabled}
           variant="outlined"
-          type="text"
+          type={fromFilter ? "search" : "text"}
           label={getLabel(label)}
           required={required}
           name={name}
@@ -728,7 +729,7 @@ const FormTypes = (props) => {
         <TextField
           {...rest}
           variant="outlined"
-          type="text"
+          type={fromFilter ? "search" : "text"}
           label={getLabel(label)}
           required={required}
           name={name}
@@ -753,7 +754,7 @@ const FormTypes = (props) => {
         <TextField
           {...rest}
           variant="outlined"
-          type="text"
+          type={fromFilter ? "search" : "text"}
           multiline
           label={getLabel(label)}
           name={name}
@@ -840,7 +841,7 @@ const FormTypes = (props) => {
         <TextField
           {...rest}
           variant="outlined"
-          type="email"
+          type={fromFilter ? "search" : "email"}
           label={getLabel(label)}
           required={required}
           name={name}
@@ -1147,7 +1148,7 @@ const FormTypes = (props) => {
         <TextField
           {...rest}
           variant="outlined"
-          type="text"
+          type={fromFilter ? "search" : "text"}
           label={getLabel(label)}
           required={required}
           name={name}
@@ -2068,15 +2069,16 @@ const FormTypes = (props) => {
     ) : type === 'fileUpload' ? (
       <Fragment>
         <Box display="flex" alignItems="center">
-          {/* <Typography color="textSecondary">{label}</Typography> */}
           {isTooltip && Boolean(tooltipMessage) && (
-            <IconButton size="small">
-              <HtmlTooltip title={tooltipMessage}>
-                <InfoIcon color="disabled" />
-              </HtmlTooltip>
-            </IconButton>
+            <Fragment>
+              <IconButton size="small">
+                <HtmlTooltip title={tooltipMessage}>
+                  <InfoIcon color="disabled" />
+                </HtmlTooltip>
+              </IconButton>
+              <Box mr={1} />
+            </Fragment>
           )}
-          <Box mr={1} />
           <input
             disabled={isFileUploading || !canEdit}
             id={name}

@@ -68,10 +68,10 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
       }
       var column: any = [
         {
-          accessor: 'srno',
+          accessor: 'index',
           Header: 'Index',
           width: 70,
-          Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+          Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
           Footer: () => {
             return <>Total</>;
           }
@@ -196,7 +196,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
       combinedData = [...combinedData, ...additionalcost];
       const rows = combinedData.filter((e) => e.parentId === null);
       rows.forEach((parent, i) => {
-        parent.srno = i + 1;
+        parent.index = i + 1;
         parent.detail =
           parent.type === 'Add On'
             ? parent.detail
@@ -232,7 +232,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
       subRows.push({
         ..._inventory,
         _id: _inventory.inventoryDetail?._id,
-        srno: `${parent.srno}.${k + 1}`,
+        index: `${parent.index}.${k + 1}`,
         detail: _inventory.inventoryDetail?.assetNumber,
         status: _inventory.inventoryDetail?.status,
         description: parent?.description || '',
@@ -245,7 +245,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
 
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
     childProduct.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail =
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productName

@@ -23,7 +23,7 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 let searchTimeout;
 
-const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, extraStaticFilter = [], serviceType = '' }) => {
+const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, extraStaticFilter = [] }) => {
   const renderedFrom = `${routes.serviceMaster.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -140,8 +140,8 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
 
   const getQueryString = () => {
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
-    let serviceTypeQuery = serviceType != '' ? `&serviceType=${serviceType}` : '';
-    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}${serviceTypeQuery}`;
+
+    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }

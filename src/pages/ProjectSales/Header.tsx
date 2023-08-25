@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import Chip from '@material-ui/core/Chip';
-import styles from '../Leads/Header.module.scss';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { BiNetworkChart } from 'react-icons/bi';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import routes from '../../components/Helpers/Routes';
+import { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdFilterList, MdSort } from 'react-icons/all';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
+import { BiNetworkChart } from 'react-icons/bi';
+import routes from '../../components/Helpers/Routes';
+import SearchBox from '../../components/Helpers/SearchBox';
+import styles from '../Leads/Header.module.scss';
 
-import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
 
 const ProjectStrategyHeader = (props) => {
   const {
@@ -81,51 +81,52 @@ const ProjectStrategyHeader = (props) => {
           <span className="listingHeader">{routes.projectSales.title}</span>
         </div>
         {isMobile && !isTablet ? (
-          <div className="d-flex ">
-            <Button
-              onClick={handleClickOpen}
-              id="demo-customized-button"
-              aria-controls="demo-customized-menu"
-              aria-haspopup="true"
-              // aria-expanded={open ? 'true' : undefined}
-              variant="text"
-              disableElevation
-              startIcon={<MdSort />}
-            >
-              Sort
-            </Button>
+          <div className="d-flex flex-wrap items-center justify-between w-full">
+            <div>{toggleInner}</div>
+            <div className="flex flex-wrap items-center gap-1">
+              <IconButton
+                onClick={handleClickOpen}
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                size="small"
+                className={'mobileIconButton secondary'}
+              >
+                <TbArrowsSort className="rotate-90" size={16} />
+              </IconButton>
 
-            <MobileSortDialog
-              isOpen={open}
-              handleClose={handleClickClose}
-              contentPart={toggleInner}
-              secHeading={['Sort ProjectSales']}
-              columns={columns}
-              dispatch={dispatch}
-            />
+              <MobileSortDialog
+                isOpen={open}
+                handleClose={handleClickClose}
+                contentPart={toggleInner}
+                secHeading={['Sort ProjectSales']}
+                columns={columns}
+                dispatch={dispatch}
+              />
 
-            <Button
-              id="demo-customized-button"
-              aria-controls="demo-customized-menu"
-              aria-haspopup="true"
-              // aria-expanded={open ? 'true' : undefined}
-              color="secondary"
-              disableElevation
-              startIcon={<MdFilterList />}
-              onClick={handleOpen}
-            >
-              Filter
-            </Button>
+              <IconButton
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                size="small"
+                className={'mobileIconButton secondary'}
+                onClick={handleOpen}
+              >
+                <MdOutlineFilterAlt size={16} />
+              </IconButton>
 
-            <MobileFilterDialog
-              isOpen={isOpenDialog}
-              handleClose={handleClose}
-              contentPart={toggleInner}
-              columns={columns}
-              dispatch={dispatch}
-              title={routes?.projectSales?.title}
-              filters={filters}
-            />
+              <MobileFilterDialog
+                isOpen={isOpenDialog}
+                handleClose={handleClose}
+                contentPart={''}
+                columns={columns}
+                dispatch={dispatch}
+                title={routes?.projectSales?.title}
+                filters={filters}
+              />
+            </div>
           </div>
         ) : (
           <ToggleButtonGroup size="small" className="ml-8" value={selectedType} exclusive onChange={handleFilter}>
@@ -136,7 +137,7 @@ const ProjectStrategyHeader = (props) => {
         {children}
       </div>
       <div className="flex flex-wrap gap-[8px]  justify-end">
-        <SearchBox onChange={onSearch} value={searchVal} className={styles.search_box_input} size="small" placeholder="Search Project List" />
+        <SearchBox onChange={onSearch} value={searchVal} className={styles.search_box_input} size="small" />
         <div className="flex gap-[8px] flex-wrap items-center">
           {permissions?.isCreate && permissions?.isUpdate && (
             <Button variant={'contained'} color="primary" size="small" onClick={onCreate} className={'no-shadow'} startIcon={<AddOutlined />}>

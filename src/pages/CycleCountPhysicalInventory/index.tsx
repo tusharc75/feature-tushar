@@ -17,11 +17,10 @@ import { getStaticFields, staticFrameworkRender } from '../../constants/useColum
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd } from 'react-icons/md';
 import AddOutlined from '@material-ui/icons/AddOutlined';
-import styles from "../Leads/Header.module.scss";
+import styles from '../Leads/Header.module.scss';
 import ManageCycleCountPInventory from './ManageCycleCountPInventory';
 
 const CycleCountPInventory = () => {
-
   const renderedFrom = camelCase(`${routes.cycleCountPhysicalInventory.title}`);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [cycleCountPInventoryDialog, setCycleCountPInventoryDialog] = useState(false);
@@ -29,7 +28,7 @@ const CycleCountPInventory = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const [gridApi, setGridApi] = useState(null);
 
-  const [productDialog, setProductDialog] = useState({ open: false, _id: "", products: [], warehouse: "" });
+  const [productDialog, setProductDialog] = useState({ open: false, _id: '', products: [], warehouse: '' });
   const { loading, page, limit, pageSizes, rowCount, dataRows, search, filters, sorting, selectedRecords, appendRows } = state;
 
   // useEffect(() => {
@@ -51,7 +50,8 @@ const CycleCountPInventory = () => {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    axiosInstance().get(cycleCountPhysicalInventory.api)
+    axiosInstance()
+      .get(cycleCountPhysicalInventory.api)
       .then(({ data: { data } }) => {
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -111,10 +111,10 @@ const CycleCountPInventory = () => {
           size="small"
           color="inherit"
           onClick={() => {
-            setProductDialog({ open: true, _id: params?.data?._id, products: params?.data?.products, warehouse: params?.data?.warehouse })
+            setProductDialog({ open: true, _id: params?.data?._id, products: params?.data?.products, warehouse: params?.data?.warehouse });
           }}
         >
-          <VisibilityIcon color="secondary" fontSize="small" />
+          <VisibilityIcon color="primary" fontSize="small" />
         </IconButton>
       </HtmlTooltip>
     );
@@ -135,24 +135,21 @@ const CycleCountPInventory = () => {
       </Grid>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container>
-            <Grid item xs={12} md={6} sm={12} className={'d-flex align-items-center gap-1'}>
-            </Grid>
-            <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
-              <Grid style={{ display: "flex", gap: "5px" }}>
-                <Button
-                  variant={isMobile && !isTablet ? "text" : "contained"}
-                  color="primary"
-                  size="small"
-                  onClick={() => setCycleCountPInventoryDialog(true)}
-                  className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
-                  startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                >
-                  {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
-                </Button>
-              </Grid>
-            </Grid>
-          </Grid>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'d-flex flex-wrap align-items-center gap-1'}></div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <Button
+                variant={'contained'}
+                color="primary"
+                size="small"
+                onClick={() => setCycleCountPInventoryDialog(true)}
+                className={`no-shadow`}
+                startIcon={<AddOutlined />}
+              >
+                Add
+              </Button>
+            </div>
+          </div>
         </div>
         <CustomAgGrid
           columns={columns}
@@ -176,28 +173,29 @@ const CycleCountPInventory = () => {
           <Products
             _id={productDialog._id}
             handleClose={() => {
-              setProductDialog({ open: false, _id: "", products: [], warehouse: "" })
+              setProductDialog({ open: false, _id: '', products: [], warehouse: '' });
             }}
             handleSucess={() => {
-              fetchData()
-              setProductDialog({ open: false, _id: "", products: [], warehouse: "" })
+              fetchData();
+              setProductDialog({ open: false, _id: '', products: [], warehouse: '' });
             }}
             products={productDialog.products}
             warehouse={productDialog.warehouse}
           />
         )}
-        {cycleCountPInventoryDialog && <ManageCycleCountPInventory
-          open={cycleCountPInventoryDialog}
-          close={() => setCycleCountPInventoryDialog(false)}
-          onSuccess={() => {
-            setCycleCountPInventoryDialog(false)
-            fetchData()
-          }
-          } />}
+        {cycleCountPInventoryDialog && (
+          <ManageCycleCountPInventory
+            open={cycleCountPInventoryDialog}
+            close={() => setCycleCountPInventoryDialog(false)}
+            onSuccess={() => {
+              setCycleCountPInventoryDialog(false);
+              fetchData();
+            }}
+          />
+        )}
       </CustomContainer>
     </Fragment>
   );
-}
+};
 
 export default CycleCountPInventory;
-

@@ -88,7 +88,7 @@ const PurchaseOrder = () => {
 
   useEffect(() => {
     getPlants();
-  }, [selectedEntity])
+  }, [selectedEntity]);
 
   useEffect(() => {
     fetchPurchaseOrder();
@@ -342,13 +342,9 @@ const PurchaseOrder = () => {
       </Grid>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-                <span className="listingHeader">{routes.purchaseOrder?.title} </span>
-              </div>
-              {isMobile ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'d-flex flex-wrap align-items-center gap-2'}>
+              {isMobile && !isTablet ? (
                 <>
                   <Grid style={{ display: 'inline-flex' }}>
                     <Button
@@ -357,7 +353,6 @@ const PurchaseOrder = () => {
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      color="secondary"
                       variant="text"
                       disableElevation
                       startIcon={<MdSort />}
@@ -380,7 +375,6 @@ const PurchaseOrder = () => {
                       aria-haspopup="true"
                       aria-expanded={'true'}
                       variant="text"
-                      color="secondary"
                       disableElevation
                       className={'sort-filter-tablet'}
                       startIcon={<MdFilterList />}
@@ -401,7 +395,7 @@ const PurchaseOrder = () => {
                 </>
               ) : (
                 <HideWhenOffline>
-                  <div className={`align-items-center gap-1 layout-for-mobile `}>
+                  <div className={`flex flex-wrap items-center gap-2 `}>
                     {PurchaseOrderType && (
                       <ToggleButtonGroup
                         size="small"
@@ -423,7 +417,8 @@ const PurchaseOrder = () => {
                 </HideWhenOffline>
               )}
               <Autocomplete
-                style={{ width: '250px' }}
+                style={{ minWidth: '200px', flexGrow: 1 }}
+                className="md:max-w-[250px]"
                 options={warehouseOptions}
                 getOptionLabel={(option: any) => option.optionLabel}
                 getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -435,21 +430,7 @@ const PurchaseOrder = () => {
                 onChange={(e, val) => {
                   setWarehouse(val && val.optionValue ? val.optionValue : '');
                 }}
-                renderInput={(params) =>
-                  isMobile && !isTablet ? (
-                    <TextField
-                      {...params}
-                      margin="dense"
-                      name="plant"
-                      placeholder="Plant"
-                      variant="standard"
-                      fullWidth
-                      className={isMobile ? 'serchBox' : ''}
-                    />
-                  ) : (
-                    <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />
-                  )
-                }
+                renderInput={(params) => <TextField {...params} margin="none" size="small" name="plant" label="Plant" variant="outlined" fullWidth />}
               />
               {fromRental && (
                 <Chip
@@ -471,82 +452,77 @@ const PurchaseOrder = () => {
                   }}
                 />
               )}
-            </Grid>
-            <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={styles.content_box}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={isMobile ? styles.search_box_input : ''}
-                    width="242px"
-                    size="small"
-                    value={search}
-                    style={isMobile ? { flex: 1 } : {}}
-                  />
-                </Grid>
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.purchaseOrder?.isCreate && (
-                    <Button
-                      onClick={() => {
-                        setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null });
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      color="primary"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    >
-                      {' '}
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                  )}
-                  <HtmlTooltip title="Please select some purchase orders">
-                    <span>
-                      <Button
-                        variant={isMobile ? 'text' : 'outlined'}
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        disabled={selectedRecords.length ? false : true}
-                        aria-controls="action-menu"
-                        className={`${isMobile ? 'mobile_button' : styles.add_submit_btn} new-dropdown-v1`}
-                        endIcon={<ExpandMore />}
-                      >
-                        {isMobile ? '' : 'Actions'}
-                      </Button>
-                    </span>
-                  </HtmlTooltip>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox
+                onChange={handleSearch}
+                className={isMobile ? styles.search_box_input : ''}
+                width="242px"
+                size="small"
+                value={search}
+                style={isMobile ? { flex: 1 } : {}}
+              />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.purchaseOrder?.isCreate && (
+                  <Button
+                    onClick={() => {
+                      setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null });
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
                   >
-                    <MenuItem
-                      disabled={
-                        permissions?.purchaseOrder?.isDelete &&
-                        selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
-                          ? false
-                          : true
-                      }
-                      onClick={() => {
-                        closeActions();
-                        setShowDeleteConfirmBox(true);
-                      }}
+                    Add
+                  </Button>
+                )}
+                <HtmlTooltip title="Please select some purchase orders">
+                  <span>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                      className={`new-dropdown-v1`}
+                      endIcon={<ExpandMore />}
                     >
-                      Delete
-                    </MenuItem>
-                  </Menu>
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+                      Actions
+                    </Button>
+                  </span>
+                </HtmlTooltip>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={
+                      permissions?.purchaseOrder?.isDelete &&
+                      selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
+                        ? false
+                        : true
+                    }
+                    onClick={() => {
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
         {columns ? (
           Object.keys(frameWorkComponent).length > 0 ? (

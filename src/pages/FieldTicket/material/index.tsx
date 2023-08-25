@@ -19,10 +19,11 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { calculatePrice } from 'src/components/RentalManagment/helper';
 import Consumables from './Consumables';
-import { fieldTicket } from 'src/constants/helpers';
+import { SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
+import { useData } from 'src/StateProvider/Provider';
 
 const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, setNextStep, refreshFieldTicket }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -38,6 +39,10 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
+
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const fetchFields = async () => {
     setColumns(null);
@@ -55,11 +60,11 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
     }
     let column: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -171,7 +176,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
     const data = response?.data?.data?.material;
 
     data.forEach((parent, i) => {
-      parent.srno = i + 1;
+      parent.index = i + 1;
       parent.detail = `${parent?.serviceDetail?.serviceName}`;
       parent.description = `${parent?.serviceDetail?.serviceDescription || ''}`;
       parent.competencyType = `${parent?.serviceDetail?.competencyType?.optionLabel || ''}`;
@@ -297,7 +302,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
       element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
-      delete element.srno;
+      delete element.index;
       delete element.detail;
       delete element.qtyDisplay;
       delete element.isValid;
@@ -358,16 +363,18 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
                   closeAddActions()
                 }}
               >
-                Add Service
+                Add Existing Service
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setServiceDialog({ open: true, type: 'newService' });
-                  closeAddActions();
-                }}
-              >
-                Add New Service
-              </MenuItem>
+              {permissions?.serviceMaster?.isCreate &&
+                <MenuItem
+                  onClick={() => {
+                    setServiceDialog({ open: true, type: 'newService' });
+                    closeAddActions();
+                  }}
+                >
+                  Add New Service
+                </MenuItem>
+              }
             </Menu>
           </Box>
           <Box display="flex" ml={1}>
@@ -467,6 +474,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
             setServiceDialog({ open: false, type: '' });
           }}
           ids={rowsData?.map((row) => row?.materialId)}
+          extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
         />
       )}
 
@@ -483,6 +491,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
             setServiceDialog({ open: false, type: '' });
           }}
           isRedirectToDetailPage={false}
+          referenceData={{ serviceType: SERVICE_TYPE.fieldService }}
         />
       )}
 

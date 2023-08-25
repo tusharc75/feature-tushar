@@ -26,6 +26,7 @@ import RepairJobViews from './RoadMapViews/index';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import EditIcon from '@material-ui/icons/Edit';
 
 function a11yProps(index: any) {
   return {
@@ -127,7 +128,7 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const fetchRepairJobData = () => {
@@ -176,14 +177,14 @@ const RepairJobDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairJob.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => { })
+      .then(({ data: { data } }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -211,14 +212,11 @@ const RepairJobDetails = () => {
             <>
               {permissions?.repairJob?.isUpdate && allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
                 <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                 </Button>
               )}
               {/* {permissions?.repairJob?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />} */}
-              <ActivityButton
-                referenceId={repairJobData?._id}
-                resource={ACTIVITY_RESOURCE.repairJob}
-                resourceLabel={repairJobData?.repairJobName} />
+              <ActivityButton referenceId={repairJobData?._id} resource={ACTIVITY_RESOURCE.repairJob} resourceLabel={repairJobData?.repairJobName} />
             </>
           </Box>
         </Box>

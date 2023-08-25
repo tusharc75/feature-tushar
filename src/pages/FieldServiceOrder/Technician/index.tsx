@@ -208,7 +208,7 @@ const Technician = ({
 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName

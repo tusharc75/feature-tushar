@@ -63,11 +63,11 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     const newColumns = generateCustomTableColumns(fields, rentalManagementData?.currency, renderedFrom);
     let column: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -140,7 +140,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       }
 
       data.forEach((parent, i) => {
-        parent.srno = i + 1;
+        parent.index = i + 1;
         parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       });
 

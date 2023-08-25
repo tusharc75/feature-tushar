@@ -4,10 +4,10 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { sidebarResource, workOrder } from 'src/constants/helpers';
+import { MATERIAL_SUB_TYPE, sidebarResource, workOrder } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, IconButton } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -20,8 +20,10 @@ import { useData } from 'src/StateProvider/Provider';
 import History from '../../ProductInventory/LedgerHistory';
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { BiChevronDown } from 'react-icons/bi';
 
-const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName }) => {
+const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName, materialSubType = MATERIAL_SUB_TYPE.consumable }) => {
 
 
   const toastConfig = useContext(CustomToastContext);
@@ -33,6 +35,9 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [consumeRequest, setConsumeRequest] = useState(false);
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
 
   const {
     state: { user, permissions }
@@ -234,7 +239,13 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
     axiosInstance()
       .get(`${workOrder.api}/${workOrderId}/consumable${query}`)
       .then(({ data: { data } }) => {
-        let rows = data.map((u) => {
+        if (materialSubType === MATERIAL_SUB_TYPE.bom) {
+          data = data?.filter((e) => e?.subType === materialSubType)
+        }
+        else {
+          data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.bom)
+        }
+        let rows = data?.map((u) => {
           let res: any = {
             ...prepareDataForGrid(u)
           };
@@ -334,6 +345,14 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       });
   };
 
+  const handleClickAction = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseAction = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <>
       {allowedToEdit && (
@@ -346,6 +365,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             )}
           </Box>
           <Box display="flex" ml={1}>
+            <Box ml={1}></Box>
             <Button
               disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
               onClick={() => setOpenConsumablesQtyDialog(true)}
@@ -358,6 +378,38 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
                 ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')'
                 : ''}
             </Button>
+            <Box ml={1}></Box>
+            <Button
+              variant={'outlined'}
+              color="primary"
+              size="small"
+              onClick={handleClickAction}
+              disabled={selectedRecords.length ? false : true}
+              endIcon={<BiChevronDown />}
+              className="new-dropdown-v1"
+            >
+              Actions
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              onClose={handleCloseAction}
+            >
+              <MenuItem
+                disabled={selectedRecords?.find(s => s?.consumedQty || s?.requestedQty) ? true : false}
+                onClick={() => {
+                  handleDelete(selectedRecords?.filter(s => !s?.consumedQty && !s?.requestedQty))
+                  handleCloseAction();
+                }}
+              >
+                Delete
+              </MenuItem>
+            </Menu>
           </Box>
         </Box>
       )}

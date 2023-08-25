@@ -335,6 +335,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                           label={field.fieldLabel}
                                           name={field.fieldName}
                                           fieldData={field}
+                                          hidelookupAddButton={true}
                                           type={field.type}
                                           options={
                                             plantShipToOptions.filter(

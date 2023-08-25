@@ -30,8 +30,6 @@ interface AssetsGridProps {
   fetchAssets: any;
   updateTransferStatus?: any;
   transferAssetData?: any;
-  handleViewPdf?: any;
-  fileDownloading?: boolean;
   renderedFrom?: string;
   allowedToEdit: boolean;
 }

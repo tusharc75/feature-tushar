@@ -327,7 +327,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 setAddProductDialog(true);
               }}
             >
-              {`Add Products`}
+              {`Add Existing Products`}
             </Button>
           </Box>
           <Box display={'flex'} justifyContent="flex-end">

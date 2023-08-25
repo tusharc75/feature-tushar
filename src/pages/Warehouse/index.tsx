@@ -442,7 +442,6 @@ const Warehouse = () => {
                     style={isMobile && !isTablet ? { flex: 1 } : {}}
                     size="small"
                     value={search}
-                    placeholder={`Search ${routes.warehouse.title}`}
                   />
                 </Grid>
 

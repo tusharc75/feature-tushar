@@ -70,11 +70,11 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
     }
     let coloum: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       {
         accessor: 'detail',
@@ -208,7 +208,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
     inventory = data.inventory;
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
+      parent.index = i + 1;
       parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
       parent.description = parent.type === 'product' ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
       parent.qtyDisplay = parent.qty;
@@ -219,7 +219,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
         const subRows: any = data.material.filter((e) => e.parentId === parent._id);
         var assetQty = 0;
         subRows.forEach((_subRow, j) => {
-          _subRow.srno = i + 1 + '.' + (j + 1);
+          _subRow.index = i + 1 + '.' + (j + 1);
           _subRow.detail = _subRow.productDetail?.productName;
           _subRow.description = _subRow.productDetail?.productDescription;
           _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
@@ -302,7 +302,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
 
   const handleSaveData = async (rows: any) => {
     rows.forEach((element) => {
-      delete element.srno;
+      delete element.index;
       delete element.detail;
       delete element.qtyDisplay;
       delete element.isValid;

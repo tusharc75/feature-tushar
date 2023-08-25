@@ -347,7 +347,7 @@ const UserDetailsPage = () => {
 
         data.forEach((obj) => {
           labels.push(moment(obj?.date).format('DD/MMM'));
-          dataSets.push(Math.ceil(obj?.totalDuration / time));
+          dataSets.push(obj?.totalDuration / time);
         });
         setUserTrackingData({
           labels: labels,
@@ -929,7 +929,7 @@ const UserDetailsPage = () => {
                             ) : userPermissions ? (
                               Object.keys(userPermissions).map((key) => (
                                 <Tooltip
-                                  title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${startCase(key)}` : ''}
+                                  title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${key === 'doaSetup' ? 'DOA Setup' : startCase(key)}` : ''}
                                 >
                                   <FormControlLabel
                                     key={key}

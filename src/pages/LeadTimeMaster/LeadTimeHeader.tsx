@@ -156,7 +156,6 @@ function LeadTimeHeader(props) {
               className={styles.search_box_input}
               value={searchVal}
               size="small"
-              placeholder="Search Lead Masters"
               style={isMobile ? { flex: 1 } : {}}
             />
           </Grid>

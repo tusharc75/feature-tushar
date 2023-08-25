@@ -15,7 +15,7 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import { FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { BiFoodMenu } from 'react-icons/bi';
 import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import Product from './Product';
@@ -31,6 +31,7 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import Invoice from './Invoice';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { Edit } from '@material-ui/icons';
 
 const PurchaseOrderDetailsPage = () => {
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
@@ -106,8 +107,7 @@ const PurchaseOrderDetailsPage = () => {
       setPurchaseOrderData(data);
       if (data?.status === PURCHASE_ORDER_STATUS.closed) {
         setCurrentStep(purchaseOrderSteps?.length - 1);
-      }
-      else {
+      } else {
         setCurrentStep(getIndex(data?.processStatus, purchaseOrderSteps));
       }
       setLoadingPurchaseOrder(false);
@@ -167,8 +167,8 @@ const PurchaseOrderDetailsPage = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const updateStatus = (status) => {
@@ -279,7 +279,7 @@ const PurchaseOrderDetailsPage = () => {
                     onClick={handleOpenUpdateDialog}
                     disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 </span>
               </HtmlTooltip>
@@ -294,7 +294,7 @@ const PurchaseOrderDetailsPage = () => {
                     onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)}
                     disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Reopen'}
+                    {isMobile && !isTablet ? <Edit /> : 'Reopen'}
                   </Button>
                 </span>
               </HtmlTooltip>

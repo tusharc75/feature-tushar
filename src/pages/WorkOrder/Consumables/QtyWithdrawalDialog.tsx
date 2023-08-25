@@ -9,7 +9,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomDialogTransition, RESOURCE_LABEL, sidebarResource, workOrder } from 'src/constants/helpers';
 
-function QtyWithdrawalDialog({ workOrderId, onClose, data, onSuccess }) {
+function QtyWithdrawalDialog({ referenceId, referenceType, onClose, data, onSuccess }) {
 
     const [loading, setLoading] = useState(false);
     const toastConfig = useContext(CustomToastContext);
@@ -29,8 +29,8 @@ function QtyWithdrawalDialog({ workOrderId, onClose, data, onSuccess }) {
     const handleSubmit = (values) => {
         setLoading(true)
         const postData: any = {
-            referenceType: sidebarResource.workOrder,
-            referenceId: workOrderId,
+            referenceType: referenceType,
+            referenceId: referenceId,
             requests: [{
                 uniqueId: data.uniqueId,
                 _id: data._id,

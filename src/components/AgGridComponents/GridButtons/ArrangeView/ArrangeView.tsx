@@ -44,7 +44,10 @@ const ArrangeView = ({
     timeout = setTimeout(function () {
       let data = localStorage.getItem('gridMetaData');
       let request = data == 'undefined' ? {} : { ...JSON.parse(data) };
-      request[renderedFrom].order = columnOrder;
+      request[renderedFrom] = {
+        ...request[renderedFrom] || {},
+        order: columnOrder
+      };
       if (request[renderedFrom]) {
         request[renderedFrom].hide = [...hiddenColumns];
       } else {

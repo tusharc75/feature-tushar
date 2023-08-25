@@ -647,7 +647,7 @@ const Report = () => {
           isUpdate: true,
           fieldData: {
             _id: '63f71ce5b17c69a1ab7e4c06',
-            fieldLabel: columns?.find((e) => e.field === 'warehouse')?.headerName || 'Warehouse',
+            fieldLabel: columns?.find((e) => e.field === 'warehouse')?.headerName || routes.warehouse?.title,
             fieldName: 'warehouse',
             type: 'dropDown',
             lookup: true,
@@ -666,19 +666,6 @@ const Report = () => {
         });
       }
       if (resourceCamelCase === 'userSession') {
-        let { data } = await axiosInstance().get(`/report/user/user-session/column`);
-        data?.data?.forEach((e) => {
-          columns.push({
-            field: e.fieldName,
-            headerName: e.fieldLabel,
-            show: true,
-            disabled: false,
-            cellRenderer:  'numberRenderer',
-            filter: false,
-            sortable: false,
-          })
-        })
-
         let fieldOptionResponce = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=User`);
         const fieldOption = fieldOptionResponce?.data?.data;
         resourceFieldData.push({
@@ -712,8 +699,147 @@ const Report = () => {
 
         setFrameWorkComponent({
           commonRenderer: CommonRenderer,
-          numberRenderer: NumberRenderer
+          numberRenderer: NumberRenderer,
+          userRenderer: UserRenderer
         });
+      }
+      if (resourceCamelCase === 'inUseSerializedAsset') {
+        const {
+          data: { data }
+        }: any = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`);
+        const fieldData = data?.filter((e) => e?.fieldData?.fieldName !== 'status');
+
+        const {
+          data: { data: lookupResource }
+        } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+        if (lookupResource) {
+          data?.forEach((e) => {
+            if (e?.fieldData?.fieldName === 'currentOwner') {
+              e.fieldData.lookup = true;
+              e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
+            }
+          });
+        }
+
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "rentalJob",
+            "fieldLabel": "Rental Job",
+            "lookup": true,
+            "lookupResource": sidebarResource.rentalManagement,
+            "order": fieldData?.length + 1,
+            filter: false,
+            sortable: false
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "customerAccount",
+            "fieldLabel": "Customer Account",
+            "lookup": true,
+            "lookupResource": sidebarResource.customerAccount,
+            "sectionName": "",
+            "order": fieldData?.length + 1,
+            filter: false
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "billingAddress",
+            "fieldLabel": "Billing Address",
+            "lookup": true,
+            "lookupResource": sidebarResource.address,
+            "sectionName": "",
+            "order": fieldData?.length + 1,
+            filter: false
+
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "shippingAddress",
+            "fieldLabel": "Shipping Address",
+            "lookup": true,
+            "lookupResource": sidebarResource.address,
+            "sectionName": "",
+            "order": fieldData?.length + 1,
+            filter: false
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "rate",
+            "fieldLabel": "Rental Rate",
+            "order": fieldData?.length + 1,
+            filter: false
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "startDate",
+            "fieldLabel": "Start Date",
+            type: 'date',
+            "order": fieldData?.length + 1,
+            filter: false
+
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+        fieldData.push({
+          "fieldData": {
+            "fieldName": "endDate",
+            "fieldLabel": "End Date",
+            type: 'date',
+            "order": fieldData?.length + 1,
+            filter: false
+
+          },
+          "isCreate": true,
+          "isRead": true,
+          "isUpdate": true
+        })
+        const fieldWithoutFilter = ["rentalJob", "customerAccount", "billingAddress", "shippingAddress", "rate", "startDate", "endDate"];
+        fieldData.forEach((o) => {
+          let currentColumn: any = getColumnData(
+            routes.serializedAsset?.title,
+            o?.fieldData,
+            routes.serializedAssetDetail.path
+          );
+          if (fieldWithoutFilter.includes(currentColumn?.columnData?.field)) {
+            currentColumn.columnData.filter = false;
+            currentColumn.columnData.sortable = false;
+          }
+          if (currentColumn !== null) {
+            columns = [...columns, { ...currentColumn?.columnData }];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
+            }
+          }
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
       }
 
       setResourceColumns(resourceFieldData);
@@ -808,6 +934,10 @@ const Report = () => {
         <Link className="link" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
+      ) : params.data.referenceType === 'Field Ticket' ? (
+        <Link className="link" title={params.value} to={`${routes.fieldTicketDetail.path}/${params.data.referenceId}`} target="_blank">
+          {params.value}
+        </Link>
       ) : (
         params.value
       )
@@ -851,6 +981,12 @@ const Report = () => {
 
   const SupplierRenderer = (params: any) => (
     <Link className="link" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`} target="_blank" >
+      {params.value}
+    </Link>
+  );
+
+  const UserRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.userDetail.path}/${params.data.userId}`} target="_blank" >
       {params.value}
     </Link>
   );
@@ -916,11 +1052,30 @@ const Report = () => {
     if (resourceCamelCase === 'userSession') {
       api = `/report/user/user-session`;
     }
+    if (resourceCamelCase === 'inUseSerializedAsset') {
+      api = `/serialized-asset/report/in-use-assets/`;
+    }
 
     axiosInstance()
       .get(`${api}${filterQuery}`, {
         cancelToken: cancelTokenSource.token
-      }).then(({ data: { data, count } }) => {
+      }).then(({ data: { data, count, columns } }) => {
+        if (resourceCamelCase === 'userSession') {
+          setLoadingColumns(true);
+          columns = columns?.map((e) => {
+            return ({
+              field: e.fieldName,
+              headerName: e.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: e.fieldName === 'user' ? 'userRenderer' : 'commonRenderer',
+              filter: false,
+              sortable: false,
+            })
+          })
+          setColumns(columns);
+          setLoadingColumns(false);
+        }
         data = data.map((u: any) => {
           if (resourceCamelCase === 'purchaseOrderDetails') {
             if (u?.productLedger?.type === 'credit') {
@@ -1039,6 +1194,9 @@ const Report = () => {
         }
       });
     }
+    if (resourceCamelCase === 'userSession') {
+      return `?column=true&${filterQuery}`;
+    }
 
     return `?${filterQuery}`;
   };
@@ -1079,6 +1237,9 @@ const Report = () => {
     }
     if (resourceCamelCase === 'userSession') {
       api = `/report/user/user-session/export`;
+    }
+    if (resourceCamelCase === 'inUseSerializedAsset') {
+      api = `/serialized-asset/report/in-use-assets/export/`;
     }
 
     axiosInstance()

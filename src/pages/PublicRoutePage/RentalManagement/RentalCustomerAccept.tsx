@@ -41,11 +41,11 @@ const RJCustomerAccept = ({ openAuthId }) => {
     var data = await fetch_rental_product_fields(rentalManagementData?.currency, false);
     const coloum: any = [
       {
-        accessor: 'srno',
-        Header: '#',
+        accessor: 'index',
+        Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       {
         accessor: 'detail',
@@ -179,7 +179,7 @@ const RJCustomerAccept = ({ openAuthId }) => {
     nonSerializeAsset = data.nonSerializeAsset;
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
+      parent.index = i + 1;
       parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
@@ -197,7 +197,7 @@ const RJCustomerAccept = ({ openAuthId }) => {
   const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = _subRow?.productDetail?.productName;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;

@@ -164,7 +164,6 @@ function ProductionOrderHeader(props) {
               className={styles.search_box_input}
               value={searchVal}
               size="small"
-              placeholder="Search Production Orders"
               style={isMobile ? { flex: 1 } : {}}
             />
           </Grid>

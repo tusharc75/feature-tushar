@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
-import { MdAdd, MdFilterList, MdSort } from 'react-icons/all';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
+import { MdAdd, MdFilterList, MdOutlineFilterAlt, MdSort, TbArrowsSort } from 'react-icons/all';
+import { Box, Grid, MenuItem, Button, Menu, IconButton } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
@@ -90,46 +90,47 @@ function QuoteHeader({
           {icon} <span className="listingHeader">{heading}</span>
         </div>
         {isMobile && !isTablet ? (
-          <div className="d-flex ">
-            <Button
-              onClick={handleClickOpen}
-              id="demo-customized-button"
-              aria-controls="demo-customized-menu"
-              aria-haspopup="true"
-              variant="text"
-              disableElevation
-              startIcon={<MdSort />}
-            >
-              Sort
-            </Button>
-            <MobileSortDialog
-              isOpen={open}
-              handleClose={handleClickClose}
-              contentPart={toggleInner}
-              secHeading={['Sort Quotes']}
-              columns={columns}
-              dispatch={dispatch}
-            />
-            <Button
-              id="demo-customized-button"
-              aria-controls="demo-customized-menu"
-              aria-haspopup="true"
-              variant="text"
-              disableElevation
-              startIcon={<MdFilterList />}
-              onClick={handleOpen}
-            >
-              Filter
-            </Button>
-            <MobileFilterDialog
-              isOpen={isOpenDialog}
-              handleClose={handleClose}
-              contentPart={toggleInner}
-              columns={columns}
-              dispatch={dispatch}
-              title={routes?.quoteBuilder?.title}
-              filters={filters}
-            />
+          <div className="d-flex flex-wrap items-center justify-between w-full">
+            <div>{toggleInner}</div>
+            <div className="flex flex-wrap items-center gap-1">
+              <IconButton
+                onClick={handleClickOpen}
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                size="small"
+                className={'mobileIconButton secondary'}
+              >
+                <TbArrowsSort className="rotate-90" size={16} />
+              </IconButton>
+              <MobileSortDialog
+                isOpen={open}
+                handleClose={handleClickClose}
+                contentPart={toggleInner}
+                secHeading={['Sort Quotes']}
+                columns={columns}
+                dispatch={dispatch}
+              />
+              <IconButton
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                size="small"
+                className={'mobileIconButton secondary'}
+                onClick={handleOpen}
+              >
+                <MdOutlineFilterAlt size={16} />
+              </IconButton>
+              <MobileFilterDialog
+                isOpen={isOpenDialog}
+                handleClose={handleClose}
+                contentPart={''}
+                columns={columns}
+                dispatch={dispatch}
+                title={routes?.quoteBuilder?.title}
+                filters={filters}
+              />
+            </div>
           </div>
         ) : (
           options && (
@@ -147,7 +148,7 @@ function QuoteHeader({
         {children}
       </div>
       <div className="flex flex-wrap gap-[8px]  justify-end">
-        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" placeholder="Search Quotes" />
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" />
 
         <div className="flex gap-[8px] flex-wrap items-center">
           {QuotePermissions.isCreate && (
