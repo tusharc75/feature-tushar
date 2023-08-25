@@ -21,7 +21,7 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
+import { MdAdd, MdSort, MdFilterList, TbArrowsSort, MdOutlineFilterAlt } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import MobileSortDialog from '../../components/MobileSortDialog';
@@ -271,37 +271,33 @@ const DynamicForm = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: resource, path: `/${route}` }]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions[renderedFrom]}
-            module={renderedFrom}
-            api={'dynamic-form'}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchData();
-            }}
-            headers={{
-              Resource: resource
-            }}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: resource, path: `/${route}` }]} />
+        <ImportExportLinks
+          permissions={permissions[renderedFrom]}
+          module={renderedFrom}
+          api={'dynamic-form'}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchData();
+          }}
+          headers={{
+            Resource: resource
+          }}
+        />
+      </div>
       <div className="main-container">
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
@@ -311,52 +307,51 @@ const DynamicForm = () => {
                 <span className="listingHeader">{resource} </span>
               </div>
               {isMobile ? (
-                <Grid style={{ display: 'inline-flex' }}>
-                  <Button
-                    onClick={handleClickOpen}
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    aria-expanded={'true'}
-                    variant="text"
-                    disableElevation
-                    startIcon={<MdSort />}
-                    className={'sort-filter-tablet'}
-                    style={isTablet ? { marginLeft: '50px' } : {}}
-                  >
-                    Sort
-                  </Button>
-                  <MobileSortDialog
-                    isOpen={sortOpen}
-                    handleClose={handleClickClose}
-                    contentPart={null}
-                    secHeading={['Sort Well Number']}
-                    columns={columns}
-                    dispatch={dispatch}
-                  />
-                  <Button
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    aria-expanded={'true'}
-                    variant="text"
-                    disableElevation
-                    className={'sort-filter-tablet'}
-                    startIcon={<MdFilterList />}
-                    onClick={handleOpen}
-                  >
-                    Filter
-                  </Button>
-                  <MobileFilterDialog
-                    isOpen={isOpenDialog}
-                    handleClose={handleFilterClose}
-                    contentPart={null}
-                    columns={columns}
-                    dispatch={dispatch}
-                    title={resource}
-                    filters={filters}
-                  />
-                </Grid>
+                <div className="d-flex flex-wrap items-center justify-between w-full">
+                  <div></div>
+                  <div className="flex flex-wrap items-center gap-1">
+                    <IconButton
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      size="small"
+                      className={'mobileIconButton secondary'}
+                      style={isTablet ? { marginLeft: '50px' } : {}}
+                    >
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
+                    <MobileSortDialog
+                      isOpen={sortOpen}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort Well Number']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                    <IconButton
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      size="small"
+                      className={'mobileIconButton secondary'}
+                      onClick={handleOpen}
+                    >
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleFilterClose}
+                      contentPart={null}
+                      columns={columns}
+                      dispatch={dispatch}
+                      title={resource}
+                      filters={filters}
+                    />
+                  </div>
+                </div>
               ) : null}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
@@ -505,7 +500,7 @@ const DynamicForm = () => {
           onOk={handleDelete}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 
