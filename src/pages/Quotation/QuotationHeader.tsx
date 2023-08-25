@@ -89,6 +89,7 @@ function QuotationHeader(props) {
             <div>{toggleInner}</div>
             <div className="flex flex-wrap items-center gap-1">
               <IconButton
+                className={'mobileIconButton secondary'}
                 size="small"
                 onClick={handleClickOpen}
                 id="demo-customized-button"
@@ -109,6 +110,7 @@ function QuotationHeader(props) {
               />
 
               <IconButton
+                className={'mobileIconButton secondary'}
                 size="small"
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
