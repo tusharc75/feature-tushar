@@ -226,7 +226,7 @@ const Leads = () => {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -504,31 +504,27 @@ const Leads = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.lead]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={leadsPermissions}
-            module="lead(s)"
-            api={leadApi}
-            afterImportCompleted={() => {
-              fetchLeads();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchLeads();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.lead]} />
+        <ImportExportLinks
+          permissions={leadsPermissions}
+          module="lead(s)"
+          api={leadApi}
+          afterImportCompleted={() => {
+            fetchLeads();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords.length}
+          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchLeads();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
 
       <CustomContainer>
         <div className="header-panel">
@@ -701,7 +697,7 @@ const Leads = () => {
           />
         )}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

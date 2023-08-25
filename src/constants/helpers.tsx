@@ -335,7 +335,7 @@ export const sidebarResource = {
   padMaster: 'Pad Master',
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
-  iotDataPoints: 'Iot Data Points',
+  iotDataPoints: 'Iot Data Points'
 };
 
 export const primaryFields = {
@@ -460,7 +460,6 @@ export const RESOURCE_LABEL = {
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
   iotReport: 'IoT Report'
-
 };
 
 export const CHILD_RESOURCE = {
@@ -996,21 +995,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -2159,148 +2158,150 @@ export const INTERVALS = [
   }
 ];
 
-export const IOT_REPORT_LIST = [{
-  title: sidebarResource.iotDataPoints,
-  key: 'iotDataPoints',
-  api: '/report/iot/data-points',
-  filters: [
-    {
-      fieldName: 'asset',
-      fieldLabel: 'Serialized Asset',
-      resource: sidebarResource.serializedAsset,
-      lookup: true,
-      type: 'dropDown',
-      multiple: false,
-      _id: '3'
-    },
-    {
-      fieldName: 'dataPoints',
-      fieldLabel: 'Iot Data Points',
-      resource: sidebarResource.iotDataPoints,
-      lookup: true,
-      type: 'dropDown',
-      multiple: true,
-      _id: '1'
-    },
-    {
-      fieldName: 'date',
-      fieldLabel: 'Date',
-      type: 'date',
-      _id: '2'
-    },
-    {
-      fieldName: 'interval',
-      fieldLabel: 'Interval',
-      type: 'dropDown',
-      options: INTERVALS,
-      _id: '4'
-    },
-  ]
-}]
+export const IOT_REPORT_LIST = [
+  {
+    title: sidebarResource.iotDataPoints,
+    key: 'iotDataPoints',
+    api: '/report/iot/data-points',
+    filters: [
+      {
+        fieldName: 'asset',
+        fieldLabel: 'Serialized Asset',
+        resource: sidebarResource.serializedAsset,
+        lookup: true,
+        type: 'dropDown',
+        multiple: false,
+        _id: '3'
+      },
+      {
+        fieldName: 'dataPoints',
+        fieldLabel: 'Iot Data Points',
+        resource: sidebarResource.iotDataPoints,
+        lookup: true,
+        type: 'dropDown',
+        multiple: true,
+        _id: '1'
+      },
+      {
+        fieldName: 'date',
+        fieldLabel: 'Date',
+        type: 'date',
+        _id: '2'
+      },
+      {
+        fieldName: 'interval',
+        fieldLabel: 'Interval',
+        type: 'dropDown',
+        options: INTERVALS,
+        _id: '4'
+      }
+    ]
+  }
+];
 
 export const REPORT_LIST = [
   {
     title: sidebarResource.rentalManagement,
     permission: 'rentalManagement',
     key: 'rentalManagement',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.salesOrder,
     permission: 'salesOrder',
     key: 'salesOrder',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.serializedAsset,
     permission: 'serializedAsset',
     key: 'serializedAsset',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.lead,
     permission: 'lead',
     key: 'lead',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.opportunity,
     permission: 'opportunity',
     key: 'opportunity',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.quoteBuilder,
     permission: 'quoteBuilder',
     key: 'quoteBuilder',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.projectSales,
     permission: 'projectSales',
     key: 'projectSales',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: 'Work Order',
     permission: 'workOrder',
     key: 'workOrder',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.purchaseOrder,
     permission: 'purchaseOrder',
     key: 'purchaseOrder',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: 'Purchase Order Details',
     permission: 'purchaseOrder',
     key: 'purchaseOrderType',
-    type: 'purchaseOrderDetails',
+    type: 'purchaseOrderDetails'
   },
   {
     title: 'Inventory Evaluation',
     permission: 'purchaseOrder',
     key: 'purchaseOrderType',
-    type: 'inventoryEvaluation',
+    type: 'inventoryEvaluation'
   },
   {
     title: 'Inventory History',
     permission: 'purchaseOrder',
     key: 'purchaseOrderType',
-    type: 'inventoryHistory',
+    type: 'inventoryHistory'
   },
   {
     title: 'Average Price By Supplier',
     permission: 'purchaseOrder',
     key: 'purchaseOrderType',
-    type: 'averagePriceBySupplier',
+    type: 'averagePriceBySupplier'
   },
   {
     title: 'Number Of Assets by Status',
     permission: 'serializedAsset',
     key: 'purchaseOrderType',
-    type: 'numberOfAssetsByStatus',
+    type: 'numberOfAssetsByStatus'
   },
   {
     title: 'Asset Utilization',
     permission: 'serializedAsset',
     key: 'purchaseOrderType',
-    type: 'assetUtilization',
+    type: 'assetUtilization'
   },
   {
     title: 'User Session',
     permission: 'user',
     key: 'purchaseOrderType',
-    type: 'userSession',
+    type: 'userSession'
   },
   {
-    title: "In Used Serialized Asset",
+    title: 'In Used Serialized Asset',
     permission: 'serializedAsset',
     key: 'purchaseOrderType',
-    type: 'InUseSerializedAsset',
-  },
+    type: 'InUseSerializedAsset'
+  }
 ];
 
 export const RESOURCE_CALENDAR = [
@@ -2494,13 +2495,13 @@ export const getChipColor = (status: ChipStatus): React.CSSProperties => {
       background = 'var(--chip-background-completed)';
       break;
 
-    case status === 'Failed' || status === 'Skipped' || status === 'Need Reperform':
+    case status === 'Failed' || status === 'Need Reperform':
       color = 'var(--chip-color-failed)';
       borderColor = 'var(--chip-border-failed)';
       background = 'var(--chip-background-failed)';
       break;
 
-    case status === 'Pending' || status === 'Backlog':
+    case status === 'Pending' || status === 'Backlog' || status === 'Skipped':
       color = 'var(--chip-color-pending)';
       borderColor = 'var(--chip-border-pending)';
       background = 'var(--chip-background-pending)';
@@ -2565,9 +2566,8 @@ export const WORK_ORDER_STATUS = {
 
 export const WORK_ORDER_TYPE = {
   repairOrder: 'Repair Order',
-  productionOrder: 'Production Order',
+  productionOrder: 'Production Order'
 };
-
 
 export const IRT_APPROVER_STATUS = {
   send: 'Email Sent',
@@ -2604,7 +2604,7 @@ export const MATERIAL_TYPE = {
 
 export const MATERIAL_SUB_TYPE = {
   consumable: 'consumable',
-  bom: 'bom',
+  bom: 'bom'
 };
 
 export const FIELD_TICKET_STATUS = {
@@ -2615,14 +2615,13 @@ export const FIELD_TICKET_STATUS = {
   invoiced: 'Invoiced'
 };
 
-
 export const INVOICE_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
   closed: 'Closed',
-  cancelled: 'Cancelled',
+  cancelled: 'Cancelled'
 };
 
 export const SALES_ORDER_STATUS = {
@@ -2636,12 +2635,12 @@ export const SALES_ORDER_STATUS = {
 export const PRICING_TYPE = [
   { optionLabel: 'Rent', optionValue: 'Rent' },
   { optionLabel: 'Sell', optionValue: 'Price' }
-]
+];
 
 export const SERVICE_TYPE = {
   shopService: 'Shop Service',
   fieldService: 'Field Service'
-}
+};
 
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
@@ -2716,7 +2715,6 @@ export const getNestedlookupDependentOn = (fields, fieldName) => {
   checkNested(fields, fieldName, result);
   return result;
 };
-
 
 export const GenerateResourceLineNumber = (fields) => {
   const primaryField = fields?.find((e) => e?.primaryField);

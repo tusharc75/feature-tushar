@@ -13,6 +13,7 @@ import DropBox from './DropBox';
 import update from 'immutability-helper';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ECOM_SECTIONS } from 'src/constants/helpers';
+import { MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
 
 const useClasses = makeStyles(() => ({
   root: {
@@ -32,7 +33,6 @@ const useClasses = makeStyles(() => ({
 }));
 
 const EcommerceHome = () => {
-
   const classes = useClasses();
   const [formData, setFormData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -45,12 +45,14 @@ const EcommerceHome = () => {
 
   const fetchData = () => {
     setLoading(true);
-    axiosInstance().get('/e-commerce-home')
+    axiosInstance()
+      .get('/e-commerce-home')
       .then(({ data: { data } }) => {
         let items = data?.items?.sort((a, b) => a.order - b.order);
         setFormData(items || []);
         setLoading(false);
-      }).catch((err) => {
+      })
+      .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
@@ -58,28 +60,28 @@ const EcommerceHome = () => {
   const handleClickSave = () => {
     setIsSubmitting(true);
     let body = {
-      items: formData?.map((i, idx) => {
-        return {
-          ...i,
-          order: idx + 1
-        };
-      }) || []
+      items:
+        formData?.map((i, idx) => {
+          return {
+            ...i,
+            order: idx + 1
+          };
+        }) || []
     };
-    axiosInstance().put('/e-commerce-home', body).then(({ data }) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    axiosInstance()
+      .put('/e-commerce-home', body)
+      .then(({ data }) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
       });
-      fetchData();
-
-    }).catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
-
-
-
   };
 
   const handleRemove = (id: string) => {
@@ -156,8 +158,12 @@ const EcommerceHome = () => {
         </Box>
         <Box className="controls-v1">
           <Box sx={{ display: 'flex' }}>
-            <label className={`new-headerbox-button-v1`} onClick={handleExportField} style={{ cursor: 'pointer' }}>
-              Export
+            <label
+              className={`new-headerbox-button-v1 ${isMobile && !isTablet ? 'w-[26px] h-[26px] p-1' : ''}`}
+              onClick={handleExportField}
+              style={{ cursor: 'pointer' }}
+            >
+              {isMobile && !isTablet ? <MobileExportIcon size={18} color={'var(--primary-text)'} /> : 'Export'}
             </label>
             <input
               onClick={(e: any) => (e.target.value = null)}
@@ -172,8 +178,12 @@ const EcommerceHome = () => {
               multiple={false}
               type="file"
             />
-            <label htmlFor="import-file" className={`new-headerbox-button-v1`} style={{ marginRight: '18px', cursor: 'pointer' }}>
-              Import
+            <label
+              htmlFor="import-file"
+              className={`new-headerbox-button-v1 ${isMobile && !isTablet ? 'w-[26px] h-[26px] p-1' : ''}`}
+              style={{ marginRight: '8px', cursor: 'pointer' }}
+            >
+              {isMobile && !isTablet ? <MobileImportIcon size={18} color={'var(--primary-text)'} /> : 'Import'}
             </label>
 
             <Button

@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
+import { Box, Grid, MenuItem, Button, Menu, IconButton } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
+import { MdAdd, MdSort, MdFilterList, TbArrowsSort, MdOutlineFilterAlt } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import routes from 'src/components/Helpers/Routes';
@@ -88,50 +88,51 @@ function InvoiceHeader(props) {
           {icon} <span className="listingHeader">{heading}</span>
         </div>
         {isMobile && !isTablet ? (
-          <div className="d-flex ">
-            <Button
-              onClick={handleClickOpen}
-              id="demo-customized-button"
-              aria-controls="demo-customized-menu"
-              aria-haspopup="true"
-              // aria-expanded={open ? 'true' : undefined}
-              variant="text"
-              disableElevation
-              startIcon={<MdSort />}
-            >
-              Sort
-            </Button>
+          <div className="d-flex flex-wrap items-center justify-between w-full">
+            <div>{toggleInner}</div>
+            <div className="flex flex-wrap items-center gap-1">
+              <IconButton
+                onClick={handleClickOpen}
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                size="small"
+                className={'mobileIconButton secondary'}
+              >
+                <TbArrowsSort className="rotate-90" size={16} />
+              </IconButton>
 
-            <MobileSortDialog
-              isOpen={open}
-              handleClose={handleClickClose}
-              contentPart={toggleInner}
-              secHeading={['Sort SalesOrder']}
-              columns={columns}
-              dispatch={dispatch}
-            />
+              <MobileSortDialog
+                isOpen={open}
+                handleClose={handleClickClose}
+                contentPart={toggleInner}
+                secHeading={['Sort SalesOrder']}
+                columns={columns}
+                dispatch={dispatch}
+              />
 
-            <Button
-              id="demo-customized-button"
-              aria-controls="demo-customized-menu"
-              aria-haspopup="true"
-              // aria-expanded={open ? 'true' : undefined}
-              variant="text"
-              disableElevation
-              startIcon={<MdFilterList />}
-              onClick={handleOpen}
-            >
-              Filter
-            </Button>
-            <MobileFilterDialog
-              isOpen={isOpenDialog}
-              handleClose={handleClose}
-              contentPart={toggleInner}
-              columns={columns}
-              dispatch={dispatch}
-              title={routes?.salesOrder?.title}
-              filters={filters}
-            />
+              <IconButton
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                onClick={handleOpen}
+                size="small"
+                className={'mobileIconButton secondary'}
+              >
+                <MdOutlineFilterAlt size={16} />
+              </IconButton>
+              <MobileFilterDialog
+                isOpen={isOpenDialog}
+                handleClose={handleClose}
+                contentPart={toggleInner}
+                columns={columns}
+                dispatch={dispatch}
+                title={routes?.salesOrder?.title}
+                filters={filters}
+              />
+            </div>
           </div>
         ) : (
           options && (
@@ -149,7 +150,7 @@ function InvoiceHeader(props) {
         {children}
       </div>
       <div className="flex flex-wrap gap-[8px] justify-end">
-        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small"  />
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" />
         <div className="flex gap-[8px] flex-wrap items-center">
           {invoicePermissions?.isCreate && (
             <Button variant={'contained'} className="no-shadow" color="primary" size="small" onClick={onCreate} startIcon={<AddOutlined />}>
