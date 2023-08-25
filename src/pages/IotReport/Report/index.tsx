@@ -299,7 +299,6 @@ const IotReport = () => {
                 </Grid>
               </Grid>
             </div>
-
             <CustomFilter
               field={[{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...refObj?.filters]}
               setFilterQuery={setFilterQuery}
@@ -307,7 +306,6 @@ const IotReport = () => {
               loadingData={loadingData}
               setShowGrid={setShowGrid}
             />
-
             <div>
               {Object.keys(frameWorkComponent).length > 0 && columns ? (
                 isSmall ? (
