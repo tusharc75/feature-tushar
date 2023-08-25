@@ -180,11 +180,9 @@ const CurrencyConverter = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={12} sm={12} xs={12}>
-          <CustomBreadCrumbs routes={[routes.currencyConverter]} />
-        </Grid>
+    <section className="main-container-v1">
+      <Grid container className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.currencyConverter]} />
       </Grid>
       <CustomContainer styles={{ overflowY: 'auto' }}>
         <div className="header-panel">
@@ -210,8 +208,9 @@ const CurrencyConverter = () => {
           <Box p={1}>
             <Grid
               container
+              spacing={2}
               style={{
-                background: 'var(--dark-primary, rgb(241, 245, 255))',
+                background: 'var(--dark-primary, white)',
                 border: '1px solid var(--common-border-color)',
                 padding: '10px 10px'
               }}
@@ -300,7 +299,7 @@ const CurrencyConverter = () => {
           </Box>
         </div>
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 
