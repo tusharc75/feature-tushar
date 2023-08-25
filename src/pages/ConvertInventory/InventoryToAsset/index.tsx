@@ -13,9 +13,6 @@ import { Autocomplete } from '@material-ui/lab';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomAssetDialog from './CustomAssetDialog';
-import {
-  serializedAsset
-} from '../../../constants/helpers';
 
 const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, storageLocation = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -111,32 +108,19 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
   }, [selectedStorageLocation]);
 
   const handleSubmit = (values) => {
-    setLoading(true);
+
     const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers'].indexOf(item?.serialNumber) > -1);
 
-    axiosInstance()
-    .get(`/field?resource=${serializedAsset.resource}`)
-    .then(({ data: { data } }) => {
+    setParsedData({
+      products: product?.map((e) => {
+        return { id: e.id, productName : e.productName, productCategory: e.productCategoryId, serialNumberIds: product > 1 ? [] : serialNumberIds.map((item) => item?._id) };
+      }),
+      qty: parseInt(values.qty),
+      warehouse: warehouse,
+      storageLocation: values?.storageLocation ? values?.storageLocation : null
+    });
 
-      const foundData = data.find((d)=>d?.fieldData?.fieldName === "assetNumberType");
-
-      setParsedData({
-        products: product?.map((e) => {
-          return { id: e.id, productName : e.productName, productCategory: e.productCategoryId, serialNumberIds: product > 1 ? [] : serialNumberIds.map((item) => item?._id) };
-        }),
-        qty: parseInt(values.qty),
-        warehouse: warehouse,
-        storageLocation: values?.storageLocation ? values?.storageLocation : null,
-        isAssetTypePresent : foundData ? true : false
-      });
-
-      setLoading(false);
-      setOpenCustomDialog(true);
-
-    }).catch((err)=>{
-      setLoading(false);
-      toastConfig.setToastConfig(err);
-    })  
+    setOpenCustomDialog(true);
   };
 
   function validate(values) {
