@@ -106,7 +106,9 @@ const Analysis = ({ assetId, dataPoints }) => {
                                                 />
                                             ) :
                                                 (
-                                                    <Loader text="Loading ..." />
+                                                    <Box display="flex" justifyContent="center" alignItems="center">
+                                                        <Loader text="Loading ..." />
+                                                    </Box>
                                                 )
                                         }
                                     </AccordionDetails>
