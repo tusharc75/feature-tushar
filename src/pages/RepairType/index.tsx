@@ -24,7 +24,7 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import ManageRepairType from './ManageRepairType';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
+import { MdAdd, MdSort, MdFilterList, TbArrowsSort, MdOutlineFilterAlt } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
@@ -245,148 +245,128 @@ const RepairType = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.repairType]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions?.repairType}
-            module="purchase order"
-            api={repairType.api}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchData();
-            }}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.repairType]} />
+        <ImportExportLinks
+          permissions={permissions?.repairType}
+          module="purchase order"
+          api={repairType.api}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchData();
+          }}
+        />
+      </div>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'d-flex flex-wrap align-items-center gap-1 w-full'}>
               <div className="d-flex align-items-center">
                 <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
                 <span className="listingHeader">{routes.repairType?.title} </span>
               </div>
-              {isMobile ? (
-                <Grid style={{ display: 'inline-flex' }}>
-                  <Button
-                    onClick={handleClickOpen}
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    aria-expanded={'true'}
-                    color="secondary"
-                    variant="text"
-                    disableElevation
-                    startIcon={<MdSort />}
-                    className={'sort-filter-tablet'}
-                    style={isTablet ? { marginLeft: '50px' } : {}}
-                  >
-                    Sort
-                  </Button>
-                  <MobileSortDialog
-                    isOpen={sortOpen}
-                    handleClose={handleClickClose}
-                    contentPart={null}
-                    secHeading={['Sort Purchase Order']}
-                    columns={columns}
-                    dispatch={dispatch}
-                  />
-                  <Button
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    aria-expanded={'true'}
-                    variant="text"
-                    color="secondary"
-                    disableElevation
-                    className={'sort-filter-tablet'}
-                    startIcon={<MdFilterList />}
-                    onClick={handleOpen}
-                  >
-                    Filter
-                  </Button>
-                  <MobileFilterDialog
-                    isOpen={isOpenDialog}
-                    handleClose={handleFilterClose}
-                    contentPart={null}
-                    columns={columns}
-                    dispatch={dispatch}
-                    title={routes?.repairType?.title}
-                    filters={filters}
-                  />
-                </Grid>
-              ) : null}
-            </Grid>
-            <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={styles.content_box}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={isMobile ? styles.search_box_input : ''}
-                    width="242px"
-                    size="small"
-                    value={search}
-                    style={isMobile ? { flex: 1 } : {}}
-                  />
-                </Grid>
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.repairType?.isCreate && (
-                    <Button
-                      onClick={() => {
-                        setShowManageDialog({ open: true, isClone: false, idToClone: null });
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+              {isMobile && !isTablet ? (
+                <div className="d-flex flex-wrap items-center justify-between w-full">
+                  <div></div>
+                  <div className="flex flex-wrap items-center gap-1">
+                    <IconButton
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
                       size="small"
-                      color="primary"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                      className={'mobileIconButton secondary'}
                     >
-                      {' '}
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                  )}
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
+                    <MobileSortDialog
+                      isOpen={sortOpen}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort Purchase Order']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                    <IconButton
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={'true'}
+                      size="small"
+                      className={'mobileIconButton secondary'}
+                      onClick={handleOpen}
+                    >
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleFilterClose}
+                      contentPart={null}
+                      columns={columns}
+                      dispatch={dispatch}
+                      title={routes?.repairType?.title}
+                      filters={filters}
+                    />
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.repairType?.isCreate && (
+                  <Button
+                    onClick={() => {
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={'no-shadow'}
+                    startIcon={<AddOutlined />}
                   >
-                    {permissions?.repairType?.isDelete && (
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    )}
-                  </Menu>
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+                    Add
+                  </Button>
+                )}
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {permissions?.repairType?.isDelete && (
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        setShowDeleteConfirmBox(true);
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                  )}
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
         {columns ? (
           Object.keys(frameWorkComponent).length > 0 ? (
@@ -471,7 +451,7 @@ const RepairType = () => {
           onOk={handleDelete}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 
