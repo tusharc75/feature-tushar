@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { AddOutlined } from '@material-ui/icons';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import styles from '../Leads/Header.module.scss';
+import { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import routes from 'src/components/Helpers/Routes';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import styles from '../Leads/Header.module.scss';
 
 function SalesOrderHeader(props) {
   const {
@@ -86,50 +85,51 @@ function SalesOrderHeader(props) {
           {icon} <span className="listingHeader">{heading}</span>
         </div>
         {isMobile && !isTablet ? (
-          <div className="d-flex ">
-            <Button
-              onClick={handleClickOpen}
-              id="demo-customized-button"
-              aria-controls="demo-customized-menu"
-              aria-haspopup="true"
-              // aria-expanded={open ? 'true' : undefined}
-              variant="text"
-              disableElevation
-              startIcon={<MdSort />}
-            >
-              Sort
-            </Button>
+          <div className="d-flex flex-wrap items-center justify-between w-full">
+            <div>{toggleInner}</div>
+            <div className="flex flex-wrap items-center gap-1">
+              <IconButton
+                onClick={handleClickOpen}
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                size="small"
+                className={'mobileIconButton secondary'}
+              >
+                <TbArrowsSort className="rotate-90" size={16} />
+              </IconButton>
 
-            <MobileSortDialog
-              isOpen={open}
-              handleClose={handleClickClose}
-              contentPart={toggleInner}
-              secHeading={['Sort SalesOrder']}
-              columns={columns}
-              dispatch={dispatch}
-            />
+              <MobileSortDialog
+                isOpen={open}
+                handleClose={handleClickClose}
+                contentPart={toggleInner}
+                secHeading={['Sort SalesOrder']}
+                columns={columns}
+                dispatch={dispatch}
+              />
 
-            <Button
-              id="demo-customized-button"
-              aria-controls="demo-customized-menu"
-              aria-haspopup="true"
-              // aria-expanded={open ? 'true' : undefined}
-              variant="text"
-              disableElevation
-              startIcon={<MdFilterList />}
-              onClick={handleOpen}
-            >
-              Filter
-            </Button>
-            <MobileFilterDialog
-              isOpen={isOpenDialog}
-              handleClose={handleClose}
-              contentPart={toggleInner}
-              columns={columns}
-              dispatch={dispatch}
-              title={routes?.salesOrder?.title}
-              filters={filters}
-            />
+              <IconButton
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                size="small"
+                className={'mobileIconButton secondary'}
+                onClick={handleOpen}
+              >
+                <MdOutlineFilterAlt size={16} />
+              </IconButton>
+              <MobileFilterDialog
+                isOpen={isOpenDialog}
+                handleClose={handleClose}
+                contentPart={''}
+                columns={columns}
+                dispatch={dispatch}
+                title={routes?.salesOrder?.title}
+                filters={filters}
+              />
+            </div>
           </div>
         ) : (
           options && (
