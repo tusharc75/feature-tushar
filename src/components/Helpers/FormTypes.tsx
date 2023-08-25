@@ -276,6 +276,7 @@ const FormTypes = (props) => {
     showErrorMessage = false,
     selectedCurrencyCode = null,
     setFields,
+    fromFilter = false,
     ...rest
   } = props;
 
@@ -708,7 +709,7 @@ const FormTypes = (props) => {
           {...rest}
           disabled={fieldData?.isUneditable || rest?.disabled}
           variant="outlined"
-          type="text"
+          type={fromFilter ? "search" : "text"}
           label={getLabel(label)}
           required={required}
           name={name}
@@ -728,7 +729,7 @@ const FormTypes = (props) => {
         <TextField
           {...rest}
           variant="outlined"
-          type="text"
+          type={fromFilter ? "search" : "text"}
           label={getLabel(label)}
           required={required}
           name={name}
@@ -753,7 +754,7 @@ const FormTypes = (props) => {
         <TextField
           {...rest}
           variant="outlined"
-          type="text"
+          type={fromFilter ? "search" : "text"}
           multiline
           label={getLabel(label)}
           name={name}
@@ -840,7 +841,7 @@ const FormTypes = (props) => {
         <TextField
           {...rest}
           variant="outlined"
-          type="email"
+          type={fromFilter ? "search" : "email"}
           label={getLabel(label)}
           required={required}
           name={name}
@@ -1147,7 +1148,7 @@ const FormTypes = (props) => {
         <TextField
           {...rest}
           variant="outlined"
-          type="text"
+          type={fromFilter ? "search" : "text"}
           label={getLabel(label)}
           required={required}
           name={name}
