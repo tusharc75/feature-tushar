@@ -406,7 +406,7 @@ const Roles: FC = () => {
               refreshGrid={fetchRoles}
               renderedFrom={renderedFrom}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
+              showFilters={false}
               resource={sidebarResource.role}
             />
           )}
