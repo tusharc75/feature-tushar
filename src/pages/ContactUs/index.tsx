@@ -336,7 +336,7 @@ const ContactUs = () => {
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions.blog}
-              primaryField={columns?.find((d) => d.primaryField)}
+              primaryField={columns?.find((d) => d.primaryField) || { field: 'name' }}
               onClick={(data) => {
                 setContactUsId(data._id);
                 setOpen({ open: true, isClone: false });
