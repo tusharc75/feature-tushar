@@ -2165,34 +2165,28 @@ export const IOT_REPORT_LIST = [{
   api: '/report/iot/data-points',
   filters: [
     {
-      fieldName: 'dataPoints',
-      fieldLabel: 'Iot Data Points',
-      resource: sidebarResource.iotDataPoints,
-      lookup: true,
-      type: 'dropDown',
-      multiple: true,
-      options: null,
-      _id: '1'
-
-    },
-    {
-      fieldName: 'date',
-      fieldLabel: 'Date',
-      type: 'date',
-      options: null,
-      _id: '2'
-
-    },
-    {
       fieldName: 'asset',
       fieldLabel: 'Serialized Asset',
       resource: sidebarResource.serializedAsset,
       lookup: true,
       type: 'dropDown',
       multiple: false,
-      options: null,
       _id: '3'
-
+    },
+    {
+      fieldName: 'dataPoints',
+      fieldLabel: 'Iot Data Points',
+      resource: sidebarResource.iotDataPoints,
+      lookup: true,
+      type: 'dropDown',
+      multiple: true,
+      _id: '1'
+    },
+    {
+      fieldName: 'date',
+      fieldLabel: 'Date',
+      type: 'date',
+      _id: '2'
     },
     {
       fieldName: 'interval',
@@ -2200,7 +2194,6 @@ export const IOT_REPORT_LIST = [{
       type: 'dropDown',
       options: INTERVALS,
       _id: '4'
-
     },
   ]
 }]
