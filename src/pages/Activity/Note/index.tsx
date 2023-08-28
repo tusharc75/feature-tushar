@@ -326,7 +326,7 @@ const Note = () => {
                 <Autocomplete
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
-                  style={{ width: isMobile && !isTablet ? '60%' : '250px' }}
+                  style={{ minWidth: '200px' }}
                   value={resource}
                   className="flex-grow"
                   size="small"
