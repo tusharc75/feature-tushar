@@ -81,18 +81,18 @@ function DemandOrderHeader(props) {
   );
 
   return (
-    <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className={'d-flex align-items-center gap-1'}>
         <div className="d-flex align-items-center"></div>
         {isMobile && (
-          <>
-            <Grid style={{ display: 'inline-flex' }}>
+          <div className="d-flex flex-wrap items-center justify-between w-full">
+            <div>{toggleInner}</div>
+            <div className="flex flex-wrap items-center gap-1 ml-auto">
               <Button
                 onClick={handleClickOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
-                color="secondary"
                 variant="text"
                 disableElevation
                 startIcon={<MdSort />}
@@ -115,7 +115,6 @@ function DemandOrderHeader(props) {
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
                 variant="text"
-                color="secondary"
                 disableElevation
                 className={'sort-filter-tablet'}
                 startIcon={<MdFilterList />}
@@ -125,14 +124,14 @@ function DemandOrderHeader(props) {
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={toggleInner}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 title={routes?.fieldServiceOrder?.title}
                 filters={filters}
               />
-            </Grid>
-          </>
+            </div>
+          </div>
         )}
         {options && (
           <ToggleButtonGroup
@@ -152,67 +151,50 @@ function DemandOrderHeader(props) {
           </ToggleButtonGroup>
         )}
         {children}
-      </Grid>
-      <Grid item xs={12} sm={6} md={6} className={styles.filter_side}>
-        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: 'flex', flex: 1 }}>
-            <SearchBox
-              onChange={onSearch}
-              className={styles.search_box_input}
-              value={searchVal}
-              size="small"
-              width="200px"
-              style={isMobile ? { flex: 1 } : {}}
-            />
-          </Grid>
-          <Grid style={{ display: 'flex', gap: '5px' }}>
-            {
+      </div>
+      <div className="flex flex-wrap gap-[8px]  justify-end">
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" />
+        <div className="flex gap-[8px] flex-wrap items-center">
+          {
+            <Button variant={'contained'} color="primary" size="small" className={`no-shadow`} onClick={onCreate} startIcon={<AddOutlined />}>
+              Add
+            </Button>
+          }
+          {SalesOrderPermissions?.isDelete && (
+            <>
               <Button
-                variant={isMobile ? 'text' : 'contained'}
-                color="primary"
+                disabled={canDelete}
+                variant={'outlined'}
+                color="default"
                 size="small"
-                className={isMobile ? 'mobile_button' : styles.add_submit_btn}
-                onClick={onCreate}
-                startIcon={isMobile ? null : <AddOutlined />}
+                onClick={openActions}
+                className={`new-dropdown-v1`}
+                aria-controls="action-menu"
+                endIcon={<ExpandMore />}
               >
-                {isMobile ? <MdAdd size={23} /> : 'Add'}
+                Actions
               </Button>
-            }
-            {SalesOrderPermissions?.isDelete && (
-              <>
-                <Button
-                  disabled={canDelete}
-                  variant={isMobile ? 'text' : 'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  className={`${isMobile ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                >
-                  {isMobile ? '' : 'Actions'}
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    showConfirmBox(null);
                   }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
                 >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      showConfirmBox(null);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                  {/* {SalesOrderPermissions.isUpdate && (
+                  Delete
+                </MenuItem>
+                {/* {SalesOrderPermissions.isUpdate && (
                   <MenuItem
                     disabled={selectedRecords.find((d) => d.canDelete === false)}
                     onClick={() => {
@@ -223,7 +205,7 @@ function DemandOrderHeader(props) {
                     Transfer Entity
                   </MenuItem>
                 )} */}
-                  {/* <MenuItem
+                {/* <MenuItem
                   disabled={selectedRecords.length !== 1}
                   onClick={() => {
                     closeActions();
@@ -232,13 +214,12 @@ function DemandOrderHeader(props) {
                 >
                   Clone
                 </MenuItem> */}
-                </Menu>
-              </>
-            )}
-          </Grid>
-        </Box>
-      </Grid>
-    </Grid>
+              </Menu>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 export default DemandOrderHeader;

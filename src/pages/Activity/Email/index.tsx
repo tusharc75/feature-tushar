@@ -409,23 +409,21 @@ const Email = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item xs={12}>
-          <CustomBreadCrumbs routes={[{ title: routes.activityEmail.title }]} />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.activityEmail.title }]} />
+      </div>
 
       <CustomContainer>
         {filter && (
           <div className="header-panel">
-            <Grid container className={styles.filter_side_container}>
-              <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={'d-flex align-items-center gap-1'}>
                 <HiOutlineMail className="headerLogo" /> <span className="listingHeader">{routes.activityEmail.title}</span>
                 <Autocomplete
+                  fullWidth
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
-                  style={{ width: '250px' }}
                   value={resource}
                   onChange={(event, newValue) => {
                     setResource(newValue);
@@ -436,16 +434,20 @@ const Email = () => {
                     }
                   }}
                   size="small"
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
-                    ) : (
-                      <TextField {...params} label="Select Resource" variant="outlined" />
-                    )
-                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      className="flex-grow md:max-w-[250px]"
+                      margin="none"
+                      size="small"
+                      label="Select Resource"
+                      variant="outlined"
+                    />
+                  )}
                 />
                 {resource && resourceData && (
                   <Autocomplete
+                    fullWidth
                     disabled={loadingResources}
                     options={resourceData}
                     getOptionLabel={(option: any) => option.optionLabel}
@@ -464,69 +466,74 @@ const Email = () => {
                       }
                     }}
                     size="small"
-                    renderInput={(params) => <TextField {...params} label={`Select ${resource.optionLabel}`} variant="outlined" />}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        className="flex-grow md:max-w-[250px]"
+                        margin="none"
+                        size="small"
+                        label={`Select ${resource.optionLabel}`}
+                        variant="outlined"
+                      />
+                    )}
                   />
                 )}
-              </Grid>
-              <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
-                <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Box style={{ flexGrow: 1, flexBasis: 'calc(100% - 187px)' }}>
-                    <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'large' }} activityName="email" />
-                  </Box>
-                  <Box style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', flexBasis: '170px' }}>
-                    {
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setOpen(true);
-                        }}
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                      >
-                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                      </Button>
-                    }
-                    {/* </Box> */}
+              </div>
+              <div className="flex flex-wrap gap-[8px]  justify-end items-start">
+                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'large' }} activityName="email" />
+                <div className="flex gap-[8px] flex-wrap items-center">
+                  {
                     <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
+                      variant={'contained'}
+                      color="primary"
                       size="small"
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      disabled={selectedRecords.length > 0 ? false : true}
-                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      {isMobile && !isTablet ? '' : 'Actions'}
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
+                      onClick={() => {
+                        setOpen(true);
                       }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
+                      className={`no-shadow`}
+                      startIcon={<AddOutlined />}
                     >
-                      <MenuItem
-                        onClick={() => {
-                          showConfirmBox(null);
-                          closeActions();
-                        }}
-                        disabled={!permissions?.email?.isDelete}
-                      >
-                        Delete
-                      </MenuItem>
-                    </Menu>
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
+                      Add
+                    </Button>
+                  }
+                  {/* </Box> */}
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedRecords.length > 0 ? false : true}
+                    className={`new-dropdown-v1`}
+                    endIcon={<ExpandMore />}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        showConfirmBox(null);
+                        closeActions();
+                      }}
+                      disabled={!permissions?.email?.isDelete}
+                    >
+                      Delete
+                    </MenuItem>
+                  </Menu>
+                </div>
+              </div>
+            </div>
           </div>
         )}
         {isMobile && !isTablet ? (
@@ -670,7 +677,7 @@ const Email = () => {
           </Dialog>
         ) : null}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 
