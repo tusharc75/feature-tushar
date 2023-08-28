@@ -5,25 +5,23 @@ import routes from 'src/components/Helpers/Routes';
 import CalendarView from './CalendarView';
 
 const RentalPlanningCalendar = () => {
-
-    return (<>
-        <Grid container className="headerbox">
-            <Grid item md={10} sm={9} xs={8}>
-                <CustomBreadCrumbs
-                    routes={[
-                        {
-                            title: routes.rentalPlanningCalendar.title,
-                            path: routes.rentalPlanningCalendar.path,
-                        }
-                    ]}
-                />
-            </Grid>
-        </Grid>
-        <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>
-            <CalendarView />
-        </CustomContainer>
-    </>
-    );
+  return (
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs
+          routes={[
+            {
+              title: routes.rentalPlanningCalendar.title,
+              path: routes.rentalPlanningCalendar.path
+            }
+          ]}
+        />
+      </div>
+      <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>
+        <CalendarView />
+      </CustomContainer>
+    </section>
+  );
 };
 
 export default RentalPlanningCalendar;

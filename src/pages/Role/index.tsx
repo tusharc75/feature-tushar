@@ -12,7 +12,15 @@ import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CreateRole from './CreateRole';
 import { PERMISSION } from '../../constants/Roles';
-import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import {
+  localStorageKeys,
+  roleTypes,
+  gridPageSizes,
+  isObjectEmpty,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from '../../constants/helpers';
 import RoleHeader from './RoleHeader';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
@@ -148,7 +156,6 @@ const Roles: FC = () => {
     actionsRenderer: ActionsRenderer
   };
 
-
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&type=2`;
 
@@ -161,7 +168,7 @@ const Roles: FC = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -169,7 +176,7 @@ const Roles: FC = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;
@@ -319,12 +326,10 @@ const Roles: FC = () => {
             }}
           />
         ))}
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={12} sm={12} xs={12}>
-            <CustomBreadCrumbs routes={[routes.role]} />
-          </Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[routes.role]} />
+        </div>
         <CustomContainer>
           <div className="header-panel">
             <RoleHeader
@@ -430,7 +435,7 @@ const Roles: FC = () => {
             onOk={handleDeleteRole}
           />
         ) : null}
-      </Fragment>
+      </section>
     </>
   );
 };

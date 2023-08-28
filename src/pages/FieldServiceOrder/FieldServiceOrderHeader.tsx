@@ -81,18 +81,18 @@ function ServiceOrderHeader(props) {
   );
 
   return (
-    <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className={'d-flex align-items-center gap-1'}>
         {isMobile && (
-          <>
-            <Grid style={{ display: 'inline-flex' }}>
+          <div className="d-flex flex-wrap items-center justify-between w-full">
+            <div>{toggleInner}</div>
+            <div className="flex flex-wrap items-center gap-1 ml-auto">
               <Button
                 onClick={handleClickOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
-                // aria-expanded={open ? 'true' : undefined}
-                color="secondary"
+                aria-expanded={open ? 'true' : undefined}
                 variant="text"
                 disableElevation
                 startIcon={<MdSort />}
@@ -116,9 +116,8 @@ function ServiceOrderHeader(props) {
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
-                // aria-expanded={open ? 'true' : undefined}
+                aria-expanded={open ? 'true' : undefined}
                 variant="text"
-                color="secondary"
                 disableElevation
                 className={'sort-filter-tablet'}
                 startIcon={<MdFilterList />}
@@ -128,14 +127,14 @@ function ServiceOrderHeader(props) {
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={toggleInner}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 title={routes?.fieldServiceOrder?.title}
                 filters={filters}
               />
-            </Grid>
-          </>
+            </div>
+          </div>
         )}
 
         {options && (
@@ -156,73 +155,56 @@ function ServiceOrderHeader(props) {
           </ToggleButtonGroup>
         )}
         {children}
-      </Grid>
-      <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: 'flex', flex: 1 }}>
-            <SearchBox
-              onChange={onSearch}
-              className={styles.search_box_input}
-              value={searchVal}
-              size="small"
-              style={isMobile ? { flex: 1 } : {}}
-            />
-          </Grid>
+      </div>
+      <div className="flex flex-wrap gap-[8px]  justify-end">
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" />
 
-          <Grid style={{ display: 'flex', gap: '5px' }}>
-            {ServiceOrderPermissions?.isCreate && ServiceOrderPermissions?.isUpdate && (
+        <div className="flex gap-[8px] flex-wrap items-center">
+          {ServiceOrderPermissions?.isCreate && ServiceOrderPermissions?.isUpdate && (
+            <Button variant={'contained'} color="primary" size="small" onClick={onCreate} className={`no-shadow`} startIcon={<AddOutlined />}>
+              Add
+            </Button>
+          )}
+          {ServiceOrderPermissions?.isDelete && (
+            <>
               <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                color="primary"
+                disabled={canDelete}
+                variant={'outlined'}
+                color="default"
                 size="small"
-                // className={styles.add_submit_btn}
-                onClick={onCreate}
-                className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                onClick={openActions}
+                aria-controls="action-menu"
+                className={`new-dropdown-v1`}
+                endIcon={<ExpandMore />}
               >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                Actions
               </Button>
-            )}
-            {ServiceOrderPermissions?.isDelete && (
-              <>
-                <Button
-                  disabled={canDelete}
-                  variant={isMobile ? 'text' : 'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  className={`${isMobile ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                >
-                  {isMobile ? '' : 'Actions'} <ExpandMore />
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    showConfirmBox(null);
                   }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
                 >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      showConfirmBox(null);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </>
-            )}
-          </Grid>
-        </Box>
-      </Grid>
-    </Grid>
+                  Delete
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

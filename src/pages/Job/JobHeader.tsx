@@ -81,17 +81,17 @@ function JobHeader(props) {
   );
 
   return (
-    <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className={'d-flex align-items-center gap-1 flex-wrap'}>
         {isMobile && (
-          <>
-            <Grid style={{ display: 'inline-flex' }}>
+          <div className="d-flex flex-wrap items-center justify-between w-full">
+            <div>{toggleInner}</div>
+            <div className="flex flex-wrap items-center gap-1">
               <Button
                 onClick={handleClickOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
-                color="secondary"
                 variant="text"
                 disableElevation
                 startIcon={<MdSort />}
@@ -116,7 +116,6 @@ function JobHeader(props) {
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
                 variant="text"
-                color="secondary"
                 disableElevation
                 className={'sort-filter-tablet'}
                 startIcon={<MdFilterList />}
@@ -126,20 +125,20 @@ function JobHeader(props) {
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={toggleInner}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 title={routes?.job?.title}
                 filters={filters}
               />
-            </Grid>
-          </>
+            </div>
+          </div>
         )}
 
         {options && (
           <ToggleButtonGroup
             size="small"
-            className="ml-2 align-items-center gap-1 layout-for-mobile "
+            className="align-items-center gap-1 layout-for-mobile "
             value={options[selectedType - 1].key}
             exclusive
             onChange={handleFilter}
@@ -154,7 +153,7 @@ function JobHeader(props) {
           </ToggleButtonGroup>
         )}
         {permissions?.fleetDispatch?.isRead && (
-          <Box ml={1}>
+          <Box>
             <ToggleButtonGroup size="small">
               <ToggleButton
                 onClick={() => {
@@ -167,7 +166,7 @@ function JobHeader(props) {
           </Box>
         )}
         {permissions?.fleetReceiver?.isRead && (
-          <Box ml={1}>
+          <Box>
             <ToggleButtonGroup size="small">
               <ToggleButton
                 onClick={() => {
@@ -179,7 +178,7 @@ function JobHeader(props) {
             </ToggleButtonGroup>
           </Box>
         )}
-        <Box ml={1}>
+        <Box>
           <IconButton
             size="small"
             aria-label="Clone"
@@ -200,73 +199,56 @@ function JobHeader(props) {
           </IconButton>
         </Box>
         {children}
-      </Grid>
-      <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: 'flex', flex: 1 }}>
-            <SearchBox
-              onChange={onSearch}
-              className={styles.search_box_input}
-              value={searchVal}
-              size="small"
-              style={isMobile ? { flex: 1 } : {}}
-            />
-          </Grid>
+      </div>
+      <div className="flex flex-wrap gap-[8px]  justify-end items-start">
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" />
 
-          <Grid style={{ display: 'flex', gap: '5px' }}>
-            {permissions?.job?.isCreate && permissions?.job?.isUpdate && (
+        <div className="flex gap-[8px] flex-wrap items-center">
+          {permissions?.job?.isCreate && permissions?.job?.isUpdate && (
+            <Button variant={'contained'} color="primary" size="small" onClick={onCreate} className={'no-shadow'} startIcon={<AddOutlined />}>
+              Add
+            </Button>
+          )}
+          {permissions?.job?.isDelete && (
+            <>
               <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                color="primary"
+                disabled={canDelete}
+                variant={'outlined'}
+                color="default"
                 size="small"
-                onClick={onCreate}
-                className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                onClick={openActions}
+                aria-controls="action-menu"
+                className={`new-dropdown-v1`}
+                endIcon={<ExpandMore />}
               >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                Actions
               </Button>
-            )}
-            {permissions?.job?.isDelete && (
-              <>
-                <Button
-                  disabled={canDelete}
-                  variant={isMobile ? 'text' : 'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  className={`${isMobile ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                  endIcon={<ExpandMore />}
-                >
-                  {isMobile ? '' : 'Actions'}
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    showConfirmBox(null);
                   }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
                 >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      showConfirmBox(null);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </>
-            )}
-          </Grid>
-        </Box>
-      </Grid>
-    </Grid>
+                  Delete
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

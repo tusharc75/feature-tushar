@@ -87,7 +87,7 @@ function QuotationHeader(props) {
         {isMobile && !isTablet ? (
           <div className="d-flex flex-wrap items-center justify-between w-full">
             <div>{toggleInner}</div>
-            <div className="flex flex-wrap items-center gap-1">
+            <div className="flex flex-wrap items-center gap-1 ml-auto">
               <IconButton
                 className={'mobileIconButton secondary'}
                 size="small"

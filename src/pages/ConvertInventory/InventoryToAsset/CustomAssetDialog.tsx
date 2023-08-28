@@ -10,220 +10,90 @@ import {
     TableBody,
     TableCell,
     TableRow,
-    FormControl,
-    Select,
-    MenuItem,
     Link
 } from '@material-ui/core';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ASSET_NUMBER_TYPE } from '../../../constants/helpers';
+import { Formik, Form, FieldArray } from 'formik';
+import CustomButton from 'src/components/Helpers/CustomButton';
+import { read, utils, writeFile } from 'xlsx';
+import { serializedAsset } from '../../../constants/helpers';
+import { Autocomplete } from '@material-ui/lab';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { makeStyles } from '@material-ui/styles';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { convertInventory } from '../../../constants/helpers';
-import { Formik, Form, FieldArray, Field } from 'formik';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import { read, utils, writeFile } from 'xlsx';
-import {
-    serializedAsset
-} from '../../../constants/helpers';
-import Loader from 'src/components/Loader';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const useClasses = makeStyles(() => ({
-    table: {
-        // minWidth: 650
-    },
-    input: {
-        display: 'none'
-    },
-    tableContainer: {
-        maxHeight: 'calc(100vh - 125px)',
-        boxShadow: 'none'
-    },
-}));
+const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
 
-const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
-    const [tableData, setTableData] = useState([]);
-    const [loading, setLoading] = useState(false);
     const { setToastConfig } = useContext(CustomToastContext);
-    const [loadingTable, setLoadingTable] = useState(false);
-    const [isAssetTypePresent, setIsAssetTypePresent] = useState(false);
 
-    const classes = useClasses();
+    const [productList, setProductList] = useState(null);
+    const [assetNumberTypeField, setAssetNumberTypeField] = useState(null);
+
+    const [fullScreen, setFullScreen] = useState(true);
 
     useEffect(() => {
-        if (!parsedData || parsedData == null) return;
-
-        setLoadingTable(true);
-        axiosInstance()
-            .get(`/field?resource=${serializedAsset.resource}`)
+        axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
             .then(({ data: { data } }) => {
-                const foundData = data.find((d) => d?.fieldData?.fieldName === "assetNumberType");
-                if (foundData) {
-                    setIsAssetTypePresent(true);
+                const assetNumberType = data.find((d) => d?.fieldData?.fieldName === "assetNumberType")?.fieldData;
+                if (assetNumberType) {
+                    setAssetNumberTypeField(assetNumberType);
                 }
-
-                const { products, qty } = parsedData;
-                const mappedTable = products.flatMap((p, index_1) =>
-                    [...Array(qty).keys()].map((_, index_2) => ({
-                        _id: p?.id,
-                        id: `${index_1 + 1}.${index_2 + 1}_${p?.id}`,
-                        srno: `${index_1 + 1}.${index_2 + 1}`,
-                        Name: p?.productName,
-                        assetNumber: '',
-                        assetNumberType: !foundData ? 'Manual' : 'Auto'
+                const productsData = products.flatMap((product, index) =>
+                    [...Array(product?.qty).keys()].map((_, index2) => ({
+                        id: product?.id,
+                        index: `${index + 1}.${index2 + 1}`,
+                        productName: product?.productName,
+                        assetNumberType: assetNumberType ? ASSET_NUMBER_TYPE.auto : ASSET_NUMBER_TYPE.manual,
+                        assetNumber: ''
                     }))
                 );
-
-                setTableData(mappedTable);
-
-                setLoadingTable(false);
-
+                setProductList(productsData);
             }).catch((err) => {
-                setLoadingTable(false);
                 setToastConfig(err);
             })
+    }, [products]);
 
-
-
-    }, [parsedData]);
-
-    const handleFormSubmit = (values) => {
-        const seenAssetNumbers = new Set();
-        const duplicates = [];
-        for (const data of values.tableData) {
-            if (data.assetNumber !== '') {
-                const assetNumber = data.assetNumber?.trim();
-
-                if (seenAssetNumbers.has(assetNumber)) {
-                    duplicates.push(data);
-                } else {
-                    seenAssetNumbers.add(assetNumber);
-                }
-            }
-        }
-
-        if (duplicates.length) {
-            setToastConfig({
-                open: true,
-                message: 'One or more asset numbers are the same!',
-                type: 'error'
-            });
-            // return false;
-        } else {
-            const updatedParsedData = {
-                ...parsedData,
-                products: parsedData.products.map((product) => {
-                    const updatedProduct = { ...product };
-                    const matchingTableData = values.tableData.find((data) => data._id === product.id);
-
-                    if (matchingTableData && matchingTableData.assetNumberType === 'Manual') {
-                        if (!updatedProduct.assetNumbers) {
-                            updatedProduct.assetNumbers = [];
-                        }
-                        updatedProduct.assetNumbers.push(matchingTableData.assetNumber);
-                    }
-
-                    return updatedProduct;
-                }),
-            };
-
-            setLoading(true);
-
-            axiosInstance()
-                .post(`${convertInventory.api}/convert-inventory-to-asset`, updatedParsedData)
-                .then(({ data: { data } }) => {
-                    setLoading(false);
-                    setToastConfig({
-                        open: true,
-                        type: 'success',
-                        message: `Convert Inventory to Asset Successfully`
-                    });
-                    handleSuccess();
-                    handleClose();
-                })
-                .catch((error) => {
-                    setLoading(false);
-                    setToastConfig(error);
-                });
-
-        }
-    };
-
-    const validateForm = (values) => {
-        const errors = {};
-
-        values.tableData.forEach((data, index) => {
-            const assetNumberType = data.assetNumberType;
-            const assetNumber = data.assetNumber;
-
-            if (assetNumberType === 'Manual' && !assetNumber) {
-                errors[`tableData.${index}.assetNumber`] = 'Asset Number is required';
-            }
-        });
-
-        return errors;
+    const handleSubmit = (values) => {
+        const data: any = [...products];
+        data?.forEach((ele) => {
+            ele.assetNumbers = values?.products?.filter((e) => e.assetNumberType === ASSET_NUMBER_TYPE.manual)?.map((e) => e.assetNumber)
+        })
+        handleSuccess(data)
     };
 
     const handleExport = (values) => {
-        const errors = validateForm(values);
-        if (Object.keys(errors)?.length >= 1) {
-            setToastConfig({
-                open: true,
-                type: 'error',
-                message: `Please fill all the fields`
-            });
+        let json_data = values.products?.map((data) => {
+            const obj: any = {};
+            obj['Index'] = data['index'];
+            obj['Product Name'] = data['productName'];
+            if (assetNumberTypeField) {
+                obj['Asset Number Type'] = data['assetNumberType'];
+            }
+            obj['Asset Number'] = data['assetNumber'];
+            return obj;
+        });
+        let header = [];
+        header.push('Index')
+        header.push('Product Name')
+        if (assetNumberTypeField) {
+            header.push('Asset Number Type')
         }
-        else {
-
-            let json_data = values.tableData.map((data) => {
-                const rowData = {
-                    'Index': data['srno'],
-                    Name: data['Name'],
-                    'Asset Number': data.assetNumberType === 'Auto' ? 'Auto Generated' : data.assetNumber,
-                };
-
-                if (isAssetTypePresent) {
-                    rowData['Asset Number Type'] = data.assetNumberType;
-                }
-
-                return isAssetTypePresent
-                    ? {
-                        'Index': rowData['Index'],
-                        Name: rowData['Name'],
-                        'Asset Number Type': rowData['Asset Number Type'],
-                        'Asset Number': rowData['Asset Number'],
-                    }
-                    : rowData;
-            });
-
-
-            let header = [];
-
-            if (isAssetTypePresent) {
-                header = ['Index', 'Name', 'Asset Number Type', 'Asset Number'];
-            }
-            else {
-                header = ['Index', 'Name', 'Asset Number'];
-            }
-
-            const ws = utils.json_to_sheet(json_data);
-            if (header.length) {
-                utils.sheet_add_aoa(ws, [header]);
-            }
-            const wb = utils.book_new();
-            utils.book_append_sheet(wb, ws, 'Sheet1');
-            writeFile(wb, 'Inventory to Asset.xlsx');
+        header.push('Asset Number')
+        const ws = utils.json_to_sheet(json_data);
+        if (header.length) {
+            utils.sheet_add_aoa(ws, [header]);
         }
+        const wb = utils.book_new();
+        utils.book_append_sheet(wb, ws, 'Sheet1');
+        writeFile(wb, 'Inventory to Asset.xlsx');
     };
 
-
     const handleImport = (e: React.ChangeEvent<HTMLInputElement>, setValues, values) => {
-
         e.preventDefault();
-        const files = e.target.files,
-            f = files[0];
+        const files = e.target.files, f = files[0];
         let reader = new FileReader();
         reader.onload = function (e) {
             const data = e.target.result;
@@ -236,208 +106,203 @@ const CustomAssetDialog = ({ parsedData, handleClose, handleSuccess }) => {
                 let option = [];
                 dataParse?.forEach((row) => {
                     let rowInsert = {};
-                    if (isAssetTypePresent) {
-
-                        if (row[0] && row[1] && row[2]) {
-                            rowInsert['srno'] = row[0]?.toString();
-                            rowInsert['product'] = row[1]?.toString();
-                            rowInsert['assetNumberType'] = row[2]?.toString();
-                            rowInsert['assetNumber'] = row[2]?.toString() === "Manual" ? row[3]?.toString() : '';
-                            option.push(rowInsert);
-                        }
+                    rowInsert['index'] = row[0]?.toString();
+                    rowInsert['productName'] = row[1]?.toString();
+                    if (assetNumberTypeField) {
+                        rowInsert['assetNumberType'] = row[2]?.toString();
+                        rowInsert['assetNumber'] = row[3]?.toString();
                     }
                     else {
-                        if (row[0] && row[1] && row[2]) {
-                            rowInsert['srno'] = row[0]?.toString();
-                            rowInsert['product'] = row[1]?.toString();
-                            rowInsert['assetNumber'] = row[2]?.toString();
-                            option.push(rowInsert);
-                        }
+                        rowInsert['assetNumber'] = row[2]?.toString();
                     }
+                    option.push(rowInsert);
                 });
-                const updatedTableData = values.tableData.map((existingData) => {
-                    const matchingRow = option.find((foundRows) =>
-                        existingData.srno === foundRows.srno && existingData.Name === foundRows.product
-                    );
-
-                    if (matchingRow && isAssetTypePresent) {
+                const updatedProducts = values.products.map((product) => {
+                    const matchingRow = option.find((e) => e.index === product.index && e.productName === product.productName);
+                    if (matchingRow) {
                         return {
-                            ...existingData,
-                            assetNumber: matchingRow.assetNumber,
+                            ...product,
                             assetNumberType: matchingRow.assetNumberType,
+                            assetNumber: matchingRow.assetNumber,
                         };
                     }
-
-                    else if (matchingRow) {
-                        return {
-                            ...existingData,
-                            assetNumber: matchingRow.assetNumber
-                        };
-                    }
-
-                    return existingData; // Preserve rows where there is no matchingRow
+                    return product;
                 });
-
                 setValues((prevState) => ({
                     ...prevState,
-                    tableData: updatedTableData,
+                    products: updatedProducts,
                 }));
-
             }
         };
         reader.readAsBinaryString(f);
         e.target.value = null;
     };
 
+    const validate = (values) => {
+        let errors: any = {};
+        if (values?.products?.length > 0) {
+            const assetNumbersSet = new Set();
+            values?.products?.map((e, index) => {
+                if (e.assetNumberType === ASSET_NUMBER_TYPE.manual) {
+                    if (!e.assetNumber || e.assetNumber?.trim() === '') {
+                        errors[`assetNumber_${index}`] = 'Asset Number is required';
+                    }
+                    else {
+                        if (assetNumbersSet.has(e.assetNumber?.trim())) {
+                            errors[`assetNumber_${index}`] = 'Asset Number duplicate';
+                        }
+                        else {
+                            assetNumbersSet.add(e.assetNumber?.trim());
+                        }
+                    }
+                }
+            });
+        }
+        return errors;
+    };
 
     return (
-        <Dialog open onClose={handleClose} fullScreen>
-
-            {loadingTable ? (
-                <>
-                    <CustomDialogHeader title={`Assign Asset Numbers`} onClose={handleClose} />
-                    <CustomDialogContent style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Loader />
-                    </CustomDialogContent>
-                </>
-
-            ) : (
+        <Dialog
+            open
+            fullScreen={fullScreen}
+            maxWidth="md"
+            fullWidth
+            onClose={(e, reason) => {
+                if (reason !== 'backdropClick') {
+                    handleClose();
+                }
+            }}
+        >
+            <CustomDialogHeader
+                title={'Assign Asset Numbers'}
+                onClose={handleClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                    setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+            ></CustomDialogHeader>
+            {productList ?
                 <Formik
-                    initialValues={{ tableData }}
-                    onSubmit={handleFormSubmit}
-                    validate={validateForm}
+                    initialValues={{ products: productList }}
                     validateOnMount
+                    validate={validate}
+                    onSubmit={handleSubmit}
                 >
-                    {({ values, handleSubmit, setFieldValue, errors, setValues }) => (
-                        <Form onSubmit={handleSubmit}>
-                            <CustomDialogHeader title={`Assign Asset Numbers`} onClose={handleClose} />
+                    {({ submitForm, values, setValues, errors }) => (
+                        <>
                             <CustomDialogContent>
-
-                                <Box display="flex" flexDirection="column" style={{ minHeight: 'calc(100vh - 125px)' }}>
-                                    <Box display="flex" justifyContent="space-between" alignItems="center" style={{ marginTop: '20px' }}>
-                                        <Box mb={1} display="flex">
-                                            <Box>
-                                                <Link className="cursor-pointer" onClick={() => handleExport(values)}>
-                                                    Export to excel
-                                                </Link>
-                                            </Box>
-                                            <Box ml={2}>
-                                                <input accept="xlsx" className={classes.input} onChange={(e) => handleImport(e, setValues, values)} id="import-file" multiple type="file" />
-                                                <label htmlFor="import-file">
-                                                    <Link className="cursor-pointer">Import from excel</Link>
-                                                </label>
-                                            </Box>
+                                <Box display="flex" justifyContent="space-between" alignItems="center">
+                                    <Box mb={2} display="flex">
+                                        <Box>
+                                            <Link className="cursor-pointer" onClick={() => handleExport(values)}>
+                                                Export to excel
+                                            </Link>
+                                        </Box>
+                                        <Box ml={2}>
+                                            <input accept="xlsx" style={{ display: 'none' }} onChange={(e) => handleImport(e, setValues, values)} id="import-file" multiple type="file" />
+                                            <label htmlFor="import-file">
+                                                <Link className="cursor-pointer">Import from excel</Link>
+                                            </label>
                                         </Box>
                                     </Box>
-                                    <TableContainer className={classes.tableContainer} component={Paper}>
-                                        <Table className={classes.table} aria-label="customized table">
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>Index</TableCell>
-                                                    <TableCell align="left">Product Name</TableCell>
-                                                    {(isAssetTypePresent) && (<TableCell>Asset Number Type</TableCell>)}
-                                                    <TableCell align="left">{'Asset Number'}</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                <FieldArray name="tableData">
-                                                    {({ push }) => (
-                                                        <>
-                                                            {values.tableData.map((data, index) => (
-                                                                <TableRow key={data.id} style={{ height: '100px' }}>
+                                </Box>
+                                <Form autoComplete="off" autoCorrect="off" noValidate>
+                                    <Box display="flex" flexDirection="column">
+                                        <TableContainer component={Paper}>
+                                            <Table aria-label="customized table">
+                                                <TableHead>
+                                                    <TableRow>
+                                                        <TableCell>Index</TableCell>
+                                                        <TableCell align="left">Product</TableCell>
+                                                        {assetNumberTypeField ? (<TableCell>Asset Number Type *</TableCell>) : null}
+                                                        <TableCell align="left">Asset Number *</TableCell>
+                                                    </TableRow>
+                                                </TableHead>
+                                                <TableBody>
+                                                    <FieldArray
+                                                        name="products"
+                                                        render={(arrayHelpers) => (
+                                                            values?.products?.map((data, index) => (
+                                                                <TableRow key={index}>
                                                                     <TableCell component="th" scope="row">
-                                                                        {data.srno}
+                                                                        {data.index}
                                                                     </TableCell>
-                                                                    <TableCell align="left">{data.Name}</TableCell>
-                                                                    {(isAssetTypePresent) &&
-                                                                        (<TableCell align="left">
-                                                                            <FormControl variant="outlined">
-                                                                                <Field
-                                                                                    name={`tableData.${index}.assetNumberType`}
-                                                                                    as={Select}
-                                                                                    onChange={e => {
-                                                                                        setFieldValue(
-                                                                                            `tableData.${index}.assetNumberType`,
-                                                                                            e.target.value
-                                                                                        );
-                                                                                        if (e.target.value === 'Auto') {
-                                                                                            setFieldValue(
-                                                                                                `tableData.${index}.assetNumber`,
-                                                                                                ''
-                                                                                            );
-                                                                                        }
-                                                                                    }}
-                                                                                    style={{ height: '40px', width: '250px', }}
-                                                                                    MenuProps={{
-                                                                                        anchorOrigin: {
-                                                                                            vertical: 'bottom',
-                                                                                            horizontal: 'left',
-                                                                                        },
-                                                                                        transformOrigin: {
-                                                                                            vertical: 'top',
-                                                                                            horizontal: 'left',
-                                                                                        },
-                                                                                        getContentAnchorEl: null,
-                                                                                    }}
-                                                                                >
-                                                                                    <MenuItem value="Auto">Auto</MenuItem>
-                                                                                    <MenuItem value="Manual">Manual</MenuItem>
-                                                                                </Field>
-
-                                                                            </FormControl>
-                                                                        </TableCell>)}
-                                                                    <TableCell align="left">
-                                                                        <FormControl fullWidth>
-                                                                            <TextField
-                                                                                name={`tableData.${index}.assetNumber`}
-                                                                                value={data.assetNumber}
-                                                                                fullWidth
-                                                                                variant="outlined"
-                                                                                placeholder={data.assetNumberType === 'Auto' ? 'Auto Generate' : 'Asset Number'}
-                                                                                autoComplete="off"
-                                                                                disabled={data.assetNumberType === 'Auto'}
-                                                                                InputProps={{
-                                                                                    style: {
-                                                                                        height: '40px',
-                                                                                        width: '250px',
-                                                                                    },
+                                                                    <TableCell align="left">{data.productName}</TableCell>
+                                                                    {assetNumberTypeField &&
+                                                                        <TableCell align="left">
+                                                                            <Autocomplete
+                                                                                size="small"
+                                                                                value={data.assetNumberType}
+                                                                                getOptionLabel={(option: any) => (option ? option : '')}
+                                                                                options={assetNumberTypeField?.option?.map((e) => e.optionLabel)}
+                                                                                onChange={(_, newValue) => {
+                                                                                    arrayHelpers.replace(index, {
+                                                                                        ...values.products[index],
+                                                                                        ['assetNumberType']: newValue,
+                                                                                    });
                                                                                 }}
-                                                                                helperText={errors[`tableData.${index}.assetNumber`]}
-                                                                                error={Boolean(errors[`tableData.${index}.assetNumber`])}
-                                                                                style={{ whiteSpace: 'nowrap' }}
-                                                                                onChange={e => {
-                                                                                    const { value } = e.target;
-                                                                                    setFieldValue(
-                                                                                        `tableData.${index}.assetNumber`,
-                                                                                        value
-                                                                                    );
-                                                                                }}
+                                                                                disableClearable
+                                                                                renderInput={(params) => (
+                                                                                    <TextField
+                                                                                        {...params}
+                                                                                        variant="outlined"
+                                                                                        name={`assetNumberType_${index}`}
+                                                                                        label=""
+                                                                                        required
+                                                                                    />
+                                                                                )}
                                                                             />
-                                                                        </FormControl>
+                                                                        </TableCell>
+                                                                    }
+                                                                    <TableCell align="left">
+                                                                        <TextField
+                                                                            fullWidth
+                                                                            label=""
+                                                                            variant="outlined"
+                                                                            type="text"
+                                                                            size="small"
+                                                                            name={`assetNumber_${index}`}
+                                                                            disabled={data.assetNumberType === ASSET_NUMBER_TYPE.auto ? true : false}
+                                                                            placeholder="Asset Number"
+                                                                            value={data.assetNumberType === ASSET_NUMBER_TYPE.auto ? 'Auto Generate' : data.assetNumber}
+                                                                            onChange={(e) => {
+                                                                                arrayHelpers.replace(index, {
+                                                                                    ...values.products[index],
+                                                                                    ['assetNumber']: e.target.value
+                                                                                });
+                                                                            }}
+                                                                            error={Boolean(errors[`assetNumber_${index}`])}
+                                                                            helperText={errors[`assetNumber_${index}`]}
+                                                                            required
+                                                                        />
                                                                     </TableCell>
                                                                 </TableRow>
-                                                            ))}
-                                                        </>
-                                                    )}
-                                                </FieldArray>
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                </Box>
+                                                            ))
+                                                        )}
+                                                    />
+                                                </TableBody>
+                                            </Table>
+                                        </TableContainer>
+                                    </Box>
+                                </Form>
                             </CustomDialogContent>
-                            <div style={{ marginTop: 'auto' }}>
-                                <CustomDialogFooter >
-
-                                    <CustomButton type="submit" variant="contained" color="primary" disabled={loading} loading={loading}>
-                                        Convert
-                                    </CustomButton>
-
-                                </CustomDialogFooter>
-                            </div>
-                        </Form>
+                            <CustomDialogFooter>
+                                <CustomButton
+                                    onClick={submitForm}
+                                    variant="contained"
+                                    color="primary"
+                                    disabled={loading}
+                                    loading={loading}>
+                                    Convert
+                                </CustomButton>
+                            </CustomDialogFooter>
+                        </>
                     )}
                 </Formik>
-            )}
+                : <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>}
         </Dialog>
     );
 };
