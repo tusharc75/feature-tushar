@@ -25,6 +25,8 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import Material from './material';
 import { camelCase, set } from 'lodash';
 import Submit from './Submit';
+import { VscVersions } from 'react-icons/vsc';
+import Version from './Versions';
 
 const FieldTicketDetail = () => {
 
@@ -51,6 +53,7 @@ const FieldTicketDetail = () => {
   const [nextStep, setNextStep] = useState(false);
   const [prevStep, setPrevStep] = useState(true);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [version, setVersion] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -157,6 +160,21 @@ const FieldTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {fieldTicketData?.versions?.length &&
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                size="small"
+                className={'btn-outline-v1'}
+                onClick={() => {
+                  setVersion(true)
+                }}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                startIcon={isMobile && !isTablet ? null : <VscVersions />}
+              >
+                {isMobile && !isTablet ? <VscVersions size={20} /> : 'Version'}
+              </Button>
+            }
             {(allowedToEdit && ![FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status)) &&
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -281,6 +299,20 @@ const FieldTicketDetail = () => {
           onSuccess={() => {
             closeUpdateDialog();
             fetchData();
+          }}
+        />
+      )}
+      {version && (
+        <Version
+          id={id}
+          label={fieldTicketData?.fieldTicketNumber}
+          child_resource={'fieldTicketMateial'}
+          resource={'fieldTicket'}
+          referenceData={fieldTicketData}
+          versions={fieldTicketData?.versions}
+          renderedFrom={`${renderedFrom}_version`}
+          handleClose={() => {
+            setVersion(false)
           }}
         />
       )}

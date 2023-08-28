@@ -106,6 +106,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
       <Autocomplete
         multiple={true}
         disableCloseOnSelect={true}
+        className={`sm:max-w-[300px] sm:min-w-[200px] flex-grow`}
         size="small"
         fullWidth
         loading={loading}
@@ -133,43 +134,23 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
             />
           ))
         }
-        renderInput={(params) =>
-          isMobile && !isTablet ? (
-            <TextField
-              {...params}
-              size="small"
-              variant="standard"
-              placeholder="Search or Filter"
-              className={isMobile ? 'serchBox' : ''}
-              InputProps={{
-                ...params.InputProps,
-                disableUnderline: true,
-                endAdornment: (
-                  <React.Fragment>
-                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </React.Fragment>
-                )
-              }}
-            />
-          ) : (
-            <TextField
-              {...params}
-              size="small"
-              variant="outlined"
-              placeholder="Search or Filter"
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <React.Fragment>
-                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </React.Fragment>
-                )
-              }}
-            />
-          )
-        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            size="small"
+            variant="outlined"
+            placeholder="Search or Filter"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <React.Fragment>
+                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </React.Fragment>
+              )
+            }}
+          />
+        )}
         value={value}
         renderOption={(option) => {
           const index = options.findIndex((o) => o.type === option.type);

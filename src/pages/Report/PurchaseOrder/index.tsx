@@ -217,6 +217,10 @@ const Report = () => {
           data: { data: POFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order`);
 
+        let {
+          data: { data: productOption }
+        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
+
         POFields.filter((field) => ['purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
           if (field?.fieldData.fieldName === 'warehouse') {
             resourceFieldData.push(field);
@@ -232,6 +236,12 @@ const Report = () => {
         productFields.forEach((o: any) => {
           if (o?.fieldData.fieldName === 'productCategory') {
             resourceFieldData.push(o);
+          }
+          if (o?.fieldData.fieldName === 'productName') {
+            resourceFieldData.push({
+              ...o,
+              fieldData: { ...o.fieldData, fieldName: '_id', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+            });
           }
           let currentColumn = getColumnData('Product', o?.fieldData, routes['productDetail'].path);
           if (currentColumn !== null) {
@@ -1140,6 +1150,7 @@ const Report = () => {
             }
           };
         });
+
 
         forDeepFilter.forEach((key) => {
           const options = selectedData[key].value;
