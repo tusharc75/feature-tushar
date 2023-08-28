@@ -382,7 +382,7 @@ const SerializedAsset = () => {
           </IconButton>
         </HtmlTooltip>
       )}
-      {(permissions?.serializedAsset?.isDelete && params.data.canDelete) ? (
+      {permissions?.serializedAsset?.isDelete && params.data.canDelete ? (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -440,35 +440,31 @@ const SerializedAsset = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.serializedAsset]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions?.serializedAsset}
-            module="product inventory"
-            api={serializedAsset.api}
-            afterImportCompleted={() => {
-              fetchProductInventory();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)].length}
-            ids={
-              [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                ? [...getLocalStorageArrayData(localStorageSelectedRecords)].map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchProductInventory();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.serializedAsset]} />
+        <ImportExportLinks
+          permissions={permissions?.serializedAsset}
+          module="product inventory"
+          api={serializedAsset.api}
+          afterImportCompleted={() => {
+            fetchProductInventory();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)].length}
+          ids={
+            [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+              ? [...getLocalStorageArrayData(localStorageSelectedRecords)].map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchProductInventory();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <div className="main-container">
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[4fr_3fr] gap-4 items-start">
@@ -647,7 +643,10 @@ const SerializedAsset = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={!permissions?.serializedAsset?.isDelete || (getLocalStorageArrayData(localStorageSelectedRecords)?.filter((e) => !e.canDelete)?.length > 0)}
+                    disabled={
+                      !permissions?.serializedAsset?.isDelete ||
+                      getLocalStorageArrayData(localStorageSelectedRecords)?.filter((e) => !e.canDelete)?.length > 0
+                    }
                     onClick={() => {
                       closeActions();
                       setShowDeleteConfirmBox(true);
@@ -888,8 +887,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -911,7 +911,7 @@ const SerializedAsset = () => {
           path={routes?.supplierAccount?.path}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

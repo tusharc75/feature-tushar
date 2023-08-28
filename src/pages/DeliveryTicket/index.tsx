@@ -335,43 +335,33 @@ const DeliveryTicket = () => {
 
   return (
     <>
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[routes.deliveryTicket]} />
-          </Grid>
-          <Grid item md={8} sm={1} xs={2}>
-            <Grid container direction="row">
-              <Grid item xs={12} sm={12}>
-                <Grid container justify="flex-end">
-                  <ImportExportLinks
-                    permissions={deliveryPermissions}
-                    module="deliveryTicket"
-                    api={deliveryTicket.api}
-                    afterImportCompleted={fetchDeliveryTicket}
-                    isExportAllOrSomeFeature={true}
-                    onlyExport={true}
-                    total={rowCount}
-                    recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                    ids={
-                      getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                        ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                        : []
-                    }
-                    onExportToExcelSuccess={() => {
-                      if (gridApi) {
-                        gridApi.deselectAll();
-                      } else {
-                        fetchDeliveryTicket();
-                      }
-                    }}
-                    additionalParams={getQueryString(true)}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[routes.deliveryTicket]} />
+          <ImportExportLinks
+            permissions={deliveryPermissions}
+            module="deliveryTicket"
+            api={deliveryTicket.api}
+            afterImportCompleted={fetchDeliveryTicket}
+            isExportAllOrSomeFeature={true}
+            onlyExport={true}
+            total={rowCount}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
+            onExportToExcelSuccess={() => {
+              if (gridApi) {
+                gridApi.deselectAll();
+              } else {
+                fetchDeliveryTicket();
+              }
+            }}
+            additionalParams={getQueryString(true)}
+          />
+        </div>
 
         {/* Tables Begins Here */}
         <CustomContainer>
@@ -394,7 +384,7 @@ const DeliveryTicket = () => {
                 </div>
                 {isMobile && !isTablet ? (
                   <>
-                    <Grid style={{ display: 'inline-flex' }}>
+                    <div className="flex flex-wrap items-center gap-1 ml-auto">
                       <Button
                         onClick={handleClickOpen}
                         id="demo-customized-button"
@@ -441,7 +431,7 @@ const DeliveryTicket = () => {
                         title={routes?.deliveryTicket?.title}
                         filters={filters}
                       />
-                    </Grid>
+                    </div>
                   </>
                 ) : (
                   <HideWhenOffline>
@@ -596,7 +586,7 @@ const DeliveryTicket = () => {
             />
           ) : null}
         </CustomContainer>
-      </Fragment>
+      </section>
     </>
   );
 };

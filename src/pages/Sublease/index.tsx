@@ -278,35 +278,31 @@ const Sublease = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.sublease]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions?.sublease}
-            module="purchase order"
-            api={sublease.api}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchData();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.sublease]} />
+        <ImportExportLinks
+          permissions={permissions?.sublease}
+          module="purchase order"
+          api={sublease.api}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchData();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <div className="main-container">
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -317,7 +313,7 @@ const Sublease = () => {
               </div>
               {isMobile && !isTablet ? (
                 <>
-                  <Grid style={{ display: 'inline-flex' }}>
+                  <div className="flex flex-wrap items-center gap-1 ml-auto">
                     <Button
                       onClick={handleClickOpen}
                       id="demo-customized-button"
@@ -364,7 +360,7 @@ const Sublease = () => {
                       title={routes?.sublease?.title}
                       filters={filters}
                     />
-                  </Grid>
+                  </div>
                 </>
               ) : (
                 <HideWhenOffline>
@@ -531,7 +527,7 @@ const Sublease = () => {
           onOk={handleDelete}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 
