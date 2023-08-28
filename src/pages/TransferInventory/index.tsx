@@ -159,7 +159,7 @@ const TransferInventory = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
@@ -171,7 +171,7 @@ const TransferInventory = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -287,31 +287,27 @@ const TransferInventory = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.transferInventory]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions?.transferInventory}
-            module="transfer inventory"
-            api={transferInventory.api}
-            afterImportCompleted={() => {
-              fetchTransferInventory();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchTransferInventory();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.transferInventory]} />
+        <ImportExportLinks
+          permissions={permissions?.transferInventory}
+          module="transfer inventory"
+          api={transferInventory.api}
+          afterImportCompleted={() => {
+            fetchTransferInventory();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords.length}
+          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchTransferInventory();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <div className="main-container">
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
@@ -321,48 +317,51 @@ const TransferInventory = () => {
                 <span className="listingHeader">{routes.transferInventory?.title} </span> */}
               </div>
               {isMobile && !isTablet ? (
-                <div className="d-flex ">
-                  <Button
-                    onClick={handleClickOpen}
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    // aria-expanded={open ? 'true' : undefined}
-                    variant="text"
-                    disableElevation
-                    startIcon={<MdSort />}
-                  >
-                    Sort
-                  </Button>
-                  <MobileSortDialog
-                    isOpen={open}
-                    handleClose={handleClickClose}
-                    contentPart={null}
-                    secHeading={['Sort Transfer Inventories']}
-                    columns={columns}
-                    dispatch={dispatch}
-                  />
-                  <Button
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    // aria-expanded={open ? 'true' : undefined}
-                    variant="text"
-                    disableElevation
-                    startIcon={<MdFilterList />}
-                    onClick={handleOpen}
-                  >
-                    Filter
-                  </Button>
-                  <MobileFilterDialog
-                    isOpen={isOpenDialog}
-                    handleClose={handleClose}
-                    contentPart={null}
-                    columns={columns}
-                    dispatch={dispatch}
-                    title={routes?.transferInventory?.title}
-                    filters={filters}
-                  />
+                <div className="d-flex flex-wrap items-center justify-between w-full">
+                  <div></div>
+                  <div className="flex flex-wrap items-center gap-1">
+                    <Button
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      variant="text"
+                      disableElevation
+                      startIcon={<MdSort />}
+                    >
+                      Sort
+                    </Button>
+                    <MobileSortDialog
+                      isOpen={open}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort Transfer Inventories']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                    <Button
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      variant="text"
+                      disableElevation
+                      startIcon={<MdFilterList />}
+                      onClick={handleOpen}
+                    >
+                      Filter
+                    </Button>
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleClose}
+                      contentPart={null}
+                      columns={columns}
+                      dispatch={dispatch}
+                      title={routes?.transferInventory?.title}
+                      filters={filters}
+                    />
+                  </div>
                 </div>
               ) : (
                 <HideWhenOffline>
@@ -522,7 +521,7 @@ const TransferInventory = () => {
           okBtnLoading={isDeleting}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

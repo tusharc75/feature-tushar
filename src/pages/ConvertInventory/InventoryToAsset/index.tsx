@@ -12,17 +12,21 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { Autocomplete } from '@material-ui/lab';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomAssetDialog from './CustomAssetDialog';
 
 const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, storageLocation = null }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
-  const toastConfig = useContext(CustomToastContext);
+  const { setToastConfig } = useContext(CustomToastContext);
 
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
   const [selectedStorageLocation, setSelectedStorageLocation] = useState(null);
   const [currentInventory, setCurrentInventory] = useState(null);
   const [loadingInitialData, setLoadingInitialData] = useState(false);
+  const [assetNumberDialog, setAssetNumberDialog] = useState({ open: false, products: [], qty: 0, warehouse: null, storageLocation: null });
+
   const [initialData, setInitialData] = useState({
     qty: 1,
     comment: '',
@@ -51,7 +55,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
       })
       .catch((err) => {
         setLoading(false);
-        toastConfig.setToastConfig(err);
+        setToastConfig(err);
       });
   };
 
@@ -83,6 +87,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
   };
 
   const getCurrentInventory = () => {
+
     let api = `${productInventory.api}/current-inventory?warehouse=${warehouse}&product=${product[0]._id}`;
     if (selectedStorageLocation) {
       api = `${api}&storageLocation=${selectedStorageLocation}`;
@@ -94,7 +99,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
           setCurrentInventory(data);
         })
         .catch((err) => {
-          toastConfig.setToastConfig(err);
+          setToastConfig(err);
         });
     }
   };
@@ -105,30 +110,21 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
 
   const handleSubmit = (values) => {
     const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers'].indexOf(item?.serialNumber) > -1);
-    const data = {
+    setAssetNumberDialog({
+      open: true,
       products: product?.map((e) => {
-        return { id: e.id, productCategory: e.productCategoryId, serialNumberIds: product > 1 ? [] : serialNumberIds.map((item) => item?._id) };
+        return {
+          id: e.id,
+          productName: e.productName,
+          productCategory: e.productCategoryId,
+          serialNumberIds: product > 1 ? [] : serialNumberIds.map((item) => item?._id),
+          qty: parseInt(values.qty),
+        };
       }),
       qty: parseInt(values.qty),
       warehouse: warehouse,
       storageLocation: values?.storageLocation ? values?.storageLocation : null
-    };
-    setLoading(true);
-    axiosInstance()
-      .post(`${convertInventory.api}/convert-inventory-to-asset`, data)
-      .then(({ data: { data } }) => {
-        setLoading(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Convert Inventory to Asset Successfully`
-        });
-        handleSuccess();
-      })
-      .catch((error) => {
-        setLoading(false);
-        toastConfig.setToastConfig(error);
-      });
+    });
   };
 
   function validate(values) {
@@ -144,6 +140,20 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
         errors['qty'] = 'Insufficient Quantity !';
       }
     }
+    else if (product?.length > 1) {
+      // Find the product with the minimum inventory
+      const minInventoryProduct = product.reduce((minProduct, currentProduct) => {
+        if (currentProduct.inventory < minProduct.inventory) {
+          return currentProduct;
+        }
+        return minProduct;
+      }, product[0]);
+
+      // Compare input quantity with minimum inventory product
+      if (parseInt(values?.qty) > minInventoryProduct.inventory) {
+        errors['qty'] = `Insufficient Quantity! Available quantity for ${minInventoryProduct.productName} is ${minInventoryProduct.inventory}.`;
+      }
+    }
 
     if (user?.user?.brandPolicy?.storageLocation && !values['storageLocation']) {
       errors['storageLocation'] = 'Please select Storage Location';
@@ -155,6 +165,34 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
     }
 
     return errors;
+  }
+
+  const handleConvert = (rows) => {
+    setLoading(true);
+    rows?.forEach((e) => {
+      delete e.qty
+    })
+    const data = {
+      qty: assetNumberDialog.qty,
+      warehouse: assetNumberDialog.warehouse,
+      storageLocation: assetNumberDialog.storageLocation,
+      products: rows
+    }
+    axiosInstance().post(`${convertInventory.api}/convert-inventory-to-asset`, data)
+      .then(({ data: { data } }) => {
+        setLoading(false);
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        handleSuccess();
+        handleClose();
+      })
+      .catch((error) => {
+        setLoading(false);
+        setToastConfig(error);
+      });
   }
 
   return (
@@ -172,7 +210,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
     >
       {!loadingInitialData ? (
         <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
-          {({ submitForm, touched, errors, setFieldValue, values }) => (
+          {({ touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogHeader
                 title={`Convert Inventory`}
@@ -277,7 +315,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                 <Button color="primary" size="small" onClick={handleClose}>
                   Cancel
                 </Button>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" >
                   Convert
                 </CustomButton>
               </CustomDialogFooter>
@@ -288,6 +326,16 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
+      )}
+      {assetNumberDialog.open && (
+        <CustomAssetDialog
+          handleClose={() => setAssetNumberDialog({ open: false, products: [], qty: 0, warehouse: null, storageLocation: null })}
+          products={assetNumberDialog.products}
+          handleSuccess={(rows) => {
+            handleConvert(rows);
+          }}
+          loading={loading}
+        />
       )}
     </Dialog>
   );
