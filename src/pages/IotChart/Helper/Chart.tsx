@@ -34,11 +34,11 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
                 const newData = [];
                 dataPoints?.forEach((obj) => {
                     newData.push({
-                        name: obj?.fieldLabel,
+                        name: `${obj?.fieldLabel}${obj?.unit ? ` (${obj?.unit})` : ``}`,
                         type: 'line',
                         data: data?.data?.map((e) => { return [new Date(e.time).getTime(), e[obj?.fieldName]] }),
                         tooltip: {
-                            valueDecimals: 2,
+                            valueDecimals: parseInt(obj?.decimalPlaces) || 2,
                         },
                     })
                 })

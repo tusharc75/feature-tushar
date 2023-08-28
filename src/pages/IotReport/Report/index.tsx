@@ -154,6 +154,9 @@ const IotReport = () => {
         returnQuery = `${returnQuery}&${_k}=${filterQuery[_k]}`;
       });
     }
+    
+    returnQuery = `${returnQuery}&timezone=${Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone}`;
+
     return `${returnQuery}`;
   };
 
