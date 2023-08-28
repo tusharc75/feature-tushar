@@ -226,41 +226,31 @@ const InventoryCycle = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.inventoryCycle]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions?.inventoryCycle}
-                  module="inventoryCycles"
-                  api={'/inventory-cycle'}
-                  afterImportCompleted={() => {
-                    fetchData();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                  ids={
-                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchData();
-                  }}
-                  additionalParams={getQueryString(true)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.inventoryCycle]} />
+        <ImportExportLinks
+          permissions={permissions?.inventoryCycle}
+          module="inventoryCycles"
+          api={'/inventory-cycle'}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchData();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
@@ -404,7 +394,7 @@ const InventoryCycle = () => {
           />
         )}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

@@ -310,43 +310,52 @@ const PurchaseOrder = () => {
     setisOpenDialog(false);
   };
 
+  let toggleInner = PurchaseOrderType && (
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
+      {PurchaseOrderType.map((k, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+        );
+      })}
+    </ToggleButtonGroup>
+  );
+
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.purchaseOrder]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions?.purchaseOrder}
-            module="purchase order"
-            api={purchaseOrder.api}
-            afterImportCompleted={() => {
-              fetchPurchaseOrder();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchPurchaseOrder();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.purchaseOrder]} />
+        <ImportExportLinks
+          permissions={permissions?.purchaseOrder}
+          module="purchase order"
+          api={purchaseOrder.api}
+          afterImportCompleted={() => {
+            fetchPurchaseOrder();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchPurchaseOrder();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <div className="main-container">
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
               {isMobile && !isTablet ? (
-                <>
-                  <Grid style={{ display: 'inline-flex' }}>
+                <div className="d-flex flex-wrap items-center justify-between w-full gap-2">
+                  <div>{toggleInner}</div>
+                  <div className="flex flex-wrap items-center gap-1 justify-end">
                     <Button
                       onClick={handleClickOpen}
                       id="demo-customized-button"
@@ -391,8 +400,8 @@ const PurchaseOrder = () => {
                       title={routes?.purchaseOrder?.title}
                       filters={filters}
                     />
-                  </Grid>
-                </>
+                  </div>
+                </div>
               ) : (
                 <HideWhenOffline>
                   <div className={`flex flex-wrap items-center gap-2 `}>
@@ -640,7 +649,7 @@ const PurchaseOrder = () => {
           onOk={handleDelete}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 
