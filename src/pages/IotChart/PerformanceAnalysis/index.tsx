@@ -3,6 +3,10 @@ import { Box, Checkbox, FormControlLabel, FormGroup } from '@material-ui/core';
 import moment from 'moment';
 import FilterModel from '../Helper/FilterModel';
 import Chart from '../Helper/Chart';
+import _ from 'lodash';
+import { TreeItem, TreeView } from '@material-ui/lab';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 
 const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
 
@@ -13,6 +17,12 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
   });
 
   const [selectedDataPoint, setSelectedDataPoint] = useState({});
+
+  // const RecursiveTreeView = ({ node }) => (
+  //   <TreeItem key={node?.category} nodeId={node?.category?.toString()} label={node?.category}>
+  //     {Array.isArray(node.children) ? node.children.map((childNode) => <RecursiveTreeView key={childNode.id} node={childNode} />) : null}
+  //   </TreeItem>
+  // );
 
   return (
     <>
@@ -25,25 +35,40 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
             </p>
             <div className="sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
               <FormGroup>
-                {Array.isArray(dataPoints) &&
-                  dataPoints?.map((dataPoint) => {
+                {Array.isArray(dataPoints) && (
+                  _.uniqBy(dataPoints, 'category')?.map((d: any, i) => {
                     return (
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            onChange={(e) => {
-                              setSelectedDataPoint({ ...selectedDataPoint, [dataPoint?.fieldName]: e.target.checked });
-                            }}
-                            checked={selectedDataPoint[dataPoint?.fieldName]}
-                            inputProps={{
-                              'aria-labelledby': `checkbox-list-label-select-all`
-                            }}
-                          />
-                        }
-                        label={dataPoint?.fieldLabel}
-                      />
-                    );
-                  })}
+                      <TreeView
+                        aria-label="disabled items"
+                        defaultCollapseIcon={<ExpandMoreIcon />}
+                        defaultExpandIcon={<ChevronRightIcon />}
+                      >
+                        <TreeItem nodeId={d?.category?.toString()} label={d?.category}>
+                          {
+                            dataPoints?.filter(data => data?.category === d?.category)?.map(dataPoint => {
+                              return (
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      onChange={(e) => {
+                                        setSelectedDataPoint({ ...selectedDataPoint, [dataPoint?.fieldName]: e.target.checked });
+                                      }}
+                                      checked={selectedDataPoint[dataPoint?.fieldName]}
+                                      inputProps={{
+                                        'aria-labelledby': `checkbox-list-label-select-all`
+                                      }}
+                                    />
+                                  }
+                                  label={dataPoint?.fieldLabel}
+                                />
+                              )
+                            })
+                          }
+                        </TreeItem>
+                      </TreeView>
+                    )
+                  })
+                )}
               </FormGroup>
             </div>
           </div>
