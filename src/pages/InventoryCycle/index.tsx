@@ -151,7 +151,7 @@ const InventoryCycle = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;

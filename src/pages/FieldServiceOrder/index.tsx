@@ -29,9 +29,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
-import {
-  SiStatuspage,
-} from 'react-icons/all';
+import { SiStatuspage } from 'react-icons/all';
 import ServiceOrderHeader from './FieldServiceOrderHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -39,9 +37,7 @@ import ManageServiceOrder from './ManageServiceOrder';
 
 let serviceOrderTimeout;
 
-
 const ServiceOrder = () => {
-
   const ServiceOrderType = [
     {
       key: `My ${routes.fieldServiceOrder.title}`,
@@ -215,14 +211,13 @@ const ServiceOrder = () => {
             <DeleteIcon color="error" />
           </IconButton>
         </HtmlTooltip>
-      ) : <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
-        <IconButton
-          size="small"
-          aria-label="Delete"
-        >
-          <DeleteIcon color="disabled" />
-        </IconButton>
-      </HtmlTooltip>}
+      ) : (
+        <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
+          <IconButton size="small" aria-label="Delete">
+            <DeleteIcon color="disabled" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
     </>
   );
 
@@ -242,7 +237,7 @@ const ServiceOrder = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -252,7 +247,7 @@ const ServiceOrder = () => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
@@ -273,7 +268,7 @@ const ServiceOrder = () => {
       data = response?.data?.data;
       count = response?.data?.count;
       let rows = data.map((u) => {
-        const ownerAndColaborators = [u?.owner, ...u?.collaborator]?.map(o => o?.optionValue);
+        const ownerAndColaborators = [u?.owner, ...u?.collaborator]?.map((o) => o?.optionValue);
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
         finalObject['allowedToEdit'] = permissions?.fieldServiceOrder?.isUpdate;
@@ -360,41 +355,31 @@ const ServiceOrder = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.fieldServiceOrder]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions?.fieldServiceOrder}
-                  module="fieldServiceOrder"
-                  api={fieldServiceOrder.api}
-                  afterImportCompleted={() => {
-                    fetchServiceOrders();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
-                  ids={
-                    getLocalStorageArrayData(localStorageSelectedRecords)?.length
-                      ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchServiceOrders();
-                  }}
-                  additionalParams={getQueryString(true)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.fieldServiceOrder]} />
+        <ImportExportLinks
+          permissions={permissions?.fieldServiceOrder}
+          module="fieldServiceOrder"
+          api={fieldServiceOrder.api}
+          afterImportCompleted={() => {
+            fetchServiceOrders();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
+          ids={
+            getLocalStorageArrayData(localStorageSelectedRecords)?.length
+              ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchServiceOrders();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           <ServiceOrderHeader
@@ -414,9 +399,9 @@ const ServiceOrder = () => {
             heading={routes.fieldServiceOrder.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             filters={filters}
-          // showCloneServiceOrderDialog={() => {
-          //   handleShowCloneServiceOrderDialog()
-          // }}
+            // showCloneServiceOrderDialog={() => {
+            //   handleShowCloneServiceOrderDialog()
+            // }}
           ></ServiceOrderHeader>
         </div>
         {Object.keys(frameworkComponents).length > 0 ? (
@@ -489,8 +474,9 @@ const ServiceOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.fieldServiceOrderNumber ? 'Service Order' : 'Service Orders'}   ${deleteRecord.fieldServiceOrderNumber || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.fieldServiceOrderNumber ? 'Service Order' : 'Service Orders'}   ${
+              deleteRecord.fieldServiceOrderNumber || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
@@ -527,7 +513,7 @@ const ServiceOrder = () => {
           open={showManageServiceOrderDialog.open}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

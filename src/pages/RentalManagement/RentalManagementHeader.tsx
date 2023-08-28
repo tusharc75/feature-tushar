@@ -146,8 +146,9 @@ function RentalManagementHeader({
           {icon} <span className="listingHeader">{heading}</span>
         </div>
         {isMobile && !isTablet ? (
-          <>
-            <div className="d-flex flex-wrap">
+          <div className="d-flex flex-wrap items-center justify-between w-full">
+            <div>{toggleInner}</div>
+            <div className="flex flex-wrap items-center gap-1 ml-auto">
               <Button
                 onClick={handleClickOpen}
                 id="demo-customized-button"
@@ -186,14 +187,14 @@ function RentalManagementHeader({
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={toggleInner}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 filters={filters}
                 title={routes?.rentalManagement?.title}
               />
             </div>
-          </>
+          </div>
         ) : (
           <HideWhenOffline>
             <div className={`flex flex-wrap items-center gap-2 `}>
@@ -246,12 +247,7 @@ function RentalManagementHeader({
 
       <div className="flex flex-wrap gap-[8px]  justify-end">
         <HideWhenOffline>
-          <SearchBox
-            onChange={onSearch}
-            className={isMobile ? styles.search_box_input : ''}
-            value={searchVal}
-            size="small"
-          />
+          <SearchBox onChange={onSearch} className={isMobile ? styles.search_box_input : ''} value={searchVal} size="small" />
         </HideWhenOffline>
         <div className="flex gap-[8px] flex-wrap items-center">
           <HideWhenOffline>
