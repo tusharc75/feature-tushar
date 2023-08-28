@@ -314,24 +314,23 @@ const Note = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item xs={6}>
-          <CustomBreadCrumbs routes={[{ title: routes.activityNote.title }]} />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.activityNote.title }]} />
+      </div>
       <CustomContainer>
         {filter && (
           <div className="header-panel">
-            <Grid container className={styles.filter_side_container}>
-              <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
-                <GoNote className="headerLogo" />
-                <span className="listingHeader">{routes.activityNote.title}</span>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={'d-flex align-items-center gap-1'}>
                 <Autocomplete
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
                   style={{ width: isMobile && !isTablet ? '60%' : '250px' }}
                   value={resource}
+                  className="flex-grow"
+                  size="small"
+                  fullWidth
                   onChange={(event, newValue) => {
                     setResource(newValue);
                     if (newValue) {
@@ -340,19 +339,24 @@ const Note = () => {
                       setFilter([]);
                     }
                   }}
-                  size="small"
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField {...params} label="Select Resource" size="small" variant="outlined" className={isMobile ? 'serchBox' : ''} />
-                    ) : (
-                      <TextField {...params} label="Select Resource" variant="outlined" />
-                    )
-                  }
+                  renderInput={(params) => (
+                    <TextField
+                      fullWidth
+                      className="flex-grow md:max-w-[250px]"
+                      margin="none"
+                      size="small"
+                      {...params}
+                      label="Select Resource"
+                      variant="outlined"
+                    />
+                  )}
                 />
                 {resource && resourceData && (
                   <Autocomplete
                     disabled={loadingResources}
                     options={resourceData}
+                    fullWidth
+                    className="flex-grow"
                     getOptionLabel={(option: any) => option.optionLabel}
                     getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
                     style={{ width: isMobile && !isTablet ? '60%' : '250px' }}
@@ -369,84 +373,73 @@ const Note = () => {
                       }
                     }}
                     size="small"
-                    renderInput={(params) =>
-                      isMobile && !isTablet ? (
-                        <TextField
-                          {...params}
-                          label={`${resource.optionLabel}`}
-                          size="small"
-                          variant="outlined"
-                          className={isMobile ? 'serchBox' : ''}
-                        />
-                      ) : (
-                        <TextField {...params} label={`${resource.optionLabel}`} variant="outlined" />
-                      )
-                    }
+                    renderInput={(params) => (
+                      <TextField
+                        fullWidth
+                        className="flex-grow md:max-w-[250px]"
+                        margin="none"
+                        size="small"
+                        {...params}
+                        label={`${resource.optionLabel}`}
+                        variant="outlined"
+                      />
+                    )}
                   />
                 )}
-              </Grid>
-              <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
-                <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Box style={{ flexGrow: 1, flexBasis: 'calc(100% - 180px)' }}>
-                    <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
-                  </Box>
-                  <Box style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', flexBasis: '170px' }}>
-                    {
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setIsNew(true);
-                          setShowCreateDialog(true);
-                        }}
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                      >
-                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                      </Button>
-                    }
-                    <div className="d-flex gap-2">
-                      {/* </Box> */}
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        disabled={selectedRecords.length > 0 ? false : true}
-                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                        endIcon={<ExpandMore />}
-                      >
-                        {isMobile && !isTablet ? '' : 'Actions'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        <MenuItem
-                          onClick={() => {
-                            showConfirmBox(selectedRecords);
-                            closeActions();
-                          }}
-                          disabled={!permissions?.note?.isDelete}
-                        >
-                          Delete
-                        </MenuItem>
-                      </Menu>
-                    </div>
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
+              </div>
+              <div className="flex flex-wrap gap-[8px]  justify-end items-start">
+                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
+                <div className="flex gap-[8px] flex-wrap items-center">
+                  <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                      setIsNew(true);
+                      setShowCreateDialog(true);
+                    }}
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedRecords.length > 0 ? false : true}
+                    className={`new-dropdown-v1`}
+                    endIcon={<ExpandMore />}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        showConfirmBox(selectedRecords);
+                        closeActions();
+                      }}
+                      disabled={!permissions?.note?.isDelete}
+                    >
+                      Delete
+                    </MenuItem>
+                  </Menu>
+                </div>
+              </div>
+            </div>
           </div>
         )}
         {isMobile && !isTablet ? (
@@ -558,7 +551,7 @@ const Note = () => {
           />
         </Dialog>
       )}
-    </Fragment>
+    </section>
   );
 };
 

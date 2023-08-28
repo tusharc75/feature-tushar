@@ -106,6 +106,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
       <Autocomplete
         multiple={true}
         disableCloseOnSelect={true}
+        className={`sm:max-w-[300px] sm:min-w-[200px] flex-grow`}
         size="small"
         fullWidth
         loading={loading}
