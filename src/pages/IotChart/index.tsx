@@ -41,7 +41,7 @@ function IotChart() {
   const getQueryString = () => {
     let deepFilter = `?page=${0}&limit=${100}`;
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
