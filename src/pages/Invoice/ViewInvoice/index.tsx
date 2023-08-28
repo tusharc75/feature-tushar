@@ -201,8 +201,6 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
       invoice: invoiceData?._id,
       fieldTicket: invoiceData?.id,
       message: data,
-      material: rowsData.filter((d) => d.type !== 'manualEntry'),
-      additionalCost: rowsData.filter((d) => d.type === 'manualEntry')
     })
       .then(({ data }) => {
         onSuccess();
