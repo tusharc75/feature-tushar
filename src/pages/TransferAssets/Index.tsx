@@ -328,7 +328,7 @@ const TransferAsset = () => {
                 <span className="listingHeader">{routes.transferAsset?.title} </span>
               </div>
               {isMobile && !isTablet ? (
-                <div className="d-flex ">
+                <div className="d-flex ml-auto ">
                   <Button
                     onClick={handleClickOpen}
                     id="demo-customized-button"

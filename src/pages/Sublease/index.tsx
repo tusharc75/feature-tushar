@@ -313,7 +313,7 @@ const Sublease = () => {
               </div>
               {isMobile && !isTablet ? (
                 <>
-                  <Grid style={{ display: 'inline-flex' }}>
+                  <div className="flex flex-wrap items-center gap-1 ml-auto">
                     <Button
                       onClick={handleClickOpen}
                       id="demo-customized-button"
@@ -360,7 +360,7 @@ const Sublease = () => {
                       title={routes?.sublease?.title}
                       filters={filters}
                     />
-                  </Grid>
+                  </div>
                 </>
               ) : (
                 <HideWhenOffline>
