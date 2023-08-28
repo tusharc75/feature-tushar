@@ -73,7 +73,6 @@ const RentalManagement = () => {
     rentalJobName: ''
   });
 
-
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
@@ -250,7 +249,7 @@ const RentalManagement = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -386,41 +385,31 @@ const RentalManagement = () => {
 
   return (
     <>
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[routes.rentalManagement]} />
-          </Grid>
-          <Grid item md={8} sm={1} xs={2}>
-            <Grid container direction="row">
-              <Grid item xs={12} sm={12}>
-                <Grid container justify="flex-end">
-                  <ImportExportLinks
-                    permissions={permissions?.rentalManagement}
-                    module="rentalManagements"
-                    api={rentalManagement.api}
-                    afterImportCompleted={() => {
-                      fetchRentalManagement();
-                    }}
-                    isExportAllOrSomeFeature={true}
-                    total={rowCount}
-                    recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                    ids={
-                      getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                        ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                        : []
-                    }
-                    onExportToExcelSuccess={() => {
-                      if (gridApi) gridApi.deselectAll();
-                      else fetchRentalManagement();
-                    }}
-                    additionalParams={getQueryString(true)}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[routes.rentalManagement]} />
+          <ImportExportLinks
+            permissions={permissions?.rentalManagement}
+            module="rentalManagements"
+            api={rentalManagement.api}
+            afterImportCompleted={() => {
+              fetchRentalManagement();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll();
+              else fetchRentalManagement();
+            }}
+            additionalParams={getQueryString(true)}
+          />
+        </div>
         {/* Tables Begins Here */}
         <CustomContainer>
           <div className="header-panel">
@@ -445,8 +434,7 @@ const RentalManagement = () => {
               gridApi={gridApi}
               fetchRentalManagement={fetchRentalManagement}
               filters={filters}
-            >
-            </RentalManagementHeader>
+            ></RentalManagementHeader>
           </div>
           {Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
@@ -547,8 +535,9 @@ const RentalManagement = () => {
           {singleRentalManagementDelete.show ? (
             <ConfirmationDialog
               open={singleRentalManagementDelete.show}
-              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-                }?`}
+              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
+                singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+              }?`}
               onClose={() =>
                 setSingleRentalManagementDelete({
                   id: null,
@@ -560,7 +549,7 @@ const RentalManagement = () => {
             />
           ) : null}
         </CustomContainer>
-      </Fragment>
+      </section>
       {showManageRentalManagementDialog.open && (
         <ManageRentalManagementDialog
           isClone={showManageRentalManagementDialog.isClone}
