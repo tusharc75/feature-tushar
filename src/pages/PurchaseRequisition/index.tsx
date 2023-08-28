@@ -299,35 +299,31 @@ const PurchaseRequisition = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.purchaseRequisition.title }]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions?.purchaseRequisition}
-            module="purchaseRequisition"
-            api={'purchase-requisition'}
-            afterImportCompleted={() => {
-              fetchPurchaseRequisitionData();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchPurchaseRequisitionData();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.purchaseRequisition.title }]} />
+        <ImportExportLinks
+          permissions={permissions?.purchaseRequisition}
+          module="purchaseRequisition"
+          api={'purchase-requisition'}
+          afterImportCompleted={() => {
+            fetchPurchaseRequisitionData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchPurchaseRequisitionData();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
@@ -499,7 +495,7 @@ const PurchaseRequisition = () => {
           />
         )}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 
