@@ -12,7 +12,6 @@ import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import AddServiceMaster from './AddServiceMaster';
 import { HiBadgeCheck } from 'react-icons/hi';
 import { FcApproval } from 'react-icons/fc';
 import { GrDrag } from 'react-icons/gr';
@@ -25,6 +24,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { flattenArray } from 'src/constants/columns';
 import AssignStepDialog from './AssignStepDialog/Index';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 
 
 interface Props {
@@ -101,7 +101,7 @@ const ServiceMaster = (props: Props) => {
         Header: 'Detail',
         minWidth: 200,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => 
+        Cell: ({ row }) =>
           row?.original?.type ? (
             <div className="d-flex gap-2 align-items-center">
               <p className="text-truncate">{row.original.detail}</p>
@@ -562,12 +562,16 @@ const ServiceMaster = (props: Props) => {
         />
       )}
       {openAddDialog && (
-        <AddServiceMaster
-          handleSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          renderedFrom={`${renderedFrom}_sub-grid-1`}
-          close={() => setOpenAddDialog(false)}
-          exisitingIds={[]}
+        <AssignServiceDialog
+          reference={'productService'}
+          onSuccess={(services) => {
+            const ids = services?.map((i) => i?._id)
+            handleSubmit(ids);
+          }}
+          handleClose={() => {
+            setOpenAddDialog(false)
+          }}
+          ids={[]}
         />
       )}
       {arrangeView && (
