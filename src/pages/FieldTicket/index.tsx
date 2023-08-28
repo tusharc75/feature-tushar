@@ -130,10 +130,9 @@ const FieldTicket = () => {
         .get(`${routes?.fieldTicket.path}${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data?.map((u: any) => {
-            const ownerAndColaborators = [u?.owner, ...u?.collaborator]?.map(o => o?.optionValue);
+            const ownerAndColaborators = [u?.owner, ...u?.collaborator]?.map((o) => o?.optionValue);
             let finalObject: any = prepareDataForGrid(u);
-            finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && ownerAndColaborators
-              .includes(user?.user?._id) && u?.canDelete
+            finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && ownerAndColaborators.includes(user?.user?._id) && u?.canDelete;
             finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
             finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
             return {
@@ -180,7 +179,7 @@ const FieldTicket = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -191,7 +190,7 @@ const FieldTicket = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -317,40 +316,57 @@ const FieldTicket = () => {
     fetchFieldTicketData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, isOffline, selectedType]);
 
+  const [filter, setFilter] = useState(FieldTicketType[0].key);
+
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      setFilter(newFilter);
+      onTypeChange(event, newFilter);
+    }
+  };
+  let toggleInner = FieldTicketType && (
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
+      {FieldTicketType.map((k, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+        );
+      })}
+    </ToggleButtonGroup>
+  );
+
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.fieldTicket.title }]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions.fieldTicket}
-            module="fieldTicket"
-            api={'field-ticket'}
-            afterImportCompleted={() => {
-              fetchFieldTicketData();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchFieldTicketData();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.fieldTicket.title }]} />
+        <ImportExportLinks
+          permissions={permissions.fieldTicket}
+          module="fieldTicket"
+          api={'field-ticket'}
+          afterImportCompleted={() => {
+            fetchFieldTicketData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchFieldTicketData();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex align-items-center gap-1'}>
+              {/* {toggleInner} */}
               <ToggleButtonGroup
                 size="small"
                 className="align-items-center gap-1 layout-for-mobile "
@@ -366,86 +382,74 @@ const FieldTicket = () => {
                   );
                 })}
               </ToggleButtonGroup>
-            </Grid>
-            <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={styles.search_box_input}
-                    width={isMobile ? '200px' : '242px'}
-                    style={isMobile ? { flex: 1 } : {}}
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.fieldTicket.isCreate && (
+                  <Button
+                    className={`no-shadow`}
+                    onClick={() => {
+                      setFieldTicketId(null);
+                      setOpen({ open: true, isClone: false });
+                    }}
+                    variant={'contained'}
                     size="small"
-                    value={search}
-                  />
-                </Grid>
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.fieldTicket.isCreate && (
+                    color="primary"
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
+                {permissions?.fieldTicket?.isDelete && (
+                  <>
                     <Button
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      onClick={() => {
-                        setFieldTicketId(null);
-                        setOpen({ open: true, isClone: false });
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      variant={'outlined'}
+                      color="default"
                       size="small"
-                      color="primary"
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                      className={` new-dropdown-v1`}
+                      endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                      Actions
                     </Button>
-                  )}
-                  {permissions?.fieldTicket?.isDelete && (
-                    <>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        disabled={selectedRecords.length ? false : true}
-                        aria-controls="action-menu"
-                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                        endIcon={<ExpandMore />}
-                      >
-                        {isMobile && !isTablet ? '' : 'Actions'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        <MenuItem
-                          disabled={
-                            !(
-                              (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) ===
-                              selectedRecords?.length
-                            )
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
+                        onClick={() => {
+                          closeActions();
+                          // eslint-disable-next-line no-lone-blocks
+                          {
+                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
                           }
-                          onClick={() => {
-                            closeActions();
-                            // eslint-disable-next-line no-lone-blocks
-                            {
-                              selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                            }
-                            setShowDeleteConfirmBox(true);
-                          }}
-                        >
-                          Delete
-                        </MenuItem>
-                      </Menu>
-                    </>
-                  )}
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+                          setShowDeleteConfirmBox(true);
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
         {Object.keys(frameWorkComponent).length > 0 ? (
           isMobile && !isTablet ? (
@@ -528,7 +532,7 @@ const FieldTicket = () => {
           />
         )}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

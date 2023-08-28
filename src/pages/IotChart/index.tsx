@@ -41,7 +41,7 @@ function IotChart() {
   const getQueryString = () => {
     let deepFilter = `?page=${0}&limit=${100}`;
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
@@ -52,16 +52,14 @@ function IotChart() {
 
   return (
     <div className="main-container-v1">
-      <Grid container className="headerbox-v1">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.iotChart]} />
-        </Grid>
-      </Grid>
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.iotChart]} />
+      </div>
       <CustomContainer>
         <div className="flex justify-end mb-3">
           <SearchBox onChange={handleSearch} size="small" value={search} className="flex-grow md:flex-grow-0" />
         </div>
-        {rowsData ?
+        {rowsData ? (
           <Box className={cardStyle.reportGrid}>
             {rowsData?.map((asset, i) => {
               const colors = getColors(i);
@@ -84,9 +82,11 @@ function IotChart() {
               );
             })}
           </Box>
-          : <Box p={2} height={500}>
+        ) : (
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>}
+          </Box>
+        )}
       </CustomContainer>
     </div>
   );

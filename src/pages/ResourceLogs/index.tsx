@@ -217,12 +217,10 @@ const ResourceLogs = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.resourceLogs]} />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.resourceLogs]} />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           {/* xs={12} sm={6} md={4} lg={4} */}
@@ -280,7 +278,7 @@ const ResourceLogs = () => {
           operations={openDialog.operations}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 
