@@ -319,7 +319,7 @@ const BulkAssetCreation = () => {
               </div>
               {isMobile && !isTablet ? (
                 <>
-                  <Grid style={{ display: 'inline-flex' }}>
+                  <div className="flex flex-wrap items-center gap-1 ml-auto">
                     <Button
                       onClick={handleClickOpen}
                       id="demo-customized-button"
@@ -366,7 +366,7 @@ const BulkAssetCreation = () => {
                       title={routes?.bulkAssetCreation?.title}
                       filters={filters}
                     />
-                  </Grid>
+                  </div>
                 </>
               ) : (
                 <HideWhenOffline>
