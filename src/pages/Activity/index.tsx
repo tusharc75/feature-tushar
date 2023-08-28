@@ -20,10 +20,10 @@ const capitalize = (string) => {
 
 const useStyles = makeStyles((theme) => ({
   activityContainer: {
-    padding: '0 10px 10px'
+    padding: '0 0px 10px'
   },
   activityHeader: {
-    margin: '6px 6px',
+    margin: '6px 0px',
     borderRadius: '6px',
     '& .MuiGrid-spacing-xs-1': {
       width: 'calc(100% + 14px)'
