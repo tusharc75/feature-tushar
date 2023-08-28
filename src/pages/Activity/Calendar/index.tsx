@@ -126,22 +126,19 @@ const BigCalendar = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={12} sm={12} xs={12}>
-          <CustomBreadCrumbs routes={[{ title: routes.calendar.title }]} />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.calendar.title }]} />
+      </div>
       <CustomContainer>
         {filter && (
           <div className={`bgLight ${classes.whiteBg}`}>
-            <Grid container className={`greyBox ${classes.topbar}`}>
-              <Grid item xs={12} sm={5}>
-                <Box display="flex" alignItems="center">
+            <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick} size="small" color="primary" variant="contained">
                     Create Activity
                   </Button>
-                  <Box component="span" mx={1} />
                   {['Event', 'Task', 'Case'].map((item) => (
                     <>
                       <Box
@@ -175,10 +172,9 @@ const BigCalendar = () => {
                           borderRadius={50}
                         /> */}
                       </Box>
-                      <Box component="span" ml={1} />
                     </>
                   ))}
-                </Box>
+                </div>
                 <Popper
                   id="simple-menu"
                   anchorEl={anchorEl}
@@ -217,11 +213,11 @@ const BigCalendar = () => {
                     </Grow>
                   )}
                 </Popper>
-              </Grid>
-              <Grid item xs={12} sm={7} className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
+              </div>
+              <div className="ml-auto min-w-[250px] md:flex-grow-0 flex-grow">
                 <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="calendar" />
-              </Grid>
-            </Grid>
+              </div>
+            </div>
             <MyCalendar activities={activities} setActivityData={setActivityData} />
           </div>
         )}
@@ -307,7 +303,7 @@ const BigCalendar = () => {
           </Dialog>
         )}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 
