@@ -15,8 +15,8 @@ import {
 import { Check } from '@material-ui/icons';
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { columnFilter } from './ReactTableHelpers';
-import { generateUniqueId, gridPageSizes, treeToFlatArray } from '../../constants/helpers';
-import { uniqBy, isString } from 'lodash';
+import { gridPageSizes } from '../../constants/helpers';
+import { isString } from 'lodash';
 import {
   useTable,
   useExpanded,
@@ -33,14 +33,12 @@ import {
 import { useSticky } from 'react-table-sticky';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import FilterListIcon from '@material-ui/icons/FilterList';
 import CustomReactTableHeaderOptions from './CustomReactTableHeaderOptions';
 import { isMobile, isTablet } from 'react-device-detect';
 import Checkbox from '@material-ui/core/Checkbox';
-import { DndProvider, DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend, getEmptyImage } from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
-import { XYCoord } from 'dnd-core';
 import HtmlTooltip from '../CustomTooltipTitle';
 import ArrangeViewButton from './ArrangeViewButton';
 import { GrFormClose } from 'react-icons/gr';
@@ -72,37 +70,10 @@ const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, style, ..
   );
 });
 
-// function DefaultColumnFilter({
-//   column: {
-//     filterValue,
-//     // preFilteredRows,
-//     setFilter
-//   }
-// }) {
-//   // const count = preFilteredRows.length
-//   return (
-//     <TextField
-//       autoComplete="off"
-//       type="search"
-//       id="search"
-//       style={{ padding: 0 }}
-//       fullWidth
-//       value={filterValue || ''}
-//       size="small"
-//       InputProps={{
-//         startAdornment: <FilterListIcon fontSize="small" className="mr-2" />
-//       }}
-//       onChange={(e) => {
-//         setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
-//       }}
-//     />
-//   );
-// }
 
 function DefaultColumnFilter({
   column: {
     filterValue,
-    // preFilteredRows,
     setFilter
   }
 }) {
@@ -128,13 +99,12 @@ function DefaultColumnFilter({
     }
   }, [isOpen]);
 
-  // const count = preFilteredRows.length
   return (
     <div>
       <IconButton onClick={() => setIsOpen(true)} size="small" className={`${filterValue ? 'activeFilter' : ''}`}>
         <CgSearch />
       </IconButton>
-      {/* {isOpen && ( */}
+
       <div className={`tableFilterSearch ${isOpen ? 'open' : ''}`} ref={ref}>
         <input
           value={filterValue || ''}
@@ -148,16 +118,14 @@ function DefaultColumnFilter({
           aria-hidden={!isOpen}
           ref={inputRef}
         />
-        {/* {filterValue !== '' && ( */}
+
         <GrFormClose
           onClick={() => {
             setFilter('');
             setIsOpen(false);
           }}
         />
-        {/* )} */}
       </div>
-      {/* )} */}
     </div>
   );
 }
@@ -263,21 +231,21 @@ function CustomReactTable({
             canDrag: false,
             Cell: ({ row }) =>
               row.original.type === 'folder' ? (
-              <span
-                {...row.getToggleRowExpandedProps({
-                  style: {
-                    paddingLeft: `${row.depth * 2}rem`
-                  }
-                })}
-              >
-                {row.isExpanded ? <FaAngleDown /> : <FaAngleRight onClick={async () => {
-                  setRender(false)
-                  const subRows = await fetchChildAttachment(row.original.id)
-                  row.original.subRows = subRows
-                  setRender(true)
-                }} />}
-              </span>
-            ) : null
+                <span
+                  {...row.getToggleRowExpandedProps({
+                    style: {
+                      paddingLeft: `${row.depth * 2}rem`
+                    }
+                  })}
+                >
+                  {row.isExpanded ? <FaAngleDown /> : <FaAngleRight onClick={async () => {
+                    setRender(false)
+                    const subRows = await fetchChildAttachment(row.original.id)
+                    row.original.subRows = subRows
+                    setRender(true)
+                  }} />}
+                </span>
+              ) : null
           },
           {
             id: 'selection',
@@ -294,20 +262,20 @@ function CustomReactTable({
           })
         ]
         : [
-            {
-              id: 'selection',
-              minWidth: 50,
-              width: 50,
-              maxWidth: 50,
-              Header: ({ getToggleAllRowsSelectedProps }) => (
-                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
-              ),
-              Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-            },
-            ...baseColumns.map((m) => {
-              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-            })
-          ],
+          {
+            id: 'selection',
+            minWidth: 50,
+            width: 50,
+            maxWidth: 50,
+            Header: ({ getToggleAllRowsSelectedProps }) => (
+              <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
+            ),
+            Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+          },
+          ...baseColumns.map((m) => {
+            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+          })
+        ],
     [baseColumns]
   );
 
@@ -318,28 +286,17 @@ function CustomReactTable({
     []
   );
 
-  const updateData = () => {};
+  const updateData = () => { };
 
   const {
     getTableProps,
-    getTableBodyProps,
     rows,
     headerGroups,
-    footerGroups,
     prepareRow,
     allColumns,
     setHiddenColumns,
     getToggleHideAllColumnsProps,
-    page,
-    canPreviousPage,
-    canNextPage,
-    pageOptions,
-    pageCount,
     gotoPage,
-    nextPage,
-    previousPage,
-    pageSize,
-    setPageSize,
     selectedFlatRows,
     toggleRowExpanded,
     toggleAllRowsExpanded,
@@ -376,9 +333,9 @@ function CustomReactTable({
         hiddenColumns: hideSelection ? ['selection', 'action'] : [],
         selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`)
           ? Object.assign(
-              {},
-              data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
-            )
+            {},
+            data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
+          )
           : {}
       },
       getSubRows: (row: any) => row.subRows,
@@ -414,6 +371,7 @@ function CustomReactTable({
     useRowState
   );
 
+  //this would be used to sync column order as set in local storage on first render
   useEffect(() => {
     //  Suggested by aman - 16-Nov-2021 - PO-174
     rows.forEach((d) => {
@@ -530,27 +488,27 @@ function CustomReactTable({
   };
 
   useEffect(() => {
-    if (!allColumns || !Array.isArray(allColumns)) return;
-    let timeout = setTimeout(() => {
-      let newColumnState = [];
-      allColumns.forEach((f) => {
-        let object = {};
+    if (!allColumns || !Array.isArray(allColumns)) {
+      return; // Exit early if conditions are not met
+    }
 
-        Object.keys(f).forEach((ff) => {
-          if (typeof f[ff] !== 'function' && typeof f[ff] !== 'object') {
-            object[ff] = f[ff];
+    const timeout = setTimeout(() => {
+      const newColumnState = allColumns.map((column) => {
+        const object = {};
+        Object.keys(column).forEach((key) => {
+          if (typeof column[key] !== 'function' && typeof column[key] !== 'object') {
+            object[key] = column[key];
           }
         });
-
-        newColumnState.push(object);
+        return object;
       });
 
       localStorage.setItem(renderedFrom, JSON.stringify(newColumnState));
     }, 500);
 
     return () => clearTimeout(timeout);
-    // localStorage.setItem(renderedFrom, newColumns);
   }, [allColumns]);
+
 
   const submitInput = () => {
     const rowData = Object.keys(rowState[currentRowEditing.id].cellState).filter((k) => rowState[currentRowEditing.id].cellState[k].isEditing);
@@ -577,76 +535,73 @@ function CustomReactTable({
 
   // Render the UI for your table
   return (
-    <div className="custom-react-table custom-react-table-v1 vertical-center">
-      <CustomReactTableHeaderOptions
-        columns={baseColumns}
-        // setSelectedReportView={setSelectedReportView}
-        // selectedReportView={selectedReportView}
-        // columns={columns}
-        // setColumns={setColumns}
-        // columnApi={columnApi}
-        // refreshGrid={refreshGrid}
-        renderedFrom={renderedFrom}
-        isClientSideGrid={isClientSideGrid}
-        // dispatch={dispatch}
-        showOnlyShowFilteredRecordSwitch={false}
-        selectedRecords={selectedFlatRows.length ?? 0}
-        setHiddenColumns={setHiddenColumns}
-        getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-        setColumnOrder={setColumnOrder}
-      />
+    <DndProvider backend={HTML5Backend}>
+      <div className="custom-react-table custom-react-table-v1 vertical-center">
+        <CustomReactTableHeaderOptions
+          columns={baseColumns}
+          // setSelectedReportView={setSelectedReportView}
+          // selectedReportView={selectedReportView}
+          // columns={columns}
+          // setColumns={setColumns}
+          // columnApi={columnApi}
+          // refreshGrid={refreshGrid}
+          renderedFrom={renderedFrom}
+          isClientSideGrid={isClientSideGrid}
+          // dispatch={dispatch}
+          showOnlyShowFilteredRecordSwitch={false}
+          selectedRecords={selectedFlatRows.length ?? 0}
+          setHiddenColumns={setHiddenColumns}
+          getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
+          setColumnOrder={setColumnOrder}
+        />
 
-      <div className="table-container-v1" style={{ position: 'relative' }}>
-        <GridHeader
-          refreshGrid={refreshGrid}
-          loading={loading}
-          buttons={
-            <>
-              <ArrangeViewButton
-                loading={loading}
-                columns={baseColumns}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={isClientSideGrid}
-                setHiddenColumns={setHiddenColumns}
-                getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-                setColumnOrder={setColumnOrder}
-              />
-            </>
-          }
-        ></GridHeader>
+        <div className="table-container-v1" style={{ position: 'relative' }}>
+          <GridHeader
+            refreshGrid={refreshGrid}
+            loading={loading}
+            buttons={
+              <>
+                <ArrangeViewButton
+                  loading={loading}
+                  columns={baseColumns}
+                  renderedFrom={renderedFrom}
+                  isClientSideGrid={isClientSideGrid}
+                  setHiddenColumns={setHiddenColumns}
+                  getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
+                  setColumnOrder={setColumnOrder}
+                />
+              </>
+            }
+          ></GridHeader>
 
-        <div
-          style={{
-            display: 'block',
-            overflow: 'auto',
-            height: height ?? '100%'
-            // maxWidth: "100%",
-            // overflowX: "scroll",
-            // overflowY: "hidden",
-            // borderBottom: "1px solid black"
-          }}
-          className="border "
-        >
-          {loading && (
-            <Box
-              bgcolor={'rgba(255,255,255,0.2)'}
-              width="100%"
-              height="100%"
-              zIndex={100}
-              position="absolute"
-              top={0}
-              left={0}
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-            >
-              <Box textAlign="center">
-                <CircularProgress color="inherit" />
-                <p>Loading...</p>
+          <div
+            style={{
+              display: 'block',
+              overflow: 'auto',
+              height: height ?? '100%'
+            }}
+            className="border "
+          >
+            {loading && (
+              <Box
+                bgcolor={'rgba(255,255,255,0.2)'}
+                width="100%"
+                height="100%"
+                zIndex={100}
+                position="absolute"
+                top={0}
+                left={0}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Box textAlign="center">
+                  <CircularProgress color="inherit" />
+                  <p>Loading...</p>
+                </Box>
               </Box>
-            </Box>
-          )}
-          <DndProvider backend={HTML5Backend}>
+            )}
+
             <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
               <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
                 {headerGroups.map((headerGroup, index) => (
@@ -658,13 +613,6 @@ function CustomReactTable({
                         </>
                       ))}
                     </TableRow>
-                    {/* <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
-                      {headerGroup.headers.map((column) => (
-                        <TableCell key={column.Header} {...column.getHeaderProps()} className="th text-truncate bg-white">
-                          <div>{column.canFilter ? column.render('Filter') : null}</div>
-                        </TableCell>
-                      ))}
-                    </TableRow> */}
                   </React.Fragment>
                 ))}
               </TableHead>
@@ -705,14 +653,13 @@ function CustomReactTable({
                             }}
                             key={index2}
                             {...cell.getCellProps()}
-                            className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${
-                              setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
-                            }`}
+                            className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
+                              }`}
                           >
                             {!['selection'].includes(cell?.column.id) &&
-                            rowState &&
-                            rowState.hasOwnProperty(row.id) &&
-                            rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
+                              rowState &&
+                              rowState.hasOwnProperty(row.id) &&
+                              rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
                               <input
                                 autoFocus
                                 onBlur={submitInput}
@@ -743,40 +690,42 @@ function CustomReactTable({
                   );
                 })}
               </TableBody>
-              {rows?.length > 0 && (
+              {/* The below footer render doesnt work because Footer render is empty in props */}
+              {/* {rows?.length > 0 && (
                 <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer">
                   {footerGroups.map((group, index) => (
                     <TableRow key={index} {...group.getFooterGroupProps()} className="tr">
                       {group.headers.map((column, index1) => (
                         <TableCell key={index1} {...column.getHeaderProps()} className="th text-truncate font-weight-bold text-black">
-                          {column.render('Footer')}
+                          {column.render('Footer')} 
                         </TableCell>
                       ))}
                     </TableRow>
                   ))}
                 </TableFooter>
-              )}
+              )} */}
             </MaUTable>
-          </DndProvider>
+
+          </div>
         </div>
+        {allowPagination && !loading && (
+          <TablePagination
+            component="div"
+            count={rowCount}
+            page={pageIndex}
+            onPageChange={(event, newPage) => {
+              gotoPage(newPage);
+              dispatch({ type: 'pageChange', page: newPage });
+            }}
+            rowsPerPage={limit}
+            onRowsPerPageChange={(event) => {
+              dispatch({ type: 'pageSizeChange', limit: event.target.value });
+            }}
+            rowsPerPageOptions={gridPageSizes}
+          />
+        )}
       </div>
-      {allowPagination && !loading && (
-        <TablePagination
-          component="div"
-          count={rowCount}
-          page={pageIndex}
-          onPageChange={(event, newPage) => {
-            gotoPage(newPage);
-            dispatch({ type: 'pageChange', page: newPage });
-          }}
-          rowsPerPage={limit}
-          onRowsPerPageChange={(event) => {
-            dispatch({ type: 'pageSizeChange', limit: event.target.value });
-          }}
-          rowsPerPageOptions={gridPageSizes}
-        />
-      )}
-    </div>
+    </DndProvider>
   );
 }
 
@@ -816,8 +765,11 @@ const DraggableHeader = ({ column, index, reorder }: { column: any; index: numbe
   drag(drop(ref));
 
   return (
-    <TableCell {...column.getHeaderProps()} className="th text-truncate table-header">
-      <div className="d-flex align-items-center justify-content-space-between pos-rel" style={{ width: '100%' }}>
+    <TableCell
+      {...column.getHeaderProps()}
+      className="th text-truncate table-header"
+    >
+      <div ref={ref} className="d-flex align-items-center justify-content-space-between pos-rel" style={{ width: '100%' }}>
         <div
           style={{ opacity: isDragging ? 0.2 : 1 }}
           className="d-flex gap-2 align-items-center"
