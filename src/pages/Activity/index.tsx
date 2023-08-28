@@ -63,12 +63,10 @@ const Activity = ({ type }) => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item xs={12}>
-          <CustomBreadCrumbs routes={[{ title: capitalize(routes[type].title) }]} />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: capitalize(routes[type].title) }]} />
+      </div>
       <CustomContainer>
         {filter && (
           <Fragment>
@@ -93,7 +91,7 @@ const Activity = ({ type }) => {
           </Fragment>
         )}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 
