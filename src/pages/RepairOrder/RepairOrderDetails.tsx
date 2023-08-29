@@ -226,8 +226,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -510,6 +510,7 @@ const RepairOrderDetails = () => {
             )}
             {(stepNames[currentStep] === 'Work Order' || stepNames[currentStep] === 'Execute') && repairOrderData && (
               <WorkOrder
+                fetchRepairOrderData={fetchRepairOrderData}
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
                 stepFullScreen={stepFullScreen}
@@ -517,10 +518,10 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                        quotationVersionData?.status
-                      )
-                    ? false
-                    : allowedToEdit
+                      quotationVersionData?.status
+                    )
+                      ? false
+                      : allowedToEdit
                 }
                 isPostWorkService={Boolean(currentStep === 3)}
                 setCurrentStep={setCurrentStep}

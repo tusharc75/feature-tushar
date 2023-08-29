@@ -36,6 +36,7 @@ import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({
+  fetchRepairOrderData,
   repairOrderData,
   setNextStep,
   stepFullScreen,
@@ -102,7 +103,7 @@ const WorkOrder = ({
         Header: 'Type',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : capitalize(row.original.type)}</p>
       },
       {
         accessor: 'detail',
@@ -128,11 +129,11 @@ const WorkOrder = ({
               <IconButton
                 size="small"
                 onClick={() => {
-                  if (row.original.type === 'service') {
+                  if (row.original.type === MATERIAL_TYPE.service) {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'serializedAsset') {
+                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -309,7 +310,7 @@ const WorkOrder = ({
                   />
                 </IconButton>
               </>
-            ) : row?.original?.type === 'serializedAsset' ? (
+            ) : row?.original?.type === MATERIAL_TYPE.serializedAsset ? (
               <>
                 <IconButton
                   disabled={row.original?.subRows?.length === 0
@@ -326,7 +327,7 @@ const WorkOrder = ({
                 </IconButton>
               </>
             ) : null}
-            {row?.original?.type === 'serializedAsset' && (
+            {row?.original?.type === MATERIAL_TYPE.serializedAsset && (
               <HtmlTooltip title="Auto Complete Work Order">
                 <IconButton
                   size="small"
@@ -442,6 +443,7 @@ const WorkOrder = ({
             type: 'success',
             message: data?.message
           });
+          fetchRepairOrderData()
         })
         .catch((err) => {
           setCompleteConfirmBox(false);
@@ -467,32 +469,32 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'service'
+      parent.detail = `${parent.type === MATERIAL_TYPE.service
         ? parent?.serviceDetail?.serviceName
-        : parent.type === 'product'
+        : parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productName
-          : parent.type === 'serializedAsset'
-            ? parent?.serializedAsset?.assetNumber
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent?.serializedAssetDetail?.assetNumber
             : parent?.packageDetail?.packageName
         }`;
       parent.description =
-        parent.type === 'service'
+        parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
+          : parent.type === MATERIAL_TYPE.product
             ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
+            : parent.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
+              : parent.type === MATERIAL_TYPE.serializedAsset
                 ? parent?.serializedAssetDetail?.product?.productDescription || ''
                 : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === 'service'
+      parent.status = `${parent.type === MATERIAL_TYPE.service
         ? parent.serviceDetail?.status
-        : parent.type === 'product'
+        : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.status
-          : parent.type === 'serializedAsset'
+          : parent.type === MATERIAL_TYPE.serializedAsset
             ? parent.serializedAssetDetail.status
             : parent.packageDetail?.status
         }`;
@@ -537,31 +539,31 @@ const WorkOrder = ({
     let productIndex = 0;
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
-      _subRow.index = parent.index + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
+      _subRow.index = parent.index + '.' + `${_subRow.type === MATERIAL_TYPE.service ? alphabet[serviceIndex] : productIndex + 1}`;
       _subRow.detail =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
               ? _subRow?.serializedAsset?.assetNumber
               : _subRow?.packageDetail?.packageName;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
+            : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
-      _subRow.preWork = _subRow.type === 'service' ? _subRow?.serviceDetail?.preWork : false;
+      _subRow.preWork = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.preWork : false;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
       _subRow.subRows = generateNestedData(material, _subRow);
-      _subRow.type === 'service' ? serviceIndex++ : productIndex++;
+      _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
       _subRow.isValid = true;
       _subRow.hideSelection = false;
       if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed) {
@@ -588,7 +590,8 @@ const WorkOrder = ({
     axiosInstance()
       .post(`${workOrder.api}/service`, data)
       .then(() => {
-        if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
+        setAddServicesDialog({ open: false, new: false });
+        if (isPostWorkService && repairOrderData?.addQuotationStep) {
           createNewVersionQuote(true);
         }
         fetchData();
@@ -599,19 +602,20 @@ const WorkOrder = ({
   };
 
   const createWorkorderService = (rows) => {
-    const rowsForWorkorder = rows.filter((d) => d.type === 'serializedAsset' && !d.workOrder);
+    const rowsForWorkorder = rows.filter((d) => d.type === MATERIAL_TYPE.serializedAsset && !d.workOrder);
     if (rowsForWorkorder.length > 0) {
       const tempInitialData = rowsForWorkorder.map((element) => {
         return {
           _id: element?._id,
-          product: element?.serializedAsset?.product,
-          serializedAsset: element?.serializedAsset?._id
+          product: element?.serializedAssetDetail?.product?.optionValue,
+          serializedAsset: element?.serializedAssetDetail?._id
         };
       });
       axiosInstance()
         .post(`${repairOrder.api}/${repairOrderData._id}/work-order/create-many`, tempInitialData)
         .then(({ data }) => {
           fetchData();
+          fetchRepairOrderData()
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -814,8 +818,8 @@ const WorkOrder = ({
                 columns={columns}
                 data={rowsData}
                 onSelect={(data) => {
-                  setSelectedServices(data?.filter((d) => d.type === 'service' && !d.hideSelection) || []);
-                  setSelectedAssets(data?.filter((d) => d.type === 'serializedAsset' && !d.hideSelection) || []);
+                  setSelectedServices(data?.filter((d) => d.type === MATERIAL_TYPE.service && !d.hideSelection) || []);
+                  setSelectedAssets(data?.filter((d) => d.type === MATERIAL_TYPE.serializedAsset && !d.hideSelection) || []);
                   setSelectedProducts(data?.filter((d) => !d.hideSelection) || []);
                 }}
                 setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
@@ -832,29 +836,27 @@ const WorkOrder = ({
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
-          {addServicesDialog.open && !addServicesDialog.new  && (
+          {addServicesDialog.open && !addServicesDialog.new && (
             <AssignServiceDialog
               reference="repairOrder"
               handleClose={() => setAddServicesDialog({ open: false, new: false })}
               ids={[]}
               onSuccess={(data) => {
-                handleAddService(data?.map((e) => e._id));
-                setAddServicesDialog({ open: false, new:false });
+                handleAddService(data?.map((e) => { return { _id: e._id, qty: parseInt(e?.qty) || 1 } }));
               }}
               extraStaticFilter={!isPostWorkService ? [] : [{ field: 'preWork', term: false }]}
             />
           )}
           {addServicesDialog.open && addServicesDialog.new && (
-             <ManageServiceMaster
-             isClone={false}
-             serviceMasterId={null}
-             onClose={() => setAddServicesDialog({ open: false, new: false })}
-             onSuccess={({data}) => {
-              handleAddService([data._id]);
-              setAddServicesDialog({ open: false, new:false });
-             }}
-             isRedirectToDetailPage={false}
-           />
+            <ManageServiceMaster
+              isClone={false}
+              serviceMasterId={null}
+              onClose={() => setAddServicesDialog({ open: false, new: false })}
+              onSuccess={({ data }) => {
+                handleAddService([{ _id: data._id, qty: 1 }]);
+              }}
+              isRedirectToDetailPage={false}
+            />
           )}
           {userAssignDialog && (
             <AssignUserDialog

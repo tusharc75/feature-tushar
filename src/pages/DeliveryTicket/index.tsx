@@ -1,38 +1,36 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import { useHistory } from 'react-router-dom';
-import { useData } from '../../StateProvider/Provider';
-import axiosInstance from '../../axios/axiosInstance';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { isObjectEmpty, gridLoadingTimeout, deliveryTicket, DELIVERY_FROM_TO_TYPE, getLocalStorageArrayData } from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import styles from '../Leads/Header.module.scss';
-import { GiAbstract055 } from 'react-icons/gi';
-import SearchBox from '../../components/Helpers/SearchBox';
-import ManageDeliveryTicket from './ManageDeliveryTicket';
-import { sidebarResource, prepareDataForGrid } from '../../constants/helpers';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
-import { PickupFromRenderer, DeliveryToRenderer } from '../../components/DeliveryTicket/helper';
+import { Chip, IconButton } from '@material-ui/core';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { GiAbstract055 } from 'react-icons/gi';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { TbArrowsSort } from 'react-icons/tb';
+import { useHistory } from 'react-router-dom';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { Button, Chip } from '@material-ui/core';
-import MobileSortDialog from 'src/components/MobileSortDialog';
 import MobileFilterDialog from 'src/components/MobileFilterDialog';
-import { MdFilterList, MdSort } from 'react-icons/md';
+import MobileSortDialog from 'src/components/MobileSortDialog';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomContainer from '../../components/CustomContainer';
+import { DeliveryToRenderer, PickupFromRenderer } from '../../components/DeliveryTicket/helper';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import SearchBox from '../../components/Helpers/SearchBox';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { deliveryTicket, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { findAll, findOne, objectStore } from '../../constants/indexdbhelper';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import styles from '../Leads/Header.module.scss';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import ManageDeliveryTicket from './ManageDeliveryTicket';
 
 let deliveryTicketTimeout;
 
@@ -385,20 +383,17 @@ const DeliveryTicket = () => {
                 {isMobile && !isTablet ? (
                   <>
                     <div className="flex flex-wrap items-center gap-1 ml-auto">
-                      <Button
+                      <IconButton
                         onClick={handleClickOpen}
                         id="demo-customized-button"
                         aria-controls="demo-customized-menu"
                         aria-haspopup="true"
                         aria-expanded={'true'}
-                        variant="text"
-                        disableElevation
-                        startIcon={<MdSort />}
-                        className={'sort-filter-tablet'}
-                        style={isTablet ? { marginLeft: '50px' } : {}}
+                        className={'mobileIconButton secondary'}
+                        size="small"
                       >
-                        Sort
-                      </Button>
+                        <TbArrowsSort className="rotate-90" size={16} />
+                      </IconButton>
                       <MobileSortDialog
                         isOpen={sortOpen}
                         handleClose={handleClickClose}
@@ -408,19 +403,17 @@ const DeliveryTicket = () => {
                         dispatch={dispatch}
                       />
 
-                      <Button
+                      <IconButton
                         id="demo-customized-button"
                         aria-controls="demo-customized-menu"
                         aria-haspopup="true"
                         aria-expanded={'true'}
-                        variant="text"
-                        disableElevation
-                        className={'sort-filter-tablet'}
-                        startIcon={<MdFilterList />}
+                        className={'mobileIconButton secondary'}
+                        size="small"
                         onClick={handleOpen}
                       >
-                        Filter
-                      </Button>
+                        <MdOutlineFilterAlt size={16} />
+                      </IconButton>
 
                       <MobileFilterDialog
                         isOpen={isOpenDialog}
