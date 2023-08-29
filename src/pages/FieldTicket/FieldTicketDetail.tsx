@@ -14,7 +14,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { ACTIVITY_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
 import TabPanel from '../../components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
 import AddCost from './AddCost';
@@ -26,7 +26,7 @@ import Material from './material';
 import { camelCase, set } from 'lodash';
 import Submit from './Submit';
 import { VscVersions } from 'react-icons/vsc';
-import Version from './Versions';
+import Versions from './Versions';
 
 const FieldTicketDetail = () => {
 
@@ -53,7 +53,7 @@ const FieldTicketDetail = () => {
   const [nextStep, setNextStep] = useState(false);
   const [prevStep, setPrevStep] = useState(true);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-  const [version, setVersion] = useState(false);
+  const [versionDialog, setVersionDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -167,12 +167,12 @@ const FieldTicketDetail = () => {
                 size="small"
                 className={'btn-outline-v1'}
                 onClick={() => {
-                  setVersion(true)
+                  setVersionDialog(true)
                 }}
                 style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                 startIcon={isMobile && !isTablet ? null : <VscVersions />}
               >
-                {isMobile && !isTablet ? <VscVersions size={20} /> : 'Version'}
+                {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
               </Button>
             }
             {(allowedToEdit && ![FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status)) &&
@@ -302,17 +302,17 @@ const FieldTicketDetail = () => {
           }}
         />
       )}
-      {version && (
-        <Version
+      {versionDialog && (
+        <Versions
           id={id}
           label={fieldTicketData?.fieldTicketNumber}
-          child_resource={'fieldTicketMateial'}
-          resource={'fieldTicket'}
+          childResource={CHILD_RESOURCE.fieldTicketMateial}
+          resource={sidebarResource.fieldTicket}
           referenceData={fieldTicketData}
           versions={fieldTicketData?.versions}
-          renderedFrom={`${renderedFrom}_version`}
+          renderedFrom={`${renderedFrom}_versions`}
           handleClose={() => {
-            setVersion(false)
+            setVersionDialog(false)
           }}
         />
       )}

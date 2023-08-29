@@ -1,31 +1,25 @@
-import { Box, Button, Dialog, IconButton } from "@material-ui/core";
-import moment from "moment";
+import { Box, Dialog, IconButton } from "@material-ui/core";
 import { useEffect, useState } from "react";
-import AttachFileIcon from '@material-ui/icons/AttachFile';
 import axiosInstance from "src/axios/axiosInstance";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
-import HtmlTooltip from "src/components/CustomTooltipTitle";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
-import { CHILD_RESOURCE, CustomDialogTransition, RESOURCE_LABEL, dateTimeFormat, fieldTicket } from "src/constants/helpers";
-import { useData } from 'src/StateProvider/Provider';
-import ManageAttachment from "src/components/Activity/Attachments/ManageAttachment";
+import { fieldTicket } from "src/constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { fetch_field_ticket_material_fields, fetch_field_ticket_submit_fields } from "../helper";
 import { generateCustomTableColumns } from "src/constants/columns";
 import { CURReplaceByCurrencySingle } from "src/constants/formulaUtility";
 import { startCase } from "lodash";
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
-function Version({ id, label, child_resource, resource, referenceData, versions = null, renderedFrom, handleClose }) {
+function Versions({ id, label, childResource, resource, referenceData, versions, renderedFrom, handleClose }) {
 
     const [fullScreen, setFullScreen] = useState(true);
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
-    const [selectedVersion, setSelectedVersion] = useState(null)
+    const [selectedVersion, setSelectedVersion] = useState(versions[0]?._id)
 
     useEffect(() => {
         fetchFields()
@@ -39,13 +33,11 @@ function Version({ id, label, child_resource, resource, referenceData, versions 
 
     const fetchFields = async () => {
         setColumns(null);
-        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE[child_resource]}`);
+        const response = await axiosInstance().get(`/field/child?resource=${childResource}`);
         const data = CURReplaceByCurrencySingle(response?.data?.data, referenceData?.referenceData ? referenceData?.currency : "USD");
-
         data?.forEach((e) => {
             e.isColumnEditable = false;
         });
-
         const newColumns = generateCustomTableColumns(data, referenceData?.currency, renderedFrom);
         let column: any = [
             {
@@ -113,13 +105,13 @@ function Version({ id, label, child_resource, resource, referenceData, versions 
     const fetchData = async () => {
         let data = [];
 
-        const version = await axiosInstance().get(`${fieldTicket.api}/${selectedVersion}/version?resource=${RESOURCE_LABEL[resource]}&id=${id}`)
+        const version = await axiosInstance().get(`${fieldTicket.api}/${selectedVersion}/version?resource=${resource}&id=${id}`)
         const versionData = version.data.data;
 
         const material = versionData?.material || []
         const cost = versionData?.cost || []
 
-        versionData?.material?.forEach((parent, i) => {
+        material?.forEach((parent, i) => {
             parent.index = i + 1;
             parent.detail = parent?.type === 'service' ? parent?.serviceDetail?.serviceName
                 : parent?.type === 'product' ? parent?.productDetail?.productName
@@ -127,16 +119,9 @@ function Version({ id, label, child_resource, resource, referenceData, versions 
             parent.description = parent?.type === 'service' ? parent?.serviceDetail?.serviceDescription
                 : parent?.type === 'product' ? parent?.productDetail?.productDescription
                     : ''
-            parent.qty = parent.qty;
-            parent.type = parent.type;
-            if (parent?.estimateStartDate || parent?.estimateEndDate) {
-                parent['actualStartDate'] = parent?.estimateStartDate;
-                parent['actualEndDate'] = parent?.estimateEndDate;
-                parent['actualJobDuration'] = parent?.estimateJobDuration;
-            }
         });
 
-        versionData?.cost?.forEach((ele, i) => {
+        cost?.forEach((ele, i) => {
             ele.index = (i + 1) + material?.length;
             ele.type = 'manualEntry';
             ele.detail = ele.description;
@@ -145,7 +130,6 @@ function Version({ id, label, child_resource, resource, referenceData, versions 
         data = [...material, ...cost]
         setRowsData(data);
     }
-
 
     return (
         <>
@@ -161,7 +145,7 @@ function Version({ id, label, child_resource, resource, referenceData, versions 
                 }}
             >
                 <CustomDialogHeader
-                    title={`Version - ${label}`}
+                    title={`Versions - ${label}`}
                     onClose={handleClose}
                     isMinimized={!fullScreen}
                     onMinimizeMaximize={() => {
@@ -172,35 +156,33 @@ function Version({ id, label, child_resource, resource, referenceData, versions 
                 />
                 <CustomDialogContent>
                     <Box width={'100%'} display='flex' flexWrap='wrap'>
-                        {
-                            versions && versions?.map((v: any, i) => (
-                                <Box
-                                    m={0.5}
-                                    p={1}
-                                    border={1}
-                                    className="cursor-pointer"
-                                    borderColor="var(--common-border-color)"
-                                    onClick={() => {
-                                        setRowsData(null);
-                                        if (selectedVersion === v?._id) {
-                                            setSelectedVersion(null);
-                                        } else {
-                                            setSelectedVersion(v?._id);
-                                        }
-                                    }}
-                                    style={{ display: 'inline-block' }}
-                                    bgcolor={v?._id === selectedVersion ? 'var(--dark-primary, var(--primary))' : 'var(--dark-secondary, transparent)'}
-                                    color={v?._id === selectedVersion && 'white'}
-                                >
-                                    {`Version - ${i + 1}`}
-                                </Box>
-                            ))
-                        }
+                        {versions && versions?.map((v: any, i) => (
+                            <Box
+                                m={0.5}
+                                p={1}
+                                border={1}
+                                className="cursor-pointer"
+                                borderColor="var(--common-border-color)"
+                                onClick={() => {
+                                    setRowsData(null);
+                                    if (selectedVersion === v?._id) {
+                                        setSelectedVersion(null);
+                                    } else {
+                                        setSelectedVersion(v?._id);
+                                    }
+                                }}
+                                style={{ display: 'inline-block' }}
+                                bgcolor={v?._id === selectedVersion ? 'var(--dark-primary, var(--primary))' : 'var(--dark-secondary, transparent)'}
+                                color={v?._id === selectedVersion && 'white'}
+                            >
+                                {`Version - ${i + 1}`}
+                            </Box>
+                        ))}
                     </Box>
                     {rowsData && columns ? (
                         <Box zIndex={5} width={'100%'} mt={2}>
                             <CustomReactTable
-                                height={'calc(100vh - 393px)'}
+                                height={'calc(100vh - 200px)'}
                                 columns={columns}
                                 data={rowsData}
                                 onSelect={() => { }}
@@ -208,7 +190,7 @@ function Version({ id, label, child_resource, resource, referenceData, versions 
                                 uniqueKey="_id"
                                 hideSelection={true}
                                 hideAction={true}
-                                renderedFrom="field_ticket_version"
+                                renderedFrom={renderedFrom}
                                 isClientSideGrid={true}
                                 hideExpander={true}
                             />
@@ -224,4 +206,4 @@ function Version({ id, label, child_resource, resource, referenceData, versions 
     );
 }
 
-export default Version;
+export default Versions;
