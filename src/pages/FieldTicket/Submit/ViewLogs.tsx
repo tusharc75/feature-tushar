@@ -78,7 +78,7 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
         width: 200,
         Cell: ({ row }) => {
           return row?.original['user'] ? (
-            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['userId']}`} target="_blank">
+            <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['userId']}`} rel="noreferrer" target="_blank">
               {row?.original['user']}
             </a>
           ) : (
