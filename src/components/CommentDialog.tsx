@@ -61,7 +61,7 @@ export default function CommentDialog({ required = false, handleSubmit, handleCl
                 if (comment) {
                     handleSubmit(comment)
                 } else {
-                    setError('Comment is Required !!')
+                    setError('Comment is required')
                 }
             }} variant="contained" color="primary">
                 Submit
