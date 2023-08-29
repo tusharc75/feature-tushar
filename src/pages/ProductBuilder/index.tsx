@@ -1,31 +1,25 @@
-import React, { useState, useEffect, Fragment, useContext, useReducer } from 'react';
-import Grid from '@material-ui/core/Grid';
+import { Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { Link } from 'react-router-dom';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { RiPriceTag2Fill } from 'react-icons/ri';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import { CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomContainer from '../../components/CustomContainer';
 import routes from '../../components/Helpers/Routes';
-import CreateNewDialog from './CreateNewDialog';
-import { CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import { Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
-import { useData } from '../../StateProvider/Provider';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
-import styles from '../Leads/Header.module.scss';
-import { MdAdd } from 'react-icons/all';
-import { camelCase } from 'lodash';
+import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import CreateNewDialog from './CreateNewDialog';
 
 const ProductBuilder = () => {
   const renderedFrom = camelCase(routes?.productBuilder.title);
@@ -189,35 +183,32 @@ const ProductBuilder = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={12} sm={12} xs={12}>
-          <CustomBreadCrumbs routes={[{ title: routes.productBuilder.title }]} />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.productBuilder.title }]} />
+      </div>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container>
-            <Grid item xs={6} className="d-flex align-items-center gap-1"></Grid>
-            <Grid item xs={6} className="d-flex justify-content-end">
-              {permission?.isCreate && (
-                <Button
-                  onClick={() => setIsCreate(true)}
-                  variant={isMobile ? 'text' : 'contained'}
-                  size="small"
-                  color="primary"
-                  className={isMobile ? 'mobile_button' : styles.add_submit_btn}
-                  startIcon={isMobile ? null : <AddOutlined />}
-                >
-                  {isMobile ? <MdAdd size={23} /> : 'Add'}
-                </Button>
-              )}
-              {permission?.isDelete && (
-                <div className="ml-[8px]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div></div>
+            <div className={'d-flex align-items-center gap-1'}>
+              <div className="flex flex-wrap gap-[8px]  justify-end w-full">
+                {permission?.isCreate && (
                   <Button
-                    className={isMobile ? 'mobile_button ml-2' : `${styles.action_submit_btn} ${'ml-2'} new-dropdown-v1`}
-                    // className={styles.action_submit_btn}
-                    variant={isMobile ? 'text' : 'outlined'}
+                    onClick={() => setIsCreate(true)}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
+                {permission?.isDelete && (
+                  <Button
+                    className={`new-dropdown-v1`}
+                    variant={'outlined'}
                     color="default"
                     size="small"
                     onClick={openActions}
@@ -225,33 +216,33 @@ const ProductBuilder = () => {
                     disabled={selectedRecords.length > 0 ? false : true}
                     endIcon={<ExpandMore />}
                   >
-                    {isMobile ? '' : 'Actions'}
+                    Actions
                   </Button>
-                </div>
-              )}
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    showConfirmBox(null);
-                    closeActions();
+                )}
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
                   }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
                 >
-                  Delete
-                </MenuItem>
-              </Menu>
-            </Grid>
-          </Grid>
+                  <MenuItem
+                    onClick={() => {
+                      showConfirmBox(null);
+                      closeActions();
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
         {isMobile ? (
           <CustomSwipableList
@@ -324,7 +315,7 @@ const ProductBuilder = () => {
         )}
         {isCreate && <CreateNewDialog handleClose={() => setIsCreate(false)} />}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 
