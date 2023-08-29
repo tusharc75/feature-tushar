@@ -2,7 +2,7 @@ import { Box, Button, Grid } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { Skeleton } from '@material-ui/lab';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
@@ -11,10 +11,10 @@ import { useData } from 'src/StateProvider/Provider';
 import { useParams, useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageSupportTicket from './ManageSupportTicket';
-
+import DetailsPage from '../../../components/Shared/DetailsPage';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import ManageSupportTicket from '../ManageSupportTicket';
+import Comments from './Comments';
 const SupportTicketDetail = () => {
   const { id } = useParams();
   const history = useHistory();
@@ -42,7 +42,7 @@ const SupportTicketDetail = () => {
     axiosInstance()
       .get('/field?resource=Support Ticket')
       .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead && field?.fieldData?.sectionName !== "Internal Information"));
+        setFields(data.data?.filter((field) => field.isRead && field?.fieldData?.sectionName !== 'Internal Information'));
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -57,7 +57,7 @@ const SupportTicketDetail = () => {
       } = await axiosInstance().get(`/support-ticket/${id}`);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
-      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id && data?.status === "Pending");
+      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id && data?.status === 'Pending');
       setSupportTicketData(data);
       setCustomizedRoutes([routes.supportTicket, { title: data?.supportTicketNumber }]);
       setLoading(false);
@@ -96,61 +96,59 @@ const SupportTicketDetail = () => {
     setOpenUpdateDialog(false);
   };
 
-  return (<Box className="main-container-v1">
-    <Box className="headerbox-v1">
-      <Box className="nav-v1">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Box>
-      <Box className="controls-v1">
-        <Box className="control-buttons-v1">
-          {permissions?.supportTicket?.isUpdate && allowedToEdit && (
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'contained'}
-              className={'btn-outline-v1'}
-              onClick={handleOpenUpdateDialog}
-            >
-              {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-            </Button>
-          )}
-          {permissions?.supportTicket?.isDelete && allowedToDelete &&
-            <DeleteButton
-              text="Delete" onClick={() => setShowConfirmBox(true)} />}
+  return (
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {permissions?.supportTicket?.isUpdate && allowedToEdit && (
+              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              </Button>
+            )}
+            {permissions?.supportTicket?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+          </Box>
         </Box>
       </Box>
-    </Box>
-    <Box className={'detail-container-v1'}>
-      <Box>
-        {loading || !fields?.length ? (
-          <Grid container spacing={2} style={{ padding: '8px' }}>
-            <CommonSkeleton lenArray={[...Array(7).keys()]} />
-          </Grid>
-        ) : (
-          <DetailsPage data={supportTicketData} fields={fields} />
-        )}
+      <Box className={'detail-container-v1'}>
+        <Box>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <>
+              <DetailsPage data={supportTicketData} fields={fields} />
+              <Comments uniqueId={id} />
+            </>
+          )}
+        </Box>
       </Box>
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete ${routes?.supportTicket?.title?.toLowerCase()} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
+      {openUpdateDialog && (
+        <ManageSupportTicket
+          id={id}
+          isClone={false}
+          onClose={closeUpdateDialog}
+          onSuccess={() => {
+            closeUpdateDialog();
+            fetchData();
+          }}
+        />
+      )}
     </Box>
-    {showConfirmBox && (
-      <ConfirmationDialog
-        open={showConfirmBox}
-        message={`Are you sure you want to delete ${routes?.supportTicket?.title?.toLowerCase()} ?`}
-        onClose={() => {
-          setShowConfirmBox(false);
-        }}
-        onOk={handleDelete}
-      />
-    )}
-    {openUpdateDialog && (
-      <ManageSupportTicket
-        id={id}
-        isClone={false}
-        onClose={closeUpdateDialog}
-        onSuccess={() => {
-          closeUpdateDialog();
-          fetchData();
-        }}
-      />
-    )}
-  </Box>
   );
 };
 

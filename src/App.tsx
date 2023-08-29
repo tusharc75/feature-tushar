@@ -171,7 +171,7 @@ import ProductionOrderDetails from './pages/ProductionOrder/ProductionOrderDetai
 import ContactUs from './pages/ContactUs';
 import ContactUsDetail from './pages/ContactUs/ContactUsDetail';
 import SupportTicket from './pages/SupportTicket';
-import SupportTicketDetail from './pages/SupportTicket/SupportTicketDetail';
+import SupportTicketDetail from './pages/SupportTicket/SupportTicketDetails/SupportTicketDetail';
 import DemandOrder from './pages/DemandOrder';
 import DemandOrderDetails from './pages/DemandOrder/DemandOrderDetails';
 import FieldServiceOrder from './pages/FieldServiceOrder';
@@ -228,7 +228,7 @@ import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
 import IotDataPoints from './pages/IotDataPoints';
 import IotDataPointsDetail from './pages/IotDataPoints/IotDataPointsDetail';
 import IotChart from './pages/IotChart';
-import IotChartDetail from './pages/IotChart/IotChartDetail'
+import IotChartDetail from './pages/IotChart/IotChartDetail';
 import IotReportList from './pages/IotReport';
 import IotReport from './pages/IotReport/Report';
 
@@ -285,7 +285,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
