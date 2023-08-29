@@ -42,7 +42,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
             });
     };
 
-    const options : ApexOptions = {
+    const options: ApexOptions = {
         chart: {
             stacked: false,
             zoom: {
@@ -59,9 +59,9 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
         },
         stroke: {
             curve: 'straight',
-            width : 1
+            width: 1
         },
-        fill : {
+        fill: {
             type: 'solid',
         },
         markers: {
@@ -75,7 +75,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
             y: {
                 formatter: function (val) {
                     return typeof val === 'number' ? val.toFixed(2) : parseFloat(val).toFixed(2);
-                }                
+                }
             }
         },
         annotations: {
@@ -89,7 +89,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
                         color: '#fff',
                         background: '#775DD0',
                     },
-                    text: 'Anno Test',
+                    text: 'Alert',
                 }
             }],
             points: [{
@@ -108,15 +108,19 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
                         color: '#fff',
                         background: '#FF4560',
                     },
-                    text: 'Point Annotation',
+                    text: 'Alert',
                 }
             }]
-        }        
+        }
     };
 
     return (
         <> {chartData ?
-            <ReactApexChart options={options} series={chartData} type="line" height={500} /> 
+            <ReactApexChart
+                options={options}
+                series={chartData}
+                type="line"
+                height={500} />
             : <Box p={2} height={500}>
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>}
