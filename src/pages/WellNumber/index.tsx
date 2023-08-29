@@ -1,43 +1,33 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
+import { Box, Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../axios/axiosInstance';
-import { GiStockpiles } from 'react-icons/gi';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
-import SearchBox from '../../components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import routes from '../../components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import {
-  storageLocation,
-  isObjectEmpty,
-  gridLoadingTimeout,
-  getLocalStorageArrayData,
-  sidebarResource,
-  removeLocalStorage
-} from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { useData } from '../../StateProvider/Provider';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { prepareDataForGrid } from '../../constants/helpers';
-import ManageWellNumber from './ManageWellNumber';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
+import { GiStockpiles } from 'react-icons/gi';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import routes from '../../components/Helpers/Routes';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import styles from '../Leads/Header.module.scss';
+import ManageWellNumber from './ManageWellNumber';
 
 const WellNumber = () => {
   let renderedFrom = camelCase(routes.wellNumber?.title);
@@ -291,20 +281,17 @@ const WellNumber = () => {
                   <div></div>
 
                   <div className="flex flex-wrap items-center gap-1 ml-auto">
-                    <Button
+                    <IconButton
                       onClick={handleClickOpen}
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      variant="text"
-                      disableElevation
-                      startIcon={<MdSort />}
-                      className={'sort-filter-tablet'}
-                      style={isTablet ? { marginLeft: '50px' } : {}}
+                      className={'mobileIconButton secondary'}
+                      size="small"
                     >
-                      Sort
-                    </Button>
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
                     <MobileSortDialog
                       isOpen={sortOpen}
                       handleClose={handleClickClose}
@@ -313,19 +300,17 @@ const WellNumber = () => {
                       columns={columns}
                       dispatch={dispatch}
                     />
-                    <Button
+                    <IconButton
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      variant="text"
-                      disableElevation
-                      className={'sort-filter-tablet'}
-                      startIcon={<MdFilterList />}
+                      className={'mobileIconButton secondary'}
+                      size="small"
                       onClick={handleOpen}
                     >
-                      Filter
-                    </Button>
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
                     <MobileFilterDialog
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}

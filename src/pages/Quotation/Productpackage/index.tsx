@@ -19,7 +19,7 @@ import { fetch_quotation_product_fields } from 'src/components/Quotation/helper'
 import PriceRequestDialog from './PriceRequestDialog';
 import { ExpandMore } from '@material-ui/icons';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
-import { startCase } from 'lodash';
+import { capitalize, startCase } from 'lodash';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -98,7 +98,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
         width: 100,
-        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
       },
       {
         accessor: 'detail',

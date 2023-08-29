@@ -18,9 +18,8 @@ import styles from './Header.module.scss';
 import ArrangeView from './ArrangeView';
 
 const FormBuilder = () => {
-
   const renderedFrom = 'form-builder';
-  
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -34,7 +33,7 @@ const FormBuilder = () => {
     { field: 'resource', headerName: 'Resource', show: false, cellRenderer: 'commonRenderer' },
     { field: 'resourceLabel', headerName: 'Resource Label', show: true, disabled: true, cellRenderer: 'resourceRenderer' },
     { field: 'homePageLabel', headerName: 'Home Page Label', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'section', headerName: 'Section', show: true, disabled: true },
+    { field: 'section', headerName: 'Section', show: true, disabled: true }
   ];
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
@@ -91,16 +90,13 @@ const FormBuilder = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={12} sm={12} xs={12}>
-          <CustomBreadCrumbs routes={[routes.formBuilder]} />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.formBuilder]} />
+      </div>
       <CustomContainer>
         <Grid className={styles.filter_side_container} container>
-          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-          </Grid>
+          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
           <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
             <Grid style={{ display: 'flex', gap: '5px' }}>
               <Button
@@ -129,18 +125,18 @@ const FormBuilder = () => {
             dataRows={dataRows}
             selectedRecords={[]}
             dispatch={dispatch}
-            onEdit={(d) => { }}
+            onEdit={(d) => {}}
             extraParamsToCheckDelete={true}
-            onDelete={(d) => { }}
+            onDelete={(d) => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
             additionalDetails={[]}
             chips={[]}
             owerCollaboratorInitialsOrImages=""
-            onCreate={() => { }}
+            onCreate={() => {}}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -163,7 +159,7 @@ const FormBuilder = () => {
           />
         )}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

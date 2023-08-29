@@ -1,39 +1,37 @@
-import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import AddIcon from '@material-ui/icons/Add';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import { GiStockpiles } from 'react-icons/gi';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Box, Chip, Tooltip } from '@material-ui/core';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import routes from 'src/components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import { transferAsset, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, sidebarResource } from 'src/constants/helpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { useData } from 'src/StateProvider/Provider';
+import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useHistory } from 'react-router-dom';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from 'src/constants/useColumns';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import ManageTransferAsset from './ManageTransferAsset';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { FaSuitcase } from 'react-icons/fa';
-import { MdAdd, MdFilterList, MdSort, RiFileTransferFill, GiCargoShip, RiFolderTransferFill, SiStatuspage } from 'react-icons/all';
-import MobileSortDialog from 'src/components/MobileSortDialog';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
+import { FaSuitcase } from 'react-icons/fa';
+import { GiStockpiles } from 'react-icons/gi';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import MobileSortDialog from 'src/components/MobileSortDialog';
+import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferAsset } from 'src/constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
+import styles from '../Leads/Header.module.scss';
+import ManageTransferAsset from './ManageTransferAsset';
 
 const TransferAsset = () => {
   const TransferAssetType = [
@@ -328,19 +326,18 @@ const TransferAsset = () => {
                 <span className="listingHeader">{routes.transferAsset?.title} </span>
               </div>
               {isMobile && !isTablet ? (
-                <div className="d-flex ml-auto ">
-                  <Button
+                <div className="d-flex ml-auto gap-2 ">
+                  <IconButton
                     onClick={handleClickOpen}
                     id="demo-customized-button"
                     aria-controls="demo-customized-menu"
                     aria-haspopup="true"
                     // aria-expanded={open ? 'true' : undefined}
-                    variant="text"
-                    disableElevation
-                    startIcon={<MdSort />}
+                    className={'mobileIconButton secondary'}
+                    size="small"
                   >
-                    Sort
-                  </Button>
+                    <TbArrowsSort className="rotate-90" size={16} />
+                  </IconButton>
                   <MobileSortDialog
                     isOpen={open}
                     handleClose={handleClickClose}
@@ -349,18 +346,17 @@ const TransferAsset = () => {
                     columns={columns}
                     dispatch={dispatch}
                   />
-                  <Button
+                  <IconButton
                     id="demo-customized-button"
                     aria-controls="demo-customized-menu"
                     aria-haspopup="true"
                     // aria-expanded={open ? 'true' : undefined}
-                    variant="text"
-                    disableElevation
-                    startIcon={<MdFilterList />}
+                    className={'mobileIconButton secondary'}
+                    size="small"
                     onClick={handleOpen}
                   >
-                    Filter
-                  </Button>
+                    <MdOutlineFilterAlt size={16} />
+                  </IconButton>
                   <MobileFilterDialog
                     isOpen={isOpenDialog}
                     handleClose={handleClose}
