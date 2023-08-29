@@ -10,7 +10,7 @@ import { prepareDataForGrid, quotation } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import SendEmail from '../SendEmail';
-import { startCase } from 'lodash';
+import { capitalize, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import { useData } from 'src/StateProvider/Provider';
@@ -82,7 +82,7 @@ const QuoteBuilder = ({
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
         width: 100,
-        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
       },
       {
         accessor: 'detail',

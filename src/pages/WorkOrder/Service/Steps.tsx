@@ -393,7 +393,7 @@ const Steps = ({
 
   const handleAddService = (ids, step) => {
     const data: any = {};
-    data.serviceIds = ids;
+    data.serviceIds = ids?.map((e) => { return { _id: e, qty: 1 } });
     if (selectedService?.uniqueId) {
       data.aboveServiceUniqueId = selectedService?.uniqueId;
       data.createdFromStep = step?._id;
