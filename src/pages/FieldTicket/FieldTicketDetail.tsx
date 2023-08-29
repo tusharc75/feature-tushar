@@ -27,6 +27,7 @@ import { camelCase, set } from 'lodash';
 import Submit from './Submit';
 import { VscVersions } from 'react-icons/vsc';
 import Versions from './Versions';
+import CloseIcon from '@material-ui/icons/Close';
 
 const FieldTicketDetail = () => {
 
@@ -88,7 +89,7 @@ const FieldTicketDetail = () => {
         data = response?.data?.data;
       }
       setFieldTicketData(data);
-      if ([FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.readyToInvoice]?.includes(data?.status)) {
+      if ([FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.readyToInvoice, FIELD_TICKET_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(fieldTicketSteps?.length - 1);
       }
       else {
@@ -152,6 +153,21 @@ const FieldTicketDetail = () => {
       .catch((error) => { });
   };
 
+  const handleClosed = async () => {
+    await axiosInstance().patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, {
+      status: FIELD_TICKET_STATUS.closed,
+    }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data?.message
+      });
+      fetchData()
+    }).catch((err) => {
+      toastConfig.setToastConfig(err)
+    })
+  }
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -160,6 +176,15 @@ const FieldTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {[FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status) && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                className={'btn-outline-v1'}
+                onClick={handleClosed}
+              >
+                {isMobile && !isTablet ? <CloseIcon /> : 'Close'}
+              </Button>
+            )}
             {fieldTicketData?.versions?.length &&
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -175,7 +200,7 @@ const FieldTicketDetail = () => {
                 {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
               </Button>
             }
-            {(allowedToEdit && ![FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status)) &&
+            {(allowedToEdit && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(fieldTicketData?.status)) &&
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
                 className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
@@ -247,7 +272,7 @@ const FieldTicketDetail = () => {
             steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={fieldTicketData?.status === FIELD_TICKET_STATUS.invoiced}
+            isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
           />
           <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && (

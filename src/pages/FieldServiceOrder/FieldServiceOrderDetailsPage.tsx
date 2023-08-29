@@ -15,7 +15,7 @@ import {
   getUniqueCurrencies,
   serviceOrderSteps,
   SERVICE_ORDER_STATUS,
-  sidebarResource
+  sidebarResource,
 } from '../../constants/helpers';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
@@ -39,6 +39,7 @@ import { GrStatusInfo } from 'react-icons/gr';
 import FieldTicket from './FieldTicket';
 import FieldTicketInvoice from './FieldTicketInvoice';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
+import CloseIcon from '@material-ui/icons/Close';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -128,8 +129,8 @@ const ServiceOrderDetailsPage = () => {
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
       }
-      setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit);
-      setAllowedToDelete(permissions?.fieldServiceOrder?.isDelete && data.owner.optionValue === user?.user?._id && data.canDelete);
+      setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
+      setAllowedToDelete(permissions?.fieldServiceOrder?.isDelete && data.owner.optionValue === user?.user?._id && data.canDelete && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
       setServiceOrderData(data);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       setCurrentStep(steps.map((s) => s.name).indexOf(data?.processStatus) !== -1 ? steps.map((s) => s.name).indexOf(data?.processStatus) : 0);
@@ -225,6 +226,17 @@ const ServiceOrderDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {serviceOrderData?.canComplete && SERVICE_ORDER_STATUS.closed !== serviceOrderData.status  && (
+              <Fragment>
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                  className={'btn-outline-v1'}
+                  onClick={() => { updateStatus(SERVICE_ORDER_STATUS.closed) }}
+                >
+                  {isMobile && !isTablet ? <CloseIcon /> : 'Close'}
+                </Button>
+              </Fragment>
+            )}
             <Fragment>
               <Button
                 className={'btn-outline-v1'}
@@ -280,11 +292,11 @@ const ServiceOrderDetailsPage = () => {
                 </Menu>
               </Fragment>
             )}
-            <ActivityButton 
-              referenceId={serviceOrderData?._id} 
+            <ActivityButton
+              referenceId={serviceOrderData?._id}
               resource={ACTIVITY_RESOURCE.fieldServiceOrder}
               resourceLabel={serviceOrderData?.fieldServiceOrderNumber}
-              />
+            />
           </Box>
         </Box>
       </Box>
@@ -347,7 +359,7 @@ const ServiceOrderDetailsPage = () => {
             steps={steps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={[SERVICE_ORDER_STATUS.completed].includes(serviceOrderData?.status)}
+            isStepEnded={[SERVICE_ORDER_STATUS.completed, SERVICE_ORDER_STATUS.closed].includes(serviceOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
           <ContentFullScreen title={steps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
