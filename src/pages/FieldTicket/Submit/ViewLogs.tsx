@@ -103,7 +103,7 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
                     src={row?.original[field.fieldName]}
                     width={65}
                     className="max-w-[65px] w-full bg-white block"
-                    alt={`signed-by-${row?.original['user']}`}
+                    alt={`Signed by ${row?.original['user'] || 'user'}`}
                   />
                 </p>
               ) : (
