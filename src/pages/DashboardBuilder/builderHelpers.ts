@@ -106,3 +106,8 @@ export const defaultFormConfigs: IFormDataType = {
   filters: [],
   currency: false
 };
+
+export const RentalJobsRevenueFrequency = [
+  { optionLabel: 'Month', optionValue: 'month' },
+  { optionLabel: 'Days', optionValue: 'day' }
+];

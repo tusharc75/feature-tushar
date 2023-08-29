@@ -16,7 +16,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ViewInvoice from 'src/pages/Invoice/ViewInvoice';
 
 
-const FieldTicketInvoice = ({fieldServiceOrderData, renderedFrom}) => {
+const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -327,7 +327,6 @@ const FieldTicketInvoice = ({fieldServiceOrderData, renderedFrom}) => {
       {viewBillDialog.open && (
         <ViewInvoice
           invoiceData={viewBillDialog?.invoiceData}
-          estimateStartDate={null}
           onClose={() => {
             setViewBillDialog({ open: false, invoiceData: null });
           }}

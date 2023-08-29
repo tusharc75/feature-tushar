@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { Box, Checkbox, FormControlLabel, FormGroup, Collapse, IconButton } from '@material-ui/core';
 import moment from 'moment';
 import FilterModel from '../Helper/FilterModel';
-import Chart from '../Helper/Chart';
+import Chart from '../Helper/Chart1';
 import _ from 'lodash';
 import { TreeItem, TreeView } from '@material-ui/lab';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';

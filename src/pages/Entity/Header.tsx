@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
+import { Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import styles from '../Leads/Header.module.scss';
-import SearchBox from '../../components/Helpers/SearchBox';
+import { useState } from 'react';
+import { isMobile } from 'react-device-detect';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { BiNetworkChart } from 'react-icons/bi';
 import routes from '../../components/Helpers/Routes';
-import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
-import MobileSortDialog from '../../components/MobileSortDialog';
+import SearchBox from '../../components/Helpers/SearchBox';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import styles from '../Leads/Header.module.scss';
 
 const EntityHeader = (props) => {
   const {
@@ -65,20 +65,17 @@ const EntityHeader = (props) => {
           <div className="d-flex flex-wrap items-center justify-between w-full">
             <div></div>
             <Grid style={{ display: 'inline-flex' }}>
-              <Button
+              <IconButton
                 onClick={handleClickOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
                 aria-expanded={'true'}
-                variant="text"
-                disableElevation
-                startIcon={<MdSort />}
-                className={'sort-filter-tablet'}
-                style={isTablet ? { marginLeft: '50px' } : {}}
+                className={'mobileIconButton secondary'}
+                size="small"
               >
-                Sort
-              </Button>
+                <TbArrowsSort className="rotate-90" size={16} />
+              </IconButton>
               <MobileSortDialog
                 isOpen={sortOpen}
                 handleClose={handleClickClose}
@@ -88,19 +85,17 @@ const EntityHeader = (props) => {
                 dispatch={dispatch}
               />
 
-              <Button
+              <IconButton
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
                 aria-expanded={'true'}
-                variant="text"
-                disableElevation
-                className={'sort-filter-tablet'}
-                startIcon={<MdFilterList />}
+                className={'mobileIconButton secondary'}
+                size="small"
                 onClick={handleOpen}
               >
-                Filter
-              </Button>
+                <MdOutlineFilterAlt size={16} />
+              </IconButton>
 
               <MobileFilterDialog
                 isOpen={isOpenDialog}

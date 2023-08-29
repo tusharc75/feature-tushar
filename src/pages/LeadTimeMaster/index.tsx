@@ -1,36 +1,27 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
+import { Chip, IconButton, Tooltip } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import ManageLeadTimeMasterDialog from './ManageLeadTimeMaster';
-import {
-  isObjectEmpty,
-  customerAccount,
-  supplierAccount,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  leadTimeMaster,
-  sidebarResource
-} from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
-import routes from './../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import LeadTimeHeader from './LeadTimeHeader';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiTimer, SiStatuspage } from 'react-icons/all';
+import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { isMobile, isTablet } from 'react-device-detect';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
-import { camelCase } from 'lodash';
-import { SiStatuspage, BiTimer } from 'react-icons/all';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { getLocalStorageArrayData, gridLoadingTimeout, leadTimeMaster, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import LeadTimeHeader from './LeadTimeHeader';
+import ManageLeadTimeMasterDialog from './ManageLeadTimeMaster';
 
 let leadMasterTimeout;
 const LeadMasterType = [
@@ -229,7 +220,7 @@ const LeadTimeMaster = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-   
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
@@ -241,7 +232,7 @@ const LeadTimeMaster = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-   
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -262,7 +253,8 @@ const LeadTimeMaster = () => {
       gridApi.setRowData([]);
     }
     try {
-      let data: any = [], count;
+      let data: any = [],
+        count;
       const response: any = await axiosInstance().get(`${leadTimeMaster.api}${queryString}`);
       data = response?.data?.data;
       count = response?.data?.count;
@@ -361,41 +353,31 @@ const LeadTimeMaster = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.leadTimeMaster]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions.leadTimeMaster}
-                  module="leadTimeMaster"
-                  api={leadTimeMaster.api}
-                  afterImportCompleted={() => {
-                    fetchLeadTimeMasters();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                  ids={
-                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchLeadTimeMasters();
-                  }}
-                  additionalParams={getQueryString(true)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.leadTimeMaster]} />
+        <ImportExportLinks
+          permissions={permissions.leadTimeMaster}
+          module="leadTimeMaster"
+          api={leadTimeMaster.api}
+          afterImportCompleted={() => {
+            fetchLeadTimeMasters();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchLeadTimeMasters();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           <LeadTimeHeader
@@ -512,8 +494,9 @@ const LeadTimeMaster = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.leadTimeMasterName ? 'Lead Time Master' : 'Lead Time Masters'}   ${deleteRecord.leadTimeMasterName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.leadTimeMasterName ? 'Lead Time Master' : 'Lead Time Masters'}   ${
+              deleteRecord.leadTimeMasterName || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
@@ -550,7 +533,7 @@ const LeadTimeMaster = () => {
           }}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 
