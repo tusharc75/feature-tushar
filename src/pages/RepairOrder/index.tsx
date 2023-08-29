@@ -35,7 +35,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 let repairOrderTimeout;
 
 const RepairOrder = () => {
-
   const RepairOrderType = [
     {
       key: `My ${routes?.repairOrder.title}`,
@@ -223,28 +222,28 @@ const RepairOrder = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (fromRental) {
-      filterByIds.push({ field: "rentalJob", term: fromRental?._id });
+      filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
     }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
@@ -351,41 +350,31 @@ const RepairOrder = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.repairOrder]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions?.repairOrder}
-                  module="repairOrder"
-                  api={repairOrder.api}
-                  afterImportCompleted={() => {
-                    fetchRepairOrders();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
-                  ids={
-                    getLocalStorageArrayData(localStorageSelectedRecords)?.length
-                      ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchRepairOrders();
-                  }}
-                  additionalParams={getQueryString(true)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.repairOrder]} />
+        <ImportExportLinks
+          permissions={permissions?.repairOrder}
+          module="repairOrder"
+          api={repairOrder.api}
+          afterImportCompleted={() => {
+            fetchRepairOrders();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
+          ids={
+            getLocalStorageArrayData(localStorageSelectedRecords)?.length
+              ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchRepairOrders();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           <RepairOrderHeader
@@ -488,8 +477,9 @@ const RepairOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${deleteRecord.repairOrderNumber || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${
+              deleteRecord.repairOrderNumber || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
@@ -525,7 +515,7 @@ const RepairOrder = () => {
           }}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

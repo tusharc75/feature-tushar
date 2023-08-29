@@ -210,19 +210,19 @@ const Quotation = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         filterByIds.push({
           field: 'customerAccount',
           term: accountDetails.accountId
-        })
+        });
       } else if (accountDetails.resource === supplierAccount.accountResource) {
         filterByIds.push({
           field: 'supplierAccountName',
           term: { $in: [accountDetails.accountId] }
-        })
+        });
       }
     }
 
@@ -230,7 +230,7 @@ const Quotation = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
@@ -242,7 +242,7 @@ const Quotation = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     if (showFilteredRecordsOnly) {
@@ -346,39 +346,29 @@ const Quotation = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.quotation]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions?.quotation}
-                  module="quotation"
-                  api={quotation.api}
-                  afterImportCompleted={() => { }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                  ids={
-                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchQuotation();
-                  }}
-                  additionalParams={getQueryString(true)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <div className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.quotation]} />
+        <ImportExportLinks
+          permissions={permissions?.quotation}
+          module="quotation"
+          api={quotation.api}
+          afterImportCompleted={() => {}}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchQuotation();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           {columns && (
@@ -555,7 +545,7 @@ const Quotation = () => {
           }}
         />
       )}
-    </Fragment>
+    </div>
   );
 };
 

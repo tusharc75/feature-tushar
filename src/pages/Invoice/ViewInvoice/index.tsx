@@ -1,33 +1,29 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { getNestedSubRows } from 'src/components/RentalManagment/helper';
+import { Box, Dialog, IconButton } from '@material-ui/core';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, INVOICE_STATUS, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, INVOICE_STATUS, invoice, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Add, Delete, Edit, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import CommentDialog from 'src/components/CommentDialog';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 
-const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => {
-  const toastConfig = useContext(CustomToastContext);
+const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
 
-  const renderedFrom = 'view_invoice';
+  const toastConfig = useContext(CustomToastContext);
+  const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -201,8 +197,6 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
       invoice: invoiceData?._id,
       fieldTicket: invoiceData?.id,
       message: data,
-      material: rowsData.filter((d) => d.type !== 'manualEntry'),
-      additionalCost: rowsData.filter((d) => d.type === 'manualEntry')
     })
       .then(({ data }) => {
         onSuccess();
@@ -225,6 +219,7 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
                   resource={sidebarResource.invoice}
                   referenceId={invoiceData?._id}
                   columns={columns}
+                  hideDetailButton={true}
                   isSendEmail={true}
                 />
               }

@@ -32,10 +32,7 @@ import { camelCase } from 'lodash';
 
 let searchTimeout;
 
-
-
 const DemandOrder = () => {
-
   const DemandOrderType = [
     {
       key: `My ${routes.demandOrder.title}`,
@@ -191,7 +188,6 @@ const DemandOrder = () => {
     </>
   );
 
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (selectedType === 1) {
@@ -210,7 +206,7 @@ const DemandOrder = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -220,7 +216,7 @@ const DemandOrder = () => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -237,19 +233,21 @@ const DemandOrder = () => {
       gridApi.setRowData([]);
     }
 
-    axiosInstance().get(`${demandOrder.api}${queryString}`).then(({ data: { data, count } }) => {
-      let rows = data.map((u) => {
-        let finalObject = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = false;
-        finalObject['allowedToEdit'] = permissions?.demandOrder?.isUpdate;
-        finalObject['canDelete'] = permissions?.demandOrder?.isDelete;
-        return finalObject;
-      });
-      dispatch({ type: 'initialize', data: rows, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    })
+    axiosInstance()
+      .get(`${demandOrder.api}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = false;
+          finalObject['allowedToEdit'] = permissions?.demandOrder?.isUpdate;
+          finalObject['canDelete'] = permissions?.demandOrder?.isDelete;
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
       .catch((error) => {
         dispatch({ type: 'loading', loading: false });
         toastConfig.setToastConfig(error);
@@ -262,7 +260,7 @@ const DemandOrder = () => {
 
   const handleSalesOrderTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`)
+    history.push(`?type=${filterValues}`);
   };
 
   const handleTransferEntityDialog = () => {
@@ -322,39 +320,29 @@ const DemandOrder = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.demandOrder]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions?.demandOrder}
-                  module="demandOrder"
-                  api={demandOrder.api}
-                  afterImportCompleted={() => { }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                  ids={
-                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchData();
-                  }}
-                  additionalParams={getQueryString(true)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.demandOrder]} />
+        <ImportExportLinks
+          permissions={permissions?.demandOrder}
+          module="demandOrder"
+          api={demandOrder.api}
+          afterImportCompleted={() => {}}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchData();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           {columns && (
@@ -479,7 +467,7 @@ const DemandOrder = () => {
           }}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

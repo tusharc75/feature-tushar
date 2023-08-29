@@ -329,10 +329,10 @@ const ReceivingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDescription || ''
-                : element.type === 'package'
-                  ? element?.packageDetail?.packageDescription || ''
-                  : '';
+              ? element?.productDetail?.productDescription || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.qty = ele.qty;
           obj.consumeQty = consumeQty;
           obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicketProducts[element?.materialId] || 0 : 0;
@@ -351,10 +351,10 @@ const ReceivingTicket = ({
             ? ele.qty === consumeQty
               ? 'Consumed'
               : consumeQty < ele.qty && consumeQty > 0
-                ? 'Partially Consumed'
-                : ele.qty === returnTicketProducts[element?.materialId]
-                  ? 'Returned'
-                  : ''
+              ? 'Partially Consumed'
+              : ele.qty === returnTicketProducts[element?.materialId]
+              ? 'Returned'
+              : ''
             : element?.status;
           obj.startDate = element?.actualStartDate;
           obj.endDate = element?.actualEndDate;
@@ -382,10 +382,10 @@ const ReceivingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDescription || ''
-                : element.type === 'package'
-                  ? element?.packageDetail?.packageDescription || ''
-                  : '';
+              ? element?.productDetail?.productDescription || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.qty = qty;
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
@@ -402,10 +402,10 @@ const ReceivingTicket = ({
             ? qty === consumeQty
               ? 'Consumed'
               : consumeQty < qty && consumeQty > 0
-                ? 'Partially Consumed'
-                : qty === returnTicketProducts[element?.materialId]
-                  ? 'Returned'
-                  : ''
+              ? 'Partially Consumed'
+              : qty === returnTicketProducts[element?.materialId]
+              ? 'Returned'
+              : ''
             : element?.status;
           obj.currentLocation =
             element?.currentLocation?.optionValue ||
@@ -466,8 +466,8 @@ const ReceivingTicket = ({
         d['isChecked'] = false;
         d['hideSelection'] =
           [ASSET_STATUS.lost].includes(d.status) ||
-            d?.manualStatus === ASSET_STATUS.reserved ||
-            (d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)
+          d?.manualStatus === ASSET_STATUS.reserved ||
+          (d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)
             ? false
             : true;
 
@@ -561,7 +561,7 @@ const ReceivingTicket = ({
           <IconButton
             size="small"
             onClick={() => {
-              window.open(`${routes.repairJobDetail.path}/${params?.data?.repairJob}`)
+              window.open(`${routes.repairJobDetail.path}/${params?.data?.repairJob}`);
             }}
           >
             <MdHomeRepairService fontSize="20" color="#163340" />
@@ -573,7 +573,7 @@ const ReceivingTicket = ({
           <IconButton
             size="small"
             onClick={() => {
-              window.open(`${routes.repairOrderDetail.path}/${params?.data?.repairOrder}`)
+              window.open(`${routes.repairOrderDetail.path}/${params?.data?.repairOrder}`);
             }}
           >
             <MdHandyman fontSize="20" color="#163340" />
@@ -674,8 +674,8 @@ const ReceivingTicket = ({
           params?.data?.isAllowedStartDate === false && params?.data?.isAllowedEndDate === false
             ? `Invoice Created - Cannot change Start Date`
             : params?.data?.isAllowedEndDate === false && params?.data?.isAllowedStartDate !== true
-              ? `Can change the End Date after received`
-              : 'Update - Start Date/End Date'
+            ? `Can change the End Date after received`
+            : 'Update - Start Date/End Date'
         }
       >
         <span>
@@ -747,7 +747,7 @@ const ReceivingTicket = ({
       }
     },
     { field: 'displayType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
+    { field: 'parentName', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: findHeader(columnHeader?.assetFields, 'serialNumber'), show: true, cellRenderer: 'commonRenderer' },
     { field: 'productName', headerName: findHeader(columnHeader?.productFields, 'productName'), show: true, cellRenderer: 'productNameRenderer' },
@@ -829,7 +829,7 @@ const ReceivingTicket = ({
       .then(({ data }) => {
         axiosInstance()
           .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
-          .then(({ data: { data } }) => { })
+          .then(({ data: { data } }) => {})
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
@@ -956,7 +956,11 @@ const ReceivingTicket = ({
             type: 'success',
             message: `Receiving Successfully`
           });
-          if (receivingTicketId?.length && selectedRecords?.filter((e) => e.type === 'Asset')?.length && user?.user?.brandPolicy?.rentalRepairAutoCreate) {
+          if (
+            receivingTicketId?.length &&
+            selectedRecords?.filter((e) => e.type === 'Asset')?.length &&
+            user?.user?.brandPolicy?.rentalRepairAutoCreate
+          ) {
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -1231,17 +1235,17 @@ const ReceivingTicket = ({
                       (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
                     [ASSET_STATUS.underReview].includes(f.status)
                 )?.length === selectedRecords?.length && (
-                    <Fragment>
-                      <MenuItem
-                        onClick={() => {
-                          setAnchorEl(null);
-                          setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.available, message: '' });
-                        }}
-                      >
-                        {ASSET_STATUS.available}
-                      </MenuItem>
-                    </Fragment>
-                  )}
+                  <Fragment>
+                    <MenuItem
+                      onClick={() => {
+                        setAnchorEl(null);
+                        setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.available, message: '' });
+                      }}
+                    >
+                      {ASSET_STATUS.available}
+                    </MenuItem>
+                  </Fragment>
+                )}
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
@@ -1331,8 +1335,8 @@ const ReceivingTicket = ({
             </MenuItem>
 
             {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                ?.length === selectedRecords?.length ? (
+            selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
+              ?.length === selectedRecords?.length ? (
               <MenuItem
                 onClick={() => {
                   setShowRemoveAssetFromReceivingTicketDialog(true);
@@ -1423,19 +1427,19 @@ const ReceivingTicket = ({
             </MenuItem>
 
             {permissions?.repairJob?.isCreate &&
-              selectedRecords.length &&
-              selectedRecords?.filter(
-                (f) =>
-                  ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    f.status === ASSET_STATUS.scrap) &&
-                  [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(
-                    f.status
-                  ) &&
-                  !f.subleaseAsset &&
-                  checkUniqWarehouse()
-              )?.length === selectedRecords?.length &&
-              !isOffline ? (
+            selectedRecords.length &&
+            selectedRecords?.filter(
+              (f) =>
+                ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  f.status === ASSET_STATUS.scrap) &&
+                [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(
+                  f.status
+                ) &&
+                !f.subleaseAsset &&
+                checkUniqWarehouse()
+            )?.length === selectedRecords?.length &&
+            !isOffline ? (
               <MenuItem
                 onClick={() => {
                   closeActions();
@@ -1447,19 +1451,19 @@ const ReceivingTicket = ({
             ) : null}
 
             {permissions?.repairOrder?.isCreate &&
-              selectedRecords.length &&
-              selectedRecords?.filter(
-                (f) =>
-                  ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    f.status === ASSET_STATUS.scrap) &&
-                  [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(
-                    f.status
-                  ) &&
-                  !f.subleaseAsset &&
-                  checkUniqWarehouse()
-              )?.length === selectedRecords?.length &&
-              !isOffline ? (
+            selectedRecords.length &&
+            selectedRecords?.filter(
+              (f) =>
+                ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  f.status === ASSET_STATUS.scrap) &&
+                [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(
+                  f.status
+                ) &&
+                !f.subleaseAsset &&
+                checkUniqWarehouse()
+            )?.length === selectedRecords?.length &&
+            !isOffline ? (
               <MenuItem
                 onClick={() => {
                   closeActions();
@@ -1505,8 +1509,8 @@ const ReceivingTicket = ({
             </MenuItem> */}
 
             {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
-                ?.length === selectedRecords?.length ? (
+            selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
+              ?.length === selectedRecords?.length ? (
               <Fragment>
                 <MenuItem
                   onClick={() => {
@@ -1534,19 +1538,19 @@ const ReceivingTicket = ({
                 f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
                 Number(f?.consumeQty) + Number(f?.returnQty) < Number(f?.qty)
             ).length === selectedRecords.length && (
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    if (selectedRecords?.length === 1) {
-                      setShowConformationConsume({ open: true, type: 'add' });
-                    } else {
-                      setShowConformationConsumeMultiple(true);
-                    }
-                  }}
-                >
-                  {RENTAL_INTERNAL_ASSET_STATUS.consumed}
-                </MenuItem>
-              )}
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  if (selectedRecords?.length === 1) {
+                    setShowConformationConsume({ open: true, type: 'add' });
+                  } else {
+                    setShowConformationConsumeMultiple(true);
+                  }
+                }}
+              >
+                {RENTAL_INTERNAL_ASSET_STATUS.consumed}
+              </MenuItem>
+            )}
             {selectedRecords.length === 1 &&
               selectedRecords?.filter(
                 (f) =>
@@ -1572,11 +1576,13 @@ const ReceivingTicket = ({
               color="default"
               size="small"
               aria-controls="action-menu"
+              className="normal-case"
               endIcon={<ExpandMore fontSize="inherit" />}
             >
               Order(s)
             </Button>
           )}
+
           <Menu
             anchorEl={anchorLinkActionEl}
             keepMounted
@@ -1675,7 +1681,7 @@ const ReceivingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (

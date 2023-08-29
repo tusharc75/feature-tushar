@@ -1,45 +1,39 @@
-import React, { useState, useEffect, Fragment, useContext, useReducer } from 'react';
-import { Link } from 'react-router-dom';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import { FaWarehouse } from 'react-icons/fa';
-import styles from '../Leads/Header.module.scss';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomContainer from 'src/components/CustomContainer';
-import ManageWarehouse from './ManageWarehouse';
-import routes from 'src/components/Helpers/Routes';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, sidebarResource } from 'src/constants/helpers';
-import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import { useData } from 'src/StateProvider/Provider';
-import EntitySelectionsDialog from 'src/components/EntitySelections';
-import { AiOutlineDeploymentUnit } from 'react-icons/ai';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+import Button from '@material-ui/core/Button';
 import Chip from '@material-ui/core/Chip';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from 'src/constants/useColumns';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import { useLocation } from 'react-router-dom';
-import queryString from 'query-string';
-import { MdSort, MdFilterList } from 'react-icons/md';
-import { MdAdd } from 'react-icons/all';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
-import MobileSortDialog from 'src/components/MobileSortDialog';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { AiOutlineDeploymentUnit } from 'react-icons/ai';
+import { MdAdd, TbArrowsSort } from 'react-icons/all';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { useHistory, useLocation } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import AssignUserDialog from 'src/components/AssignRolesDialog/NewAssignUserDialog';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import EntitySelectionsDialog from 'src/components/EntitySelections';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import MobileSortDialog from 'src/components/MobileSortDialog';
+import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
+import styles from '../Leads/Header.module.scss';
+import ManageWarehouse from './ManageWarehouse';
 const Warehouse = () => {
   const renderedFrom = camelCase(routes?.warehouse.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -257,7 +251,7 @@ const Warehouse = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -268,7 +262,7 @@ const Warehouse = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -325,212 +319,196 @@ const Warehouse = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.warehouse.title }]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions?.warehouse}
-            module="warehouse"
-            api={'warehouse'}
-            afterImportCompleted={() => {
-              fetchWarehouses();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
-            ids={
-              getLocalStorageArrayData(localStorageSelectedRecords)?.length
-                ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchWarehouses();
-            }}
-            additionalParams={getQueryString(true)}
-            extraImportExportLinks={
-              user?.user?.brandPolicy?.warehouseAccessByUser
-                ? [
-                    {
-                      title: 'Assign Users Template',
-                      api: `warehouse/user/template`,
-                      type: 'download'
-                    },
-                    {
-                      title: 'Assign Users Export',
-                      api: `warehouse/user/template?export=true${
-                        getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                          ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                          : ''
-                      }`,
-                      type: 'export'
-                    },
-                    {
-                      title: 'Assign Users Import',
-                      api: `warehouse/user/import`,
-                      type: 'import'
-                    }
-                  ]
-                : []
-            }
-            title={routes.warehouse.title}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.warehouse.title }]} />
+        <ImportExportLinks
+          permissions={permissions?.warehouse}
+          module="warehouse"
+          api={'warehouse'}
+          afterImportCompleted={() => {
+            fetchWarehouses();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
+          ids={
+            getLocalStorageArrayData(localStorageSelectedRecords)?.length
+              ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchWarehouses();
+          }}
+          additionalParams={getQueryString(true)}
+          extraImportExportLinks={
+            user?.user?.brandPolicy?.warehouseAccessByUser
+              ? [
+                  {
+                    title: 'Assign Users Template',
+                    api: `warehouse/user/template`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Assign Users Export',
+                    api: `warehouse/user/template?export=true${
+                      getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                        ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                        : ''
+                    }`,
+                    type: 'export'
+                  },
+                  {
+                    title: 'Assign Users Import',
+                    api: `warehouse/user/import`,
+                    type: 'import'
+                  }
+                ]
+              : []
+          }
+          title={routes.warehouse.title}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex align-items-center gap-1'}>
               {isMobile && !isTablet && (
-                <div className="d-flex ">
-                  <Button
-                    onClick={handleClickOpen}
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    // aria-expanded={open ? 'true' : undefined}
-                    color="secondary"
-                    variant="text"
-                    disableElevation
-                    startIcon={<MdSort />}
-                  >
-                    Sort
-                  </Button>
-                  <MobileSortDialog
-                    isOpen={sortOpen}
-                    handleClose={handleClickClose}
-                    contentPart={null}
-                    secHeading={['Sort Plants']}
-                    columns={columns}
-                    dispatch={dispatch}
-                  />
-                  <Button
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    // aria-expanded={open ? 'true' : undefined}
-                    variant="text"
-                    color="secondary"
-                    disableElevation
-                    startIcon={<MdFilterList />}
-                    onClick={handleOpen}
-                  >
-                    Filter
-                  </Button>
-                  <MobileFilterDialog
-                    isOpen={isOpenDialog}
-                    handleClose={handleClose}
-                    contentPart={null}
-                    columns={columns}
-                    dispatch={dispatch}
-                    title={routes?.warehouse?.title}
-                    filters={filters}
-                  />
+                <div className="d-flex flex-wrap items-center justify-between w-full">
+                  <div></div>
+                  <div className="flex flex-wrap items-center gap-1 ml-auto">
+                    <IconButton
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      className={'mobileIconButton secondary'}
+                      size="small"
+                    >
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
+                    <MobileSortDialog
+                      isOpen={sortOpen}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort Plants']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                    <IconButton
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      className={'mobileIconButton secondary'}
+                      size="small"
+                      onClick={handleOpen}
+                    >
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleClose}
+                      contentPart={null}
+                      columns={columns}
+                      dispatch={dispatch}
+                      title={routes?.warehouse?.title}
+                      filters={filters}
+                    />
+                  </div>
                 </div>
               )}
-            </Grid>
-            <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1 }}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={styles.search_box_input}
-                    width={isMobile && !isTablet ? '200px' : '242px'}
-                    style={isMobile && !isTablet ? { flex: 1 } : {}}
-                    size="small"
-                    value={search}
-                  />
-                </Grid>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
 
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.warehouse?.isCreate && (
-                    <Button
-                      onClick={() => {
-                        setOpen({ open: true, isClone: false, id: null });
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      color="primary"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                  )}
-
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.warehouse?.isCreate && (
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    disabled={getLocalStorageArrayData(localStorageSelectedRecords)?.length ? false : true}
-                    aria-controls="action-menu"
-                    className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                    endIcon={<ExpandMore />}
-                  >
-                    {isMobile && !isTablet ? '' : 'Actions'}
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+                    onClick={() => {
+                      setOpen({ open: true, isClone: false, id: null });
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
+                    variant={'contained'}
+                    className="no-shadow"
+                    color="primary"
+                    size="small"
+                    startIcon={<AddOutlined />}
                   >
-                    {permissions?.warehouse?.isDelete ? <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem> : null}
-                    {permissions?.warehouse?.isUpdate && (
-                      <MenuItem
-                        onClick={() => {
-                          if (selectedRecords.some((d) => d.isUpdate === false)) {
-                            closeActions();
-                            setShowUpdateWarningConfirmBox(true);
-                          } else {
-                            closeActions();
-                            if (selectedRecords.length) {
-                              let entities = [];
-                              selectedRecords.map((current) => {
-                                if (current?.entity) {
-                                  if (current?.entityId) {
-                                    entities.push(current?.entityId);
-                                  }
-                                  if (current?.restentity) {
-                                    let restEntities = current?.restentity.map((o) => o.optionValue);
-                                    entities = [...entities, ...restEntities];
-                                  }
-                                }
-                              });
-                              setEntities([...entities]);
-                            }
-                            setShowEntityDialog(true);
-                          }
-                        }}
-                      >
-                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                      </MenuItem>
-                    )}
-                    {permissions?.warehouse?.isUpdate && user?.user?.brandPolicy?.warehouseAccessByUser && (
-                      <MenuItem
-                        onClick={() => {
+                    Add
+                  </Button>
+                )}
+
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  disabled={getLocalStorageArrayData(localStorageSelectedRecords)?.length ? false : true}
+                  aria-controls="action-menu"
+                  className={`new-dropdown-v1`}
+                  endIcon={<ExpandMore />}
+                >
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {permissions?.warehouse?.isDelete ? <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem> : null}
+                  {permissions?.warehouse?.isUpdate && (
+                    <MenuItem
+                      onClick={() => {
+                        if (selectedRecords.some((d) => d.isUpdate === false)) {
                           closeActions();
-                          setUserAssignDialog(true);
-                        }}
-                      >
-                        Assign Users &nbsp; <Chip size="small" label={selectedRecords.length} />
-                      </MenuItem>
-                    )}
-                  </Menu>
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+                          setShowUpdateWarningConfirmBox(true);
+                        } else {
+                          closeActions();
+                          if (selectedRecords.length) {
+                            let entities = [];
+                            selectedRecords.map((current) => {
+                              if (current?.entity) {
+                                if (current?.entityId) {
+                                  entities.push(current?.entityId);
+                                }
+                                if (current?.restentity) {
+                                  let restEntities = current?.restentity.map((o) => o.optionValue);
+                                  entities = [...entities, ...restEntities];
+                                }
+                              }
+                            });
+                            setEntities([...entities]);
+                          }
+                          setShowEntityDialog(true);
+                        }
+                      }}
+                    >
+                      Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                    </MenuItem>
+                  )}
+                  {permissions?.warehouse?.isUpdate && user?.user?.brandPolicy?.warehouseAccessByUser && (
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        setUserAssignDialog(true);
+                      }}
+                    >
+                      Assign Users &nbsp; <Chip size="small" label={selectedRecords.length} />
+                    </MenuItem>
+                  )}
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
 
         {Object.keys(frameWorkComponent).length > 0 ? (
@@ -649,7 +627,7 @@ const Warehouse = () => {
           />
         ) : null}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

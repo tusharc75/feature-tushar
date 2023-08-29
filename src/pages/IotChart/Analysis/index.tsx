@@ -1,79 +1,65 @@
-import { useState, useEffect, useContext } from 'react';
-import axiosInstance from 'src/axios/axiosInstance';
-import { Box, Grid } from '@material-ui/core';
+import { useState, useCallback } from 'react';
+import { Box, IconButton, Typography } from '@material-ui/core';
 import moment from 'moment';
-import Chart from '../Chart';
-import FilterModel from '../Chart/FilterModel';
-import { dateTimeFormat } from 'src/constants/helpers';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import Chart from '../Helper/Chart';
+import FilterModel from '../Helper/FilterModel';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 
 const Analysis = ({ assetId, dataPoints }) => {
+  const [dateFilters, setDateFilters] = useState({
+    from: new Date(moment().subtract(15, 'days').format('MM-DD-YYYY')),
+    to: new Date(),
+    intervals: '1hour'
+  });
 
-    const toastConfig = useContext(CustomToastContext);
+  const [expandedAccordition, setExpandedAccordition] = useState<string | false>('');
 
-    const [chartData, setChartData] = useState(null);
-    const [dateFilters, setDateFilters] = useState({
-        from: new Date(moment().subtract(15, 'days').format('MM-DD-YYYY')),
-        to: new Date(),
-        intervals: '1minute'
-    });
+  const handleChange = useCallback((name: string) => {
+    setExpandedAccordition((prev) => (!prev ? name : prev === name ? false : name));
+  }, []);
 
-    useEffect(() => {
-        if (dataPoints?.length) {
-            fetchData()
-        }
-    }, [dataPoints, dateFilters])
-
-    const fetchData = async () => {
-        axiosInstance().get(`/report/iot/data-points`, {
-            params: {
-                asset: assetId,
-                from_date: new Date(dateFilters.from).toISOString(),
-                to_date: new Date(dateFilters.to).toISOString(),
-                interval: dateFilters.intervals,
-                dataPoints: dataPoints?.map(d => d?._id)?.toString()
-            }
-        })
-            .then(({ data: { data } }) => {
-                setChartData(data?.data)
-            })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
-    };
-
-    return (
-        <>
-            <FilterModel dateFilters={dateFilters} setDateFilters={setDateFilters} />
+  return (
+    <>
+      <FilterModel dateFilters={dateFilters} setDateFilters={setDateFilters} />
+      <Box mt={2}>
+        {dataPoints?.map((dataPoint) => {
+          return (
             <Box mt={2}>
-                <Grid container spacing={2}>
-                    {
-                        dataPoints?.map((dataPoint) => {
-                            return (
-                                <Grid item md={6} lg={6} xs={12} sm={12}>
-                                    <Chart
-                                        id={`${dataPoint?._id}`}
-                                        data={
-                                            {
-                                                labels: chartData?.map((e) => moment(e?.time).format(dateTimeFormat)),
-                                                datasets: [{
-                                                    label: dataPoint?.fieldLabel,
-                                                    data: chartData?.map((e) => e[dataPoint?.fieldName]),
-                                                    borderColor: 'rgb(255, 99, 132)',
-                                                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                                                }]
-                                            }
-                                        }
-                                        label={dataPoint?.fieldLabel}
-                                    />
-                                </Grid>
-                            )
-                        })
-                    }
-                </Grid>
+              <Accordion
+                expanded={expandedAccordition === dataPoint?._id}
+                className={`omsAccordian`}
+                onChange={() => {
+                  handleChange(dataPoint?._id);
+                }}
+              >
+                <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+                  <Box display="flex">
+                    <Box>
+                      <IconButton size="small"> {expandedAccordition === dataPoint?._id ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+                    </Box>
+                    <Box padding="5px">
+                      <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
+                        {dataPoint?.fieldLabel}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails>
+                  {expandedAccordition === dataPoint?._id && (
+                    <div className="container-with-border w-100 sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
+                      <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} />
+                    </div>
+                  )}
+                </AccordionDetails>
+              </Accordion>
             </Box>
-        </>
-    );
+          );
+        })}
+      </Box>
+    </>
+  );
 };
 
 export default Analysis;

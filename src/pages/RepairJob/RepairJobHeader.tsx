@@ -95,12 +95,12 @@ function RepairJobHeader(props) {
               <div className="flex flex-wrap items-center gap-1">
                 <IconButton
                   size="small"
+                  className={'mobileIconButton secondary'}
                   onClick={handleClickOpen}
                   id="demo-customized-button"
                   aria-controls="demo-customized-menu"
                   aria-haspopup="true"
                   aria-expanded={open ? 'true' : undefined}
-                  className={'mobileIconButton secondary'}
                   style={isTablet ? { marginLeft: '50px' } : {}}
                 >
                   <TbArrowsSort className="rotate-90" size={16} />

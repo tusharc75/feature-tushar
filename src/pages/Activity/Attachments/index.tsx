@@ -227,11 +227,7 @@ export default function Attachment() {
               return (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <p>{d.name}</p>
-                  <IconButton
-                    className="ml-3"
-                    size="small"
-                    onClick={() => redirectToResource(d?.type, d?.referenceId)}
-                  >
+                  <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                     <OpenInNewIcon fontSize="small" color="primary" />
                   </IconButton>
                   <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
@@ -605,9 +601,9 @@ export default function Attachment() {
   };
 
   const fetchChildAttachment = async (id) => {
-    const attachment = await axiosInstance().get(`/attachment/child/${id}`)
-    return attachment?.data?.data
-  }
+    const attachment = await axiosInstance().get(`/attachment/child/${id}`);
+    return attachment?.data?.data;
+  };
 
   const generateNestedData = (data, parent) => {
     const childRow = data
@@ -679,40 +675,31 @@ export default function Attachment() {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.attachment.title }]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions?.attachment}
-                  module="Attachment"
-                  api={`/attachment`}
-                  afterImportCompleted={() => { }}
-                  total={rowCount}
-                  onlyExport={true}
-                  additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.attachment.title }]} />
+        <ImportExportLinks
+          permissions={permissions?.attachment}
+          module="Attachment"
+          api={`/attachment`}
+          afterImportCompleted={() => {}}
+          total={rowCount}
+          onlyExport={true}
+          additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
+        />
+      </div>
       <CustomContainer>
         {filter && (
           <div className="header-panel">
-            <Grid container className={styles.filter_side_container}>
-              <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={'d-flex align-items-center gap-1'}>
                 <AiOutlinePaperClip className="headerLogo" />
                 <span className="listingHeader">{routes.attachment.title} </span>
                 <Autocomplete
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
-                  style={{ width: '250px' }}
+                  style={{ minWidth: '200px' }}
+                  fullWidth
                   value={resource}
                   onChange={(event, newValue) => {
                     setResource(newValue);
@@ -723,13 +710,17 @@ export default function Attachment() {
                     }
                   }}
                   size="small"
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
-                    ) : (
-                      <TextField {...params} label="Select Resource" variant="outlined" />
-                    )
-                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      fullWidth
+                      className="flex-grow md:max-w-[250px]"
+                      margin="none"
+                      size="small"
+                      label="Select Resource"
+                      variant="outlined"
+                    />
+                  )}
                 />
                 {resource && resourceData && (
                   <Autocomplete
@@ -751,65 +742,70 @@ export default function Attachment() {
                       }
                     }}
                     size="small"
-                    renderInput={(params) => <TextField {...params} label={`Select ${resource.optionLabel}`} variant="outlined" />}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        className="flex-grow md:max-w-[250px]"
+                        margin="none"
+                        size="small"
+                        label={`Select ${resource.optionLabel}`}
+                        variant="outlined"
+                      />
+                    )}
                   />
                 )}
-              </Grid>
-              <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
-                <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Box style={{ flexGrow: 1, minWidth: 210 }}>
-                    <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="attachment" />
-                  </Box>
-                  <Box style={{ display: 'flex', gap: '5px' }}>
-                    {
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        onClick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null })}
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                      >
-                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                      </Button>
-                    }
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      disabled={selectedRecords.length > 0 ? false : true}
-                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                    >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
+              </div>
+              <div className="flex flex-wrap gap-[8px]  justify-end items-start">
+                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="attachment" />
+                <div className="flex gap-[8px] flex-wrap items-center">
+                  <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    onClick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null })}
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedRecords.length > 0 ? false : true}
+                    className={`new-dropdown-v1`}
+                    endIcon={<ExpandMore />}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      disabled={permissions.attachment.isDelete ? !selectedRecords.some((records) => records.canEdit) : true}
+                      onClick={() => {
+                        showConfirmBox(null);
+                        closeActions();
                       }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
                     >
-                      <MenuItem
-                        disabled={permissions.attachment.isDelete ? !selectedRecords.some((records) => records.canEdit) : true}
-                        onClick={() => {
-                          showConfirmBox(null);
-                          closeActions();
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    </Menu>
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
+                      Delete
+                    </MenuItem>
+                  </Menu>
+                </div>
+              </div>
+            </div>
           </div>
         )}
         <Box zIndex={5} width={'100%'}>
@@ -826,7 +822,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => { }}
+              setWholeRowsCellColor={() => {}}
               renderedFrom={'attachment_render'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -916,8 +912,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                      ? selectedResourceData.optionValue
-                      : user?.user?._id,
+                    ? selectedResourceData.optionValue
+                    : user?.user?._id,
                   access: true
                 }
               ]}
@@ -984,6 +980,6 @@ export default function Attachment() {
           />
         ) : null}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 }

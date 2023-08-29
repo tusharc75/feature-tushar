@@ -37,7 +37,6 @@ import { camelCase } from 'lodash';
 let invoiceTimeout;
 
 const Invoice = () => {
-
   const InvoiceType = [
     {
       key: `My ${routes.invoice.title}`,
@@ -178,19 +177,21 @@ const Invoice = () => {
         </Tooltip>
       )}
 
-      {params?.data?.canDelete && <GridDeleteIcon
-        hasDeletePermission={params?.data?.canDelete}
-        ownerId={user?.user?._id}
-        userId={user?.user?._id}
-        onDelete={() =>
-          setSingleInvoiceDelete({
-            show: true,
-            id: params.data._id,
-            invoiceNumber: `${params.data.invoiceNumber}`
-          })
-        }
-        entity="invoice"
-      />}
+      {params?.data?.canDelete && (
+        <GridDeleteIcon
+          hasDeletePermission={params?.data?.canDelete}
+          ownerId={user?.user?._id}
+          userId={user?.user?._id}
+          onDelete={() =>
+            setSingleInvoiceDelete({
+              show: true,
+              id: params.data._id,
+              invoiceNumber: `${params.data.invoiceNumber}`
+            })
+          }
+          entity="invoice"
+        />
+      )}
     </>
   );
 
@@ -207,19 +208,19 @@ const Invoice = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         filterByIds.push({
           field: 'customerAccount',
           term: accountDetails.accountId
-        })
+        });
       } else if (accountDetails.resource === supplierAccount.accountResource) {
         filterByIds.push({
           field: 'supplierAccountName',
           term: { $in: [accountDetails.accountId] }
-        })
+        });
       }
     }
 
@@ -227,7 +228,7 @@ const Invoice = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
@@ -239,7 +240,7 @@ const Invoice = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;
@@ -340,39 +341,29 @@ const Invoice = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.invoice]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions?.invoice}
-                  module="invoice"
-                  api={invoice.api}
-                  afterImportCompleted={() => { }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                  ids={
-                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchInvoiceData();
-                  }}
-                  additionalParams={getQueryString(true)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.invoice]} />
+        <ImportExportLinks
+          permissions={permissions?.invoice}
+          module="invoice"
+          api={invoice.api}
+          afterImportCompleted={() => {}}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchInvoiceData();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           {columns && (
@@ -545,7 +536,7 @@ const Invoice = () => {
           }}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

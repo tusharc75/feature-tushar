@@ -14,11 +14,12 @@ import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { getColors } from '../Home/helpers';
 import { DataPointsIcon } from 'src/assets/svg/svgIcons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 function IotChart() {
   const toastConfig = useContext(CustomToastContext);
 
-  const [rowsData, setRowsData] = useState([]);
+  const [rowsData, setRowsData] = useState(null);
   const [search, setSearch] = useState();
 
   useEffect(() => {
@@ -40,7 +41,7 @@ function IotChart() {
   const getQueryString = () => {
     let deepFilter = `?page=${0}&limit=${100}`;
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
@@ -51,37 +52,41 @@ function IotChart() {
 
   return (
     <div className="main-container-v1">
-      <Grid container className="headerbox-v1">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.iotChart]} />
-        </Grid>
-      </Grid>
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.iotChart]} />
+      </div>
       <CustomContainer>
         <div className="flex justify-end mb-3">
           <SearchBox onChange={handleSearch} size="small" value={search} className="flex-grow md:flex-grow-0" />
         </div>
-        <Box className={cardStyle.reportGrid}>
-          {rowsData?.map((asset, i) => {
-            const colors = getColors(i);
-            return (
-              <div key={i} className={cardStyle.singleCard}>
-                <Link to={`${routes.iotChart.path}/${asset?._id}`}>
-                  <DashBoardCardShell
-                    darkThemeBackgroundColor="var(--dark-secondary)"
-                    background={'#fff'}
-                    gradientColors={colors.gradient}
-                    className={cardStyle.cardInner}
-                    minHeight={false}
-                  >
-                    <DataPointsIcon colors={colors.iconGradient} className={`absolute -top-[23px] left-[18px]`} />
-                    <Typography variant="h6">{asset?.assetNumber}</Typography>
-                    <Typography variant="body2">{asset?.currentLocation?.optionLabel}</Typography>
-                  </DashBoardCardShell>
-                </Link>
-              </div>
-            );
-          })}
-        </Box>
+        {rowsData ? (
+          <Box className={cardStyle.reportGrid}>
+            {rowsData?.map((asset, i) => {
+              const colors = getColors(i);
+              return (
+                <div key={i} className={cardStyle.singleCard}>
+                  <Link to={`${routes.iotChart.path}/${asset?._id}`}>
+                    <DashBoardCardShell
+                      darkThemeBackgroundColor="var(--dark-secondary)"
+                      background={'#fff'}
+                      gradientColors={colors.gradient}
+                      className={cardStyle.cardInner}
+                      minHeight={false}
+                    >
+                      <DataPointsIcon colors={colors.iconGradient} className={`absolute -top-[23px] left-[18px]`} />
+                      <Typography variant="h6">{asset?.assetNumber}</Typography>
+                      <Typography variant="body2">{asset?.currentLocation?.optionLabel}</Typography>
+                    </DashBoardCardShell>
+                  </Link>
+                </div>
+              );
+            })}
+          </Box>
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
     </div>
   );

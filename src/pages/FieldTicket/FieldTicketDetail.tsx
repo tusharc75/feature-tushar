@@ -14,7 +14,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { ACTIVITY_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
 import TabPanel from '../../components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
 import AddCost from './AddCost';
@@ -25,6 +25,8 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import Material from './material';
 import { camelCase, set } from 'lodash';
 import Submit from './Submit';
+import { VscVersions } from 'react-icons/vsc';
+import Versions from './Versions';
 
 const FieldTicketDetail = () => {
 
@@ -51,6 +53,7 @@ const FieldTicketDetail = () => {
   const [nextStep, setNextStep] = useState(false);
   const [prevStep, setPrevStep] = useState(true);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [versionDialog, setVersionDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -157,6 +160,21 @@ const FieldTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {fieldTicketData?.versions?.length &&
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                size="small"
+                className={'btn-outline-v1'}
+                onClick={() => {
+                  setVersionDialog(true)
+                }}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                startIcon={isMobile && !isTablet ? null : <VscVersions />}
+              >
+                {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
+              </Button>
+            }
             {(allowedToEdit && ![FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status)) &&
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -281,6 +299,20 @@ const FieldTicketDetail = () => {
           onSuccess={() => {
             closeUpdateDialog();
             fetchData();
+          }}
+        />
+      )}
+      {versionDialog && (
+        <Versions
+          id={id}
+          label={fieldTicketData?.fieldTicketNumber}
+          childResource={CHILD_RESOURCE.fieldTicketMateial}
+          resource={sidebarResource.fieldTicket}
+          referenceData={fieldTicketData}
+          versions={fieldTicketData?.versions}
+          renderedFrom={`${renderedFrom}_versions`}
+          handleClose={() => {
+            setVersionDialog(false)
           }}
         />
       )}

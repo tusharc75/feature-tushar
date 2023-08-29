@@ -1,25 +1,24 @@
-import { useState, useContext, useEffect } from 'react';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { AddOutlined } from '@material-ui/icons';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import styles from '../Leads/Header.module.scss';
-import HideWhenOffline from '../../components/HideWhenOffline';
-import routes from '../../components/Helpers/Routes';
+import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdFilterList, MdSort } from 'react-icons/md';
-import { objectStore, insertUpdate, clearAll } from '../../constants/indexdbhelper';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { sidebarResource, CHILD_RESOURCE, serializedAsset } from '../../constants/helpers';
-import { useData } from '../../StateProvider/Provider';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
-import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
-import DateRangeIcon from '@material-ui/icons/DateRange';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { TbArrowsSort } from 'react-icons/tb';
 import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import routes from '../../components/Helpers/Routes';
+import SearchBox from '../../components/Helpers/SearchBox';
+import HideWhenOffline from '../../components/HideWhenOffline';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import { CHILD_RESOURCE, serializedAsset, sidebarResource } from '../../constants/helpers';
+import { clearAll, insertUpdate, objectStore } from '../../constants/indexdbhelper';
+import styles from '../Leads/Header.module.scss';
+import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
 
 function RentalManagementHeader({
   selectedRecords,
@@ -146,22 +145,20 @@ function RentalManagementHeader({
           {icon} <span className="listingHeader">{heading}</span>
         </div>
         {isMobile && !isTablet ? (
-          <>
-            <div className="d-flex flex-wrap">
-              <Button
+          <div className="d-flex flex-wrap items-center justify-between w-full gap-2">
+            <div>{toggleInner}</div>
+            <div className="flex flex-wrap items-center gap-1 ml-auto">
+              <IconButton
                 onClick={handleClickOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
                 // aria-expanded={open ? 'true' : undefined}
-                variant="text"
-                disableElevation
-                startIcon={<MdSort />}
-                className={'sort-filter-tablet'}
-                style={isTablet ? { marginLeft: '50px' } : {}}
+                className={'mobileIconButton secondary'}
+                size="small"
               >
-                Sort
-              </Button>
+                <TbArrowsSort className="rotate-90" size={16} />
+              </IconButton>
               <MobileSortDialog
                 isOpen={open}
                 handleClose={handleClickClose}
@@ -170,30 +167,28 @@ function RentalManagementHeader({
                 columns={columns}
                 dispatch={dispatch}
               />
-              <Button
+              <IconButton
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
                 // aria-expanded={open ? 'true' : undefined}
-                variant="text"
-                disableElevation
-                className={'sort-filter-tablet'}
-                startIcon={<MdFilterList />}
+                className={'mobileIconButton secondary'}
+                size="small"
                 onClick={handleOpen}
               >
-                Filter
-              </Button>
+                <MdOutlineFilterAlt size={16} />
+              </IconButton>
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={toggleInner}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 filters={filters}
                 title={routes?.rentalManagement?.title}
               />
             </div>
-          </>
+          </div>
         ) : (
           <HideWhenOffline>
             <div className={`flex flex-wrap items-center gap-2 `}>
@@ -246,12 +241,7 @@ function RentalManagementHeader({
 
       <div className="flex flex-wrap gap-[8px]  justify-end">
         <HideWhenOffline>
-          <SearchBox
-            onChange={onSearch}
-            className={isMobile ? styles.search_box_input : ''}
-            value={searchVal}
-            size="small"
-          />
+          <SearchBox onChange={onSearch} className={isMobile ? styles.search_box_input : ''} value={searchVal} size="small" />
         </HideWhenOffline>
         <div className="flex gap-[8px] flex-wrap items-center">
           <HideWhenOffline>

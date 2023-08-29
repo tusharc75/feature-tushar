@@ -179,6 +179,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                                     label={field.fieldLabel}
                                     name={field.fieldName}
                                     type={field.type}
+                                    fields={initialData.fields}
                                     options={parentEntityDataSource}
                                     setFieldValue={(name, value) => {
                                       setFieldValue(name, value);
@@ -204,6 +205,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                                     setFieldValue={(name, value) => {
                                       setFieldValue(name, value);
                                     }}
+                                    fields={initialData.fields}
                                     required={field.required}
                                     fullWidth
                                     isTooltip={field?.isTooltip || false}
