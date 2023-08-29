@@ -1,17 +1,16 @@
-import { useState } from 'react';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { useState } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 
-import { BsPersonBoundingBox } from 'react-icons/bs';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
-import styles from '../Leads/Header.module.scss';
+import { isMobile } from 'react-device-detect';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { useData } from '../../StateProvider/Provider';
-import { localStorageKeys } from '../../constants/helpers';
 import routes from '../../components/Helpers/Routes';
-import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import { localStorageKeys } from '../../constants/helpers';
+import styles from '../Leads/Header.module.scss';
 
 const RoleHeader = (props) => {
   const {
@@ -77,20 +76,17 @@ const RoleHeader = (props) => {
           <div className="d-flex flex-wrap items-center justify-between w-full">
             <div></div>
             <div className="flex flex-wrap items-center gap-1 ml-auto">
-              <Button
+              <IconButton
                 onClick={handleClickOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
                 aria-expanded={'true'}
-                variant="text"
-                disableElevation
-                startIcon={<MdSort />}
-                className={'sort-filter-tablet'}
-                style={isTablet ? { marginLeft: '50px' } : {}}
+                className={'mobileIconButton secondary'}
+                size="small"
               >
-                Sort
-              </Button>
+                <TbArrowsSort className="rotate-90" size={16} />
+              </IconButton>
               <MobileSortDialog
                 isOpen={sortOpen}
                 handleClose={handleClickClose}
@@ -100,19 +96,17 @@ const RoleHeader = (props) => {
                 dispatch={dispatch}
               />
 
-              <Button
+              <IconButton
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
                 aria-expanded={'true'}
-                variant="text"
-                disableElevation
-                className={'sort-filter-tablet'}
-                startIcon={<MdFilterList />}
+                className={'mobileIconButton secondary'}
+                size="small"
                 onClick={handleOpen}
               >
-                Filter
-              </Button>
+                <MdOutlineFilterAlt size={16} />
+              </IconButton>
 
               <MobileFilterDialog
                 isOpen={isOpenDialog}
