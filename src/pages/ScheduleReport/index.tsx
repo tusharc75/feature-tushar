@@ -18,7 +18,7 @@ import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwip
 import ManageScheduleReport from './ManageScheduleReport';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Delete, ExpandMore } from '@material-ui/icons';
+import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';
 import { getStaticFields, staticFrameworkRender } from '../../constants/useColumns';
 
 const ScheduleReport = () => {
@@ -244,79 +244,74 @@ const ScheduleReport = () => {
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
-      <div>
-        <Grid container className="headerbox">
-          <Grid item xs={10}>
-            <CustomBreadCrumbs
-              routes={[
-                { title: 'Reports', path: '/reports' },
-                { title: 'Schedule Report', path: '' }
-              ]}
-            />
-          </Grid>
-          <Grid item xs={2}></Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs
+            routes={[
+              { title: 'Reports', path: '/reports' },
+              { title: 'Schedule Report', path: '' }
+            ]}
+          />
+        </div>
         <CustomContainer>
           <div className="header-panel">
-            <Grid container className={styles.filter_side_container}>
-              <Grid item xs={4} className="d-flex align-items-center gap-1 layout-for-tablet">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={'d-flex align-items-center gap-1'}>
                 <Box display="flex" justifyContent="center" alignItems="center">
                   <MdDescription size={22} className="headerLogo" />
                   <span className="listingHeader">Schedule Report</span>
                 </Box>
-              </Grid>
-              <Grid item xs={8}>
-                <Box display="flex" alignItems="center" justifyContent="flex-end">
-                  <Box mr={1}>
-                    <Button
-                      disabled={!permissions?.scheduleReport?.isCreate}
-                      onClick={() => setShowManageDialog((prev) => ({ ...prev, open: true }))}
-                      variant="contained"
-                      size="small"
-                      color="primary"
-                    >
-                      Add
-                    </Button>
-                  </Box>
-                  <Box>
-                    <Button
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      endIcon={<ExpandMore />}
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      disabled={selectedRecords.length === 0 || !permissions?.scheduleReport?.isDelete}
-                      className="new-dropdown-v1"
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
+              </div>
+              <div className="flex flex-wrap gap-[8px]  justify-end">
+                <div className="flex-grow"></div>
+                <div className="flex gap-[8px] flex-wrap items-center">
+                  <Button
+                    disabled={!permissions?.scheduleReport?.isCreate}
+                    onClick={() => setShowManageDialog((prev) => ({ ...prev, open: true }))}
+                    variant="contained"
+                    size="small"
+                    color="primary"
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    endIcon={<ExpandMore />}
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedRecords.length === 0 || !permissions?.scheduleReport?.isDelete}
+                    className="new-dropdown-v1"
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      disabled={!permissions?.report?.isDelete}
+                      onClick={() => {
+                        closeActions();
+                        setShowDeleteConfirmBox(true);
                       }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
                     >
-                      <MenuItem
-                        disabled={!permissions?.report?.isDelete}
-                        onClick={() => {
-                          closeActions();
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    </Menu>
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
+                      Delete
+                    </MenuItem>
+                  </Menu>
+                </div>
+              </div>
+            </div>
           </div>
           <div>
             {Object.keys(frameworkComponents).length > 0 && columns ? (
@@ -377,7 +372,7 @@ const ScheduleReport = () => {
             )}
           </div>
         </CustomContainer>
-      </div>
+      </section>
       <Fragment>
         {showManageDialog.open && (
           <ManageScheduleReport
