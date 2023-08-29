@@ -308,7 +308,6 @@ const FieldTicketInvoice = () => {
         {viewInvoiceDialog.open && (
           <ViewInvoice
             invoiceData={{ ...viewInvoiceDialog.data, invoiceNumber: viewInvoiceDialog?.data?.invoice, _id: viewInvoiceDialog?.data?.invoiceId }}
-            estimateStartDate={null}
             onClose={() => {
               setViewInvoiceDialog({ open: false, data: null });
             }}
