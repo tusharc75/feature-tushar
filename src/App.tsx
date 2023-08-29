@@ -171,7 +171,7 @@ import ProductionOrderDetails from './pages/ProductionOrder/ProductionOrderDetai
 import ContactUs from './pages/ContactUs';
 import ContactUsDetail from './pages/ContactUs/ContactUsDetail';
 import SupportTicket from './pages/SupportTicket';
-import SupportTicketDetail from './pages/SupportTicket/SupportTicketDetails/SupportTicketDetail';
+import SupportTicketDetail from './pages/SupportTicket/SupportTicketDetail';
 import DemandOrder from './pages/DemandOrder';
 import DemandOrderDetails from './pages/DemandOrder/DemandOrderDetails';
 import FieldServiceOrder from './pages/FieldServiceOrder';
