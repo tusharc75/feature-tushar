@@ -3,10 +3,7 @@ import { Box, Checkbox, FormControlLabel, FormGroup, Collapse, IconButton } from
 import moment from 'moment';
 import FilterModel from '../Helper/FilterModel';
 import Chart from '../Helper/Chart1';
-import _ from 'lodash';
-import { TreeItem, TreeView } from '@material-ui/lab';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import { uniqBy } from 'lodash';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 
 const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
@@ -49,53 +46,51 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
             <div className="sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
               <FormGroup>
                 {Array.isArray(dataPoints) &&
-                  _.uniqBy(dataPoints, 'category')?.map((d: any, i) => {
+                  uniqBy(dataPoints, 'category.optionValue')?.map((d: any, i) => {
                     return (
                       <>
                         <div
                           className={`flex flex-wrap justify-between items-center cursor-pointer py-2 px-1 rounded-md `}
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleChange(`${d?.category}`);
+                            handleChange(`${d?.category?.optionValue}`);
                           }}
                         >
-                          <h6 className=" line-clamp-1 text-sm">{d?.category}</h6>
+                          <h6 className=" line-clamp-1 text-sm">{d?.category?.optionLabel}</h6>
                           <IconButton
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleChange(`${d?.category}`);
+                              handleChange(`${d?.category?.optionValue}`);
                             }}
                           >
-                            {compareCollapse(`${d?.category}`) ? (
+                            {compareCollapse(`${d?.category?.optionValue}`) ? (
                               <ExpandLess style={{ color: 'currentcolor' }} />
                             ) : (
                               <ExpandMore style={{ color: 'currentcolor' }} />
                             )}
                           </IconButton>
                         </div>
-                        <Collapse in={compareCollapse(`${d?.category}`)} unmountOnExit>
+                        <Collapse in={compareCollapse(`${d?.category?.optionValue}`)} unmountOnExit>
                           <div className="px-1">
-                            {dataPoints
-                              ?.filter((data) => data?.category === d?.category)
-                              ?.map((dataPoint) => {
-                                return (
-                                  <FormControlLabel
-                                    control={
-                                      <Checkbox
-                                        onChange={(e) => {
-                                          setSelectedDataPoint({ ...selectedDataPoint, [dataPoint?.fieldName]: e.target.checked });
-                                        }}
-                                        checked={selectedDataPoint[dataPoint?.fieldName]}
-                                        inputProps={{
-                                          'aria-labelledby': `checkbox-list-label-select-all`
-                                        }}
-                                      />
-                                    }
-                                    label={dataPoint?.fieldLabel}
-                                  />
-                                );
-                              })}
+                            {dataPoints?.filter((data) => data?.category?.optionValue === d?.category?.optionValue)?.map((dataPoint) => {
+                              return (
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      onChange={(e) => {
+                                        setSelectedDataPoint({ ...selectedDataPoint, [dataPoint?.fieldName]: e.target.checked });
+                                      }}
+                                      checked={selectedDataPoint[dataPoint?.fieldName]}
+                                      inputProps={{
+                                        'aria-labelledby': `checkbox-list-label-select-all`
+                                      }}
+                                    />
+                                  }
+                                  label={dataPoint?.fieldLabel}
+                                />
+                              );
+                            })}
                           </div>
                         </Collapse>
                       </>
