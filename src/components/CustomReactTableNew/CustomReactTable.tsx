@@ -16,7 +16,7 @@ import { Check } from '@material-ui/icons';
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { columnFilter } from './ReactTableHelpers';
 import { gridPageSizes } from '../../constants/helpers';
-import { isString } from 'lodash';
+import { isString, uniqBy } from 'lodash';
 import {
   useTable,
   useExpanded,
@@ -37,7 +37,7 @@ import CustomReactTableHeaderOptions from './CustomReactTableHeaderOptions';
 import { isMobile, isTablet } from 'react-device-detect';
 import Checkbox from '@material-ui/core/Checkbox';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend, getEmptyImage } from 'react-dnd-html5-backend';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 import HtmlTooltip from '../CustomTooltipTitle';
 import ArrangeViewButton from './ArrangeViewButton';
@@ -170,7 +170,8 @@ function CustomReactTable({
   dispatch,
   sorting,
   loading,
-  fetchChildAttachment = null
+  fetchChildAttachment = null,
+  showOnlyShowFilteredRecordSwitch = false
   // customPageSize = 20,
 }) {
   const defaultColumn = {
@@ -191,6 +192,37 @@ function CustomReactTable({
   useEffect(() => {
     setBaseColumns(columns);
   }, [columns]);
+
+  const handleCellSelection = (row) => {
+    if (!isClientSideGrid) {
+      try {
+        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`)
+          ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`))
+          : [];
+
+        if (!row.isSelected && !oldSelectedRecords.some((s) => s['_id'] === row?.original?._id)) {
+          oldSelectedRecords = [...oldSelectedRecords, row?.original];
+
+          localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
+        } else if (row.isSelected) {
+          if (oldSelectedRecords.length > 0) {
+            localStorage.setItem(
+              `${renderedFrom}_selected`,
+              JSON.stringify(oldSelectedRecords.filter((f) => f['_id'] !== row?.original?._id))
+            );
+          }
+        }
+      } catch (ex) {
+        console.error('Error in getting / storing selected records');
+      }
+    }
+  }
+
+  const handleAllSelect = (checked) => {
+    if (checked) {
+      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+    }
+  }
 
   const newColumns = React.useMemo(
     () =>
@@ -253,9 +285,10 @@ function CustomReactTable({
             width: 50,
             maxWidth: 50,
             Header: ({ getToggleAllRowsSelectedProps }) => (
-              <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
+              <IndeterminateCheckbox
+                onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)} {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
             ),
-            Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+            Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
           },
           ...baseColumns.map((m) => {
             return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
@@ -268,9 +301,11 @@ function CustomReactTable({
             width: 50,
             maxWidth: 50,
             Header: ({ getToggleAllRowsSelectedProps }) => (
-              <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
+              <IndeterminateCheckbox
+                onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)} {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
             ),
-            Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+            Cell: ({ row }) => <IndeterminateCheckbox
+              onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
           },
           ...baseColumns.map((m) => {
             return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
@@ -450,11 +485,28 @@ function CustomReactTable({
       }
     });
     onSelect([...flatSelectedData]);
-    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([...flatSelectedData]));
     dispatch({
       type: 'selection',
       selectedRecords: [...flatSelectedData]
     });
+
+    if (renderedFrom) {
+      try {
+        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`)
+          ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`))
+          : [];
+        if (oldSelectedRecords.length > 0) {
+          const uniqueRecords = uniqBy([...oldSelectedRecords, ...flatSelectedData], '_id');
+          localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(uniqueRecords));
+        } else {
+          localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(flatSelectedData));
+        }
+      } catch (ex) {
+        console.error('Error in getting / storing selected records');
+      }
+    }
+
+
   }, [selectedRowIds]);
 
   const reorder = (item: any, newIndex: number) => {
@@ -537,23 +589,7 @@ function CustomReactTable({
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="custom-react-table custom-react-table-v1 vertical-center">
-        <CustomReactTableHeaderOptions
-          columns={baseColumns}
-          // setSelectedReportView={setSelectedReportView}
-          // selectedReportView={selectedReportView}
-          // columns={columns}
-          // setColumns={setColumns}
-          // columnApi={columnApi}
-          // refreshGrid={refreshGrid}
-          renderedFrom={renderedFrom}
-          isClientSideGrid={isClientSideGrid}
-          // dispatch={dispatch}
-          showOnlyShowFilteredRecordSwitch={false}
-          selectedRecords={selectedFlatRows.length ?? 0}
-          setHiddenColumns={setHiddenColumns}
-          getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-          setColumnOrder={setColumnOrder}
-        />
+
 
         <div className="table-container-v1" style={{ position: 'relative' }}>
           <GridHeader
@@ -572,7 +608,25 @@ function CustomReactTable({
                 />
               </>
             }
-          ></GridHeader>
+          >
+            <CustomReactTableHeaderOptions
+              columns={baseColumns}
+              // setSelectedReportView={setSelectedReportView}
+              // selectedReportView={selectedReportView}
+              // columns={columns}
+              // setColumns={setColumns}
+              // columnApi={columnApi}
+              // refreshGrid={refreshGrid}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={isClientSideGrid}
+              dispatchTable={dispatch}
+              showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
+              selectedRecords={selectedFlatRows?.length}
+              setHiddenColumns={setHiddenColumns}
+              getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
+              setColumnOrder={setColumnOrder}
+            />
+          </GridHeader>
 
           <div
             style={{

@@ -25,22 +25,22 @@ export default function Current({ assetId }) {
   }, [assetId]);
 
   const fetchData = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/report/iot/current-status?asset=${assetId}`);
-      let tableData = data?.dataPointData?.map((data) => {
+    axiosInstance().get(`/report/iot/current-status`, {
+      params: {
+        asset: assetId
+      }
+    }).then(({ data: { data } }) => {
+      let newData = data?.dataPointData?.map((data) => {
         const obj = {
           ...data,
           time: moment(data?.time).format(dateTimeFormat)
         };
         return obj;
       });
-
-      setDataPointData(tableData);
-    } catch (error) {
+      setDataPointData(newData);
+    }).catch((error) => {
       toastConfig.setToastConfig(error);
-    }
+    });
   };
 
   const fetchErrorData = async () => {
@@ -69,57 +69,58 @@ export default function Current({ assetId }) {
     setExpandedAccordition((prev) => (!prev ? name : prev === name ? false : name));
   }, []);
 
+
+  console.log(_.uniqBy(dataPointData, 'category.optionValue'))
+
   return (
     <>
       {(dataPointData && dataPointData?.length) || (errorData && errorData?.length) ? (
         <Grid container spacing={2}>
           <Grid item lg={8} md={8} sm={12} xs={12}>
-            {_.uniqBy(dataPointData, 'category')?.map((d: any, i) => {
+            {_.uniqBy(dataPointData, 'category.optionValue')?.map((d: any, i) => {
               return (
                 <Accordion
-                  expanded={expandedAccordition === d?.category}
+                  expanded={expandedAccordition === d?.category?.optionValue}
                   className={`omsAccordian`}
                   onChange={() => {
-                    handleChange(d?.category);
+                    handleChange(d?.category?.optionValue);
                   }}
                 >
                   <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
                     <Box display="flex">
                       <Box>
-                        <IconButton size="small"> {expandedAccordition === d?.category ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+                        <IconButton size="small"> {expandedAccordition === d?.category?.optionValue ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
                       </Box>
                       <Box padding="5px">
                         <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-                          {d?.category || 'Data'}
+                          {d?.category?.optionLabel || 'Data'}
                         </Typography>
                       </Box>
                     </Box>
                   </AccordionSummary>
                   <AccordionDetails>
-                    {expandedAccordition === d?.category && (
+                    {expandedAccordition === d?.category?.optionValue && (
                       <Grid container spacing={1}>
-                        {dataPointData
-                          ?.filter((d) => d?.category === expandedAccordition)
-                          ?.map((data) => {
-                            return (
-                              <Grid item xs={12} sm={6} lg={4} md={4}>
-                                <Box
-                                  border="1px solid var(--common-border-color)"
-                                  className="p-[10px] rounded-md min-h-full"
-                                  title={`${data?.fieldLabel} : ${data?.value} ${data?.unit ? `(${data.unit})` : ''}`}
-                                >
-                                  <p className="mb-2 flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
-                                    <strong className=" line-clamp-1">{data?.fieldLabel} : </strong>
-                                    <span className=" font-medium">
-                                      {data?.value}
-                                      {data?.unit && `(${data?.unit})`}
-                                    </span>
-                                  </p>
-                                  <span className="text-gray-500 dark:text-gray-300 text-[12px]">{data?.time}</span>
-                                </Box>
-                              </Grid>
-                            );
-                          })}
+                        {dataPointData?.filter((d) => d?.category?.optionValue === expandedAccordition)?.map((data) => {
+                          return (
+                            <Grid item xs={12} sm={6} lg={4} md={4}>
+                              <Box
+                                border="1px solid var(--common-border-color)"
+                                className="p-[10px] rounded-md min-h-full"
+                                title={`${data?.fieldLabel} : ${data?.value} ${data?.unit ? `(${data.unit})` : ''}`}
+                              >
+                                <p className="mb-2 flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
+                                  <strong className=" line-clamp-1">{data?.fieldLabel} : </strong>
+                                  <span className=" font-medium">
+                                    {data?.value}
+                                    {data?.unit && `(${data?.unit})`}
+                                  </span>
+                                </p>
+                                <span className="text-gray-500 dark:text-gray-300 text-[12px]">{data?.time}</span>
+                              </Box>
+                            </Grid>
+                          );
+                        })}
                       </Grid>
                     )}
                   </AccordionDetails>
