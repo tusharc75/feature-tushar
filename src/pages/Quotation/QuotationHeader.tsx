@@ -85,7 +85,7 @@ function QuotationHeader(props) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div className={'d-flex align-items-center gap-1'}>
         {isMobile && !isTablet ? (
-          <div className="d-flex flex-wrap items-center justify-between w-full">
+          <div className="d-flex flex-wrap items-center justify-between w-full gap-2">
             <div>{toggleInner}</div>
             <div className="flex flex-wrap items-center gap-1 ml-auto">
               <IconButton
