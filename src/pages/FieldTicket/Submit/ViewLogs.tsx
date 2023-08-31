@@ -1,7 +1,7 @@
 import { Box, Dialog, IconButton } from '@material-ui/core';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -15,6 +15,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, dateTimeFormat, fieldTicket } from 'src/constants/helpers';
 import { fetch_field_ticket_submit_fields } from '../helper';
+import { Skeleton } from '@material-ui/lab';
 
 function ViewLogs({ id, fieldTicketName, handleClose }) {
   const {
@@ -26,6 +27,15 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [openAttachment, setOpenAttachment] = useState({ open: false, attachmentId: null });
+  const [imageDialogProps, setImageDialogProps] = useState<{ open: boolean; src: null | string; alt: string }>({
+    open: false,
+    src: null,
+    alt: ''
+  });
+
+  const onClose = React.useCallback(() => {
+    setImageDialogProps({ open: false, src: null, alt: '' });
+  }, []);
 
   useEffect(() => {
     fetchColumn();
@@ -61,7 +71,7 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
         Cell: ({ row }) => {
           return row?.original['invoice'] ? (
             permissions?.invoice?.isRead ? (
-              <a className="link text-truncate" href={`${routes.invoiceDetail.path}/${row?.original['invoiceId']}`} target="_blank">
+              <a className="link text-truncate" href={`${routes.invoiceDetail.path}/${row?.original['invoiceId']}`} target="_blank" rel="noreferrer">
                 {row?.original['invoice']}
               </a>
             ) : (
@@ -98,11 +108,21 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
             disableFilters: true,
             Cell: ({ row }) => {
               return row?.original[field.fieldName] ? (
-                <p className="text-truncate -my-[2px]">
+                <p
+                  className="text-truncate -my-[2px] cursor-pointer"
+                  role="button"
+                  onClick={() => {
+                    setImageDialogProps({
+                      open: true,
+                      src: row?.original[field.fieldName],
+                      alt: `Signed by ${row?.original['user'] || 'user'}`
+                    });
+                  }}
+                >
                   <img
                     src={row?.original[field.fieldName]}
                     width={65}
-                    className="max-w-[65px] w-full bg-white block"
+                    className="max-w-[65px] w-full block max-h-[38px] object-contain  dark:invert"
                     alt={`Signed by ${row?.original['user'] || 'user'}`}
                   />
                 </p>
@@ -206,7 +226,7 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
               </Box>
             </Box>
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
@@ -245,8 +265,42 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
           />
         </Dialog>
       )}
+      <ImageDialog onClose={onClose} {...imageDialogProps} />
     </>
   );
 }
 
 export default ViewLogs;
+
+export interface ImageDialogProps {
+  open: boolean;
+  onClose: () => void;
+  src: string | null;
+  alt?: string;
+}
+
+function ImageDialog(props: ImageDialogProps) {
+  const { onClose, open, src, alt } = props;
+
+  return (
+    <Dialog
+      // TransitionComponent={Transition}
+      TransitionProps={{ timeout: 300 }}
+      onClose={onClose}
+      aria-labelledby="simple-dialog-title"
+      open={open}
+      fullWidth
+      maxWidth="xs"
+      // PaperProps={{ className: 'min-w-[300px] max-w-[500px] w-full' }}
+      BackdropProps={{ style: { backdropFilter: 'blur(5px)' } }}
+    >
+      {src ? (
+        <img src={src} alt={alt || ''} className="w-full block max-w-[500px] object-contain mx-auto p-2 h-full dark:invert" />
+      ) : (
+        <div className="w-[444px] h-[278px] p-2 grid place-items-center">
+          <p className="text-gray-500 text-lg">No image to display</p>
+        </div>
+      )}
+    </Dialog>
+  );
+}
