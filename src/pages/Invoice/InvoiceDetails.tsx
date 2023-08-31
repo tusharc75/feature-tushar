@@ -27,6 +27,7 @@ import { GrStatusInfo } from 'react-icons/all';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -55,6 +56,9 @@ const InvoiceDetails = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
+
+  const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+
   const invoiceProcessStepsNames = React.useMemo(() => {
     return invoiceProcessSteps.map((item) => item.name);
   }, [invoiceProcessSteps]);
@@ -70,20 +74,6 @@ const InvoiceDetails = () => {
       'aria-controls': `main-tabpanel-${index}`
     };
   }
-
-  const handleStatusChange = (o) => {
-    if (o.optionValue && invoiceData?.status !== o.optionValue) {
-      updateJobStatus(o.optionValue);
-    }
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   useEffect(() => {
     if (id) {
@@ -166,11 +156,12 @@ const InvoiceDetails = () => {
       });
   };
 
-  const updateJobStatus = (status) => {
+  const handleChangeStatus = (status) => {
     axiosInstance()
       .patch(`${invoice.api}/status/${invoiceData._id}`, { status: status })
       .then(({ data: { data } }) => {
         fetchInvoiceData();
+        setShowClosedConfirmBox(false)
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -206,48 +197,19 @@ const InvoiceDetails = () => {
                 {permissions?.invoice?.isDelete && ![INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
-                {permissions?.invoice?.isUpdate &&
-                  [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
-                    <>
-                      <Button
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                      >
-                        {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        {statusOptions?.map((o, index) => {
-                          return (
-                            <MenuItem
-                              disabled={index <= statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)}
-                              onClick={() => {
-                                closeActions();
-                                handleStatusChange(o);
-                              }}
-                              value={o}
-                            >
-                              {o?.optionLabel}
-                            </MenuItem>
-                          );
-                        })}
-                      </Menu>
-                    </>
-                  )}
+                {permissions?.invoice?.isUpdate && [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
+                  <ButtonWithPulse
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={() => {
+                      setShowClosedConfirmBox(true)
+                    }}
+                    className={'btn-outline-v1'}
+                  >
+                    Close
+                  </ButtonWithPulse>
+                )}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -321,7 +283,6 @@ const InvoiceDetails = () => {
                 setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
-                updateJobStatus={updateJobStatus}
                 allowedToEdit={allowedToEdit && permissions?.invoice?.isUpdate ? true : false}
               />
             )}
@@ -336,7 +297,7 @@ const InvoiceDetails = () => {
               <Invoice
                 invoiceData={invoiceData}
                 setNextStep={setNextStep}
-                updateJobStatus={updateJobStatus}
+                handleChangeStatus={handleChangeStatus}
                 stepFullScreen={stepFullScreen}
                 statusOptions={statusOptions}
                 renderedFrom={`${renderedFrom}_grid-5`}
@@ -353,6 +314,18 @@ const InvoiceDetails = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showClosedConfirmBox && (
+        <ConfirmationDialog
+          open={showClosedConfirmBox}
+          message={`Are you sure you want to close ${invoiceData?.invoiceNumber} ?`}
+          onClose={() => {
+            setShowClosedConfirmBox(false);
+          }}
+          onOk={() => {
+            handleChangeStatus(INVOICE_STATUS.closed)
+          }}
         />
       )}
       {openUpdateDialog && (

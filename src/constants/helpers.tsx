@@ -2580,7 +2580,8 @@ export const SERVICE_ORDER_STATUS = {
   inProgress: 'In-Progress',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
-  completed: 'Completed'
+  completed: 'Completed',
+  closed: 'Closed'
 };
 
 export const MATERIAL_REQUEST_STATUS = {
@@ -2612,7 +2613,8 @@ export const FIELD_TICKET_STATUS = {
   inProgress: 'In-Progress',
   submitted: 'Submitted',
   readyToInvoice: 'Ready to Invoice',
-  invoiced: 'Invoiced'
+  invoiced: 'Invoiced',
+  closed: 'Closed'
 };
 
 export const INVOICE_STATUS = {

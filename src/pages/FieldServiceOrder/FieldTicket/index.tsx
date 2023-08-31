@@ -126,8 +126,8 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
           var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          finalObject['allowedToEdit'] = isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced]?.includes(u?.status);
-          finalObject['canDelete'] = u?.canDelete && permissions?.fieldTicket?.isDelete && u?.owner?.optionValue === user?.user?._id
+          finalObject['allowedToEdit'] = isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+          finalObject['canDelete'] = u?.canDelete && permissions?.fieldTicket?.isDelete && u?.owner?.optionValue === user?.user?._id && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status)
           let res = {
             ...finalObject
           };
@@ -307,6 +307,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
                 onClose={closeActions}
               >
                 <MenuItem
+                  disabled={!selectedRecords?.every(s => s.canDelete)}
                   onClick={() => {
                     closeActions();
                     setShowDeleteConfirmBox(true);
