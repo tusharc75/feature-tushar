@@ -15,7 +15,7 @@ import {
   getUniqueCurrencies,
   serviceOrderSteps,
   SERVICE_ORDER_STATUS,
-  sidebarResource
+  sidebarResource,
 } from '../../constants/helpers';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
@@ -39,6 +39,8 @@ import { GrStatusInfo } from 'react-icons/gr';
 import FieldTicket from './FieldTicket';
 import FieldTicketInvoice from './FieldTicketInvoice';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
+import CloseIcon from '@material-ui/icons/Close';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -72,6 +74,7 @@ const ServiceOrderDetailsPage = () => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [steps, setSteps] = useState([]);
+  const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -128,8 +131,8 @@ const ServiceOrderDetailsPage = () => {
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
       }
-      setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit);
-      setAllowedToDelete(permissions?.fieldServiceOrder?.isDelete && data.owner.optionValue === user?.user?._id && data.canDelete);
+      setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
+      setAllowedToDelete(permissions?.fieldServiceOrder?.isDelete && data.owner.optionValue === user?.user?._id && data.canDelete && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
       setServiceOrderData(data);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       setCurrentStep(steps.map((s) => s.name).indexOf(data?.processStatus) !== -1 ? steps.map((s) => s.name).indexOf(data?.processStatus) : 0);
@@ -187,25 +190,12 @@ const ServiceOrderDetailsPage = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const handleStatusChange = (o) => {
-    if (o.optionValue && serviceOrderData?.status !== o.optionValue) {
-      updateStatus(o.optionValue);
-    }
-  };
-
-  const updateStatus = (status) => {
+  const handleChangeStatus = (status) => {
     axiosInstance()
       .patch(`${routes.fieldServiceOrder.path}/status/${serviceOrderData._id}`, { status: status })
       .then(({ data: { data } }) => {
         fetchServiceOrderData();
+        setShowClosedConfirmBox(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -225,6 +215,19 @@ const ServiceOrderDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            {allowedToEdit && serviceOrderData?.canComplete && SERVICE_ORDER_STATUS.closed !== serviceOrderData.status && (
+              <ButtonWithPulse
+                variant={'outlined'}
+                color="default"
+                size="small"
+                onClick={() => {
+                  setShowClosedConfirmBox(true)
+                }}
+                className={'btn-outline-v1'}
+              >
+                Close
+              </ButtonWithPulse>
+            )}
             <Fragment>
               <Button
                 className={'btn-outline-v1'}
@@ -236,55 +239,15 @@ const ServiceOrderDetailsPage = () => {
                 {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
               </Button>
             </Fragment>
-            <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
-            {allowedToEdit && (
-              <Fragment>
-                {[SERVICE_ORDER_STATUS.readyToInvoice, SERVICE_ORDER_STATUS.invoiced]?.includes(serviceOrderData?.status) && (
-                  <Button
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                  >
-                    {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
-                  </Button>
-                )}
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  {statusOptions?.map((o, index) => {
-                    return (
-                      <MenuItem
-                        disabled={index <= statusOptions.findIndex((d) => d.optionLabel === serviceOrderData?.status)}
-                        onClick={() => {
-                          closeActions();
-                          handleStatusChange(o);
-                        }}
-                        value={o}
-                      >
-                        {o?.optionLabel}
-                      </MenuItem>
-                    );
-                  })}
-                </Menu>
-              </Fragment>
-            )}
-            <ActivityButton 
-              referenceId={serviceOrderData?._id} 
+            <DeleteButton
+              text="Delete"
+              disabled={!allowedToDelete}
+              onClick={() => setShowConfirmBox(true)} />
+            <ActivityButton
+              referenceId={serviceOrderData?._id}
               resource={ACTIVITY_RESOURCE.fieldServiceOrder}
               resourceLabel={serviceOrderData?.fieldServiceOrderNumber}
-              />
+            />
           </Box>
         </Box>
       </Box>
@@ -347,7 +310,7 @@ const ServiceOrderDetailsPage = () => {
             steps={steps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={[SERVICE_ORDER_STATUS.completed].includes(serviceOrderData?.status)}
+            isStepEnded={[SERVICE_ORDER_STATUS.completed, SERVICE_ORDER_STATUS.closed].includes(serviceOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
           <ContentFullScreen title={steps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
@@ -400,7 +363,7 @@ const ServiceOrderDetailsPage = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
                 fromInvoice={true}
-                updateStatus={updateStatus}
+                updateStatus={handleChangeStatus}
                 statusOptions={statusOptions}
               />
             )}
@@ -424,6 +387,18 @@ const ServiceOrderDetailsPage = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showClosedConfirmBox && (
+        <ConfirmationDialog
+          open={showClosedConfirmBox}
+          message={`Are you sure you want to close ${serviceOrderData?.fieldServiceOrderNumber} ?`}
+          onClose={() => {
+            setShowClosedConfirmBox(false);
+          }}
+          onOk={() => {
+            handleChangeStatus(SERVICE_ORDER_STATUS.closed)
+          }}
         />
       )}
       {openUpdateDialog && (
