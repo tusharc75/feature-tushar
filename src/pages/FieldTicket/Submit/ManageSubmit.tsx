@@ -1,6 +1,6 @@
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -14,6 +14,21 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { fetch_field_ticket_submit_fields } from '../helper';
+import { array, object, string } from 'yup';
+
+const submitValidation = object().shape({
+    signature: string(),
+    files: array()
+        .test('files-and-signature', 'Files or Signature is required', function (value) {
+            const { signature } = this.parent;
+
+            if ((!value || value?.length === 0) && !signature) {
+                return this.createError({ message: 'Files or Signature is required', path: 'files' });
+            }
+
+            return true;
+        }),
+});
 
 const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
 
@@ -82,12 +97,13 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
         >
             {initialData.fields.length ? (
                 <Formik
+                    enableReinitialize={true}
                     initialValues={initialData.values}
                     onSubmit={handleSubmit}
-                    validationSchema={yupSchema(initialData.fields)}
+                    validationSchema={submitValidation}
                     validateOnMount
                 >
-                    {({ values, errors, setFieldValue, touched, submitForm }) => (
+                    {({ values, errors, setFieldValue, touched, setFieldTouched, submitForm }) => (
                         <Fragment>
                             <CustomDialogHeader
                                 onClose={() => {
@@ -171,7 +187,13 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
                                     color="primary"
                                     size="small"
                                     type="submit"
-                                    onClick={submitForm}
+                                    onClick={() => {
+                                        if (isEmpty(errors)) {
+                                            submitForm()
+                                        } else {
+                                            setFieldTouched('files', true)
+                                        }
+                                    }}
                                     endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                                 >
                                     {' '}

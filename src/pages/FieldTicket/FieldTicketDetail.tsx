@@ -26,7 +26,8 @@ import Material from './material';
 import { camelCase, set } from 'lodash';
 import Submit from './Submit';
 import { VscVersions } from 'react-icons/vsc';
-import Versions from './Versions';
+import CloseIcon from '@material-ui/icons/Close';
+import Versions from 'src/components/Versions';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const FieldTicketDetail = () => {
