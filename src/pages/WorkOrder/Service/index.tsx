@@ -801,23 +801,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               {selectedService && (
                 <>
                   {selectedService?.type === 'service' ? (
-                    allowedToEdit ||
-                      (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
-                      <Steps
-                        workOrderId={workOrderId}
-                        warehouse={workOrderData?.warehouse}
-                        selectedService={selectedService}
-                        allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
-                        setDisableCompleteFail={setDisableCompleteFail}
-                        fetchService={fetchServiceData}
-                        referencType="workOrder"
-                        stepSubmitedData={stepSubmitedData}
-                      />
-                    ) : (
-                      <Box textAlign="center">
-                        <p>No services</p>
-                      </Box>
-                    )
+                    <Steps
+                      workOrderId={workOrderId}
+                      warehouse={workOrderData?.warehouse}
+                      selectedService={selectedService}
+                      allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
+                      setDisableCompleteFail={setDisableCompleteFail}
+                      fetchService={fetchServiceData}
+                      referencType="workOrder"
+                      stepSubmitedData={stepSubmitedData}
+                    />
                   ) : (
                     <Quotation />
                   )}
