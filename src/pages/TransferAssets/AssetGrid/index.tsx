@@ -83,15 +83,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = columns.map(column => {
-          if (column.field === 'certificateAttached') {
-            return {
-              ...column,
-              cellRenderer: 'commonRenderer'
-            };
-          }
-          return column;
-        });
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
       });

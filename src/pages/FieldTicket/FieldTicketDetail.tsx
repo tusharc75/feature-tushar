@@ -28,6 +28,7 @@ import Submit from './Submit';
 import { VscVersions } from 'react-icons/vsc';
 import CloseIcon from '@material-ui/icons/Close';
 import Versions from 'src/components/Versions';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const FieldTicketDetail = () => {
 
@@ -52,9 +53,11 @@ const FieldTicketDetail = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [nextStep, setNextStep] = useState(false);
-  const [prevStep, setPrevStep] = useState(true);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [versionDialog, setVersionDialog] = useState(false);
+
+  const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+
 
   useEffect(() => {
     if (id) {
@@ -139,12 +142,12 @@ const FieldTicketDetail = () => {
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
+
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0) {
       updateProcessStatus(fieldTicketSteps[currentStep]?.name);
     }
   }, [currentStep]);
-
 
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
@@ -153,10 +156,9 @@ const FieldTicketDetail = () => {
       .catch((error) => { });
   };
 
-  const handleClosed = async () => {
-    await axiosInstance().patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, {
-      status: FIELD_TICKET_STATUS.closed,
-    }).then(({ data }) => {
+  const handleChangeStatus = async (status) => {
+    await axiosInstance().patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, { status }).then(({ data }) => {
+      setShowClosedConfirmBox(false)
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
@@ -176,14 +178,18 @@ const FieldTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {[FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status) && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+            {allowedToEdit && [FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status) && (
+              <ButtonWithPulse
+                variant={'outlined'}
+                color="default"
+                size="small"
+                onClick={() => {
+                  setShowClosedConfirmBox(true)
+                }}
                 className={'btn-outline-v1'}
-                onClick={handleClosed}
               >
-                {isMobile && !isTablet ? <CloseIcon /> : 'Close'}
-              </Button>
+                Close
+              </ButtonWithPulse>
             )}
             {fieldTicketData?.versions?.length &&
               <Button
@@ -314,6 +320,18 @@ const FieldTicketDetail = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showClosedConfirmBox && (
+        <ConfirmationDialog
+          open={showClosedConfirmBox}
+          message={`Are you sure you want to close ${fieldTicketData?.fieldTicketNumber} ?`}
+          onClose={() => {
+            setShowClosedConfirmBox(false);
+          }}
+          onOk={() => {
+            handleChangeStatus(FIELD_TICKET_STATUS.closed)
+          }}
         />
       )}
       {openUpdateDialog && (
