@@ -137,7 +137,7 @@ const SupportTicketDetail = () => {
       <Box className={'detail-container-v1'}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab index={0} value={0} {...a11yProps(0)}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            <FaWpforms className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
           <CustomTab index={1} value={1} {...a11yProps(1)}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Comment
