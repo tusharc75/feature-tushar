@@ -10,7 +10,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { invoice, invoiceProcessSteps, ACTIVITY_RESOURCE, INVOICE_STATUS } from '../../constants/helpers';
+import { invoice, invoiceProcessSteps, ACTIVITY_RESOURCE, INVOICE_STATUS, CHILD_RESOURCE, sidebarResource } from '../../constants/helpers';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
@@ -23,10 +23,11 @@ import AdditionalCost from './AdditionalCost';
 import Invoice from './Invoice';
 import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { GrStatusInfo } from 'react-icons/all';
+import { GrStatusInfo, VscVersions } from 'react-icons/all';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import Versions from 'src/components/Versions';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const InvoiceDetails = () => {
@@ -55,6 +56,7 @@ const InvoiceDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [versionDialog, setVersionDialog] = useState(false);
 
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
@@ -183,6 +185,21 @@ const InvoiceDetails = () => {
           <Box className="control-buttons-v1">
             {invoiceData ? (
               <>
+                {invoiceData?.versions?.length &&
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="primary"
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={() => {
+                      setVersionDialog(true)
+                    }}
+                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                  >
+                    {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
+                  </Button>
+                }
                 {permissions?.invoice?.isUpdate && allowedToEdit &&
                   ![INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
                     <Button
@@ -340,6 +357,20 @@ const InvoiceDetails = () => {
           onSuccess={() => {
             setOpenUpdateDialog(false);
             invoiceData();
+          }}
+        />
+      )}
+      {versionDialog && (
+        <Versions
+          id={id}
+          label={invoiceData?.invoiceNumber}
+          childResource={CHILD_RESOURCE.invoiceProduct}
+          resource={sidebarResource.invoice}
+          referenceData={invoiceData}
+          versions={invoiceData?.versions}
+          renderedFrom={`${renderedFrom}_versions`}
+          handleClose={() => {
+            setVersionDialog(false)
           }}
         />
       )}
