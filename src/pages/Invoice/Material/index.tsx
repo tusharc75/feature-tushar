@@ -27,7 +27,7 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
-const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, updateJobStatus, allowedToEdit }) => {
+const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
