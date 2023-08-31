@@ -71,7 +71,7 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
         Cell: ({ row }) => {
           return row?.original['invoice'] ? (
             permissions?.invoice?.isRead ? (
-              <a className="link text-truncate" href={`${routes.invoiceDetail.path}/${row?.original['invoiceId']}`} target="_blank">
+              <a className="link text-truncate" href={`${routes.invoiceDetail.path}/${row?.original['invoiceId']}`} target="_blank" rel="noreferrer">
                 {row?.original['invoice']}
               </a>
             ) : (
