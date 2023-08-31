@@ -14,7 +14,8 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORK_ORDER_STATUS,
   CHILD_RESOURCE,
-  MATERIAL_TYPE
+  MATERIAL_TYPE,
+  asyncForEach
 } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -654,40 +655,24 @@ const WorkOrder = ({
 
   const handleSaveData = async (rows: any) => {
     setUpdating(true);
-    const workOrderId = rows[0]?.workOrder?._id;
-    axiosInstance()
-      .put(`${repairOrder.api}/${repairOrderData._id}/work-order/${workOrderId}`, { material: rows })
-      .then(({ data }) => {
-        setUpdating(false);
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        setIsBulkEdit(false);
-        setUpdateDialog({ open: false, data: null });
+    const workOrderIds = uniq(selectedProducts?.filter((e: any) => e.type === 'service')?.map((e) => e?.workOrder?._id))
+    try {
+      await asyncForEach(workOrderIds, async (id: any) => {
+        const data: any = JSON.parse(JSON.stringify(rows?.filter((e) => e?.workOrder?._id === id)))
+        data?.forEach((e) => {
+          delete e.workOrder
+        })
+        await axiosInstance().put(`${repairOrder.api}/${repairOrderData._id}/work-order/${id}`, { material: data })
       })
-      .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const checkUniqWorkOrder = () => {
-    if (selectedProducts.length === 0) {
-      return false;
-    } else if (
-      uniq(
-        map(
-          selectedProducts?.filter((e: any) => e.type === 'service'),
-          'workOrder'
-        )
-      ).length === 1
-    ) {
-      return true;
-    } else {
-      return false;
+    } catch (error) {
+      setUpdating(false);
+      toastConfig.setToastConfig(error);
+    }
+    finally {
+      setUpdating(false);
+      fetchData();
+      setIsBulkEdit(false);
+      setUpdateDialog({ open: false, data: null });
     }
   };
 
@@ -775,7 +760,7 @@ const WorkOrder = ({
                   });
                   closeActions();
                 }}
-                disabled={selectedProducts.filter((e) => e.type === 'service').length > 0 && checkUniqWorkOrder() ? false : true}
+                disabled={selectedProducts.filter((e) => e.type === 'service').length > 0 ? false : true}
               >
                 Bulk Edit
               </MenuItem>

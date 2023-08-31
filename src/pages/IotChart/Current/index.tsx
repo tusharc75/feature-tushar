@@ -69,9 +69,6 @@ export default function Current({ assetId }) {
     setExpandedAccordition((prev) => (!prev ? name : prev === name ? false : name));
   }, []);
 
-
-  console.log(_.uniqBy(dataPointData, 'category.optionValue'))
-
   return (
     <>
       {(dataPointData && dataPointData?.length) || (errorData && errorData?.length) ? (
