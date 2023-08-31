@@ -171,7 +171,11 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
                                     color="primary"
                                     size="small"
                                     type="submit"
-                                    onClick={submitForm}
+                                    onClick={() => {
+                                        if (values?.signature || values?.files?.length) {
+                                            submitForm()
+                                        }
+                                    }}
                                     endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                                 >
                                     {' '}
