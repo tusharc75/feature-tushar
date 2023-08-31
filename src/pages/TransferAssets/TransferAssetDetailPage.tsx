@@ -231,10 +231,7 @@ const TransferAssetDetailPage = () => {
                 ...d,
                 productDescription: d?.product?.optionLabel ?? '',
                 productId: d?.product?.optionValue ?? '',
-                isChecked: false,
-                ...(d.hasOwnProperty('certificateAttached') && { 
-                  certificateAttached: d.certificateAttached ? "Yes" : "No" 
-                })
+                isChecked: false
               }))
             ];
             setExistingAssets(data);
