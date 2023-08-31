@@ -16,7 +16,7 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { fetch_field_ticket_submit_fields } from '../helper';
 import { array, object, string } from 'yup';
 
-const schema = object().shape({
+const submitValidation = object().shape({
     signature: string(),
     files: array()
         .test('files-and-signature', 'Files or Signature is required', function (value) {
@@ -100,7 +100,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
                     enableReinitialize={true}
                     initialValues={initialData.values}
                     onSubmit={handleSubmit}
-                    validationSchema={schema}
+                    validationSchema={submitValidation}
                     validateOnMount
                 >
                     {({ values, errors, setFieldValue, touched, setFieldTouched, submitForm }) => (
