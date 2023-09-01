@@ -85,9 +85,6 @@ const Comments = ({ uniqueId }) => {
 
   return (
     <Box mt={3}>
-      <Box marginLeft={3}>
-        <Typography style={{ fontSize: '20px', fontWeight: '530' }}>Activity</Typography>
-      </Box>
       <CustomDialogContent style={{ padding: '18px 24px 12px', marginTop: '3px' }}>
         {data ? (
           <div>
