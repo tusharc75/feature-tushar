@@ -95,7 +95,7 @@ const ReceivingTicket = ({
   const [showConformationConsume, setShowConformationConsume] = useState({ open: false, type: 'add' });
   const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
   const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
-  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState(false);
+  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState({ open: false, type: null });
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
@@ -975,8 +975,7 @@ const ReceivingTicket = ({
     }
   };
 
-  const handelCanceledTickets = () => {
-    let data = {};
+  const handelCancelDeliveredTicket = () => {
     const receivingTicketId = uniq(map(selectedRecords, 'receivingTicketId'));
     const returnTicketId = uniq(map(selectedRecords, 'returnTicketId'));
     const ticketIds: any = [];
@@ -991,16 +990,15 @@ const ReceivingTicket = ({
       }
     });
     if (ticketIds.length) {
+      let data = {};
       data['_ids'] = ticketIds;
-      data['status'] = DELIVERY_TICKET_STATUS.cancelled;
-
       axiosInstance()
-        .post(`${deliveryTicket.api}/cancelbulk`, data)
-        .then(({ data: { data } }) => {
+        .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
+        .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: `Receiving Successfully`
+            message: `Cancelled Successfully`
           });
           fetchRecords();
         })
@@ -1546,7 +1544,6 @@ const ReceivingTicket = ({
             >
               Replace Products
             </MenuItem> */}
-
             {selectedRecords.length &&
               selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
                 ?.length === selectedRecords?.length ? (
@@ -1562,14 +1559,25 @@ const ReceivingTicket = ({
                 <MenuItem
                   onClick={() => {
                     closeActions();
-                    setShowConformationCancleTicket(true);
+                    setShowConformationCancleTicket({ open: true, type: 'Non-Delivered' });
                   }}
                 >
-                  Cancel Receiving Ticket
+                  Cancel Receiving Ticket(s)
                 </MenuItem>
               </Fragment>
             ) : null}
-
+            {selectedRecords.length > 0 &&
+              selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered
+                && e?.status === ASSET_STATUS.underReview && e?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.complete)?.length === selectedRecords?.length
+              ?
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setShowConformationCancleTicket({ open: true, type: 'Delivered' });
+                }}
+              >
+                Cancel Receiving Ticket(s)
+              </MenuItem> : null}
             {selectedRecords?.filter(
               (f) =>
                 f.type === 'Product' &&
@@ -1590,18 +1598,6 @@ const ReceivingTicket = ({
                   {RENTAL_INTERNAL_ASSET_STATUS.consumed}
                 </MenuItem>
               )}
-            <MenuItem
-              disabled={
-                selectedRecords.length === 0 ||
-                selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered && e?.status === ASSET_STATUS.underReview && e?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.complete).length !== selectedRecords.length
-              }
-              onClick={() => {
-                handelCanceledTickets();
-                closeActions();
-              }}
-            >
-              Cancel Receiving/Return Ticket
-            </MenuItem>
             {selectedRecords.length === 1 &&
               selectedRecords?.filter(
                 (f) =>
@@ -1825,7 +1821,7 @@ const ReceivingTicket = ({
       {showRemoveAssetFromReceivingTicketDialog && (
         <ConfirmationDialog
           open={showRemoveAssetFromReceivingTicketDialog}
-          message={`Are you sure you want to revert selected records from Receiving Ticket?`}
+          message={`Are you sure you want to revert selected records from Receiving Ticket(s)?`}
           onClose={() => {
             setShowRemoveAssetFromReceivingTicketDialog(false);
           }}
@@ -2013,16 +2009,21 @@ const ReceivingTicket = ({
           okBtnLoading={okBtnLoading}
         />
       )}
-      {showConformationCancleTicket && (
+      {showConformationCancleTicket.open && (
         <ConfirmationDialog
-          open={showConformationCancleTicket}
-          message={`This action will cancel the complete Receiving Ticket. Are you sure?`}
+          open={showConformationCancleTicket.open}
+          message={`This action will cancel the complete Receiving Ticket(s). Are you sure?`}
           onClose={() => {
-            setShowConformationCancleTicket(false);
+            setShowConformationCancleTicket({ open: false, type: '' });
           }}
           onOk={() => {
-            handelCancleTickets();
-            setShowConformationCancleTicket(false);
+            if (showConformationCancleTicket.type === 'Delivered') {
+              handelCancelDeliveredTicket();
+            }
+            else {
+              handelCancleTickets();
+            }
+            setShowConformationCancleTicket({ open: false, type: '' });
           }}
           okBtnLoading={okBtnLoading}
         />
