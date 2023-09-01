@@ -48,7 +48,11 @@ export default function CommentDialog({ required = false, handleSubmit, handleCl
                     error={Boolean(error)}
                     helperText={Boolean(error) && error}
                     onChange={(e) => {
-                        setComment(e.target.value)
+                        const commentValue = e.target.value;
+                        if(commentValue.trim()!==""){
+                            setComment(e.target.value);
+                        }
+                        
                     }}
                 />
             </Box>
