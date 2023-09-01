@@ -584,6 +584,36 @@ const LoadingTicket = ({
     }
   };
 
+
+  const handelCancelTickets = () => {
+    let data = {};
+    const loadingTicketId = uniq(map(selectedRecords, 'loadingTicketId'));
+    const ticketIds: any = [];
+    loadingTicketId?.forEach((e) => {
+      if (e && e !== undefined) {
+        ticketIds.push(e);
+      }
+    });
+    if (ticketIds.length) {
+      data['_ids'] = ticketIds;
+      data['status'] = DELIVERY_TICKET_STATUS.cancelled;
+
+      axiosInstance()
+        .post(`${deliveryTicket.api}/cancelbulk`, data)
+        .then(({ data: { data } }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Receiving Successfully`
+          });
+          fetchRecords();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -934,6 +964,18 @@ const LoadingTicket = ({
                   }}
                 >
                   Delivered to Customer
+                </MenuItem>
+                <MenuItem
+                  disabled={
+                    selectedRecords.length === 0 ||
+                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && e?.status === ASSET_STATUS.inUse && e?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.inUse).length !== selectedRecords.length
+                  }
+                  onClick={() => {
+                    handelCancelTickets();
+                    closeActions();
+                  }}
+                >
+                  Cancel Loading Ticket
                 </MenuItem>
                 {user?.user?.brandPolicy?.assetDeliveredStatus && (
                   <Box>
