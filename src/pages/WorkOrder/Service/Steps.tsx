@@ -1424,9 +1424,9 @@ const Steps = ({
               variant="outlined"
               color="primary"
               size="small"
-              disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+              disabled={allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
                 selectedService?.status
-              )}
+              ) ? false : true}
               onClick={(e) => {
                 e.stopPropagation();
                 setAssignSteps(true);
