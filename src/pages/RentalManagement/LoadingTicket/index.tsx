@@ -111,7 +111,7 @@ const LoadingTicket = ({
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
-  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState(false);
+  const [showConformationCancleTicket, setShowConformationCancleTicket] = useState({ open: false, type: null });
 
   const [checkMTRValidation, setCheckMTRValidation] = useState(false);
   const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
@@ -584,6 +584,9 @@ const LoadingTicket = ({
     }
   };
 
+
+
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -709,13 +712,40 @@ const LoadingTicket = ({
     if (loadingTicketIds.length) {
       axiosInstance()
         .put(`${deliveryTicket.api}/revert`, { ids: loadingTicketIds })
-        .then(({ data: { data } }) => {
+        .then(({ data }) => {
           fetchRecords();
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: `Cancelled Successfully`
           });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
+  const handelCancelDeliveredTicket = () => {
+    const loadingTicketId = uniq(map(selectedRecords, 'loadingTicketId'));
+    const ticketIds: any = [];
+    loadingTicketId?.forEach((e) => {
+      if (e && e !== undefined) {
+        ticketIds.push(e);
+      }
+    });
+    if (ticketIds.length) {
+      let data = {};
+      data['_ids'] = ticketIds;
+      axiosInstance()
+        .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Cancelled Successfully`
+          });
+          fetchRecords();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -1041,13 +1071,26 @@ const LoadingTicket = ({
                     <MenuItem
                       onClick={() => {
                         closeActions();
-                        setShowConformationCancleTicket(true);
+                        setShowConformationCancleTicket({ open: true, type: 'Non-Delivered' });
                       }}
                     >
-                      Cancel Loading Ticket
+                      Cancel Loading Ticket(s)
                     </MenuItem>
                   </Box>
                 ) : null}
+                {(selectedRecords.length > 0 &&
+                  selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
+                    && e?.status === ASSET_STATUS.inUse && e?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.inUse).length === selectedRecords?.length)
+                  ?
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      setShowConformationCancleTicket({ open: true, type: 'Delivered' });
+                    }}
+                  >
+                    Cancel Loading Ticket(s)
+                  </MenuItem>
+                  : null}
                 {selectedRecords.length &&
                   selectedRecords?.filter(
                     (f) =>
@@ -1372,16 +1415,21 @@ const LoadingTicket = ({
           okBtnLoading={okBtnLoading}
         />
       )}
-      {showConformationCancleTicket && (
+      {showConformationCancleTicket.open && (
         <ConfirmationDialog
-          open={showConformationCancleTicket}
-          message={`This action will cancel the complete Loading Ticket. Are you sure?`}
+          open={showConformationCancleTicket.open}
+          message={`This action will cancel the complete Loading Ticket(s). Are you sure?`}
           onClose={() => {
-            setShowConformationCancleTicket(false);
+            setShowConformationCancleTicket({ open: false, type: '' });
           }}
           onOk={() => {
-            handelCancleTickets();
-            setShowConformationCancleTicket(false);
+            if (showConformationCancleTicket.type === 'Delivered') {
+              handelCancelDeliveredTicket();
+            }
+            else {
+              handelCancleTickets();
+            }
+            setShowConformationCancleTicket({ open: false, type: '' });
           }}
           okBtnLoading={okBtnLoading}
         />

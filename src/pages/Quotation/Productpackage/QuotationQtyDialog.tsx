@@ -387,8 +387,31 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                           }}
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
-                                            getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
-                                              if (price) {
+                                            if (field.fieldName === 'pricingCondition') {
+                                              setFieldValue('pricingMethod', '');
+                                              setPriceMethodList(
+                                                priceConditionListConst
+                                                  ?.filter((d) => d.conditionId === value)
+                                                  .map((d) => {
+                                                    return {
+                                                      optionLabel: d?.pricingMethod,
+                                                      optionValue: d?.pricingMethod
+                                                    };
+                                                  })
+                                              );
+                                              let priceFieldName = 'price_' + quotationData?.currency?.toLowerCase();
+                                              const result = autoCalculateSpecificFields(
+                                                { [priceFieldName]: 0, [field.fieldName]: value },
+                                                values,
+                                                initialData.fields
+                                              );
+                                              if (Object.keys(result).length >= 1) {
+                                                for (var x in result) {
+                                                  setFieldValue(x, result[x]);
+                                                }
+                                              }
+                                            } else {
+                                              getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
                                                 let priceFieldName = 'price_' + quotationData?.currency?.toLowerCase();
                                                 const result = autoCalculateSpecificFields(
                                                   { [priceFieldName]: price, [field.fieldName]: value },
@@ -400,23 +423,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                                     setFieldValue(x, result[x]);
                                                   }
                                                 }
-                                              } else {
-                                                const result = handleAutoCalculation(
-                                                  field,
-                                                  initialData.fields,
-                                                  values,
-                                                  field.fieldName,
-                                                  '',
-                                                  '',
-                                                  value
-                                                );
-                                                if (Object.keys(result).length >= 1) {
-                                                  for (var x in result) {
-                                                    setFieldValue(x, result[x]);
-                                                  }
-                                                }
-                                              }
-                                            });
+                                              });
+                                            }
                                           }}
                                           required={field.required}
                                           fullWidth

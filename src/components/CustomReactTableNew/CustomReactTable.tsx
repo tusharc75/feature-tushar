@@ -16,7 +16,7 @@ import { Check } from '@material-ui/icons';
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { columnFilter } from './ReactTableHelpers';
 import { gridPageSizes } from '../../constants/helpers';
-import { isString, uniqBy } from 'lodash';
+import { isString, uniqBy, debounce } from 'lodash';
 import {
   useTable,
   useExpanded,
@@ -69,6 +69,94 @@ const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, style, ..
     />
   );
 });
+
+/*
+Understanding How Filter Works:
+Firstly on each render filters in table is synced with customFilters(globalState)
+Now when user types something we capture the id of that column and do the setFilters in TempFilter component
+=> Whenever filters gets updated we use dispatch for updating globalFilters which makes new request to backend
+Data rows gets updated and filters gets updated from custom Filters again on re-render
+
+Purpose for removing filters from useTable :
+It filters the data again that comes from backend and client side filtering needs to be avoided
+*/
+
+function TempFilter({
+  filterValue,
+  id,
+  setFilters,
+  customFilters
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = React.useRef(null);
+  const inputRef = React.useRef(null);
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ref]);
+
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
+
+  const handleFilterChange = (newValue) => {
+    let tempArr = Object.keys(customFilters).map((key, i) => {
+      return { id: key, value: customFilters[key].filter };
+    });
+    const existingFilterIndex = tempArr.findIndex((filter) => filter.id === id);
+
+    if (existingFilterIndex !== -1) {
+      // Update existing filter
+      const updatedFilters = tempArr.map((filter, index) =>
+        index === existingFilterIndex ? { ...filter, value: newValue } : filter
+      );
+      setFilters(updatedFilters);
+    } else {
+      // Add new filter
+      const newFilter = { id, value: newValue };
+      setFilters([...tempArr, newFilter]);
+    }
+  }
+
+
+  return (
+    <div>
+      <IconButton onClick={() => setIsOpen(true)} size="small" className={`${filterValue ? 'activeFilter' : ''}`}>
+        <CgSearch />
+      </IconButton>
+
+      <div className={`tableFilterSearch ${isOpen ? 'open' : ''}`} ref={ref}>
+        <input
+          value={filterValue || ''}
+          onChange={(e) => handleFilterChange(e.target.value)}
+          autoComplete="off"
+          placeholder="Search..."
+          type="text"
+          id="search"
+          aria-hidden={!isOpen}
+          ref={inputRef}
+        />
+
+        <GrFormClose
+          onClick={() => {
+            handleFilterChange('');
+            setIsOpen(false);
+          }}
+        />
+      </div>
+    </div>
+  );
+}
 
 
 function DefaultColumnFilter({
@@ -320,9 +408,17 @@ function CustomReactTable({
     }),
     []
   );
-
   const updateData = () => { };
 
+  const returnHiddenCols = () => {
+    const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
+
+    let hiddenCols = []
+    if (storedColumns) {
+      hiddenCols = storedColumns.filter((f) => f.isVisible === false).map((m) => m.id)
+    }
+    return hiddenCols;
+  }
   const {
     getTableProps,
     rows,
@@ -357,15 +453,15 @@ function CustomReactTable({
       filterTypes,
       initialState: {
         columnOrder: newColumns.map((col) => col?.id || col?.accessor),
-        filters: Object.keys(customFilters).map((key, i) => {
-          return { id: key, value: customFilters[key].filter };
-        }),
+        // filters: Object.keys(customFilters).map((key, i) => {
+        //   return { id: key, value: customFilters[key].filter };
+        // }),
         sortBy: sorting.map((d) => {
           return { id: d.colId, desc: d.sort === 'asc' ? false : true };
         }),
         pageIndex: currentPage,
         autoResetExpanded: false,
-        hiddenColumns: hideSelection ? ['selection', 'action'] : [],
+        hiddenColumns: hideSelection ? ['selection', 'action'] : returnHiddenCols(),
         selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`)
           ? Object.assign(
             {},
@@ -431,22 +527,22 @@ function CustomReactTable({
     }
   }, []);
 
-  useEffect(() => {
-    if (!isClientSideGrid) {
-      let tempArray = Object.keys(customFilters).map((key, i) => {
-        return { id: key, value: customFilters[key].filter };
-      });
-      if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
-        var tempResult = {};
-        filters?.forEach((v) => {
-          if (v.value && v.value !== '') {
-            tempResult[v.id] = { filter: v.value };
-          }
-        });
-        dispatch({ type: 'filter', filters: tempResult });
-      }
-    }
-  }, [filters]);
+  // useEffect(() => {
+  //   if (!isClientSideGrid) {
+  //     let tempArray = Object.keys(customFilters).map((key, i) => {
+  //       return { id: key, value: customFilters[key].filter };
+  //     });
+  //     if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
+  //       var tempResult = {};
+  //       filters?.forEach((v) => {
+  //         if (v.value && v.value !== '') {
+  //           tempResult[v.id] = { filter: v.value };
+  //         }
+  //       });
+  //       dispatch({ type: 'filter', filters: tempResult });
+  //     }
+  //   }
+  // }, [filters]);
 
   useEffect(() => {
     if (!isClientSideGrid) {
@@ -543,7 +639,6 @@ function CustomReactTable({
     if (!allColumns || !Array.isArray(allColumns)) {
       return; // Exit early if conditions are not met
     }
-
     const timeout = setTimeout(() => {
       const newColumnState = allColumns.map((column) => {
         const object = {};
@@ -554,10 +649,8 @@ function CustomReactTable({
         });
         return object;
       });
-
       localStorage.setItem(renderedFrom, JSON.stringify(newColumnState));
     }, 500);
-
     return () => clearTimeout(timeout);
   }, [allColumns]);
 
@@ -598,6 +691,7 @@ function CustomReactTable({
             buttons={
               <>
                 <ArrangeViewButton
+                  defaultColumns = {allColumns}
                   loading={loading}
                   columns={baseColumns}
                   renderedFrom={renderedFrom}
@@ -605,6 +699,7 @@ function CustomReactTable({
                   setHiddenColumns={setHiddenColumns}
                   getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
                   setColumnOrder={setColumnOrder}
+                  refColsOrder = {newColumns}
                 />
               </>
             }
@@ -663,7 +758,7 @@ function CustomReactTable({
                     <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
                       {headerGroup.headers.map((column, index) => (
                         <>
-                          <DraggableHeader key={column.id} column={column} reorder={reorder} index={index} />
+                          <DraggableHeader key={column.id} column={column} reorder={reorder} index={index} customFilters={customFilters} dispatch={dispatch} isClientSideGrid={isClientSideGrid} />
                         </>
                       ))}
                     </TableRow>
@@ -789,9 +884,31 @@ const ItemTypes = {
   COLUMN: 'COLUMN'
 };
 
-const DraggableHeader = ({ column, index, reorder }: { column: any; index: number; reorder: (item: any, index: number) => void }) => {
+interface DraggableHeaderProps {
+  column: any;
+  index: number;
+  reorder: (item: any, index: number) => void;
+  customFilters: any;
+  dispatch: (action: any) => void; 
+  isClientSideGrid: boolean; 
+}
+
+const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorder, customFilters, dispatch, isClientSideGrid }) => {
   const ref = React.useRef();
   const { id, Header } = column;
+  const [filters, setFilters] = useState(() => {
+    if (Object.keys(customFilters).length === 0) {
+      return [];
+    } else {
+      return Object.keys(customFilters).map((key, i) => {
+        return { id: key, value: customFilters[key].filter };
+      });
+    }
+  });  
+
+  const debouncedFilterDispatch = debounce((updatedCustomFilters) => {
+    dispatch({ type: 'filter', filters: updatedCustomFilters });
+  }, 600);
 
   const [, drop] = useDrop({
     accept: ItemTypes.COLUMN,
@@ -813,8 +930,27 @@ const DraggableHeader = ({ column, index, reorder }: { column: any; index: numbe
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
     }),
-    canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action' || column?.id !== 'expand'
+    canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action' || column?.id !== 'expand',
+
   });
+
+  useEffect(() => {
+    if (!isClientSideGrid) {
+      let tempArray = Object.keys(customFilters).map((key, i) => {
+        return { id: key, value: customFilters[key].filter };
+      });
+      if ((JSON.stringify(filters) !== JSON.stringify(tempArray))) {
+
+        var tempResult = {};
+        filters?.forEach((v) => {
+          if (v.value && v.value !== '') {
+            tempResult[v.id] = { filter: v.value };
+          }
+        });
+        debouncedFilterDispatch(tempResult)
+      }
+    }
+  }, [filters])
 
   drag(drop(ref));
 
@@ -832,7 +968,17 @@ const DraggableHeader = ({ column, index, reorder }: { column: any; index: numbe
           <span>{column.render('Header')}</span>
           {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
         </div>
-        <div>{column.canFilter ? column.render('Filter') : null}</div>
+        <div>
+          {column.canFilter ? (
+            <TempFilter
+              filterValue={filters.find(filter => filter.id === column.id)?.value || ''}
+              id={column?.id}
+              setFilters={setFilters}
+              customFilters={customFilters}
+            />
+          ) : null}
+        </div>
+        {/* <div>{column.canFilter ? column.render('Filter') : null}</div> */}
       </div>
       <div {...column.getResizerProps()} className="resizer" />
     </TableCell>
