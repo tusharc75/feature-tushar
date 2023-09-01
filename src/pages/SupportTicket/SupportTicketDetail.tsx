@@ -5,19 +5,24 @@ import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Skeleton } from '@material-ui/lab';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { useData } from 'src/StateProvider/Provider';
 import { useParams, useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
+import queryString from 'query-string';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageSupportTicket from './ManageSupportTicket';
 import Comments from './Comments';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { FaWpforms } from 'react-icons/fa';
 const SupportTicketDetail = () => {
   const { id } = useParams();
   const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { tab }: any = parsed;
   const toastConfig = useContext(CustomToastContext);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.supportTicket]);
   const [supportTicketData, setSupportTicketData] = useState(null);
@@ -27,6 +32,7 @@ const SupportTicketDetail = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const {
     state: { permissions, user }
   }: any = useData();
@@ -88,6 +94,21 @@ const SupportTicketDetail = () => {
     }
   };
 
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+    history.push(`?tab=${newValue}`);
+    if (newValue === 0) {
+      fetchData();
+    }
+  };
+
+  function a11yProps(index: any) {
+    return {
+      id: `main-tab-${index}`,
+      'aria-controls': `main-tabpanel-${index}`
+    };
+  }
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -114,18 +135,30 @@ const SupportTicketDetail = () => {
         </Box>
       </Box>
       <Box className={'detail-container-v1'}>
-        <Box>
-          {loading || !fields?.length ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
-          ) : (
-            <>
-              <DetailsPage data={supportTicketData} fields={fields} />
-              <Comments uniqueId={id} />
-            </>
-          )}
-        </Box>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab index={0} value={0} {...a11yProps(0)}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+          <CustomTab index={1} value={1} {...a11yProps(1)}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Comment
+          </CustomTab>
+        </CustomTabs>
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {loading || !fields?.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <>
+                <DetailsPage data={supportTicketData} fields={fields} />
+              </>
+            )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          {supportTicketData && <Comments uniqueId={id} />}
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

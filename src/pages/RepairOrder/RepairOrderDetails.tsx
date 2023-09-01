@@ -39,6 +39,7 @@ import WorkOrder from './WorkOrder';
 import LoadingTicket from './LoadingTicket';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import EditIcon from '@material-ui/icons/Edit';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 function a11yProps(index: any) {
   return {
@@ -76,9 +77,6 @@ const RepairOrderDetails = () => {
   const [showQuotationConfirmBox, setShowQuotationConfirmBox] = useState(false);
   const [quoteClonning, setQuoteClonning] = useState(false);
   const [isAnyMaterial, setisAnyMaterial] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [statusOptions, setStatusOptions] = useState([]);
-  const [enableStatusChange, setEnableStatusChange] = useState(false);
 
   const [stepList, setStepList] = useState(repairOrderSteps);
   const [stepNames, setStepNames] = useState(repairOrderSteps.map((item) => item.name));
@@ -126,12 +124,6 @@ const RepairOrderDetails = () => {
       .get(`/field?resource=${sidebarResource.repairOrder}`)
       .then(({ data: { data } }) => {
         setRepairOrderFields(data);
-        data.some((o) => {
-          if (o?.fieldData?.fieldName === 'status') {
-            setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue !== 'Deleted')]);
-            return true;
-          }
-        });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -175,27 +167,6 @@ const RepairOrderDetails = () => {
         }
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setRepairOrderData({ ...data });
-        if ((data?.type === REPAIR_ORDER_TYPE.internal || !data?.addQuotationStep) && data?.status !== REPAIR_ORDER_STATUS.completed) {
-          checkStatusChange();
-        } else {
-          setEnableStatusChange(false);
-        }
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
-  const checkStatusChange = () => {
-    axiosInstance()
-      .get(`${repairOrder.api}/${id}/work-order/service`)
-      .then(({ data: { data } }) => {
-        if (data?.material?.length) {
-          const material = data?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset);
-          if (material?.filter((e) => e?.workOrder?.status === WORKORDER_SERVICE_STATUS.completed)?.length === material?.length) {
-            setEnableStatusChange(true);
-          }
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -259,12 +230,6 @@ const RepairOrderDetails = () => {
       });
   };
 
-  const handleStatusChange = (o) => {
-    if (o.optionValue && repairOrderData?.status !== o.optionValue) {
-      updateOrderStatus(o.optionValue);
-    }
-  };
-
   const updateOrderStatus = (status) => {
     axiosInstance()
       .patch(`${repairOrder.api}/status/${repairOrderData._id}`, { status: status })
@@ -281,14 +246,6 @@ const RepairOrderDetails = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -299,69 +256,18 @@ const RepairOrderDetails = () => {
           <Box className="control-buttons-v1 ">
             {repairOrderData ? (
               <>
-                {permissions?.repairOrder?.isUpdate &&
-                  allowedToEdit &&
-                  (enableStatusChange || [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced].includes(repairOrderData?.status)) && (
-                    <Fragment>
-                      <div className="relative isolate">
-                        <span className="animate-ripple bg-white dark-bg-[var(--dark-primary)] rounded-[3px]">
-                          <span></span>
-                          <span></span>
-                        </span>
-                        <Button
-                          variant={'contained'}
-                          size="small"
-                          onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
-                          className={'btn-outline-v1'}
-                        >
-                          Complete
-                        </Button>
-                      </div>
-                      {/* <Button
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                      >
-                        {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        {statusOptions?.map((o, index) => {
-                          return (
-                            <MenuItem
-                              disabled={
-                                [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.completed]?.includes(
-                                  o?.optionLabel
-                                )
-                                  ? index <= statusOptions.findIndex((d) => d.optionLabel === repairOrderData?.status)
-                                  : true
-                              }
-                              onClick={() => {
-                                closeActions();
-                                handleStatusChange(o);
-                              }}
-                              value={o}
-                            >
-                              {o?.optionLabel}
-                            </MenuItem>
-                          );
-                        })}
-                      </Menu> */}
-                    </Fragment>
-                  )}
+                {permissions?.repairOrder?.isUpdate && allowedToEdit && repairOrderData?.canComplete && (
+                  <ButtonWithPulse
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
+
+                    className={'btn-outline-v1'}
+                  >
+                    Complete
+                  </ButtonWithPulse>
+                )}
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
                   ['Add Assets', 'Work Order'].includes(stepNames[currentStep]) &&
