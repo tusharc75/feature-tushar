@@ -109,6 +109,7 @@ const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null
           });
         })
         .catch((error) => {
+          toastConfig.setToastConfig(error);
           setLoading(false);
           setSubmitting(false);
         });
