@@ -53,6 +53,8 @@ interface ArrangeColumnsProps {
   setHiddenColumns?: any;
   getToggleHideAllColumnsProps?: any;
   setColumnOrder?: any;
+  defaultColumns : any[];
+  refColsOrder : any[];
 }
 
 const ItemTypes = {
@@ -85,7 +87,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     saveColumnOptions,
     setHiddenColumns,
     getToggleHideAllColumnsProps,
-    setColumnOrder
+    setColumnOrder,
+    defaultColumns,
+    refColsOrder
   } = props;
 
   const classes = useStyles();
@@ -130,10 +134,11 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         let latestColumns = [...JSON.parse(storedColumns)];
 
         setSortedColumns(latestColumns);
-
         if (latestColumns.filter((f) => f.sticky === undefined).some((s) => s.isVisible === false)) {
           setAllChecked(false);
         }
+        setOldData(JSON.stringify(latestColumns));
+        setNewData(JSON.stringify(latestColumns));
       } else {
         setSortedColumns([...columns]);
       }
@@ -146,6 +151,17 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     // setOldData(JSON.stringify([...columns]));
     // setNewData(JSON.stringify([...columns]));
   }, [columns]);
+
+  useEffect(()=>{
+    if (oldData === newData) {
+      setHasChanged(false);
+    } else {
+      setHasChanged(true);
+    }
+    const allShow = sortedColumns.filter((f) => f.sticky === undefined).some((s) => s.isVisible === false)
+    setAllChecked(!allShow)
+
+  }, [oldData, newData,sortedColumns])
 
   // React.useEffect(() => {
   //   if (oldData === newData) {
@@ -164,7 +180,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     newColumns[getFieldIndex].isVisible = event.target.checked;
 
     setSortedColumns(newColumns);
-    // setNewData(JSON.stringify(newColumns));
+    setNewData(JSON.stringify(newColumns));
   };
 
   const handleToggleAll = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,13 +190,27 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         e.isVisible = event.target.checked;
       }
     });
+    setNewData(JSON.stringify(newColumns));
     // setSortedColumns(newColumns);
     setAllChecked(event.target.checked);
 
-    // setHiddenColumns(event.target.checked ? [] : [...newColumns.map(m => m.id)])
-
-    // setNewData(JSON.stringify(newColumns));
   };
+
+  const handleReset = ()=>{
+    delete localStorage[renderedFrom]
+
+    const freshColumns = [...defaultColumns]
+
+    freshColumns?.forEach((e: any) => {
+      if (!e.disabled) {
+        e.isVisible = true;
+      }
+    });
+    setSortedColumns(freshColumns)
+    setHiddenColumns([])
+    setColumnOrder(refColsOrder?.map((col) => col?.id || col?.accessor))
+    onClose();
+  }
 
   const handleSaveChange = () => {
     // const newColumns = [...sortedColumns];
@@ -256,8 +286,8 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
           [hoverIndex, 0, dragCard]
         ]
       });
-
       setSortedColumns([...columnsForGrid]);
+      setNewData(JSON.stringify(columnsForGrid));
     },
     [sortedColumns]
   );
@@ -385,7 +415,10 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         <Button variant="outlined" color="primary" onClick={onClose}>
           Close
         </Button>
-        <Button variant="contained" color="primary" disableElevation onClick={handleSaveChange}>
+        <Button variant="outlined" color="primary" onClick={handleReset}>
+          Reset
+        </Button>
+        <Button variant="contained" color="primary" disableElevation disabled={!hasChanged} onClick={handleSaveChange}>
           Save changes
         </Button>
       </CustomDialogFooter>
@@ -487,6 +520,7 @@ const RenderListItem = (props: ItemProps) => {
         <ListItemSecondaryAction>
           <Switch
             size="small"
+            disabled = {column.disabled}
             checked={column.isVisible}
             onChange={(e) => {
               handleToggle(column, e);

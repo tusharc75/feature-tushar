@@ -501,6 +501,7 @@ function CustomReactTable({
     useSticky,
     useRowState
   );
+
   //this would be used to sync column order as set in local storage on first render
   useEffect(() => {
     //  Suggested by aman - 16-Nov-2021 - PO-174
@@ -638,7 +639,6 @@ function CustomReactTable({
     if (!allColumns || !Array.isArray(allColumns)) {
       return; // Exit early if conditions are not met
     }
-
     const timeout = setTimeout(() => {
       const newColumnState = allColumns.map((column) => {
         const object = {};
@@ -691,6 +691,7 @@ function CustomReactTable({
             buttons={
               <>
                 <ArrangeViewButton
+                  defaultColumns = {allColumns}
                   loading={loading}
                   columns={baseColumns}
                   renderedFrom={renderedFrom}
@@ -698,6 +699,7 @@ function CustomReactTable({
                   setHiddenColumns={setHiddenColumns}
                   getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
                   setColumnOrder={setColumnOrder}
+                  refColsOrder = {newColumns}
                 />
               </>
             }
