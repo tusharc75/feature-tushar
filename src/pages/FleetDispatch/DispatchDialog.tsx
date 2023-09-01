@@ -186,7 +186,7 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
                             rows={3}
                             margin="dense"
                             value={comment}
-                            onChange={(e: any) => setComment(e.target.value?.trim())}
+                            onChange={(e: any) => setComment(e.target.value)}
                         />
                     </Grid>
                 </Grid>

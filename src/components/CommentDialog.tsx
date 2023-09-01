@@ -48,7 +48,7 @@ export default function CommentDialog({ required = false, handleSubmit, handleCl
                     error={Boolean(error)}
                     helperText={Boolean(error) && error}
                     onChange={(e) => {
-                        setComment(e.target.value?.trim())
+                        setComment(e.target.value)
                     }}
                 />
             </Box>
