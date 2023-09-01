@@ -388,6 +388,7 @@ const Quotation = () => {
               columns={columns}
               dispatch={dispatch}
               filters={filters}
+              resource={sidebarResource.quotation}
             >
               {accountDetails.accountId && (
                 <Chip

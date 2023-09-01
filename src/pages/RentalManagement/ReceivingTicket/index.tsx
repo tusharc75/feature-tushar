@@ -975,6 +975,41 @@ const ReceivingTicket = ({
     }
   };
 
+  const handelCanceledTickets = () => {
+    let data = {};
+    const receivingTicketId = uniq(map(selectedRecords, 'receivingTicketId'));
+    const returnTicketId = uniq(map(selectedRecords, 'returnTicketId'));
+    const ticketIds: any = [];
+    receivingTicketId?.forEach((e) => {
+      if (e && e !== undefined) {
+        ticketIds.push(e);
+      }
+    });
+    returnTicketId?.forEach((e) => {
+      if (e && e !== undefined) {
+        ticketIds.push(e);
+      }
+    });
+    if (ticketIds.length) {
+      data['_ids'] = ticketIds;
+      data['status'] = DELIVERY_TICKET_STATUS.cancelled;
+
+      axiosInstance()
+        .post(`${deliveryTicket.api}/cancelbulk`, data)
+        .then(({ data: { data } }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Receiving Successfully`
+          });
+          fetchRecords();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
   const handleConsumProduct = (data) => {
     const products = [];
     if (data) {
@@ -1555,6 +1590,18 @@ const ReceivingTicket = ({
                   {RENTAL_INTERNAL_ASSET_STATUS.consumed}
                 </MenuItem>
               )}
+            <MenuItem
+              disabled={
+                selectedRecords.length === 0 ||
+                selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered && e?.status === ASSET_STATUS.underReview && e?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.complete).length !== selectedRecords.length
+              }
+              onClick={() => {
+                handelCanceledTickets();
+                closeActions();
+              }}
+            >
+              Cancel Receiving/Return Ticket
+            </MenuItem>
             {selectedRecords.length === 1 &&
               selectedRecords?.filter(
                 (f) =>
