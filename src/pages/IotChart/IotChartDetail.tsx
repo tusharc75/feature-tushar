@@ -31,13 +31,8 @@ const IotChartDetail = () => {
 
     const fetchData = async () => {
         try {
-            const {
-                data: { data }
-            } = await axiosInstance().get(`${serializedAsset.api}/${assetId}`);
-            setCustomizedRoutes([
-                routes.iotChart,
-                { title: `${data?.assetNumber ?? ''}` }
-            ]);
+            const { data: { data } } = await axiosInstance().get(`${serializedAsset.api}/${assetId}`);
+            setCustomizedRoutes([routes.iotChart, { title: `${data?.assetNumber ?? ''}` }]);
         } catch (error) {
             toastConfig.setToastConfig(error);
         }

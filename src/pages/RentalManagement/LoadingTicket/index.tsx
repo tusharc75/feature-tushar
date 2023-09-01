@@ -827,7 +827,11 @@ const LoadingTicket = ({
               color="primary"
               aria-controls="simple-menu"
               aria-haspopup="true"
-              disabled={!allowUpdateStatus || selectedRecords.length === 0 || selectedRecords?.some((f) => f.type === 'Product') || isOffline}
+              disabled={!allowUpdateStatus
+                || selectedRecords.length === 0
+                || selectedRecords?.some((f) => f.type === 'Product')
+                || isOffline
+                || selectedRecords?.some((f) => [ASSET_STATUS.lost].includes(f.status))}
               size="small"
               onClick={handleClick}
               endIcon={<ArrowDropDownIcon />}

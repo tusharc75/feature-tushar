@@ -192,15 +192,18 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
   };
 
   const handleCancelInvoice = async (data) => {
-    axiosInstance().patch(`${routes?.fieldTicketInvoice.path}/status`, {
-      status: INVOICE_STATUS.cancelled,
+    axiosInstance().patch(`${routes?.fieldTicketInvoice.path}/invoice/cancle`, {
       invoice: invoiceData?._id,
       fieldTicket: invoiceData?.id,
-      message: data,
+      comment: data,
     })
       .then(({ data }) => {
         onSuccess();
-        toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

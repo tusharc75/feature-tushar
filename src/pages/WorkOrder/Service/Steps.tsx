@@ -317,12 +317,20 @@ const Steps = ({
       });
     } else {
       serviceDetail.steps?.forEach((ele) => {
-        ele.isAllowToPerform = true;
-        ele.isAllowToCheck = stepSubmitedData?.find(
-          (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === ele?._id
-        )
+        if (ele?.assignedUsers?.length) {
+          if (ele?.assignedUsers?.map((e) => e.optionValue)?.includes(user?._id)) {
+            ele.isAllowToPerform = true;
+          }
+          else {
+            ele.isAllowToPerform = false;
+          }
+        }
+        else {
+          ele.isAllowToPerform = true;
+        }
+        ele.isAllowToCheck = stepSubmitedData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === ele?._id)
           ? false
-          : true;
+          : ele.isAllowToPerform;
       });
     }
 
@@ -767,9 +775,9 @@ const Steps = ({
                 variant="outlined"
                 color="primary"
                 size="small"
-                disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                disabled={allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
                   selectedService?.status
-                )}
+                ) ? false : true}
                 onClick={(e) => {
                   e.stopPropagation();
                   setAssignSteps(true);
@@ -784,9 +792,9 @@ const Steps = ({
                 variant="outlined"
                 color="primary"
                 size="small"
-                disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                disabled={allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
                   selectedService?.status
-                )}
+                ) ? false : true}
                 onClick={() => setArrangeView(true)}
               >
                 <DragIndicatorIcon className="mr-1" fontSize="small" />
@@ -1416,9 +1424,9 @@ const Steps = ({
               variant="outlined"
               color="primary"
               size="small"
-              disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+              disabled={allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
                 selectedService?.status
-              )}
+              ) ? false : true}
               onClick={(e) => {
                 e.stopPropagation();
                 setAssignSteps(true);
