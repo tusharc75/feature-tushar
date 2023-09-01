@@ -348,7 +348,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${quotationData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp, pricingCondition: rateResult[0].conditionId }, element, allFields);
         Object.assign(element, calValues);
       }
     });
