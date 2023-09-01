@@ -285,8 +285,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
               : '';
       parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
-      parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
-      parent.pricingCondition = parent.pricingCondition?.optionValue;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
@@ -416,7 +414,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       delete element.detail;
       delete element.serializedProduct;
       delete element.qtyDisplay;
-      delete element.pricingConditionDisplay;
       delete element.isValid;
       delete element.hideSelection;
       delete element.assetQty;

@@ -428,7 +428,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       delete element.detail;
       delete element.serializedProduct;
       delete element.qtyDisplay;
-      delete element.pricingConditionDisplay;
       delete element.isValid;
       delete element.hideSelection;
       delete element.assetQty;
