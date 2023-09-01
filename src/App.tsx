@@ -231,6 +231,8 @@ import IotChart from './pages/IotChart';
 import IotChartDetail from './pages/IotChart/IotChartDetail';
 import IotReportList from './pages/IotReport';
 import IotReport from './pages/IotReport/Report';
+import DeviceTemplates from './pages/DeviceTemplates';
+import DeviceTemplatesDetails from './pages/DeviceTemplates/DeviceTemplatesDetails';
 
 var notificationInterval: any = null;
 
@@ -285,7 +287,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -1018,6 +1020,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.iotReport.path}/:resource`}>
               <IotReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.deviceTemplates.path}`}>
+              <DeviceTemplates />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.deviceTemplatesDetail.path}/:id`}>
+              <DeviceTemplatesDetails />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
