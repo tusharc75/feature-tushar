@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Box, Checkbox, FormControlLabel, FormGroup, Collapse, IconButton } from '@material-ui/core';
 import moment from 'moment';
 import FilterModel from '../Helper/FilterModel';
@@ -16,23 +16,97 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
   const [selectedDataPoint, setSelectedDataPoint] = useState({});
 
   const [open, setOpen] = useState<string | false>(false);
+  const [openChild, setOpenChild] = useState<string | false>(false);
 
   const handleChange = useCallback((name: string) => {
     setOpen((prev) => (!prev ? name : prev === name ? false : name));
   }, []);
 
+  const handleChangeChild = useCallback((name: string) => {
+    setOpenChild((prev) => (!prev ? name : prev === name ? false : name));
+  }, []);
+
   const compareCollapse = useCallback(
-    (name: string) => {
-      return open === name;
+    (name: string, type: string) => {
+      if (type === 'parentCategory')
+        return open === name;
+      else if (type === 'category')
+        return openChild === name;
     },
-    [open]
+    [open, openChild]
   );
 
-  // const RecursiveTreeView = ({ node }) => (
-  //   <TreeItem key={node?.category} nodeId={node?.category?.toString()} label={node?.category}>
-  //     {Array.isArray(node.children) ? node.children.map((childNode) => <RecursiveTreeView key={childNode.id} node={childNode} />) : null}
-  //   </TreeItem>
-  // );
+  const TreeView = ({ data, type, allData = [] }) => {
+    return (
+      <>
+        <div
+          className={`flex flex-wrap justify-between items-center cursor-pointer py-2 px-1 rounded-md `}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleChange(`${data[type]?.optionValue}`);
+          }}
+        >
+          <h6 className=" line-clamp-1 text-sm">{data[type]?.optionLabel}</h6>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (type === 'parentCategory')
+                handleChange(`${data[type]?.optionValue}`);
+              else if (type === 'category')
+                handleChangeChild(`${data[type]?.optionValue}`);
+            }}
+          >
+            {compareCollapse(`${data[type]?.optionValue}`, type) ? (
+              <ExpandLess style={{ color: 'currentcolor' }} />
+            ) : (
+              <ExpandMore style={{ color: 'currentcolor' }} />
+            )}
+          </IconButton>
+        </div>
+        <Collapse in={compareCollapse(`${data[type]?.optionValue}`, type)} unmountOnExit>
+          <div className="px-1">
+            {
+              type === 'parentCategory' ? (
+                uniqBy(allData?.filter(d => d['category']?.parentCategory === open), 'category.optionValue')?.map((data => {
+                  return (
+                    <TreeView
+                      data={data}
+                      type={'category'}
+                      allData={allData?.filter(d => d['category']?.optionValue === openChild)}
+                    />
+                  )
+                }))
+              )
+                :
+                type === 'category' ? (
+                  allData?.filter((d) => d[type]?.optionValue === data[type]?.optionValue)?.map((dataPoint) => {
+                    return (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            onChange={(e) => {
+                              setSelectedDataPoint({ ...selectedDataPoint, [dataPoint?.fieldName]: e.target.checked });
+                            }}
+                            checked={selectedDataPoint[dataPoint?.fieldName]}
+                            inputProps={{
+                              'aria-labelledby': `checkbox-list-label-select-all`
+                            }}
+                          />
+                        }
+                        label={dataPoint?.fieldLabel}
+                      />
+                    )
+                  })
+                )
+                  :
+                  null
+            }
+          </div>
+        </Collapse>
+      </>
+    )
+  }
 
   return (
     <>
@@ -45,57 +119,32 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
             </p>
             <div className="sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
               <FormGroup>
-                {Array.isArray(dataPoints) &&
-                  uniqBy(dataPoints, 'category.optionValue')?.map((d: any, i) => {
-                    return (
-                      <>
-                        <div
-                          className={`flex flex-wrap justify-between items-center cursor-pointer py-2 px-1 rounded-md `}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleChange(`${d?.category?.optionValue}`);
-                          }}
-                        >
-                          <h6 className=" line-clamp-1 text-sm">{d?.category?.optionLabel}</h6>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleChange(`${d?.category?.optionValue}`);
-                            }}
-                          >
-                            {compareCollapse(`${d?.category?.optionValue}`) ? (
-                              <ExpandLess style={{ color: 'currentcolor' }} />
-                            ) : (
-                              <ExpandMore style={{ color: 'currentcolor' }} />
-                            )}
-                          </IconButton>
-                        </div>
-                        <Collapse in={compareCollapse(`${d?.category?.optionValue}`)} unmountOnExit>
-                          <div className="px-1">
-                            {dataPoints?.filter((data) => data?.category?.optionValue === d?.category?.optionValue)?.map((dataPoint) => {
-                              return (
-                                <FormControlLabel
-                                  control={
-                                    <Checkbox
-                                      onChange={(e) => {
-                                        setSelectedDataPoint({ ...selectedDataPoint, [dataPoint?.fieldName]: e.target.checked });
-                                      }}
-                                      checked={selectedDataPoint[dataPoint?.fieldName]}
-                                      inputProps={{
-                                        'aria-labelledby': `checkbox-list-label-select-all`
-                                      }}
-                                    />
-                                  }
-                                  label={dataPoint?.fieldLabel}
-                                />
-                              );
-                            })}
-                          </div>
-                        </Collapse>
-                      </>
-                    );
-                  })}
+                {Array.isArray(dataPoints) && (
+                  <>
+                    {
+                      uniqBy(dataPoints.filter(d => d?.hasOwnProperty('parentCategory')), 'parentCategory.optionValue')?.map((category: any) => {
+                        return (
+                          <TreeView
+                            data={category}
+                            type={'parentCategory'}
+                            allData={dataPoints.filter(d => d?.hasOwnProperty('parentCategory'))}
+                          />
+                        )
+                      })
+                    }
+                    {
+                      uniqBy(dataPoints.filter(d => !d?.hasOwnProperty('parentCategory')), 'category.optionValue')?.map((category: any) => {
+                        return (
+                          <TreeView
+                            data={category}
+                            type={'category'}
+                            allData={dataPoints.filter(d => !d?.hasOwnProperty('parentCategory'))}
+                          />
+                        )
+                      })
+                    }
+                  </>
+                )}
               </FormGroup>
             </div>
           </div>

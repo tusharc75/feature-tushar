@@ -1,21 +1,18 @@
-import { Box, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
+import { Box, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
 import _, { startCase } from 'lodash';
-
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-
 import moment from 'moment';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { dateTimeFormat } from 'src/constants/helpers';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import CustomAccordian from '../Accordian';
 
 export default function Current({ assetId }) {
   const toastConfig = useContext(CustomToastContext);
 
-  const [dataPointData, setDataPointData] = useState(null);
+  const [category, setCategory] = useState(null);
+  const [parentCategory, setParentCategory] = useState(null);
   const [errorData, setErrorData] = useState(null);
   const [expandedAccordition, setExpandedAccordition] = useState<string | false>('');
 
@@ -30,14 +27,26 @@ export default function Current({ assetId }) {
         asset: assetId
       }
     }).then(({ data: { data } }) => {
-      let newData = data?.dataPointData?.map((data) => {
-        const obj = {
-          ...data,
-          time: moment(data?.time).format(dateTimeFormat)
-        };
-        return obj;
+
+      const parentCategory: any = [];
+      const category: any = [];
+
+      data?.dataPointData.forEach(d => {
+        if (d?.hasOwnProperty('parentCategory')) {
+          parentCategory.push({
+            ...d,
+            time: moment(d?.time).format(dateTimeFormat)
+          })
+        } else {
+          category.push({
+            ...d,
+            time: moment(d?.time).format(dateTimeFormat)
+          })
+        }
       });
-      setDataPointData(newData);
+
+      setParentCategory(parentCategory)
+      setCategory(category)
     }).catch((error) => {
       toastConfig.setToastConfig(error);
     });
@@ -65,65 +74,37 @@ export default function Current({ assetId }) {
     }
   };
 
-  const handleChange = useCallback((name: string) => {
-    setExpandedAccordition((prev) => (!prev ? name : prev === name ? false : name));
-  }, []);
-
   return (
     <>
-      {(dataPointData && dataPointData?.length) || (errorData && errorData?.length) ? (
+      {((parentCategory && parentCategory?.length) || (category && category?.length)) || (errorData && errorData?.length) ? (
         <Grid container spacing={2}>
           <Grid item lg={8} md={8} sm={12} xs={12}>
-            {_.uniqBy(dataPointData, 'category.optionValue')?.map((d: any, i) => {
-              return (
-                <Accordion
-                  expanded={expandedAccordition === d?.category?.optionValue}
-                  className={`omsAccordian`}
+            {
+              _.uniqBy(parentCategory, 'parentCategory.optionValue')?.map((p: any, index) => (
+                <CustomAccordian
+                  expended={expandedAccordition}
+                  data={p}
                   onChange={() => {
-                    handleChange(d?.category?.optionValue);
+                    setExpandedAccordition((prev) => (!prev ? p?.parentCategory?.optionValue : prev === p?.parentCategory?.optionValue ? false : p?.parentCategory?.optionValue));
                   }}
-                >
-                  <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-                    <Box display="flex">
-                      <Box>
-                        <IconButton size="small"> {expandedAccordition === d?.category?.optionValue ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                      </Box>
-                      <Box padding="5px">
-                        <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-                          {d?.category?.optionLabel || 'Data'}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {expandedAccordition === d?.category?.optionValue && (
-                      <Grid container spacing={1}>
-                        {dataPointData?.filter((d) => d?.category?.optionValue === expandedAccordition)?.map((data) => {
-                          return (
-                            <Grid item xs={12} sm={6} lg={4} md={4}>
-                              <Box
-                                border="1px solid var(--common-border-color)"
-                                className="p-[10px] rounded-md min-h-full"
-                                title={`${data?.fieldLabel} : ${data?.value} ${data?.unit ? `(${data.unit})` : ''}`}
-                              >
-                                <p className="mb-2 flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
-                                  <strong className=" line-clamp-1">{data?.fieldLabel} : </strong>
-                                  <span className=" font-medium">
-                                    {data?.value}
-                                    {data?.unit && `(${data?.unit})`}
-                                  </span>
-                                </p>
-                                <span className="text-gray-500 dark:text-gray-300 text-[12px]">{data?.time}</span>
-                              </Box>
-                            </Grid>
-                          );
-                        })}
-                      </Grid>
-                    )}
-                  </AccordionDetails>
-                </Accordion>
-              );
-            })}
+                  type={'parentCategory'}
+                  allData={parentCategory}
+                />
+              ))
+            }
+            {
+              _.uniqBy(category, 'category.optionValue')?.map((c: any, i) => (
+                <CustomAccordian
+                  expended={expandedAccordition}
+                  data={c}
+                  onChange={() => {
+                    setExpandedAccordition((prev) => (!prev ? c?.category?.optionValue : prev === c?.category?.optionValue ? false : c?.category?.optionValue));
+                  }}
+                  type={'category'}
+                  allData={category}
+                />
+              ))
+            }
           </Grid>
           <Grid item lg={4} md={4} sm={12} xs={12}>
             <TableContainer id={`${Date.now()}`} style={{ height: 'calc(100vh - 200px)', width: 'auto' }}>
