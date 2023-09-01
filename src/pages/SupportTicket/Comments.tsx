@@ -158,7 +158,7 @@ const Comments = ({ uniqueId }) => {
             <TextField
               fullWidth
               value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={(e) => setComment(e.target.value?.trim())}
               variant="outlined"
               placeholder="Comment"
               label={'Comment'}

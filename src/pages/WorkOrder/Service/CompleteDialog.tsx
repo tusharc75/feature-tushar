@@ -35,7 +35,7 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
               rows={3}
               maxRows={4}
               value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={(e) => setComment(e.target.value?.trim())}
               variant="outlined"
             />
           </Box>

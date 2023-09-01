@@ -182,7 +182,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
             <TextField
               fullWidth
               value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={(e) => setComment(e.target.value?.trim())}
               variant="outlined"
               placeholder="Comment"
               label={'Comment'}
