@@ -29,7 +29,8 @@ function QuotationHeader(props) {
     columns,
     dispatch,
     showTransferEntityDialog,
-    filters
+    filters,
+    resource = ''
     // showCloneRentalManagementDialog
   } = props;
 
@@ -128,6 +129,7 @@ function QuotationHeader(props) {
                 dispatch={dispatch}
                 title={routes?.quotation?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
