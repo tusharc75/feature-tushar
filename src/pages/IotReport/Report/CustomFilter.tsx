@@ -380,7 +380,7 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
                                                             {field?.type === 'date' ? (
                                                                 <>
                                                                     <Grid item xs={12} sm={6} md={6}>
-                                                                        <FormControl fullWidth size="small" variant="outlined">
+                                                                        <FormControl fullWidth size="small" variant="outlined" >
                                                                             <InputLabel id={field.fieldName}>Select Duration</InputLabel>
                                                                             <Select
                                                                                 labelId={field.fieldLabel}
@@ -395,6 +395,7 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
                                                                                     setSelectedResources(tempArray);
                                                                                 }}
                                                                                 label="Select Duration"
+                                                                                style={{ textAlign: 'start' }}
                                                                             >
                                                                                 <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
                                                                                 <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
