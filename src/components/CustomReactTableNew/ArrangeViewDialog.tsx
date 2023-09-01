@@ -219,8 +219,8 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
       dataToStore.push(object);
     });
-
     const columnState = JSON.stringify([...dataToStore]);
+    
     localStorage.setItem(renderedFrom, columnState);
 
     setColumnOrder([...sortedColumns.map((m) => m.id)]);
@@ -338,19 +338,24 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
           {!searchVal ? (
             <DndProvider backend={HTML5Backend}>
               {sortedColumns.map((column, index) => (
-                <RenderListItem
-                  key={column.id}
-                  column={column}
-                  handleToggle={handleToggle}
-                  moveItem={moveItem}
-                  index={index}
-                  id={column.id}
-                  columns={sortedColumns}
-                />
+                (column?.id!=="selection" && column?.id!=="expander") && (
+
+                  <RenderListItem
+                    key={column.id}
+                    column={column}
+                    handleToggle={handleToggle}
+                    moveItem={moveItem}
+                    index={index}
+                    id={column.id}
+                    columns={sortedColumns}
+                  />
+                )
               ))}
             </DndProvider>
           ) : searchedColumns.length > 0 ? (
             searchedColumns.map((column, index) => (
+              (column?.id!=="selection" && column?.id!=="expander") && (
+
               <ListItem key={`${column.id}-${index}`} divider disableGutters disabled={column.disabled} className={column.sticky ? 'd-none' : ''}>
                 <ListItemText id="switch-list-column" primary={column.Header} />
                 <ListItemSecondaryAction>
@@ -367,6 +372,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
                   )}
                 </ListItemSecondaryAction>
               </ListItem>
+              )
             ))
           ) : (
             <Box my={5}>
