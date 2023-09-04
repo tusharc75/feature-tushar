@@ -75,15 +75,6 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
       });
   };
 
-  // const chipColor = (element) => {
-  //      if(element.status === "To Do"){
-  //       Chip = "green"
-  //      }else if(element.status === "In Progress"){
-  //       document.getElementById("demo").style.backgroundColor = 'red'
-  //      }
-  // }
-  // chipColor(true)
-
   const classes = useStyles();
 
   return (
