@@ -49,6 +49,7 @@
   --colorAccount: red;
   --colorProject: yellow;
   --new_theme_color: #0f9fa9;
+  --new-theme-color: #0f9fa9;
   --new_theme_secondary_color: #ffc955;
   --new_theme_secondary_border_color: #ff9c28;
   --ag-odd-row-background-color: #fff;
@@ -3826,6 +3827,7 @@ body {
   @media all and (min-width: 600px) {
     min-height: 100% !important;
     padding: 2px 9px !important;
+    height: 31px;
   }
   @media all and (max-width: 600px) {
     padding: 3px 9px !important;

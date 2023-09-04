@@ -1029,6 +1029,18 @@ const routes = {
       : RESOURCE_LABEL.iotReport,
     path: '/iot-report'
   },
+  deviceTemplates: {
+    title: storedRoutes && storedRoutes.deviceTemplates && storedRoutes.deviceTemplates?.title ? storedRoutes.deviceTemplates?.title
+      : RESOURCE_LABEL.deviceTemplates,
+    path: '/device-templates'
+  },
+  deviceTemplatesDetail: {
+    title:
+      storedRoutes && storedRoutes.deviceTemplates && storedRoutes.deviceTemplates.title
+        ? storedRoutes.deviceTemplates?.title
+        : RESOURCE_LABEL.deviceTemplates,
+    path: '/device-templates/detail'
+  },
 };
 
 export default routes;

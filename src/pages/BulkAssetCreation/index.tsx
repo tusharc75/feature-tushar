@@ -24,7 +24,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from 'src/constants/useColumns';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
-import { AiFillCrown, MdAdd, MdSort, MdFilterList } from 'react-icons/all';
+import { AiFillCrown, MdAdd, MdSort, MdFilterList, TbArrowsSort, MdOutlineFilterAlt } from 'react-icons/all';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
@@ -320,20 +320,17 @@ const BulkAssetCreation = () => {
               {isMobile && !isTablet ? (
                 <>
                   <div className="flex flex-wrap items-center gap-1 ml-auto">
-                    <Button
+                    <IconButton
                       onClick={handleClickOpen}
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      variant="text"
-                      disableElevation
-                      startIcon={<MdSort />}
-                      className={'sort-filter-tablet'}
-                      style={isTablet ? { marginLeft: '50px' } : {}}
+                      className={'mobileIconButton secondary'}
+                      size="small"
                     >
-                      Sort
-                    </Button>
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
                     <MobileSortDialog
                       isOpen={sortOpen}
                       handleClose={handleClickClose}
@@ -343,19 +340,17 @@ const BulkAssetCreation = () => {
                       dispatch={dispatch}
                     />
 
-                    <Button
+                    <IconButton
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      variant="text"
-                      disableElevation
-                      className={'sort-filter-tablet'}
-                      startIcon={<MdFilterList />}
+                      className={'mobileIconButton secondary'}
+                      size="small"
                       onClick={handleOpen}
                     >
-                      Filter
-                    </Button>
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
 
                     <MobileFilterDialog
                       isOpen={isOpenDialog}

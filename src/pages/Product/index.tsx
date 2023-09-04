@@ -28,7 +28,7 @@ import TextField from '@material-ui/core/TextField';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from 'src/constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import Tooltip from '@material-ui/core/Tooltip';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
+import { MdAdd, MdSort, MdFilterList, TbArrowsSort, MdOutlineFilterAlt } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { IoPricetagsSharp } from 'react-icons/io5';
@@ -502,10 +502,11 @@ const Product = () => {
 
   const searchInnner = (
     <Autocomplete
-      style={{ width: '250px' }}
+      className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
       options={productCategoryList}
       getOptionLabel={(option: any) => (option ? option.name : '')}
       getOptionSelected={(option: any, val) => option._id === val}
+      size="small"
       value={
         productCategoryList.filter((data) => data._id === productCategory).length
           ? productCategoryList.filter((data) => data._id === productCategory)[0]
@@ -515,139 +516,118 @@ const Product = () => {
         setProductCategory(val && val._id ? val._id : '');
         handleFilterClose();
       }}
-      renderInput={(params) =>
-        isMobile && !isTablet ? (
-          <TextField
-            {...params}
-            margin="dense"
-            name="productCategory"
-            placeholder="Product Category"
-            variant="standard"
-            fullWidth
-            className={isMobile ? 'serchBox' : ''}
-          />
-        ) : (
-          <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
-        )
-      }
+      renderInput={(params) => (
+        <TextField {...params} margin="none" size="small" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+      )}
     />
   );
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.product.title }]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions.product}
-            module="product(s)"
-            api={'product'}
-            refrenceId={null}
-            onSuccessfulImport={(isImportedSuccessfully) => {
-              if (isImportedSuccessfully) {
-                fetchProduct();
-              }
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`).length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id)
-                : []
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.product.title }]} />
+        <ImportExportLinks
+          permissions={permissions.product}
+          module="product(s)"
+          api={'product'}
+          refrenceId={null}
+          onSuccessfulImport={(isImportedSuccessfully) => {
+            if (isImportedSuccessfully) {
+              fetchProduct();
             }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchProduct();
-            }}
-            additionalParams={getQueryString(true)}
-            extraImportExportLinks={[
-              {
-                title: 'Child Product Template',
-                api: `${product.api}/unknown/bom/template`,
-                type: 'download'
-              },
-              {
-                title: 'Child Product Export',
-                api: `${product.api}/unknown/bom/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`).length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchProduct();
+          }}
+          additionalParams={getQueryString(true)}
+          extraImportExportLinks={[
+            {
+              title: 'Child Product Template',
+              api: `${product.api}/unknown/bom/template`,
+              type: 'download'
+            },
+            {
+              title: 'Child Product Export',
+              api: `${product.api}/unknown/bom/template?export=true${
+                getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                   ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                   : ''
-                  }`,
-                type: 'export'
-              },
-              {
-                title: 'Child Product Import',
-                api: `${product.api}/unknown/bom/import`,
-                type: 'import'
-              },
-              {
-                title: 'Service/Consumable Template',
-                api: `${product.api}/unknown/service-master/template`,
-                type: 'download'
-              },
-              {
-                title: 'Service/Consumable Export',
-                api: `${product.api}/unknown/service-master/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+              }`,
+              type: 'export'
+            },
+            {
+              title: 'Child Product Import',
+              api: `${product.api}/unknown/bom/import`,
+              type: 'import'
+            },
+            {
+              title: 'Service/Consumable Template',
+              api: `${product.api}/unknown/service-master/template`,
+              type: 'download'
+            },
+            {
+              title: 'Service/Consumable Export',
+              api: `${product.api}/unknown/service-master/template?export=true${
+                getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                   ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                   : ''
-                  }`,
-                type: 'export'
-              },
-              {
-                title: 'Service/Consumable Import',
-                api: `${product.api}/unknown/service-master/import`,
-                type: 'import'
-              },
-              {
-                title: 'Service Package Template',
-                api: `${product.api}/unknown/package/template`,
-                type: 'download'
-              },
-              {
-                title: 'Service Package Export',
-                api: `${product.api}/unknown/package/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+              }`,
+              type: 'export'
+            },
+            {
+              title: 'Service/Consumable Import',
+              api: `${product.api}/unknown/service-master/import`,
+              type: 'import'
+            },
+            {
+              title: 'Service Package Template',
+              api: `${product.api}/unknown/package/template`,
+              type: 'download'
+            },
+            {
+              title: 'Service Package Export',
+              api: `${product.api}/unknown/package/template?export=true${
+                getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                   ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                   : ''
-                  }`,
-                type: 'export'
-              },
-              {
-                title: 'Service Package Import',
-                api: `${product.api}/unknown/package/import`,
-                type: 'import'
-              }
-            ]}
-          />
-        </Grid>
-      </Grid>
+              }`,
+              type: 'export'
+            },
+            {
+              title: 'Service Package Import',
+              api: `${product.api}/unknown/package/import`,
+              type: 'import'
+            }
+          ]}
+        />
+      </div>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1 layout-for-tablet">
-              <Grid style={{ display: 'flex', justifyContent: 'center' }}>
-                <RiShoppingBag3Fill size={22} style={{ paddingBottom: '3px' }} className="headerLogo" />
-                <span className="listingHeader">{routes.product.title} </span>
-              </Grid>
-              {isMobile && (
-                <>
-                  <Grid style={{ display: 'inline-flex' }}>
-                    <Button
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex flex-wrap align-items-center gap-1'}>
+              {isMobile && !isTablet ? (
+                <div className="d-flex flex-wrap items-center justify-between w-full gap-2">
+                  <div className="flex flex-wrap items-center gap-1 ml-auto">
+                    <IconButton
                       onClick={handleClickOpen}
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      color="secondary"
-                      variant="text"
-                      disableElevation
-                      startIcon={<MdSort />}
-                      className={'sort-filter-tablet'}
-                      style={isTablet ? { marginLeft: '50px' } : {}}
+                      className={'mobileIconButton secondary'}
+                      size="small"
                     >
-                      Sort
-                    </Button>
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
                     <MobileSortDialog
                       isOpen={sortOpen}
                       handleClose={handleClickClose}
@@ -657,64 +637,65 @@ const Product = () => {
                       dispatch={dispatch}
                     />
 
-                    <Button
+                    <IconButton
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      variant="text"
-                      color="secondary"
-                      disableElevation
-                      className={'sort-filter-tablet'}
-                      startIcon={<MdFilterList />}
+                      className={'mobileIconButton secondary'}
+                      size="small"
                       onClick={handleOpen}
                     >
-                      Filter
-                    </Button>
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
 
                     <MobileFilterDialog
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
-                      contentPart={searchInnner}
+                      contentPart={null}
                       columns={columns}
                       dispatch={dispatch}
                       title={routes?.product?.title}
                       filters={filters}
                     />
-                  </Grid>
+                  </div>
+                  <div className="w-full">{searchInnner}</div>
+                </div>
+              ) : (
+                <>
+                  {permissions?.productCategory?.isRead && (
+                    <div className="w-full md:w-auto">
+                      <Autocomplete
+                        className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
+                        options={productCategoryList}
+                        getOptionLabel={(option: any) => (option ? option.name : '')}
+                        size="small"
+                        getOptionSelected={(option: any, val) => option._id === val}
+                        value={
+                          productCategoryList.filter((data) => data._id === productCategory).length
+                            ? productCategoryList.filter((data) => data._id === productCategory)[0]
+                            : ''
+                        }
+                        onChange={(e, val) => {
+                          setProductCategory(val && val._id ? val._id : '');
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            margin="none"
+                            size="small"
+                            name="productCategory"
+                            label="Product Category"
+                            variant="outlined"
+                            fullWidth
+                          />
+                        )}
+                      />
+                    </div>
+                  )}
                 </>
               )}
-              {permissions?.productCategory?.isRead &&
-                <Autocomplete
-                  style={{ width: '250px' }}
-                  options={productCategoryList}
-                  getOptionLabel={(option: any) => (option ? option.name : '')}
-                  getOptionSelected={(option: any, val) => option._id === val}
-                  value={
-                    productCategoryList.filter((data) => data._id === productCategory).length
-                      ? productCategoryList.filter((data) => data._id === productCategory)[0]
-                      : ''
-                  }
-                  onChange={(e, val) => {
-                    setProductCategory(val && val._id ? val._id : '');
-                  }}
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name="productCategory"
-                        placeholder="Product Category"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
-                    )
-                  }
-                />
-              }
+
               {isProductTemplate && (
                 <Autocomplete
                   style={{ width: '250px' }}
@@ -777,84 +758,73 @@ const Product = () => {
                   }
                 />
               )}
-            </Grid>
-            <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                <Box style={{ flexGrow: 1, minWidth: 210 }}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={styles.search_box_input}
-                    width={isMobile ? '200px' : '210px'}
-                    style={{ width: '100%', maxWidth: '250px', marginLeft: 'auto', display: 'flex' }}
-                    size="small"
-                    value={search}
-                  />
-                </Box>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end items-start">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
 
-                <Box style={{ display: 'flex', gap: '5px' }}>
-                  {productPermissions.isCreate && (
-                    <Button
-                      onClick={() => OpenProduct(null)}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      color="primary"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                  )}
-
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {productPermissions.isCreate && (
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="default"
+                    onClick={() => OpenProduct(null)}
+                    variant={'contained'}
                     size="small"
-                    onClick={openActions}
-                    disabled={selectedRecords.length ? false : true}
-                    aria-controls="action-menu"
-                    className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                    endIcon={<ExpandMore />}
+                    color="primary"
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'}
+                    Add
                   </Button>
+                )}
 
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  disabled={selectedRecords.length ? false : true}
+                  aria-controls="action-menu"
+                  className={`new-dropdown-v1`}
+                  endIcon={<ExpandMore />}
+                >
+                  Actions
+                </Button>
+
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={!productPermissions.isDelete}
+                    onClick={() => {
+                      setShowDeleteConfirmBox(true);
+                      closeActions();
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
                   >
+                    Delete
+                  </MenuItem>
+                  {permissions?.repairType?.isRead && (
                     <MenuItem
-                      disabled={!productPermissions.isDelete}
+                      disabled={!productPermissions.isUpdate && !permissions?.hasOwnProperty('repairType')}
                       onClick={() => {
-                        setShowDeleteConfirmBox(true);
+                        setOpenAddDialog(true);
                         closeActions();
                       }}
                     >
-                      Delete
+                      {`Assign ${routes?.repairType?.title}`}
                     </MenuItem>
-                    {permissions?.repairType?.isRead && (
-                      <MenuItem
-                        disabled={!productPermissions.isUpdate && !permissions?.hasOwnProperty('repairType')}
-                        onClick={() => {
-                          setOpenAddDialog(true);
-                          closeActions();
-                        }}
-                      >
-                        {`Assign ${routes?.repairType?.title}`}
-                      </MenuItem>
-                    )}
-                  </Menu>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
+                  )}
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
         {columns && frameWorkComponent ? (
           isMobile && !isTablet ? (
@@ -947,7 +917,7 @@ const Product = () => {
           onOk={handleDelete}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

@@ -185,7 +185,7 @@ const PackageList = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -320,57 +320,48 @@ const PackageList = () => {
 
   return (
     <>
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[routes.packages]} />
-          </Grid>
-          <Grid item md={8} sm={1} xs={2}>
-            <Grid container direction="row">
-              <Grid item xs={12} sm={12}>
-                <Grid container justify="flex-end">
-                  <ImportExportLinks
-                    permissions={permissions?.packages}
-                    module="packagess"
-                    api={packages.api}
-                    afterImportCompleted={() => {
-                      fetchPackages();
-                    }}
-                    isExportAllOrSomeFeature={true}
-                    total={rowCount}
-                    recordsToExport={selectedRecords.length}
-                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-                    onExportToExcelSuccess={() => {
-                      if (gridApi) gridApi.deselectAll();
-                      else fetchPackages();
-                    }}
-                    additionalParams={getQueryString(true)}
-                    extraImportExportLinks={[
-                      {
-                        title: 'Sub-Package Template',
-                        api: `${packages.api}/unknown/package/template`,
-                        type: 'download'
-                      },
-                      {
-                        title: 'Sub-Package Export',
-                        api: `${packages.api}/unknown/package/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                            ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                            : ''
-                          }`,
-                        type: 'export'
-                      },
-                      {
-                        title: 'Sub-Package Import',
-                        api: `${packages.api}/unknown/package/import`,
-                        type: 'import'
-                      }
-                    ]}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[routes.packages]} />
+          <ImportExportLinks
+            permissions={permissions?.packages}
+            module="packagess"
+            api={packages.api}
+            afterImportCompleted={() => {
+              fetchPackages();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll();
+              else fetchPackages();
+            }}
+            additionalParams={getQueryString(true)}
+            extraImportExportLinks={[
+              {
+                title: 'Sub-Package Template',
+                api: `${packages.api}/unknown/package/template`,
+                type: 'download'
+              },
+              {
+                title: 'Sub-Package Export',
+                api: `${packages.api}/unknown/package/template?export=true${
+                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                    : ''
+                }`,
+                type: 'export'
+              },
+              {
+                title: 'Sub-Package Import',
+                api: `${packages.api}/unknown/package/import`,
+                type: 'import'
+              }
+            ]}
+          />
+        </div>
         <CustomContainer>
           <div className="header-panel">
             <PackageHeader
@@ -390,9 +381,9 @@ const PackageList = () => {
               showTransferEntityDialog={handleTransferEntityDialog}
               openAssingToProduct={openAssingToProduct}
               filters={filters}
-            // showClonepackagesDialog={() => {
-            //   handleShowClonepackagesDialog()
-            // }}
+              // showClonepackagesDialog={() => {
+              //   handleShowClonepackagesDialog()
+              // }}
             ></PackageHeader>
           </div>
           {Object.keys(frameWorkComponent).length > 0 ? (
@@ -507,7 +498,7 @@ const PackageList = () => {
             />
           ) : null}
         </CustomContainer>
-      </Fragment>
+      </section>
       {showProductAssignDialog && (
         <AssignProductDialog
           reference="package"

@@ -238,108 +238,93 @@ const Address = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.address.title }]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions?.address}
-            module="address"
-            api={'address'}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
-            ids={getLocalStorageArrayData(localStorageSelectedRecords)?.length ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id) : []}
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchData();
-            }}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.address.title }]} />
+        <ImportExportLinks
+          permissions={permissions?.address}
+          module="address"
+          api={'address'}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
+          ids={
+            getLocalStorageArrayData(localStorageSelectedRecords)?.length
+              ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchData();
+          }}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item md={6} sm={6} xs={12} className="d-flex align-items-center gap-1"></Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-              className={`d-flex align-items-center gap-1 ${styles.filter_side}`}
-              justify={isMobile ? 'flex-start' : 'flex-end'}
-            >
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1 }}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={styles.search_box_input}
-                    width={isMobile ? '200px' : '242px'}
-                    style={isMobile ? { flex: 1 } : {}}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex align-items-center gap-1'}></div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.address?.isCreate && (
+                  <Button
+                    onClick={() => {
+                      setOpen({ title: 'Add New Address', open: true, edit: false, isClone: false });
+                    }}
+                    variant={'contained'}
                     size="small"
-                    value={search}
-                  />
-                </Grid>
+                    color="primary"
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
 
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.address?.isCreate && (
+                {permissions?.address?.isDelete && (
+                  <>
                     <Button
-                      onClick={() => {
-                        setOpen({ title: 'Add New Address', open: true, edit: false, isClone: false });
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      color="primary"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                  )}
-
-                  {permissions?.address?.isDelete && (
-                    <><Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      variant={'outlined'}
                       color="default"
                       size="small"
                       onClick={openActions}
                       disabled={getLocalStorageArrayData(localStorageSelectedRecords)?.length ? false : true}
                       aria-controls="action-menu"
-                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
+                      className={` new-dropdown-v1`}
                       endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? '' : 'Actions'}
+                      Actions
                     </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          closeActions();
+                          setShowDeleteConfirmBox(true);
                         }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
                       >
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            setShowDeleteConfirmBox(true)
-                          }}
-                        >Delete</MenuItem>
-                      </Menu>
-                    </>
-                  )}
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {Object.keys(frameWorkComponent).length > 0 ? (
@@ -371,7 +356,7 @@ const Address = () => {
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -425,7 +410,7 @@ const Address = () => {
           />
         ) : null}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

@@ -96,6 +96,7 @@ const IotReport = () => {
 
   const fetchResourceData = () => {
     setLoadingData(true)
+    setColumns(null)
     let filterQuery = getFilter();
     if (cancelTokenSource) {
       cancelTokenSource.cancel();

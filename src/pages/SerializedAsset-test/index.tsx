@@ -772,6 +772,7 @@ const SerializedAssetTest = () => {
               sorting={sorting}
               refreshGrid={fetchProductInventory}
               loading={loading}
+              showOnlyShowFilteredRecordSwitch = {true}
             />
           )
         ) : (

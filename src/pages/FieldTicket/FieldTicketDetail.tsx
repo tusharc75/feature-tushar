@@ -14,7 +14,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { ACTIVITY_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
 import TabPanel from '../../components/TabPanel';
 import { FaWpforms } from 'react-icons/fa';
 import AddCost from './AddCost';
@@ -25,6 +25,10 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import Material from './material';
 import { camelCase, set } from 'lodash';
 import Submit from './Submit';
+import { VscVersions } from 'react-icons/vsc';
+import CloseIcon from '@material-ui/icons/Close';
+import Versions from 'src/components/Versions';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const FieldTicketDetail = () => {
 
@@ -49,8 +53,11 @@ const FieldTicketDetail = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [nextStep, setNextStep] = useState(false);
-  const [prevStep, setPrevStep] = useState(true);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [versionDialog, setVersionDialog] = useState(false);
+
+  const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+
 
   useEffect(() => {
     if (id) {
@@ -85,7 +92,7 @@ const FieldTicketDetail = () => {
         data = response?.data?.data;
       }
       setFieldTicketData(data);
-      if ([FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.readyToInvoice]?.includes(data?.status)) {
+      if ([FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.readyToInvoice, FIELD_TICKET_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(fieldTicketSteps?.length - 1);
       }
       else {
@@ -135,12 +142,12 @@ const FieldTicketDetail = () => {
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
+
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0) {
       updateProcessStatus(fieldTicketSteps[currentStep]?.name);
     }
   }, [currentStep]);
-
 
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
@@ -148,6 +155,20 @@ const FieldTicketDetail = () => {
       .then(({ data }) => { })
       .catch((error) => { });
   };
+
+  const handleChangeStatus = async (status) => {
+    await axiosInstance().patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, { status }).then(({ data }) => {
+      setShowClosedConfirmBox(false)
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data?.message
+      });
+      fetchData()
+    }).catch((err) => {
+      toastConfig.setToastConfig(err)
+    })
+  }
 
   return (
     <Box className="main-container-v1">
@@ -157,7 +178,35 @@ const FieldTicketDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {(allowedToEdit && ![FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status)) &&
+            {allowedToEdit && [FIELD_TICKET_STATUS.invoiced]?.includes(fieldTicketData?.status) && (
+              <ButtonWithPulse
+                variant={'outlined'}
+                color="default"
+                size="small"
+                onClick={() => {
+                  setShowClosedConfirmBox(true)
+                }}
+                className={'btn-outline-v1'}
+              >
+                Close
+              </ButtonWithPulse>
+            )}
+            {fieldTicketData?.versions?.length &&
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                size="small"
+                className={'btn-outline-v1'}
+                onClick={() => {
+                  setVersionDialog(true)
+                }}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                startIcon={isMobile && !isTablet ? null : <VscVersions />}
+              >
+                {isMobile && !isTablet ? <VscVersions size={20} /> : 'Versions'}
+              </Button>
+            }
+            {(allowedToEdit && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(fieldTicketData?.status)) &&
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
                 className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
@@ -229,7 +278,7 @@ const FieldTicketDetail = () => {
             steps={fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={fieldTicketData?.status === FIELD_TICKET_STATUS.invoiced}
+            isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
           />
           <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && (
@@ -273,6 +322,18 @@ const FieldTicketDetail = () => {
           onOk={handleDelete}
         />
       )}
+      {showClosedConfirmBox && (
+        <ConfirmationDialog
+          open={showClosedConfirmBox}
+          message={`Are you sure you want to close ${fieldTicketData?.fieldTicketNumber} ?`}
+          onClose={() => {
+            setShowClosedConfirmBox(false);
+          }}
+          onOk={() => {
+            handleChangeStatus(FIELD_TICKET_STATUS.closed)
+          }}
+        />
+      )}
       {openUpdateDialog && (
         <ManageFieldTicket
           id={id}
@@ -281,6 +342,20 @@ const FieldTicketDetail = () => {
           onSuccess={() => {
             closeUpdateDialog();
             fetchData();
+          }}
+        />
+      )}
+      {versionDialog && (
+        <Versions
+          id={id}
+          label={fieldTicketData?.fieldTicketNumber}
+          childResource={CHILD_RESOURCE.fieldTicketMateial}
+          resource={sidebarResource.fieldTicket}
+          referenceData={fieldTicketData}
+          versions={fieldTicketData?.versions}
+          renderedFrom={`${renderedFrom}_versions`}
+          handleClose={() => {
+            setVersionDialog(false)
           }}
         />
       )}

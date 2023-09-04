@@ -1,23 +1,19 @@
-import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { Delete, ExpandMore, FileCopy } from '@material-ui/icons';
-import { useHistory, Link } from 'react-router-dom';
-import { MdDashboardCustomize } from 'react-icons/md';
+import { AddOutlined, Delete, ExpandMore, FileCopy } from '@material-ui/icons';
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import axiosInstance from 'src/axios/axiosInstance';
-import CustomContainer from 'src/components/CustomContainer';
-import { gridLoadingTimeout } from 'src/constants/helpers';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import { useData } from 'src/StateProvider/Provider';
-import { baseURL } from './builderHelpers';
-import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
-import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
-import { prepareDataForGrid } from 'src/constants/helpers';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { getStaticFields } from 'src/constants/useColumns';
 import { staticFrameworkRender } from '../../constants/useColumns';
+import { baseURL } from './builderHelpers';
 
 const Dashboards = () => {
   const history = useHistory();
@@ -161,36 +157,27 @@ const Dashboards = () => {
   };
 
   return (
-    <React.Fragment>
-      <div className="headerbox">
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: 'Dashboard Master' }]} />
       </div>
       <CustomContainer>
-        <Box className="header-panel" display="flex" justifyContent="space-between" alignItems={'center'}>
-          <Box display={'flex'} alignItems="center">
-            <MdDashboardCustomize size={22} className="headerLogo" />
-            <Box ml={1}>
-              <span className="listingHeader">Dashboard Master</span>
-            </Box>
-          </Box>
-          <Box py={'6px'}>
+        <Box className="header-panel">
+          <div className="flex gap-2">
+            <Box className="ml-auto" />
             {permissions?.dashboardMaster?.isCreate && (
-              <Button color="primary" variant="contained" size="small" disableRipple onClick={() => history.push(`dashboard-master/new`)}>
+              <Button
+                color="primary"
+                variant="contained"
+                size="small"
+                disableRipple
+                startIcon={<AddOutlined />}
+                onClick={() => history.push(`dashboard-master/new`)}
+              >
                 Add
               </Button>
             )}
-            <Box component="span" ml={1} />
-            {/* <DeleteButton
-              disabled={selectedRecords.length === 0}
-              text="Delete"
-              onClick={() => {
-                setShowDeleteDialog({
-                  ...showDeleteDialog,
-                  open: true,
-                  data: selectedRecords.map((d: any) => d._id)
-                });
-              }}
-            /> */}
+
             <Button
               variant="outlined"
               color="default"
@@ -229,7 +216,7 @@ const Dashboards = () => {
                 Delete
               </MenuItem>
             </Menu>
-          </Box>
+          </div>
         </Box>
         <CustomAgGrid
           columns={columns}
@@ -259,7 +246,7 @@ const Dashboards = () => {
           onOk={removeDashboard}
         />
       )}
-    </React.Fragment>
+    </section>
   );
 };
 

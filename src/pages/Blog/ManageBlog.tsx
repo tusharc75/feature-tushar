@@ -111,6 +111,7 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
     }
   };

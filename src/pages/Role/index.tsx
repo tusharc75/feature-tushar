@@ -12,7 +12,15 @@ import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CreateRole from './CreateRole';
 import { PERMISSION } from '../../constants/Roles';
-import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import {
+  localStorageKeys,
+  roleTypes,
+  gridPageSizes,
+  isObjectEmpty,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from '../../constants/helpers';
 import RoleHeader from './RoleHeader';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
@@ -147,7 +155,6 @@ const Roles: FC = () => {
     updatedByRenderer: UpdatedByRenderer,
     actionsRenderer: ActionsRenderer
   };
-
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&type=2`;
@@ -319,12 +326,10 @@ const Roles: FC = () => {
             }}
           />
         ))}
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={12} sm={12} xs={12}>
-            <CustomBreadCrumbs routes={[routes.role]} />
-          </Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[routes.role]} />
+        </div>
         <CustomContainer>
           <div className="header-panel">
             <RoleHeader
@@ -430,7 +435,7 @@ const Roles: FC = () => {
             onOk={handleDeleteRole}
           />
         ) : null}
-      </Fragment>
+      </section>
     </>
   );
 };

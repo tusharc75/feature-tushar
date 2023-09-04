@@ -19,10 +19,10 @@ import useColumns, { getStaticFields, getFrameworkComponents } from '../../const
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom'
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { camelCase } from "lodash";
-import { SET_USER } from "src/StateProvider/actionTypes";
+import { useHistory } from 'react-router-dom';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { camelCase } from 'lodash';
+import { SET_USER } from 'src/StateProvider/actionTypes';
 
 let entityTimeout;
 
@@ -267,30 +267,26 @@ const Entity: FC = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.entity]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions[entityResource]}
-            module="entity(s)"
-            api={entityApi}
-            afterImportCompleted={() => {
-              fetchEntity();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchEntity();
-            }}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.entity]} />
+        <ImportExportLinks
+          permissions={permissions[entityResource]}
+          module="entity(s)"
+          api={entityApi}
+          afterImportCompleted={() => {
+            fetchEntity();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords.length}
+          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchEntity();
+          }}
+        />
+      </div>
 
       <CustomContainer>
         <div className="header-panel">
@@ -331,7 +327,7 @@ const Entity: FC = () => {
               history.push(`${routes.entityDetail.path}/${d._id}`);
             }}
             extraParamsToCheckDelete={false}
-            onDelete={(d) => { }}
+            onDelete={(d) => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -361,7 +357,7 @@ const Entity: FC = () => {
             owerCollaboratorInitialsOrImages=""
             onCreate={false}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -385,47 +381,39 @@ const Entity: FC = () => {
           />
         ) : null}
 
-        {
-          isOpen?.open && (
-            <ManageEntity
-              open={isOpen}
-              close={handleClose}
-              fetchData={fetchEntity}
-              isNew={true}
-              entityId={isOpen?.entityId}
-              isClone={isOpen?.isClone}
+        {isOpen?.open && (
+          <ManageEntity
+            open={isOpen}
+            close={handleClose}
+            fetchData={fetchEntity}
+            isNew={true}
+            entityId={isOpen?.entityId}
+            isClone={isOpen?.isClone}
+          />
+        )}
+        {usersDialogOpen && !usersDialogLoding && (
+          <Dialog fullWidth maxWidth="sm" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+            <AssignUsersDialog
+              entitiesDialogOpen={usersDialogOpen}
+              handleCloseDialog={handleCloseDialog}
+              type="user"
+              ids={selectedEntity ? [selectedEntity] : selectedRecords.map((rec) => rec._id)}
+              assignedEntity={users}
+              regionalRole={false}
+              onSuccess={() => {
+                setSelectedEntity(null);
+                handleCloseDialog();
+              }}
             />
-          )
-        }
-        {
-          usersDialogOpen && !usersDialogLoding && (
-            <Dialog
-              fullWidth
-              maxWidth="sm"
-              open={usersDialogOpen}
-              onClose={handleCloseDialog}
-              aria-labelledby="assign-roles-dialog"
-            >
-              <AssignUsersDialog
-                entitiesDialogOpen={usersDialogOpen}
-                handleCloseDialog={handleCloseDialog}
-                type="user"
-                ids={selectedEntity ? [selectedEntity] : selectedRecords.map(rec => rec._id)}
-                assignedEntity={users}
-                regionalRole={false}
-                onSuccess={() => {
-                  setSelectedEntity(null)
-                  handleCloseDialog();
-                }}
-              />
-            </Dialog>
-          )
-        }
+          </Dialog>
+        )}
         {showDeleteDialog ? (
           <ResourceTransferDialog
             open={true}
             fromResource={{ ...deleteEntity, name: deleteEntity.entityName ?? '' }}
-            allResourceData={user?.entity?.filter(entity => entity._id !== deleteEntity?._id).map(e => ({ ...e, optionLabel: e?.entityName, optionValue: e?._id }))}
+            allResourceData={user?.entity
+              ?.filter((entity) => entity._id !== deleteEntity?._id)
+              .map((e) => ({ ...e, optionLabel: e?.entityName, optionValue: e?._id }))}
             onClose={() => {
               setDeleteEntity({});
               setShowDeleteDialog(false);
@@ -440,7 +428,7 @@ const Entity: FC = () => {
           />
         ) : null}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

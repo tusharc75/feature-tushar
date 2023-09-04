@@ -16,7 +16,7 @@ import { IconButton } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import routes from 'src/components/Helpers/Routes';
 
-const Invoice = ({ invoiceData, setNextStep, updateJobStatus, statusOptions, stepFullScreen, renderedFrom }) => {
+const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -26,7 +26,7 @@ const Invoice = ({ invoiceData, setNextStep, updateJobStatus, statusOptions, ste
 
   useEffect(() => {
     if (statusOptions.findIndex((d) => d.optionLabel === INVOICE_STATUS.readyToInvoice) > statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)) {
-      updateJobStatus(INVOICE_STATUS.readyToInvoice);
+      handleChangeStatus(INVOICE_STATUS.readyToInvoice);
     }
   }, []);
 

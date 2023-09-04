@@ -1,44 +1,34 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
+import { Box, Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import IconButton from '@material-ui/core/IconButton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../axios/axiosInstance';
-import { GiStockpiles } from 'react-icons/gi';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { AddOutlined } from '@material-ui/icons';
-import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
-import SearchBox from '../../components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import routes from '../../components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import {
-  wellMaster,
-  isObjectEmpty,
-  gridLoadingTimeout,
-  getLocalStorageArrayData,
-  sidebarResource,
-  removeLocalStorage
-} from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { useData } from '../../StateProvider/Provider';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { prepareDataForGrid } from '../../constants/helpers';
-import ManageWellMaster from './ManageWellMaster';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
-import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ExpandMore from '@material-ui/icons/ExpandMore';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
+import { useHistory } from 'react-router-dom';
 import MergeRecords from 'src/components/MergeRecords';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import routes from '../../components/Helpers/Routes';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource, wellMaster } from '../../constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import styles from '../Leads/Header.module.scss';
+import ManageWellMaster from './ManageWellMaster';
 
 let searchTimeout;
 
@@ -257,57 +247,51 @@ const WellMaster = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.wellMaster]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions?.wellMaster}
-            module="well master"
-            api={wellMaster.api}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.length}
-            ids={
-              [...getLocalStorageArrayData(localStorageSelectedRecords)]?.length
-                ? [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchData();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.wellMaster]} />
+        <ImportExportLinks
+          permissions={permissions?.wellMaster}
+          module="well master"
+          api={wellMaster.api}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.length}
+          ids={
+            [...getLocalStorageArrayData(localStorageSelectedRecords)]?.length
+              ? [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchData();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <div className="main-container">
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex align-items-center gap-1'}>
               {isMobile && (
-                <>
-                  <Grid style={{ display: 'inline-flex' }}>
-                    <Button
+                <div className="d-flex flex-wrap items-center justify-between w-full">
+                  <div></div>
+                  <div className="flex flex-wrap items-center gap-1 ml-auto">
+                    <IconButton
                       onClick={handleClickOpen}
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      color="secondary"
-                      variant="text"
-                      disableElevation
-                      startIcon={<MdSort />}
-                      className={'sort-filter-tablet'}
+                      className={'mobileIconButton secondary'}
+                      size="small"
                       style={isTablet ? { marginLeft: '50px' } : {}}
                     >
-                      Sort
-                    </Button>
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
                     <MobileSortDialog
                       isOpen={sortOpen}
                       handleClose={handleClickClose}
@@ -317,20 +301,17 @@ const WellMaster = () => {
                       dispatch={dispatch}
                     />
 
-                    <Button
+                    <IconButton
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      variant="text"
-                      color="secondary"
-                      disableElevation
-                      className={'sort-filter-tablet'}
-                      startIcon={<MdFilterList />}
+                      className={'mobileIconButton secondary'}
+                      size="small"
                       onClick={handleOpen}
                     >
-                      Filter
-                    </Button>
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
                     <MobileFilterDialog
                       isOpen={isOpenDialog}
                       handleClose={handleFilterClose}
@@ -340,87 +321,75 @@ const WellMaster = () => {
                       title={routes?.wellMaster?.title}
                       filters={filters}
                     />
-                  </Grid>
-                </>
+                  </div>
+                </div>
               )}
-            </Grid>
-            <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={styles.content_box}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={isMobile ? styles.search_box_input : ''}
-                    width="242px"
-                    size="small"
-                    value={search}
-                    style={isMobile ? { flex: 1 } : {}}
-                  />
-                </Grid>
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.wellMaster?.isCreate && (
-                    <Button
-                      onClick={() => {
-                        setShowManageDialog({ open: true, isClone: false, idToClone: null });
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      color="primary"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    >
-                      {' '}
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                  )}
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.wellMaster?.isCreate && (
                   <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="default"
-                    size="small"
-                    className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                    onClick={openActions}
-                    disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                  >
-                    {isMobile && !isTablet ? '' : 'Actions'}
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+                    onClick={() => {
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
                   >
-                    <MenuItem
-                      disabled={!permissions?.wellMaster?.isDelete}
-                      onClick={() => {
-                        closeActions();
-                        setShowDeleteConfirmBox(true);
+                    Add
+                  </Button>
+                )}
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  className={`new-dropdown-v1`}
+                  onClick={openActions}
+                  disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
+                  aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
+                >
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={!permissions?.wellMaster?.isDelete}
+                    onClick={() => {
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                  {permissions?.wellMaster?.isUpdate && (
+                    <MergeRecords
+                      selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
+                      resource={sidebarResource?.wellMaster}
+                      closeActions={closeActions}
+                      onSuccess={() => {
+                        localStorage.removeItem(localStorageSelectedRecords);
+                        fetchData();
                       }}
-                    >
-                      Delete
-                    </MenuItem>
-                    {permissions?.wellMaster?.isUpdate && (
-                      <MergeRecords
-                        selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
-                        resource={sidebarResource?.wellMaster}
-                        closeActions={closeActions}
-                        onSuccess={() => {
-                          localStorage.removeItem(localStorageSelectedRecords);
-                          fetchData();
-                        }}
-                      />
-                    )}
-                  </Menu>
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+                    />
+                  )}
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
         {columns ? (
           Object.keys(frameWorkComponent).length > 0 ? (
@@ -505,7 +474,7 @@ const WellMaster = () => {
           onOk={handleDelete}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 
