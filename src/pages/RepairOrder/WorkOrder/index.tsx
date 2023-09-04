@@ -655,7 +655,7 @@ const WorkOrder = ({
 
   const handleSaveData = async (rows: any) => {
     setUpdating(true);
-    const workOrderIds = uniq(selectedProducts?.filter((e: any) => e.type === 'service')?.map((e) => e?.workOrder?._id))
+    const workOrderIds = uniq(rows?.map((e) => e?.workOrder?._id))
     try {
       await asyncForEach(workOrderIds, async (id: any) => {
         const data: any = JSON.parse(JSON.stringify(rows?.filter((e) => e?.workOrder?._id === id)))
