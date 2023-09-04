@@ -161,7 +161,6 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
     setStoreFormData({ [MOBILE_FILTER_FORM_DATA]: null });
     setStoreUserFilter({ [MOBILE_USER_FILTER]: null });
     setStoreMobileFilterModel({ [MOBILE_FILTER_MODEL]: { data: {}, changedFrom: 'applyFilter' } });
-    console.log('reset');
   }, [setStoreFormData, setStoreUserFilter, setStoreMobileFilterModel]);
 
   // To reset filter for other pages
