@@ -84,10 +84,6 @@ const Report = () => {
   const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });
   const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
 
-  console.log(user);
-
-  console.log(user.user.brandCurrency);
-
   const fetchGridColumns = async () => {
     try {
       setLoadingColumns(true);

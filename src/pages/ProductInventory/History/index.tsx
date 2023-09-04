@@ -5,7 +5,7 @@ import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridCo
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, isObjectEmpty, productInventory, sidebarResource } from 'src/constants/helpers';
+import { currencyCodeToSymbol, gridLoadingTimeout, isObjectEmpty, productInventory, sidebarResource } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
@@ -141,6 +141,8 @@ const History = ({ product, warehouse, storageLocation }) => {
       });
   };
 
+  const currSymbol = currencyCodeToSymbol(user?.user?.brandCurrency);
+
   const columns = [
     { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
     {
@@ -177,13 +179,13 @@ const History = ({ product, warehouse, storageLocation }) => {
       }
     },
     ...(!user?.user?.brandPolicy?.hideInventoryCount ? [{ field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false }] : []),
-    { field: 'price', headerName: 'Cost', show: true, filter: false, cellRenderer: 'commonRenderer' },
-    { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
+    { field: 'price', headerName: `Cost (${currSymbol})`, show: true, filter: false, cellRenderer: 'commonRenderer' },
+    { field: 'totalPrice', headerName: `Amount (${currSymbol})`, show: true, filter: false, cellRenderer: 'commonRenderer' },
     ...(warehouse && warehouse?.split(',')?.length === 1
       ? [
         {
           field: 'finalAvgPrice',
-          headerName: 'Final Average Cost',
+          headerName: `Final Average Cost (${currSymbol})`,
           show: true,
           cellRenderer: 'commonRenderer',
           filter: false,
