@@ -20,7 +20,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage } from '../../constants/helpers';
@@ -347,6 +347,7 @@ const DynamicForm = () => {
                       dispatch={dispatch}
                       title={resource}
                       filters={filters}
+                      resource={resource}
                     />
                   </div>
                 </div>
@@ -411,6 +412,7 @@ const DynamicForm = () => {
                 )}
               </div>
             </div>
+            <DisplayFiltersForMobile resource={resource} />
           </div>
         </div>
         {columns ? (

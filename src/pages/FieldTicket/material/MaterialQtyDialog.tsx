@@ -35,7 +35,6 @@ interface EditDialogProps {
     selectedServices: any[];
     isBulkedit: any;
     loading: any;
-    isQtyOnly?: Boolean;
     isInlineEdit?: Boolean;
     showSaveAndNext?: Boolean;
     referenceType?: any;
@@ -52,7 +51,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     selectedServices,
     isBulkedit,
     loading,
-    isQtyOnly = false,
     isInlineEdit = false,
     showSaveAndNext = false,
     referenceType = null,
@@ -193,13 +191,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     }, [initialData, ref.current, isInlineEdit]);
 
     const EvaluteproductFields = async (fields) => {
-        if (isQtyOnly) {
-            fields = fields.filter((d) => d.fieldName === 'qty');
-        }
         if (isBulkedit) {
-            fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
+            fields = fields.filter((d) => d.fieldName !== 'pricingCondition');
         }
-
         const sections = uniq(map(fields, 'sectionName'));
         const customData = sections.map((name) => {
             let sectionFields = fields.filter((field) => field.sectionName === name);
@@ -329,12 +323,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
             if (values.qty < rowData.assetQty) {
                 errors['qty'] = 'The quantity is less than what was assigned.';
             }
-        }
-        if (isQtyOnly && rowData && values.qty > rowData.qty) {
-            errors['qty'] = `Quantity can not be greater than ${rowData?.qty}`;
-        }
-        if (isQtyOnly && rowData && values.qty <= 0) {
-            errors['qty'] = `Quantity should be greater than 0`;
         }
         return errors;
     }
@@ -644,7 +632,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                 {isBulkedit === false && showSaveAndNext && (
                                     <CustomButton
                                         loading={loading}
-                                        disabled={loading || (isQtyOnly ? false : isEqual(ref?.current?.values, initialData.values))}
+                                        disabled={loading || isEqual(ref?.current?.values, initialData.values)}
                                         variant="contained"
                                         color="primary"
                                         type="submit"
@@ -659,7 +647,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                 )}
                                 <CustomButton
                                     loading={loading}
-                                    disabled={loading || (isQtyOnly ? false : isEqual(ref?.current?.values, initialData.values))}
+                                    disabled={loading || isEqual(ref?.current?.values, initialData.values)}
                                     variant="contained"
                                     color="primary"
                                     type="submit"
