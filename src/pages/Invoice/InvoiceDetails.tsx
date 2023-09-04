@@ -29,6 +29,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Versions from 'src/components/Versions';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import { IoMdDownload } from 'react-icons/io';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -57,6 +58,7 @@ const InvoiceDetails = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [versionDialog, setVersionDialog] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
@@ -158,6 +160,31 @@ const InvoiceDetails = () => {
       });
   };
 
+  const handleDownload = () => {
+    setIsDownloading(true);
+  
+    axiosInstance()
+      .get(`/invoice/zip/${invoiceData._id}`, {
+        responseType: 'blob'
+      })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+  
+        const filename = response.headers["content-disposition"].split("filename=")[1];
+        link.setAttribute('download', filename);
+        
+        document.body.appendChild(link);
+        link.click();
+        setIsDownloading(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDownloading(false);
+      });
+  };
+
   const handleChangeStatus = (status) => {
     axiosInstance()
       .patch(`${invoice.api}/status/${invoiceData._id}`, { status: status })
@@ -185,6 +212,19 @@ const InvoiceDetails = () => {
           <Box className="control-buttons-v1">
             {invoiceData ? (
               <>
+                <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    className="btn-outline-v1"
+                    type="button"
+                    size="small"
+                    disabled={isDownloading ? true : false}
+                    startIcon={isMobile ? '' : <IoMdDownload />}
+                    onClick={(e) => {
+                      handleDownload();
+                    }}
+                  >
+                    {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
+                </Button>
                 {invoiceData?.versions?.length &&
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
