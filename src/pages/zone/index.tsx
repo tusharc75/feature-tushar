@@ -1,4 +1,4 @@
-import { Box, Menu, MenuItem } from '@material-ui/core';
+import { Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
@@ -10,7 +10,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { FaSuitcase } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -23,7 +23,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
@@ -285,8 +285,8 @@ const Zone = () => {
       </div>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex align-items-center gap-1'}>
               {isMobile && !isTablet && (
                 <>
                   <div className="d-flex flex-wrap items-center justify-between w-full">
@@ -330,74 +330,74 @@ const Zone = () => {
                         dispatch={dispatch}
                         title={routes?.zone?.title}
                         filters={filters}
+                        resource={sidebarResource.zone}
                       />
                     </div>
                   </div>
                 </>
               )}
-            </Grid>
-            <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid>
-                  <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
-                </Grid>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
 
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {permissions?.zone?.isCreate && (
-                    <Button
-                      className={'no-shadow'}
-                      onClick={() => {
-                        setZoneId(null);
-                        setOpen({ open: true, isClone: false });
-                      }}
-                      variant={'contained'}
-                      size="small"
-                      color="primary"
-                      startIcon={<AddOutlined />}
-                    >
-                      Add
-                    </Button>
-                  )}
-                  {permissions?.zone?.isDelete && (
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                  )}
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.zone?.isCreate && (
+                  <Button
+                    className={'no-shadow'}
+                    onClick={() => {
+                      setZoneId(null);
+                      setOpen({ open: true, isClone: false });
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    startIcon={<AddOutlined />}
                   >
-                    <MenuItem
-                      disabled={!permissions?.zone.isDelete}
-                      onClick={() => {
-                        closeActions();
-                        setShowDeleteConfirmBox(true);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  </Menu>
-                </Grid>
-              </Box>
+                    Add
+                  </Button>
+                )}
+                {permissions?.zone?.isDelete && (
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    disabled={selectedRecords.length ? false : true}
+                    aria-controls="action-menu"
+                    className={`new-dropdown-v1`}
+                    endIcon={<ExpandMore />}
+                  >
+                    Actions
+                  </Button>
+                )}
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={!permissions?.zone.isDelete}
+                    onClick={() => {
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                </Menu>
+              </div>
+            </div>
+            <Grid xs={12}>
+              <DisplayFiltersForMobile resource={sidebarResource.zone} />
             </Grid>
-          </Grid>
+          </div>
         </div>
 
         {Object.keys(frameWorkComponent).length > 0 ? (
