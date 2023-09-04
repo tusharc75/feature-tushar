@@ -76,7 +76,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
             }
           }
         });
-
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,

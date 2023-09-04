@@ -15,6 +15,7 @@ import axiosInstance from "src/axios/axiosInstance";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import DetailsPage from '../../components/Shared/DetailsPage';
 import IotDataPoints from "./IotDataPoints";
+import Rules from "./Rules";
 
 export default function DeviceTemplatesDetails() {
     const toastConfig = useContext(CustomToastContext);
@@ -139,6 +140,13 @@ export default function DeviceTemplatesDetails() {
                         id="a11y-tab-1"
                         className={'tabLayout'}
                     />
+                    <Tab
+                        label={<div className="tab-font">Rules</div>}
+                        value={2}
+                        aria-controls="a11y-tabpanel-2"
+                        id="a11y-tab-2"
+                        className={'tabLayout'}
+                    />
                 </Tabs>
                 {tabValue === 0 && (
                     <Box>
@@ -152,6 +160,7 @@ export default function DeviceTemplatesDetails() {
                     </Box>
                 )}
                 {tabValue === 1 && <IotDataPoints deviceTemplate={id} />}
+                {tabValue === 2 && <Rules deviceTemplate={id} />}
             </Box>
             {openUpdateDialog && (
                 <ManageDeviceTemplates
