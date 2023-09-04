@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect, useState } from "react";
 import { Box, Button, Checkbox, Dialog, FormControlLabel, Grid, IconButton, TextField } from "@material-ui/core";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition, sidebarResource, yupSchema } from "src/constants/helpers";
-import { FieldArray, Form, Formik } from "formik";
+import { FieldArray, Form, Formik, getIn } from "formik";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
@@ -16,6 +16,7 @@ import routes from "src/components/Helpers/Routes";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { UserDropdown } from "src/components/Activity/Helpers/userDropdown";
+import { TbRuler2Off } from "react-icons/tb";
 
 export default function ManageRules({ deviceTemplate, open, id = null, onClose, onSuccess }) {
 
@@ -67,7 +68,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
         } else {
             setInitialValue({
                 ruleName: '',
-                condition: [''],
+                condition: [{ dataPoint: null, operator: null, value: null }],
                 isEmailAlert: false,
                 emailAlertUsers: [],
                 isCreateTask: false,
@@ -125,6 +126,33 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
         if (values.ruleName === '') {
             errors['ruleName'] = 'Please enter rule name';
         }
+
+        if (values?.condition?.length > 0) {
+            values?.condition?.forEach((cnd: any, i) => {
+                if (!cnd?.dataPoint) {
+                    errors[`condition.${i}.dataPoint`] = 'Data Point is Required';
+                }
+                if (!cnd?.operator) {
+                    errors[`condition.${i}.operator`] = 'Operator is Required';
+                }
+                if (!cnd?.value) {
+                    errors[`condition.${i}.value`] = 'Value is Required';
+                }
+            });
+        }
+
+        if (values?.isEmailAlert) {
+            if (values?.emailAlertUsers?.length <= 0) {
+                errors['emailAlertUsers'] = 'Email Alert Users is Required';
+            }
+        }
+
+        if (values?.isCreateTask) {
+            if (values?.taksAssignUsers?.length <= 0) {
+                errors['taksAssignUsers'] = 'Taks Assign Users is Required';
+            }
+        }
+
         return errors;
     }
 
@@ -153,7 +181,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                         {({ values, errors, touched, setFieldValue, submitForm }) => (
                             <Fragment>
                                 <CustomDialogHeader
-                                    title={'Create Rule'}
+                                    title={id ? `Update Rule - ${initialValue?.ruleName}` : 'Create Rule'}
                                     onClose={onClose}
                                     isMinimized={!fullScreen}
                                     onMinimizeMaximize={() => {
@@ -211,6 +239,8 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                                                                                                 <TextField
                                                                                                     {...params}
                                                                                                     label="Data Points"
+                                                                                                    error={touched?.condition && touched?.condition[i]?.dataPoint && Boolean(errors[`condition.${i}.dataPoint`])}
+                                                                                                    helperText={touched?.condition && touched?.condition[i]?.dataPoint && errors[`condition.${i}.dataPoint`]}
                                                                                                     variant="outlined"
                                                                                                 />
                                                                                             )}
@@ -230,6 +260,8 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                                                                                                 <TextField
                                                                                                     {...params}
                                                                                                     label="Operator"
+                                                                                                    error={touched?.condition && touched?.condition[i]?.operator && Boolean(errors[`condition.${i}.operator`])}
+                                                                                                    helperText={touched?.condition && touched?.condition[i]?.operator && errors[`condition.${i}.operator`]}
                                                                                                     variant="outlined"
                                                                                                 />
                                                                                             )}
@@ -239,13 +271,13 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                                                                                         <TextField
                                                                                             margin="dense"
                                                                                             type="number"
-                                                                                            label="value"
+                                                                                            label="Value"
                                                                                             name="value"
                                                                                             variant="outlined"
                                                                                             fullWidth
                                                                                             value={values?.condition[i]?.value}
-                                                                                            // error={touched['value'] && Boolean(errors['value'])}
-                                                                                            // helperText={touched['value'] && errors['value']}
+                                                                                            error={touched?.condition && touched?.condition[i]?.value && Boolean(errors[`condition.${i}.value`])}
+                                                                                            helperText={touched?.condition && touched?.condition[i]?.value && errors[`condition.${i}.value`]}
                                                                                             onChange={(e) => {
                                                                                                 setFieldValue(`condition.${i}.value`, parseFloat(e.target.value));
                                                                                             }}
@@ -262,7 +294,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                                                                                         <IconButton
                                                                                             size="small"
                                                                                             aria-label="add"
-                                                                                            onClick={() => push('')}
+                                                                                            onClick={() => push({ dataPoint: null, operator: null, value: null })}
                                                                                         >
                                                                                             <AddIcon fontSize="small" color={'primary'} />
                                                                                         </IconButton>
@@ -303,7 +335,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                                                                     label="Email Alert Users"
                                                                     errors={errors}
                                                                     touched={touched}
-                                                                    required={false}
+                                                                    required={true}
                                                                     setFieldValue={(name, value) => {
                                                                         setFieldValue(name, value);
                                                                     }}
@@ -342,7 +374,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                                                                     label="Taks Assign Users"
                                                                     errors={errors}
                                                                     touched={touched}
-                                                                    required={false}
+                                                                    required={true}
                                                                     setFieldValue={(name, value) => {
                                                                         setFieldValue(name, value);
                                                                     }}
