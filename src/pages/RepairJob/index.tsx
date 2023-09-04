@@ -434,6 +434,7 @@ const RepairJob = () => {
             heading={routes.repairJob.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             filters={filters}
+            resource={sidebarResource.repairJob}
             // showCloneRepairJobDialog={() => {
             //   handleShowCloneRepairJobDialog()
             // }}

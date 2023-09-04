@@ -11,7 +11,7 @@ import { TbArrowsSort } from 'react-icons/tb';
 import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -400,11 +400,12 @@ const WorkOrder = () => {
                         <MobileFilterDialog
                           isOpen={isOpenDialog}
                           handleClose={handleClose}
-                          contentPart={toggleInner}
+                          contentPart={null}
                           columns={columns}
                           dispatch={dispatch}
                           title={routes?.repairOrder?.title}
                           filters={filters}
+                          resource={sidebarResource.workOrder}
                         />
                       </div>
                     </div>
@@ -474,6 +475,7 @@ const WorkOrder = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.workOrder} />
           </div>
         </div>
         {isMobile && !isTablet ? (

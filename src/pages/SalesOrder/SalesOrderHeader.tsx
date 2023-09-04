@@ -7,7 +7,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import styles from '../Leads/Header.module.scss';
 
@@ -29,7 +29,8 @@ function SalesOrderHeader(props) {
     dispatch,
     showTransferEntityDialog,
     filters,
-    selectedType
+    selectedType,
+    resource = ''
     // showCloneRentalManagementDialog
   } = props;
 
@@ -123,11 +124,12 @@ function SalesOrderHeader(props) {
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={''}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 title={routes?.salesOrder?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
@@ -214,6 +216,7 @@ function SalesOrderHeader(props) {
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }

@@ -514,6 +514,7 @@ const ProjectSales: FC = () => {
               setShowEntityDialog={setShowEntityDialog}
               setEntities={setEntities}
               filters={filters}
+              resource={sidebarResource.projectSales}
             >
               {referenceDetails.referenceId && (
                 <Chip
