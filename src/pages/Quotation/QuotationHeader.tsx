@@ -9,7 +9,7 @@ import styles from '../Leads/Header.module.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdSort, MdFilterList, TbArrowsSort, MdOutlineFilterAlt } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import routes from 'src/components/Helpers/Routes';
 
 function QuotationHeader(props) {
@@ -195,6 +195,7 @@ function QuotationHeader(props) {
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }
