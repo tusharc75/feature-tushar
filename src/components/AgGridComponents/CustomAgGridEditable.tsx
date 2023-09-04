@@ -307,6 +307,17 @@ export default function CustomAgGridEditable({
     return [dataObj];
   };
 
+  useEffect(()=>{
+    const checkBoxCols = columns?.filter((m)=>m?.cellRenderer === "checkboxRenderer")
+    dataRows.map((row)=>{
+      checkBoxCols.forEach(col =>{
+           if(!row.hasOwnProperty(col?.field)){
+            row[col?.field] = false;
+           }
+      })
+    })
+  }, [dataRows, columns])
+
   const generateColumns = columns.map((column: any, index) => {
     return isClientSideGrid ? (
       <AgGridColumn

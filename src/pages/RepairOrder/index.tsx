@@ -394,6 +394,7 @@ const RepairOrder = () => {
             heading={routes.repairOrder.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             filters={filters}
+            resource={sidebarResource.repairOrder}
           >
             {fromRental && (
               <Chip

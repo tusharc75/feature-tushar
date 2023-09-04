@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { AddOutlined } from '@material-ui/icons';
-import { MdAdd, MdFilterList, MdOutlineFilterAlt, MdSort, TbArrowsSort } from 'react-icons/all';
-import { Box, Grid, MenuItem, Button, Menu, IconButton } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import styles from '../Leads/Header.module.scss';
-import { useData } from '../../StateProvider/Provider';
+import { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import routes from 'src/components/Helpers/Routes';
+import { useData } from '../../StateProvider/Provider';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import styles from '../Leads/Header.module.scss';
 
 function QuoteHeader({
   selectedRecords,
@@ -31,7 +30,8 @@ function QuoteHeader({
   columns,
   dispatch,
   filters,
-  selectedType
+  selectedType,
+  resource = ''
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
@@ -124,11 +124,12 @@ function QuoteHeader({
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={''}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 title={routes?.quoteBuilder?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
@@ -216,6 +217,7 @@ function QuoteHeader({
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }

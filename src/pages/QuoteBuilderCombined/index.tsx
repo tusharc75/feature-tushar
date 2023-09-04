@@ -22,7 +22,8 @@ import {
   supplierContact,
   quote,
   getLocalStorageArrayData,
-  removeLocalStorage
+  removeLocalStorage,
+  sidebarResource
 } from '../../constants/helpers';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
@@ -679,6 +680,7 @@ const QuoteBuilders = () => {
             dispatch={dispatch}
             filters={filters}
             selectedType={selectedType}
+            resource={sidebarResource.quoteBuilder}
           >
             {accountDetails.accountId && (
               <Chip

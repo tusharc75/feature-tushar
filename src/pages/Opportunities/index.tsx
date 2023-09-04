@@ -480,6 +480,7 @@ const Opportunities = () => {
             dispatch={dispatch}
             selectedType={selectedType}
             filters={filters}
+            resource={sidebarResource.opportunity}
           >
             {accountDetails.accountId && (
               <Chip

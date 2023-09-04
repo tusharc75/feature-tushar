@@ -361,6 +361,17 @@ export default function CustomAgGrid({
   //   }
   // }
 
+  useEffect(()=>{
+    const checkBoxCols = columns?.filter((m)=>m?.cellRenderer === "checkboxRenderer")
+    dataRows.map((row)=>{
+      checkBoxCols.forEach(col =>{
+           if(!row.hasOwnProperty(col?.field)){
+            row[col?.field] = false;
+           }
+      })
+    })
+  }, [dataRows, columns])
+
   const getActionColumn = () => {
     if (allowAction) {
       return (

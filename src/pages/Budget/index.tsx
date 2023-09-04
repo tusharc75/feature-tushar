@@ -19,7 +19,7 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { budget, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
@@ -350,6 +350,7 @@ function Budget() {
                         dispatch={dispatch}
                         title={routes?.budget?.title}
                         filters={filters}
+                        resource={sidebarResource.budget}
                       />
                     </div>
                   </div>
@@ -401,6 +402,7 @@ function Budget() {
                   </Menu>
                 </div>
               </div>
+              <DisplayFiltersForMobile resource={sidebarResource.budget} />
             </div>
           </div>
           <Box component="div">
