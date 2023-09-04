@@ -64,7 +64,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
     setIsSubmitting(true);
     const data: any = [];
     values?.seriaizedAsset?.forEach((element) => {
-      if (parseInt(element?.inventoryQuantity)) {
+      if (parseInt(element?.inventoryQuantity) || parseInt(element?.assetQuantity)) {
         data.push({
           _id: element._id,
           product: element.productId,
@@ -251,7 +251,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({ values, setFieldValue, errors }) => (
             <>
@@ -376,60 +376,28 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                       error={validate([data])?.inventoryQuantity}
                                       helperText={validate([data]).inventoryQuantity ? 'Receiving quantity is more than actual quantity' : ''}
                                     />
-                                    {data?.serializedProduct && (
-                                      <div className="flex gap-2 items-center">
-                                        <Autocomplete
-                                          options={[]}
-                                          size="small"
-                                          fullWidth={true}
-                                          freeSolo={true}
-                                          multiple={true}
-                                          disableCloseOnSelect
-                                          value={data.serialNumber}
-                                          onChange={(_, val) => {
-                                            arrayHelpers.replace(index, {
-                                              ...values.seriaizedAsset[index],
-                                              ['serialNumber']: val
-                                            });
-                                          }}
-                                          getOptionSelected={(item, current) => item === current}
-                                          getOptionLabel={(option) => option}
-                                          renderInput={(props) => (
-                                            <TextField
-                                              {...props}
-                                              placeholder={`Serial Number`}
-                                              variant="outlined"
-                                              name="serialNumber"
-                                              label={'Serial Number'}
-                                              error={validate([data])?.serialNumber}
-                                              helperText={
-                                                validate([data]).serialNumber ? 'Serial numbers should be less then inventory quantity' : ''
-                                              }
-                                            />
-                                          )}
-                                        />
-                                        <Typography
-                                          className="link cursor-pointer"
-                                          style={{ color: 'var(--primary)' }}
-                                          onClick={() => handleExportField(data)}
-                                        >
-                                          Export
-                                        </Typography>
-                                        <input
-                                          accept="json"
-                                          style={{ display: 'none' }}
-                                          onChange={handleImport(arrayHelpers, index, values)}
-                                          id={`import-file-${index}`}
-                                          multiple={false}
-                                          type="file"
-                                        />
-                                        <label htmlFor={`import-file-${index}`}>
-                                          <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
-                                            Import
-                                          </Typography>
-                                        </label>
-                                      </div>
-                                    )}
+                                    {/* {data?.serializedProduct && (
+                                      <TextField
+                                        fullWidth
+                                        label="Asset Quantity"
+                                        variant="outlined"
+                                        type="number"
+                                        size="small"
+                                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                        name="assetQuantity"
+                                        placeholder="Asset Quantity"
+                                        value={data.assetQuantity}
+                                        onChange={(e) => {
+                                          const value = e.target.value.replace(/[^0-9]/g, '');
+                                          arrayHelpers.replace(index, {
+                                            ...values.seriaizedAsset[index],
+                                            ['assetQuantity']: value
+                                          });
+                                        }}
+                                        error={validate([data])?.assetQuantity}
+                                        helperText={validate([data]).assetQuantity ? 'Receiving quantity is more than actual quantity' : ''}
+                                      />
+                                    )} */}
                                     <TextField
                                       fullWidth
                                       label="Supplier Part Number"
@@ -462,6 +430,60 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                         });
                                       }}
                                     />
+                                    {data?.serializedProduct && (
+                                      <div className="flex gap-2 items-center">
+                                        <Autocomplete
+                                          options={[]}
+                                          size="small"
+                                          fullWidth={true}
+                                          freeSolo={true}
+                                          multiple={true}
+                                          disableCloseOnSelect
+                                          value={data.serialNumber}
+                                          onChange={(_, val) => {
+                                            arrayHelpers.replace(index, {
+                                              ...values.seriaizedAsset[index],
+                                              ['serialNumber']: val
+                                            });
+                                          }}
+                                          getOptionSelected={(item, current) => item === current}
+                                          getOptionLabel={(option) => option}
+                                          renderInput={(props) => (
+                                            <TextField
+                                              {...props}
+                                              placeholder={`Serial Numbers`}
+                                              variant="outlined"
+                                              name="serialNumber"
+                                              label={'Serial Numbers'}
+                                              error={validate([data])?.serialNumber}
+                                              helperText={
+                                                validate([data]).serialNumber ? 'Serial numbers should be less then inventory quantity' : ''
+                                              }
+                                            />
+                                          )}
+                                        />
+                                        <Typography
+                                          className="link cursor-pointer"
+                                          style={{ color: 'var(--primary)' }}
+                                          onClick={() => handleExportField(data)}
+                                        >
+                                          Export
+                                        </Typography>
+                                        <input
+                                          accept="json"
+                                          style={{ display: 'none' }}
+                                          onChange={handleImport(arrayHelpers, index, values)}
+                                          id={`import-file-${index}`}
+                                          multiple={false}
+                                          type="file"
+                                        />
+                                        <label htmlFor={`import-file-${index}`}>
+                                          <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
+                                            Import
+                                          </Typography>
+                                        </label>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               </div>
