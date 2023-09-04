@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CustomToastContext } from '../StateProvider/CustomToastContext/CustomToastContext';
 import { isObjectEmpty } from '../constants/helpers';
 import lodash from 'lodash';
+import { useLocation } from 'react-router-dom';
 
 import axiosInstance from 'src/axios/axiosInstance';
 import './MobileFilterDialog.scss';
@@ -24,7 +25,7 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
   const [storeFormData, setStoreFormData] = useStore((store) => store[MOBILE_FILTER_FORM_DATA]);
   const [storeFilterCleared, setStoreFilterCleared] = useStore((store) => store[MOBILE_FILTER_CLEARED]);
   const [storeMobileFilterModel, setStoreMobileFilterModel] = useStore((store) => store[MOBILE_FILTER_MODEL]);
-  const initialRender = React.useRef(true);
+  const prevResource = React.useRef('');
 
   const toastConfig = React.useContext(CustomToastContext);
   const [inputFields, setInputFields] = React.useState<TInputField[] | null>(null);
@@ -159,17 +160,19 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
   const resetStore = React.useCallback(() => {
     setStoreFormData({ [MOBILE_FILTER_FORM_DATA]: null });
     setStoreUserFilter({ [MOBILE_USER_FILTER]: null });
-  }, [setStoreFormData, setStoreUserFilter]);
+    setStoreMobileFilterModel({ [MOBILE_FILTER_MODEL]: { data: {}, changedFrom: 'applyFilter' } });
+    console.log('reset');
+  }, [setStoreFormData, setStoreUserFilter, setStoreMobileFilterModel]);
 
   // To reset filter for other pages
-  React.useEffect(() => {
-    if (initialRender.current) {
+  const resourceDependency = React.useMemo(() => prevResource.current, []);
+  React.useLayoutEffect(() => {
+    if (resourceDependency !== resource) {
       resetStore();
-      initialRender.current = false;
     }
-  }, [resetStore]);
+  }, [resetStore, resource, resourceDependency]);
 
-  //  // To change filter from display filter component
+  // To change filter from display filter component
   React.useEffect(() => {
     if (storeMobileFilterModel?.changedFrom === 'showFilter' && !storeFilterCleared) {
       if (!storeUserFilter) setSelectedUserFilter(null);
@@ -323,18 +326,19 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
 
 type TData = { id: string; name: string; value: string | number | null; from: 'userFilter' | 'formData' };
 
-export const DisplayFiltersForMobile = () => {
+export const DisplayFiltersForMobile = ({ resource = '' }) => {
   const [storeUserFilter, setStoreUserFilter] = useStore((store) => store[MOBILE_USER_FILTER]);
   const [storeFormData, setStoreFormData] = useStore((store) => store[MOBILE_FILTER_FORM_DATA]);
   const [_, setStoreMobileFilterModel] = useStore((store) => store[MOBILE_FILTER_MODEL]);
   const [storeFilterCleared, setStoreFilterCleared] = useStore((store) => store[MOBILE_FILTER_CLEARED]);
   const [data, setData] = React.useState<TData[]>([]);
+  const prevResource = React.useRef('');
 
   function humanize(str: string): string {
     return lodash.capitalize(lodash.trim(lodash.snakeCase(str).replace(/_id$/, '').replace(/_/g, ' ')));
   }
 
-  React.useEffect(() => {
+  const dataSetter = React.useCallback(() => {
     if (storeUserFilter) {
       const newData: TData = { id: uuidv4(), name: '', value: '', from: 'userFilter' };
       newData.name = storeUserFilter?.title;
@@ -349,6 +353,14 @@ export const DisplayFiltersForMobile = () => {
       setData(newData);
     }
   }, [storeUserFilter, storeFormData]);
+
+  React.useEffect(() => {
+    if (prevResource.current !== resource) {
+      prevResource.current = resource;
+    } else {
+      dataSetter();
+    }
+  }, [resource, dataSetter]);
 
   const clearFilter = React.useCallback(
     (data: TData) => {

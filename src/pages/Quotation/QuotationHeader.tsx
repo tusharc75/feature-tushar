@@ -195,7 +195,7 @@ function QuotationHeader(props) {
           )}
         </div>
       </div>
-      <DisplayFiltersForMobile />
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }
