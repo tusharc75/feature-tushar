@@ -10,7 +10,7 @@ import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 
 const ProjectStrategyHeader = (props) => {
@@ -30,7 +30,8 @@ const ProjectStrategyHeader = (props) => {
     columns,
     dispatch,
     children,
-    filters
+    filters,
+    resource = ''
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
@@ -120,11 +121,12 @@ const ProjectStrategyHeader = (props) => {
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={''}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 title={routes?.projectSales?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
@@ -218,6 +220,7 @@ const ProjectStrategyHeader = (props) => {
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 };

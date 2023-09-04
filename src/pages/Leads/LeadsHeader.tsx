@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { AddOutlined } from '@material-ui/icons';
-import { Grid, MenuItem, Button, Menu, Box, IconButton } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
-import styles from './Header.module.scss';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import { getLocalStorageArrayData, processFieldName } from '../../constants/helpers';
+import React, { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdSort, MdFilterList, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import routes from 'src/components/Helpers/Routes';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import { processFieldName } from '../../constants/helpers';
+import styles from './Header.module.scss';
 
 function LeadsHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -71,7 +70,8 @@ function LeadsHeader(props) {
     columns,
     dispatch,
     children,
-    filters
+    filters,
+    resource = ''
   } = props;
 
   let toggleInner = options && (
@@ -128,11 +128,12 @@ function LeadsHeader(props) {
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={''}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 title={routes?.lead?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
@@ -253,6 +254,7 @@ function LeadsHeader(props) {
           ) : null}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }
