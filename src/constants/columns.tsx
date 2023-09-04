@@ -248,7 +248,7 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
           column.push({
             ...currentColumn,
             width: 200,
-            Cell: ({ row }) => (row.original[ele.fieldName] ? <p>{Boolean(row.original[ele.fieldName]) ? 'Yes' : 'No'}</p> : <NoDataCell />)
+            Cell: ({ row }) => (<p>{Boolean(row.original[ele.fieldName]) ? 'Yes' : 'No'}</p>)
           });
         } else if (ele.type === 'multiSelect') {
           column.push({

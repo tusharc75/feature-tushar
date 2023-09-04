@@ -7,7 +7,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import styles from '../Leads/Header.module.scss';
 
@@ -33,7 +33,8 @@ function OpportunitiesHeader(props) {
     columns,
     dispatch,
     filters,
-    selectedType
+    selectedType,
+    resource = ''
   } = props;
 
   const handleOpen = () => {
@@ -142,6 +143,7 @@ function OpportunitiesHeader(props) {
                 dispatch={dispatch}
                 title={routes?.opportunity?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
@@ -217,6 +219,7 @@ function OpportunitiesHeader(props) {
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }

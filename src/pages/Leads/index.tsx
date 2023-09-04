@@ -543,6 +543,7 @@ const Leads = () => {
             showConfirmBox={showConfirmBox}
             icon={<HiUserGroup className="headerLogo" />}
             heading={routes.lead.title}
+            resource={sidebarResource.lead}
             allowToConvertLeadToOpportunity={
               permissions['customerAccount'].isCreate && permissions['customerContact'].isCreate && permissions['opportunity'].isCreate
             }
