@@ -9,7 +9,7 @@ import styles from '../Leads/Header.module.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdSort, MdFilterList, TbArrowsSort, MdOutlineFilterAlt } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import routes from 'src/components/Helpers/Routes';
 
 function InvoiceHeader(props) {
@@ -29,7 +29,8 @@ function InvoiceHeader(props) {
     columns,
     dispatch,
     showTransferEntityDialog,
-    filters
+    filters,
+    resource = ''
     // showCloneRentalManagementDialog
   } = props;
 
@@ -126,11 +127,12 @@ function InvoiceHeader(props) {
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={toggleInner}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 title={routes?.salesOrder?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
@@ -196,6 +198,7 @@ function InvoiceHeader(props) {
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }

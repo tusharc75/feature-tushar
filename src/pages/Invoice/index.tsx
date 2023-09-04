@@ -383,6 +383,7 @@ const Invoice = () => {
               columns={columns}
               dispatch={dispatch}
               filters={filters}
+              resource={sidebarResource.invoice}
             >
               {accountDetails.accountId && (
                 <Chip
