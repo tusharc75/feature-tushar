@@ -185,7 +185,8 @@ const LoadingTicket = ({
             warehouseId: u?.warehouse?.optionValue,
             currentOwner: u?.currentOwner,
             currentLocation: u?.currentLocation?.optionValue,
-            startDate: u?.startDate
+            startDate: u?.startDate,
+            mtrAttachedView: u?.mtrAttached ? 'Yes' : 'No',
           }));
 
         const result = await axiosInstance().get(
@@ -522,7 +523,7 @@ const LoadingTicket = ({
   ];
 
   if (findHeader(columnHeader?.assetFields, 'mtrAttached')) {
-    columns.push({ field: 'mtrAttached', headerName: 'MTR Attached', show: true, cellRenderer: 'checkboxRenderer' });
+    columns.push({ field: 'mtrAttachedView', headerName: 'MTR Attached', show: true, cellRenderer: 'commonRenderer' });
   }
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
