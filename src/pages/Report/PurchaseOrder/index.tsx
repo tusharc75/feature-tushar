@@ -21,7 +21,8 @@ import {
   primaryFields,
   productInventory,
   isObjectEmpty,
-  sidebarResource
+  sidebarResource,
+  currencyCodeToSymbol
 } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import MomentUtils from '@date-io/moment';
@@ -83,12 +84,17 @@ const Report = () => {
   const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });
   const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
 
+  console.log(user);
+
+  console.log(user.user.brandCurrency);
+
   const fetchGridColumns = async () => {
     try {
       setLoadingColumns(true);
       let columns = [];
       let rendererNames = [];
       let resourceFieldData = [];
+      let currSymbol = currencyCodeToSymbol(user?.user?.brandCurrency);
 
       if (resourceCamelCase === 'purchaseOrderDetails') {
         let {
@@ -269,7 +275,7 @@ const Report = () => {
           },
           {
             field: 'averagePrice',
-            headerName: 'Average Cost',
+            headerName: `Average Cost (${currSymbol})`,
             show: true,
             disabled: false,
             filter: false,
@@ -278,7 +284,7 @@ const Report = () => {
           },
           {
             field: 'totalPrice',
-            headerName: 'Total',
+            headerName: `Total (${currSymbol})`,
             show: true,
             disabled: false,
             filter: false,
@@ -423,8 +429,8 @@ const Report = () => {
               }
             }
           },
-          { field: 'price', headerName: 'Cost', show: true, filter: false, cellRenderer: 'commonRenderer' },
-          { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
+          { field: 'price', headerName: `Cost (${currSymbol})`, show: true, filter: false, cellRenderer: 'commonRenderer' },
+          { field: 'totalPrice', headerName: `Amount (${currSymbol})`, show: true, filter: false, cellRenderer: 'commonRenderer' },
           { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
           ...(user?.user?.brandPolicy?.storageLocation
             ? [
@@ -512,7 +518,7 @@ const Report = () => {
           },
           {
             field: 'averagePrice',
-            headerName: 'Average Cost',
+            headerName: `Average Cost (${currSymbol})`,
             show: true,
             disabled: false,
             filter: false,
@@ -521,7 +527,7 @@ const Report = () => {
           },
           {
             field: 'totalPrice',
-            headerName: 'Total',
+            headerName: `Total (${currSymbol})`,
             show: true,
             disabled: false,
             filter: false,
