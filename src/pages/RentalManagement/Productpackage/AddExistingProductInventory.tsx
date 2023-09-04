@@ -67,7 +67,7 @@ const AddExistingProductInventory = ({
             editable: true
           },
           {
-            field: 'inventoryInWarehouseCount',
+            field: 'availableAssetCount',
             headerName: 'Available Asset',
             show: true,
             disabled: true,
