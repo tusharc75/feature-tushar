@@ -76,7 +76,6 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
     });
     saveDataInStore();
     setStoreMobileFilterModel({ [MOBILE_FILTER_MODEL]: { data: result, changedFrom: 'applyFilter' } });
-    console.log(result);
     dispatch({ type: 'filter', filters: result });
     toastConfig.setToastConfig({
       open: true,
