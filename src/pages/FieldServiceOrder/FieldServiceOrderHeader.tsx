@@ -128,6 +128,7 @@ function ServiceOrderHeader(props) {
                 dispatch={dispatch}
                 title={routes?.fieldServiceOrder?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
