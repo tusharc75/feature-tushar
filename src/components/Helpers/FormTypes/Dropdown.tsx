@@ -106,7 +106,6 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
       }
     }
   }
-
   return optionsToShow;
 }
 
@@ -338,7 +337,13 @@ function Dropdown({
                 {...rest}
                 multiple
                 disableCloseOnSelect={true}
-                options={dropdownOptions(option, values, fields, fieldData)}
+                options={[
+                  ...(dropdownOptions(option, values, fields, fieldData).length > 0
+                    ? [{ optionValue: 'selectAll', optionLabel: 'Select All' }]
+                    : []),
+                  ...dropdownOptions(option, values, fields, fieldData)
+                ]}
+                
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                 value={
                   values[name]
@@ -353,13 +358,30 @@ function Dropdown({
                 }}
                 onChange={
                   onChange
-                    ? onChange
+                    ? (e, value: any, reason) =>{
+                      const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if(isSelectedAll){
+                        onChange(e, dropdownOptions(option, values, fields, fieldData), reason)
+                      }
+                      else{
+                        onChange(e, value, reason)
+                      }
+                    }
                     : (e, value: any, reason) => {
                       if (setFieldValue) {
-                        setFieldValue(
-                          name,
-                          value.map((val) => val.optionValue)
-                        );
+                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+
+                        if (isSelectedAll) {
+                          // If "Select All" is selected, set all other options as values
+                          setFieldValue(
+                            name,
+                            dropdownOptions(option, values, fields, fieldData)
+                              .map((item) => item.optionValue)
+                          );
+                        } else {
+                          // Remove "Select All" if it was selected and set the values accordingly
+                          setFieldValue(name, value.map((val) => val.optionValue));
+                        }
                       }
                     }
                 }
