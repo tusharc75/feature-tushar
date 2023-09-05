@@ -691,14 +691,15 @@ export default function Attachment() {
       <CustomContainer>
         {filter && (
           <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={'d-flex align-items-center gap-1'}>
+            <div className="grid grid-cols-1 lg:grid-cols-[4fr_3fr] gap-4">
+              <div className={'d-flex flex-wrap items-start gap-2 content-start'}>
                 <AiOutlinePaperClip className="headerLogo" />
                 <span className="listingHeader">{routes.attachment.title} </span>
                 <Autocomplete
+                  limitTags={1}
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
-                  style={{ minWidth: '200px' }}
+                  className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
                   fullWidth
                   value={resource}
                   onChange={(event, newValue) => {
@@ -724,11 +725,12 @@ export default function Attachment() {
                 />
                 {resource && resourceData && (
                   <Autocomplete
+                    limitTags={1}
                     disabled={loadingResources}
                     options={resourceData}
+                    className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
                     getOptionLabel={(option: any) => option.optionLabel}
                     getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
-                    style={{ width: '250px' }}
                     value={selectedResourceData}
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
@@ -746,7 +748,7 @@ export default function Attachment() {
                       <TextField
                         {...params}
                         fullWidth
-                        className="flex-grow md:max-w-[250px]"
+                        className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
                         margin="none"
                         size="small"
                         label={`Select ${resource.optionLabel}`}
