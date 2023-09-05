@@ -336,7 +336,8 @@ export const sidebarResource = {
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
-  deviceTemplates: 'Device Templates'
+  deviceTemplates: 'Device Templates',
+  workStations: 'Work Stations',
 };
 
 export const primaryFields = {
@@ -461,7 +462,8 @@ export const RESOURCE_LABEL = {
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
   iotReport: 'IoT Report',
-  deviceTemplates: 'Device Templates'
+  deviceTemplates: 'Device Templates',
+  workStations: 'Work Stations',
 };
 
 export const CHILD_RESOURCE = {
