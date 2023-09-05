@@ -22,34 +22,36 @@ export default function Current({ assetId }) {
   }, [assetId]);
 
   const fetchData = async () => {
-    axiosInstance().get(`/report/iot/current-status`, {
-      params: {
-        asset: assetId
-      }
-    }).then(({ data: { data } }) => {
-
-      const parentCategory: any = [];
-      const category: any = [];
-
-      data?.dataPointData.forEach(d => {
-        if (d?.hasOwnProperty('parentCategory')) {
-          parentCategory.push({
-            ...d,
-            time: moment(d?.time).format(dateTimeFormat)
-          })
-        } else {
-          category.push({
-            ...d,
-            time: moment(d?.time).format(dateTimeFormat)
-          })
+    axiosInstance()
+      .get(`/report/iot/current-status`, {
+        params: {
+          asset: assetId
         }
-      });
+      })
+      .then(({ data: { data } }) => {
+        const parentCategory: any = [];
+        const category: any = [];
 
-      setParentCategory(parentCategory)
-      setCategory(category)
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
+        data?.dataPointData.forEach((d) => {
+          if (d?.hasOwnProperty('parentCategory')) {
+            parentCategory.push({
+              ...d,
+              time: moment(d?.time).format(dateTimeFormat)
+            });
+          } else {
+            category.push({
+              ...d,
+              time: moment(d?.time).format(dateTimeFormat)
+            });
+          }
+        });
+
+        setParentCategory(parentCategory);
+        setCategory(category);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const fetchErrorData = async () => {
@@ -76,35 +78,35 @@ export default function Current({ assetId }) {
 
   return (
     <>
-      {((parentCategory && parentCategory?.length) || (category && category?.length)) || (errorData && errorData?.length) ? (
+      {(parentCategory && parentCategory?.length) || (category && category?.length) || (errorData && errorData?.length) ? (
         <Grid container spacing={2}>
           <Grid item lg={8} md={8} sm={12} xs={12}>
-            {
-              _.uniqBy(parentCategory, 'parentCategory.optionValue')?.map((p: any, index) => (
-                <CustomAccordian
-                  expended={expandedAccordition}
-                  data={p}
-                  onChange={() => {
-                    setExpandedAccordition((prev) => (!prev ? p?.parentCategory?.optionValue : prev === p?.parentCategory?.optionValue ? false : p?.parentCategory?.optionValue));
-                  }}
-                  type={'parentCategory'}
-                  allData={parentCategory}
-                />
-              ))
-            }
-            {
-              _.uniqBy(category, 'category.optionValue')?.map((c: any, i) => (
-                <CustomAccordian
-                  expended={expandedAccordition}
-                  data={c}
-                  onChange={() => {
-                    setExpandedAccordition((prev) => (!prev ? c?.category?.optionValue : prev === c?.category?.optionValue ? false : c?.category?.optionValue));
-                  }}
-                  type={'category'}
-                  allData={category}
-                />
-              ))
-            }
+            {_.uniqBy(parentCategory, 'parentCategory.optionValue')?.map((p: any, index) => (
+              <CustomAccordian
+                expended={expandedAccordition}
+                data={p}
+                onChange={() => {
+                  setExpandedAccordition((prev) =>
+                    !prev ? p?.parentCategory?.optionValue : prev === p?.parentCategory?.optionValue ? false : p?.parentCategory?.optionValue
+                  );
+                }}
+                type={'parentCategory'}
+                allData={parentCategory}
+              />
+            ))}
+            {_.uniqBy(category, 'category.optionValue')?.map((c: any, i) => (
+              <CustomAccordian
+                expended={expandedAccordition}
+                data={c}
+                onChange={() => {
+                  setExpandedAccordition((prev) =>
+                    !prev ? c?.category?.optionValue : prev === c?.category?.optionValue ? false : c?.category?.optionValue
+                  );
+                }}
+                type={'category'}
+                allData={category}
+              />
+            ))}
           </Grid>
           <Grid item lg={4} md={4} sm={12} xs={12}>
             <TableContainer id={`${Date.now()}`} style={{ height: 'calc(100vh - 200px)', width: 'auto' }}>

@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Box, Checkbox, FormControlLabel, FormGroup, Collapse, IconButton } from '@material-ui/core';
+import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Box, Checkbox, FormControlLabel, FormGroup, IconButton } from '@material-ui/core';
 import moment from 'moment';
 import FilterModel from '../Helper/FilterModel';
 import Chart from '../Helper/Chart1';
 import { uniqBy } from 'lodash';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import Collapse from '@material-ui/core/Collapse';
+
+import Grow from '@material-ui/core/Grow';
 
 const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
   const [dateFilters, setDateFilters] = useState({
@@ -28,33 +31,35 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
 
   const compareCollapse = useCallback(
     (name: string, type: string) => {
-      if (type === 'parentCategory')
-        return open === name;
-      else if (type === 'category')
-        return openChild === name;
+      if (type === 'parentCategory') return open === name;
+      else if (type === 'category') return openChild === name;
     },
     [open, openChild]
   );
 
   const TreeView = ({ data, type, allData = [] }) => {
     return (
-      <>
+      <div key={data[type]?.optionLabel} className=" shadow-[0px_4px_20px_rgba(0,_0,_0,_0.06)] my-3 rounded-md ">
         <div
-          className={`flex flex-wrap justify-between items-center cursor-pointer py-2 px-1 rounded-md `}
+          className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all duration-[300ms]  ${
+            compareCollapse(`${data[type]?.optionValue}`, type)
+              ? 'bg-[var(--new-theme-color)] text-white'
+              : 'hover:bg-gray-300 dark:hover:bg-gray-800'
+          }`}
           onClick={(e) => {
             e.stopPropagation();
-            handleChange(`${data[type]?.optionValue}`);
+            if (type === 'parentCategory') handleChange(`${data[type]?.optionValue}`);
+            else if (type === 'category') handleChangeChild(`${data[type]?.optionValue}`);
           }}
         >
           <h6 className=" line-clamp-1 text-sm">{data[type]?.optionLabel}</h6>
           <IconButton
             size="small"
+            className={`${compareCollapse(`${data[type]?.optionValue}`, type) ? 'text-white' : ''}`}
             onClick={(e) => {
               e.stopPropagation();
-              if (type === 'parentCategory')
-                handleChange(`${data[type]?.optionValue}`);
-              else if (type === 'category')
-                handleChangeChild(`${data[type]?.optionValue}`);
+              if (type === 'parentCategory') handleChange(`${data[type]?.optionValue}`);
+              else if (type === 'category') handleChangeChild(`${data[type]?.optionValue}`);
             }}
           >
             {compareCollapse(`${data[type]?.optionValue}`, type) ? (
@@ -64,25 +69,22 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
             )}
           </IconButton>
         </div>
-        <Collapse in={compareCollapse(`${data[type]?.optionValue}`, type)} unmountOnExit>
-          <div className="px-1">
-            {
-              type === 'parentCategory' ? (
-                uniqBy(allData?.filter(d => d['category']?.parentCategory === open), 'category.optionValue')?.map((data => {
-                  return (
-                    <TreeView
-                      data={data}
-                      type={'category'}
-                      allData={allData?.filter(d => d['category']?.optionValue === openChild)}
-                    />
-                  )
-                }))
-              )
-                :
-                type === 'category' ? (
-                  allData?.filter((d) => d[type]?.optionValue === data[type]?.optionValue)?.map((dataPoint) => {
+        <Collapse in={compareCollapse(`${data[type]?.optionValue}`, type)} key={data[type]?.optionLabel} unmountOnExit>
+          <div className="pl-4 pr-2" key={data[type]?.optionLabel}>
+            {type === 'parentCategory'
+              ? uniqBy(
+                  allData?.filter((d) => d['category']?.parentCategory === open),
+                  'category.optionValue'
+                )?.map((data) => {
+                  return <TreeView data={data} type={'category'} allData={allData?.filter((d) => d['category']?.optionValue === openChild)} />;
+                })
+              : type === 'category'
+              ? allData
+                  ?.filter((d) => d[type]?.optionValue === data[type]?.optionValue)
+                  ?.map((dataPoint) => {
                     return (
                       <FormControlLabel
+                        key={dataPoint?.fieldName}
                         control={
                           <Checkbox
                             onChange={(e) => {
@@ -96,17 +98,14 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
                         }
                         label={dataPoint?.fieldLabel}
                       />
-                    )
+                    );
                   })
-                )
-                  :
-                  null
-            }
+              : null}
           </div>
         </Collapse>
-      </>
-    )
-  }
+      </div>
+    );
+  };
 
   return (
     <>
@@ -121,28 +120,20 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
               <FormGroup>
                 {Array.isArray(dataPoints) && (
                   <>
-                    {
-                      uniqBy(dataPoints.filter(d => d?.hasOwnProperty('parentCategory')), 'parentCategory.optionValue')?.map((category: any) => {
-                        return (
-                          <TreeView
-                            data={category}
-                            type={'parentCategory'}
-                            allData={dataPoints.filter(d => d?.hasOwnProperty('parentCategory'))}
-                          />
-                        )
-                      })
-                    }
-                    {
-                      uniqBy(dataPoints.filter(d => !d?.hasOwnProperty('parentCategory')), 'category.optionValue')?.map((category: any) => {
-                        return (
-                          <TreeView
-                            data={category}
-                            type={'category'}
-                            allData={dataPoints.filter(d => !d?.hasOwnProperty('parentCategory'))}
-                          />
-                        )
-                      })
-                    }
+                    {uniqBy(
+                      dataPoints.filter((d) => d?.hasOwnProperty('parentCategory')),
+                      'parentCategory.optionValue'
+                    )?.map((category: any) => {
+                      return (
+                        <TreeView data={category} type={'parentCategory'} allData={dataPoints.filter((d) => d?.hasOwnProperty('parentCategory'))} />
+                      );
+                    })}
+                    {uniqBy(
+                      dataPoints.filter((d) => !d?.hasOwnProperty('parentCategory')),
+                      'category.optionValue'
+                    )?.map((category: any) => {
+                      return <TreeView data={category} type={'category'} allData={dataPoints.filter((d) => !d?.hasOwnProperty('parentCategory'))} />;
+                    })}
                   </>
                 )}
               </FormGroup>
