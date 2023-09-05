@@ -70,24 +70,14 @@ const Activity = ({ type }) => {
       <CustomContainer>
         {filter && (
           <Fragment>
-            <Box className={classes.activityHeader}>
-              <Box style={{ marginBottom: 20 }}>
-                <Grid container>
-                  <Grid item xs={12} md={5} sm={7}>
-                    <Box display="flex" justifyContent="center">
-                      <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} md={7} sm={5}>
-                    <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} activityName={type} />
-                  </Grid>
-                </Grid>
+            <div className="flex flex-wrap justify-between items-start content-start gap-2 mb-[16px]">
+              <Box display="flex" justifyContent="center">
+                <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
               </Box>
-            </Box>
-            <Box className={classes.activityContainer}>
-              {viewType === 0 && <Board type={type} filter={filter} />}
-              {viewType === 1 && <Roadmap type={type} filter={filter} />}
-            </Box>
+              <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} activityName={type} />
+            </div>
+            {viewType === 0 && <Board type={type} filter={filter} />}
+            {viewType === 1 && <Roadmap type={type} filter={filter} />}
           </Fragment>
         )}
       </CustomContainer>

@@ -279,6 +279,7 @@ const FieldTicketDetail = () => {
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
+            setStepFullScreen={() => setStepFullScreen(true)}
           />
           <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && (

@@ -24,7 +24,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource, sublease } from '../../constants/helpers';
@@ -350,6 +350,7 @@ const Sublease = () => {
                       dispatch={dispatch}
                       title={routes?.sublease?.title}
                       filters={filters}
+                      resource={sidebarResource.sublease}
                     />
                   </div>
                 </>
@@ -423,6 +424,7 @@ const Sublease = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.sublease} />
           </div>
         </div>
         {columns ? (

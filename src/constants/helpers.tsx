@@ -1083,6 +1083,9 @@ export const isObjectEmpty = (obj) => {
 };
 
 export const currencyCodeToSymbol = (currencyCode) => {
+  if (!currencyCode) {
+    return "";
+  }
   return currencies.filter((obj) => obj.currencyCode === currencyCode)[0].symbolNative;
 };
 

@@ -9,7 +9,7 @@ import { MdOutlineFilterAlt } from 'react-icons/md';
 import { TbArrowsSort } from 'react-icons/tb';
 import { useHistory } from 'react-router-dom';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
@@ -423,6 +423,7 @@ const DeliveryTicket = () => {
                         dispatch={dispatch}
                         title={routes?.deliveryTicket?.title}
                         filters={filters}
+                        resource={sidebarResource.deliveryTicket}
                       />
                     </div>
                   </>
@@ -488,6 +489,7 @@ const DeliveryTicket = () => {
                     }}>Delete</MenuItem>
                   </Menu> */}
               </div>
+              <DisplayFiltersForMobile resource={sidebarResource.deliveryTicket} />
             </div>
           </div>
 

@@ -23,7 +23,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
@@ -387,6 +387,7 @@ const PurchaseOrder = () => {
                       dispatch={dispatch}
                       title={routes?.purchaseOrder?.title}
                       filters={filters}
+                      resource={sidebarResource.purchaseOrder}
                     />
                   </div>
                 </div>
@@ -519,6 +520,7 @@ const PurchaseOrder = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.purchaseOrder} />
           </div>
         </div>
         {columns ? (

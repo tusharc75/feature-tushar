@@ -13,7 +13,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
 import HideWhenOffline from '../../components/HideWhenOffline';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import { CHILD_RESOURCE, serializedAsset, sidebarResource } from '../../constants/helpers';
 import { clearAll, insertUpdate, objectStore } from '../../constants/indexdbhelper';
@@ -38,7 +38,8 @@ function RentalManagementHeader({
   selectedType,
   fetchRentalManagement,
   gridApi,
-  filters
+  filters,
+  resource = ''
   // showCloneRentalManagementDialog
 }) {
   const {
@@ -186,6 +187,7 @@ function RentalManagementHeader({
                 dispatch={dispatch}
                 filters={filters}
                 title={routes?.rentalManagement?.title}
+                resource={resource}
               />
             </div>
           </div>
@@ -315,6 +317,7 @@ function RentalManagementHeader({
           </HideWhenOffline>
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }

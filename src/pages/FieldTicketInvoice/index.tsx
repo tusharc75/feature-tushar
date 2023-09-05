@@ -7,7 +7,7 @@ import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser }
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { FIELD_TICKET_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { FIELD_TICKET_STATUS, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import CreateInvoiceDialog from './CreateInvoiceDialog';
@@ -290,6 +290,7 @@ const FieldTicketInvoice = () => {
             onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
             onSuccess={() => {
               setCreateInvoiceDialog({ open: false, data: null });
+              removeLocalStorage(localStorageSelectedRecords);
               fetchFieldTicketData();
             }}
           />
@@ -302,6 +303,7 @@ const FieldTicketInvoice = () => {
             }}
             onSuccess={() => {
               setViewInvoiceDialog({ open: false, data: null });
+              removeLocalStorage(localStorageSelectedRecords);
               fetchFieldTicketData();
             }}
           />
