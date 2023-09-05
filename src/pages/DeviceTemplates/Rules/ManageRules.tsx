@@ -427,6 +427,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                                         loading={loading}
                                         variant="contained"
                                         color="primary"
+                                        disabled={isEqual(initialValue, values)}
                                         onClick={(e) => {
                                             e.preventDefault();
                                             submitForm();
