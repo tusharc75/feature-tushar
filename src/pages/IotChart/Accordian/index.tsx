@@ -61,7 +61,7 @@ export default function CustomAccordian({ expended, data, onChange, type, allDat
   const [expandedAccordition, setExpandedAccordition] = useState<string | false>('');
 
   return (
-    <Accordion expanded={expended === data[type]?.optionValue} className={`omsAccordian`} onChange={onChange}>
+    <Accordion expanded={expended === data[type]?.optionValue} className={`omsAccordian w-full`} onChange={onChange}>
       <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
         <Box display="flex">
           <Box>
