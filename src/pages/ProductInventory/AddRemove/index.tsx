@@ -45,7 +45,8 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     state: { user }
   }: any = useData();
 
-  const currSymbol = currencyCodeToSymbol(user?.user?.brandCurrency);
+  const curr = user?.user?.brandCurrency || "";
+  const currSymbol = currencyCodeToSymbol(curr);
 
   useEffect(() => {
     if (product.length === 1 && type === 'remove') {
@@ -350,7 +351,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                         <TextField
                           margin="dense"
                           type="number"
-                          label={`Cost (${currSymbol})`}
+                          label={`Cost ${curr}`}
                           name="price"
                           required
                           fullWidth

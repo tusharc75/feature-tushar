@@ -5,7 +5,7 @@ import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridCo
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { currencyCodeToSymbol, gridLoadingTimeout, productInventory } from 'src/constants/helpers';
+import { gridLoadingTimeout, productInventory } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CommonRenderer, NumberRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
@@ -61,7 +61,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     }, gridLoadingTimeout);
   };
   
-  const currSymbol = currencyCodeToSymbol(user?.user?.brandCurrency);
+  const curr = user?.user?.brandCurrency || "";
 
   const columns = [
     { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
@@ -84,10 +84,10 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
         }
       }
     },
-    { field: 'price', headerName: `Cost (${currSymbol})`, show: true, cellRenderer: 'numberRenderer', filter: false, sortable: false },
+    { field: 'price', headerName: `Cost ${curr}`, show: true, cellRenderer: 'numberRenderer', filter: false, sortable: false },
     {
       field: 'totalPrice',
-      headerName: `Amount (${currSymbol})`,
+      headerName: `Amount ${curr}`,
       show: true,
       cellRenderer: 'creditDebitRenderer',
       filter: false,

@@ -5,7 +5,7 @@ import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridCo
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { currencyCodeToSymbol, gridLoadingTimeout, isObjectEmpty, productInventory, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, productInventory, sidebarResource } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
@@ -141,7 +141,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       });
   };
 
-  const currSymbol = currencyCodeToSymbol(user?.user?.brandCurrency);
+  const curr = user?.user?.brandCurrency || "";
 
   const columns = [
     { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
@@ -179,13 +179,13 @@ const History = ({ product, warehouse, storageLocation }) => {
       }
     },
     ...(!user?.user?.brandPolicy?.hideInventoryCount ? [{ field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false }] : []),
-    { field: 'price', headerName: `Cost (${currSymbol})`, show: true, filter: false, cellRenderer: 'commonRenderer' },
-    { field: 'totalPrice', headerName: `Amount (${currSymbol})`, show: true, filter: false, cellRenderer: 'commonRenderer' },
+    { field: 'price', headerName: `Cost ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
+    { field: 'totalPrice', headerName: `Amount ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
     ...(warehouse && warehouse?.split(',')?.length === 1
       ? [
         {
           field: 'finalAvgPrice',
-          headerName: `Final Average Cost (${currSymbol})`,
+          headerName: `Final Average Cost ${curr}`,
           show: true,
           cellRenderer: 'commonRenderer',
           filter: false,
