@@ -24,11 +24,11 @@ import io, { Socket } from 'socket.io-client';
 import { useHistory, Link, useLocation } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import UserProfile from './../UserProfile';
-import { SET_CHATTER, SET_SELECTED_ENTITY, SET_START_TOUR, SET_USER, SET_SEARCH } from '../../StateProvider/actionTypes';
+import { SET_CHATTER, SET_SELECTED_ENTITY, SET_START_TOUR, SET_USER, SET_SEARCH, USER_LOADING } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import routes from '../Helpers/Routes';
+import routes from '../Helpers/Routes';``
 import { useAccount, useMsal } from '@azure/msal-react';
 import { isEmpty } from 'lodash';
 import { FiCheckCircle } from 'react-icons/fi';
@@ -160,7 +160,15 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   const saveEntity = () => {
     axiosInstance()
       .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
-      .then(({ data }) => {})
+      .then(({ data }) => {
+        axiosInstance().get('/user/me').then(({ data: response }) => {
+          const { data } = response;
+          dispatch({ type: SET_USER, payload: data });
+        })
+          .catch((err) => {
+            localStorage.setItem('token', '');
+          });
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -428,8 +436,8 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     id === selectedEntity
       ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
       : hasAccessToEntity(id)
-      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-      : '';
+        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+        : '';
 
   function handleListKeyDown(event) {
     if (event.key === 'Tab') {
@@ -552,7 +560,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => {})
+                      .then(() => { })
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -672,7 +680,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => {})
+                      .then(() => { })
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -778,7 +786,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
 
       {/* Remove below false to show chat notification icon */}
 
-      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => {}}>
+      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => { }}>
         <Badge
           variant="dot"
           overlap="circular"
@@ -815,7 +823,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => {}}>
+      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => { }}>
         <Badge
           variant="dot"
           overlap="circular"

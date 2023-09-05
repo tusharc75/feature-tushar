@@ -376,7 +376,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                       error={validate([data])?.inventoryQuantity}
                                       helperText={validate([data]).inventoryQuantity ? 'Receiving quantity is more than actual quantity' : ''}
                                     />
-                                    {/* {data?.serializedProduct && (
+                                    {data?.serializedProduct && (
                                       <TextField
                                         fullWidth
                                         label="Asset Quantity"
@@ -397,7 +397,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                         error={validate([data])?.assetQuantity}
                                         helperText={validate([data]).assetQuantity ? 'Receiving quantity is more than actual quantity' : ''}
                                       />
-                                    )} */}
+                                    )}
                                     <TextField
                                       fullWidth
                                       label="Supplier Part Number"

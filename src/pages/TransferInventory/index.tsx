@@ -24,7 +24,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { TRANSFER_INVENTORY_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferInventory } from 'src/constants/helpers';
@@ -355,6 +355,7 @@ const TransferInventory = () => {
                       dispatch={dispatch}
                       title={routes?.transferInventory?.title}
                       filters={filters}
+                      resource={sidebarResource.transferInventory}
                     />
                   </div>
                 </div>
@@ -401,6 +402,7 @@ const TransferInventory = () => {
                 )}
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.transferInventory} />
           </div>
         </div>
         {columns ? (

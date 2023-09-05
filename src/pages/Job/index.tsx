@@ -383,6 +383,7 @@ const Job = () => {
             filters={filters}
             viewType={viewType}
             setViewType={setViewType}
+            resource={sidebarResource.job}
           />
         </div>
 
