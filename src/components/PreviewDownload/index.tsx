@@ -159,6 +159,7 @@ function PreviewDownload({
         const attachments = {
           base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
           contentType: base64data.split(';')[0].split(':')[1],
+          extension: '.pdf',
           name: `${resource}-${pdfType}`
         };
         setEmailAttachments((prevState) => {
