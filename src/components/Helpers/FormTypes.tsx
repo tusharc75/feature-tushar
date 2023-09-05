@@ -2122,7 +2122,7 @@ const FormTypes = (props) => {
               component="span"
               startIcon={isFileUploading && <CircularProgress size={15} />}
             >
-              {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
+              {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
             </Button>
           </label>
           {showErrorMessage ? (
@@ -2200,7 +2200,7 @@ const FormTypes = (props) => {
                   component="span"
                   startIcon={isFileUploading && <CircularProgress size={15} />}
                 >
-                  {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
+                  {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
                 </Button>
               </label>
               {showErrorMessage ? (
