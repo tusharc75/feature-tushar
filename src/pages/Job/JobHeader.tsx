@@ -11,7 +11,7 @@ import { TbArrowsSort } from 'react-icons/tb';
 import { useHistory } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import styles from '../Leads/Header.module.scss';
 
@@ -31,7 +31,8 @@ function JobHeader(props) {
     dispatch,
     filters,
     viewType,
-    setViewType
+    setViewType,
+    resource = ''
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [isOpenDialog, setisOpenDialog] = useState(false);
@@ -125,6 +126,7 @@ function JobHeader(props) {
                 dispatch={dispatch}
                 title={routes?.job?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
@@ -243,6 +245,7 @@ function JobHeader(props) {
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { MdOutlineFilterAlt } from 'react-icons/md';
 import { TbArrowsSort } from 'react-icons/tb';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import styles from '../Leads/Header.module.scss';
 
@@ -30,7 +30,8 @@ function ServiceOrderHeader(props) {
     selectedType,
     columns,
     dispatch,
-    filters
+    filters,
+    resource = ''
     // showCloneRentalManagementDialog
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
@@ -127,6 +128,7 @@ function ServiceOrderHeader(props) {
                 dispatch={dispatch}
                 title={routes?.fieldServiceOrder?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
@@ -199,6 +201,7 @@ function ServiceOrderHeader(props) {
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }
