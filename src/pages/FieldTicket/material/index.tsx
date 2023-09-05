@@ -17,9 +17,9 @@ import MaterialQtyDialog from './MaterialQtyDialog';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculatePrice, calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import Consumables from './Consumables';
-import { SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
+import { MATERIAL_TYPE, SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
@@ -230,8 +230,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.detail = d?.serviceName;
-      element.type = 'service';
+      element.type = MATERIAL_TYPE.service;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -330,7 +329,6 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
-
     if (inputField.hasOwnProperty('qtyDisplay')) {
       if (parseInt(inputField?.qtyDisplay) === 0) {
         toastConfig.setToastConfig({
@@ -343,7 +341,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
