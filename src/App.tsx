@@ -233,6 +233,8 @@ import IotReportList from './pages/IotReport';
 import IotReport from './pages/IotReport/Report';
 import DeviceTemplates from './pages/DeviceTemplates';
 import DeviceTemplatesDetails from './pages/DeviceTemplates/DeviceTemplatesDetails';
+import WorkStations from './pages/WorkStations';
+import WorkStationsDetail from './pages/WorkStations/WorkStationsDetail';
 
 var notificationInterval: any = null;
 
@@ -1026,6 +1028,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.deviceTemplatesDetail.path}/:id`}>
               <DeviceTemplatesDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workStations.path}`}>
+              <WorkStations />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workStationsDetail.path}/:id`}>
+              <WorkStationsDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
