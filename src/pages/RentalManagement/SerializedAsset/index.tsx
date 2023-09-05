@@ -375,11 +375,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
         parent.assetQty =
           parent.subRows.filter((d) => d.type !== 'asset').length === 0
             ? parent.assetQty
-            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
+            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
+            (parent.type === 'product' ? parent.assetQty : 0);
         parent.assetAssignedQty =
           parent.subRows.filter((d) => d.type !== 'asset').length === 0
             ? parent.assetAssignedQty
-            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0);
+            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0) +
+            (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
         parent.isValid = parent.serializedProduct
           ? parent.assetAssignedQty === parent.assetQty
             ? true
@@ -537,7 +539,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       _subRow.assetQty =
         tempSubRows.filter((d) => d.type !== 'asset').length === 0
           ? _subRow.assetQty
-          : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
+          : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
+          (_subRow.type === 'product' ? _subRow.assetQty : 0);
       _subRow.isValid = _subRow.serializedProduct
         ? _subRow.assetAssignedQty === _subRow.assetQty
           ? true

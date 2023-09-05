@@ -2120,6 +2120,7 @@ const FormTypes = (props) => {
               color="primary"
               size="small"
               component="span"
+              className="normal-case"
               startIcon={isFileUploading && <CircularProgress size={15} />}
             >
               {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
@@ -2198,6 +2199,7 @@ const FormTypes = (props) => {
                   color="primary"
                   size="small"
                   component="span"
+                  className="normal-case"
                   startIcon={isFileUploading && <CircularProgress size={15} />}
                 >
                   {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}

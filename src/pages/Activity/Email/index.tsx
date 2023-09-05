@@ -417,14 +417,15 @@ const Email = () => {
       <CustomContainer>
         {filter && (
           <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={'d-flex align-items-center gap-1'}>
+            <div className="grid grid-cols-1 lg:grid-cols-[4fr_3fr] gap-4">
+              <div className={'d-flex flex-wrap items-start gap-2 content-start'}>
                 <HiOutlineMail className="headerLogo" /> <span className="listingHeader">{routes.activityEmail.title}</span>
                 <Autocomplete
                   fullWidth
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
                   value={resource}
+                  className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
                   onChange={(event, newValue) => {
                     setResource(newValue);
                     if (newValue) {
@@ -437,7 +438,7 @@ const Email = () => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      className="flex-grow md:max-w-[250px]"
+                      className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
                       margin="none"
                       size="small"
                       label="Select Resource"
@@ -452,7 +453,7 @@ const Email = () => {
                     options={resourceData}
                     getOptionLabel={(option: any) => option.optionLabel}
                     getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
-                    style={{ width: '250px' }}
+                    className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
                     value={selectedResourceData}
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
@@ -469,7 +470,7 @@ const Email = () => {
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        className="flex-grow md:max-w-[250px]"
+                        className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
                         margin="none"
                         size="small"
                         label={`Select ${resource.optionLabel}`}
