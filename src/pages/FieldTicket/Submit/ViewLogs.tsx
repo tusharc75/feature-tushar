@@ -49,7 +49,7 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
       {
         accessor: 'date',
         Header: 'Date',
-        // primaryField: true,
+        disableFilters: true,
         width: 150,
         Cell: ({ row }) => {
           return row?.original['date'] ? <p className="text-truncate">{moment(row?.original['date']).format(dateTimeFormat)}</p> : <NoDataCell />;
@@ -58,7 +58,6 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
       {
         accessor: 'type',
         Header: 'Action',
-        // primaryField: true,
         width: 150,
         Cell: ({ row }) => {
           return row?.original['type'] ? <p className="text-truncate">{row?.original['type']}</p> : <NoDataCell />;
@@ -215,7 +214,7 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
                   height={'calc(100vh - 200px)'}
                   columns={columns}
                   data={rowsData}
-                  onSelect={() => {}}
+                  onSelect={() => { }}
                   childrenProperty="subRows"
                   uniqueKey="_id"
                   hideSelection={true}
