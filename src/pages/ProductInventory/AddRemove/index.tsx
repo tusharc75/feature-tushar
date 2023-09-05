@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
-import { Box, Button, CircularProgress, Dialog, Divider, List, ListItem, ListItemText, TextField, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Divider, InputAdornment, List, ListItem, ListItemText, TextField, Typography } from '@material-ui/core';
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { Autocomplete } from '@material-ui/lab';
@@ -12,7 +12,7 @@ import { read, utils, writeFile } from 'xlsx';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { capitalize, isEmpty } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
-import { convertDateInDateTime, dateFormatForInputControl, productInventory, sidebarResource } from '../../../constants/helpers';
+import { convertDateInDateTime, currencyCodeToSymbol, dateFormatForInputControl, productInventory, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
@@ -44,6 +44,9 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
   const {
     state: { user }
   }: any = useData();
+
+  const curr = user?.user?.brandCurrency || "";
+  const currSymbol = currencyCodeToSymbol(curr);
 
   useEffect(() => {
     if (product.length === 1 && type === 'remove') {
@@ -348,7 +351,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                         <TextField
                           margin="dense"
                           type="number"
-                          label="Cost"
+                          label={`Cost ${curr}`}
                           name="price"
                           required
                           fullWidth
@@ -359,6 +362,9 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                           onChange={(e) => {
                             setFieldValue('price', e.target.value);
+                          }}
+                          InputProps={{
+                            startAdornment: <InputAdornment position="start">{currSymbol}</InputAdornment>,
                           }}
                         />
                       </Box>

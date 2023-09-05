@@ -89,6 +89,7 @@ const Report = () => {
       let columns = [];
       let rendererNames = [];
       let resourceFieldData = [];
+      let curr = user?.user?.brandCurrency || "";
 
       if (resourceCamelCase === 'purchaseOrderDetails') {
         let {
@@ -269,7 +270,7 @@ const Report = () => {
           },
           {
             field: 'averagePrice',
-            headerName: 'Average Cost',
+            headerName: `Average Cost ${curr}`,
             show: true,
             disabled: false,
             filter: false,
@@ -278,7 +279,7 @@ const Report = () => {
           },
           {
             field: 'totalPrice',
-            headerName: 'Total',
+            headerName: `Total ${curr}`,
             show: true,
             disabled: false,
             filter: false,
@@ -423,8 +424,8 @@ const Report = () => {
               }
             }
           },
-          { field: 'price', headerName: 'Cost', show: true, filter: false, cellRenderer: 'commonRenderer' },
-          { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
+          { field: 'price', headerName: `Cost ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
+          { field: 'totalPrice', headerName: `Amount ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
           { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
           ...(user?.user?.brandPolicy?.storageLocation
             ? [
@@ -512,7 +513,7 @@ const Report = () => {
           },
           {
             field: 'averagePrice',
-            headerName: 'Average Cost',
+            headerName: `Average Cost ${curr}`,
             show: true,
             disabled: false,
             filter: false,
@@ -521,7 +522,7 @@ const Report = () => {
           },
           {
             field: 'totalPrice',
-            headerName: 'Total',
+            headerName: `Total ${curr}`,
             show: true,
             disabled: false,
             filter: false,

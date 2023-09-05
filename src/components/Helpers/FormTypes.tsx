@@ -1724,17 +1724,28 @@ const FormTypes = (props) => {
                 }
               }}
               options={
-                fieldData && fieldData?.isDependentDropdown
-                  ? option.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn])
-                  : //  Some times for resource dropdown we are not getting optionLabel, and multi-select breaks
-                  option.filter((f) => f.optionLabel)
-              }
+                [
+                  { optionValue: 'selectAll', optionLabel: 'Select All' },
+                  ...(fieldData && fieldData?.isDependentDropdown
+                    ? option.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn])
+                    : option.filter((f) => f.optionLabel)
+                  )
+                ]
+              }                            
               getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
               value={values[name] ? option.filter((data: any) => values[name].includes(data.optionValue)) : []}
               getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
               onChange={
                 onChange
-                  ? onChange
+                  ? (e, value: any, reason) =>{
+                    const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                    if(isSelectedAll){
+                      onChange(e, option.filter((opt) => opt.optionValue !== 'selectAll'), reason)
+                    }
+                    else{
+                      onChange(e, value, reason)
+                    }
+                  }
                   : (e, value: any, reason) => {
                     if (setFieldValue) {
                       if (!lookup) {
@@ -1743,7 +1754,14 @@ const FormTypes = (props) => {
                         } else if (reason === 'remove-option' && values[name].length === 1) {
                           setFieldValue(name, []);
                         }
-                        value.forEach((val) => {
+                        let modValues = [];
+                        if(!value.some((val) => val.optionValue === 'selectAll')){
+                          modValues = value
+                        }
+                        else {
+                          modValues = option.filter((opt) => opt.optionValue !== 'selectAll')
+                        }
+                        modValues.forEach((val) => {
                           if (typeof val === 'string' && /^[a-zA-Z ]*$/.test(val)) {
                             const newOption = {
                               order: option.length,
@@ -1787,15 +1805,20 @@ const FormTypes = (props) => {
                                 addFieldOption(newOption);
                                 setOptionsList([newOption, ...option]);
                               }
-
                               setFieldValue(
                                 name,
-                                value.filter((v) => v.optionValue).map((val) => val.optionValue)
+                                modValues.filter((v) => v.optionValue).map((val) => val.optionValue)
                               );
                             }
                           }
                         });
                       } else {
+                        if(value.some((val) => val.optionValue === 'selectAll')){
+                          setFieldValue(
+                            name,
+                            option.filter((opt) => opt.optionValue !== 'selectAll').map((val) => val.optionValue)
+                          )
+                        }
                         setFieldValue(
                           name,
                           value.map((val) => val.optionValue)
@@ -2099,7 +2122,7 @@ const FormTypes = (props) => {
               component="span"
               startIcon={isFileUploading && <CircularProgress size={15} />}
             >
-              {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
+              {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
             </Button>
           </label>
           {showErrorMessage ? (
@@ -2177,7 +2200,7 @@ const FormTypes = (props) => {
                   component="span"
                   startIcon={isFileUploading && <CircularProgress size={15} />}
                 >
-                  {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
+                  {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
                 </Button>
               </label>
               {showErrorMessage ? (
