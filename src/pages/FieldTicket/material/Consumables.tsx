@@ -23,7 +23,7 @@ import Technicians from './Technicians';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { calculatePrice } from 'src/components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import EditIcon from '@material-ui/icons/Edit';
 import HistoryIcon from '@material-ui/icons/History';
@@ -441,16 +441,20 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const dataRow = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    if (parseInt(inputField.qty) === 0) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'error',
-        message: 'Qty can not be 0'
-      });
-      return;
+
+    if (inputField.hasOwnProperty('qtyDisplay')) {
+      if (parseInt(inputField?.qtyDisplay) === 0) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Qty can not be 0'
+        });
+        return;
+      }
+      inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...dataRow, ...updatedData }];
-    inputField.qty = parseInt(inputField.qty);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 

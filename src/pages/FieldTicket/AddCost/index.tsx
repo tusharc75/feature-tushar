@@ -8,7 +8,7 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { CHILD_RESOURCE, fieldTicket, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import { generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AddCostDialog from './AddCostDialog';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
@@ -17,6 +17,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 
 const AddCost = ({ id, fieldTicketData, setNextStep, renderedFrom }) => {
 
@@ -34,6 +35,7 @@ const AddCost = ({ id, fieldTicketData, setNextStep, renderedFrom }) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [columns, setColumns] = useState([]);
   const [addDialog, setAddDialog] = useState({ open: false, data: null });
+  const [allFields, setAllFields] = useState([]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -44,6 +46,7 @@ const AddCost = ({ id, fieldTicketData, setNextStep, renderedFrom }) => {
       .get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`)
       .then(({ data: { data } }) => {
         data = CURReplaceByCurrencySingle(data, fieldTicketData?.currency || 'USD');
+        setAllFields(JSON.parse(JSON.stringify(data)));
         const newColumns = generateCustomTableColumns(data, fieldTicketData?.currency || 'USD', renderedFrom);
         let columns: any = [
           {
@@ -147,6 +150,41 @@ const AddCost = ({ id, fieldTicketData, setNextStep, renderedFrom }) => {
       });
   };
 
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+
+    if (inputField.hasOwnProperty('qty')) {
+      if (parseInt(inputField?.qty) === 0) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Qty can not be 0'
+        });
+        return;
+      }
+    }
+    let rows: any = [{ ...rowData, ...updatedData }];
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+
+    rows.forEach((element) => {
+      delete element.index;
+    });
+
+    axiosInstance()
+      .put(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, rows)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchCostData()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
@@ -211,6 +249,7 @@ const AddCost = ({ id, fieldTicketData, setNextStep, renderedFrom }) => {
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
             onSelect={setSelectedRecords}
             childrenProperty="subRows"
+            onSaveEdit={onSaveInlineEdit}
             uniqueKey="_id"
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
