@@ -399,6 +399,7 @@ const ServiceOrder = () => {
             heading={routes.fieldServiceOrder.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             filters={filters}
+            resource={sidebarResource.fieldServiceOrder}
             // showCloneServiceOrderDialog={() => {
             //   handleShowCloneServiceOrderDialog()
             // }}
