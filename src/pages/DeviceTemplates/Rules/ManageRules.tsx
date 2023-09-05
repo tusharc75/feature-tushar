@@ -17,6 +17,7 @@ import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomT
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { UserDropdown } from "src/components/Activity/Helpers/userDropdown";
 import { TbRuler2Off } from "react-icons/tb";
+import { isEqual } from "lodash";
 
 export default function ManageRules({ deviceTemplate, open, id = null, onClose, onSuccess }) {
 
@@ -44,12 +45,15 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
     const [fullScreen, setFullScreen] = useState(true);
     const [iotDataPoints, setIotDataPoints] = useState([]);
     const [initialValue, setInitialValue] = useState(null)
+    const [loading, setLoading] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
     useEffect(() => {
         fetchData()
     }, [id])
 
     const fetchData = () => {
+        setLoading(true)
         if (id) {
             axiosInstance().get(`${routes.deviceTemplates.path}/rule/${id}`)
                 .then(({ data: { data } }) => {
@@ -61,6 +65,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                         isCreateTask: data?.isCreateTask,
                         taksAssignUsers: data?.taksAssignUsers?.map(t => ({ userId: t }))
                     })
+                    setLoading(false)
                 })
                 .catch((error) => {
                     toastConfig.setToastConfig(error);
@@ -74,6 +79,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                 isCreateTask: false,
                 taksAssignUsers: []
             })
+            setLoading(false)
         }
     }
 
@@ -90,6 +96,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
     }, [])
 
     const handleSubmit = (values) => {
+        setLoading(true)
         if (id) {
             values._id = id;
             axiosInstance().put(`${routes.deviceTemplates.path}/rule`, values)
@@ -100,8 +107,10 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                         message: message
                     });
                     onSuccess()
+                    setLoading(false)
                 })
                 .catch((error) => {
+                    setLoading(false)
                     toastConfig.setToastConfig(error);
                 });
         } else {
@@ -114,9 +123,11 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                         message: message
                     });
                     onSuccess()
+                    setLoading(false)
                 })
                 .catch((error) => {
                     toastConfig.setToastConfig(error);
+                    setLoading(false)
                 });
         }
     };
@@ -166,7 +177,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                 aria-labelledby="customized-dialog-title"
                 onClose={(e, reason) => {
                     if (reason !== 'backdropClick') {
-                        onClose()
+                        setShowConfirmDialog(true);
                     }
                 }}
                 open={open}
@@ -182,7 +193,13 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                             <Fragment>
                                 <CustomDialogHeader
                                     title={id ? `Update Rule - ${initialValue?.ruleName}` : 'Create Rule'}
-                                    onClose={onClose}
+                                    onClose={(e, reason) => {
+                                        if (isEqual(initialValue, values)) {
+                                            onClose();
+                                        } else {
+                                            setShowConfirmDialog(true);
+                                        }
+                                    }}
                                     isMinimized={!fullScreen}
                                     onMinimizeMaximize={() => {
                                         setFullScreen((prevState) => !prevState);
@@ -396,12 +413,18 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                                         variant="outlined"
                                         color="primary"
                                         size="small"
-                                        onClick={onClose}
+                                        onClick={() => {
+                                            if (isEqual(initialValue, values)) {
+                                                onClose();
+                                            } else {
+                                                setShowConfirmDialog(true);
+                                            }
+                                        }}
                                     >
                                         Cancel
                                     </Button>
                                     <CustomButton
-                                        loading={false}
+                                        loading={loading}
                                         variant="contained"
                                         color="primary"
                                         onClick={(e) => {
@@ -412,6 +435,21 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
                                         Save
                                     </CustomButton>
                                 </CustomDialogFooter>
+
+                                {showConfirmDialog ? (
+                                    <ConfirmCancelDialog
+                                        open={showConfirmDialog}
+                                        onSave={() => {
+                                            setShowConfirmDialog(false);
+                                            submitForm();
+                                        }}
+                                        close={() => setShowConfirmDialog(false)}
+                                        onClose={() => {
+                                            setShowConfirmDialog(false);
+                                            onClose();
+                                        }}
+                                    />
+                                ) : null}
                             </Fragment >
                         )}
                     </Formik >
