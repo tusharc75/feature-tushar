@@ -60,6 +60,8 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
       dispatch({ type: 'loading', loading: false });
     }, gridLoadingTimeout);
   };
+  
+  const curr = user?.user?.brandCurrency || "";
 
   const columns = [
     { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
@@ -82,10 +84,10 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
         }
       }
     },
-    { field: 'price', headerName: 'Cost', show: true, cellRenderer: 'numberRenderer', filter: false, sortable: false },
+    { field: 'price', headerName: `Cost ${curr}`, show: true, cellRenderer: 'numberRenderer', filter: false, sortable: false },
     {
       field: 'totalPrice',
-      headerName: 'Amount',
+      headerName: `Amount ${curr}`,
       show: true,
       cellRenderer: 'creditDebitRenderer',
       filter: false,
