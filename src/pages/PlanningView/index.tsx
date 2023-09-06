@@ -104,13 +104,21 @@ const PLANNING_RESOURCE = [
         start: 'estimateStartDate',
         end: 'estimateEndDate'
     },
+    {
+        key: 'quotation',
+        resource: sidebarResource.quotation,
+        title: routes.quotationDetail.title,
+        path: routes.quotationDetail.path,
+        fieldName: 'quotationNumber',
+        start: 'estimateStartDate',
+        end: 'estimateEndDate'
+    },
 ]
 
 function PlanningView() {
 
-    const toastConfig = useContext(CustomToastContext);
     const {
-        state: { user, selectedEntity, permissions }
+        state: { permissions }
     }: any = useData();
 
     const history = useHistory();
