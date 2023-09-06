@@ -27,12 +27,10 @@ const AssetQtyDialog = ({ purchaseOrderID, onClose, onSuccess, product, purchase
     const [assetQty, setAssetQty] = useState()
 
     const handleSubmit = () => {
-        console.log(product)
         setAssetNumberDialog({ open: true, products: [{ ...product, product: product.productId, qty: parseInt(assetQty), warehouse: purchaseOrderData?.warehouse?.optionValue, storageLocation: user?.user?.brandPolicy?.storageLocation ? product?.storageLocation?.optionValue : null, }], receiveDate: null })
     };
 
     const handleReceive = (products) => {
-        console.log(products)
         setIsSubmitting(true);
         axiosInstance()
             .post(`${purchaseOrder.api}/add-assets/${purchaseOrderID}`, { products: products })
@@ -86,7 +84,6 @@ const AssetQtyDialog = ({ purchaseOrderID, onClose, onSuccess, product, purchase
                         placeholder="Asset Qty"
                         value={assetQty}
                         onChange={(e: any) => {
-                            console.log(e.target.value)
                             setAssetQty(e.target.value)
                         }}
                         error={(assetQty || 0) > (product.qty - product.actualReceived
