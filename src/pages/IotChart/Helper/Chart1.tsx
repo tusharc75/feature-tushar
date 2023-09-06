@@ -29,7 +29,8 @@ const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
         },
         stroke: {
             curve: 'straight',
-            width: 1
+            width: 1,
+            // dashArray: [8]
         },
         fill: {
             type: 'solid',
@@ -50,7 +51,7 @@ const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
         },
         annotations: {
             xaxis: [],
-            points: []
+            points: [],
         }
     })
 
@@ -73,10 +74,56 @@ const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
                 }
             })
             .then(({ data: { data } }) => {
-                const newData = dataPoints?.map(obj => ({
-                    name: obj?.fieldLabel,
-                    data: data?.data?.map(e => [new Date(e.time).getTime(), e[obj?.fieldName]])
-                }));
+                const newData: any = []
+                const yaxis: any = []
+                // const newData = dataPoints?.map(obj => ({
+                //     name: obj?.fieldLabel,
+                //     data: data?.data?.map(e => [new Date(e.time).getTime(), e[obj?.fieldName]])
+                // }));
+
+                dataPoints?.forEach(dataPoint => {
+                    newData.push({
+                        name: dataPoint?.fieldLabel,
+                        data: data?.data?.map(e => [new Date(e.time).getTime(), e[dataPoint?.fieldName]])
+                    })
+                    console.log('aaaaaaaa', dataPoint?.highValue, dataPoint?.lowValue, dataPoint?.fieldLabel)
+                    if (dataPoint?.highValue) {
+                        yaxis.push({
+                            y: dataPoint?.highValue,
+                            borderColor: '#ff0000',
+                            label: {
+                                borderColor: '#ff0000',
+                                style: {
+                                    color: '#fff',
+                                    background: '#ff0000'
+                                },
+                                text: dataPoint?.fieldLabel
+                            }
+                        })
+                    }
+                    if (dataPoint?.lowValue) {
+                        yaxis.push({
+                            y: dataPoint?.lowValue,
+                            borderColor: '#ff0000',
+                            label: {
+                                borderColor: '#fff',
+                                style: {
+                                    color: '#ff0000',
+                                    background: '#ff0000'
+                                },
+                                text: dataPoint?.fieldLabel
+                            }
+                        })
+                    }
+                });
+
+                setOptions({
+                    ...options,
+                    annotations: {
+                        ...options?.annotations,
+                        yaxis: yaxis
+                    }
+                })
 
                 setChartData(newData);
             })
@@ -115,11 +162,11 @@ const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
                             })
                             points.push({
                                 x,
-                                y: 145,
+                                y: 149,
                                 marker: {
                                     size: 5,
                                     fillColor: '#fff',
-                                    strokeColor: 'red',
+                                    strokeColor: '#ff0000',
                                     radius: 2,
                                 },
                                 label: {
@@ -136,8 +183,9 @@ const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
                     });
                     setOptions({
                         ...options, annotations: {
+                            ...options?.annotations,
                             xaxis: xaxis,
-                            points: points
+                            points: points,
                         }
                     })
                 })
