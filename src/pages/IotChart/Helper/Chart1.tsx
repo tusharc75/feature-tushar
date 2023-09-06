@@ -9,10 +9,6 @@ import { ApexOptions } from 'apexcharts';
 
 const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
 
-    useEffect(() => {
-        console.log('aaaaaaaaa', alert)
-    }, [alert])
-
     const toastConfig = useContext(CustomToastContext);
     const [chartData, setChartData] = useState(null);
 
