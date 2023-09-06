@@ -1041,6 +1041,18 @@ const routes = {
         : RESOURCE_LABEL.deviceTemplates,
     path: '/device-templates/detail'
   },
+  workStations: {
+    title: storedRoutes && storedRoutes.workStations && storedRoutes.workStations?.title ? storedRoutes.workStations?.title
+      : RESOURCE_LABEL.workStations,
+    path: '/work-stations'
+  },
+  workStationsDetail: {
+    title:
+      storedRoutes && storedRoutes.workStations && storedRoutes.workStations.title
+        ? storedRoutes.workStations?.title
+        : RESOURCE_LABEL.workStations,
+    path: '/work-stations/detail'
+  },
 };
 
 export default routes;

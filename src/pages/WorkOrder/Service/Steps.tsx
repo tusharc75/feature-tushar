@@ -554,10 +554,6 @@ const Steps = ({
       })
       .then(({ data }) => {
         const result = data?.data;
-        if ([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.failed].includes(type) && (result?.isAddStepsOnFail || result?.isAddStepsOnPass)
-        ) {
-          setAssignSteps(true);
-        }
         if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isPassAddon && result?.passAddon?.length) {
           if (referencType === 'workOrderTechnician') {
             handleAddService(
@@ -627,6 +623,10 @@ const Steps = ({
             type: 'skipServices',
             services: result?.skipServiceOnFail
           }));
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isAddStepsOnPass) {
+          setAssignSteps(true);
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isAddStepsOnFail) {
+          setAssignSteps(true);
         }
         toastConfig.setToastConfig({
           open: true,
