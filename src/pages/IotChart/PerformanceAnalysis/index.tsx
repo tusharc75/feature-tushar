@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Checkbox, FormControlLabel, FormGroup, Collapse, IconButton, TextField } from '@material-ui/core';
+import { Box, Checkbox, FormControlLabel, FormGroup, Collapse, IconButton, TextField, Grid } from '@material-ui/core';
 import moment from 'moment';
 import FilterModel from '../Helper/FilterModel';
 import Chart from '../Helper/Chart1';
@@ -21,9 +21,8 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
 
   const [open, setOpen] = useState<string | false>(false);
   const [openChild, setOpenChild] = useState<string | false>(false);
-  const [showAlert, setShowAlert] = useState(false)
-  const [errorOptions, setErrorOptions] = useState([])
-  const [selectedErrorOptions, setSelectedErrorOptions] = useState(null)
+  const [alertOptions, setAlertOptions] = useState([])
+  const [selectedAlertOptions, setSelectedAlertOptions] = useState(null)
 
   const handleChange = useCallback((name: string) => {
     setOpen((prev) => (!prev ? name : prev === name ? false : name));
@@ -45,11 +44,10 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
     return (
       <div key={data[type]?.optionLabel} className=" shadow-[0px_4px_20px_rgba(0,_0,_0,_0.06)] my-3 rounded-md ">
         <div
-          className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all duration-[300ms]  ${
-            compareCollapse(`${data[type]?.optionValue}`, type)
-              ? 'bg-[var(--new-theme-color)] text-white'
-              : 'hover:bg-gray-300 dark:hover:bg-gray-800'
-          }`}
+          className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all duration-[300ms]  ${compareCollapse(`${data[type]?.optionValue}`, type)
+            ? 'bg-[var(--new-theme-color)] text-white'
+            : 'hover:bg-gray-300 dark:hover:bg-gray-800'
+            }`}
           onClick={(e) => {
             e.stopPropagation();
             if (type === 'parentCategory') handleChange(`${data[type]?.optionValue}`);
@@ -77,13 +75,13 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
           <div className="pl-4 pr-2" key={data[type]?.optionLabel}>
             {type === 'parentCategory'
               ? uniqBy(
-                  allData?.filter((d) => d['category']?.parentCategory === open),
-                  'category.optionValue'
-                )?.map((data) => {
-                  return <TreeView data={data} type={'category'} allData={allData?.filter((d) => d['category']?.optionValue === openChild)} />;
-                })
+                allData?.filter((d) => d['category']?.parentCategory === open),
+                'category.optionValue'
+              )?.map((data) => {
+                return <TreeView data={data} type={'category'} allData={allData?.filter((d) => d['category']?.optionValue === openChild)} />;
+              })
               : type === 'category'
-              ? allData
+                ? allData
                   ?.filter((d) => d[type]?.optionValue === data[type]?.optionValue)
                   ?.map((dataPoint) => {
                     return (
@@ -104,7 +102,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
                       />
                     );
                   })
-              : null}
+                : null}
           </div>
         </Collapse>
       </div>
@@ -122,16 +120,12 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
         })
       }
     });
-    setErrorOptions(error)
+    setAlertOptions([{ optionLabel: 'All', optionValue: 'All' }, ...error])
   };
 
   useEffect(() => {
-    if (showAlert) {
-      fetchErrorData()
-    } else {
-      setSelectedErrorOptions(null)
-    }
-  }, [assetId, showAlert])
+    fetchErrorData()
+  }, [assetId])
 
   return (
     <>
@@ -168,41 +162,27 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
           <div className="container-with-border sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
             {Object.keys(selectedDataPoint).filter((item) => selectedDataPoint[item]).length ? (
               <>
-                <Box display='flex' alignItems='center'>
-                  <FormControlLabel
-                    style={{ margin: 0 }}
-                    control={
-                      <Checkbox
-                        checked={showAlert}
-                        onChange={(e) => {
-                          setShowAlert(e.target.checked);
+                <Box mt={2}>
+                  <Grid container>
+                    <Grid item md={6} lg={6}>
+                      <Autocomplete
+                        options={alertOptions}
+                        fullWidth
+                        getOptionLabel={(option: any) => option?.optionLabel ?? ''}
+                        value={
+                          alertOptions.find((data) => data?.optionValue === selectedAlertOptions?.optionValue)
+                            ? alertOptions.find((data) => data?.optionValue === selectedAlertOptions?.optionValue)
+                            : ''
+                        }
+                        getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                        onChange={(e, newVal) => {
+                          setSelectedAlertOptions(newVal);
                         }}
-                        name="showAlert"
-                        color="primary"
+                        size="small"
+                        renderInput={(params) => <TextField {...params} label="Select Alert" variant="outlined" />}
                       />
-                    }
-                    label="Show Alert"
-                  />
-                  {
-                    showAlert && (
-                      <Box ml={2}>
-                        <Autocomplete
-                          options={errorOptions}
-                          multiple
-                          fullWidth
-                          style={{ minWidth: '260px' }}
-                          getOptionLabel={(option: any) => option?.optionLabel ?? ''}
-                          value={selectedErrorOptions ? errorOptions?.filter((data: any) => selectedErrorOptions?.includes(data.optionValue)) : []}
-                          getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
-                          onChange={(e, newVal) => {
-                            setSelectedErrorOptions(newVal?.map((val) => val.optionValue));
-                          }}
-                          size="small"
-                          renderInput={(params) => <TextField {...params} label="Select Error" variant="outlined" />}
-                        />
-                      </Box>
-                    )
-                  }
+                    </Grid>
+                  </Grid>
                 </Box>
                 <Box mt={1}>
                   <Chart
@@ -211,7 +191,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
                     dataPoints={Object.keys(selectedDataPoint)
                       .filter((_k) => selectedDataPoint[_k])
                       ?.map((k) => dataPoints?.find((d) => d.fieldName === k))}
-                    errorDescriptions={selectedErrorOptions}
+                    alert={selectedAlertOptions}
                   />
                 </Box>
               </>
