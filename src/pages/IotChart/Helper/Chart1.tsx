@@ -7,14 +7,53 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
 
-const Chart = ({ dateFilters, assetId, dataPoints, errorDescriptions = null }) => {
+const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [chartData, setChartData] = useState(null);
-    const [annotations, setAnnotations] = useState({
-        xaxis: [],
-        points: []
-    });
+
+    const [options, setOptions] = useState<ApexOptions>({
+        chart: {
+            stacked: false,
+            zoom: {
+                type: 'x',
+                enabled: true,
+                autoScaleYaxis: true
+            },
+            toolbar: {
+                autoSelected: 'zoom'
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'straight',
+            width: 1,
+            // dashArray: [8]
+        },
+        fill: {
+            type: 'solid',
+        },
+        markers: {
+            size: 0
+        },
+        xaxis: {
+            type: 'datetime'
+        },
+        tooltip: {
+            shared: true,
+            y: {
+                formatter: function (val) {
+                    return typeof val === 'number' ? val.toFixed(2) : parseFloat(val).toFixed(2);
+                }
+            }
+        },
+        annotations: {
+            xaxis: [],
+            points: [],
+        }
+    })
 
     useEffect(() => {
         if (!isEmpty(dataPoints)) {
@@ -35,10 +74,56 @@ const Chart = ({ dateFilters, assetId, dataPoints, errorDescriptions = null }) =
                 }
             })
             .then(({ data: { data } }) => {
-                const newData = dataPoints?.map(obj => ({
-                    name: obj?.fieldLabel,
-                    data: data?.data?.map(e => [new Date(e.time).getTime(), e[obj?.fieldName]])
-                }));
+                const newData: any = []
+                const yaxis: any = []
+                // const newData = dataPoints?.map(obj => ({
+                //     name: obj?.fieldLabel,
+                //     data: data?.data?.map(e => [new Date(e.time).getTime(), e[obj?.fieldName]])
+                // }));
+
+                dataPoints?.forEach(dataPoint => {
+                    newData.push({
+                        name: dataPoint?.fieldLabel,
+                        data: data?.data?.map(e => [new Date(e.time).getTime(), e[dataPoint?.fieldName]])
+                    })
+                    console.log('aaaaaaaa', dataPoint?.highValue, dataPoint?.lowValue, dataPoint?.fieldLabel)
+                    if (dataPoint?.highValue) {
+                        yaxis.push({
+                            y: dataPoint?.highValue,
+                            borderColor: '#ff0000',
+                            label: {
+                                borderColor: '#ff0000',
+                                style: {
+                                    color: '#fff',
+                                    background: '#ff0000'
+                                },
+                                text: dataPoint?.fieldLabel
+                            }
+                        })
+                    }
+                    if (dataPoint?.lowValue) {
+                        yaxis.push({
+                            y: dataPoint?.lowValue,
+                            borderColor: '#ff0000',
+                            label: {
+                                borderColor: '#fff',
+                                style: {
+                                    color: '#ff0000',
+                                    background: '#ff0000'
+                                },
+                                text: dataPoint?.fieldLabel
+                            }
+                        })
+                    }
+                });
+
+                setOptions({
+                    ...options,
+                    annotations: {
+                        ...options?.annotations,
+                        yaxis: yaxis
+                    }
+                })
 
                 setChartData(newData);
             })
@@ -48,140 +133,79 @@ const Chart = ({ dateFilters, assetId, dataPoints, errorDescriptions = null }) =
     };
 
     const fetchAlert = () => {
-        axiosInstance()
-            .get(`/report/iot/asset-error-message?asset=${assetId}&from_date=${new Date(dateFilters.from).toISOString()}&to_date=${new Date(dateFilters.to).toISOString()}&errorDescriptions=${errorDescriptions?.map((e) => e)?.toString()}`)
-            .then(({ data: { data } }) => {
-                const xaxis: any = [];
-                const points: any = [];
-                data?.forEach(d => {
-                    if (d?.errorMessage) {
-                        const x = new Date(d.time).getTime();
-                        xaxis.push({
-                            x,
-                            strokeDashArray: 0,
-                            borderColor: '#775DD0',
-                            label: {
+        if (alert) {
+            let api = `/report/iot/asset-error-message?asset=${assetId}&from_date=${new Date(dateFilters.from).toISOString()}&to_date=${new Date(dateFilters.to).toISOString()}`
+            if (alert?.optionValue !== 'All') {
+                api = `${api}&errorDescriptions=${alert?.optionValue}`
+            }
+
+            axiosInstance()
+                .get(api)
+                .then(({ data: { data } }) => {
+                    const xaxis: any = [];
+                    const points: any = [];
+                    data?.forEach(d => {
+                        if (d?.errorMessage) {
+                            const x = new Date(d.time).getTime();
+                            xaxis.push({
+                                x,
+                                strokeDashArray: 0,
                                 borderColor: '#775DD0',
-                                style: {
-                                    color: '#fff',
-                                    background: '#775DD0',
+                                label: {
+                                    borderColor: '#775DD0',
+                                    style: {
+                                        color: '#fff',
+                                        background: '#775DD0',
+                                    },
+                                    text: d?.errorMessage,
+                                }
+                            })
+                            points.push({
+                                x,
+                                y: 145,
+                                marker: {
+                                    size: 5,
+                                    fillColor: '#fff',
+                                    strokeColor: '#fff',
+                                    radius: 2,
                                 },
-                                text: d?.errorMessage,
-                            }
-                        })
-                        points.push({
-                            x,
-                            y: 145,
-                            marker: {
-                                size: 5,
-                                fillColor: '#fff',
-                                strokeColor: 'red',
-                                radius: 2,
-                            },
-                            label: {
-                                borderColor: '#FF4560',
-                                offsetY: 0,
-                                style: {
-                                    color: '#fff',
-                                    background: '#FF4560',
-                                },
-                                text: d?.errorMessage,
-                            }
-                        })
-                    }
-                });
-                setAnnotations({
-                    xaxis,
-                    points
+                                label: {
+                                    borderColor: '#FF4560',
+                                    offsetY: 0,
+                                    style: {
+                                        color: '#fff',
+                                        background: '#FF4560',
+                                    },
+                                    text: d?.errorMessage,
+                                }
+                            })
+                        }
+                    });
+                    setOptions({
+                        ...options, annotations: {
+                            ...options?.annotations,
+                            xaxis: xaxis,
+                            points: points,
+                        }
+                    })
                 })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+        }
+        else {
+            setOptions({
+                ...options, annotations: {
+                    xaxis: [],
+                    points: []
+                }
             })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
+        }
     };
 
     useEffect(() => {
-        if (errorDescriptions) {
-            fetchAlert()
-        } else {
-            setAnnotations({
-                xaxis: [],
-                points: []
-            })
-        }
-    }, [errorDescriptions, assetId, dateFilters])
-
-    const options: ApexOptions = {
-        chart: {
-            stacked: false,
-            zoom: {
-                type: 'x',
-                enabled: true,
-                autoScaleYaxis: true
-            },
-            toolbar: {
-                autoSelected: 'zoom'
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            curve: 'straight',
-            width: 1
-        },
-        fill: {
-            type: 'solid',
-        },
-        markers: {
-            size: 0
-        },
-        xaxis: {
-            type: 'datetime'
-        },
-        tooltip: {
-            shared: true,
-            y: {
-                formatter: function (val) {
-                    return typeof val === 'number' ? val.toFixed(2) : parseFloat(val).toFixed(2);
-                }
-            }
-        },
-        annotations
-        // xaxis: [{
-        //     x: 1691994600000,
-        //     strokeDashArray: 0,
-        //     borderColor: '#775DD0',
-        //     label: {
-        //         borderColor: '#775DD0',
-        //         style: {
-        //             color: '#fff',
-        //             background: '#775DD0',
-        //         },
-        //         text: 'Alert',
-        //     }
-        // }],
-        // points: [{
-        //     x: 1692994600000,
-        //     y: 145,
-        //     marker: {
-        //         size: 5,
-        //         fillColor: '#fff',
-        //         strokeColor: 'red',
-        //         radius: 2,
-        //     },
-        //     label: {
-        //         borderColor: '#FF4560',
-        //         offsetY: 0,
-        //         style: {
-        //             color: '#fff',
-        //             background: '#FF4560',
-        //         },
-        //         text: 'Alert',
-        //     }
-        // }]
-        // }
-    };
+        fetchAlert()
+    }, [alert, assetId, dateFilters])
 
     return (
         <> {chartData ?
