@@ -26,17 +26,9 @@ const AssetQtyDialog = ({ purchaseOrderID, onClose, onSuccess, product, purchase
     const [assetNumberDialog, setAssetNumberDialog] = useState({ open: false, products: [], receiveDate: null });
     const [assetQty, setAssetQty] = useState()
 
-    useEffect(() => {
-        axiosInstance()
-            .get(`/sa-formbuilder/lookup?lookupResource=Warehouse`)
-            .then(({ data: { data } }) => {
-                setDefaultWareHouse(data['Warehouse']?.find((d) => d?.optionValue === purchaseOrderData?.warehouse?.optionValue));
-            });
-    }, []);
-
     const handleSubmit = () => {
         console.log(product)
-        setAssetNumberDialog({ open: true, products: [{ ...product, product: product.productId, qty: parseInt(assetQty), warehouse: defaultWareHouse }], receiveDate: null })
+        setAssetNumberDialog({ open: true, products: [{ ...product, product: product.productId, qty: parseInt(assetQty), warehouse: purchaseOrderData?.warehouse?.optionValue, storageLocation: user?.user?.brandPolicy?.storageLocation ? product?.storageLocation?.optionValue : null, }], receiveDate: null })
     };
 
     const handleReceive = (products) => {

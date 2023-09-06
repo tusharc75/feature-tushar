@@ -265,8 +265,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           Cell: ({ row }) =>
             row?.original?.type === 'Product' ? (
               <>
-                {row?.original?.type === 'Product' && row?.original?.serializedProduct &&
-                  < HtmlTooltip title={row.original?.qty - (row.original?.actualReceived || 0) === 0 ? "Enough Inventory Added" : `Add Inventory`}>
+                {row?.original?.type === 'Product' && row?.original?.serializedProduct && row.original?.qty - (row.original?.actualReceived || 0) - (row?.original?.assetQty || 0) <= 0 &&
+                  < HtmlTooltip title={`Add Inventory`}>
                     <span>
                       <IconButton
                         disabled={row.original?.qty - (row.original?.actualReceived || 0) === 0}
@@ -411,6 +411,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           return { ...e, type: 'Product' };
         })
       );
+      console.log(rows)
       setRowsData(rows);
       setSelectedRecords([]);
     } catch (error) {
