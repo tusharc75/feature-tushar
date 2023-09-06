@@ -34,7 +34,9 @@ import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, 
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
 import ManageQuotationDialog from './ManageQuotationDialog';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Delete, Info, Warning } from '@material-ui/icons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import moment from 'moment';
 
 let quotationTimeout;
 
@@ -103,9 +105,16 @@ const Quotation = () => {
       }
       return o?.fieldData;
     });
+    columns?.forEach((e) => {
+      if (e.field === 'quotationNumber') {
+        e.cellRenderer = 'quotationNumberRenderer';
+      }
+    });
+
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
+      quotationNumberRenderer: QuotationNumberRenderer,
       actionsRenderer: ActionsRenderer
     };
     setFrameworkComponent({ ...tempFrameworkComponent });
@@ -157,6 +166,39 @@ const Quotation = () => {
       });
   };
 
+  const isDatePast = (dateStr) => {
+    return moment(dateStr).isBefore(moment(), 'day');
+  };
+
+  const isDateWithinNext15Days = (dateStr) => {
+    const today = moment();
+    const newDate = moment(dateStr);
+    return newDate.isBetween(today, today.add(15, 'days'), 'day', '[]');
+  };
+
+  const QuotationNumberRenderer = (params) => (
+    <Fragment>
+      <Link className="link text-truncate" title={params.value} to={`${routes.quotation.path}/detail/${params.data?._id}`}>
+        {params.value}
+      </Link>
+      {params.data?.type === 'Rental Job' && isDatePast(params.data?.estimateEndDate) && (
+        <Box ml={1}>
+          <HtmlTooltip title={`${routes.quotation.title} Expired`}>
+            <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
+          </HtmlTooltip>
+        </Box>
+      )}
+
+      {params.data?.type === 'Rental Job' && isDateWithinNext15Days(params.data?.estimateEndDate) && (
+        <Box ml={1}>
+          <HtmlTooltip title={`${routes.quotation.title} about to renew`}>
+            <Info style={{ fontSize: '14px' }} fontSize="small" color="primary" />
+          </HtmlTooltip>
+        </Box>
+      )}
+    </Fragment>
+  );
+
   const ActionsRenderer = (params) => (
     <>
       {permissions?.quotation?.isCreate ? (
@@ -195,7 +237,7 @@ const Quotation = () => {
       ) : (
         <Tooltip className="cursor-stop" title="You do not have permission to delete">
           <IconButton aria-label="Clone" size="small">
-            <DeleteIcon fontSize="small" />
+            <Delete fontSize="small" />
           </IconButton>
         </Tooltip>
       )}
