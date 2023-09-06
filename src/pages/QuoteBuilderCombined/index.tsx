@@ -811,6 +811,18 @@ const QuoteBuilders = () => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchQuoteBuilder}
             showOnlyShowFilteredRecordSwitch={true}
+            rowClassRules={{
+              'light-red-data-row': function (params) {
+                const versions = params.data?.versions;
+                if (versions && versions.length > 0) {
+                  const lastVersion = versions[versions.length - 1];
+                  if (lastVersion?.status === "Building Quote") {
+                    return true;
+                  }
+                }
+                return false;
+              }
+            }}
           />
         ) : null}
 
