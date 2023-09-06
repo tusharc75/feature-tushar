@@ -22,6 +22,7 @@ import { AddOutlined, RemoveOutlined } from '@material-ui/icons';
 import CustomAgGridEditable, { reducer, intialState } from '../AgGridComponents/CustomAgGridEditable';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
+import { debounce } from 'lodash';
 
 const options = [
   {
@@ -273,6 +274,8 @@ const AssignProductDialog = ({
     }
   };
 
+  const debouncedHandleAssignProduct = debounce(handleAssignProduct, 1500);
+
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -311,7 +314,7 @@ const AssignProductDialog = ({
                   <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                   <Button
                     disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
-                    onClick={handleAssignProduct}
+                    onClick={debouncedHandleAssignProduct}
                     color="primary"
                     size="small"
                     variant="contained"
