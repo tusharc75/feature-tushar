@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Box, Checkbox, FormControlLabel, FormGroup, Collapse, IconButton, TextField, Grid } from '@material-ui/core';
 import moment from 'moment';
 import FilterModel from '../Helper/FilterModel';
-import Chart from '../Helper/Chart1';
+import Chart from '../Helper/Chart';
 import { uniqBy } from 'lodash';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
@@ -110,17 +110,20 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
   };
 
   const fetchErrorData = async () => {
-    const { data: { data } } = await axiosInstance().get(`/report/iot/asset-error-message?asset=${assetId}`)
-    const error: any = []
-    uniqBy(data, '_id')?.forEach((e: any) => {
-      if (e?.errorMessage) {
-        error.push({
-          optionLabel: e?.errorMessage,
-          optionValue: e?._id
-        })
-      }
-    });
-    setAlertOptions([{ optionLabel: 'All', optionValue: 'All' }, ...error])
+    // const { data: { data } } = await axiosInstance().get(`/report/iot/asset-error-message?asset=${assetId}`)
+    // const error: any = []
+    // uniqBy(data, '_id')?.forEach((e: any) => {
+    //   if (e?.errorMessage) {
+    //     error.push({
+    //       optionLabel: e?.errorMessage,
+    //       optionValue: e?._id
+    //     })
+    //   }
+    // });
+
+    const { data: { data } } = await axiosInstance().get(`/dynamic-form`, { headers: { Resource: 'Error Descriptions' } })
+
+    setAlertOptions([{ optionLabel: 'All', optionValue: 'All' }, ...data?.map(d => ({ optionLabel: d?.errorMessage, optionValue: d?._id}))])
   };
 
   useEffect(() => {
