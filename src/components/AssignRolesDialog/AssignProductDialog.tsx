@@ -44,7 +44,8 @@ const AssignProductDialog = ({
   assignedProducts,
   reference = 'product',
   serialized = null,
-  extraDeepFilter = []
+  extraDeepFilter = [],
+  isSubmitting = false
 }) => {
   const renderedFrom = `${routes.product.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -313,8 +314,8 @@ const AssignProductDialog = ({
                 <Box className={styles.filter_side_header} component="div">
                   <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                   <Button
-                    disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
-                    onClick={debouncedHandleAssignProduct}
+                    disabled={isSubmitting || isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
+                    onClick={handleAssignProduct}
                     color="primary"
                     size="small"
                     variant="contained"
