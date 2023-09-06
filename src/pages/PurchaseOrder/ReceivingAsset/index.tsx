@@ -411,7 +411,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           return { ...e, type: 'Product' };
         })
       );
-      console.log(rows)
+      
       setRowsData(rows);
       setSelectedRecords([]);
     } catch (error) {
