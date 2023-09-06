@@ -31,6 +31,8 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [columns, setColumns] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [consumeRequest, setConsumeRequest] = useState(false);
@@ -265,6 +267,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   };
 
   const handleSubmit = async (rows) => {
+    setIsSubmitting(true)
     const data: any = [];
     rows?.forEach((e) => {
       if (parseInt(e.qty)) {
@@ -275,6 +278,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
         fetchData();
+        setIsSubmitting(false)
         setConsumablesDialog(false);
         toastConfig.setToastConfig({
           open: true,
@@ -283,6 +287,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         });
       })
       .catch((error) => {
+        setIsSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -447,6 +452,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               handleSubmit(rows);
             }}
             serialized={false}
+            isSubmitting={isSubmitting}
           />
         )}
         {openConsumablesQtyDialog && (
