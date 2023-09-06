@@ -131,6 +131,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
     const handleReOpen = async (data: any) => {
         await axiosInstance().patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, {
             status: FIELD_TICKET_STATUS.inProgress,
+            oldStatus: fieldTicketData?.status,
             comment: data
         }).then(({ data }) => {
             toastConfig.setToastConfig({
