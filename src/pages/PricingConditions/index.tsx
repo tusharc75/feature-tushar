@@ -238,47 +238,47 @@ const PricingConditions = () => {
           extraImportExportLinks={[
             {
               title: 'Product Template',
-              api: `${pricingCondition.api}/template?conditionType=product`,
+              api: `${pricingCondition.api}/template?materialType=product`,
               type: 'download'
             },
             {
               title: 'Product Export',
-              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&conditionType=product`,
+              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&materialType=product`,
               type: 'export'
             },
             {
               title: 'Product Import',
-              api: `${pricingCondition.api}/import?conditionType=product`,
+              api: `${pricingCondition.api}/import?materialType=product`,
               type: 'import'
             },
             {
               title: 'Package Template',
-              api: `${pricingCondition.api}/template?conditionType=package`,
+              api: `${pricingCondition.api}/template?materialType=package`,
               type: 'download'
             },
             {
               title: 'Package Export',
-              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&conditionType=package`,
+              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&materialType=package`,
               type: 'export'
             },
             {
               title: 'Package Import',
-              api: `${pricingCondition.api}/import?conditionType=package`,
+              api: `${pricingCondition.api}/import?materialType=package`,
               type: 'import'
             },
             {
               title: 'Service Template',
-              api: `${pricingCondition.api}/template?conditionType=service`,
+              api: `${pricingCondition.api}/template?materialType=service`,
               type: 'download'
             },
             {
               title: 'Service Export',
-              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&conditionType=service`,
+              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&materialType=service`,
               type: 'export'
             },
             {
               title: 'Service Import',
-              api: `${pricingCondition.api}/import?conditionType=service`,
+              api: `${pricingCondition.api}/import?materialType=service`,
               type: 'import'
             }
           ]}
