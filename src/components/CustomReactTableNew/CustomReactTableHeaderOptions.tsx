@@ -1,16 +1,79 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Popover, FormControl, FormGroup, Divider, FormControlLabel, Tooltip, Switch, IconButton } from '@material-ui/core';
-import ViewWeekIcon from '@material-ui/icons/ViewWeek';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import { createStyles, withStyles, Theme, FormControlLabel, Switch, Typography, SwitchClassKey, SwitchProps } from '@material-ui/core';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
 import { disabledColumns, getSortedColumns } from '../../constants/useColumns';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
-import ArrangeViewDialog from './ArrangeViewDialog';
-import ReportArrangeView from './ReportArrangeView';
 
 let timeout;
+
+interface Styles extends Partial<Record<SwitchClassKey, string>> {
+  focusVisible?: string;
+}
+interface Props extends SwitchProps {
+  classes: Styles;
+}
+
+const CustomSwitch = withStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      width: 37,
+      height: 20,
+      padding: 0,
+      margin: `0 ${theme.spacing(1)}px 0 0`
+    },
+    switchBase: {
+      padding: '2px',
+      '&$checked': {
+        transform: 'translateX(16px)',
+        color: theme.palette.common.white,
+        '& + $track': {
+          backgroundColor: '#B7B7B7',
+          opacity: 1,
+          border: 'none'
+        }
+      },
+      '&$focusVisible $thumb': {
+        color: '#52d869',
+        border: '6px solid #fff'
+      },
+      '&.Mui-disabled': {
+        color: `${theme.palette.grey[100]} !important`
+      }
+    },
+    thumb: {
+      width: 16,
+      height: 16
+    },
+    track: {
+      borderRadius: 26 / 2,
+      border: `1px solid ${theme.palette.grey[400]}`,
+      backgroundColor: '#B7B7B7',
+      opacity: 1,
+      transition: theme.transitions.create(['background-color', 'border'])
+    },
+    checked: {},
+    focusVisible: {}
+  })
+)(({ classes, ...props }: Props) => {
+  return (
+    <Switch
+      focusVisibleClassName={classes.focusVisible}
+      // disableRipple
+      classes={{
+        root: classes.root,
+        switchBase: classes.switchBase,
+        thumb: classes.thumb,
+        track: classes.track,
+        checked: classes.checked
+      }}
+      {...props}
+    />
+  );
+});
+
+
 function CustomReactTableHeaderOptions({
   columns,
   // setColumns,
@@ -18,7 +81,7 @@ function CustomReactTableHeaderOptions({
   // refreshGrid = null,
   renderedFrom = null,
   isClientSideGrid = false,
-  // dispatch: gridDispatch = null,
+  dispatchTable = null,
   showOnlyShowFilteredRecordSwitch = false,
   saveColumnOptions = false,
   selectedRecords = 0,
@@ -30,22 +93,6 @@ function CustomReactTableHeaderOptions({
 }) {
   const [disableSelectionSwitch, setDisableSelectionSwitch] = useState(true);
 
-  useEffect(() => {
-    if (selectedRecords === 0) {
-      const saved = localStorage.getItem(`${renderedFrom}_selected`);
-      if (saved) {
-        try {
-          const initialValue = JSON.parse(saved);
-          setDisableSelectionSwitch(initialValue.length === 0);
-        } catch {
-          setDisableSelectionSwitch(true);
-        }
-      } else {
-        setDisableSelectionSwitch(true);
-      }
-    }
-  }, [selectedRecords]);
-
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
   const [checked, setChecked] = useState(false);
   const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -54,6 +101,28 @@ function CustomReactTableHeaderOptions({
     state: { user }
   }: any = useData();
   const { dispatch }: any = useData();
+
+  useEffect(() => {
+
+    const saved = localStorage.getItem(`${renderedFrom}_selected`);
+    if (saved) {
+      try {
+        const initialValue = JSON.parse(saved);
+        setDisableSelectionSwitch(selectedRecords === 0);
+        if (initialValue?.length === 0 && checked) {
+          setChecked(false);
+          dispatchTable({
+            type: 'showFilteredRecordsOnly'
+          });
+        }
+      } catch {
+        setDisableSelectionSwitch(true);
+      }
+    } else {
+      setDisableSelectionSwitch(true);
+    }
+
+  }, [selectedRecords]);
 
   const updateGridHiddenColumns = (hiddenColumns = []) => {
     if (timeout) clearTimeout(timeout);
@@ -111,55 +180,27 @@ function CustomReactTableHeaderOptions({
   return (
     <>
       {showOnlyShowFilteredRecordSwitch && (
-        <Box className="ag-grid-listing-grid-header-options border px-2 py-1 d-flex gap-2 justify-content-space-between">
-          <div className="d-flex gap-2">
-            <>
-              <Divider orientation="vertical" flexItem className="mr-2" />
 
-              <FormControlLabel
-                value={checked}
-                checked={checked}
-                onChange={() => {
-                  setChecked(!checked);
+        <>
+          <FormControlLabel
+            value={checked}
+            checked={checked}
+            onChange={() => {
+              setChecked(!checked);
 
-                  // if (gridDispatch) {
-                  //     gridDispatch({
-                  //         type: 'showFilteredRecordsOnly',
-                  //         // showFilteredRecordsOnly: columnApi.getColumnState().filter((d) => ['asc', 'desc'].some((s) => s === d.sort))
-                  //     });
-                  // }
-                }}
-                control={<Switch size="small" color="primary" disabled={disableSelectionSwitch} />}
-                style={{ fontSize: '0.8rem' }}
-                label="Show Only Selected"
-                labelPlacement="end"
-              />
-            </>
-          </div>
+              if (dispatchTable) {
+                dispatchTable({
+                  type: 'showFilteredRecordsOnly'
+                });
+              }
+            }}
+            control={<CustomSwitch disabled={disableSelectionSwitch} />}
+            style={{ fontSize: '0.8rem', marginLeft: 0, padding: '0px 0 10px' }}
+            label={<Typography style={{ fontWeight: 400 }}>Show Only Selected</Typography>}
+            labelPlacement="end"
+          />
 
-          <div>
-            {/* {refreshGrid && (
-                        <>
-                            <Tooltip title="Refresh">
-                                <IconButton
-                                    // aria-describedby="columnSelection"
-                                    // size="small"
-                                    // className="px-2"
-                                    // startIcon={<RefreshIcon />}
-                                    // color="primary"
-                                    disabled={isOffline}
-                                    size="small"
-                                    onClick={() => {
-                                        refreshGrid();
-                                    }}
-                                >
-                                    <RefreshIcon />
-                                </IconButton>
-                            </Tooltip>
-                        </>
-                    )} */}
-          </div>
-        </Box>
+        </>
       )}
     </>
   );

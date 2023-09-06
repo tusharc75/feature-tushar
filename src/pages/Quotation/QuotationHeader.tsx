@@ -9,7 +9,7 @@ import styles from '../Leads/Header.module.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdSort, MdFilterList, TbArrowsSort, MdOutlineFilterAlt } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import routes from 'src/components/Helpers/Routes';
 
 function QuotationHeader(props) {
@@ -29,7 +29,8 @@ function QuotationHeader(props) {
     columns,
     dispatch,
     showTransferEntityDialog,
-    filters
+    filters,
+    resource = ''
     // showCloneRentalManagementDialog
   } = props;
 
@@ -85,7 +86,7 @@ function QuotationHeader(props) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div className={'d-flex align-items-center gap-1'}>
         {isMobile && !isTablet ? (
-          <div className="d-flex flex-wrap items-center justify-between w-full">
+          <div className="d-flex flex-wrap items-center justify-between w-full gap-2">
             <div>{toggleInner}</div>
             <div className="flex flex-wrap items-center gap-1 ml-auto">
               <IconButton
@@ -128,6 +129,7 @@ function QuotationHeader(props) {
                 dispatch={dispatch}
                 title={routes?.quotation?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
@@ -193,6 +195,7 @@ function QuotationHeader(props) {
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }

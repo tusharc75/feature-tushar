@@ -21,7 +21,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, repairType, sidebarResource } from '../../constants/helpers';
@@ -316,6 +316,7 @@ const RepairType = () => {
                       dispatch={dispatch}
                       title={routes?.repairType?.title}
                       filters={filters}
+                      resource={sidebarResource.repairType}
                     />
                   </div>
                 </div>
@@ -363,6 +364,7 @@ const RepairType = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.repairType} />
           </div>
         </div>
         {columns ? (

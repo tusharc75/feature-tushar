@@ -1,37 +1,35 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { getNestedSubRows } from 'src/components/RentalManagment/helper';
-import { isMobile } from 'react-device-detect';
+import { Box, Grid, Dialog, IconButton } from '@material-ui/core';
+import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, INVOICE_STATUS, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, INVOICE_STATUS, invoice, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Add, Delete, Edit, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import CommentDialog from 'src/components/CommentDialog';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { IoMdDownload } from 'react-icons/io';
 
-const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => {
+const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
+
   const toastConfig = useContext(CustomToastContext);
-
-  const renderedFrom = 'view_invoice';
+  const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [commentDialog, setCommentDialog] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -196,20 +194,45 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
   };
 
   const handleCancelInvoice = async (data) => {
-    axiosInstance().patch(`${routes?.fieldTicketInvoice.path}/status`, {
-      status: INVOICE_STATUS.cancelled,
+    axiosInstance().patch(`${routes?.fieldTicketInvoice.path}/invoice/cancle`, {
       invoice: invoiceData?._id,
       fieldTicket: invoiceData?.id,
-      message: data,
+      comment: data,
     })
       .then(({ data }) => {
         onSuccess();
-        toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   }
+
+  const handleDownload = () => {
+    setIsDownloading(true);
+    axiosInstance()
+      .get(`${invoice.api}/zip/${invoiceData._id}`, {
+        responseType: 'blob'
+      })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = response.headers["content-disposition"].split("filename=")[1];
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        setIsDownloading(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDownloading(false);
+      });
+  };
 
   return (
     <Fragment>
@@ -217,17 +240,39 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
         <CustomDialogHeader title={`Invoice Number : ${invoiceData?.invoiceNumber}`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
-            <Box display="flex" justifyContent="space-between" p={1}>
-              {invoiceData &&
-                <PreviewDownload
-                  resource={sidebarResource.invoice}
-                  referenceId={invoiceData?._id}
-                  columns={columns}
-                  isSendEmail={true}
-                />
-              }
-              <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
-            </Box>
+            <Grid container spacing={2} >
+              <Grid item xs={12} sm={6} md={6}>
+                {invoiceData &&
+                  <Box display="flex" p={1}>
+                    <PreviewDownload
+                      resource={sidebarResource.invoice}
+                      referenceId={invoiceData?._id}
+                      columns={columns}
+                      hideDetailButton={true}
+                      isSendEmail={true}
+                    />
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      className="btn-outline-v1 ml-3"
+                      type="button"
+                      size="small"
+                      disabled={isDownloading ? true : false}
+                      startIcon={isMobile ? '' : <IoMdDownload />}
+                      onClick={(e) => {
+                        handleDownload();
+                      }}
+                    >
+                      {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Save as Zip File'}
+                    </Button>
+                  </Box>
+                }
+              </Grid>
+              <Grid item xs={12} sm={6} md={6}>
+                <Box display="flex" justifyContent={'end'} p={1}>
+                  <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
+                </Box>
+              </Grid>
+            </Grid>
             {columns && rowsData ? (
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
                 <CustomReactTable

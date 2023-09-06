@@ -228,9 +228,13 @@ import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
 import IotDataPoints from './pages/IotDataPoints';
 import IotDataPointsDetail from './pages/IotDataPoints/IotDataPointsDetail';
 import IotChart from './pages/IotChart';
-import IotChartDetail from './pages/IotChart/IotChartDetail'
+import IotChartDetail from './pages/IotChart/IotChartDetail';
 import IotReportList from './pages/IotReport';
 import IotReport from './pages/IotReport/Report';
+import DeviceTemplates from './pages/DeviceTemplates';
+import DeviceTemplatesDetails from './pages/DeviceTemplates/DeviceTemplatesDetails';
+import WorkStations from './pages/WorkStations';
+import WorkStationsDetail from './pages/WorkStations/WorkStationsDetail';
 
 var notificationInterval: any = null;
 
@@ -1018,6 +1022,18 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.iotReport.path}/:resource`}>
               <IotReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.deviceTemplates.path}`}>
+              <DeviceTemplates />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.deviceTemplatesDetail.path}/:id`}>
+              <DeviceTemplatesDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workStations.path}`}>
+              <WorkStations />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workStationsDetail.path}/:id`}>
+              <WorkStationsDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

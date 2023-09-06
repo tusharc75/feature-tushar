@@ -1,17 +1,16 @@
-import { useState } from 'react';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { useState } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 
-import { BsPersonBoundingBox } from 'react-icons/bs';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
-import styles from '../Leads/Header.module.scss';
+import { isMobile } from 'react-device-detect';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { useData } from '../../StateProvider/Provider';
-import { localStorageKeys } from '../../constants/helpers';
 import routes from '../../components/Helpers/Routes';
-import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import { localStorageKeys } from '../../constants/helpers';
+import styles from '../Leads/Header.module.scss';
 
 const RoleHeader = (props) => {
   const {
@@ -71,26 +70,23 @@ const RoleHeader = (props) => {
   };
 
   return (
-    <Grid container className={styles.filter_side_container}>
-      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className={'d-flex align-items-center gap-1'}>
         {isMobile && (
-          <>
-            <Grid style={{ display: 'inline-flex' }}>
-              <Button
+          <div className="d-flex flex-wrap items-center justify-between w-full">
+            <div></div>
+            <div className="flex flex-wrap items-center gap-1 ml-auto">
+              <IconButton
                 onClick={handleClickOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
                 aria-expanded={'true'}
-                color="secondary"
-                variant="text"
-                disableElevation
-                startIcon={<MdSort />}
-                className={'sort-filter-tablet'}
-                style={isTablet ? { marginLeft: '50px' } : {}}
+                className={'mobileIconButton secondary'}
+                size="small"
               >
-                Sort
-              </Button>
+                <TbArrowsSort className="rotate-90" size={16} />
+              </IconButton>
               <MobileSortDialog
                 isOpen={sortOpen}
                 handleClose={handleClickClose}
@@ -100,20 +96,17 @@ const RoleHeader = (props) => {
                 dispatch={dispatch}
               />
 
-              <Button
+              <IconButton
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
                 aria-expanded={'true'}
-                variant="text"
-                color="secondary"
-                disableElevation
-                className={'sort-filter-tablet'}
-                startIcon={<MdFilterList />}
+                className={'mobileIconButton secondary'}
+                size="small"
                 onClick={handleOpen}
               >
-                Filter
-              </Button>
+                <MdOutlineFilterAlt size={16} />
+              </IconButton>
 
               <MobileFilterDialog
                 isOpen={isOpenDialog}
@@ -124,8 +117,8 @@ const RoleHeader = (props) => {
                 title={routes?.role?.title}
                 filters={filters}
               />
-            </Grid>
-          </>
+            </div>
+          </div>
         )}
 
         {/* {options && (
@@ -144,85 +137,67 @@ const RoleHeader = (props) => {
             })}
           </ToggleButtonGroup>
         )} */}
-      </Grid>
-      <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
-        <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header}>
-          <Grid style={{ display: 'flex', flex: 1 }}>
-            <SearchBox
-              onChange={onSearch}
-              className={styles.search_box_input}
-              value={searchVal}
-              size="small"
-              width={isMobile && !isTablet ? '200px' : '242px'}
-              style={isMobile && !isTablet ? { flex: 1 } : {}}
-            />
-          </Grid>
+      </div>
+      <div className="flex flex-wrap gap-[8px]  justify-end">
+        <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" />
 
-          <Grid style={{ display: 'flex', gap: '5px' }}>
-            {rolePermissions.isCreate && (filter === 'Global' || (filter === 'Regional' && selectedEntity)) && (
+        <div className="flex gap-[8px] flex-wrap items-center">
+          {rolePermissions.isCreate && (filter === 'Global' || (filter === 'Regional' && selectedEntity)) && (
+            <Button variant={'contained'} color="primary" size="small" onClick={onCreate} className={`no-shadow`} startIcon={<AddOutlined />}>
+              Add
+            </Button>
+          )}
+
+          {(rolePermissions.isDelete || rolePermissions.isUpdate) && (
+            <>
               <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                color="primary"
+                disabled={selectedRecords.length === 0}
+                className={`new-dropdown-v1`}
+                variant={'outlined'}
+                color="default"
                 size="small"
-                onClick={onCreate}
-                className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                onClick={openActions}
+                aria-controls="action-menu"
+                endIcon={<ExpandMore />}
               >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                Actions
               </Button>
-            )}
-
-            {(rolePermissions.isDelete || rolePermissions.isUpdate) && (
-              <>
-                <Button
-                  disabled={selectedRecords.length === 0}
-                  className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                >
-                  {isMobile && !isTablet ? '' : 'Actions'}
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  disabled={Boolean(!canDelete)}
+                  onClick={() => {
+                    closeActions();
+                    showConfirmBox(null);
                   }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
                 >
-                  <MenuItem
-                    disabled={Boolean(!canDelete)}
-                    onClick={() => {
-                      closeActions();
-                      showConfirmBox(null);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                  <MenuItem
-                    disabled={!rolePermissions.isUpdate}
-                    onClick={() => {
-                      closeActions();
-                      userDialogOpen();
-                    }}
-                  >
-                    Assign users
-                  </MenuItem>
-                </Menu>
-              </>
-            )}
-          </Grid>
-        </Box>
-      </Grid>
-    </Grid>
+                  Delete
+                </MenuItem>
+                <MenuItem
+                  disabled={!rolePermissions.isUpdate}
+                  onClick={() => {
+                    closeActions();
+                    userDialogOpen();
+                  }}
+                >
+                  Assign users
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

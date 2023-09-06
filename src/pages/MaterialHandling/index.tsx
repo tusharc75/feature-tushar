@@ -217,6 +217,17 @@ const MaterialHandling = () => {
                                   </Typography>
                                 </>
                               )}
+                              {data?.referenceType === sidebarResource.fieldTicket && (
+                                <>
+                                  <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                                    Customer : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.customerAccount?.optionLabel}</span>
+                                  </Typography>
+                                  <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                                    Well Name :{' '}
+                                    <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.wellName?.optionLabel}</span>
+                                  </Typography>
+                                </>
+                              )}
                               <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 600 }}>
                                 {routes.warehouse.title} :{' '}
                                 <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.warehouse?.optionLabel}</span>

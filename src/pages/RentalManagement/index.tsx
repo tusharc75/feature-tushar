@@ -434,6 +434,7 @@ const RentalManagement = () => {
               gridApi={gridApi}
               fetchRentalManagement={fetchRentalManagement}
               filters={filters}
+              resource={sidebarResource.rentalManagement}
             ></RentalManagementHeader>
           </div>
           {Object.keys(frameWorkComponent).length > 0 ? (

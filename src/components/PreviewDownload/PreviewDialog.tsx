@@ -91,7 +91,7 @@ export const PreviewDialog = ({
         setSelectedView(data);
         if (data && data.columns) {
             const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
-            setVisibleColumnsPdf(columnsArray);
+            setVisibleColumnsPdf(allColumn?.filter((d) => columnsArray?.includes(d?.fieldName)).map((d) => { return d?.fieldLabel }));
         }
     }
 
@@ -246,10 +246,9 @@ export const PreviewDialog = ({
                     onOk={handleDeleteView}
                 />
             )}
-
             {showSaveViewDialog.open && (
                 <ViewDialog
-                    columns={visibleColumnsPdf}
+                    columns={allColumn?.filter((d) => visibleColumnsPdf?.includes(d?.fieldLabel)).map((d) => { return d?.fieldName })}
                     resource={resource}
                     handleSucess={() => {
                         setShowSaveViewDialog({ open: false, data: null });

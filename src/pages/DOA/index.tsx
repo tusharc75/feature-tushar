@@ -1,69 +1,58 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from "react";
-import Grid from "@material-ui/core/Grid";
-import Button from "@material-ui/core/Button";
-import { Link } from "react-router-dom";
-import { MdSort, MdFilterList } from "react-icons/all";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import NoDataCell from "../../components/Helpers/NoDataCell";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import axiosInstance from "../../axios/axiosInstance";
-import { GiAbstract055 } from "react-icons/gi";
-import styles from '../Leads/Header.module.scss';
-import CustomContainer from "../../components/CustomContainer";
-import { gridLoadingTimeout, gridPageSizes } from "../../constants/helpers";
-import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import routes from "../../components/Helpers/Routes";
-import { useHistory } from 'react-router-dom'
+import { IconButton } from '@material-ui/core';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import MobileSortDialog from '../../components/MobileSortDialog';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
+import { Link, useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CustomContainer from '../../components/CustomContainer';
+import NoDataCell from '../../components/Helpers/NoDataCell';
+import routes from '../../components/Helpers/Routes';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
-import { camelCase } from "lodash";
+import MobileSortDialog from '../../components/MobileSortDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { gridLoadingTimeout } from '../../constants/helpers';
 
 const DOARequest = () => {
-  const renderedFrom = camelCase(routes?.DOARequest.title)
+  const renderedFrom = camelCase(routes?.DOARequest.title);
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
-  const history = useHistory()
+  const history = useHistory();
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const {
-    dataRows,
-    rowCount,
-    loading,
-    page,
-    limit,
-    pageSizes
-  } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
   const [columns] = useState([
     {
-      field: "name",
-      headerName: "Name",
+      field: 'name',
+      headerName: 'Name',
       show: true,
       disabled: true,
-      cellRenderer: "nameRenderer",
+      cellRenderer: 'nameRenderer'
     },
     {
-      field: "quotedBy",
-      headerName: "Quoted By",
+      field: 'quotedBy',
+      headerName: 'Quoted By',
       show: true,
       disabled: true,
-      cellRenderer: "quotedByRenderer",
+      cellRenderer: 'quotedByRenderer'
     },
     {
-      field: "requestedBy",
-      headerName: "Requested By",
+      field: 'requestedBy',
+      headerName: 'Requested By',
       show: true,
-      cellRenderer: "requestedByRendered",
+      cellRenderer: 'requestedByRendered'
     },
     {
-      field: "status",
-      headerName: "Status",
-      show: true,
-    },
+      field: 'status',
+      headerName: 'Status',
+      show: true
+    }
   ]);
 
   if (columnState) {
@@ -109,11 +98,7 @@ const DOARequest = () => {
   const QuotedByRenderer = (params) => (
     <>
       {params.value ? (
-        <Link
-          className="link"
-          to={`/user/detail/${params.data.quoteById}`}
-          title={params.value}
-        >
+        <Link className="link" to={`/user/detail/${params.data.quoteById}`} title={params.value}>
           {params.value}
         </Link>
       ) : (
@@ -125,11 +110,7 @@ const DOARequest = () => {
   const RequestedByRenderer = (params) => (
     <>
       {params.value ? (
-        <Link
-          className="link"
-          to={`/user/detail/${params.data.requestedById}`}
-          title={params.value}
-        >
+        <Link className="link" to={`/user/detail/${params.data.requestedById}`} title={params.value}>
           {params.value}
         </Link>
       ) : (
@@ -141,11 +122,11 @@ const DOARequest = () => {
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     requestedByRendered: RequestedByRenderer,
-    quotedByRenderer: QuotedByRenderer,
+    quotedByRenderer: QuotedByRenderer
   };
 
   const fetchData = () => {
-    dispatch({ type: "loading", loading: true });
+    dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
@@ -159,50 +140,43 @@ const DOARequest = () => {
           quotedBy: doa.QuotedBy.firstName,
           quoteById: doa.QuotedBy.id,
           requestedBy: doa.RequestedBy.firstName,
-          requestedById: doa.RequestedBy.id,
+          requestedById: doa.RequestedBy.id
         }));
-        dispatch({ type: "initialize", data: rows, count: data.length });
+        dispatch({ type: 'initialize', data: rows, count: data.length });
         setTimeout(() => {
-          dispatch({ type: "loading", loading: false });
+          dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: "loading", loading: false });
+        dispatch({ type: 'loading', loading: false });
       });
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.DOARequest]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.DOARequest]} />
+      </div>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex align-items-center gap-1'}>
               {isMobile && (
-                <>
-                  <Grid style={{ display: 'inline-flex' }}>
-                    <Button
+                <div className="d-flex flex-wrap items-center justify-between w-full">
+                  <div></div>
+                  <div className="flex flex-wrap items-center gap-1 ml-auto">
+                    <IconButton
                       onClick={handleClickOpen}
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      color="secondary"
-                      variant="text"
-                      disableElevation
-                      startIcon={<MdSort />}
-                      className={'sort-filter-tablet'}
-                      style={isTablet ? { marginLeft: '50px' } : {}}
+                      className={'mobileIconButton secondary'}
+                      size="small"
                     >
-                      Sort
-                    </Button>
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
                     <MobileSortDialog
                       isOpen={sortOpen}
                       handleClose={handleClickClose}
@@ -212,20 +186,17 @@ const DOARequest = () => {
                       dispatch={dispatch}
                     />
 
-                    <Button
+                    <IconButton
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      variant="text"
-                      color="secondary"
-                      disableElevation
-                      className={'sort-filter-tablet'}
-                      startIcon={<MdFilterList />}
+                      className={'mobileIconButton secondary'}
+                      size="small"
                       onClick={handleOpen}
                     >
-                      Filter
-                    </Button>
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
 
                     <MobileFilterDialog
                       isOpen={isOpenDialog}
@@ -236,43 +207,42 @@ const DOARequest = () => {
                       title={routes?.DOARequest?.title}
                       filters={{}}
                     />
-                  </Grid>
-                </>
+                  </div>
+                </div>
               )}
-            </Grid>
-          </Grid>
+            </div>
+          </div>
         </div>
-        {isMobile && !isTablet
-          ? <CustomSwipableList
+        {isMobile && !isTablet ? (
+          <CustomSwipableList
             allowSelection={false}
             allowSwipe={false}
             permissions={null}
-            primaryField={columns?.find(d => d.field === "name")}
+            primaryField={columns?.find((d) => d.field === 'name')}
             onClick={(d) => {
-              history.push(`${routes.budget.path}?id=${d._id}`)
+              history.push(`${routes.budget.path}?id=${d._id}`);
             }}
             dataRows={dataRows}
             selectedRecords={[]}
             dispatch={dispatch}
             onEdit={(d) => {
-              history.push(`${routes.budget.path}?id=${d._id}`)
+              history.push(`${routes.budget.path}?id=${d._id}`);
             }}
             extraParamsToCheckDelete={true}
-            onDelete={(d) => {
-
-            }}
+            onDelete={(d) => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
             additionalDetails={[]}
             chips={[]}
             owerCollaboratorInitialsOrImages=""
-            onCreate={() => { }}
+            onCreate={() => {}}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
-
-          /> : <CustomAgGrid
+          />
+        ) : (
+          <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
             frameworkComponents={frameworkComponents}
@@ -289,9 +259,10 @@ const DOARequest = () => {
             loading={loading}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
-          />}
+          />
+        )}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

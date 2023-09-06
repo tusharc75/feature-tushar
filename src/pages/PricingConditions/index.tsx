@@ -1,35 +1,32 @@
-import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
-import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
-import { useData } from 'src/StateProvider/Provider';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import CustomContainer from 'src/components/CustomContainer';
-import styles from '../Leads/Header.module.scss';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { MdContacts, MdSort, MdFilterList } from 'react-icons/md';
-import axiosInstance from 'src/axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout, pricingCondition, sidebarResource } from 'src/constants/helpers';
-import routes from 'src/components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import Tooltip from '@material-ui/core/Tooltip';
+import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import { Link, useHistory } from 'react-router-dom';
+import { camelCase, startCase } from 'lodash';
+import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, FaSuitcase } from 'react-icons/all';
-import PricingConditionsDialog from './PricingConditionsDialog';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
+import { FaSuitcase, TbArrowsSort } from 'react-icons/all';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import { startCase } from 'lodash';
-import EditIcon from '@material-ui/icons/Edit';
-import MobileSortDialog from 'src/components/MobileSortDialog';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import MobileFilterDialog from 'src/components/MobileFilterDialog';
-import { camelCase } from 'lodash';
+import MobileSortDialog from 'src/components/MobileSortDialog';
+import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
+import { gridLoadingTimeout, prepareDataForGrid, pricingCondition, sidebarResource } from 'src/constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
+import styles from '../Leads/Header.module.scss';
+import PricingConditionsDialog from './PricingConditionsDialog';
 
 let timeout;
 
@@ -219,104 +216,93 @@ const PricingConditions = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.pricingCondition.title }]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions.pricingCondition}
-            module="pricingCondition(s)"
-            api={pricingCondition.api}
-            afterImportCompleted={() => {
-              fetchPriceConditionList();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchPriceConditionList();
-            }}
-            additionalParams={getQueryString(true)}
-            extraImportExportLinks={[
-              {
-                title: 'Product Template',
-                api: `${pricingCondition.api}/template?conditionType=product`,
-                type: 'download'
-              },
-              {
-                title: 'Product Export',
-                api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ""}&conditionType=product`,
-                type: 'export'
-              },
-              {
-                title: 'Product Import',
-                api: `${pricingCondition.api}/import?conditionType=product`,
-                type: 'import'
-              },
-              {
-                title: 'Package Template',
-                api: `${pricingCondition.api}/template?conditionType=package`,
-                type: 'download'
-              },
-              {
-                title: 'Package Export',
-                api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ""}&conditionType=package`,
-                type: 'export'
-              },
-              {
-                title: 'Package Import',
-                api: `${pricingCondition.api}/import?conditionType=package`,
-                type: 'import'
-              },
-              {
-                title: 'Service Template',
-                api: `${pricingCondition.api}/template?conditionType=service`,
-                type: 'download'
-              },
-              {
-                title: 'Service Export',
-                api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ""}&conditionType=service`,
-                type: 'export'
-              },
-              {
-                title: 'Service Import',
-                api: `${pricingCondition.api}/import?conditionType=service`,
-                type: 'import'
-              },
-            ]}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.pricingCondition.title }]} />
+        <ImportExportLinks
+          permissions={permissions.pricingCondition}
+          module="pricingCondition(s)"
+          api={pricingCondition.api}
+          afterImportCompleted={() => {
+            fetchPriceConditionList();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords.length}
+          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchPriceConditionList();
+          }}
+          additionalParams={getQueryString(true)}
+          extraImportExportLinks={[
+            {
+              title: 'Product Template',
+              api: `${pricingCondition.api}/template?materialType=product`,
+              type: 'download'
+            },
+            {
+              title: 'Product Export',
+              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&materialType=product`,
+              type: 'export'
+            },
+            {
+              title: 'Product Import',
+              api: `${pricingCondition.api}/import?materialType=product`,
+              type: 'import'
+            },
+            {
+              title: 'Package Template',
+              api: `${pricingCondition.api}/template?materialType=package`,
+              type: 'download'
+            },
+            {
+              title: 'Package Export',
+              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&materialType=package`,
+              type: 'export'
+            },
+            {
+              title: 'Package Import',
+              api: `${pricingCondition.api}/import?materialType=package`,
+              type: 'import'
+            },
+            {
+              title: 'Service Template',
+              api: `${pricingCondition.api}/template?materialType=service`,
+              type: 'download'
+            },
+            {
+              title: 'Service Export',
+              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&materialType=service`,
+              type: 'export'
+            },
+            {
+              title: 'Service Import',
+              api: `${pricingCondition.api}/import?materialType=service`,
+              type: 'import'
+            }
+          ]}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
-          <Grid className={styles.filter_side_container} container justify="space-between">
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <MdContacts className="headerLogo" />
-                <span className="listingHeader">{routes.pricingCondition.title}</span>
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex align-items-center gap-1'}>
               {isMobile && (
-                <>
-                  <Grid style={{ display: 'inline-flex' }}>
-                    <Button
+                <div className="d-flex flex-wrap items-center justify-between w-full">
+                  <div></div>
+                  <div className="flex flex-wrap items-center gap-1 ml-auto">
+                    <IconButton
                       onClick={handleClickOpen}
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      color="secondary"
-                      variant="text"
-                      disableElevation
-                      startIcon={<MdSort />}
-                      className={'sort-filter-tablet'}
-                      style={isTablet ? { marginLeft: '50px' } : {}}
+                      className={'mobileIconButton secondary'}
+                      size="small"
                     >
-                      Sort
-                    </Button>
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
                     <MobileSortDialog
                       isOpen={sortOpen}
                       handleClose={handleClickClose}
@@ -326,20 +312,17 @@ const PricingConditions = () => {
                       dispatch={dispatch}
                     />
 
-                    <Button
+                    <IconButton
                       id="demo-customized-button"
                       aria-controls="demo-customized-menu"
                       aria-haspopup="true"
                       aria-expanded={'true'}
-                      variant="text"
-                      color="secondary"
-                      disableElevation
-                      className={'sort-filter-tablet'}
-                      startIcon={<MdFilterList />}
+                      className={'mobileIconButton secondary'}
+                      size="small"
                       onClick={handleOpen}
                     >
-                      Filter
-                    </Button>
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
 
                     <MobileFilterDialog
                       isOpen={isOpenDialog}
@@ -350,66 +333,55 @@ const PricingConditions = () => {
                       title={routes?.pricingCondition?.title}
                       filters={filters}
                     />
-                  </Grid>
-                </>
+                  </div>
+                </div>
               )}
-            </Grid>
-            <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1 }}>
-                  <SearchBox
-                    onChange={onSearch}
-                    className={styles.search_box_input}
-                    value={search}
-                    size="small"
-                    width={isMobile ? '200px' : '242px'}
-                    style={isMobile ? { flex: 1 } : {}}
-                  />
-                </Grid>
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    onClick={() => {
-                      setPricingConditionId(null);
-                      setOpen({ open: true, isClone: false });
-                    }}
-                  >
-                    {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                  </Button>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    color="default"
-                    size="small"
-                    className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                    onClick={openActions}
-                    disabled={selectedRecords.length ? false : true}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                  >
-                    {isMobile && !isTablet ? '' : 'Actions'}
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                  </Menu>
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={onSearch} className={styles.search_box_input} value={search} size="small" />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                <Button
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
+                  className={`no-shadow`}
+                  startIcon={<AddOutlined />}
+                  onClick={() => {
+                    setPricingConditionId(null);
+                    setOpen({ open: true, isClone: false });
+                  }}
+                >
+                  Add
+                </Button>
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  className={`new-dropdown-v1`}
+                  onClick={openActions}
+                  disabled={selectedRecords.length ? false : true}
+                  aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
+                >
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
         {columns && frameworkComponent ? (
           isMobile && !isTablet ? (
@@ -445,7 +417,7 @@ const PricingConditions = () => {
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
-              onClone={(data) => { }}
+              onClone={(data) => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -498,7 +470,7 @@ const PricingConditions = () => {
           }}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

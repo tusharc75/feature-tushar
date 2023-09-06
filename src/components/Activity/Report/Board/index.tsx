@@ -163,13 +163,7 @@ const Board = ({ type, filter }) => {
             setResource(newValue);
           }}
           size="small"
-          renderInput={(params) =>
-            isMobile && !isTablet ? (
-              <TextField {...params} label="Select Resource" size="small" variant="outlined" className={isMobile ? 'serchBox' : ''} />
-            ) : (
-              <TextField {...params} label="Select Resource" variant="outlined" />
-            )
-          }
+          renderInput={(params) => <TextField {...params} label="Select Resource" variant="outlined" />}
         />
         <Box mx={isMobile ? 0 : 1} />
         {resource && resourceData && (

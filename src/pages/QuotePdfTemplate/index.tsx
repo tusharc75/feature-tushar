@@ -17,10 +17,10 @@ import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../comp
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { gridLoadingTimeout, prepareDataForGrid, quoteBuilder, quotePdfTemplate } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, quoteBuilder, quotePdfTemplate, sidebarResource } from '../../constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -351,6 +351,7 @@ const QuotePdfTemplate: FC = () => {
                         dispatch={dispatch}
                         title={routes?.quotePdfTemplate?.title}
                         filters={filters}
+                        resource={sidebarResource.quotePdfTemplate}
                       />
                     </div>
                   </div>
@@ -403,6 +404,7 @@ const QuotePdfTemplate: FC = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.quotePdfTemplate} />
           </div>
         </div>
 

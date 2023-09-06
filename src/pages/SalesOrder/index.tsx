@@ -378,6 +378,7 @@ const SalesOrder = () => {
               dispatch={dispatch}
               filters={filters}
               selectedType={selectedType}
+              resource={sidebarResource.salesOrder}
             >
               {accountDetails.accountId && (
                 <Chip
