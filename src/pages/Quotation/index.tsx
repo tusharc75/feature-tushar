@@ -34,7 +34,7 @@ import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, 
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
 import ManageQuotationDialog from './ManageQuotationDialog';
-import { Delete, Info, Warning} from '@material-ui/icons';
+import { Delete, Info, Warning } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import moment from 'moment';
 
@@ -168,34 +168,34 @@ const Quotation = () => {
 
   const isDatePast = (dateStr) => {
     return moment(dateStr).isBefore(moment(), 'day');
-  }
+  };
 
   const isDateWithinNext15Days = (dateStr) => {
-      const today = moment();
-      const newDate = moment(dateStr);
-      return newDate.isBetween(today, today.add(15, 'days'), 'day', '[]');
-  }
+    const today = moment();
+    const newDate = moment(dateStr);
+    return newDate.isBetween(today, today.add(15, 'days'), 'day', '[]');
+  };
 
   const QuotationNumberRenderer = (params) => (
     <Fragment>
       <Link className="link text-truncate" title={params.value} to={`${routes.quotation.path}/detail/${params.data?._id}`}>
         {params.value}
       </Link>
-      {params.data?.type === "Rental Job" && isDatePast(params.data?.estimateEndDate) && (
-            <Box ml={1}>
-                <HtmlTooltip title={`${routes.quotation.title} Expired`}>
-                    <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
-                </HtmlTooltip>
-            </Box>
-        )}
+      {params.data?.type === 'Rental Job' && isDatePast(params.data?.estimateEndDate) && (
+        <Box ml={1}>
+          <HtmlTooltip title={`${routes.quotation.title} Expired`}>
+            <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
+          </HtmlTooltip>
+        </Box>
+      )}
 
-        {params.data?.type === "Rental Job" && isDateWithinNext15Days(params.data?.estimateEndDate) && (
-            <Box ml={1}>
-                <HtmlTooltip title={`${routes.quotation.title} about to renew`}>
-                    <Info style={{ fontSize: '14px' }} fontSize="small" color="primary" />
-                </HtmlTooltip>
-            </Box>
-        )}
+      {params.data?.type === 'Rental Job' && isDateWithinNext15Days(params.data?.estimateEndDate) && (
+        <Box ml={1}>
+          <HtmlTooltip title={`${routes.quotation.title} about to renew`}>
+            <Info style={{ fontSize: '14px' }} fontSize="small" color="primary" />
+          </HtmlTooltip>
+        </Box>
+      )}
     </Fragment>
   );
 
