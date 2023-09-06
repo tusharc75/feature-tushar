@@ -162,11 +162,11 @@ const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
                             })
                             points.push({
                                 x,
-                                y: 149,
+                                y: 145,
                                 marker: {
                                     size: 5,
                                     fillColor: '#fff',
-                                    strokeColor: '#ff0000',
+                                    strokeColor: '#fff',
                                     radius: 2,
                                 },
                                 label: {
