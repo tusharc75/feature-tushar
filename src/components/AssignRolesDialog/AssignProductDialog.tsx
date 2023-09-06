@@ -213,7 +213,9 @@ const AssignProductDialog = ({
     return deepFilter;
   };
 
-  const handleAssignProduct = async () => {
+  const handleAssignProduct = async (event) => {
+    event.preventDefault();
+    event.currentTarget.disabled = true;
     setAssigning(true);
     if (reference === 'product') {
       const dataObj = [...getLocalStorageArrayData(localStorageSelectedRecords)]
@@ -311,7 +313,7 @@ const AssignProductDialog = ({
                   <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                   <Button
                     disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
-                    onClick={handleAssignProduct}
+                    onClick={(e) => handleAssignProduct(e)}
                     color="primary"
                     size="small"
                     variant="contained"
