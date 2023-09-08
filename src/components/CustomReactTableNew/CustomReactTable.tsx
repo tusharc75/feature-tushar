@@ -712,6 +712,7 @@ function CustomReactTable({
               // setColumns={setColumns}
               // columnApi={columnApi}
               // refreshGrid={refreshGrid}
+              customFilters = {customFilters}
               renderedFrom={renderedFrom}
               isClientSideGrid={isClientSideGrid}
               dispatchTable={dispatch}
