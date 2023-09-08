@@ -610,29 +610,29 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
       })
       .then(({ data }) => {
         const tempfile = new Blob([data], { type: 'application/pdf' });
-        generateBase64forFile(tempfile, file[0].name, 'pdf');
+        generateBase64forFile(tempfile, file[0].name, `.${file[0].name.split(".")?.pop()}`);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
 
-  const generateBase64forFile = (blobData, fileName, type) => {
+  const generateBase64forFile = (blobData, fileName, extension) => {
     let reader = new FileReader();
     reader.readAsDataURL(blobData);
     reader.onloadend = function () {
       let base64data: any = reader.result;
-      if (type === 'pdf') {
-        const attachments = [
-          {
-            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-            contentType: base64data.split(';')[0].split(':')[1],
-            name: fileName
-          }
-        ];
-        setEmailAttachment(attachments);
-        setSendMail(true);
-      }
+      const attachments = [
+        {
+          base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+          contentType: base64data.split(';')[0].split(':')[1],
+          extension: extension,
+          name: fileName
+        }
+      ];
+      setEmailAttachment(attachments);
+      setSendMail(true);
+
     };
   };
 

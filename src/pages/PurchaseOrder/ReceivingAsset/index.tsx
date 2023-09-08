@@ -24,6 +24,8 @@ import Logs from './Logs';
 import History from 'src/pages/ProductInventory/LedgerHistory';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import PreviewDownload from 'src/components/PreviewDownload';
+import { Add } from '@material-ui/icons';
+import AssetQtyDialog from './AssetQtyDialog';
 
 
 const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
@@ -44,6 +46,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
   const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
+  const [addAssetDialog, setAddAssetDialog] = useState({ open: false, product: null })
 
   useEffect(() => {
     fetchColumns();
@@ -262,24 +265,48 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           Cell: ({ row }) =>
             row?.original?.type === 'Product' ? (
               <>
-                {permissions?.purchaseOrder?.isUpdate &&
-                  allowedToEdit &&
-                  row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) &&
-                  ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
-                  <HtmlTooltip title="Reject">
+                {row?.original?.type === 'Product' && row?.original?.serializedProduct && row.original?.qty - (row.original?.actualReceived || 0) - (row?.original?.assetQty || 0) <= 0 &&
+                  < HtmlTooltip title={`Add Inventory`}>
                     <span>
                       <IconButton
+                        disabled={row.original?.qty - (row.original?.actualReceived || 0) === 0}
                         size="small"
-                        aria-label="reject"
+                        aria-label="Add Inventory"
                         onClick={() => {
-                          setRejectProductDialog(row.original);
+
+                          setAddAssetDialog({ open: true, product: row.original })
+                          // setHistoryDialog({
+                          //   open: true,
+                          //   _id: row?.original?._id,
+                          //   product: row?.original?.productId,
+                          //   productName: row?.original?.detail
+                          // });
                         }}
                       >
-                        <TransformIcon fontSize="small" color={'primary'} />
+                        <Add fontSize="small" color={'primary'} />
                       </IconButton>
                     </span>
-                  </HtmlTooltip>
-                ) : null}
+                  </HtmlTooltip>}
+                {
+                  permissions?.purchaseOrder?.isUpdate &&
+                    allowedToEdit &&
+                    row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) &&
+                    ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+                    <HtmlTooltip title="Reject">
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="reject"
+                          onClick={() => {
+                            setRejectProductDialog(row.original);
+                          }}
+                        >
+                          <TransformIcon fontSize="small" color={'primary'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                  ) : null
+                }
                 <HtmlTooltip title="History">
                   <span>
                     <IconButton
@@ -352,11 +379,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         if (subRows?.length) {
           let actualReceived = item.actualReceived;
           subRows?.forEach((e: any, index) => {
-            if (actualReceived && !e.isUsed) {
-              res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.assetNumber, type: 'Asset', assetId: e?._id, hideSelection: true });
-              actualReceived = actualReceived - 1;
-              e.isUsed = true;
-            }
+            res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.assetNumber, type: 'Asset', assetId: e?._id, hideSelection: true });
+            actualReceived = actualReceived - 1;
+            e.isUsed = true;
           });
         }
         const subRowsproductSerialNumber = productSerialNumber?.filter((e) => e?.product === res?.productId);
@@ -386,6 +411,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           return { ...e, type: 'Product' };
         })
       );
+      
       setRowsData(rows);
       setSelectedRecords([]);
     } catch (error) {
@@ -486,6 +512,18 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             fetchProduct();
           }}
           productList={selectedRecords.filter((d) => d.type === 'Product' && d.qty !== d.actualReceived)}
+          purchaseOrderData={purchaseOrderData}
+        />
+      )}
+      {addAssetDialog.open && (
+        <AssetQtyDialog
+          purchaseOrderID={purchaseOrderData._id}
+          onClose={() => setAddAssetDialog({ open: false, product: null })}
+          onSuccess={() => {
+            setAddAssetDialog({ open: false, product: null });
+            fetchProduct();
+          }}
+          product={addAssetDialog.product}
           purchaseOrderData={purchaseOrderData}
         />
       )}

@@ -35,11 +35,9 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
     const fetchFields = async () => {
         setColumns(null);
         var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
-        if (!allowedToEdit) {
-            fields?.forEach((e) => {
-                e.isColumnEditable = false;
-            });
-        }
+        fields?.forEach((e) => {
+            e.isColumnEditable = false;
+        });
         const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
         let column: any = [
             {
@@ -131,6 +129,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
     const handleReOpen = async (data: any) => {
         await axiosInstance().patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, {
             status: FIELD_TICKET_STATUS.inProgress,
+            oldStatus: fieldTicketData?.status,
             comment: data
         }).then(({ data }) => {
             toastConfig.setToastConfig({
