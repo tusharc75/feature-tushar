@@ -704,7 +704,7 @@ export default function Attachment() {
                   onChange={(event, newValue) => {
                     setResource(newValue);
                     if (newValue) {
-                      setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
+                      //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
                     } else {
                       setFilter([]);
                     }
