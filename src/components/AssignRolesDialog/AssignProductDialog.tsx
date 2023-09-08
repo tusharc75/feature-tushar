@@ -22,7 +22,6 @@ import { AddOutlined, RemoveOutlined } from '@material-ui/icons';
 import CustomAgGridEditable, { reducer, intialState } from '../AgGridComponents/CustomAgGridEditable';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
-import { debounce } from 'lodash';
 
 const options = [
   {
@@ -274,8 +273,6 @@ const AssignProductDialog = ({
       setAssigning(false);
     }
   };
-
-  const debouncedHandleAssignProduct = debounce(handleAssignProduct, 1500);
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
