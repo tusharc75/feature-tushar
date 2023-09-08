@@ -70,6 +70,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     fetchFields();
   }, []);
 
+  const OpenInNewWindow = (url) => {
+    window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank')
+  }
+
   const fetchFields = async () => {
     setNextStep(false);
     var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
@@ -161,9 +165,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 <IconButton
                   size="small"
                   onClick={() => {
-                    history.push(routes.bulkAssetCreation.path, {
-                      rental: rentalManagementData
-                    });
+                    OpenInNewWindow(routes.bulkAssetCreation.path)
                   }}
                 >
                   <LibraryBooksIcon fontSize="small" color={'primary'} />
@@ -175,9 +177,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 <IconButton
                   size="small"
                   onClick={() => {
-                    history.push(routes.sublease.path, {
-                      rental: rentalManagementData
-                    });
+                    OpenInNewWindow(routes.sublease.path)
                   }}
                 >
                   <ReceiptIcon fontSize="small" color={'primary'} />
@@ -217,9 +217,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                     <IconButton
                       size="small"
                       onClick={() => {
-                        history.push(routes.transferAsset.path, {
-                          rental: rentalManagementData
-                        });
+                        OpenInNewWindow(routes.transferAsset.path)
                       }}
                     >
                       <RepeatIcon fontSize="small" color={'primary'} />

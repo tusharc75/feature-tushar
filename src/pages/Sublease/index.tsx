@@ -46,7 +46,7 @@ const Sublease = () => {
   let renderedFrom = camelCase(routes.sublease?.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const { type }: any = queryString.parse(history.location.search);
+  const { type, referenceId, referenceType  }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.sublease.title}`);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -62,7 +62,7 @@ const Sublease = () => {
     state;
 
   const [isOpenDialog, setisOpenDialog] = useState(false);
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
+  const [fromRental, setFromRental] = useState(history.location?.state?.rental || {_id: referenceId, rentalJobName: referenceType});
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
@@ -207,7 +207,11 @@ const Sublease = () => {
   };
   const handleSubleaseTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+    if(referenceId && referenceType) {
+      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleFilter = (event, newFilter) => {
@@ -378,6 +382,12 @@ const Sublease = () => {
                   label={`Rental Job : ${fromRental?.rentalJobName}`}
                   onDelete={() => {
                     setFromRental(null);
+                    const queryParams = new URLSearchParams(history.location.search)
+                    queryParams.delete('referenceId')
+                    queryParams.delete('referenceType')
+                    history.replace({
+                      search: queryParams.toString(),
+                    })
                   }}
                 />
               )}

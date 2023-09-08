@@ -59,10 +59,9 @@ const BulkAssetCreation = () => {
     state;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [isOpenDialog, setisOpenDialog] = useState(false);
-  const { type }: any = queryString.parse(history.location.search);
+  const { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
-
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
+  const [fromRental, setFromRental] = useState(history.location?.state?.rental || {_id: referenceId, rentalJobName: referenceType});
 
   const {
     state: { user, permissions, selectedEntity }
@@ -270,7 +269,11 @@ const BulkAssetCreation = () => {
 
   const handleBulkAssetCreationType = (filterValues) => {
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+    if(referenceId && referenceType) {
+    history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleFilter = (event, newFilter) => {
@@ -390,6 +393,12 @@ const BulkAssetCreation = () => {
                   label={`Rental Job : ${fromRental?.rentalJobName}`}
                   onDelete={() => {
                     setFromRental(null);
+                    const queryParams = new URLSearchParams(history.location.search)
+                    queryParams.delete('referenceId')
+                    queryParams.delete('referenceType')
+                    history.replace({
+                      search: queryParams.toString(),
+                    })
                   }}
                 />
               )}
