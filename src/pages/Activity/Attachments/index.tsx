@@ -444,29 +444,28 @@ export default function Attachment() {
       })
       .then(({ data }) => {
         const tempfile = new Blob([data], { type: 'application/pdf' });
-        generateBase64forFile(tempfile, file[0].name, 'pdf');
+        generateBase64forFile(tempfile, file[0].name, `.${file[0].name.split(".")?.pop()}`);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
 
-  const generateBase64forFile = (blobData, fileName, type) => {
+  const generateBase64forFile = (blobData, fileName, extension) => {
     let reader = new FileReader();
     reader.readAsDataURL(blobData);
     reader.onloadend = function () {
       let base64data: any = reader.result;
-      if (type === 'pdf') {
-        const attachments = [
-          {
-            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-            contentType: base64data.split(';')[0].split(':')[1],
-            name: fileName
-          }
-        ];
-        setEmailAttachment(attachments);
-        setSendMail(true);
-      }
+      const attachments = [
+        {
+          base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+          contentType: base64data.split(';')[0].split(':')[1],
+          extension: extension,
+          name: fileName
+        }
+      ];
+      setEmailAttachment(attachments);
+      setSendMail(true);
     };
   };
 
@@ -682,7 +681,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module="Attachment"
           api={`/attachment`}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -824,7 +823,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => {}}
+              setWholeRowsCellColor={() => { }}
               renderedFrom={'attachment_render'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -914,8 +913,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                    ? selectedResourceData.optionValue
-                    : user?.user?._id,
+                      ? selectedResourceData.optionValue
+                      : user?.user?._id,
                   access: true
                 }
               ]}
