@@ -78,7 +78,7 @@ const AddSerializedAsset = ({
   const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
 
   const [warehouseOption, setWarehouseOption] = useState([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant?.optionValue);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [tabValue, setTabValue] = useState(0);
 
@@ -318,7 +318,7 @@ const AddSerializedAsset = ({
       ) {
         return true;
       }
-      if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), 'warehouseId'))[0] === filterByPlant) {
+      if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), 'warehouseId'))[0] === filterByPlant?.optionValue) {
         return true;
       }
       return false;
@@ -372,7 +372,7 @@ const AddSerializedAsset = ({
       localStorage.removeItem(localStorageSelectedRecords);
     }
     // if (newValue === 0) {
-    //   setSelectedWarehouse(filterByPlant);
+    //   setSelectedWarehouse(filterByPlant?.optionValue);
     // } else {
     //   setSelectedWarehouse(null);
     // }
@@ -535,7 +535,7 @@ const AddSerializedAsset = ({
                   </Box>
                 </Box>
                 {serializedProducts.length > 0 && serializedProducts.some((s) => s.qty < 0) ? (
-                  <div className="text-error font-weight-bold">You have selected more assets then needed.</div>
+                  <div className="text-error font-weight-bold">You have selected more assets than required</div>
                 ) : (
                   ''
                 )}
@@ -599,10 +599,10 @@ const AddSerializedAsset = ({
                               }}
                               variant={isMobile && !isTablet ? 'text' : 'contained'}
                               disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
-                              className={`${isMobile && !isTablet ? 'mobile_button' : ''} yellow-button `}
+                              className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
                               endIcon={isAdding && <CircularProgress size={20} />}
                             >
-                              {'Transfer to Job Plant'}
+                              {`Transfer to ${filterByPlant?.optionLabel}`}
                               {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                                 ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
                                 : ''}
