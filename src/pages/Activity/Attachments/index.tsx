@@ -492,7 +492,7 @@ export default function Attachment() {
   };
   const handleMailForFolder = (data) => {
     const folderId = data?._id;
-    const folderName = data?.name;
+    const folderName = data?.name || 'Folder';
 
     if (!folderId || !folderName) {
       toastConfig.setToastConfig('Invalid Data');
