@@ -56,7 +56,8 @@ const Steps = (props) => {
     DOAData = null,
     quoteData,
     globalLoading = false,
-    setStepFullScreen
+    setStepFullScreen,
+    isStepEnded = false,
   } = props;
   const classes = useStyles();
   let activeStep = currentStep;
@@ -120,6 +121,7 @@ const Steps = (props) => {
             setSubmitting(false);
             activeStep = activeStep + 1;
             Refresh(version);
+            setShowManualCustomerActionDialog(false);
           })
           .catch((error) => {
             setSubmitting(false);
@@ -175,10 +177,10 @@ const Steps = (props) => {
           !loading ||
           !globalLoading
         }
-        isStepEnded={currentStep === steps.length}
+        isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
         nextStep={steps[currentStep + 1]}
-        setCurrentStep={() => {}}
+        setCurrentStep={() => { }}
         handleNext={() => {
           if (versionStatus.includes('Sent to Customer') || steps[currentStep]?.key === 'Send To Customer' || versionStatus === 'Sent to Customer') {
             setShowManualCustomerActionDialog(true);

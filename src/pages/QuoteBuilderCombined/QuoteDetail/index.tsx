@@ -38,7 +38,8 @@ import {
   formatAmountWithCurrency,
   gridLoadingTimeout,
   termsAndCondition,
-  ACTIVITY_RESOURCE
+  ACTIVITY_RESOURCE,
+  sidebarResource
 } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -59,7 +60,7 @@ import { VscVersions } from 'react-icons/vsc';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import DOAReasonDialog from '../../DOA/DOAReasonDialog';
-import { ExpandMore } from '@material-ui/icons';
+import { Edit, ExpandMore } from '@material-ui/icons';
 import { MdDeleteSweep } from 'react-icons/md';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { AiFillPlusCircle } from 'react-icons/ai';
@@ -664,6 +665,24 @@ export default function QuoteDetail() {
           <Box className="control-buttons-v1">
             {quoteData ? (
               <>
+                {permissions[sidebarResource.quoteBuilder]?.isCreate ? (
+                  <Button
+                    variant="text"
+                    size="small"
+                    className="mr-1"
+                    startIcon={<BiLayerPlus />}
+                    onClick={handleOpenCloneDialog}
+                  >
+                    Clone
+                  </Button>
+                ) : null}
+                {allowedToEdit ? (
+                  <Tooltip title="Edit">
+                    <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
+                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
+                    </Button>
+                  </Tooltip>
+                ) : null}
                 {processStatus !== 'New' && (
                   <Tooltip title="Quote Summary">
                     <Button
