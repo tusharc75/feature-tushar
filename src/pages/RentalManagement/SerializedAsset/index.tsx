@@ -70,6 +70,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     fetchFields();
   }, []);
 
+  const OpenInNewWindow = (url) => {
+    window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank')
+  }
+
   const fetchFields = async () => {
     setNextStep(false);
     var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
@@ -129,9 +133,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 <IconButton
                   size="small"
                   onClick={() => {
-                    history.push(routes.purchaseOrder.path, {
-                      rental: rentalManagementData
-                    });
+                    OpenInNewWindow(routes.purchaseOrder.path)
                   }}
                 >
                   <OpenInNewIcon fontSize="small" color={'primary'} />
@@ -161,9 +163,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 <IconButton
                   size="small"
                   onClick={() => {
-                    history.push(routes.bulkAssetCreation.path, {
-                      rental: rentalManagementData
-                    });
+                    OpenInNewWindow(routes.bulkAssetCreation.path)
                   }}
                 >
                   <LibraryBooksIcon fontSize="small" color={'primary'} />
@@ -175,9 +175,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 <IconButton
                   size="small"
                   onClick={() => {
-                    history.push(routes.sublease.path, {
-                      rental: rentalManagementData
-                    });
+                    OpenInNewWindow(routes.sublease.path)
                   }}
                 >
                   <ReceiptIcon fontSize="small" color={'primary'} />
@@ -217,9 +215,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                     <IconButton
                       size="small"
                       onClick={() => {
-                        history.push(routes.transferAsset.path, {
-                          rental: rentalManagementData
-                        });
+                        OpenInNewWindow(routes.transferAsset.path)
                       }}
                     >
                       <RepeatIcon fontSize="small" color={'primary'} />
@@ -575,7 +571,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     );
   };
 
-  const handleAddSerializedAsset = (assets) => {
+  const handleAddSerializedAsset = (assets, withTransfer = false) => {
     setNextStep(false);
     var data = [];
     var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === 'product');
@@ -601,7 +597,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     if (data.length) {
       setAdding(true);
       axiosInstance()
-        .post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data })
+        .post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data, withTransfer })
         .then(({ data }) => {
           setAddSerializedAssetDialog({ open: false });
           fetchData();
@@ -890,9 +886,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <MenuItem
                     disabled={purchaseOrderCount === 0}
                     onClick={() => {
-                      history.push(routes.purchaseOrder.path, {
-                        rental: rentalManagementData
-                      });
+                      OpenInNewWindow(routes.purchaseOrder.path)
                     }}
                   >
                     {`Show ${routes.purchaseOrder.title}`}
@@ -902,9 +896,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <MenuItem
                     disabled={bulkAssetCreationCount === 0}
                     onClick={() => {
-                      history.push(routes.bulkAssetCreation.path, {
-                        rental: rentalManagementData
-                      });
+                      OpenInNewWindow(routes.bulkAssetCreation.path)
                     }}
                   >
                     {`Show ${routes.bulkAssetCreation.title}`}
@@ -915,9 +907,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <MenuItem
                     disabled={subleaseCount === 0}
                     onClick={() => {
-                      history.push(routes.sublease.path, {
-                        rental: rentalManagementData
-                      });
+                      OpenInNewWindow(routes.sublease.path)
                     }}
                   >
                     {`Show ${routes.sublease.title}`}
@@ -927,9 +917,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <MenuItem
                     disabled={transferAssetCount === 0}
                     onClick={() => {
-                      history.push(routes.transferAsset.path, {
-                        rental: rentalManagementData
-                      });
+                      OpenInNewWindow(routes.transferAsset.path)
                     }}
                   >
                     {`Show ${routes.transferAsset.title}`}

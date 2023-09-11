@@ -13,12 +13,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import {
-  CustomDialogTransition,
-  transferAsset,
-  setFieldsInAscendingOrder,
-  GenerateResourceLineNumber,
-} from 'src/constants/helpers';
+import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder, GenerateResourceLineNumber } from 'src/constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -115,7 +110,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
         } else {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
           setAllFields(fieldsDataForCreate);
-          createValues.transferAssetNumber = GenerateResourceLineNumber(fieldsDataForCreate);;
+          createValues.transferAssetNumber = GenerateResourceLineNumber(fieldsDataForCreate);
           if (referenceType === 'Rental Job') {
             createValues['transferFromPlant'] = referenceData?.transferFromPlant;
             createValues['transfertoPlant'] = referenceData?.transferToPlant;
@@ -233,6 +228,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
 
   return (
     <Dialog
+      disableEnforceFocus
       maxWidth="md"
       fullScreen={fullScreen || isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
@@ -489,7 +485,10 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                   <FormTypes
                                     isNew={Boolean(transferAssetId)}
                                     {...field}
-                                    disabled={(Boolean(transferAssetId) && field.disableOnEdit) || (field.fieldName === 'transferAssetNumber' && field?.isSystemGenerate)}
+                                    disabled={
+                                      (Boolean(transferAssetId) && field.disableOnEdit) ||
+                                      (field.fieldName === 'transferAssetNumber' && field?.isSystemGenerate)
+                                    }
                                     values={values}
                                     errors={errors}
                                     touched={touched}

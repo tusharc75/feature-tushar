@@ -103,7 +103,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
   };
 
   return (
-    <div className={`sm:max-w-[300px] sm:min-w-[200px] flex-grow`}>
+    <div className={`w-full sm:w-[unset] sm:max-w-[300px] sm:min-w-[200px] flex-grow`}>
       <Autocomplete
         limitTags={1}
         multiple={true}
