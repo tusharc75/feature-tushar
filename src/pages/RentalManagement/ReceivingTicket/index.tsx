@@ -161,11 +161,15 @@ const ReceivingTicket = ({
   const closeLinkActions = () => {
     setAnchorLinkActionEl(null);
   };
-
+  
   useEffect(() => {
     getColumn();
     fetchRecords();
   }, []);
+
+  const OpenInNewWindow = (url) => {
+    window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank')
+  }
 
   const fetchRecords = async () => {
     setLoadingData(true);
@@ -1645,9 +1649,7 @@ const ReceivingTicket = ({
             {repairJobCount > 0 && (
               <MenuItem
                 onClick={() => {
-                  history.push(routes.repairJob.path, {
-                    rental: rentalManagementData
-                  });
+                 OpenInNewWindow(routes.repairJob.path)
                 }}
               >
                 {`Created ${routes.repairJob.title}`}
@@ -1656,9 +1658,7 @@ const ReceivingTicket = ({
             {repairOrderCount > 0 && (
               <MenuItem
                 onClick={() => {
-                  history.push(routes.repairOrder.path, {
-                    rental: rentalManagementData
-                  });
+                  OpenInNewWindow(routes.repairOrder.path)
                 }}
               >
                 {`Created ${routes.repairOrder.title}`}
