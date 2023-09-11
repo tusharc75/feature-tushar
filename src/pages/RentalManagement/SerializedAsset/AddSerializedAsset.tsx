@@ -347,7 +347,7 @@ const AddSerializedAsset = ({
       .then(({ data }) => {
         fetchAssets();
         setShowTransferAssetDialog(false);
-        addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+        addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)], true);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

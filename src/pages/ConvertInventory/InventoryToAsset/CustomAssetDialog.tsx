@@ -294,7 +294,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
                                     color="primary"
                                     disabled={loading}
                                     loading={loading}>
-                                    Convert
+                                    Submit
                                 </CustomButton>
                             </CustomDialogFooter>
                         </>

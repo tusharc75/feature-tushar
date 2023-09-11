@@ -775,13 +775,15 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       {addDialog.open && addDialog.type === MATERIAL_TYPE.serializedAsset && (
         <AssignSerializedAssetDialog
           reference="quotation"
+          referenceData={{
+            fromDate: quotationData?.estimateStartDate,
+            toDate: quotationData?.estimateEndDate,
+            warehouse: quotationData?.warehouse?.optionValue
+          }}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           ids={[...rowsData?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e: any) => e?.serializedAssetDetail?._id)]}
-          referenceData={{
-            warehouse: quotationData?.warehouse?.optionValue,
-          }}
           isAssigning={isAddingProducts}
-          extraStaticFilter={[{ field: 'status', term: [ASSET_STATUS.new, ASSET_STATUS.available] }]}
+          // extraStaticFilter={[{ field: 'status', term: [ASSET_STATUS.new, ASSET_STATUS.available] }]}
           handleSucess={(rows) => {
             if (products?.length) {
               const dataToAddFormat = rows?.map(d => {
