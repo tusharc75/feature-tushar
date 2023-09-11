@@ -69,6 +69,7 @@ import CustomButton from '../../../../components/Helpers/CustomButton';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 // import Steps from 'src/components/Steps';
 import { stepIconInterface } from 'src/components/Steps/icons';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 interface StepInterface extends stepIconInterface {
   key: string;
@@ -312,6 +313,7 @@ export default function QuoteProcess(props) {
   const [showPDFArrangeColumns, setShowPDFArrangeColumns] = useState(false);
   const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [columns, setColumnDatas] = useState([])
 
   const [messageDialog, setMessageDialog] = useState({
     open: false,
@@ -1359,6 +1361,14 @@ export default function QuoteProcess(props) {
                 ) : null}
               </Grid>
               <div className="flex items-center justify-between flex-wrap w-full mx-3 gap-[8px]">
+                {!['New', 'Price Builder'].includes(ProcessStatus) && (
+                  <PreviewDownload
+                    resource={sidebarResource.quoteBuilder}
+                    referenceId={quoteData?._id}
+                    columns={columns}
+                    hideDetailButton={true}
+                    extraQueryParams={{ uniqueId: quoteData.versions[currentVersion]._id }} />
+                )}
                 {ProcessStatus !== 'New' && ProcessStatus !== 'Price Builder' ? (
                   <span className="d-flex align-items-center justify-content-end">
                     <Tooltip title="View">
@@ -1526,6 +1536,7 @@ export default function QuoteProcess(props) {
                     isAddExistingProduct={isAddExistingProduct}
                     setIsAddExistingProduct={setIsAddExistingProduct}
                     setColumnForPDFExcel={setColName}
+                    setColumnDatas={setColumnDatas}
                     refreshProducts={refreshProducts}
                     stage={ProcessStatus === 'New' ? 'product' : 'cost'}
                     isPriceBuilder={ProcessStatus === 'Price Builder'}
