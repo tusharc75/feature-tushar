@@ -631,6 +631,11 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     const folderId = data?._id;
     const folderName = data?.name;
 
+    if (!folderId || !folderName) {
+      toastConfig.setToastConfig('Invalid Data');
+      return;
+    }
+
     axiosInstance()
       .get(`attachment/zip/${folderId}`, { responseType: 'blob' })
       .then(({ data }) => {
@@ -708,6 +713,12 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   const downloadZip = (data) => {
     const folderId = data?._id;
     const folderName = data?.name;
+
+    if (!folderId || !folderName) {
+      toastConfig.setToastConfig('Invalid Data');
+      return;
+    }
+    
     axiosInstance()
       .get(`attachment/zip/${folderId}`, {
         responseType: 'blob'

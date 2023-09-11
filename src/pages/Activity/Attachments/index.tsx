@@ -354,7 +354,13 @@ export default function Attachment() {
 
   const downloadZip = (data) => {
     const folderId = data?._id;
-    const folderName = data?.name;
+    const folderName = data?.name || 'Folder';
+
+    if (!folderId || !folderName) {
+      toastConfig.setToastConfig('Invalid Data');
+      return;
+    }
+
     axiosInstance()
       .get(`attachment/zip/${folderId}`, {
         responseType: 'blob'
@@ -487,6 +493,11 @@ export default function Attachment() {
   const handleMailForFolder = (data) => {
     const folderId = data?._id;
     const folderName = data?.name;
+
+    if (!folderId || !folderName) {
+      toastConfig.setToastConfig('Invalid Data');
+      return;
+    }
 
     axiosInstance()
       .get(`attachment/zip/${folderId}`, { responseType: 'blob' })
