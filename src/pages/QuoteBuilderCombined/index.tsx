@@ -50,6 +50,8 @@ import IconButton from '@material-ui/core/IconButton';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { styles } from '@material-ui/pickers/views/Calendar/Calendar';
 import { camelCase } from 'lodash';
+import queryString from 'query-string';
+
 
 let quoteTimeout;
 const QuoteType = [
@@ -65,9 +67,10 @@ const QuoteType = [
 const arr = [...Array(9).keys()];
 
 const QuoteBuilders = () => {
+  const history = useHistory();
+  const { type }: any = queryString.parse(history.location.search);
   const renderedFrom = camelCase(routes?.quoteBuilder.title);
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
@@ -554,7 +557,11 @@ const QuoteBuilders = () => {
 
   const handleQuoteBuilderTypeSel = (filterValues) => {
     setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`);
   };
+  useEffect(() => {
+    setSelectedType(type ? parseInt(type) : 1);
+  }, [])
 
   const onSuccess = () => {
     setshowCreateQuoteDialog(false);
@@ -792,7 +799,7 @@ const QuoteBuilders = () => {
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
             onCreate={false}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
