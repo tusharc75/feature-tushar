@@ -66,6 +66,8 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
     { field: 'issueDate', headerName: 'Issue Date', show: true, filter: false, sortable: false, disabled: true, cellRenderer: 'dateRenderer' },
     { field: 'expiryDate', headerName: 'Expiry Date', show: true, filter: false, sortable: false, disabled: true, cellRenderer: 'dateRenderer' },
     { field: 'supplierAccount', headerName: 'Certification Supplier', show: true, cellRenderer: 'supplierAccountRenderer' },
+    { field: 'owner', headerName: 'Owner', show: true, cellRenderer: 'linkRenderer' },
+    { field: 'collaborator', headerName: 'Collaborator', show: true, cellRenderer: 'collaboratorLinkRenderer' },
     { field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' }
   ];
 
@@ -98,15 +100,42 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
       )}
     </>
   );
+  const CollaboratorLinkRenderer = (params) => {
+    return (
+      <>
+        {params.value ? (
+          <Link className="link" target="_blank" title={params.value} to={`${routes.userDetail.path}/${params.data.collaboratorId}`}>
+            {params.value}
+          </Link>
+        ) : (
+          <NoDataCell />
+        )}
+      </>
+    );
+  };
 
+  const LinkRenderer = (params) => {
+    return (
+      <>
+        {params.value ? (
+          <Link className="link" target="_blank" title={params.value} to={`${routes.userDetail.path}/${params.data.ownerId}`}>
+            {params.value}
+          </Link>
+        ) : (
+          <NoDataCell />
+        )}
+      </>
+    );
+  };
   const frameworkComponents = {
     supplierAccountRenderer: SupplierAccountRenderer,
+    collaboratorLinkRenderer: CollaboratorLinkRenderer,
+    linkRenderer: LinkRenderer,
     commonRenderer: CommonRenderer,
     dateRenderer: DateRenderer,
     actionsRenderer: ActionsRenderer,
     ...staticFrameworkRender
   };
-
   return (
     <>
       {canIssueCertificate && (
