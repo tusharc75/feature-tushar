@@ -82,31 +82,6 @@ export default function QuoteDetailPage({
     <div className={`position-relative ${classes.detailBox}`}>
       {quoteData && (
         <>
-          <div className={classes.btnHeader}>
-            {/* {quotePermissions?.isCreate ? (
-                            <Button
-                                variant="text"
-                                style={{color:"white"}}
-                                size="small"
-                                className="mr-1"
-                                startIcon={<BiLayerPlus />}
-                                onClick={handleOpenCloneDialog}
-                            >
-                                Clone
-                            </Button>
-                        ) : null}
-                        {allowedToEdit ? (
-                            <Button
-                                variant="text"
-                                style={{color:"white"}}
-                                size="small"
-                                startIcon={<HiPencil />}
-                                onClick={handleOpenUpdateDialog}
-                            >
-                                Edit
-                            </Button>
-                        ) : null} */}
-          </div>
           {!loadingFields && quoteFields ? (
             <DetailsPage
               data={getCopyOfQuoteData}
