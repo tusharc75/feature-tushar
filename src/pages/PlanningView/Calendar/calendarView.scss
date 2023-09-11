@@ -13,7 +13,7 @@
 
 .rbc-agenda-view {
   flex: 1 1 100% !important;
-  max-height: max(calc(100vh - 380px), 600px);
+  max-height: max(calc(100vh - 380px), 500px);
   overflow: auto;
   .rbc-agenda-table {
     border: 1px solid var(--common-border-color) !important;

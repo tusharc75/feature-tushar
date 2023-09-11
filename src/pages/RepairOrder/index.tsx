@@ -54,7 +54,7 @@ const RepairOrder = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { type }: any = queryString.parse(history.location.search);
+  let { type, referenceId , referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -77,7 +77,6 @@ const RepairOrder = () => {
   const [columns, setColumns] = useState([]);
 
   const { getColumnData } = useColumns();
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
   useEffect(() => {
     fetchGridColumns();
@@ -148,7 +147,7 @@ const RepairOrder = () => {
     if (renderCount > 0) {
       fetchRepairOrders();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, fromRental, showFilteredRecordsOnly]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const handleSingleDeleteRepairOrder = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -224,8 +223,8 @@ const RepairOrder = () => {
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (fromRental) {
-      filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
+    if (referenceId) {
+      filterByIds.push({ field: 'rentalJob', term: referenceId });
     }
 
     if (filterByIds?.length) {
@@ -290,7 +289,11 @@ const RepairOrder = () => {
 
   const handleRepairOrderTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+    if(referenceId && referenceType) {
+      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+      } else {
+        history.push(`?type=${filterValues}`);
+      }
   };
 
   const handleTransferEntityDialog = () => {
@@ -349,6 +352,18 @@ const RepairOrder = () => {
     }
   };
 
+  const updateQueryParams = () => {
+    const queryParams = new URLSearchParams(history.location.search)
+    queryParams.delete('referenceId')
+    queryParams.delete('referenceType')
+    referenceId = queryParams.get('referenceId');
+    referenceType = queryParams.get('referenceType');
+    history.replace({
+      search: queryParams.toString(),
+    })
+    fetchRepairOrders();
+  }
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -396,14 +411,12 @@ const RepairOrder = () => {
             filters={filters}
             resource={sidebarResource.repairOrder}
           >
-            {fromRental && (
+            {referenceType && (
               <Chip
                 className="ml-3"
                 color="primary"
-                label={`Rental Job : ${fromRental?.rentalJobName}`}
-                onDelete={() => {
-                  setFromRental(null);
-                }}
+                label={`Rental Job : ${referenceType}`}
+                onDelete={updateQueryParams}
               />
             )}
           </RepairOrderHeader>
