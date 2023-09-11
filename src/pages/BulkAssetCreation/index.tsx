@@ -59,9 +59,8 @@ const BulkAssetCreation = () => {
     state;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [isOpenDialog, setisOpenDialog] = useState(false);
-  const { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental || {_id: referenceId, rentalJobName: referenceType});
 
   const {
     state: { user, permissions, selectedEntity }
@@ -74,7 +73,7 @@ const BulkAssetCreation = () => {
 
   useEffect(() => {
     fetchBulkAssetCreation();
-  }, [page, limit, filters, sorting, search, selectedEntity, fromRental, selectedType, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -160,8 +159,8 @@ const BulkAssetCreation = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (fromRental) {
-      filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
+    if (referenceId) {
+      filterByIds.push({ field: 'rentalJob', term: referenceId });
     }
 
     if (filterByIds?.length) {
@@ -282,6 +281,18 @@ const BulkAssetCreation = () => {
     }
   };
 
+  const updateQueryParams = () => {
+    const queryParams = new URLSearchParams(history.location.search)
+    queryParams.delete('referenceId')
+    queryParams.delete('referenceType')
+    referenceId = queryParams.get('referenceId');
+    referenceType = queryParams.get('referenceType');
+    history.replace({
+      search: queryParams.toString(),
+    })
+    fetchBulkAssetCreation();
+  }
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -386,20 +397,12 @@ const BulkAssetCreation = () => {
                   </div>
                 </HideWhenOffline>
               )}
-              {fromRental && (
+              {referenceType && (
                 <Chip
                   className="ml-3"
                   color="primary"
-                  label={`Rental Job : ${fromRental?.rentalJobName}`}
-                  onDelete={() => {
-                    setFromRental(null);
-                    const queryParams = new URLSearchParams(history.location.search)
-                    queryParams.delete('referenceId')
-                    queryParams.delete('referenceType')
-                    history.replace({
-                      search: queryParams.toString(),
-                    })
-                  }}
+                  label={`Rental Job : ${referenceType}`}
+                  onDelete={updateQueryParams}
                 />
               )}
             </div>

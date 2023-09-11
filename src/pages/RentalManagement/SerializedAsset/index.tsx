@@ -133,9 +133,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 <IconButton
                   size="small"
                   onClick={() => {
-                    history.push(routes.purchaseOrder.path, {
-                      rental: rentalManagementData
-                    });
+                    OpenInNewWindow(routes.purchaseOrder.path)
                   }}
                 >
                   <OpenInNewIcon fontSize="small" color={'primary'} />
@@ -888,9 +886,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <MenuItem
                     disabled={purchaseOrderCount === 0}
                     onClick={() => {
-                      history.push(routes.purchaseOrder.path, {
-                        rental: rentalManagementData
-                      });
+                      OpenInNewWindow(routes.purchaseOrder.path)
                     }}
                   >
                     {`Show ${routes.purchaseOrder.title}`}
@@ -900,9 +896,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <MenuItem
                     disabled={bulkAssetCreationCount === 0}
                     onClick={() => {
-                      history.push(routes.bulkAssetCreation.path, {
-                        rental: rentalManagementData
-                      });
+                      OpenInNewWindow(routes.bulkAssetCreation.path)
                     }}
                   >
                     {`Show ${routes.bulkAssetCreation.title}`}
@@ -913,9 +907,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <MenuItem
                     disabled={subleaseCount === 0}
                     onClick={() => {
-                      history.push(routes.sublease.path, {
-                        rental: rentalManagementData
-                      });
+                      OpenInNewWindow(routes.sublease.path)
                     }}
                   >
                     {`Show ${routes.sublease.title}`}
@@ -925,9 +917,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <MenuItem
                     disabled={transferAssetCount === 0}
                     onClick={() => {
-                      history.push(routes.transferAsset.path, {
-                        rental: rentalManagementData
-                      });
+                      OpenInNewWindow(routes.transferAsset.path)
                     }}
                   >
                     {`Show ${routes.transferAsset.title}`}

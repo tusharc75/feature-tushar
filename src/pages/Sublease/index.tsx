@@ -46,7 +46,7 @@ const Sublease = () => {
   let renderedFrom = camelCase(routes.sublease?.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const { type, referenceId, referenceType  }: any = queryString.parse(history.location.search);
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.sublease.title}`);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -60,9 +60,7 @@ const Sublease = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-
   const [isOpenDialog, setisOpenDialog] = useState(false);
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental || {_id: referenceId, rentalJobName: referenceType});
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
@@ -76,7 +74,7 @@ const Sublease = () => {
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, fromRental, selectedType, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -157,8 +155,8 @@ const Sublease = () => {
       deepFilter = `?`;
     }
     let filterById = [];
-    if (fromRental) {
-      filterById.push({ field: 'rentalJob', term: fromRental?._id });
+    if (referenceId) {
+      filterById.push({ field: 'rentalJob', term: referenceId });
     }
     if (filterById.length > 0) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
@@ -207,7 +205,7 @@ const Sublease = () => {
   };
   const handleSubleaseTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    if(referenceId && referenceType) {
+    if (referenceId && referenceType) {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
     } else {
       history.push(`?type=${filterValues}`);
@@ -276,6 +274,18 @@ const Sublease = () => {
   const handleFilterClose = () => {
     setisOpenDialog(false);
   };
+
+  const updateQueryParams = () => {
+    const queryParams = new URLSearchParams(history.location.search)
+    queryParams.delete('referenceId')
+    queryParams.delete('referenceType')
+    referenceId = queryParams.get('referenceId');
+    referenceType = queryParams.get('referenceType');
+    history.replace({
+      search: queryParams.toString(),
+    })
+    fetchData();
+  }
 
   return (
     <section className="main-container-v1">
@@ -375,20 +385,12 @@ const Sublease = () => {
                   </div>
                 </HideWhenOffline>
               )}
-              {fromRental && (
+              {referenceType && (
                 <Chip
                   className="ml-3"
                   color="primary"
-                  label={`Rental Job : ${fromRental?.rentalJobName}`}
-                  onDelete={() => {
-                    setFromRental(null);
-                    const queryParams = new URLSearchParams(history.location.search)
-                    queryParams.delete('referenceId')
-                    queryParams.delete('referenceType')
-                    history.replace({
-                      search: queryParams.toString(),
-                    })
-                  }}
+                  label={`Rental Job : ${referenceType}`}
+                  onDelete={updateQueryParams}
                 />
               )}
             </div>
