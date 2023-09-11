@@ -325,7 +325,7 @@ export default function Attachment() {
                 </IconButton>
               </Tooltip>
             )}
-            {row.original.type === 'folder' && !row.original.parentFolder && (
+            {row.original.type === 'folder' && (
               <Tooltip title="Download Zip">
                 <IconButton size="small" aria-label="Download" onClick={() => downloadZip(row.original)}>
                   <GetAppIcon fontSize="small" color="primary" />
