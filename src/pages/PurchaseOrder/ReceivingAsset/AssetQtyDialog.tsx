@@ -1,39 +1,46 @@
 import React, { useContext, useEffect, useState, FC, Fragment } from 'react';
-import { Dialog, Button, TextField } from '@material-ui/core';
+import { Dialog, Button, TextField, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import {
-    purchaseOrder
-} from '../../../constants/helpers';
+import { purchaseOrder } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import CustomAssetDialog from 'src/pages/ConvertInventory/InventoryToAsset/CustomAssetDialog';
 import { isEqual } from 'lodash';
+import { isMobile, isTablet } from 'react-device-detect';
+import routes from 'src/components/Helpers/Routes';
+import { Formik, Form } from 'formik';
+import CustomButton from 'src/components/Helpers/CustomButton';
 
-const AssetQtyDialog = ({ purchaseOrderID, onClose, onSuccess, product, purchaseOrderData }) => {
-    const [fullScreen, setFullScreen] = useState(true);
+const AssetQtyDialog = ({ onClose, onSuccess, product, purchaseOrderData }) => {
 
-    const {
-        state: { user }
-    }: any = useData();
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-    const [defaultWareHouse, setDefaultWareHouse] = useState(null);
+    const { state: { user } }: any = useData();
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const toastConfig = useContext(CustomToastContext);
 
-    const [assetNumberDialog, setAssetNumberDialog] = useState({ open: false, products: [], receiveDate: null });
-    const [assetQty, setAssetQty] = useState()
+    const [assetNumberDialog, setAssetNumberDialog] = useState({ open: false, products: [] });
 
-    const handleSubmit = () => {
-        setAssetNumberDialog({ open: true, products: [{ ...product, product: product.productId, qty: parseInt(assetQty), warehouse: purchaseOrderData?.warehouse?.optionValue, storageLocation: user?.user?.brandPolicy?.storageLocation ? product?.storageLocation?.optionValue : null, }], receiveDate: null })
+    const handleSubmit = (values) => {
+        setAssetNumberDialog({
+            open: true,
+            products: [{
+                ...product, product: product.productId,
+                qty: parseInt(values?.qty),
+                warehouse: purchaseOrderData?.warehouse?.optionValue,
+                storageLocation: user?.user?.brandPolicy?.storageLocation ? purchaseOrderData?.storageLocation?.optionValue : null,
+            }]
+        })
     };
 
     const handleReceive = (products) => {
         setIsSubmitting(true);
         axiosInstance()
-            .post(`${purchaseOrder.api}/add-assets/${purchaseOrderID}`, { products: products })
+            .post(`${purchaseOrder.api}/add-assets/${purchaseOrderData?._id}`, { products: products })
             .then(({ data }) => {
                 setIsSubmitting(false);
                 toastConfig.setToastConfig({
@@ -41,7 +48,7 @@ const AssetQtyDialog = ({ purchaseOrderID, onClose, onSuccess, product, purchase
                     type: 'success',
                     message: data.message
                 });
-                setAssetNumberDialog({ open: false, products: [], receiveDate: null })
+                setAssetNumberDialog({ open: false, products: [] })
                 onSuccess();
             })
             .catch((error) => {
@@ -50,13 +57,23 @@ const AssetQtyDialog = ({ purchaseOrderID, onClose, onSuccess, product, purchase
             });
     }
 
+    function validate(values) {
+        const errors = {};
+        if (values.qty <= 0) {
+            errors['qty'] = 'Please enter valid qty';
+        }
+        if (values.qty > (product?.qty - (product?.actualReceived || 0) - (product?.assetQty || 0))) {
+            errors['qty'] = 'Please enter valid qty';
+        }
+        return errors;
+    }
 
     return (
         <>
             <Dialog
                 open
                 fullScreen={fullScreen}
-                maxWidth="md"
+                maxWidth="sm"
                 fullWidth
                 onClose={(e, reason) => {
                     if (reason !== 'backdropClick') {
@@ -64,56 +81,65 @@ const AssetQtyDialog = ({ purchaseOrderID, onClose, onSuccess, product, purchase
                     }
                 }}
             >
-                <CustomDialogHeader
-                    title={'Add Assets'}
-                    onClose={onClose}
-                    isMinimized={!fullScreen}
-                    onMinimizeMaximize={() => {
-                        setFullScreen((prevState) => !prevState);
-                    }}
-                    showManimizeMaximize={true}
-                ></CustomDialogHeader>
-                <CustomDialogContent>
-                    <TextField
-                        fullWidth
-                        label="Asset Qty"
-                        variant="outlined"
-                        type="number"
-                        size="small"
-                        name="assetQty"
-                        placeholder="Asset Qty"
-                        value={assetQty}
-                        onChange={(e: any) => {
-                            setAssetQty(e.target.value)
-                        }}
-                        error={(assetQty || 0) > (product.qty - product.actualReceived
-                        ) ? true : false}
-                        helperText={(assetQty || 0) > (product.qty - product.actualReceived
-                        ) ? "Asset Qty can't be greater than remaining qty" : null}
-                    />
-                </CustomDialogContent>
-                <CustomDialogFooter>
-                    <Button variant="outlined" disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={() => {
-                            handleSubmit();
-                        }}
-                        size="small"
-                        variant="contained"
-                        disabled={isSubmitting || (assetQty || 0) > (product.qty - product.actualReceived
-                        )}
-                        color="primary"
-                    >
-                        Save
-                    </Button>
-                </CustomDialogFooter>
+                <Formik initialValues={{ qty: 1 }}
+                    onSubmit={handleSubmit} validateOnMount validate={validate}>
+                    {({ submitForm, touched, errors, setFieldValue, values }) => (
+                        <Form autoComplete="off" autoCorrect="off" noValidate>
+                            <CustomDialogHeader
+                                title={`Create ${routes.serializedAsset.title}`}
+                                onClose={onClose}
+                                isMinimized={!fullScreen}
+                                onMinimizeMaximize={() => {
+                                    setFullScreen((prevState) => !prevState);
+                                }}
+                                showManimizeMaximize={true}
+                            ></CustomDialogHeader>
+                            <CustomDialogContent>
+                                <Box p={2}>
+                                    <TextField
+                                        fullWidth
+                                        label="Asset Quantity"
+                                        variant="outlined"
+                                        type="number"
+                                        size="small"
+                                        name="qty"
+                                        placeholder="Asset Quantity"
+                                        value={values['qty']}
+                                        error={touched['qty'] && Boolean(errors['qty'])}
+                                        helperText={touched['qty'] && errors['qty']}
+                                        onChange={(e) => {
+                                            setFieldValue('qty', e.target.value);
+                                        }}
+                                        required
+                                    />
+                                </Box>
+                            </CustomDialogContent>
+                            <CustomDialogFooter>
+                                <Button
+                                    variant="outlined"
+                                    disabled={isSubmitting}
+                                    size="small"
+                                    color="primary"
+                                    onClick={onClose}>
+                                    Cancel
+                                </Button>
+                                <CustomButton
+                                    variant="contained"
+                                    color="primary"
+                                    type="submit"
+                                >
+                                    Submit
+                                </CustomButton>
+                            </CustomDialogFooter>
 
+                        </Form>
+
+                    )}
+                </Formik>
             </Dialog>
             {assetNumberDialog.open && (
                 <CustomAssetDialog
-                    handleClose={() => setAssetNumberDialog({ open: false, products: [], receiveDate: null })}
+                    handleClose={() => setAssetNumberDialog({ open: false, products: [] })}
                     products={[...assetNumberDialog.products]?.map((e: any) => { return { ...e, id: e._id, productName: product?.productName } })}
                     handleSuccess={(rows) => {
                         const products = assetNumberDialog.products;
