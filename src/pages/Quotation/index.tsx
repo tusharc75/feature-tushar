@@ -14,7 +14,8 @@ import {
   sidebarResource,
   prepareDataForGrid,
   getLocalStorageArrayData,
-  removeLocalStorage
+  removeLocalStorage,
+  QUOTATION_TYPE
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from '../../components/Helpers/Routes';
@@ -166,14 +167,18 @@ const Quotation = () => {
       });
   };
 
-  const isDatePast = (dateStr) => {
-    return moment(dateStr).isBefore(moment(), 'day');
-  };
 
-  const isDateWithinNext15Days = (dateStr) => {
-    const today = moment();
-    const newDate = moment(dateStr);
-    return newDate.isBetween(today, today.add(15, 'days'), 'day', '[]');
+  const isDateWithinNext15Days = (endData) => {
+    var a = moment(endData);
+    var b = moment();
+    const days = a.diff(b, 'days');
+    if (days < 15 && days >= 0) {
+      return true;
+    } else if (days < 0) {
+      return false;
+    } else {
+      return false
+    }
   };
 
   const QuotationNumberRenderer = (params) => (
@@ -181,20 +186,22 @@ const Quotation = () => {
       <Link className="link text-truncate" title={params.value} to={`${routes.quotation.path}/detail/${params.data?._id}`}>
         {params.value}
       </Link>
-      {params.data?.type === 'Rental Job' && isDatePast(params.data?.estimateEndDate) && (
-        <Box ml={1}>
-          <HtmlTooltip title={`${routes.quotation.title} Expired`}>
-            <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
-          </HtmlTooltip>
-        </Box>
-      )}
-
-      {params.data?.type === 'Rental Job' && isDateWithinNext15Days(params.data?.estimateEndDate) && (
-        <Box ml={1}>
-          <HtmlTooltip title={`${routes.quotation.title} about to renew`}>
-            <Info style={{ fontSize: '14px' }} fontSize="small" color="primary" />
-          </HtmlTooltip>
-        </Box>
+      {params.data?.type === QUOTATION_TYPE.rentalJob && (
+        <Fragment>
+          {moment(params.data?.estimateEndDate).isBefore(moment(), 'day') &&
+            <Box ml={1}>
+              <HtmlTooltip title={`${routes.quotation.title} Expired`}>
+                <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
+              </HtmlTooltip>
+            </Box>}
+          {isDateWithinNext15Days(params.data?.estimateEndDate) && (
+            <Box ml={1}>
+              <HtmlTooltip title={`${routes.quotation.title} about to renew`}>
+                <Info style={{ fontSize: '14px' }} fontSize="small" color="primary" />
+              </HtmlTooltip>
+            </Box>
+          )}
+        </Fragment>
       )}
     </Fragment>
   );
@@ -395,7 +402,7 @@ const Quotation = () => {
           permissions={permissions?.quotation}
           module="quotation"
           api={quotation.api}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
