@@ -992,7 +992,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           }}
           isAdding={isAdding}
           selectedProducts={assetAssignedProduct}
-          filterByPlant={rentalManagementData?.warehouse?.optionValue}
+          filterByPlant={rentalManagementData?.warehouse}
           handleSuccess={() => {
             setAddSerializedAssetDialog({ open: false });
             fetchData();

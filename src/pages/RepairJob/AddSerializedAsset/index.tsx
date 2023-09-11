@@ -436,7 +436,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
           }}
           isAdding={isAdding}
           selectedProducts={[]}
-          filterByPlant={repairJobData.warehouse?.optionValue}
+          filterByPlant={repairJobData.warehouse}
         />
       )}
       {showAssetRemoveConfirmationDialog.open && (

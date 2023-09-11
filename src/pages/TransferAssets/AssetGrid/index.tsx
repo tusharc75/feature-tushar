@@ -328,7 +328,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           referenceType="Transfer Asset"
           isAdding={isAdding}
           selectedProducts={[]}
-          filterByPlant={transferAssetData?.transferFromPlant.optionValue}
+          filterByPlant={transferAssetData?.transferFromPlant}
         />
       )}
       {showConfirmBox && (
