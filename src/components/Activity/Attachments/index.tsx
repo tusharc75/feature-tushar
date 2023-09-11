@@ -26,11 +26,11 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import SendIcon from '@material-ui/icons/Send';
 import { AiOutlineFileAdd, AiOutlineFolderAdd, AiOutlineDelete, AiOutlineFile } from 'react-icons/ai';
-import { FiEdit2 } from 'react-icons/fi';
+import { FiEdit2, FiDownload } from 'react-icons/fi';
 import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CreateEmail } from '../Email/CreateEmail';
-import GetAppOutlined from '@material-ui/icons/GetAppOutlined';
+
 
 const order = ['file', 'folder'];
 
@@ -136,35 +136,8 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                   className="right-size-buttons folder"
                                   style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}
                                 >
-                                  {/* <HtmlTooltip title={'Create file'}>
-                                    <IconButton
-                                      size="small"
-                                      color="primary"
-                                      aria-label="create file"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOpen({ open: true, type: 'file', parentFolder: _attachment._id, purpose: 'add' });
-                                      }}
-                                    >
-                                      <AiOutlineFileAdd />
-                                    </IconButton>
-                                  </HtmlTooltip>
-                                  <HtmlTooltip title={'Create folder'}>
-                                    <IconButton
-                                      size="small"
-                                      color="primary"
-                                      aria-label="Create folder"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOpen({ open: true, type: 'folder', parentFolder: _attachment._id, purpose: 'add' });
-                                      }}
-                                    >
-                                      <AiOutlineFolderAdd />
-                                    </IconButton>
-                                  </HtmlTooltip> */}
                                   <CreateFolderFile attachment={_attachment} />
-
-                                  <HtmlTooltip title={'Send Mail'}>
+                                  <HtmlTooltip title={'Send Email'}>
                                     <IconButton size="small" color="primary" aria-label="send" onClick={() => handleMailForFolder(_attachment)}>
                                       <SendIcon color="primary" style={{ maxWidth: '18px' }} />
                                     </IconButton>
@@ -366,7 +339,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                         <span>{` ${_attachment?.name} ${childTree?.length ? `(${childTree?.length})` : ''}`}</span>
                         <Box className="right-size-buttons folder" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                           <CreateFolderFile attachment={_attachment} />
-                          <HtmlTooltip title={'Send Mail'}>
+                          <HtmlTooltip title={'Send Email'}>
                             <IconButton size="small" color="primary" aria-label="send" onClick={() => handleMailForFolder(_attachment)}>
                               <SendIcon color="primary" style={{ maxWidth: '18px' }} />
                             </IconButton>
@@ -514,7 +487,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   const CreateFolderFile = ({ attachment }) => {
     return (
       <>
-        <HtmlTooltip title={'Create file'}>
+        <HtmlTooltip title={'Create File'}>
           <IconButton
             size="small"
             color="primary"
@@ -527,11 +500,11 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
             <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
           </IconButton>
         </HtmlTooltip>
-        <HtmlTooltip title={'Create folder'}>
+        <HtmlTooltip title={'Create Folder'}>
           <IconButton
             size="small"
             color="primary"
-            aria-label="Create folder"
+            aria-label="Create Folder"
             onClick={(e) => {
               e.stopPropagation();
               setOpen({ open: true, type: 'folder', parentFolder: attachment._id, purpose: 'add' });
@@ -682,16 +655,9 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
         });
     } else {
       const fileUrl = file.map((f) => f.url);
-      axiosInstance()
-        .put(
-          `user/download`,
-          {
-            files: fileUrl
-          },
-          {
-            responseType: 'blob'
-          }
-        )
+      axiosInstance().put(`user/download`, { files: fileUrl },
+        { responseType: 'blob' }
+      )
         .then(({ data }) => {
           const url = window.URL.createObjectURL(new Blob([data]));
           const link = document.createElement('a');
@@ -705,18 +671,16 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
         });
     }
   };
-  const downloadZip = (data) => {
-    const folderId = data?._id;
-    const folderName = data?.name;
-    axiosInstance()
-      .get(`attachment/zip/${folderId}`, {
-        responseType: 'blob'
-      })
+
+  const downloadFolder = (_id, name) => {
+    axiosInstance().get(`attachment/zip/${_id}`, {
+      responseType: 'blob'
+    })
       .then(({ data }) => {
         const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `${folderName}.zip`);
+        link.setAttribute('download', `${name || 'folder'}.zip`);
         document.body.appendChild(link);
         link.click();
       })
@@ -804,11 +768,12 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
         {permissions['attachment']?.isRead ? (
           <MenuItem
             onClick={() => {
-              downloadZip(currentFolder);
+              handleFolderOptionsClose();
+              downloadFolder(currentFolder?._id, currentFolder?.name);
             }}
           >
             <ListItemIcon style={{ minWidth: '30px' }}>
-              <GetAppOutlined fontSize="small" color="primary" />
+              <FiDownload />
             </ListItemIcon>
             <ListItemText>Download</ListItemText>
           </MenuItem>
