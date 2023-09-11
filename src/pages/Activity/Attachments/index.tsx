@@ -12,10 +12,9 @@ import Dialog from '@material-ui/core/Dialog';
 import ManageAttachment from '../../../components/Activity/Attachments/ManageAttachment';
 import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import styles from '../../Leads/Header.module.scss';
 import { AiOutlinePaperClip } from 'react-icons/ai';
 import { AddOutlined } from '@material-ui/icons';
-import { Button, Tooltip, IconButton, MenuItem, Menu, TextField, Chip, Link, Popover, MenuList } from '@material-ui/core';
+import { Button, IconButton, MenuItem, Menu, TextField, Chip, Link, Popover, MenuList } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
@@ -23,7 +22,6 @@ import { Delete as DeleteIcon } from '@material-ui/icons';
 import { gridPageSizes, isObjectEmpty, displayDate } from '../../../constants/helpers';
 import { ExpandMore } from '@material-ui/icons';
 import routes from '../../../components/Helpers/Routes';
-import { MdAdd } from 'react-icons/all';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { Autocomplete } from '@material-ui/lab';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
@@ -287,34 +285,33 @@ export default function Attachment() {
         const allPdf = _.every(row.original?.file, (d) => _.endsWith(d?.url, '.pdf'));
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original.type === 'file' && (
-              <Tooltip
-                title="Send Email"
+            <HtmlTooltip title="Send Email" >
+              <IconButton size="small"
                 onClick={() => {
-                  handleMail(row.original);
-                }}
-              >
-                <IconButton size="small">
-                  <SendIcon color="primary" style={{ maxWidth: '18px' }} />
-                </IconButton>
-              </Tooltip>
-            )}
-            {row.original.type === 'folder' && (
-              <Tooltip title="Send Email" onClick={() => handleMailForFolder(row.original)}>
-                <IconButton size="small">
-                  <SendIcon color="primary" style={{ maxWidth: '18px' }} />
-                </IconButton>
-              </Tooltip>
-            )}
-            {row.original.type !== 'folder' && (
-              <Tooltip title="Download">
-                <IconButton size="small" aria-label="Delete" onClick={() => downloadFile(row.original)}>
-                  <GetAppIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Tooltip>
-            )}
+                  if (row.original.type === 'folder') {
+                    handleMailForFolder(row.original?._id, row.original?.name)
+                  }
+                  else {
+                    handleMail(row.original);
+                  }
+                }}>
+                <SendIcon color="primary" style={{ maxWidth: '18px' }} />
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title="Download">
+              <IconButton size="small" aria-label="Download" onClick={() => {
+                if (row.original.type === 'folder') {
+                  downloadFolder(row.original?._id, row.original?.name)
+                }
+                else {
+                  downloadFile(row.original)
+                }
+              }}
+              ><GetAppIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
             {allPdf && row.original.type === 'file' && (
-              <Tooltip
+              <HtmlTooltip
                 title="Preview"
                 onClick={(e) => {
                   viewPdf(e, row.original);
@@ -323,53 +320,37 @@ export default function Attachment() {
                 <IconButton size="small">
                   <PreviewIcon fontSize="small" color="primary" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             )}
-            {row.original.type === 'folder' && (
-              <Tooltip title="Download Zip">
-                <IconButton size="small" aria-label="Download" onClick={() => downloadZip(row.original)}>
-                  <GetAppIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Tooltip>
-            )}
-
             {row.original.canEdit ? (
-              <Tooltip title="Delete">
+              <HtmlTooltip title="Delete">
                 <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
                   <DeleteIcon fontSize="small" color="error" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             ) : (
-              <Tooltip className="cursor-stop" title="Signed Quote Attachment can not be deleted">
+              <HtmlTooltip className="cursor-stop" title="Signed Quote Attachment can not be deleted">
                 <IconButton size="small" aria-label="Delete">
                   <DeleteIcon fontSize="small" color="disabled" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             )}
-          </div>
+          </div >
         );
       }
     }
   ];
 
-  const downloadZip = (data) => {
-    const folderId = data?._id;
-    const folderName = data?.name || 'Folder';
-
-    if (!folderId || !folderName) {
-      toastConfig.setToastConfig('Invalid Data');
-      return;
-    }
-
+  const downloadFolder = (_id, name) => {
     axiosInstance()
-      .get(`attachment/zip/${folderId}`, {
+      .get(`attachment/zip/${_id}`, {
         responseType: 'blob'
       })
       .then(({ data }) => {
         const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `${folderName}.zip`);
+        link.setAttribute('download', `${name || 'folder'}.zip`);
         document.body.appendChild(link);
         link.click();
       })
@@ -476,6 +457,7 @@ export default function Attachment() {
         });
     }
   };
+
   const handleMail = (data) => {
     const file = data?.file;
     axiosInstance()
@@ -490,20 +472,13 @@ export default function Attachment() {
         toastConfig.setToastConfig(err);
       });
   };
-  const handleMailForFolder = (data) => {
-    const folderId = data?._id;
-    const folderName = data?.name || 'Folder';
 
-    if (!folderId || !folderName) {
-      toastConfig.setToastConfig('Invalid Data');
-      return;
-    }
-
+  const handleMailForFolder = (_id, name) => {
     axiosInstance()
-      .get(`attachment/zip/${folderId}`, { responseType: 'blob' })
+      .get(`attachment/zip/${_id}`, { responseType: 'blob' })
       .then(({ data }) => {
         const zipfile = new Blob([data], { type: 'application/zip' });
-        generateBase64forFile(zipfile, `${folderName}.zip`, '.zip');
+        generateBase64forFile(zipfile, `${name || 'folder'}.zip`, '.zip');
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -740,7 +715,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module="Attachment"
           api={`/attachment`}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -882,7 +857,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => {}}
+              setWholeRowsCellColor={() => { }}
               renderedFrom={'attachment_render'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -972,8 +947,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                    ? selectedResourceData.optionValue
-                    : user?.user?._id,
+                      ? selectedResourceData.optionValue
+                      : user?.user?._id,
                   access: true
                 }
               ]}
