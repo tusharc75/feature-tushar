@@ -1367,6 +1367,7 @@ export default function QuoteProcess(props) {
                     referenceId={quoteData?._id}
                     columns={columns}
                     hideDetailButton={true}
+                    isSendEmail={true}
                     extraQueryParams={{ uniqueId: quoteData.versions[currentVersion]._id }} />
                 )}
                 {ProcessStatus !== 'New' && ProcessStatus !== 'Price Builder' ? (
