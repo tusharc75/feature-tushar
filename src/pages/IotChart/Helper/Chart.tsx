@@ -132,7 +132,7 @@ const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
         if (alert) {
             let api = `/report/iot/asset-error-message?asset=${assetId}&from_date=${new Date(dateFilters.from).toISOString()}&to_date=${new Date(dateFilters.to).toISOString()}`
             if (alert?.optionValue !== 'All') {
-                api = `${api}&errorDescriptions=${alert?.optionValue}`
+                api = `${api}&deviceTemplateAlert=${alert?.optionValue}`
             }
 
             axiosInstance()

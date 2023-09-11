@@ -294,12 +294,16 @@ const AddExistingProduct = (props) => {
   };
 
   const handleAdd = () => {
+    const objsWithOrder = getLocalStorageArrayData(localStorageSelectedRecords);
+    const orderIds = objsWithOrder?.sort((a, b) => a?.sequenceOrder - b?.sequenceOrder)?.map((m) => m._id);
+
     dispatch({ type: 'loading', loading: true });
 
     axiosInstance()
       .get(`${product.api}?limit=0&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords).map((m) => m._id))}`)
       .then(({ data: { data } }) => {
-        data.forEach((_d) => {
+        const sortedData = orderIds?.map((m) => data.find((f) => f._id === m));
+        sortedData.forEach((_d) => {
           _d.productId = _d._id;
           if (_d.fields) {
             const qtyField = _d.fields.filter((_f) => _f.fieldName === 'qty');
@@ -328,7 +332,7 @@ const AddExistingProduct = (props) => {
             }
           }
         });
-        addProductInBuilder(data);
+        addProductInBuilder(sortedData);
         handleClose();
       })
       .catch((error) => {
@@ -419,6 +423,7 @@ const AddExistingProduct = (props) => {
             refreshGrid={fetchProduct}
             renderedFrom={renderedFrom}
             showOnlyShowFilteredRecordSwitch={true}
+            sequenceWise={true}
           />
         ) : (
           <Box p={2} height={500}>

@@ -606,7 +606,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           }}
           isAdding={replaceLoading}
           selectedProducts={addSerializedAssetDialog.products}
-          filterByPlant={transferAssetData?.transferFromPlant.optionValue}
+          filterByPlant={transferAssetData?.transferFromPlant}
         />
       )}
       {showReplaceReason.open && (

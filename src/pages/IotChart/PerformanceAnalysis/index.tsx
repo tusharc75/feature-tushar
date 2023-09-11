@@ -9,6 +9,7 @@ import { Autocomplete } from '@material-ui/lab';
 import axiosInstance from 'src/axios/axiosInstance';
 
 import Grow from '@material-ui/core/Grow';
+import routes from 'src/components/Helpers/Routes';
 
 const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
   const [dateFilters, setDateFilters] = useState({
@@ -110,20 +111,8 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
   };
 
   const fetchErrorData = async () => {
-    // const { data: { data } } = await axiosInstance().get(`/report/iot/asset-error-message?asset=${assetId}`)
-    // const error: any = []
-    // uniqBy(data, '_id')?.forEach((e: any) => {
-    //   if (e?.errorMessage) {
-    //     error.push({
-    //       optionLabel: e?.errorMessage,
-    //       optionValue: e?._id
-    //     })
-    //   }
-    // });
-
-    const { data: { data } } = await axiosInstance().get(`/dynamic-form`, { headers: { Resource: 'Error Descriptions' } })
-
-    setAlertOptions([{ optionLabel: 'All', optionValue: 'All' }, ...data?.map(d => ({ optionLabel: d?.errorMessage, optionValue: d?._id}))])
+    const { data: { data } } = await axiosInstance().get(`${routes?.deviceTemplateAlert?.path}`)
+    setAlertOptions([{ optionLabel: 'All', optionValue: 'All' }, ...data?.map(d => ({ optionLabel: d?.message, optionValue: d?._id }))])
   };
 
   useEffect(() => {
