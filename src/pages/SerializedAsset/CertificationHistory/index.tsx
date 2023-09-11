@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer } from 'react';
-import { Box, Button, Dialog, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, IconButton, Tooltip } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -100,13 +100,27 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
       )}
     </>
   );
+  const getTitle = (data) => {
+    if (data.length) {
+      let restParams = data.map((o) => (o?.optionLabel ? o?.optionLabel : typeof o !== 'object' ? o : '')).join(', ');
+      return restParams;
+    }
+    return '';
+  };
   const CollaboratorLinkRenderer = (params) => {
     return (
       <>
         {params.value ? (
-          <Link className="link" target="_blank" title={params.value} to={`${routes.userDetail.path}/${params.data.collaboratorId}`}>
-            {params.value}
-          </Link>
+          <>
+            <Link className="link" target="_blank" title={params.value} to={`${routes.userDetail.path}/${params.data.collaboratorId}`}>
+              {params.value}
+            </Link>
+            {params.data['restcollaborator']?.length > 0 && (
+              <Tooltip title={getTitle(params.data['restcollaborator'])}>
+                <span className="createdAtTime badge-date">{`+${params.data['restcollaborator'].length} more..`}</span>
+              </Tooltip>
+            )}
+          </>
         ) : (
           <NoDataCell />
         )}
