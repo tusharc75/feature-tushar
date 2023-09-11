@@ -573,7 +573,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     );
   };
 
-  const handleAddSerializedAsset = (assets) => {
+  const handleAddSerializedAsset = (assets, withTransfer = false) => {
     setNextStep(false);
     var data = [];
     var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === 'product');
@@ -599,7 +599,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     if (data.length) {
       setAdding(true);
       axiosInstance()
-        .post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data })
+        .post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data, withTransfer })
         .then(({ data }) => {
           setAddSerializedAssetDialog({ open: false });
           fetchData();
@@ -990,7 +990,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           }}
           isAdding={isAdding}
           selectedProducts={assetAssignedProduct}
-          filterByPlant={rentalManagementData?.warehouse?.optionValue}
+          filterByPlant={rentalManagementData?.warehouse}
           handleSuccess={() => {
             setAddSerializedAssetDialog({ open: false });
             fetchData();

@@ -179,7 +179,8 @@ export default function CustomAgGrid({
   isMultipleSelection = true,
   reportSave = false,
   showFilters = false,
-  resource = null
+  resource = null,
+  sequenceWise = false,
 }) {
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
@@ -361,13 +362,13 @@ export default function CustomAgGrid({
   //   }
   // }
 
-  useEffect(()=>{
-    const checkBoxCols = columns?.filter((m)=>m?.cellRenderer === "checkboxRenderer")
-    dataRows.map((row)=>{
-      checkBoxCols.forEach(col =>{
-           if(!row.hasOwnProperty(col?.field)){
-            row[col?.field] = false;
-           }
+  useEffect(() => {
+    const checkBoxCols = columns?.filter((m) => m?.cellRenderer === "checkboxRenderer")
+    dataRows.map((row) => {
+      checkBoxCols.forEach(col => {
+        if (!row.hasOwnProperty(col?.field)) {
+          row[col?.field] = false;
+        }
       })
     })
   }, [dataRows, columns])
@@ -606,7 +607,12 @@ export default function CustomAgGrid({
                         : [];
 
                       if (event.node.isSelected() === true && !oldSelectedRecords.some((s) => s[idProperty] === event.node.data[idProperty])) {
-                        oldSelectedRecords = [...oldSelectedRecords, event.node.data];
+                        const sequenceOrder = (oldSelectedRecords.length || 0) + 1;
+                        const newRecord = {
+                          ...event.node.data,
+                          ...(sequenceWise && { sequenceOrder })
+                        }
+                        oldSelectedRecords = [...oldSelectedRecords, newRecord];
                         localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
                       } else if (event.node.isSelected() === false) {
                         if (oldSelectedRecords.length > 0) {

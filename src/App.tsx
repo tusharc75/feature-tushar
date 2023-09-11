@@ -235,6 +235,8 @@ import DeviceTemplates from './pages/DeviceTemplates';
 import DeviceTemplatesDetails from './pages/DeviceTemplates/DeviceTemplatesDetails';
 import WorkStations from './pages/WorkStations';
 import WorkStationsDetail from './pages/WorkStations/WorkStationsDetail';
+import DeviceTemplatesAlert from './pages/DeviceTemplatesAlert';
+import DeviceTemplateAlertDetail from './pages/DeviceTemplatesAlert/DeviceTemplateAlertDetail'
 
 var notificationInterval: any = null;
 
@@ -1034,6 +1036,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.workStationsDetail.path}/:id`}>
               <WorkStationsDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.deviceTemplateAlert.path}`}>
+              <DeviceTemplatesAlert />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.deviceTemplateAlertDetail.path}`}>
+              <DeviceTemplateAlertDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

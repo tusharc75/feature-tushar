@@ -299,6 +299,13 @@ export default function Attachment() {
                 </IconButton>
               </Tooltip>
             )}
+            {row.original.type === 'folder' && (
+              <Tooltip title="Send Email" onClick={() => handleMailForFolder(row.original)}>
+                <IconButton size="small">
+                  <SendIcon color="primary" style={{ maxWidth: '18px' }} />
+                </IconButton>
+              </Tooltip>
+            )}
             {row.original.type !== 'folder' && (
               <Tooltip title="Download">
                 <IconButton size="small" aria-label="Delete" onClick={() => downloadFile(row.original)}>
@@ -315,6 +322,13 @@ export default function Attachment() {
               >
                 <IconButton size="small">
                   <PreviewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Tooltip>
+            )}
+            {row.original.type === 'folder' && (
+              <Tooltip title="Download Zip">
+                <IconButton size="small" aria-label="Download" onClick={() => downloadZip(row.original)}>
+                  <GetAppIcon fontSize="small" color="primary" />
                 </IconButton>
               </Tooltip>
             )}
@@ -337,6 +351,26 @@ export default function Attachment() {
       }
     }
   ];
+
+  const downloadZip = (data) => {
+    const folderId = data?._id;
+    const folderName = data?.name;
+    axiosInstance()
+      .get(`attachment/zip/${folderId}`, {
+        responseType: 'blob'
+      })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${folderName}.zip`);
+        document.body.appendChild(link);
+        link.click();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   useEffect(() => {
     setResourceOptions(get_activity_resource(permissions));
@@ -444,7 +478,21 @@ export default function Attachment() {
       })
       .then(({ data }) => {
         const tempfile = new Blob([data], { type: 'application/pdf' });
-        generateBase64forFile(tempfile, file[0].name, `.${file[0].name.split(".")?.pop()}`);
+        generateBase64forFile(tempfile, file[0].name, `.${file[0].name.split('.')?.pop()}`);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+  const handleMailForFolder = (data) => {
+    const folderId = data?._id;
+    const folderName = data?.name;
+
+    axiosInstance()
+      .get(`attachment/zip/${folderId}`, { responseType: 'blob' })
+      .then(({ data }) => {
+        const zipfile = new Blob([data], { type: 'application/zip' });
+        generateBase64forFile(zipfile, `${folderName}.zip`, '.zip');
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -681,7 +729,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module="Attachment"
           api={`/attachment`}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -823,7 +871,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => { }}
+              setWholeRowsCellColor={() => {}}
               renderedFrom={'attachment_render'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -913,8 +961,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                      ? selectedResourceData.optionValue
-                      : user?.user?._id,
+                    ? selectedResourceData.optionValue
+                    : user?.user?._id,
                   access: true
                 }
               ]}

@@ -33,6 +33,7 @@ import {
   customerContact,
   formatAmountWithCurrency,
   opportunity,
+  QUOTATION_STATUS,
   quote,
   quoteBuilder,
   sidebarResource,
@@ -68,6 +69,7 @@ import CustomButton from '../../../../components/Helpers/CustomButton';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 // import Steps from 'src/components/Steps';
 import { stepIconInterface } from 'src/components/Steps/icons';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 interface StepInterface extends stepIconInterface {
   key: string;
@@ -311,6 +313,7 @@ export default function QuoteProcess(props) {
   const [showPDFArrangeColumns, setShowPDFArrangeColumns] = useState(false);
   const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [columns, setColumnDatas] = useState([])
 
   const [messageDialog, setMessageDialog] = useState({
     open: false,
@@ -471,7 +474,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -1287,8 +1290,8 @@ export default function QuoteProcess(props) {
             DOAneeded
               ? DOASteps.findIndex((d) => d?.key === ProcessStatus)
               : ProcessStatus === 'DOA Process'
-              ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
-              : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
+                ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
+                : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
           }
           id={quoteData._id}
           version={currentVersion}
@@ -1305,6 +1308,7 @@ export default function QuoteProcess(props) {
               state?.selectedRecords
             );
           }}
+          isStepEnded={['End'].includes(ProcessStatus)}
           handleViewPdf={handleViewPdf}
           allowedToEdit={allowedToEdit}
           DOAData={DOAData}
@@ -1357,6 +1361,15 @@ export default function QuoteProcess(props) {
                 ) : null}
               </Grid>
               <div className="flex items-center justify-between flex-wrap w-full mx-3 gap-[8px]">
+                {!['New', 'Price Builder'].includes(ProcessStatus) && (
+                  <PreviewDownload
+                    resource={sidebarResource.quoteBuilder}
+                    referenceId={quoteData?._id}
+                    columns={columns}
+                    hideDetailButton={true}
+                    isSendEmail={true}
+                    extraQueryParams={{ uniqueId: quoteData.versions[currentVersion]._id }} />
+                )}
                 {ProcessStatus !== 'New' && ProcessStatus !== 'Price Builder' ? (
                   <span className="d-flex align-items-center justify-content-end">
                     <Tooltip title="View">
@@ -1463,7 +1476,7 @@ export default function QuoteProcess(props) {
                   </span>
                 ) : null}
                 {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
-                (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
+                  (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
                   <div className={`flex items-center ml-auto ${isMobile ? 'actio-pos-quote' : ''}`}>
                     {!ifQuoteApproved.approved && (
                       <Button
@@ -1524,6 +1537,7 @@ export default function QuoteProcess(props) {
                     isAddExistingProduct={isAddExistingProduct}
                     setIsAddExistingProduct={setIsAddExistingProduct}
                     setColumnForPDFExcel={setColName}
+                    setColumnDatas={setColumnDatas}
                     refreshProducts={refreshProducts}
                     stage={ProcessStatus === 'New' ? 'product' : 'cost'}
                     isPriceBuilder={ProcessStatus === 'Price Builder'}
@@ -1778,8 +1792,8 @@ export default function QuoteProcess(props) {
                           checked={
                             (showExcelArrangeColumns &&
                               ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()) ||
-                            (showPDFArrangeColumns &&
-                              ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumns].sort().toString())
+                              (showPDFArrangeColumns &&
+                                ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumns].sort().toString())
                               ? true
                               : selected
                           }

@@ -60,8 +60,9 @@ const ProductBuilder = (props) => {
     permissions,
     fromQuote,
     setColumnForPDFExcel,
+    setColumnDatas,
     fullScreen = false,
-    quoteData = null
+    quoteData = null,
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -157,6 +158,7 @@ const ProductBuilder = (props) => {
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         setColumns([...columns]);
+        setColumnDatas([...columns])
         if (setColumnForPDFExcel) {
           setColumnForPDFExcel([...columns].filter((d) => d.field !== 'srno').map((d) => d.headerName));
         }
@@ -690,8 +692,8 @@ const ProductBuilder = (props) => {
                   isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
                     ? false
                     : selectedRecords.length
-                    ? false
-                    : true
+                      ? false
+                      : true
                 }
                 onClick={openActions}
                 endIcon={<ExpandMore />}
@@ -768,26 +770,26 @@ const ProductBuilder = (props) => {
               dataToShowForMobile
                 ? dataToShowForMobile.some((f) => f.editable === true)
                   ? [
-                      ...dataToShowForMobile
-                        .filter((f) => f.editable === true)
-                        .map((m) => {
-                          return {
-                            label: `${m.headerName}: `,
-                            field: m.field,
-                            forceShow: true
-                            // onClick: (data, index) => {
-                            //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
-                            // }
-                          };
-                        })
-                    ]
+                    ...dataToShowForMobile
+                      .filter((f) => f.editable === true)
+                      .map((m) => {
+                        return {
+                          label: `${m.headerName}: `,
+                          field: m.field,
+                          forceShow: true
+                          // onClick: (data, index) => {
+                          //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
+                          // }
+                        };
+                      })
+                  ]
                   : [
-                      {
-                        label: `Product description: `,
-                        field: 'productName',
-                        forceShow: true
-                      }
-                    ]
+                    {
+                      label: `Product description: `,
+                      field: 'productName',
+                      forceShow: true
+                    }
+                  ]
                 : []
             }
             onCreate={null}
