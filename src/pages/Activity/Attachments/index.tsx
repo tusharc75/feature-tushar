@@ -299,6 +299,13 @@ export default function Attachment() {
                 </IconButton>
               </Tooltip>
             )}
+            {row.original.type === 'folder' && (
+              <Tooltip title="Send Email" onClick={() => handleMailForFolder(row.original)}>
+                <IconButton size="small">
+                  <SendIcon color="primary" style={{ maxWidth: '18px' }} />
+                </IconButton>
+              </Tooltip>
+            )}
             {row.original.type !== 'folder' && (
               <Tooltip title="Download">
                 <IconButton size="small" aria-label="Delete" onClick={() => downloadFile(row.original)}>
@@ -318,7 +325,7 @@ export default function Attachment() {
                 </IconButton>
               </Tooltip>
             )}
-            {row.original.type === 'folder' && !row.original.parentFolder && (
+            {row.original.type === 'folder' && (
               <Tooltip title="Download Zip">
                 <IconButton size="small" aria-label="Download" onClick={() => downloadZip(row.original)}>
                   <GetAppIcon fontSize="small" color="primary" />
@@ -472,6 +479,20 @@ export default function Attachment() {
       .then(({ data }) => {
         const tempfile = new Blob([data], { type: 'application/pdf' });
         generateBase64forFile(tempfile, file[0].name, `.${file[0].name.split('.')?.pop()}`);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+  const handleMailForFolder = (data) => {
+    const folderId = data?._id;
+    const folderName = data?.name;
+
+    axiosInstance()
+      .get(`attachment/zip/${folderId}`, { responseType: 'blob' })
+      .then(({ data }) => {
+        const zipfile = new Blob([data], { type: 'application/zip' });
+        generateBase64forFile(zipfile, `${folderName}.zip`, '.zip');
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);

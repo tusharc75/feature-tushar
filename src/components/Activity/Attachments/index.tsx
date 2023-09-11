@@ -30,6 +30,7 @@ import { FiEdit2 } from 'react-icons/fi';
 import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CreateEmail } from '../Email/CreateEmail';
+import GetAppOutlined from '@material-ui/icons/GetAppOutlined';
 
 const order = ['file', 'folder'];
 
@@ -163,6 +164,11 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                                   </HtmlTooltip> */}
                                   <CreateFolderFile attachment={_attachment} />
 
+                                  <HtmlTooltip title={'Send Mail'}>
+                                    <IconButton size="small" color="primary" aria-label="send" onClick={() => handleMailForFolder(_attachment)}>
+                                      <SendIcon color="primary" style={{ maxWidth: '18px' }} />
+                                    </IconButton>
+                                  </HtmlTooltip>
                                   <HtmlTooltip title={'Options'}>
                                     <IconButton
                                       size="small"
@@ -360,6 +366,11 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                         <span>{` ${_attachment?.name} ${childTree?.length ? `(${childTree?.length})` : ''}`}</span>
                         <Box className="right-size-buttons folder" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                           <CreateFolderFile attachment={_attachment} />
+                          <HtmlTooltip title={'Send Mail'}>
+                            <IconButton size="small" color="primary" aria-label="send" onClick={() => handleMailForFolder(_attachment)}>
+                              <SendIcon color="primary" style={{ maxWidth: '18px' }} />
+                            </IconButton>
+                          </HtmlTooltip>
                           <HtmlTooltip title={'Options'}>
                             <IconButton
                               size="small"
@@ -610,7 +621,21 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
       })
       .then(({ data }) => {
         const tempfile = new Blob([data], { type: 'application/pdf' });
-        generateBase64forFile(tempfile, file[0].name, `.${file[0].name.split(".")?.pop()}`);
+        generateBase64forFile(tempfile, file[0].name, `.${file[0].name.split('.')?.pop()}`);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+  const handleMailForFolder = (data) => {
+    const folderId = data?._id;
+    const folderName = data?.name;
+
+    axiosInstance()
+      .get(`attachment/zip/${folderId}`, { responseType: 'blob' })
+      .then(({ data }) => {
+        const zipfile = new Blob([data], { type: 'application/zip' });
+        generateBase64forFile(zipfile, `${folderName}.zip`, '.zip');
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -632,7 +657,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
       ];
       setEmailAttachment(attachments);
       setSendMail(true);
-
     };
   };
 
@@ -680,6 +704,25 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           toastConfig.setToastConfig(err);
         });
     }
+  };
+  const downloadZip = (data) => {
+    const folderId = data?._id;
+    const folderName = data?.name;
+    axiosInstance()
+      .get(`attachment/zip/${folderId}`, {
+        responseType: 'blob'
+      })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${folderName}.zip`);
+        document.body.appendChild(link);
+        link.click();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const CreateMail = () => {
@@ -757,6 +800,18 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               <ListItemText>Edit</ListItemText>
             </MenuItem>
           </>
+        ) : null}
+        {permissions['attachment']?.isRead ? (
+          <MenuItem
+            onClick={() => {
+              downloadZip(currentFolder);
+            }}
+          >
+            <ListItemIcon style={{ minWidth: '30px' }}>
+              <GetAppOutlined fontSize="small" color="primary" />
+            </ListItemIcon>
+            <ListItemText>Download</ListItemText>
+          </MenuItem>
         ) : null}
         {permissions['attachment']?.isDelete ? (
           <MenuItem
