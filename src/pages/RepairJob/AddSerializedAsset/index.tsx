@@ -456,7 +456,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
                   return {
                     _id: m._id ?? m.id,
                     currentStatus: m?.status,
-                    qty: 1,
                   };
                 })
               })
