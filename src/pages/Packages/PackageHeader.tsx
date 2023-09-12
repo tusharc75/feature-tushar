@@ -8,7 +8,7 @@ import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
 import HideWhenOffline from '../../components/HideWhenOffline';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import styles from '../Leads/Header.module.scss';
 
@@ -69,7 +69,8 @@ function PackageHeader(props) {
     columns,
     dispatch,
     // showClonePackageDialog
-    filters
+    filters,
+    resource
   } = props;
 
   let toggleInner = options && (
@@ -126,11 +127,12 @@ function PackageHeader(props) {
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={toggleInner}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 title={routes?.packages?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
@@ -214,6 +216,7 @@ function PackageHeader(props) {
           </div>
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }

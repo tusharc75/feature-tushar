@@ -1,40 +1,35 @@
-import { useState, useEffect, Fragment, useContext, useReducer } from 'react';
-import Grid from '@material-ui/core/Grid';
+import { Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import AddIcon from '@material-ui/icons/Add';
-import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../axios/axiosInstance';
-import { GiAbstract055 } from 'react-icons/gi';
-import styles from '../Leads/Header.module.scss';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomContainer from '../../components/CustomContainer';
-import CreateMarketSegment from './ManageMarketSegmentDialog';
-import routes from '../../components/Helpers/Routes';
+import Tooltip from '@material-ui/core/Tooltip';
 import { ExpandMore } from '@material-ui/icons';
-import { Box, Menu, MenuItem } from '@material-ui/core';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, marketSegment } from '../../constants/helpers';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { useData } from '../../StateProvider/Provider';
+import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import queryString from 'query-string';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { prepareDataForGrid } from '../../constants/helpers';
-import { useLocation, useHistory } from 'react-router-dom';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { MdAdd, MdSort, MdFilterList, MdOutlineFilterAlt } from 'react-icons/md';
-import { FaSuitcase, IoIosCreate, TbArrowsSort } from 'react-icons/all';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
-import { Link } from 'react-router-dom';
+import queryString from 'query-string';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaSuitcase, IoIosCreate, TbArrowsSort } from 'react-icons/all';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { useHistory, useLocation } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import routes from '../../components/Helpers/Routes';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { gridLoadingTimeout, marketSegment, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import styles from '../Leads/Header.module.scss';
+import CreateMarketSegment from './ManageMarketSegmentDialog';
 
 const MarketSegment = () => {
   const renderedFrom = camelCase(routes?.marketSegment.title);
@@ -332,6 +327,7 @@ const MarketSegment = () => {
                       dispatch={dispatch}
                       title={routes?.marketSegment?.title}
                       filters={filters}
+                      resource={sidebarResource.marketSegment}
                     />
                   </div>
                 </div>
@@ -385,6 +381,7 @@ const MarketSegment = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.marketSegment} />
           </div>
         </div>
 

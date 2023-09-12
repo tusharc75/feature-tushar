@@ -1,49 +1,35 @@
-import { useState, useEffect, Fragment, useContext, useReducer } from 'react';
-import Grid from '@material-ui/core/Grid';
-import { Link } from 'react-router-dom';
+import { Chip, Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import AddIcon from '@material-ui/icons/Add';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
+import queryString from 'query-string';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { AiOutlineBgColors, TbArrowsSort } from 'react-icons/all';
+import { FaSuitcase } from 'react-icons/fa';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { FaThemeisle } from 'react-icons/fa';
-import styles from '../Leads/Header.module.scss';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
-import CreateProductCategory from './CreateProductCategory';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import {
-  getLocalStorageArrayData,
-  gridLoadingTimeout,
-  gridPageSizes,
-  isObjectEmpty,
-  removeLocalStorage,
-  sidebarResource
-} from '../../constants/helpers';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { useData } from '../../StateProvider/Provider';
-import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import NoDataCell from '../../components/Helpers/NoDataCell';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useLocation } from 'react-router-dom';
-import queryString from 'query-string';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { prepareDataForGrid } from '../../constants/helpers';
-import { MdAccountCircle, MdOutlineFilterAlt } from 'react-icons/md';
-import { AiFillCrown, MdAdd, MdSort, MdFilterList, AiOutlineBgColors, TbArrowsSort } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
-import { FaSuitcase } from 'react-icons/fa';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
-import { camelCase } from 'lodash';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import styles from '../Leads/Header.module.scss';
+import CreateProductCategory from './CreateProductCategory';
 
 const ProductCategory = () => {
   const renderedFrom = camelCase(routes?.productCategory.title);
@@ -496,6 +482,7 @@ const ProductCategory = () => {
                       dispatch={dispatch}
                       title={routes?.productCategory?.title}
                       filters={filters}
+                      resource={sidebarResource.productCategory}
                     />
                   </div>
                 </div>
@@ -561,6 +548,7 @@ const ProductCategory = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.productCategory} />
           </div>
         </div>
         {Object.keys(frameWorkComponent).length > 0 ? (

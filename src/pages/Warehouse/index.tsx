@@ -1,7 +1,6 @@
-import { Box, Menu, MenuItem } from '@material-ui/core';
+import { Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import Chip from '@material-ui/core/Chip';
-import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -10,7 +9,7 @@ import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
-import { MdAdd, TbArrowsSort } from 'react-icons/all';
+import { TbArrowsSort } from 'react-icons/all';
 import { MdOutlineFilterAlt } from 'react-icons/md';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -27,7 +26,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
@@ -416,6 +415,7 @@ const Warehouse = () => {
                       dispatch={dispatch}
                       title={routes?.warehouse?.title}
                       filters={filters}
+                      resource={sidebarResource.warehouse}
                     />
                   </div>
                 </div>
@@ -508,6 +508,7 @@ const Warehouse = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.warehouse} />
           </div>
         </div>
 
