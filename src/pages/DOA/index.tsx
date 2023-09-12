@@ -11,10 +11,10 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import routes from '../../components/Helpers/Routes';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { gridLoadingTimeout } from '../../constants/helpers';
+import { gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 
 const DOARequest = () => {
   const renderedFrom = camelCase(routes?.DOARequest.title);
@@ -206,11 +206,13 @@ const DOARequest = () => {
                       dispatch={dispatch}
                       title={routes?.DOARequest?.title}
                       filters={{}}
+                      resource={sidebarResource.DOARequest}
                     />
                   </div>
                 </div>
               )}
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.DOARequest} />
           </div>
         </div>
         {isMobile && !isTablet ? (

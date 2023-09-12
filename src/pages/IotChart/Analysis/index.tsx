@@ -1,15 +1,15 @@
 import { useState, useCallback } from 'react';
 import { Box, IconButton, Typography } from '@material-ui/core';
 import moment from 'moment';
-import Chart from '../Helper/Chart';
-import FilterModel from '../Helper/FilterModel';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import Chart from '../Helper/Chart';
+import FilterModel from '../Helper/FilterModel';
 
 const Analysis = ({ assetId, dataPoints }) => {
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(moment().subtract(15, 'days').format('MM-DD-YYYY')),
+    from: new Date(moment().subtract(8, 'days').format('MM-DD-YYYY')),
     to: new Date(),
     intervals: '1hour'
   });

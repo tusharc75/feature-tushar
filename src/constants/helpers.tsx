@@ -496,7 +496,8 @@ export const CHILD_RESOURCE = {
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
-  invoiceCost: 'Invoice Cost'
+  invoiceCost: 'Invoice Cost',
+  serializedAssetsCertification: 'Serialized Assets Certificate'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -2447,7 +2448,8 @@ export const QUOTATION_STATUS = {
 export const QUOTATION_TYPE = {
   salesOrder: 'Sales Order',
   rentalJob: 'Rental Job',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  fieldJob: 'Field Job',
 };
 
 export const WORKORDER_SERVICE_COLOR = {
