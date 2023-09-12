@@ -7,7 +7,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { getLocalStorageArrayData, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import { COLOUR_MASTER, getLocalStorageArrayData, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FaRegistered, FaSuitcase } from 'react-icons/fa';
 import { SiStatuspage } from 'react-icons/all';
@@ -144,16 +144,19 @@ const RentalManagement = () => {
       checkboxRenderer: CheckboxRenderer,
       actionsRenderer: ActionsRenderer
     };
-
     // for demo purpose
     columns?.forEach((e) => {
       if (e.field === 'rentalJobName') {
         e.cellRenderer = 'rentalJobNameRenderer';
+        e.cellStyle = (params) => {
+          if (params.data?.assetsNotReceivedInPo) {
+            return { backgroundColor: COLOUR_MASTER.lostAssets.background };
+          }
+          return null;
+        };
       }
     });
     // till for demo pupose
-
-
     setFrameWorkComponent({
       ...tempFrameworkComponent,
       rentalJobNameRenderer: RentalJobNameRenderer
