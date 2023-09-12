@@ -38,7 +38,7 @@ import { MdAdd, TbArrowsSort } from 'react-icons/all';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import { FaSuitcase, MdFilterList, MdSort } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 import WarhouseList from '../Account/Warehouse/WarhouseList';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -616,6 +616,7 @@ export default function Contact(props) {
                       dispatch={dispatch}
                       title={routes?.[contactResource]?.title}
                       filters={filters}
+                      resource={sidebarResource[contactResource]}
                     />
                   </div>
                 </div>
@@ -775,6 +776,7 @@ export default function Contact(props) {
                 )}
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource[contactResource]} />
           </div>
         </div>
 
