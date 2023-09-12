@@ -13,16 +13,24 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { camelCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import { Link } from 'react-router-dom';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import ManageQuotationDialog from '../ManageQuotationDialog';
+import { useData } from '../../../StateProvider/Provider';
 
 export default function Version({ onClose, quotationId, handleChangeVersion, referenceType = "" }) {
 
   const renderedFrom = `${camelCase(routes?.quotation.title)}_versions`;
+
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [showManageQuotationDialog, setShowManageQuotationDialog] = useState({ open: false, isClone: false, idToClone: null, versionNumber : null });
 
   const [columns, setColumns] = useState([]);
 
@@ -63,10 +71,35 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
     </Link>
   );
 
+  const ActionsRenderer = (params) => (
+    <>
+      {permissions?.quotation?.isCreate && (
+
+        <Tooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowManageQuotationDialog({
+                open: true,
+                isClone: true,
+                idToClone: params?.data?.quotationId,
+                versionNumber: params?.data?.version
+              })
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      )}
+    </>
+  );
+
   const frameworkComponents = {
     nameRenderer: NameRenderer,
     quotationNumberRenderer: QuotationNumberRenderer,
-    commonRenderer: CommonRenderer
+    commonRenderer: CommonRenderer,
+    actionsRenderer : ActionsRenderer
   };
 
   const fetchData = () => {
@@ -127,6 +160,20 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
           renderedFrom={renderedFrom}
         />
       </CustomDialogContent>
+      {showManageQuotationDialog.open && (
+        <ManageQuotationDialog
+          isClone={showManageQuotationDialog.isClone}
+          open={showManageQuotationDialog.open}
+          quotationId={showManageQuotationDialog.idToClone}
+          onClose={() => setShowManageQuotationDialog({ open: false, isClone: false, idToClone: null, versionNumber: null })}
+          onSuccess={() => {
+            // fetchQuotation();
+            setShowManageQuotationDialog({ open: false, isClone: false, idToClone: null, versionNumber : null });
+            onClose();
+          }}
+          versionNumber = {showManageQuotationDialog.versionNumber}
+        />
+      )}
     </Dialog>
   );
 }

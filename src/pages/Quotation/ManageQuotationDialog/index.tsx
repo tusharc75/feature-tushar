@@ -28,8 +28,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import moment from 'moment';
 
-const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open }) => {
-
+const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open, versionNumber=null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -127,8 +126,17 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
           toastConfig.setToastConfig(error);
         });
     } else {
+      if (versionNumber!==null && versionNumber > 0) {
+        values = {
+          ...values,
+          quotationId: quotationId,
+          versionNumber: `${versionNumber}`
+        };
+      }
+
+      const apiUrl = versionNumber!==null && versionNumber > 0 ? `${quotation.api}/clone-new-quotation-version` : `${quotation.api}`;
       axiosInstance()
-        .post(`${quotation.api}`, values)
+        .post(apiUrl, values)
         .then(({ data: { data, message } }) => {
           history.push(`${routes.quotationDetail.path}/${data._id}`);
           setLoading(false);
