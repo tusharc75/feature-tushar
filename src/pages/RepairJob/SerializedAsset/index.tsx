@@ -197,7 +197,6 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       width: 100,
       sticky: 'right',
       Cell: ({ row }) =>{
-        console.log(row.original)
         return <div className="d-flex gap-1">
           {row?.original?.repairTypeId && (
             <HtmlTooltip title="Repair Process">

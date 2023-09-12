@@ -278,7 +278,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    console.log(rows, 'updated Rows')
     setUpdating(true);
     axiosInstance()
     .put(`${repairJob.api}/${repairJobData?._id}/assets`, rows)
