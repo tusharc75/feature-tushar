@@ -20,7 +20,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { gridLoadingTimeout, prepareDataForGrid, pricingCondition, sidebarResource } from 'src/constants/helpers';
@@ -332,6 +332,7 @@ const PricingConditions = () => {
                       dispatch={dispatch}
                       title={routes?.pricingCondition?.title}
                       filters={filters}
+                      resource={sidebarResource.pricingCondition}
                     />
                   </div>
                 </div>
@@ -381,6 +382,7 @@ const PricingConditions = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.pricingCondition} />
           </div>
         </div>
         {columns && frameworkComponent ? (
