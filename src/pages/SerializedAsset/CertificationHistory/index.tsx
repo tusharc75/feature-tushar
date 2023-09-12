@@ -18,6 +18,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 import useColumns, { getFrameworkComponents } from '../../../constants/useColumns';
+import { useData } from 'src/StateProvider/Provider';
 
 const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetDetails = null }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -32,6 +33,10 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
 
   const { getColumnData } = useColumns();
+
+  const {
+    state: { permissions }
+  }: any = useData();
 
   useEffect(() => {
     fetchGridColumns();
@@ -123,9 +128,10 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
   const SupplierAccountRenderer = (params: { value: any; data: any }) => (
     <>
       {params.value ? (
-        <Link className="link" target="_blanck" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`}>
-          {params.value}
-        </Link>
+        permissions?.supplierAccount?.isRead ?
+          <Link className="link" target="_blanck" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`}>
+            {params.value}
+          </Link> : <span>{params.value}</span>
       ) : (
         <NoDataCell />
       )}
