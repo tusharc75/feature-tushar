@@ -31,7 +31,6 @@ function RentalManagementHeader({
   showConfirmBox,
   icon,
   heading,
-  children,
   columns,
   dispatch,
   showTransferEntityDialog,
@@ -238,7 +237,6 @@ function RentalManagementHeader({
             </div>
           </HideWhenOffline>
         )}
-        {children}
       </div>
 
       <div className="flex flex-wrap gap-[8px]  justify-end">

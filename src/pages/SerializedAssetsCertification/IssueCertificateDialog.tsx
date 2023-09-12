@@ -22,8 +22,10 @@ import {
   setFieldsInAscendingOrder,
   yupSchema
 } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiryDate }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -32,6 +34,10 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
   const [loading, setLoading] = useState(false);
   const [formsData, setFormsData] = useState([]);
 
+  const {
+    state: { user }
+  }: any = useData();
+
   useEffect(() => {
     fetchFields();
   }, []);
@@ -39,15 +45,16 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
   const fetchFields = async () => {
     try {
       const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.serializedAssetsCertification}`);
-      
       const fields = response?.data?.data;
-      const tempInitialData: any = getObjKeys('', fields);
-      tempInitialData['issueDate'] = null;
-      tempInitialData['expiryDate'] = null;
-
+      let createValues = { ...getObjKeys('', fields) };
+      createValues['issueDate'] = null;
+      createValues['expiryDate'] = null;
+      if (fields?.find((e) => e.fieldName === 'owner')) {
+        createValues['owner'] = user.user._id;
+      }
       setInitialData({
         fields: fields,
-        values: tempInitialData
+        values: createValues
       });
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -151,8 +158,8 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
                                   imageOrFileUploadCompletePercentage={
                                     ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                       ? (completePercentage) => {
-                                          setUploadingImageOrFileProgress(completePercentage);
-                                        }
+                                        setUploadingImageOrFileProgress(completePercentage);
+                                      }
                                       : null
                                   }
                                   {...(certificateExpiryDate && field.fieldName === 'issueDate' ? { minDate: new Date(certificateExpiryDate) } : {})}
