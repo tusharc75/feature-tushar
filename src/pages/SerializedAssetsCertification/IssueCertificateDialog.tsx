@@ -13,10 +13,10 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
+import routes from '../../components/Helpers/Routes';
 import { CustomDialogTransition, getObjKeys, serializedAssetsCertification, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
 
 const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiryDate }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -24,18 +24,59 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const [formsData, setFormsData] = useState([]);
+  const [userData, setuserData] = useState([]);
+
+  useEffect(() => {
+    getUsers();
+  }, []);
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [userData]);
+
+  const getUsers = async () => {
+    axiosInstance()
+      .get(`${routes.user.path}`)
+      .then(({ data }) => {
+        const extractedData = data?.data.map((item) => {
+          const { _id, firstName, lastName, email, entities, currency } = item;
+          return { _id, firstName, lastName, email, entities, currency };
+        });
+        const users = [];
+        extractedData.forEach((_user, i) => {
+          users.push({
+            optionValue: _user._id,
+            optionLabel: `${_user.firstName} ${_user.lastName}`,
+            order: i,
+            entities: _user.entities,
+            email: _user.email,
+            currency: _user.currency
+          });
+        });
+        setuserData(users);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const fetchFields = async () => {
     try {
-      const tempInitialData: any = getObjKeys('', fields);
+      const updatedFields = fields.map((field) => {
+        if (field.fieldName === 'owner' || field.fieldName === 'collaborator') {
+          return {
+            ...field,
+            option: userData
+          };
+        }
+        return field;
+      });
+      const tempInitialData: any = getObjKeys('', updatedFields);
       tempInitialData['issueDate'] = null;
       tempInitialData['expiryDate'] = null;
+
       setInitialData({
-        fields: fields,
+        fields: updatedFields,
         values: tempInitialData
       });
     } catch (error) {
@@ -44,23 +85,24 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
   };
 
   const handleSubmit = (values) => {
-    setLoading(true)
-    const attachments = values?.attachments?.map((file) => ({ name: file?.fileName?.split('_')[3], url: file?.fileName }))
+    setLoading(true);
+    const attachments = values?.attachments?.map((file) => ({ name: file?.fileName?.split('_')[3], url: file?.fileName }));
     const body = { ...values, asset: assetId, attachments: attachments };
-    axiosInstance().post(`${serializedAssetsCertification.api}/issue-certificate`, body)
+    axiosInstance()
+      .post(`${serializedAssetsCertification.api}/issue-certificate`, body)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        onSuccess()
-        setLoading(false)
+        onSuccess();
+        setLoading(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-      })
-  }
+      });
+  };
 
   function validate(values) {
     const errors = {};
@@ -139,8 +181,8 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
                                   imageOrFileUploadCompletePercentage={
                                     ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                       ? (completePercentage) => {
-                                        setUploadingImageOrFileProgress(completePercentage);
-                                      }
+                                          setUploadingImageOrFileProgress(completePercentage);
+                                        }
                                       : null
                                   }
                                   {...(certificateExpiryDate && field.fieldName === 'issueDate' ? { minDate: new Date(certificateExpiryDate) } : {})}
@@ -251,6 +293,38 @@ const fields = [
     fieldName: 'attachments',
     resource: 'Serialized Asset',
     sectionName: 'Information',
+    roleType: 0
+  },
+  {
+    _id: '6426d49d6ccedf33bf69cc7c',
+    fieldLabel: 'Owner',
+    type: 'dropDown',
+    option: [],
+    required: true,
+    isTooltip: false,
+    tooltipMessage: '',
+    editAble: true,
+    deletAble: true,
+    order: 3,
+    fieldName: 'owner',
+    resource: 'Serialized Asset',
+    sectionName: 'User Information',
+    roleType: 0
+  },
+  {
+    _id: '6426d49d6ccedf33bf69cc7d',
+    fieldLabel: 'Collaborator',
+    type: 'multiSelect',
+    option: [],
+    required: false,
+    isTooltip: false,
+    tooltipMessage: '',
+    editAble: true,
+    deletAble: true,
+    order: 4,
+    fieldName: 'collaborator',
+    resource: 'Serialized Asset',
+    sectionName: 'User Information',
     roleType: 0
   }
 ];

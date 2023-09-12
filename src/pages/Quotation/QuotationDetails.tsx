@@ -311,6 +311,9 @@ const QuotationDetails = () => {
         if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
           history.push(`${routes.repairOrderDetail.path}/${data?._id}`);
         }
+        if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
+          history.push(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -456,7 +459,8 @@ const QuotationDetails = () => {
                     quotationData?.status === QUOTATION_STATUS.acceptByCustomer &&
                     !quotationData?.rentalJob &&
                     !quotationData?.repairOrder &&
-                    !quotationData?.salesOrder && (
+                    !quotationData?.salesOrder && 
+                    !quotationData?.fieldJob && (
                       <MenuItem>
                         <Button
                           onClick={() => {
