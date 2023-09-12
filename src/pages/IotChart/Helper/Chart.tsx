@@ -6,11 +6,15 @@ import { Box } from '@material-ui/core';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
+import FilterAlertModel from './FilterAlertModel';
 
-const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
+const Chart = ({ dateFilters, assetId, dataPoints }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [chartData, setChartData] = useState(null);
+    const [alert, setAlert] = useState(null);
+    const [showHighLow, setShowHighLow] = useState(false);
+    const [highLowData, setHighLowData] = useState([]);
 
     const [options, setOptions] = useState<ApexOptions>({
         chart: {
@@ -63,6 +67,18 @@ const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
         }
     }, [assetId, dataPoints, dateFilters]);
 
+    useEffect(() => {
+        let data = highLowData;
+        if (!showHighLow) data = []
+        setOptions({
+            ...options,
+            annotations: {
+                ...options?.annotations,
+                yaxis: data
+            }
+        })
+    }, [showHighLow]);
+
     const fetchData = () => {
         axiosInstance()
             .get(`/report/iot/data-points`, {
@@ -112,15 +128,7 @@ const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
                         })
                     }
                 });
-
-                setOptions({
-                    ...options,
-                    annotations: {
-                        ...options?.annotations,
-                        yaxis: yaxis
-                    }
-                })
-
+                setHighLowData(yaxis)
                 setChartData(newData);
             })
             .catch((error) => {
@@ -205,12 +213,15 @@ const Chart = ({ dateFilters, assetId, dataPoints, alert }) => {
 
     return (
         <> {chartData ?
-            <ReactApexChart
-                options={options}
-                series={chartData}
-                type="line"
-                height={500}
-            />
+            <>
+                <FilterAlertModel assetId={assetId} selectedAlert={alert} setSelectedAlert={setAlert} showHighLow={showHighLow} setShowHighLow={setShowHighLow} />
+                <ReactApexChart
+                    options={options}
+                    series={chartData}
+                    type="line"
+                    height={500}
+                />
+            </>
             : <Box p={2} height={500}>
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>}
