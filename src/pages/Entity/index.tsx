@@ -1,28 +1,26 @@
-import { useState, FC, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Dialog, Grid, IconButton, Tooltip } from '@material-ui/core';
-import { entity, gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../constants/helpers';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from './../../components/Helpers/Routes';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import EntityHeader from './Header';
-import { useData } from '../../StateProvider/Provider';
-import ManageEntity from './ManageEntity';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import AssignUsersDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomContainer from '../../components/CustomContainer';
-import { FaUser, FaSuitcase, BsCurrencyExchange, FaAddressCard, IoCreate } from 'react-icons/all';
+import { Dialog, IconButton, Tooltip } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { prepareDataForGrid } from '../../constants/helpers';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import ResourceTransferDialog from '../../components/ResourceTransferDialog';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { camelCase } from 'lodash';
-import { SET_USER } from 'src/StateProvider/actionTypes';
+import { FC, useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BsCurrencyExchange, FaAddressCard, FaSuitcase, FaUser, IoCreate } from 'react-icons/all';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import AssignUsersDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import CustomContainer from '../../components/CustomContainer';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import ResourceTransferDialog from '../../components/ResourceTransferDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { entity, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import EntityHeader from './Header';
+import ManageEntity from './ManageEntity';
 
 let entityTimeout;
 
@@ -308,6 +306,7 @@ const Entity: FC = () => {
             openUserDialog={handleOpenDialog}
             anyEntitySelected={selectedRecords.length > 0} //single select entity can assign user
             filters={filters}
+            resource={sidebarResource.entity}
           />
         </div>
 

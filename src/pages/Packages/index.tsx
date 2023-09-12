@@ -1,33 +1,32 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Grid, Chip, IconButton } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { IoIosPricetags, RiPriceTagLine } from 'react-icons/all';
+import { BiPackage } from 'react-icons/bi';
+import { GoDeviceMobile } from 'react-icons/go';
+import { MdDescription } from 'react-icons/md';
+import { useHistory } from 'react-router-dom';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomContainer from '../../components/CustomContainer';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { getLocalStorageArrayData, gridLoadingTimeout, packages, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { BiPackage } from 'react-icons/bi';
-import { isObjectEmpty, gridLoadingTimeout, packages, product, sidebarResource, getLocalStorageArrayData } from '../../constants/helpers';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomContainer from '../../components/CustomContainer';
-import { useHistory } from 'react-router-dom';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import PackageHeader from './PackageHeader';
 import ManagePackageDialog from './ManagePackageDialog';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
-import { camelCase } from 'lodash';
+import PackageHeader from './PackageHeader';
 import ProductListDialog from './ProductListDialog';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import { prepareDataForGrid } from '../../constants/helpers';
-import { MdAccountCircle, MdDescription } from 'react-icons/md';
-import { GoDeviceMobile } from 'react-icons/go';
-import { AiFillCrown, IoIosPricetags, RiPriceTagLine } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 let packagesTimeout;
 
@@ -381,6 +380,7 @@ const PackageList = () => {
               showTransferEntityDialog={handleTransferEntityDialog}
               openAssingToProduct={openAssingToProduct}
               filters={filters}
+              resource={sidebarResource.packages}
               // showClonepackagesDialog={() => {
               //   handleShowClonepackagesDialog()
               // }}

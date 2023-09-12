@@ -14,7 +14,7 @@ export default function Current({ assetId }) {
   const [category, setCategory] = useState(null);
   const [parentCategory, setParentCategory] = useState(null);
   const [errorData, setErrorData] = useState(null);
-  const [expandedAccordition, setExpandedAccordition] = useState<string | false>('');
+  const [expandedAccordition, setExpandedAccordition] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -45,6 +45,24 @@ export default function Current({ assetId }) {
             });
           }
         });
+
+        if (parentCategory?.length > 0) {
+          const data: any = _.uniqBy(parentCategory, 'parentCategory.optionValue')[0];
+          setExpandedAccordition(preVal => (
+            {
+              ...preVal,
+              [data?.parentCategory?.optionValue]: true
+            }
+          ))
+        } else if (category?.length > 0) {
+          const data: any = _.uniqBy(category, 'category.optionValue')[0];
+          setExpandedAccordition(preVal => (
+            {
+              ...preVal,
+              [data?.category?.optionValue]: true
+            }
+          ))
+        }
 
         setParentCategory(parentCategory);
         setCategory(category);
@@ -86,9 +104,12 @@ export default function Current({ assetId }) {
                 expended={expandedAccordition}
                 data={p}
                 onChange={() => {
-                  setExpandedAccordition((prev) =>
-                    !prev ? p?.parentCategory?.optionValue : prev === p?.parentCategory?.optionValue ? false : p?.parentCategory?.optionValue
-                  );
+                  setExpandedAccordition((prev) => (
+                    {
+                      ...prev,
+                      [p?.parentCategory?.optionValue]: expandedAccordition[p?.parentCategory?.optionValue] ? false : true
+                    }
+                  ));
                 }}
                 type={'parentCategory'}
                 allData={parentCategory}
@@ -99,9 +120,12 @@ export default function Current({ assetId }) {
                 expended={expandedAccordition}
                 data={c}
                 onChange={() => {
-                  setExpandedAccordition((prev) =>
-                    !prev ? c?.category?.optionValue : prev === c?.category?.optionValue ? false : c?.category?.optionValue
-                  );
+                  setExpandedAccordition((prev) => (
+                    {
+                      ...prev,
+                      [c?.category?.optionValue]: expandedAccordition[c?.category?.optionValue] ? false : true
+                    }
+                  ));
                 }}
                 type={'category'}
                 allData={category}

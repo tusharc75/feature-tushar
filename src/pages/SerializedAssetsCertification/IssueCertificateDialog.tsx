@@ -14,9 +14,18 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import routes from '../../components/Helpers/Routes';
-import { CustomDialogTransition, getObjKeys, serializedAssetsCertification, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
+import {
+  CHILD_RESOURCE,
+  CustomDialogTransition,
+  getObjKeys,
+  serializedAssetsCertification,
+  setFieldsInAscendingOrder,
+  yupSchema
+} from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiryDate }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -24,60 +33,28 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const [formsData, setFormsData] = useState([]);
-  const [userData, setuserData] = useState([]);
 
-  useEffect(() => {
-    getUsers();
-  }, []);
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     fetchFields();
-  }, [userData]);
-
-  const getUsers = async () => {
-    axiosInstance()
-      .get(`${routes.user.path}`)
-      .then(({ data }) => {
-        const extractedData = data?.data.map((item) => {
-          const { _id, firstName, lastName, email, entities, currency } = item;
-          return { _id, firstName, lastName, email, entities, currency };
-        });
-        const users = [];
-        extractedData.forEach((_user, i) => {
-          users.push({
-            optionValue: _user._id,
-            optionLabel: `${_user.firstName} ${_user.lastName}`,
-            order: i,
-            entities: _user.entities,
-            email: _user.email,
-            currency: _user.currency
-          });
-        });
-        setuserData(users);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
+  }, []);
 
   const fetchFields = async () => {
     try {
-      const updatedFields = fields.map((field) => {
-        if (field.fieldName === 'owner' || field.fieldName === 'collaborator') {
-          return {
-            ...field,
-            option: userData
-          };
-        }
-        return field;
-      });
-      const tempInitialData: any = getObjKeys('', updatedFields);
-      tempInitialData['issueDate'] = null;
-      tempInitialData['expiryDate'] = null;
-
+      const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.serializedAssetsCertification}`);
+      const fields = response?.data?.data;
+      let createValues = { ...getObjKeys('', fields) };
+      createValues['issueDate'] = null;
+      createValues['expiryDate'] = null;
+      if (fields?.find((e) => e.fieldName === 'owner')) {
+        createValues['owner'] = user.user._id;
+      }
       setInitialData({
-        fields: updatedFields,
-        values: tempInitialData
+        fields: fields,
+        values: createValues
       });
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -181,8 +158,8 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
                                   imageOrFileUploadCompletePercentage={
                                     ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                       ? (completePercentage) => {
-                                          setUploadingImageOrFileProgress(completePercentage);
-                                        }
+                                        setUploadingImageOrFileProgress(completePercentage);
+                                      }
                                       : null
                                   }
                                   {...(certificateExpiryDate && field.fieldName === 'issueDate' ? { minDate: new Date(certificateExpiryDate) } : {})}
@@ -246,87 +223,5 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
   );
 };
 
-const fields = [
-  {
-    _id: '6426d49d6ccedf33bf69cc7a',
-    fieldLabel: 'Issue Date',
-    type: 'date',
-    option: [],
-    required: true,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    deletAble: true,
-    order: 0,
-    fieldName: 'issueDate',
-    resource: 'Serialized Asset',
-    sectionName: 'Information',
-    roleType: 0
-  },
-  {
-    _id: '6426d49d6ccedf33bf69cc7b',
-    fieldLabel: 'Expiry Date',
-    type: 'date',
-    option: [],
-    required: true,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    deletAble: true,
-    order: 1,
-    fieldName: 'expiryDate',
-    resource: 'Serialized Asset',
-    sectionName: 'Information',
-    roleType: 0
-  },
-  {
-    _id: '6492e7d800bd0966ec702574',
-    fieldLabel: 'Attachment',
-    type: 'multiFileUpload',
-    option: [],
-    required: true,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    deletAble: true,
-    order: 2,
-    fieldName: 'attachments',
-    resource: 'Serialized Asset',
-    sectionName: 'Information',
-    roleType: 0
-  },
-  {
-    _id: '6426d49d6ccedf33bf69cc7c',
-    fieldLabel: 'Owner',
-    type: 'dropDown',
-    option: [],
-    required: true,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    deletAble: true,
-    order: 3,
-    fieldName: 'owner',
-    resource: 'Serialized Asset',
-    sectionName: 'User Information',
-    roleType: 0
-  },
-  {
-    _id: '6426d49d6ccedf33bf69cc7d',
-    fieldLabel: 'Collaborator',
-    type: 'multiSelect',
-    option: [],
-    required: false,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    deletAble: true,
-    order: 4,
-    fieldName: 'collaborator',
-    resource: 'Serialized Asset',
-    sectionName: 'User Information',
-    roleType: 0
-  }
-];
 
 export default IssueCertificateDialog;
