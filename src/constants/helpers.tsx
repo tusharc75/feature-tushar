@@ -2447,7 +2447,8 @@ export const QUOTATION_STATUS = {
 export const QUOTATION_TYPE = {
   salesOrder: 'Sales Order',
   rentalJob: 'Rental Job',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  fieldJob: 'Field Job',
 };
 
 export const WORKORDER_SERVICE_COLOR = {
