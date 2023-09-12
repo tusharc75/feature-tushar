@@ -113,6 +113,15 @@ const PLANNING_RESOURCE = [
         start: 'estimateStartDate',
         end: 'estimateEndDate'
     },
+    {
+        key: 'serializedAsset',
+        resource: sidebarResource.serializedAsset,
+        title: routes.serializedAsset.title,
+        path: routes.serializedAssetDetail.path,
+        fieldName: 'assetNumber',
+        start: 'estimateStartDate',
+        end: 'estimateEndDate'
+    }
 ]
 
 function PlanningView() {
