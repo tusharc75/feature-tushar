@@ -28,7 +28,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import moment from 'moment';
 
-const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open, versionNumber=null }) => {
+const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open, versionId = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -126,26 +126,40 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
           toastConfig.setToastConfig(error);
         });
     } else {
-      if (versionNumber!==null && versionNumber > 0) {
-        values = {
-          ...values,
-          quotationId: quotationId,
-          versionNumber: `${versionNumber}`
-        };
-      }
-
-      const apiUrl = versionNumber!==null && versionNumber > 0 ? `${quotation.api}/clone-new-quotation-version` : `${quotation.api}`;
       axiosInstance()
-        .post(apiUrl, values)
+        .post(`${quotation.api}`, values)
         .then(({ data: { data, message } }) => {
-          history.push(`${routes.quotationDetail.path}/${data._id}`);
-          setLoading(false);
-          onSuccess(data);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
+          if (versionId) {
+            axiosInstance().post(`${quotation.api}/clone-new-quotation-version`, {
+              oldQuotationId: quotationId,
+              newQuotationId: data._id,
+              versionId: versionId
+            })
+              .then(() => {
+                history.push(`${routes.quotationDetail.path}/${data._id}`);
+                setLoading(false);
+                onSuccess(data);
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: 'success',
+                  message: message
+                });
+              })
+              .catch((error) => {
+                setLoading(false);
+                toastConfig.setToastConfig(error);
+              });
+          }
+          else {
+            history.push(`${routes.quotationDetail.path}/${data._id}`);
+            setLoading(false);
+            onSuccess(data);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: message
+            });
+          }
         })
         .catch((error) => {
           setLoading(false);
