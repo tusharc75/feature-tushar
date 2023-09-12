@@ -1,48 +1,36 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
+import { IconButton, Tooltip } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { FaRegistered } from 'react-icons/fa';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import {
-  isObjectEmpty,
-  customerAccount,
-  supplierAccount,
-  gridLoadingTimeout,
-  productionOrder,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  removeLocalStorage
-} from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
-import routes from './../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { SiStatuspage } from 'react-icons/all';
+import { FaRegistered } from 'react-icons/fa';
+import { useHistory } from 'react-router-dom';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { isMobile, isTablet } from 'react-device-detect';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
-import { camelCase } from 'lodash';
 import {
-  FaSuitcase,
-  SiStatuspage,
-  FaWarehouse,
-  GiAutoRepair,
-  GrStatusInfo,
-  BsFillPersonFill,
-  GiCargoShip,
-  FaShippingFast,
-  RiSpaceShipFill
-} from 'react-icons/all';
-import ProductionOrderHeader from './ProductionOrderHeader';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@material-ui/icons/Delete';
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  productionOrder,
+  removeLocalStorage,
+  sidebarResource
+} from '../../constants/helpers';
+import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
 import ManageProductionOrder from './ManageProductionOrder';
+import ProductionOrderHeader from './ProductionOrderHeader';
 
 let productionOrderTimeout;
 
@@ -403,6 +391,7 @@ const ProductionOrder = () => {
             heading={routes.productionOrder.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             filters={filters}
+            resource={sidebarResource.productionOrder}
             // showCloneProductionOrderDialog={() => {
             //   handleShowCloneProductionOrderDialog()
             // }}
