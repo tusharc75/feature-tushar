@@ -496,7 +496,8 @@ export const CHILD_RESOURCE = {
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
-  invoiceCost: 'Invoice Cost'
+  invoiceCost: 'Invoice Cost',
+  serializedAssetsCertification: 'Serialized Assets Certificate'
 };
 
 export const sidebarResourceObjectFromValues = () => {
