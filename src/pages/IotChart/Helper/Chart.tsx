@@ -142,14 +142,12 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
             if (alert?.optionValue !== 'All') {
                 api = `${api}&deviceTemplateAlert=${alert?.optionValue}`
             }
-
-            axiosInstance()
-                .get(api)
+            axiosInstance().get(api)
                 .then(({ data: { data } }) => {
                     const xaxis: any = [];
                     const points: any = [];
                     data?.forEach(d => {
-                        if (d?.errorMessage) {
+                        if (d?.message) {
                             const x = new Date(d.time).getTime();
                             xaxis.push({
                                 x,
@@ -161,7 +159,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
                                         color: '#fff',
                                         background: '#775DD0',
                                     },
-                                    text: d?.errorMessage,
+                                    text: d?.message,
                                 }
                             })
                             points.push({
@@ -180,7 +178,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
                                         color: '#fff',
                                         background: '#FF4560',
                                     },
-                                    text: d?.errorMessage,
+                                    text: d?.message,
                                 }
                             })
                         }
