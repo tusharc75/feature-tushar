@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Grid, Chip, IconButton, Tooltip } from '@material-ui/core';
+import { Grid, Chip, IconButton, Tooltip, Box } from '@material-ui/core';
 import queryString from 'query-string';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -14,7 +14,7 @@ import { SiStatuspage } from 'react-icons/all';
 import { gridLoadingTimeout, rentalManagement } from '../../constants/helpers';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import RentalManagementHeader from './RentalManagementHeader';
@@ -29,6 +29,8 @@ import { setUpindexDB, objectStore, insertUpdate, findAll, findOne } from '../..
 import { CheckboxRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import HideWhenOffline from '../../components/HideWhenOffline';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Info, Warning } from '@material-ui/icons';
 
 let rentalManagementTimeout;
 
@@ -142,7 +144,20 @@ const RentalManagement = () => {
       checkboxRenderer: CheckboxRenderer,
       actionsRenderer: ActionsRenderer
     };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
+
+    // for demo purpose
+    columns?.forEach((e) => {
+      if (e.field === 'rentalJobName') {
+        e.cellRenderer = 'rentalJobNameRenderer';
+      }
+    });
+    // till for demo pupose
+
+
+    setFrameWorkComponent({
+      ...tempFrameworkComponent,
+      rentalJobNameRenderer: RentalJobNameRenderer
+    });
     let staticFields = getStaticFields();
     if (permissions?.sublease) {
       staticFields = [...extraColumns, ...staticFields];
@@ -152,6 +167,23 @@ const RentalManagement = () => {
     });
     setColumns([...columns]);
   };
+
+  // for demo purpose only
+  const RentalJobNameRenderer = (params) => {
+    return <Fragment>
+      <Link className="link text-truncate" title={params.value} to={`${routes.rentalManagement.path}/detail/${params.data?._id}`}>
+        {params.value}
+      </Link>
+      {params.data?.assetsNotReceivedInPo && (
+        <Box ml={1}>
+          <HtmlTooltip title={`Assets on PO not received`}>
+            <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
+          </HtmlTooltip>
+        </Box>
+      )}
+    </Fragment>
+  }
+  // till here demo purpose only
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -536,9 +568,8 @@ const RentalManagement = () => {
           {singleRentalManagementDelete.show ? (
             <ConfirmationDialog
               open={singleRentalManagementDelete.show}
-              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
-                singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-              }?`}
+              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+                }?`}
               onClose={() =>
                 setSingleRentalManagementDelete({
                   id: null,
