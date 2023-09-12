@@ -265,7 +265,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
       element[i].onclick = () => {
         const event = events.filter((event) => event.title === element[i].innerText)[0];
         const path = selectedResource.path;
-        history.push(`${path}/${event.id}`);
+        window.open(`${path}/${event.id}`);
       };
     }
   };
@@ -499,7 +499,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
               onNavigate(date);
             }}
             onSelectEvent={(event: any) => {
-              history.push(`${selectedResource.path}/${event.id}`);
+              window.open(`${selectedResource.path}/${event.id}`);
             }}
           />
         ) : (
@@ -528,9 +528,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
             onSelectEvent={(event: any) => {
               if (event.resource) {
                 const resource = resourceList?.find((r) => r.resource === event.resource);
-                history.push(`${resource.path}/${event.id}`);
+                window.open(`${resource.path}/${event.id}`);
               } else {
-                history.push(`${selectedResource.path}/${event.id}`);
+                window.open(`${selectedResource.path}/${event.id}`);
               }
             }}
           />
