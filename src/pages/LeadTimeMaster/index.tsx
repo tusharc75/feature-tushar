@@ -72,8 +72,6 @@ const LeadTimeMaster = () => {
 
   const { getColumnData } = useColumns();
 
-
-
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -298,11 +296,11 @@ const LeadTimeMaster = () => {
 
   const handleLeadTimeMasterTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    if(referenceId && referenceType) {
+    if (referenceId && referenceType) {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
-      } else {
-        history.push(`?type=${filterValues}`);
-      }
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleTransferEntityDialog = () => {
@@ -361,16 +359,16 @@ const LeadTimeMaster = () => {
   };
 
   const updateQueryParams = () => {
-    const queryParams = new URLSearchParams(history.location.search)
-    queryParams.delete('referenceId')
-    queryParams.delete('referenceType')
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
     referenceId = queryParams.get('referenceId');
     referenceType = queryParams.get('referenceType');
     history.replace({
-      search: queryParams.toString(),
-    })
+      search: queryParams.toString()
+    });
     fetchLeadTimeMasters();
-  }
+  };
 
   return (
     <section className="main-container-v1">
@@ -417,6 +415,7 @@ const LeadTimeMaster = () => {
             heading={routes.leadTimeMaster.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             filters={filters}
+            resource={sidebarResource.leadTimeMaster}
           >
             {accountDetails.accountId && (
               <Chip
@@ -432,14 +431,7 @@ const LeadTimeMaster = () => {
                 }}
               />
             )}
-            {referenceType && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Rental Job : ${referenceType}`}
-                onDelete={updateQueryParams}
-              />
-            )}
+            {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
           </LeadTimeHeader>
         </div>
         {Object.keys(frameworkComponents).length > 0 ? (
