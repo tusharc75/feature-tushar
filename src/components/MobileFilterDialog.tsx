@@ -297,7 +297,15 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
                 Save Filter
               </Button>
             )}
-            <Button type="submit" className="no-shadow" color="primary" size="small" variant="contained" onClick={handleSubmit}>
+            <Button
+              disabled={inputFields?.length === 0 || inputFields?.some((v) => v.fieldValue === '' || v.fieldName === '')}
+              type="submit"
+              className="no-shadow"
+              color="primary"
+              size="small"
+              variant="contained"
+              onClick={handleSubmit}
+            >
               Apply Now
             </Button>
           </CustomDialogFooter>
