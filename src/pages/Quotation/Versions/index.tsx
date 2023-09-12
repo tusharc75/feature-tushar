@@ -30,7 +30,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [showManageQuotationDialog, setShowManageQuotationDialog] = useState({ open: false, isClone: false, idToClone: null, versionNumber : null });
+  const [showManageQuotationDialog, setShowManageQuotationDialog] = useState({ open: false, isClone: false, idToClone: null, versionId: null });
 
   const [columns, setColumns] = useState([]);
 
@@ -84,7 +84,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
                 open: true,
                 isClone: true,
                 idToClone: params?.data?.quotationId,
-                versionNumber: params?.data?.version
+                versionId: params?.data?._id
               })
             }}
           >
@@ -99,7 +99,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
     nameRenderer: NameRenderer,
     quotationNumberRenderer: QuotationNumberRenderer,
     commonRenderer: CommonRenderer,
-    actionsRenderer : ActionsRenderer
+    actionsRenderer: ActionsRenderer
   };
 
   const fetchData = () => {
@@ -165,13 +165,12 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
           isClone={showManageQuotationDialog.isClone}
           open={showManageQuotationDialog.open}
           quotationId={showManageQuotationDialog.idToClone}
-          onClose={() => setShowManageQuotationDialog({ open: false, isClone: false, idToClone: null, versionNumber: null })}
+          onClose={() => setShowManageQuotationDialog({ open: false, isClone: false, idToClone: null, versionId: null })}
           onSuccess={() => {
-            // fetchQuotation();
-            setShowManageQuotationDialog({ open: false, isClone: false, idToClone: null, versionNumber : null });
+            setShowManageQuotationDialog({ open: false, isClone: false, idToClone: null, versionId: null });
             onClose();
           }}
-          versionNumber = {showManageQuotationDialog.versionNumber}
+          versionId={showManageQuotationDialog.versionId}
         />
       )}
     </Dialog>
