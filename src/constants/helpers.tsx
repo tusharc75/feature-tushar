@@ -338,6 +338,7 @@ export const sidebarResource = {
   iotDataPoints: 'Iot Data Points',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
+  deviceTemplateAlert: 'Device Template Alert'
 };
 
 export const primaryFields = {
@@ -464,6 +465,7 @@ export const RESOURCE_LABEL = {
   iotReport: 'IoT Report',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
+  deviceTemplateAlert: 'Device Template Alert'
 };
 
 export const CHILD_RESOURCE = {
@@ -2445,7 +2447,8 @@ export const QUOTATION_STATUS = {
 export const QUOTATION_TYPE = {
   salesOrder: 'Sales Order',
   rentalJob: 'Rental Job',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  fieldJob: 'Field Job',
 };
 
 export const WORKORDER_SERVICE_COLOR = {

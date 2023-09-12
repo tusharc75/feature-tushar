@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer } from 'react';
-import { Box, Button, Dialog, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, IconButton, Tooltip } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -66,6 +66,8 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
     { field: 'issueDate', headerName: 'Issue Date', show: true, filter: false, sortable: false, disabled: true, cellRenderer: 'dateRenderer' },
     { field: 'expiryDate', headerName: 'Expiry Date', show: true, filter: false, sortable: false, disabled: true, cellRenderer: 'dateRenderer' },
     { field: 'supplierAccount', headerName: 'Certification Supplier', show: true, cellRenderer: 'supplierAccountRenderer' },
+    { field: 'owner', headerName: 'Owner', show: true, cellRenderer: 'linkRenderer' },
+    { field: 'collaborator', headerName: 'Collaborator', show: true, cellRenderer: 'collaboratorLinkRenderer' },
     { field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' }
   ];
 
@@ -98,15 +100,56 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
       )}
     </>
   );
+  const getTitle = (data) => {
+    if (data.length) {
+      let restParams = data.map((o) => (o?.optionLabel ? o?.optionLabel : typeof o !== 'object' ? o : '')).join(', ');
+      return restParams;
+    }
+    return '';
+  };
+  const CollaboratorLinkRenderer = (params) => {
+    return (
+      <>
+        {params.value ? (
+          <>
+            <Link className="link" target="_blank" title={params.value} to={`${routes.userDetail.path}/${params.data.collaboratorId}`}>
+              {params.value}
+            </Link>
+            {params.data['restcollaborator']?.length > 0 && (
+              <Tooltip title={getTitle(params.data['restcollaborator'])}>
+                <span className="createdAtTime badge-date">{`+${params.data['restcollaborator'].length} more..`}</span>
+              </Tooltip>
+            )}
+          </>
+        ) : (
+          <NoDataCell />
+        )}
+      </>
+    );
+  };
 
+  const LinkRenderer = (params) => {
+    return (
+      <>
+        {params.value ? (
+          <Link className="link" target="_blank" title={params.value} to={`${routes.userDetail.path}/${params.data.ownerId}`}>
+            {params.value}
+          </Link>
+        ) : (
+          <NoDataCell />
+        )}
+      </>
+    );
+  };
   const frameworkComponents = {
     supplierAccountRenderer: SupplierAccountRenderer,
+    collaboratorLinkRenderer: CollaboratorLinkRenderer,
+    linkRenderer: LinkRenderer,
     commonRenderer: CommonRenderer,
     dateRenderer: DateRenderer,
     actionsRenderer: ActionsRenderer,
     ...staticFrameworkRender
   };
-
   return (
     <>
       {canIssueCertificate && (
