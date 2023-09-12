@@ -268,8 +268,8 @@ const BulkAssetCreation = () => {
 
   const handleBulkAssetCreationType = (filterValues) => {
     setSelectedType(filterValues);
-    if(referenceId && referenceType) {
-    history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    if (referenceId && referenceType) {
+      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
     } else {
       history.push(`?type=${filterValues}`);
     }
@@ -536,9 +536,8 @@ const BulkAssetCreation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.bulkAssetCreation?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.bulkAssetCreation?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
