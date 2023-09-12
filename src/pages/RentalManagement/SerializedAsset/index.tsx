@@ -215,7 +215,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                     <IconButton
                       size="small"
                       onClick={() => {
-                        OpenInNewWindow(routes.transferAsset.path)
+                        window.open(`${routes.transferAssetDetail.path}/${row?.original?.transferData?._id}`, '_blank')
                       }}
                     >
                       <RepeatIcon fontSize="small" color={'primary'} />
