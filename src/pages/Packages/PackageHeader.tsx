@@ -127,7 +127,7 @@ function PackageHeader(props) {
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={toggleInner}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 title={routes?.packages?.title}
