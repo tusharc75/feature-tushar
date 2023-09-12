@@ -17,7 +17,7 @@ import routes from '../../components/Helpers/Routes';
 import { ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, marketSegment } from '../../constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, marketSegment, sidebarResource } from '../../constants/helpers';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
@@ -32,7 +32,7 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { MdAdd, MdSort, MdFilterList, MdOutlineFilterAlt } from 'react-icons/md';
 import { FaSuitcase, IoIosCreate, TbArrowsSort } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 
@@ -332,6 +332,7 @@ const MarketSegment = () => {
                       dispatch={dispatch}
                       title={routes?.marketSegment?.title}
                       filters={filters}
+                      resource={sidebarResource.marketSegment}
                     />
                   </div>
                 </div>
@@ -385,6 +386,7 @@ const MarketSegment = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.marketSegment} />
           </div>
         </div>
 
