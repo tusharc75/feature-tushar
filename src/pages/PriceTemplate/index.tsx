@@ -15,10 +15,10 @@ import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../comp
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, priceTemplate } from '../../constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, priceTemplate, sidebarResource } from '../../constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -322,6 +322,7 @@ const PriceTemplate: FC = () => {
                       dispatch={dispatch}
                       title={routes?.priceTemplate?.title}
                       filters={filters}
+                      resource={sidebarResource.priceTemplate}
                     />
                   </div>
                 </div>
@@ -373,6 +374,7 @@ const PriceTemplate: FC = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.priceTemplate} />
           </div>
         </div>
         {isMobile && !isTablet ? (

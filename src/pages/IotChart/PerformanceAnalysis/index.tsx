@@ -1,42 +1,43 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Box, Checkbox, FormControlLabel, FormGroup, Collapse, IconButton, TextField, Grid } from '@material-ui/core';
 import moment from 'moment';
 import FilterModel from '../Helper/FilterModel';
 import Chart from '../Helper/Chart';
 import { uniqBy } from 'lodash';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
-import axiosInstance from 'src/axios/axiosInstance';
-
-import Grow from '@material-ui/core/Grow';
-import routes from 'src/components/Helpers/Routes';
 
 const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(moment().subtract(15, 'days').format('MM-DD-YYYY')),
+    from: new Date(moment().subtract(8, 'days').format('MM-DD-YYYY')),
     to: new Date(),
     intervals: '1hour'
   });
 
   const [selectedDataPoint, setSelectedDataPoint] = useState({});
 
-  const [open, setOpen] = useState<string | false>(false);
-  const [openChild, setOpenChild] = useState<string | false>(false);
-  const [alertOptions, setAlertOptions] = useState([])
-  const [selectedAlertOptions, setSelectedAlertOptions] = useState(null)
+  const [open, setOpen] = useState({});
+  const [openChild, setOpenChild] = useState({});
 
-  const handleChange = useCallback((name: string) => {
-    setOpen((prev) => (!prev ? name : prev === name ? false : name));
-  }, []);
+  const handleChange = (name: string) => {
+    setOpen(prev => (
+      {
+        ...prev,
+        [name]: open[name] ? false : true
+      }
+    ));
+  }
 
-  const handleChangeChild = useCallback((name: string) => {
-    setOpenChild((prev) => (!prev ? name : prev === name ? false : name));
-  }, []);
+  const handleChangeChild = (name: string) => {
+    setOpenChild((prev) => ({
+      ...prev,
+      [name]: openChild[name] ? false : true
+    }));
+  };
 
   const compareCollapse = useCallback(
     (name: string, type: string) => {
-      if (type === 'parentCategory') return open === name;
-      else if (type === 'category') return openChild === name;
+      if (type === 'parentCategory') return open[name];
+      else if (type === 'category') return openChild[name];
     },
     [open, openChild]
   );
@@ -76,10 +77,10 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
           <div className="pl-4 pr-2" key={data[type]?.optionLabel}>
             {type === 'parentCategory'
               ? uniqBy(
-                allData?.filter((d) => d['category']?.parentCategory === open),
+                allData?.filter((d) => d['category']?.parentCategory === data[type]?.optionValue),
                 'category.optionValue'
               )?.map((data) => {
-                return <TreeView data={data} type={'category'} allData={allData?.filter((d) => d['category']?.optionValue === openChild)} />;
+                return <TreeView data={data} type={'category'} allData={allData?.filter((d) => d['category']?.optionValue === data?.category?.optionValue)} />;
               })
               : type === 'category'
                 ? allData
@@ -109,15 +110,6 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
       </div>
     );
   };
-
-  const fetchErrorData = async () => {
-    const { data: { data } } = await axiosInstance().get(`${routes?.deviceTemplateAlert?.path}`)
-    setAlertOptions([{ optionLabel: 'All', optionValue: 'All' }, ...data?.map(d => ({ optionLabel: d?.message, optionValue: d?._id }))])
-  };
-
-  useEffect(() => {
-    fetchErrorData()
-  }, [assetId])
 
   return (
     <>
@@ -153,40 +145,13 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
           </div>
           <div className="container-with-border sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
             {Object.keys(selectedDataPoint).filter((item) => selectedDataPoint[item]).length ? (
-              <>
-                <Box mt={2}>
-                  <Grid container>
-                    <Grid item md={6} lg={6}>
-                      <Autocomplete
-                        options={alertOptions}
-                        fullWidth
-                        getOptionLabel={(option: any) => option?.optionLabel ?? ''}
-                        value={
-                          alertOptions.find((data) => data?.optionValue === selectedAlertOptions?.optionValue)
-                            ? alertOptions.find((data) => data?.optionValue === selectedAlertOptions?.optionValue)
-                            : ''
-                        }
-                        getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
-                        onChange={(e, newVal) => {
-                          setSelectedAlertOptions(newVal);
-                        }}
-                        size="small"
-                        renderInput={(params) => <TextField {...params} label="Select Alert" variant="outlined" />}
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-                <Box mt={1}>
-                  <Chart
-                    dateFilters={dateFilters}
-                    assetId={assetId}
-                    dataPoints={Object.keys(selectedDataPoint)
-                      .filter((_k) => selectedDataPoint[_k])
-                      ?.map((k) => dataPoints?.find((d) => d.fieldName === k))}
-                    alert={selectedAlertOptions}
-                  />
-                </Box>
-              </>
+              <Chart
+                dateFilters={dateFilters}
+                assetId={assetId}
+                dataPoints={Object.keys(selectedDataPoint)
+                  .filter((_k) => selectedDataPoint[_k])
+                  ?.map((k) => dataPoints?.find((d) => d.fieldName === k))}
+              />
             ) : (
               <div className="text-center grid place-items-center text-xl font-semibold text-gray-400 dark:text-gray-300 min-h-[574px]">
                 <p className="border-dashed border-r-0 border-l-0 py-4 select-none">Select Some Datapoints</p>

@@ -7,7 +7,7 @@ import { isMobile } from 'react-device-detect';
 import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { useData } from '../../StateProvider/Provider';
 import routes from '../../components/Helpers/Routes';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import { localStorageKeys } from '../../constants/helpers';
 import styles from '../Leads/Header.module.scss';
@@ -26,7 +26,8 @@ const RoleHeader = (props) => {
     userDialogOpen,
     columns,
     dispatch,
-    filters
+    filters,
+    resource
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(
@@ -116,6 +117,7 @@ const RoleHeader = (props) => {
                 dispatch={dispatch}
                 title={routes?.role?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
@@ -197,6 +199,7 @@ const RoleHeader = (props) => {
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 };

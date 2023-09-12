@@ -4,7 +4,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, prepareDataForGrid, serializedAsset } from '../../../constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, prepareDataForGrid, serializedAsset } from '../../../constants/helpers';
 import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { camelCase } from 'lodash';
@@ -17,16 +17,30 @@ import IssueCertificateDialog from '../../SerializedAssetsCertification/IssueCer
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
+import useColumns, { getFrameworkComponents } from '../../../constants/useColumns';
+import { useData } from 'src/StateProvider/Provider';
 
 const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetDetails = null }) => {
   const toastConfig = useContext(CustomToastContext);
+  const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_certificationHistory`;
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
-
+  const [columns, setColumns] = useState([]);
   const [openDialog, setOpenDialog] = useState({ open: false });
   const [openAttachment, setOpenAttachment] = useState({ open: false, attachmentId: null });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+
+  const { getColumnData } = useColumns();
+
+  const {
+    state: { permissions }
+  }: any = useData();
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -62,14 +76,36 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
       });
   };
 
-  const columns = [
-    { field: 'issueDate', headerName: 'Issue Date', show: true, filter: false, sortable: false, disabled: true, cellRenderer: 'dateRenderer' },
-    { field: 'expiryDate', headerName: 'Expiry Date', show: true, filter: false, sortable: false, disabled: true, cellRenderer: 'dateRenderer' },
-    { field: 'supplierAccount', headerName: 'Certification Supplier', show: true, cellRenderer: 'supplierAccountRenderer' },
-    { field: 'owner', headerName: 'Owner', show: true, cellRenderer: 'linkRenderer' },
-    { field: 'collaborator', headerName: 'Collaborator', show: true, cellRenderer: 'collaboratorLinkRenderer' },
-    { field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' }
-  ];
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get(`/field/child?resource=${CHILD_RESOURCE.serializedAssetsCertification}`)
+      .then(({ data: { data } }) => {
+        let columns = [];
+        let rendererNames = [];
+        data?.forEach((o) => {
+          if (o.fieldName == 'attachments') {
+            return;
+          }
+          let currentColumn = getColumnData(renderedFrom, o, routes.serializedAssetDetail.path, true);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
+            }
+          }
+        });
+        columns.push({ field: 'supplierAccount', headerName: 'Certification Supplier', show: true, cellRenderer: 'supplierAccountRenderer' });
+        columns.push({ field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+          supplierAccountRenderer: SupplierAccountRenderer,
+          actionsRenderer: ActionsRenderer
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        setColumns([...columns]);
+      });
+  };
 
   const ActionsRenderer = (params) => (
     <>
@@ -92,64 +128,16 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
   const SupplierAccountRenderer = (params: { value: any; data: any }) => (
     <>
       {params.value ? (
-        <Link className="link" target="_blanck" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`}>
-          {params.value}
-        </Link>
+        permissions?.supplierAccount?.isRead ?
+          <Link className="link" target="_blanck" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`}>
+            {params.value}
+          </Link> : <span>{params.value}</span>
       ) : (
         <NoDataCell />
       )}
     </>
   );
-  const getTitle = (data) => {
-    if (data.length) {
-      let restParams = data.map((o) => (o?.optionLabel ? o?.optionLabel : typeof o !== 'object' ? o : '')).join(', ');
-      return restParams;
-    }
-    return '';
-  };
-  const CollaboratorLinkRenderer = (params) => {
-    return (
-      <>
-        {params.value ? (
-          <>
-            <Link className="link" target="_blank" title={params.value} to={`${routes.userDetail.path}/${params.data.collaboratorId}`}>
-              {params.value}
-            </Link>
-            {params.data['restcollaborator']?.length > 0 && (
-              <Tooltip title={getTitle(params.data['restcollaborator'])}>
-                <span className="createdAtTime badge-date">{`+${params.data['restcollaborator'].length} more..`}</span>
-              </Tooltip>
-            )}
-          </>
-        ) : (
-          <NoDataCell />
-        )}
-      </>
-    );
-  };
 
-  const LinkRenderer = (params) => {
-    return (
-      <>
-        {params.value ? (
-          <Link className="link" target="_blank" title={params.value} to={`${routes.userDetail.path}/${params.data.ownerId}`}>
-            {params.value}
-          </Link>
-        ) : (
-          <NoDataCell />
-        )}
-      </>
-    );
-  };
-  const frameworkComponents = {
-    supplierAccountRenderer: SupplierAccountRenderer,
-    collaboratorLinkRenderer: CollaboratorLinkRenderer,
-    linkRenderer: LinkRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer,
-    actionsRenderer: ActionsRenderer,
-    ...staticFrameworkRender
-  };
   return (
     <>
       {canIssueCertificate && (
@@ -167,11 +155,11 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
         </Grid>
       )}
       <Box>
-        {columns ? (
+        {Object.keys(frameWorkComponent).length > 0 ? (
           <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
+            frameworkComponents={frameWorkComponent}
             setGridApi={setGridApi}
             dispatch={dispatch}
             rowCount={rowCount}
@@ -183,7 +171,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
             allowSelection={false}
             isClientSideGrid={true}
             loading={loading}
-            renderedFrom={`${camelCase(routes?.serializedAsset.title)}_certificationHistory`}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchData}
           />
         ) : (

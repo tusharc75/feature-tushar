@@ -1,41 +1,45 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { Link, useHistory } from 'react-router-dom';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../axios/axiosInstance';
-import CreateProduct from '../../components/Product/CreateProduct';
-import { RiShoppingBag3Fill } from 'react-icons/ri';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
-import SearchBox from '../../components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import routes from '../../components/Helpers/Routes';
-import ImportExportLinks from '../../components/Product/ImportExportLinks';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { product, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage, sidebarResource } from '../../constants/helpers';
-import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { useData } from '../../StateProvider/Provider';
-import { RiBillLine } from 'react-icons/ri';
-import { Autocomplete } from '@material-ui/lab';
+import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from 'src/constants/useColumns';
-import { prepareDataForGrid } from '../../constants/helpers';
 import Tooltip from '@material-ui/core/Tooltip';
-import { MdAdd, MdSort, MdFilterList, TbArrowsSort, MdOutlineFilterAlt } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { IoPricetagsSharp } from 'react-icons/io5';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
-import AddRepairType from './RepairType/AddRepairTypes';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
+import { IoPricetagsSharp } from 'react-icons/io5';
+import { RiBillLine } from 'react-icons/ri';
+import { useHistory } from 'react-router-dom';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import CreateProduct from '../../components/Product/CreateProduct';
+import ImportExportLinks from '../../components/Product/ImportExportLinks';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import {
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  product,
+  removeLocalStorage,
+  sidebarResource
+} from '../../constants/helpers';
+import styles from '../Leads/Header.module.scss';
+import AddRepairType from './RepairType/AddRepairTypes';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -657,6 +661,7 @@ const Product = () => {
                       dispatch={dispatch}
                       title={routes?.product?.title}
                       filters={filters}
+                      resource={sidebarResource.product}
                     />
                   </div>
                   <div className="w-full">{searchInnner}</div>
@@ -824,6 +829,7 @@ const Product = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.product} />
           </div>
         </div>
         {columns && frameWorkComponent ? (
