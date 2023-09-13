@@ -135,14 +135,13 @@ const RepairJobDetails = () => {
     axiosInstance()
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
-        setRepairJobData({ ...data });
         setCurrentStep(getIndex(data?.processStatus, repairJobProcessSteps));
-
         let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         if (user?.role?.selectedEntity?.superAdminAccess) {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit);
+        setRepairJobData({ ...data });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -293,7 +292,7 @@ const RepairJobDetails = () => {
               setStepFullScreen={() => setStepFullScreen(true)}
             />
             <ContentFullScreen title={repairJobProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-              {currentStep === 0 && (
+              {(currentStep === 0 && repairJobData) && (
                 <AddSerializedAsset
                   repairJobData={repairJobData}
                   setNextStep={setNextStep}
@@ -305,7 +304,7 @@ const RepairJobDetails = () => {
                   stepFullScreen={stepFullScreen}
                 />
               )}
-              {currentStep === 1 && (
+              {(currentStep === 1 && repairJobData) && (
                 <SerializedAsset
                   repairJobData={repairJobData}
                   fetchRepairJobData={fetchRepairJobData}
