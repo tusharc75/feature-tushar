@@ -361,6 +361,7 @@ const TransferAssetDetailPage = () => {
                   transferAssetData={transferAssetData}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   allowedToEdit={allowedToEdit}
+                  stepFullScreen={stepFullScreen}
                 />
               )}
               {currentStep === 1 && (

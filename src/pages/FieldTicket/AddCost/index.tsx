@@ -19,7 +19,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 
-const AddCost = ({ id, fieldTicketData, setNextStep, renderedFrom }) => {
+const AddCost = ({ fieldTicketData, setNextStep, renderedFrom, allowedToEdit }) => {
 
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -100,7 +100,7 @@ const AddCost = ({ id, fieldTicketData, setNextStep, renderedFrom }) => {
 
   const fetchCostData = () => {
     axiosInstance()
-      .get(`${fieldTicket.api}/${id}/cost`)
+      .get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`)
       .then(({ data: { data } }) => {
         let rows = [];
         if (data) {
@@ -133,7 +133,7 @@ const AddCost = ({ id, fieldTicketData, setNextStep, renderedFrom }) => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`${routes?.fieldTicket?.path}/${id}/cost/remove`, { ids: ids })
+      .put(`${routes?.fieldTicket?.path}/${fieldTicketData?._id}/cost/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
         fetchCostData();
@@ -187,59 +187,61 @@ const AddCost = ({ id, fieldTicketData, setNextStep, renderedFrom }) => {
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex" alignItems="center">
-          <Button
-            variant={'outlined'}
-            color="primary"
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={() => setAddDialog({ open: true, data: null })}
-            aria-controls="add-menu"
-          >
-            {'Add Manual Entry'}
-          </Button>
-        </Box>
-        <Box display="flex">
-          <Button
-            disabled={selectedRecords.length ? false : true}
-            variant={'outlined'}
-            color="default"
-            size="small"
-            onClick={openActions}
-            aria-controls="action-menu"
-            endIcon={<ExpandMore />}
-            className="new-dropdown-v1"
-          >
-            {'Actions'}
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorEl)}
-            onClose={closeActions}
-          >
-            <MenuItem
-              disabled={!(selectedRecords?.length > 0 && selectedRecords?.length)}
-              onClick={() => {
-                closeActions();
-                if (selectedRecords.length === 1) {
-                  setDeleteRecord(selectedRecords[0]);
-                }
-                setShowDeleteConfirmBox(true);
-              }}
+      {allowedToEdit &&
+        <Box display="flex" justifyContent="space-between" m={1}>
+          <Box display="flex" alignItems="center">
+            <Button
+              variant={'outlined'}
+              color="primary"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={() => setAddDialog({ open: true, data: null })}
+              aria-controls="add-menu"
             >
-              Delete
-            </MenuItem>
-          </Menu>
+              {'Add Manual Entry'}
+            </Button>
+          </Box>
+          <Box display="flex">
+            <Button
+              disabled={selectedRecords.length ? false : true}
+              variant={'outlined'}
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
+              endIcon={<ExpandMore />}
+              className="new-dropdown-v1"
+            >
+              {'Actions'}
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                disabled={!(selectedRecords?.length > 0 && selectedRecords?.length)}
+                onClick={() => {
+                  closeActions();
+                  if (selectedRecords.length === 1) {
+                    setDeleteRecord(selectedRecords[0]);
+                  }
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                Delete
+              </MenuItem>
+            </Menu>
+          </Box>
         </Box>
-      </Box>
+      }
       {columns && rowsData ? (
         <Box p="6px" zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -252,7 +254,10 @@ const AddCost = ({ id, fieldTicketData, setNextStep, renderedFrom }) => {
             onSaveEdit={onSaveInlineEdit}
             uniqueKey="_id"
             renderedFrom={renderedFrom}
+            hideAction={!allowedToEdit}
+            hideSelection={!allowedToEdit}
             isClientSideGrid={true}
+            hideExpander={true}
           />
         </Box>
       ) : (

@@ -9,8 +9,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AiOutlineBgColors, TbArrowsSort } from 'react-icons/all';
-import { FaSuitcase } from 'react-icons/fa';
+import { AiOutlineBgColors, CiUser, TbArrowsSort } from 'react-icons/all';
 import { MdOutlineFilterAlt } from 'react-icons/md';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -579,7 +578,7 @@ const ProductCategory = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'supplierAccount'
                 }
               ]}

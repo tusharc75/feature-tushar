@@ -3,7 +3,7 @@ import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { FIELD_TICKET_STATUS, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -18,7 +18,7 @@ import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 
-const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, refreshFieldServiceOrder }) => {
+const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, handleChangeStatus }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = useState({ open: false, isClone: false, id: null });
@@ -361,9 +361,11 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || [],
           }}
           onSuccess={() => {
+            if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
+              handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
+            }
             setOpenDialog({ open: false, isClone: false, id: null });
             fetchData();
-            refreshFieldServiceOrder();
           }}
           renderedFrom={renderedFrom}
         />

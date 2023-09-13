@@ -315,7 +315,12 @@ const ServiceOrderDetailsPage = () => {
           />
           <ContentFullScreen title={steps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {steps[currentStep]?.name === serviceOrderSteps[0]?.name && serviceOrderData && (
-              <FieldTicket serviceOrderData={serviceOrderData} setNextStep={setNextStep} renderedFrom={`${renderedFrom}_grid-0`} allowedToEdit={allowedToEdit} refreshFieldServiceOrder={fetchServiceOrderData} />
+              <FieldTicket
+                serviceOrderData={serviceOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-0`}
+                allowedToEdit={allowedToEdit}
+                handleChangeStatus={handleChangeStatus} />
             )}
             {steps[currentStep]?.name === serviceOrderSteps[1]?.name && serviceOrderData && (
               <Services

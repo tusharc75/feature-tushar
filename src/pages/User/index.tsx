@@ -3,7 +3,7 @@ import { Delete as DeleteIcon } from '@material-ui/icons';
 import { camelCase, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaSuitcase, FaUserAltSlash, FaUserCheck, IoCreateSharp, MdEmail } from 'react-icons/all';
+import { CiUser, FaUserAltSlash, FaUserCheck, IoCreateSharp, MdEmail } from 'react-icons/all';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -756,7 +756,7 @@ const User: FC = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'regionalWideRole'
                 }
               ]}
