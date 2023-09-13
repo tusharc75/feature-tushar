@@ -9,7 +9,6 @@ import queryString from 'query-string';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CiUser, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
-import { FaSuitcase } from 'react-icons/fa';
 import { GiStockpiles } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 import HideWhenOffline from 'src/components/HideWhenOffline';
