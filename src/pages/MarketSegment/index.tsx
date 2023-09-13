@@ -10,7 +10,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CiUser, FaSuitcase, IoIosCreate, TbArrowsSort } from 'react-icons/all';
+import { CiUser, IoIosCreate, TbArrowsSort } from 'react-icons/all';
 import { MdOutlineFilterAlt } from 'react-icons/md';
 import { useHistory, useLocation } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
