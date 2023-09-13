@@ -112,7 +112,7 @@ function LeadTimeDialog({ quotationId, data, versionId, onClose, handleSucess })
                 {leadTimeMasterSteps?.length && totalDays ? `${totalDays} Days` : 'Days'}
               </Typography>
 
-              <div className="sm:mr-[4px] mr-0">
+              <div className="sm:mr-[4px_!important] mr-0">
                 <IconButton
                   size="small"
                   aria-label="setting"
