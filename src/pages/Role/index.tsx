@@ -4,7 +4,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import { FC, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CiUser, FaSuitcase, IoCreateSharp, MdDescription } from 'react-icons/all';
+import { CiUser, IoCreateSharp, MdDescription } from 'react-icons/all';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
