@@ -11,6 +11,7 @@ import { AiOutlineClose } from 'react-icons/ai';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     padding: '4px',
     paddingLeft: '5px',
-    border: '1px solid lightgray',
+    border: '1px solid var(--common-border-color)',
     borderBottom: '0'
   },
   varibalesButton: {
@@ -33,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
 
 function RichTextEditor({ value, label, name, setFieldValue }) {
   const editorRef = useRef(null);
+  const [themeColor] = useAppTheme();
   const classes = useStyles();
   const [prevData, setPrevData] = useState('');
   const [isUpdate, setIsUpdate] = React.useState(true);
@@ -293,7 +295,9 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
               text: 'Upload Image',
               onAction: () => setIsUploadImage(true)
             });
-          }
+          },
+          skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
+          content_css: themeColor === 'dark' ? 'dark' : 'default'
         }}
       />
     </Box>
