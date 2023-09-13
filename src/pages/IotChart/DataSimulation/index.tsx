@@ -13,9 +13,10 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
 import { useParams } from 'react-router-dom';
+
 const DataSimulationDialog = ({ onClose }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -23,10 +24,8 @@ const DataSimulationDialog = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [formsData, setFormsData] = useState([]);
 
-  //   const {
-  //     state: { user }
-  //   }: any = useData();
   const { assetId } = useParams();
+
   useEffect(() => {
     fetchFields();
   }, []);
@@ -46,7 +45,7 @@ const DataSimulationDialog = ({ onClose }) => {
   const handleSubmit = (values) => {
     setLoading(true);
     const body = { ...values, asset: assetId };
-    body.value = parseInt(body.value);
+    body.fieldValue = parseFloat(body.fieldValue);
     axiosInstance()
       .post('iot-data-points/iot-data', body)
       .then(({ data }) => {
@@ -59,6 +58,7 @@ const DataSimulationDialog = ({ onClose }) => {
         onClose();
       })
       .catch((error) => {
+        setLoading(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -192,7 +192,7 @@ const DataSimulationDialog = ({ onClose }) => {
 const fields = [
   {
     _id: '6426d49d6ccedf33bf69cc7a',
-    fieldLabel: 'Data Point',
+    fieldLabel: 'Field Name',
     type: 'singleLine',
     option: [],
     required: true,
@@ -201,13 +201,13 @@ const fields = [
     editAble: true,
     deletAble: true,
     order: 0,
-    fieldName: 'dataPoint',
+    fieldName: 'fieldName',
     sectionName: 'Data Simulation',
     roleType: 0
   },
   {
     _id: '6426d49d6ccedf33bf69cc7b',
-    fieldLabel: 'Value',
+    fieldLabel: 'Field Value',
     type: 'number',
     option: [],
     required: true,
@@ -216,13 +216,13 @@ const fields = [
     editAble: true,
     deletAble: true,
     order: 1,
-    fieldName: 'value',
+    fieldName: 'fieldValue',
     sectionName: 'Data Simulation',
     roleType: 0
   },
   {
     _id: '6426d49d6ccedf33bf69cc7c',
-    fieldLabel: 'Time',
+    fieldLabel: 'Date Time',
     type: 'dateTime',
     option: [],
     required: true,
@@ -231,7 +231,7 @@ const fields = [
     editAble: true,
     deletAble: true,
     order: 2,
-    fieldName: 'time',
+    fieldName: 'dateTime',
     sectionName: 'Data Simulation',
     roleType: 0
   }

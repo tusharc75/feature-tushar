@@ -11,9 +11,10 @@ import { serializedAsset } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import PerformanceAnalysis from './PerformanceAnalysis';
 import Current from './Current';
-import DataSimulationDialog from './Data Simulation';
+import DataSimulationDialog from './DataSimulation';
 
 const IotChartDetail = () => {
+
     const toastConfig = useContext(CustomToastContext);
     const { assetId } = useParams();
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
@@ -54,16 +55,19 @@ const IotChartDetail = () => {
     return (
         <Box className="main-container-v1">
             <Box className="headerbox-v1 flex flex-row justify-between">
-             <Box className="nav-v1">
-            <CustomBreadCrumbs routes={customizedRoutes} />
-             </Box>
-            <Button
-            onClick={() => {
-              setOpenDataSimulationDialog(!openDataSimulationDialog);
-            }}
-            >
-            Data Simulation
-           </Button>
+                <Box className="nav-v1">
+                    <CustomBreadCrumbs routes={customizedRoutes} />
+                </Box>
+                <Button
+                    onClick={() => {
+                        setOpenDataSimulationDialog(!openDataSimulationDialog);
+                    }}
+                    variant='contained'
+                    color="primary"
+                    size="small"
+                >
+                    Data Simulation
+                </Button>
             </Box>
             <Box className={`detail-container-v1`}>
                 <Tabs
@@ -89,7 +93,10 @@ const IotChartDetail = () => {
                 {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />}
                 {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} />}
             </Box>
-            {openDataSimulationDialog && <DataSimulationDialog onClose={() => setOpenDataSimulationDialog(false)} />}
+            {openDataSimulationDialog &&
+                <DataSimulationDialog
+                    onClose={() => setOpenDataSimulationDialog(false)}
+                />}
         </Box>
     );
 };
