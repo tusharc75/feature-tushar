@@ -25,7 +25,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { prepareDataForGrid } from '../../constants/helpers';
-import { SiMarketo, AiFillFileMarkdown, FaPercentage } from 'react-icons/all';
+import { SiMarketo, AiFillFileMarkdown, FaPercentage, CiUser } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaSuitcase } from 'react-icons/fa';
@@ -526,7 +526,7 @@ const Opportunities = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'customerAccountName'
                 }
               ]}

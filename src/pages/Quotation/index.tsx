@@ -4,7 +4,7 @@ import { Chip, Grid, IconButton, Tooltip, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaSuitcase } from 'react-icons/fa';
 import { GiHiveMind } from 'react-icons/gi';
-import { MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, FaWarehouse, SiStatuspage } from 'react-icons/all';
+import { MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, FaWarehouse, SiStatuspage, CiUser } from 'react-icons/all';
 import {
   isObjectEmpty,
   customerAccount,
@@ -167,7 +167,6 @@ const Quotation = () => {
       });
   };
 
-
   const isDateWithinNext15Days = (endData) => {
     var a = moment(endData);
     var b = moment();
@@ -177,7 +176,7 @@ const Quotation = () => {
     } else if (days < 0) {
       return false;
     } else {
-      return false
+      return false;
     }
   };
 
@@ -188,12 +187,13 @@ const Quotation = () => {
       </Link>
       {params.data?.type === QUOTATION_TYPE.rentalJob && (
         <Fragment>
-          {moment(params.data?.estimateEndDate).isBefore(moment(), 'day') &&
+          {moment(params.data?.estimateEndDate).isBefore(moment(), 'day') && (
             <Box ml={1}>
               <HtmlTooltip title={`${routes.quotation.title} Expired`}>
                 <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
               </HtmlTooltip>
-            </Box>}
+            </Box>
+          )}
           {isDateWithinNext15Days(params.data?.estimateEndDate) && (
             <Box ml={1}>
               <HtmlTooltip title={`${routes.quotation.title} about to renew`}>
@@ -402,7 +402,7 @@ const Quotation = () => {
           permissions={permissions?.quotation}
           module="quotation"
           api={quotation.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -485,7 +485,7 @@ const Quotation = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'customerAccount'
                 }
               ]}

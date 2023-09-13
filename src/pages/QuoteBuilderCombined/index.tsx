@@ -9,7 +9,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { GiHiveMind } from 'react-icons/gi';
-import { SiMarketo, AiFillFileMarkdown, FaPercentage, SiStatuspage, GoVersions } from 'react-icons/all';
+import { SiMarketo, AiFillFileMarkdown, FaPercentage, SiStatuspage, GoVersions, CiUser } from 'react-icons/all';
 import {
   isObjectEmpty,
   customerAccount,
@@ -51,7 +51,6 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { styles } from '@material-ui/pickers/views/Calendar/Calendar';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-
 
 let quoteTimeout;
 const QuoteType = [
@@ -561,7 +560,7 @@ const QuoteBuilders = () => {
   };
   useEffect(() => {
     setSelectedType(type ? parseInt(type) : 1);
-  }, [])
+  }, []);
 
   const onSuccess = () => {
     setshowCreateQuoteDialog(false);
@@ -761,7 +760,7 @@ const QuoteBuilders = () => {
             loading={loading}
             additionalDetails={[
               {
-                icon: <FaSuitcase size={18} />,
+                icon: <CiUser size={18} />,
                 field: 'customerAccountName'
               },
               {
@@ -799,7 +798,7 @@ const QuoteBuilders = () => {
             owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
             onCreate={false}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -823,7 +822,7 @@ const QuoteBuilders = () => {
                 const versions = params.data?.versions;
                 if (versions && versions.length > 0) {
                   const lastVersion = versions[versions.length - 1];
-                  if (lastVersion?.status === "Building Quote") {
+                  if (lastVersion?.status === 'Building Quote') {
                     return true;
                   }
                 }

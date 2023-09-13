@@ -431,7 +431,7 @@ const Invoice = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'customerAccount'
                 }
               ]}

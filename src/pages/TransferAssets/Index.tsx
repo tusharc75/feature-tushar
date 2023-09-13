@@ -9,7 +9,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
+import { CiUser, GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
 import { FaSuitcase } from 'react-icons/fa';
 import { GiStockpiles } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
@@ -214,7 +214,7 @@ const TransferAsset = () => {
   };
   const handleTransferAssetTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    if(referenceId && referenceType) {
+    if (referenceId && referenceType) {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
     } else {
       history.push(`?type=${filterValues}`);
@@ -295,16 +295,16 @@ const TransferAsset = () => {
   };
 
   const updateQueryParams = () => {
-    const queryParams = new URLSearchParams(history.location.search)
-    queryParams.delete('referenceId')
-    queryParams.delete('referenceType')
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
     referenceId = queryParams.get('referenceId');
     referenceType = queryParams.get('referenceType');
     history.replace({
-      search: queryParams.toString(),
-    })
+      search: queryParams.toString()
+    });
     fetchTransferAsset();
-  }
+  };
 
   return (
     <section className="main-container-v1">
@@ -406,14 +406,7 @@ const TransferAsset = () => {
                   </div>
                 </HideWhenOffline>
               )}
-              {referenceType && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Rental Job : ${referenceType}`}
-                  onDelete={updateQueryParams}
-                />
-              )}
+              {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
@@ -484,7 +477,7 @@ const TransferAsset = () => {
                 ]}
                 additionalDetails={[
                   {
-                    icon: <FaSuitcase size={18} />,
+                    icon: <CiUser size={18} />,
                     field: 'transferType'
                   }
                 ]}
