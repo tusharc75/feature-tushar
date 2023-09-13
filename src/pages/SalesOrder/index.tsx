@@ -4,7 +4,7 @@ import { camelCase } from 'lodash';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CiUser, FaWarehouse, MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, SiStatuspage } from 'react-icons/all';
-import { FaRegistered, FaSuitcase } from 'react-icons/fa';
+import { FaRegistered } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
