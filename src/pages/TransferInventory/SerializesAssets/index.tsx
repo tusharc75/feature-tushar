@@ -275,7 +275,7 @@ const SerialzedAssets = ({ allowedToEdit, transferInventoryData, setNextStep, re
           referenceData={null}
           isAdding={isAdding}
           selectedProducts={addSerializedAssetDialog.product}
-          filterByPlant={transferInventoryData?.transferFromPlant?.optionValue}
+          filterByPlant={transferInventoryData?.transferFromPlant}
         />
       )}
       {showConfirmBox && (

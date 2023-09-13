@@ -233,6 +233,12 @@ import IotReportList from './pages/IotReport';
 import IotReport from './pages/IotReport/Report';
 import DeviceTemplates from './pages/DeviceTemplates';
 import DeviceTemplatesDetails from './pages/DeviceTemplates/DeviceTemplatesDetails';
+import WorkStations from './pages/WorkStations';
+import WorkStationsDetail from './pages/WorkStations/WorkStationsDetail';
+import DeviceTemplatesAlert from './pages/DeviceTemplatesAlert';
+import DeviceTemplateAlertDetail from './pages/DeviceTemplatesAlert/DeviceTemplateAlertDetail'
+import ChartOfAccount from './pages/ChartOfAccount';
+import ChartOfAccountDetail from './pages/ChartOfAccount/ChartOfAccountDetail';
 
 var notificationInterval: any = null;
 
@@ -1026,6 +1032,24 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.deviceTemplatesDetail.path}/:id`}>
               <DeviceTemplatesDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workStations.path}`}>
+              <WorkStations />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workStationsDetail.path}/:id`}>
+              <WorkStationsDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.deviceTemplateAlert.path}`}>
+              <DeviceTemplatesAlert />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.deviceTemplateAlertDetail.path}`}>
+              <DeviceTemplateAlertDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.chartOfAccount.path}`}>
+              <ChartOfAccount />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.chartOfAccountDetail.path}/:id`}>
+              <ChartOfAccountDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

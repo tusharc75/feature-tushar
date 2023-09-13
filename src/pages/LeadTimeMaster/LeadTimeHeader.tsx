@@ -8,7 +8,7 @@ import { MdOutlineFilterAlt } from 'react-icons/md';
 import { TbArrowsSort } from 'react-icons/tb';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import styles from '../Leads/Header.module.scss';
 
@@ -30,7 +30,8 @@ function LeadTimeHeader(props) {
     selectedType,
     columns,
     dispatch,
-    filters
+    filters,
+    resource
     // showCloneRentalManagementDialog
   } = props;
 
@@ -132,6 +133,7 @@ function LeadTimeHeader(props) {
                 dispatch={dispatch}
                 title={routes?.leadTimeMaster?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
           </div>
@@ -150,6 +152,7 @@ function LeadTimeHeader(props) {
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }

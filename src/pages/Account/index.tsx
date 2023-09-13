@@ -1,4 +1,4 @@
-import { Button, Chip, Grid, IconButton, Menu, MenuItem, MenuList } from '@material-ui/core';
+import { Button, Chip, IconButton, Menu, MenuItem, MenuList } from '@material-ui/core';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Grow from '@material-ui/core/Grow';
@@ -14,7 +14,7 @@ import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
-import { MdAdd, MdWeb, TbArrowsSort } from 'react-icons/all';
+import { CiUser, MdWeb, TbArrowsSort } from 'react-icons/all';
 import { FaAddressBook, FaAddressCard, FaSuitcase } from 'react-icons/fa';
 import { FcApproval } from 'react-icons/fc';
 import { HiBadgeCheck } from 'react-icons/hi';
@@ -35,7 +35,7 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
@@ -720,6 +720,7 @@ export default function Account(props) {
                           dispatch={dispatch}
                           title={routes?.[accountResource]?.title}
                           filters={filters}
+                          resource={sidebarResource[accountResource]}
                         />
                       </div>
                     </div>
@@ -929,6 +930,7 @@ export default function Account(props) {
                   </Menu>
                 </div>
               </div>
+              <DisplayFiltersForMobile resource={sidebarResource[accountResource]} />
             </div>
           </div>
         </div>
@@ -962,7 +964,7 @@ export default function Account(props) {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'parentAccount'
                 }
               ]}

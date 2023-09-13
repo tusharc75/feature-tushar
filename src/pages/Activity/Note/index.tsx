@@ -321,20 +321,19 @@ const Note = () => {
       <CustomContainer>
         {filter && (
           <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={'d-flex align-items-center gap-1'}>
+            <div className="grid grid-cols-1 lg:grid-cols-[4fr_3fr] gap-4">
+              <div className={'d-flex flex-wrap items-start gap-2 content-start'}>
                 <Autocomplete
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
-                  style={{ minWidth: '200px' }}
+                  className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
                   value={resource}
-                  className="flex-grow"
                   size="small"
                   fullWidth
                   onChange={(event, newValue) => {
                     setResource(newValue);
                     if (newValue) {
-                      setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
+                      //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
                     } else {
                       setFilter([]);
                     }
@@ -356,10 +355,9 @@ const Note = () => {
                     disabled={loadingResources}
                     options={resourceData}
                     fullWidth
-                    className="flex-grow"
+                    className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
                     getOptionLabel={(option: any) => option.optionLabel}
                     getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
-                    style={{ width: isMobile && !isTablet ? '60%' : '250px' }}
                     value={selectedResourceData}
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
@@ -376,7 +374,7 @@ const Note = () => {
                     renderInput={(params) => (
                       <TextField
                         fullWidth
-                        className="flex-grow md:max-w-[250px]"
+                        className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
                         margin="none"
                         size="small"
                         {...params}

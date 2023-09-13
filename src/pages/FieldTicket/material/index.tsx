@@ -17,15 +17,15 @@ import MaterialQtyDialog from './MaterialQtyDialog';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculatePrice, calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import Consumables from './Consumables';
-import { SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
+import { FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import { useData } from 'src/StateProvider/Provider';
 
-const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, setNextStep, refreshFieldTicket }) => {
+const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, handleChangeStatus }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
@@ -172,7 +172,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
   };
 
   const fetchMaterial = async () => {
-    const response = await axiosInstance().get(`${fieldTicket.api}/${id}/material?type=service`);
+    const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=service`);
     const data = response?.data?.data?.material;
 
     data.forEach((parent, i) => {
@@ -206,7 +206,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
 
   useEffect(() => {
     fetchFields();
-  }, [id]);
+  }, [fieldTicketData]);
 
   useEffect(() => {
     if (columns) {
@@ -230,8 +230,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.detail = d?.serviceName;
-      element.type = 'service';
+      element.type = MATERIAL_TYPE.service;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -271,22 +270,23 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       });
     }
 
-    await axiosInstance()
-      .post(`${fieldTicket.api}/${id}/material`, { material: tempMaterial })
+    await axiosInstance().post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: tempMaterial })
       .then(() => {
-        setServiceDialog({ open: false, type: '' });
+        if (fieldTicketData?.status === FIELD_TICKET_STATUS.new) {
+          handleChangeStatus(FIELD_TICKET_STATUS.inProgress)
+        }
         fetchMaterial();
+        setServiceDialog({ open: false, type: '' });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-    refreshFieldTicket();
   };
 
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${fieldTicket.api}/${id}/material/delete`, { ids: rows })
+      .put(`${fieldTicket.api}/${fieldTicketData?._id}/material/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
         fetchMaterial();
@@ -310,7 +310,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
     });
     setUpdating(true);
     axiosInstance()
-      .put(`${fieldTicket.api}/${id}/material`, { material: rows })
+      .put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows })
       .then(() => {
         fetchMaterial();
         if (saveAndNext) {
@@ -330,7 +330,6 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
-
     if (inputField.hasOwnProperty('qtyDisplay')) {
       if (parseInt(inputField?.qtyDisplay) === 0) {
         toastConfig.setToastConfig({
@@ -343,7 +342,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -460,7 +459,7 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
-            height={stepFullScreen ? 'calc(100vh - 440px)' : '278px'}
+            height={'300px'}
             columns={columns}
             data={rowsData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
@@ -476,19 +475,21 @@ const Material = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedTo
           />
         </Box>
       ) : (
-        <Box p={2} height={stepFullScreen ? 500 : 278}>
+        <Box p={2} height={300}>
           <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
         </Box>
       )}
-
       <Box mt={3}>
-        <Consumables stepFullScreen={stepFullScreen} id={id} allowedToEdit={allowedToEdit} services={rowsData} fieldTicketData={fieldTicketData} renderedFrom={renderedFrom} />
+        <Consumables
+          allowedToEdit={allowedToEdit}
+          services={rowsData}
+          fieldTicketData={fieldTicketData}
+          renderedFrom={`${renderedFrom}_1`} />
       </Box>
-
       {serviceDialog?.open && serviceDialog?.type === 'service' && (
         <AssignServiceDialog
           reference={'fieldTicket'}
-          referenceId={id}
+          referenceId={fieldTicketData?._id}
           onSuccess={handleAdd}
           handleClose={() => {
             setServiceDialog({ open: false, type: '' });

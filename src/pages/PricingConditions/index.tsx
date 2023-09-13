@@ -6,7 +6,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaSuitcase, TbArrowsSort } from 'react-icons/all';
+import { CiUser, TbArrowsSort } from 'react-icons/all';
 import { MdOutlineFilterAlt } from 'react-icons/md';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -20,7 +20,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { gridLoadingTimeout, prepareDataForGrid, pricingCondition, sidebarResource } from 'src/constants/helpers';
@@ -238,47 +238,47 @@ const PricingConditions = () => {
           extraImportExportLinks={[
             {
               title: 'Product Template',
-              api: `${pricingCondition.api}/template?conditionType=product`,
+              api: `${pricingCondition.api}/template?materialType=product`,
               type: 'download'
             },
             {
               title: 'Product Export',
-              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&conditionType=product`,
+              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&materialType=product`,
               type: 'export'
             },
             {
               title: 'Product Import',
-              api: `${pricingCondition.api}/import?conditionType=product`,
+              api: `${pricingCondition.api}/import?materialType=product`,
               type: 'import'
             },
             {
               title: 'Package Template',
-              api: `${pricingCondition.api}/template?conditionType=package`,
+              api: `${pricingCondition.api}/template?materialType=package`,
               type: 'download'
             },
             {
               title: 'Package Export',
-              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&conditionType=package`,
+              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&materialType=package`,
               type: 'export'
             },
             {
               title: 'Package Import',
-              api: `${pricingCondition.api}/import?conditionType=package`,
+              api: `${pricingCondition.api}/import?materialType=package`,
               type: 'import'
             },
             {
               title: 'Service Template',
-              api: `${pricingCondition.api}/template?conditionType=service`,
+              api: `${pricingCondition.api}/template?materialType=service`,
               type: 'download'
             },
             {
               title: 'Service Export',
-              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&conditionType=service`,
+              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `&${getQueryString(true)}` : ''}&materialType=service`,
               type: 'export'
             },
             {
               title: 'Service Import',
-              api: `${pricingCondition.api}/import?conditionType=service`,
+              api: `${pricingCondition.api}/import?materialType=service`,
               type: 'import'
             }
           ]}
@@ -332,6 +332,7 @@ const PricingConditions = () => {
                       dispatch={dispatch}
                       title={routes?.pricingCondition?.title}
                       filters={filters}
+                      resource={sidebarResource.pricingCondition}
                     />
                   </div>
                 </div>
@@ -381,6 +382,7 @@ const PricingConditions = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.pricingCondition} />
           </div>
         </div>
         {columns && frameworkComponent ? (
@@ -409,7 +411,7 @@ const PricingConditions = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'conditionName'
                 }
               ]}

@@ -21,7 +21,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
@@ -319,6 +319,7 @@ const WellNumber = () => {
                       dispatch={dispatch}
                       title={routes?.wellNumber?.title}
                       filters={filters}
+                      resource={sidebarResource.wellNumber}
                     />
                   </div>
                 </div>
@@ -383,6 +384,7 @@ const WellNumber = () => {
                 )}
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.wellNumber} />
           </div>
         </div>
         {columns ? (

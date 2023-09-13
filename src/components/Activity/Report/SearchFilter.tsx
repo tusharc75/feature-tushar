@@ -16,6 +16,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     height: 'unset !important',
     padding: '2px 12px',
+    maxWidth: '100%',
     '& span.MuiChip-label': {
       fontWeight: '500'
     },
@@ -102,13 +103,14 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
   };
 
   return (
-    <>
+    <div className={`w-full sm:w-[unset] sm:max-w-[300px] sm:min-w-[200px] flex-grow`}>
       <Autocomplete
+        limitTags={1}
         multiple={true}
         disableCloseOnSelect={true}
         className={`sm:max-w-[300px] sm:min-w-[200px] flex-grow`}
         size="small"
-        fullWidth
+        // fullWidth
         loading={loading}
         options={options}
         getOptionLabel={(option) => (option ? option.name : '')}
@@ -121,7 +123,6 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
           value.map((option, index) => (
             <Chip
               size={chip?.size || 'medium'}
-              style={{ margin: 3 }}
               label={
                 option && option.type === 'my'
                   ? activityName
@@ -186,7 +187,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
           activityId={selectedActivityId}
         />
       )}
-    </>
+    </div>
   );
 };
 

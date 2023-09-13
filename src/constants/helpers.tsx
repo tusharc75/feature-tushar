@@ -336,7 +336,10 @@ export const sidebarResource = {
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
-  deviceTemplates: 'Device Templates'
+  deviceTemplates: 'Device Templates',
+  workStations: 'Work Stations',
+  deviceTemplateAlert: 'Device Template Alert',
+  chartOfAccount: 'Chart Of Account',
 };
 
 export const primaryFields = {
@@ -461,7 +464,10 @@ export const RESOURCE_LABEL = {
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
   iotReport: 'IoT Report',
-  deviceTemplates: 'Device Templates'
+  deviceTemplates: 'Device Templates',
+  workStations: 'Work Stations',
+  deviceTemplateAlert: 'Device Template Alert',
+  chartOfAccount: 'Chart Of Account',
 };
 
 export const CHILD_RESOURCE = {
@@ -492,7 +498,8 @@ export const CHILD_RESOURCE = {
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
-  invoiceCost: 'Invoice Cost'
+  invoiceCost: 'Invoice Cost',
+  serializedAssetsCertification: 'Serialized Assets Certificate'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -2443,7 +2450,8 @@ export const QUOTATION_STATUS = {
 export const QUOTATION_TYPE = {
   salesOrder: 'Sales Order',
   rentalJob: 'Rental Job',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  fieldJob: 'Field Job',
 };
 
 export const WORKORDER_SERVICE_COLOR = {
