@@ -1,0 +1,240 @@
+import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from 'react-icons/fa';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import FormTypes from 'src/components/Helpers/FormTypes';
+import { CustomDialogTransition, getObjKeys, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
+import { useParams } from 'react-router-dom';
+const DataSimulationDialog = ({ onClose }) => {
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const toastConfig = useContext(CustomToastContext);
+  const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
+  const [loading, setLoading] = useState(false);
+  const [formsData, setFormsData] = useState([]);
+
+  //   const {
+  //     state: { user }
+  //   }: any = useData();
+  const { assetId } = useParams();
+  useEffect(() => {
+    fetchFields();
+  }, []);
+
+  const fetchFields = async () => {
+    try {
+      let createValues = { ...getObjKeys('', fields) };
+      setInitialData({
+        fields: fields,
+        values: createValues
+      });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const handleSubmit = (values) => {
+    setLoading(true);
+    const body = { ...values, asset: assetId };
+    body.value = parseInt(body.value);
+    axiosInstance()
+      .post('iot-data-points/iot-data', body)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setLoading(false);
+        onClose();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  useEffect(() => {
+    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+  }, [initialData.fields]);
+
+  return (
+    <Dialog
+      maxWidth="md"
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
+      open={true}
+      fullWidth
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true);
+        }
+      }}
+    >
+      {formsData && formsData.length ? (
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
+          {({ values, errors, setFieldValue, touched, submitForm }) => (
+            <Fragment>
+              <CustomDialogHeader
+                onClose={() => {
+                  if (isEqual(initialData.values, values)) onClose();
+                  else setShowConfirmDialog(true);
+                }}
+                title={'Data Simulation'}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              />
+              <CustomDialogContent>
+                <Form autoComplete="off" autoCorrect="off" noValidate>
+                  {formsData.length > 0 &&
+                    formsData.map((form, i) => (
+                      <div key={i}>
+                        <div className={'detail-box-content'}>
+                          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                        </div>
+                        <Box marginY={2}>
+                          <Grid spacing={3} container>
+                            {form.sectionFields.map((field, index2) => (
+                              <Grid key={index2} item xs={12} sm={6} md={6}>
+                                <FormTypes
+                                  {...field}
+                                  fieldData={field}
+                                  fields={initialData.fields}
+                                  values={values}
+                                  errors={errors}
+                                  touched={touched}
+                                  label={field.fieldLabel}
+                                  name={field.fieldName}
+                                  type={field.type}
+                                  options={field.option}
+                                  setFieldValue={(name, value) => {
+                                    setFieldValue(name, value);
+                                  }}
+                                  required={field.required}
+                                  fullWidth
+                                  isTooltip={field?.isTooltip || false}
+                                  tooltipMessage={field?.tooltipMessage}
+                                  size="small"
+                                />
+                              </Grid>
+                            ))}
+                          </Grid>
+                        </Box>
+                      </div>
+                    ))}
+                </Form>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <Button
+                  size="small"
+                  color="primary"
+                  disabled={loading}
+                  onClick={() => {
+                    if (isEqual(initialData.values, values)) onClose();
+                    else setShowConfirmDialog(true);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  disabled={loading}
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  size="small"
+                  onClick={submitForm}
+                  endIcon={loading && <CircularProgress color="inherit" size={18} />}
+                >
+                  {' '}
+                  Save
+                </Button>
+              </CustomDialogFooter>
+              {showConfirmDialog ? (
+                <ConfirmationCancelDialog
+                  close={() => setShowConfirmDialog(false)}
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false);
+                    onClose();
+                  }}
+                />
+              ) : null}
+            </Fragment>
+          )}
+        </Formik>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+    </Dialog>
+  );
+};
+
+const fields = [
+  {
+    _id: '6426d49d6ccedf33bf69cc7a',
+    fieldLabel: 'Data Point',
+    type: 'singleLine',
+    option: [],
+    required: true,
+    isTooltip: false,
+    tooltipMessage: '',
+    editAble: true,
+    deletAble: true,
+    order: 0,
+    fieldName: 'dataPoint',
+    sectionName: 'Data Simulation',
+    roleType: 0
+  },
+  {
+    _id: '6426d49d6ccedf33bf69cc7b',
+    fieldLabel: 'Value',
+    type: 'number',
+    option: [],
+    required: true,
+    isTooltip: false,
+    tooltipMessage: '',
+    editAble: true,
+    deletAble: true,
+    order: 1,
+    fieldName: 'value',
+    sectionName: 'Data Simulation',
+    roleType: 0
+  },
+  {
+    _id: '6426d49d6ccedf33bf69cc7c',
+    fieldLabel: 'Time',
+    type: 'dateTime',
+    option: [],
+    required: true,
+    isTooltip: false,
+    tooltipMessage: '',
+    editAble: true,
+    deletAble: true,
+    order: 2,
+    fieldName: 'time',
+    sectionName: 'Data Simulation',
+    roleType: 0
+  }
+];
+
+export default DataSimulationDialog;
