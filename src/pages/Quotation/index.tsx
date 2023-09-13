@@ -35,10 +35,7 @@ import {
 } from '../../constants/helpers';
 import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import ManageQuotationDialog from './ManageQuotationDialog';
-import { Delete, Info, Warning } from '@material-ui/icons';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import moment from 'moment';
 import QuotationHeader from './QuotationHeader';
 
 let quotationTimeout;
