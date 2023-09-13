@@ -6,7 +6,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CiUser, FaSuitcase, TbArrowsSort } from 'react-icons/all';
+import { CiUser, TbArrowsSort } from 'react-icons/all';
 import { MdOutlineFilterAlt } from 'react-icons/md';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

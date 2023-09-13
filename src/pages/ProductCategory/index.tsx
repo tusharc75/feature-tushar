@@ -10,7 +10,6 @@ import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiOutlineBgColors, CiUser, TbArrowsSort } from 'react-icons/all';
-import { FaSuitcase } from 'react-icons/fa';
 import { MdOutlineFilterAlt } from 'react-icons/md';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
