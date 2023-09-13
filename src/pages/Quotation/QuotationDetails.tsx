@@ -93,6 +93,12 @@ const QuotationDetails = () => {
   const [stepList, setStepList] = useState(quotationProcessSteps);
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
 
+  useEffect(() => {
+    if (tabValue !== tab) {
+      setTabValue(tab ? parseInt(tab) : 0);
+    }
+  }, [tab]);
+
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
@@ -459,7 +465,7 @@ const QuotationDetails = () => {
                     quotationData?.status === QUOTATION_STATUS.acceptByCustomer &&
                     !quotationData?.rentalJob &&
                     !quotationData?.repairOrder &&
-                    !quotationData?.salesOrder && 
+                    !quotationData?.salesOrder &&
                     !quotationData?.fieldJob && (
                       <MenuItem>
                         <Button
