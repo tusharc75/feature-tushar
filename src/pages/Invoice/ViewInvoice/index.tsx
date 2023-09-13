@@ -269,7 +269,9 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
               </Grid>
               <Grid item xs={12} sm={6} md={6}>
                 <Box display="flex" justifyContent={'end'} p={1}>
-                  <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
+                  {(rowsData && rowsData?.length > 0) &&
+                    <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
+                  }
                 </Box>
               </Grid>
             </Grid>

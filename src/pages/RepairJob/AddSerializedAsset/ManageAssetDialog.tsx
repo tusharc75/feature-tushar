@@ -14,10 +14,11 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy } from 'lodash';
 import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
-export default function ManageAssetDialog({ repairJobAssetFields, isBulkedit, onSuccess, onClose, repairJobData, inventory, selectedRecords }) {
+export default function ManageAssetDialog({ allFields, isBulkedit, onClose, repairJobData, inventory, selectedRecords, handleSaveData, loadingEdit }) {
+
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [isUpdating, setIsUpdating] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [customFields, setCustomFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -25,29 +26,29 @@ export default function ManageAssetDialog({ repairJobAssetFields, isBulkedit, on
 
   useEffect(() => {
     if (isBulkedit) {
-      repairJobAssetFields?.forEach((e) => {
+      allFields?.forEach((e) => {
         e.required = false;
       });
       setInitialData({
-        fields: repairJobAssetFields,
-        values: getObjKeysWithValues({ expectedCompletionDate: '' }, repairJobAssetFields)
+        fields: allFields,
+        values: getObjKeysWithValues({ expectedCompletionDate: '' }, allFields)
       });
     } else {
       axiosInstance()
         .get(`${repairJob.api}/${repairJobData?._id}/assets/${inventory}`)
         .then(({ data: { data } }) => {
           setInitialData({
-            fields: repairJobAssetFields,
-            values: getObjKeysWithValues(data, repairJobAssetFields)
+            fields: allFields,
+            values: getObjKeysWithValues(data, allFields)
           });
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     }
-    const sections = uniq(map(repairJobAssetFields, 'sectionName'));
+    const sections = uniq(map(allFields, 'sectionName'));
     const customData = sections.map((name) => {
-      let sectionFields = repairJobAssetFields.filter((field) => field.sectionName === name);
+      let sectionFields = allFields.filter((field) => field.sectionName === name);
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
@@ -55,40 +56,24 @@ export default function ManageAssetDialog({ repairJobAssetFields, isBulkedit, on
   }, []);
 
   const handleSubmit = (values) => {
-    const data = [];
+    const returnData = [];
     if (isBulkedit) {
       for (const x in values) {
-        if (values[x] === '' || (Array.isArray(values[x]) && values[x].length === 0)) {
+        if (values[x] === '' || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
           delete values[x];
         }
       }
-      selectedRecords.forEach((d) => {
-        data.push({
-          ...values,
-          id: d.inventory
-        });
+      selectedRecords.forEach((element) => {
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        returnData.push({ _id: element.inventory, ...calValues });
       });
     } else {
-      data.push({
+      returnData.push({
         ...values,
-        id: inventory
+        _id: inventory
       });
     }
-    setIsUpdating(true);
-    axiosInstance()
-      .put(`${repairJob.api}/${repairJobData?._id}/assets`, data)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        setIsUpdating(false);
-        onSuccess();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    handleSaveData(returnData)
   };
 
   return (
@@ -142,10 +127,30 @@ export default function ManageAssetDialog({ repairJobAssetFields, isBulkedit, on
                             <Grid spacing={3} container>
                               {section.sectionFields &&
                                 section.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    <Box display="flex">
-                                      <Box flexGrow={1}>
-                                        {field.fieldName === 'expectedCompletionDate' ? (
+                                  field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter ? (
+                                    <FormTypes
+                                      fields={initialData.fields}
+                                      fieldData={{ ...field, hideConverter: true }}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field.isTooltip}
+                                      tooltipMessage={field.tooltipMessage}
+                                      size="small"
+                                    />
+                                  ) : ['expectedCompletionDate'].includes(field.fieldName) ? (
+                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Box display="flex">
+                                        <Box flexGrow={1}>
                                           <FormTypes
                                             {...field}
                                             values={values}
@@ -165,7 +170,13 @@ export default function ManageAssetDialog({ repairJobAssetFields, isBulkedit, on
                                             size="small"
                                             minDate={repairJobData['startDate'] ? moment(repairJobData['startDate']) : undefined}
                                           />
-                                        ) : (
+                                        </Box>
+                                      </Box>
+                                    </Grid>
+                                  ) : (
+                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      <Box display="flex">
+                                        <Box flexGrow={1}>
                                           <FormTypes
                                             {...field}
                                             disabled={repairJobData['status'] === REPAIR_JOB_STATUS.completed ? true : field.disableOnEdit}
@@ -187,10 +198,10 @@ export default function ManageAssetDialog({ repairJobAssetFields, isBulkedit, on
                                             tooltipMessage={field.tooltipMessage}
                                             size="small"
                                           />
-                                        )}
+                                        </Box>
                                       </Box>
-                                    </Box>
-                                  </Grid>
+                                    </Grid>
+                                  )
                                 ))}
                             </Grid>
                           </Box>
@@ -207,11 +218,11 @@ export default function ManageAssetDialog({ repairJobAssetFields, isBulkedit, on
                     onClick={() => {
                       submitForm();
                     }}
-                    disabled={isUpdating}
+                    disabled={loadingEdit}
                     variant="contained"
                     color="primary"
                   >
-                    {isUpdating ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
+                    {loadingEdit ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
                     Update
                   </Button>
                 </CustomDialogFooter>
@@ -220,7 +231,7 @@ export default function ManageAssetDialog({ repairJobAssetFields, isBulkedit, on
           </Formik>
         ) : (
           <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(repairJobAssetFields.length).keys()]} />
+            <CommonSkeleton lenArray={[...Array(allFields.length).keys()]} />
           </Box>
         )}
       </Dialog>

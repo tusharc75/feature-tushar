@@ -1067,6 +1067,18 @@ const routes = {
         : RESOURCE_LABEL.deviceTemplateAlert,
     path: '/device-template-alert/detail'
   },
+  chartOfAccount: {
+    title: storedRoutes && storedRoutes.chartOfAccount && storedRoutes.chartOfAccount?.title ? storedRoutes.chartOfAccount?.title
+      : RESOURCE_LABEL.chartOfAccount,
+    path: '/chart-of-account'
+  },
+  chartOfAccountDetail: {
+    title:
+      storedRoutes && storedRoutes.chartOfAccount && storedRoutes.chartOfAccount.title
+        ? storedRoutes.chartOfAccount?.title
+        : RESOURCE_LABEL.chartOfAccount,
+    path: '/chart-of-account/detail'
+  },
 };
 
 export default routes;

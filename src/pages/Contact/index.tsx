@@ -8,7 +8,7 @@ import { camelCase } from 'lodash';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
-import { FaSuitcase, TbArrowsSort } from 'react-icons/all';
+import { CiUser, FaSuitcase, TbArrowsSort } from 'react-icons/all';
 import { MdOutlineFilterAlt } from 'react-icons/md';
 import { Link, useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -811,7 +811,7 @@ export default function Contact(props) {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'accountName'
                 }
               ]}

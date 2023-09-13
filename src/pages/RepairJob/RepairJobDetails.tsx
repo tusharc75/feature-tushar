@@ -128,7 +128,7 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchRepairJobData = () => {
@@ -177,14 +177,14 @@ const RepairJobDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairJob.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => {})
+      .then(({ data: { data } }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -302,6 +302,7 @@ const RepairJobDetails = () => {
                   renderedFrom={`${renderedFrom}_grid-1`}
                   allowedToEdit={allowedToEdit}
                   allowUpdateStatus={allowUpdateStatus}
+                  stepFullScreen={stepFullScreen}
                 />
               )}
               {currentStep === 1 && (
@@ -312,6 +313,7 @@ const RepairJobDetails = () => {
                   renderedFrom={`${renderedFrom}_grid-2`}
                   allowedToEdit={allowedToEdit}
                   allowUpdateStatus={allowUpdateStatus}
+                  stepFullScreen={stepFullScreen}
                 />
               )}
             </ContentFullScreen>
