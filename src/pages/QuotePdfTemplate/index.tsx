@@ -6,7 +6,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import { camelCase } from 'lodash';
 import { FC, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CiUser, FaSuitcase, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
+import { CiUser, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { Link, useHistory } from 'react-router-dom';
 import { gridFilterParser } from 'src/constants/useColumns';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
