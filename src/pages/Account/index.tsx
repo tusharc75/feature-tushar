@@ -14,7 +14,7 @@ import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
-import { MdWeb, TbArrowsSort } from 'react-icons/all';
+import { CiUser, MdWeb, TbArrowsSort } from 'react-icons/all';
 import { FaAddressBook, FaAddressCard, FaSuitcase } from 'react-icons/fa';
 import { FcApproval } from 'react-icons/fc';
 import { HiBadgeCheck } from 'react-icons/hi';
@@ -964,7 +964,7 @@ export default function Account(props) {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'parentAccount'
                 }
               ]}

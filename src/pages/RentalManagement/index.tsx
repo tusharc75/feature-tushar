@@ -10,7 +10,7 @@ import routes from './../../components/Helpers/Routes';
 import { COLOUR_MASTER, getLocalStorageArrayData, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FaRegistered, FaSuitcase } from 'react-icons/fa';
-import { SiStatuspage } from 'react-icons/all';
+import { CiUser, SiStatuspage } from 'react-icons/all';
 import { gridLoadingTimeout, rentalManagement } from '../../constants/helpers';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
@@ -173,19 +173,21 @@ const RentalManagement = () => {
 
   // for demo purpose only
   const RentalJobNameRenderer = (params) => {
-    return <Fragment>
-      <Link className="link text-truncate" title={params.value} to={`${routes.rentalManagement.path}/detail/${params.data?._id}`}>
-        {params.value}
-      </Link>
-      {params.data?.assetsNotReceivedInPo && (
-        <Box ml={1}>
-          <HtmlTooltip title={`Assets on PO not received`}>
-            <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
-          </HtmlTooltip>
-        </Box>
-      )}
-    </Fragment>
-  }
+    return (
+      <Fragment>
+        <Link className="link text-truncate" title={params.value} to={`${routes.rentalManagement.path}/detail/${params.data?._id}`}>
+          {params.value}
+        </Link>
+        {params.data?.assetsNotReceivedInPo && (
+          <Box ml={1}>
+            <HtmlTooltip title={`Assets on PO not received`}>
+              <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
+            </HtmlTooltip>
+          </Box>
+        )}
+      </Fragment>
+    );
+  };
   // till here demo purpose only
 
   useEffect(() => {
@@ -512,7 +514,7 @@ const RentalManagement = () => {
                 ]}
                 additionalDetails={[
                   {
-                    icon: <FaSuitcase size={18} />,
+                    icon: <CiUser size={18} />,
                     field: 'customerAccount'
                   }
                 ]}
@@ -571,8 +573,9 @@ const RentalManagement = () => {
           {singleRentalManagementDelete.show ? (
             <ConfirmationDialog
               open={singleRentalManagementDelete.show}
-              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-                }?`}
+              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
+                singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+              }?`}
               onClose={() =>
                 setSingleRentalManagementDelete({
                   id: null,

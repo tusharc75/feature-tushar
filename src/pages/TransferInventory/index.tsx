@@ -9,8 +9,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
-import { FaSuitcase } from 'react-icons/fa';
+import { CiUser, GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -452,7 +451,7 @@ const TransferInventory = () => {
                 ]}
                 additionalDetails={[
                   {
-                    icon: <FaSuitcase size={18} />,
+                    icon: <CiUser size={18} />,
                     field: 'transferType'
                   }
                 ]}

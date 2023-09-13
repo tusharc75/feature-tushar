@@ -577,102 +577,95 @@ const AddSerializedAsset = ({
                 )}
               </Grid>
               <Grid item xs={12} md={5}>
-                <Box display="flex" alignItems={'center'}>
-                  <Box flexGrow={1}>
-                    <SearchBox
-                      onChange={handleSearch}
-                      className="terms_header_search_bar"
-                      value={search}
-                      width={isMobile && !isTablet ? '75%' : '100%'}
-                    />
-                  </Box>
+                <Box className="flex flex-wrap justify-end items-center gap-2">
+                  <SearchBox
+                    size="small"
+                    onChange={handleSearch}
+                    className="small-searchbar ml-auto"
+                    value={search}
+                    width={isMobile && !isTablet ? '75%' : '100%'}
+                  />
                   {(Number(tabValue) === 0 || Number(tabValue) === 1) && (
                     <Fragment>
                       {permissions?.transferAsset?.isCreate &&
                         getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 &&
                         !checkUniqWarehouse() && (
-                          <Box pl={1}>
-                            <Button
-                              style={{ minWidth: 'max-content' }}
-                              size="small"
-                              color="primary"
-                              onClick={() => {
-                                setShowTransferAssetDialog(true);
-                              }}
-                              variant={isMobile && !isTablet ? 'text' : 'contained'}
-                              disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
-                              className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                              endIcon={isAdding && <CircularProgress size={20} />}
-                            >
-                              {`Transfer to ${filterByPlant?.optionLabel}`}
-                              {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                                ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
-                                : ''}
-                            </Button>
-                          </Box>
-                        )}
-                      <Box pl={1}>
-                        <HtmlTooltip
-                          title={
-                            getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()
-                              ? 'Direct transfer to customer location'
-                              : referenceType === 'Rental Job'
-                              ? 'Add to Job'
-                              : referenceType === 'ReplaceAsset'
-                              ? 'Replace'
-                              : 'Add'
-                          }
-                        >
                           <Button
-                            color="primary"
-                            size="small"
                             style={{ minWidth: 'max-content' }}
+                            size="small"
+                            color="primary"
                             onClick={() => {
-                              if (referenceType === 'Rental Job') {
-                                if (
-                                  user?.user?.brandPolicy?.serializedAssetCertification &&
-                                  [...getLocalStorageArrayData(localStorageSelectedRecords)]?.some(
-                                    (e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime()
-                                  )
-                                ) {
-                                  setCertificateExpireAlert({
-                                    open: true,
-                                    asset: [...getLocalStorageArrayData(localStorageSelectedRecords)]
-                                      ?.filter(
-                                        (e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime()
-                                      )
-                                      ?.map((e) => e.assetNumber)
-                                      ?.toString()
-                                  });
-                                } else if (checkMTRValidation) {
-                                  if ([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.mtrAttached !== true)) {
-                                    setMtrConfirmBox(true);
-                                  } else {
-                                    addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
-                                  }
+                              setShowTransferAssetDialog(true);
+                            }}
+                            variant={isMobile && !isTablet ? 'text' : 'contained'}
+                            disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
+                            className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
+                            endIcon={isAdding && <CircularProgress size={20} />}
+                          >
+                            {`Transfer to ${filterByPlant?.optionLabel}`}
+                            {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                              ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
+                              : ''}
+                          </Button>
+                        )}
+                      <HtmlTooltip
+                        title={
+                          getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()
+                            ? 'Direct transfer to customer location'
+                            : referenceType === 'Rental Job'
+                            ? 'Add to Job'
+                            : referenceType === 'ReplaceAsset'
+                            ? 'Replace'
+                            : 'Add'
+                        }
+                      >
+                        <Button
+                          color="primary"
+                          size="small"
+                          style={{ minWidth: 'max-content' }}
+                          onClick={() => {
+                            if (referenceType === 'Rental Job') {
+                              if (
+                                user?.user?.brandPolicy?.serializedAssetCertification &&
+                                [...getLocalStorageArrayData(localStorageSelectedRecords)]?.some(
+                                  (e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime()
+                                )
+                              ) {
+                                setCertificateExpireAlert({
+                                  open: true,
+                                  asset: [...getLocalStorageArrayData(localStorageSelectedRecords)]
+                                    ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+                                    ?.map((e) => e.assetNumber)
+                                    ?.toString()
+                                });
+                              } else if (checkMTRValidation) {
+                                if ([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.mtrAttached !== true)) {
+                                  setMtrConfirmBox(true);
                                 } else {
                                   addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                                 }
                               } else {
                                 addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                               }
-                            }}
-                            variant={isMobile && !isTablet ? 'text' : 'contained'}
-                            disabled={
-                              getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 ||
-                              isAdding ||
-                              serializedProducts.some((d) => d?.qty < 0)
+                            } else {
+                              addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                             }
-                            className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                            endIcon={isAdding && <CircularProgress size={20} />}
-                          >
-                            {referenceType === 'Rental Job' ? 'Add to Job' : referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'}
-                            {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                              ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
-                              : ''}
-                          </Button>
-                        </HtmlTooltip>
-                      </Box>
+                          }}
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          disabled={
+                            getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 ||
+                            isAdding ||
+                            serializedProducts.some((d) => d?.qty < 0)
+                          }
+                          className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
+                          endIcon={isAdding && <CircularProgress size={20} />}
+                        >
+                          {referenceType === 'Rental Job' ? 'Add to Job' : referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'}
+                          {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                            ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
+                            : ''}
+                        </Button>
+                      </HtmlTooltip>
                     </Fragment>
                   )}
                   {Number(tabValue) === 2 && (
