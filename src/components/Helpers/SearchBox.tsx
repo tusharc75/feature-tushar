@@ -13,13 +13,13 @@ function SearchBox({ onChange, value, size, width, placeholder, style, className
   return (
     <TextField
       {...otherProps}
-      style={{ ...style }}
+      style={{ ...style, display: 'flex' }}
       variant="outlined"
       placeholder={placeholder || 'Search'}
       type="search"
       size={size || 'small'}
       value={value}
-      className={`${className} sm:max-w-[300px] sm:min-w-[200px] flex-grow`}
+      className={`${className} sm:max-w-[300px] sm:min-w-[200px] flex-grow small-searchbar`}
       onChange={onChange}
       InputProps={{
         ...InputProps,

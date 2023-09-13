@@ -36,7 +36,8 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 
-const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus }) => {
+const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus, stepFullScreen }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
@@ -266,19 +267,18 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
 
     var pickupFrom = '';
     if (selectedRecords[0].currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
-      pickupFrom = selectedRecords[0].warehouseId;
+      pickupFrom = selectedRecords[0]?.warehouse?.optionValue;
     } else {
-      pickupFrom = selectedRecords[0]?.currentOwnerId;
+      pickupFrom = selectedRecords[0]?.currentOwner?.optionValue;
     }
 
     data['pickupFrom'] = pickupFrom;
-    data['pickupFromAddress'] = selectedRecords[0]?.currentLocationId;
+    data['pickupFromAddress'] = selectedRecords[0]?.currentLocation?.optionValue;
 
     data['deliveryToType'] = deliveryToType;
     data['isPickupFromDisable'] = true;
 
     data['wellName'] = repairJobData?.wellName?.optionValue;
-
     if (repairJobData?.wellNumber) {
       if (repairJobData?.wellNumber?.optionValue) {
         data['wellNumber'] = repairJobData?.wellNumber?.optionValue;
@@ -286,7 +286,6 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         data['wellNumber'] = repairJobData?.wellNumber?.map((e) => e?.optionValue);
       }
     }
-
     data['afeNumber'] = repairJobData?.afeNumber;
 
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
@@ -459,25 +458,22 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
           )}
         </Box>
       </Box>
-      {columns && rowsData ? (
-        <>
-          <Box mt={1} p="6px" zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={'calc(100vh - 345px)'}
-              columns={columns}
-              data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-              onSelect={setSelectedRecords}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
-              hideSelection={!allowedToEdit}
-              hideAction={!allowedToEdit}
-              hideExpander={true}
-            />
-          </Box>
-        </>
+      {columns && rowsData ? (<Box zIndex={5} width={'100%'}>
+        <CustomReactTable
+          height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+          columns={columns}
+          data={rowsData}
+          setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+          onSelect={setSelectedRecords}
+          childrenProperty="subRows"
+          uniqueKey="_id"
+          renderedFrom={renderedFrom}
+          isClientSideGrid={true}
+          hideSelection={!allowedToEdit}
+          hideAction={!allowedToEdit}
+          hideExpander={true}
+        />
+      </Box>
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

@@ -1,3 +1,5 @@
+import { FC } from 'react';
+
 interface svgInterface extends React.SVGAttributes<SVGElement> {}
 interface svgInterfaceWithSize extends svgInterface {
   size?: number;
@@ -717,6 +719,17 @@ export const MobileExportIcon: React.FC<svgInterfaceWithSize> = ({ size = 18, wi
       <path
         fill={color}
         d="M14.663 7.479v4.124a1.667 1.667 0 01-1.719 1.604H3.78a1.667 1.667 0 01-1.718-1.604V7.48a.573.573 0 111.146 0v4.124a.533.533 0 00.572.458h9.165a.532.532 0 00.573-.458V7.48a.573.573 0 111.146 0zM6.98 5.663l.808-.813v4.92a.573.573 0 101.146 0V4.85l.807.813a.573.573 0 00.98-.407.574.574 0 00-.166-.406L8.769 3.063a.573.573 0 00-.367-.167h-.109a.573.573 0 00-.31.138h-.028L6.168 4.85a.575.575 0 10.813.813z"
+      ></path>
+    </svg>
+  );
+};
+export const FileCopyIcon: FC<svgInterfaceWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
+  return (
+    <svg {...others} xmlns="http://www.w3.org/2000/svg" width={width ?? size} height={height ?? size} fill="none" viewBox="0 0 18 18">
+      <path fill="transparent" d="M0 0H18V18H0z"></path>
+      <path
+        fill="currentcolor"
+        d="M11.25 4.5H7.5A1.5 1.5 0 006 6v6.75H3.75a1.5 1.5 0 01-1.5-1.5V3a1.5 1.5 0 011.5-1.5h6a1.5 1.5 0 011.5 1.5v1.5zm-3 .75h5.25l2.25 2.25V15a1.5 1.5 0 01-1.5 1.5h-6a1.5 1.5 0 01-1.5-1.5V6.75a1.5 1.5 0 011.5-1.5z"
       ></path>
     </svg>
   );

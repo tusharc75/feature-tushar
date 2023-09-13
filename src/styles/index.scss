@@ -619,7 +619,6 @@ body::-webkit-scrollbar-thumb {
 
   & .MuiTablePagination-root:last-child {
     padding: 0;
-    background: #f7f7f7;
     border: 1px solid var(--common-border-color);
     [data-mode='dark'] {
       background-color: var(--dark-primary) !important;
@@ -1149,7 +1148,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .all-check-box {
-  padding-left: 12px !important;
+  padding-left: 14px !important;
 }
 
 .detailHeader {
@@ -1874,7 +1873,7 @@ body::-webkit-scrollbar-thumb {
   }
 
   .all-check-box {
-    padding-left: 12px !important;
+    padding-left: 14px !important;
   }
 
   .sort-filter-tablet {
@@ -4034,4 +4033,8 @@ body {
   & > button {
     margin: 0 !important;
   }
+}
+.small-searchbar .MuiOutlinedInput-inputMarginDense {
+  padding-top: 7.5px;
+  padding-bottom: 7.5px;
 }

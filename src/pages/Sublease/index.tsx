@@ -8,8 +8,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
-import { FaSuitcase } from 'react-icons/fa';
+import { CiUser, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { GiStockpiles } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 import HideWhenOffline from 'src/components/HideWhenOffline';
@@ -276,16 +275,16 @@ const Sublease = () => {
   };
 
   const updateQueryParams = () => {
-    const queryParams = new URLSearchParams(history.location.search)
-    queryParams.delete('referenceId')
-    queryParams.delete('referenceType')
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
     referenceId = queryParams.get('referenceId');
     referenceType = queryParams.get('referenceType');
     history.replace({
-      search: queryParams.toString(),
-    })
+      search: queryParams.toString()
+    });
     fetchData();
-  }
+  };
 
   return (
     <section className="main-container-v1">
@@ -385,14 +384,7 @@ const Sublease = () => {
                   </div>
                 </HideWhenOffline>
               )}
-              {referenceType && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Rental Job : ${referenceType}`}
-                  onDelete={updateQueryParams}
-                />
-              )}
+              {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
@@ -466,7 +458,7 @@ const Sublease = () => {
                 loading={loading}
                 additionalDetails={[
                   {
-                    icon: <FaSuitcase size={18} />,
+                    icon: <CiUser size={18} />,
                     field: 'supplierAccount'
                   }
                 ]}
