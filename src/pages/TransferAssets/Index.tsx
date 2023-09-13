@@ -10,7 +10,6 @@ import queryString from 'query-string';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CiUser, GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
-import { FaSuitcase } from 'react-icons/fa';
 import { GiStockpiles } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
