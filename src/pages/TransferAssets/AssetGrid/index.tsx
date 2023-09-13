@@ -1,6 +1,5 @@
 import { useState, useEffect, Fragment, FC, useContext } from 'react';
 import { Button, Box } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -20,8 +19,7 @@ import {
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
 import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import moment from 'moment';
+
 
 interface AssetsGridProps {
   permissions?: any;
@@ -33,10 +31,12 @@ interface AssetsGridProps {
   transferAssetData?: any;
   renderedFrom?: string;
   allowedToEdit: boolean;
+  stepFullScreen: any;
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-  const { allowedToEdit, permissions, user, fetchAssets, currentStep, setNextStep, updateTransferStatus, transferAssetData, renderedFrom } = props;
+
+  const { allowedToEdit, permissions, user, fetchAssets, currentStep, setNextStep, updateTransferStatus, transferAssetData, renderedFrom, stepFullScreen } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [isRemovingAssets, setRemovingAssets] = useState(false);
@@ -44,14 +44,11 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   const [removeData, setRemoveData] = useState([]);
   const [columns, setColumns] = useState(null);
   const [dataRows, setDataRows] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [openAddNewAssets, setAddSerializedAssetDialog] = useState(false);
   const { getColumnData } = useColumns();
 
   const [isAdding, setIsAdding] = useState(false);
-
-  const history = useHistory();
 
   useEffect(() => {
     if (currentStep === 0) {
@@ -96,43 +93,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
             columns = [...columns, currentColumn?.columnData];
           }
         });
-
-        const createdByAndUpdatedBy = [
-          {
-            accessor: 'createdBy',
-            Header: 'Created By',
-            show: true,
-            minWidth: 185,
-            disableFilters: true,
-            Cell: ({ row }) =>
-              row?.original?.createdBy ? (
-                <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}`}>
-                  {row?.original?.createdBy}
-                  <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}</span>
-                </h5>
-              ) : (
-                <NoDataCell />
-              )
-          },
-          {
-            accessor: 'updatedBy',
-            Header: 'Updated By',
-            minWidth: 185,
-            show: true,
-            disableFilters: true,
-            Cell: ({ row }) =>
-              row?.original?.updatedBy ? (
-                <h5 className="updateBy" title={`${row?.original?.updatedBye} • ${moment(row?.original?.updatedByDate.slice(0, 10)).format(dateFormat)}`}>
-                  {row?.original?.updatedBy}
-                  <span className="updatedAtTime badge-date">{moment(row?.original?.updatedByDate.slice(0, 10)).format(dateFormat)}</span>
-                </h5>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ];
-
-        setColumns([...columns, ...createdByAndUpdatedBy, ...ActionsRenderer]);
+        setColumns([...columns, ...ActionsRenderer]);
       });
   };
 
@@ -142,7 +103,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         fetchAssetsData(true);
       }
     }
-    // eslint-disable-next-line
   }, [currentStep, transferAssetData]);
 
   const fetchLoadingTickets = () =>
@@ -160,7 +120,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     });
 
   const fetchAssetsData = async (forceRefresh) => {
-    setLoading(true)
     try {
       let data = await fetchAssets(forceRefresh);
       let ticketData: any = await fetchLoadingTickets();
@@ -187,9 +146,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         };
       });
       setDataRows(data)
-      setLoading(false)
     } catch (error) {
-      setLoading(false)
       toastConfig.setToastConfig(error);
     }
   };
@@ -238,7 +195,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
                 setAddSerializedAssetDialog(true);
               }}
             >
-              {isMobile && !isTablet ? 'Add assets' : `Add ${routes.serializedAsset.title}`}
+              {`Add Existing ${routes.serializedAsset.title}`}
             </Button>
           )}
           {permissions?.transferAsset?.isUpdate && (
@@ -259,49 +216,10 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         </Box>
       )}
       <Box mt={1}>
-        {
-          columns && dataRows ? (
-            // isMobile && !isTablet ? (
-            //   <CustomSwipableList
-            //     allowSelection={true}
-            //     allowSwipe={true}
-            //     permissions={permissions?.transferAsset}
-            //     primaryField={columns?.find((d) => d.primaryField)}
-            //     onClick={(d) => {
-            //       history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
-            //     }}
-            //     dataRows={dataRows}
-            //     selectedRecords={selectedRecords}
-            //     dispatch={gridDispatch}
-            //     onEdit={(d) => {
-            //     }}
-            //     extraParamsToCheckDelete={false}
-            //     onDelete={(data) => { }}
-            //     rowCount={rowCount}
-            //     page={page}
-            //     loading={gridLoading}
-            //     chips={[
-            //       {
-            //         label: 'Product Desc : ',
-            //         field: 'productCategory'
-            //       }
-            //     ]}
-            //     additionalDetails={[
-            //       {
-            //         icon: <FaSuitcase size={18} />,
-            //         field: 'customerAccount'
-            //       }
-            //     ]}
-            //     owerCollaboratorInitialsOrImages=""
-            //     onCreate={false}
-            //     showClone={false}
-            //     onClone={(data) => { }}
-            //     renderedFrom={renderedFrom}
-            //   />
-
-            // ) : (
+        {columns && dataRows ? (
+          <Box zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={'calc(100vh - 393px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={dataRows}
               onSelect={setSelectedRecords}
@@ -313,12 +231,12 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
               isClientSideGrid={true}
               hideExpander={true}
             />
-            // )
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )
+          </Box>
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )
         }
       </Box>
       {openAddNewAssets && (
