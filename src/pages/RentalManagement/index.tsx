@@ -7,7 +7,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { COLOUR_MASTER, getLocalStorageArrayData, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import { getLocalStorageArrayData, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FaRegistered, FaSuitcase } from 'react-icons/fa';
 import { CiUser, SiStatuspage } from 'react-icons/all';
@@ -30,7 +30,7 @@ import { CheckboxRenderer } from '../../components/AgGridComponents/CustomAgGrid
 import DeleteIcon from '@material-ui/icons/Delete';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Info, Warning } from '@material-ui/icons';
+import { Warning } from '@material-ui/icons';
 
 let rentalManagementTimeout;
 
@@ -148,12 +148,6 @@ const RentalManagement = () => {
     columns?.forEach((e) => {
       if (e.field === 'rentalJobName') {
         e.cellRenderer = 'rentalJobNameRenderer';
-        e.cellStyle = (params) => {
-          if (params.data?.assetsNotReceivedInPo) {
-            return { backgroundColor: COLOUR_MASTER.lostAssets.background };
-          }
-          return null;
-        };
       }
     });
     // till for demo pupose
