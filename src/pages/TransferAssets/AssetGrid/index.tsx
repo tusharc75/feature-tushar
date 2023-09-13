@@ -1,4 +1,4 @@
-import { useReducer, useState, useEffect, Fragment, FC, useContext } from 'react';
+import { useState, useEffect, Fragment, FC, useContext } from 'react';
 import { Button, Box } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
@@ -7,7 +7,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
   prepareDataForGrid,
@@ -15,12 +14,14 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   transferAsset,
-  serializedAsset
+  serializedAsset,
+  dateFormat
 } from 'src/constants/helpers';
-import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { FaSuitcase } from 'react-icons/fa';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
+import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import moment from 'moment';
 
 interface AssetsGridProps {
   permissions?: any;
@@ -41,13 +42,12 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   const [isRemovingAssets, setRemovingAssets] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [removeData, setRemoveData] = useState([]);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
+  const [dataRows, setDataRows] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedRecords, setSelectedRecords] = useState([]);
   const [openAddNewAssets, setAddSerializedAssetDialog] = useState(false);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [gridApi, setGridApi] = useState(null);
-  const [agGridState, gridDispatch] = useReducer(gridReducer, gridState);
   const { getColumnData } = useColumns();
-  const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = agGridState;
 
   const [isAdding, setIsAdding] = useState(false);
 
@@ -61,47 +61,80 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     }
   }, [transferAssetData, currentStep]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
-  };
-
-  const ActionsRenderer = (params) =>
-    !params.data.hasOwnProperty('deliveryTicket') && (
-      <>
+  const ActionsRenderer = [
+    {
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => (
         <GridDeleteIcon
           hasDeletePermission={permissions?.transferAsset?.isUpdate}
           ownerId={transferAssetData?.createdBy.user._id}
           userId={user?.user?._id}
           onDelete={() => {
             setShowConfirmBox(true);
-            setRemoveData([params.data._id]);
+            setRemoveData([row.original?._id]);
           }}
           entity=""
         />
-      </>
-    );
+      )
+    }
+  ];
+
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get(`/field?resource=${serializedAsset.resource}`)
+      .then(({ data: { data } }) => {
+        let columns = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+          }
+        });
+
+        const createdByAndUpdatedBy = [
+          {
+            accessor: 'createdBy',
+            Header: 'Created By',
+            show: true,
+            minWidth: 185,
+            disableFilters: true,
+            Cell: ({ row }) =>
+              row?.original?.createdBy ? (
+                <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}`}>
+                  {row?.original?.createdBy}
+                  <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}</span>
+                </h5>
+              ) : (
+                <NoDataCell />
+              )
+          },
+          {
+            accessor: 'updatedBy',
+            Header: 'Updated By',
+            minWidth: 185,
+            show: true,
+            disableFilters: true,
+            Cell: ({ row }) =>
+              row?.original?.updatedBy ? (
+                <h5 className="updateBy" title={`${row?.original?.updatedBye} • ${moment(row?.original?.updatedByDate.slice(0, 10)).format(dateFormat)}`}>
+                  {row?.original?.updatedBy}
+                  <span className="updatedAtTime badge-date">{moment(row?.original?.updatedByDate.slice(0, 10)).format(dateFormat)}</span>
+                </h5>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ];
+
+        setColumns([...columns, ...createdByAndUpdatedBy, ...ActionsRenderer]);
+      });
+  };
 
   useEffect(() => {
     if (currentStep === 0) {
@@ -127,10 +160,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     });
 
   const fetchAssetsData = async (forceRefresh) => {
-    gridDispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+    setLoading(true)
     try {
       let data = await fetchAssets(forceRefresh);
       let ticketData: any = await fetchLoadingTickets();
@@ -156,10 +186,10 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           ...finalObject
         };
       });
-      gridDispatch({ type: 'initialize', data: data, count: data.length });
-      gridDispatch({ type: 'loading', loading: false });
+      setDataRows(data)
+      setLoading(false)
     } catch (error) {
-      gridDispatch({ type: 'loading', loading: false });
+      setLoading(false)
       toastConfig.setToastConfig(error);
     }
   };
@@ -186,7 +216,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
   useEffect(() => {
     if (currentStep === 0) {
-      if (dataRows.length > 0) {
+      if (dataRows?.length > 0) {
         setNextStep(true);
       } else {
         setNextStep(false);
@@ -229,69 +259,67 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         </Box>
       )}
       <Box mt={1}>
-        {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={allowedToEdit}
-              allowSwipe={allowedToEdit}
-              permissions={permissions?.transferAsset}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={gridDispatch}
-              onEdit={(data) => {
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {}}
-              rowCount={rowCount}
-              page={page}
-              loading={gridLoading}
-              chips={[
-                {
-                  label: 'Product Desc : ',
-                  field: 'productCategory'
-                }
-              ]}
-              additionalDetails={[
-                {
-                  icon: <FaSuitcase size={18} />,
-                  field: 'customerAccount'
-                }
-              ]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={false}
-              onClone={(data) => {}}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
+        {
+          columns && dataRows ? (
+            // isMobile && !isTablet ? (
+            //   <CustomSwipableList
+            //     allowSelection={true}
+            //     allowSwipe={true}
+            //     permissions={permissions?.transferAsset}
+            //     primaryField={columns?.find((d) => d.primaryField)}
+            //     onClick={(d) => {
+            //       history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
+            //     }}
+            //     dataRows={dataRows}
+            //     selectedRecords={selectedRecords}
+            //     dispatch={gridDispatch}
+            //     onEdit={(d) => {
+            //     }}
+            //     extraParamsToCheckDelete={false}
+            //     onDelete={(data) => { }}
+            //     rowCount={rowCount}
+            //     page={page}
+            //     loading={gridLoading}
+            //     chips={[
+            //       {
+            //         label: 'Product Desc : ',
+            //         field: 'productCategory'
+            //       }
+            //     ]}
+            //     additionalDetails={[
+            //       {
+            //         icon: <FaSuitcase size={18} />,
+            //         field: 'customerAccount'
+            //       }
+            //     ]}
+            //     owerCollaboratorInitialsOrImages=""
+            //     onCreate={false}
+            //     showClone={false}
+            //     onClone={(data) => { }}
+            //     renderedFrom={renderedFrom}
+            //   />
+
+            // ) : (
+            <CustomReactTable
+              height={'calc(100vh - 393px)'}
               columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={gridDispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={allowedToEdit}
-              actionWidth={100}
-              allowSelection={allowedToEdit}
-              isClientSideGrid={true}
-              loading={gridLoading}
+              data={dataRows}
+              onSelect={setSelectedRecords}
+              childrenProperty="subRows"
+              uniqueKey="_id"
+              hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
               renderedFrom={renderedFrom}
-              refreshGrid={() => fetchAssetsData(true)}
+              isClientSideGrid={true}
+              hideExpander={true}
             />
+            // )
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
           )
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+        }
       </Box>
       {openAddNewAssets && (
         <AddSerializedAsset

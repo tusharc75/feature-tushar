@@ -2,7 +2,7 @@ import Box from '@material-ui/core/Box/Box';
 import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-import { Button, IconButton, Menu, MenuItem} from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import {
@@ -89,6 +89,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     });
 
     let fields = CURReplaceByCurrencySingle(fieldResponce?.data?.data, repairJobData?.currency || "USD");
+    fields?.forEach((e) => {
+      e.isColumnEditable = false;
+    });
     const assetField = data?.find((e) => e.resource === 'Serialized Asset')?.fieldNames || [];
     const productField = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
 
@@ -196,7 +199,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       Header: 'Actions',
       width: 100,
       sticky: 'right',
-      Cell: ({ row }) =>{
+      Cell: ({ row }) => {
         return <div className="d-flex gap-1">
           {row?.original?.repairTypeId && (
             <HtmlTooltip title="Repair Process">
