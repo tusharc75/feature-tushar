@@ -73,6 +73,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   };
 
   const fetchFields = async () => {
+    setColumns(null)
     const fieldResponce = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`);
     const repairJobAssetFields = fieldResponce?.data?.data;
     const {
@@ -126,7 +127,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
                       onClick={() => setShowEditAssetDialog({ open: true, isBulkedit: false, inventory: row?.original?.inventory, selectedRecords: [] })}
                     >{row.original.assetNumber}</p>
                     :
-                    <p className=" text-truncate">{row.original.assetNumber}</p>
+                    <p className="text-truncate">{row.original.assetNumber}</p>
                   }
                   <Box ml={1}>
                     <IconButton
@@ -285,20 +286,19 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       .put(`${repairJob.api}/${repairJobData?._id}/assets`, rows)
       .then(({ data }) => {
         setUpdating(false);
-        fetchRecords();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
         setShowEditAssetDialog({ open: false, isBulkedit: false, inventory: null, selectedRecords: [] });
+        fetchRecords();
       })
       .catch((error) => {
         setUpdating(false);
         toastConfig.setToastConfig(error);
       });
   };
-
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
