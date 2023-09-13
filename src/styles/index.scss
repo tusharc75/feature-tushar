@@ -619,7 +619,6 @@ body::-webkit-scrollbar-thumb {
 
   & .MuiTablePagination-root:last-child {
     padding: 0;
-    background: #f7f7f7;
     border: 1px solid var(--common-border-color);
     [data-mode='dark'] {
       background-color: var(--dark-primary) !important;
