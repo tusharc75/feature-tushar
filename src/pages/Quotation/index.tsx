@@ -1,43 +1,42 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip, Box } from '@material-ui/core';
+import { Box, Chip, IconButton, Tooltip } from '@material-ui/core';
+import { Delete, Info, Warning } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { FaSuitcase } from 'react-icons/fa';
-import { GiHiveMind } from 'react-icons/gi';
-import { MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, FaWarehouse, SiStatuspage } from 'react-icons/all';
-import {
-  isObjectEmpty,
-  customerAccount,
-  supplierAccount,
-  gridLoadingTimeout,
-  quotation,
-  sidebarResource,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  removeLocalStorage,
-  QUOTATION_TYPE
-} from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import QuotationHeader from './QuotationHeader';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { camelCase } from 'lodash';
+import moment from 'moment';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { CiUser, FaWarehouse, MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, SiStatuspage } from 'react-icons/all';
+import { GiHiveMind } from 'react-icons/gi';
+import { Link, useHistory } from 'react-router-dom';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CustomContainer from '../../components/CustomContainer';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { camelCase } from 'lodash';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import routes from '../../components/Helpers/Routes';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import {
+  QUOTATION_TYPE,
+  customerAccount,
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  quotation,
+  removeLocalStorage,
+  sidebarResource,
+  supplierAccount
+} from '../../constants/helpers';
+import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import ManageQuotationDialog from './ManageQuotationDialog';
-import { Delete, Info, Warning } from '@material-ui/icons';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import moment from 'moment';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
+import QuotationHeader from './QuotationHeader';
 
 let quotationTimeout;
 
@@ -167,7 +166,6 @@ const Quotation = () => {
       });
   };
 
-
   const isDateWithinNext15Days = (endData) => {
     var a = moment(endData);
     var b = moment();
@@ -177,7 +175,7 @@ const Quotation = () => {
     } else if (days < 0) {
       return false;
     } else {
-      return false
+      return false;
     }
   };
 
@@ -188,16 +186,17 @@ const Quotation = () => {
       </Link>
       {params.data?.type === QUOTATION_TYPE.rentalJob && (
         <Fragment>
-          {moment(params.data?.estimateEndDate).isBefore(moment(), 'day') &&
+          {moment(params.data?.estimateEndDate).isBefore(moment(), 'day') && (
             <Box ml={1}>
               <HtmlTooltip title={`${routes.quotation.title} Expired`}>
                 <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
               </HtmlTooltip>
-            </Box>}
+            </Box>
+          )}
           {isDateWithinNext15Days(params.data?.estimateEndDate) && (
             <Box ml={1}>
               <HtmlTooltip title={`${routes.quotation.title} about to renew`}>
-                <Info style={{ fontSize: '14px' }} fontSize="small" color="primary" />
+                <HelpOutlineIcon style={{ fontSize: '14px', backgroundColor: 'yellow' }} fontSize="small" />
               </HtmlTooltip>
             </Box>
           )}
@@ -402,7 +401,7 @@ const Quotation = () => {
           permissions={permissions?.quotation}
           module="quotation"
           api={quotation.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -485,7 +484,7 @@ const Quotation = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'customerAccount'
                 }
               ]}

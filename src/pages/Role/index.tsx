@@ -4,7 +4,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import { FC, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaSuitcase, IoCreateSharp, MdDescription } from 'react-icons/all';
+import { CiUser, IoCreateSharp, MdDescription } from 'react-icons/all';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -364,7 +364,7 @@ const Roles: FC = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'type'
                 }
               ]}
