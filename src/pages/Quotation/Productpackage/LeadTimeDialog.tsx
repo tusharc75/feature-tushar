@@ -102,94 +102,79 @@ function LeadTimeDialog({ quotationId, data, versionId, onClose, handleSucess })
           showManimizeMaximize={true}
         />
         <CustomDialogContent>
-          <Grid container>
-            <Grid item xs={12}>
-              <Box
-                style={{ maxHeight: '350px', overflow: 'auto' }}
-                bgcolor="white"
-                border={1}
-                mt={2}
-                mb={1}
-                borderColor="var(--common-border-color)"
-                width={'100%'}
-              >
-                <Box p={1} bgcolor="grey.200">
-                  <Grid container xs={12}>
-                    <Grid item xs={6}>
-                      <Typography variant="body2">Lead Time Status</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Typography variant="body2">{leadTimeMasterSteps?.length && totalDays ? `${totalDays} Days` : 'Days'}</Typography>
-                    </Grid>
-                    <Grid item xs={2}>
-                      <Grid container justifyContent="flex-end">
-                        <IconButton
-                          size="small"
-                          aria-label="setting"
-                          onClick={() => {
-                            handleAddLTMSteps();
-                          }}
-                        >
-                          <AddCircleOutlineIcon fontSize="small" />
-                        </IconButton>
-                      </Grid>
-                    </Grid>
-                  </Grid>
+          <Box className="rounded-md" border={1} mt={2} mb={1} borderColor="var(--common-border-color)" width={'100%'}>
+            <div className="grid grid-cols-[1fr_auto] sm:grid-cols-[6fr_4fr_auto] gap-2 p-2">
+              <Typography variant="body2" className="pl-3  sm:block hidden">
+                Lead Time Status
+              </Typography>
+
+              <Typography variant="body2" className="pl-3 ">
+                {leadTimeMasterSteps?.length && totalDays ? `${totalDays} Days` : 'Days'}
+              </Typography>
+
+              <div className="sm:mr-[4px] mr-0">
+                <IconButton
+                  size="small"
+                  aria-label="setting"
+                  onClick={() => {
+                    handleAddLTMSteps();
+                  }}
+                >
+                  <AddCircleOutlineIcon fontSize="small" />
+                </IconButton>
+              </div>
+            </div>
+            <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+              {leadTimeMasterSteps?.map((steps, index) => (
+                <Box
+                  key={index}
+                  borderTop={1}
+                  borderColor="var(--common-border-color)"
+                  className="grid grid-cols-[1fr_auto] sm:grid-cols-[6fr_4fr_auto]  gap-2 p-2"
+                >
+                  <Autocomplete
+                    options={leadTimeStatusDropdown || []}
+                    getOptionLabel={(option) => option}
+                    value={steps?.leadTimeStatus || ''}
+                    onChange={(event: any, value) => {
+                      handleOnLTMStatusChangeValue(index, value);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Lead Time Status"
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: <React.Fragment>{params.InputProps.endAdornment}</React.Fragment>
+                        }}
+                      />
+                    )}
+                  />
+                  <div className="col-span-1 col-start-1 sm:col-span-[unset] sm:col-start-[unset]">
+                    <TextField
+                      id="Days-Field"
+                      variant="outlined"
+                      margin="dense"
+                      name="Days"
+                      label="Days"
+                      type="number"
+                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                      fullWidth
+                      style={{ margin: 0 }}
+                      value={steps?.days || ''}
+                      onChange={(event) => handleOnDaysChangeValue(index, event.target.value)}
+                    />
+                  </div>
+                  <IconButton size="small" aria-label="setting" onClick={() => handleRemoveLTMSteps(index)}>
+                    <RemoveCircleOutlineIcon fontSize="small" />
+                  </IconButton>
                 </Box>
-                {leadTimeMasterSteps?.map((steps, index) => (
-                  <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
-                    <Grid container spacing={1}>
-                      <Grid item xs={6}>
-                        <Autocomplete
-                          options={leadTimeStatusDropdown || []}
-                          getOptionLabel={(option) => option}
-                          value={steps?.leadTimeStatus || ''}
-                          onChange={(event: any, value) => {
-                            handleOnLTMStatusChangeValue(index, value);
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label="Lead Time Status"
-                              variant="outlined"
-                              size="small"
-                              fullWidth
-                              InputProps={{
-                                ...params.InputProps,
-                                endAdornment: <React.Fragment>{params.InputProps.endAdornment}</React.Fragment>
-                              }}
-                            />
-                          )}
-                        />
-                      </Grid>
-                      <Grid item xs={4}>
-                        <TextField
-                          id="Days-Field"
-                          variant="outlined"
-                          margin="dense"
-                          name="Days"
-                          label="Days"
-                          type="number"
-                          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                          fullWidth
-                          style={{ margin: 0 }}
-                          value={steps?.days || ''}
-                          onChange={(event) => handleOnDaysChangeValue(index, event.target.value)}
-                        />
-                      </Grid>
-                      <Grid item xs={2}>
-                        <Grid container justifyContent="flex-end">
-                          <IconButton size="small" aria-label="setting" onClick={() => handleRemoveLTMSteps(index)}>
-                            <RemoveCircleOutlineIcon fontSize="small" />
-                          </IconButton>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                ))}
-              </Box>
-            </Grid>
-          </Grid>
+              ))}
+            </div>
+          </Box>
         </CustomDialogContent>
         <CustomDialogFooter>
           <Button
