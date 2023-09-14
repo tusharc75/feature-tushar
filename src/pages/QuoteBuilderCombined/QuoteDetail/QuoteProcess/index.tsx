@@ -165,6 +165,7 @@ const DOASteps: StepInterface[] = [
     icon: 'closed'
   }
 ];
+
 const OtherSteps: StepInterface[] = [
   {
     key: 'New',
@@ -202,6 +203,7 @@ const OtherSteps: StepInterface[] = [
     icon: 'closed'
   }
 ];
+
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 

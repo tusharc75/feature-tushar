@@ -58,7 +58,7 @@ const Steps = (props) => {
     quoteData,
     globalLoading = false,
     setStepFullScreen,
-    isStepEnded = false
+    isStepEnded = false,
   } = props;
   const classes = useStyles();
   let activeStep = currentStep;
@@ -181,9 +181,9 @@ const Steps = (props) => {
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
         nextStep={steps[currentStep + 1]}
-        setCurrentStep={() => {}}
+        setCurrentStep={() => { }}
         handleNext={() => {
-          if (versionStatus.includes('Sent to Customer') || steps[currentStep]?.key === 'Send To Customer' || versionStatus === 'Sent to Customer') {
+          if (versionStatus.includes('Sent to Customer') && steps[currentStep]?.key === 'Send To Customer') {
             setShowManualCustomerActionDialog(true);
           } else {
             handleNext();
