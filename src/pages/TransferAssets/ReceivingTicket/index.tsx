@@ -102,10 +102,12 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           {
             accessor: 'loadingTicket',
             Header: 'Loading Ticket',
-            width: 200,
+            width: 300,
             Cell: ({ row }) =>
               row?.original?.loadingTicket ? (
-                <p title={row?.original?.loadingTicket} className="link cursor-pointer" onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`)}>
+                <p title={row?.original?.loadingTicket}
+                  className="link cursor-pointer"
+                  onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`)}>
                   {row?.original?.loadingTicket}
                 </p>
               ) : (
@@ -123,10 +125,12 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             accessor: 'receivingTicket',
             Header: 'Receiving Ticket',
             primaryField: true,
-            width: 200,
+            width: 300,
             Cell: ({ row }) =>
               row?.original?.receivingTicket ? (
-                <p title={row?.original?.receivingTicket} className="link cursor-pointer" onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.receivingTicketId}`)}>
+                <p title={row?.original?.receivingTicket}
+                  className="link cursor-pointer"
+                  onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.receivingTicketId}`)}>
                   {row?.original?.receivingTicket}
                 </p>
               ) : (
