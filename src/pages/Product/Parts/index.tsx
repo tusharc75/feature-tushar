@@ -1,25 +1,24 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Box, Grid, Button, Menu, MenuItem } from '@material-ui/core';
-import { product, prepareDataForGrid } from '../../../constants/helpers';
+import { useState, useEffect, useContext, Fragment } from 'react';
+import { Box, Button, Menu, MenuItem } from '@material-ui/core';
+import { product } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import AssignProductDialog from '../../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
-import useColumns, { getFrameworkComponents } from '../../../constants/useColumns';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { isMobile, isTablet } from 'react-device-detect';
+import { generateCustomTableColumns } from 'src/constants/columns';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 function Parts({ id }) {
   const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const {
     state: { permissions, user, selectedEntity }
   }: any = useData();
@@ -30,106 +29,104 @@ function Parts({ id }) {
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
   const [isDeleting, setIsDeleting] = useState(false);
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
-  const { getColumnData } = useColumns();
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
   const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const { dataRows, rowCount, loading: gridLoading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
-
-  const defaultColumns = [
-    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
-  ];
-
-  useEffect(() => {
-    if (id) {
-      fetchBOMData();
-    }
-  }, [id, page, limit, search, filters, sorting, selectedEntity]);
+  const [selectedRecords, setSelectedRecords] = useState([]);
+  const [rowsData, setRowsData] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
-  const fetchBOMData = () => {
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    axiosInstance()
-      .get(`/product/${id}/bom`)
-      .then(({ data: { data } }) => {
-        data = data.map((o: any) => {
-          let finalObject = {
-            ...o,
-            ...o?.childProductDetail
-          };
-          return prepareDataForGrid(finalObject);
-        });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...data],
-            count: data.length,
-            selectedRecords: [...dataRows, ...data].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: data,
-            count: data.length,
-            selectedRecords: data.filter((f) => f.isChecked === true)
-          });
-        }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
-        }
-        setParts([...data]);
-        dispatch({ type: 'loading', loading: false });
-      })
-      .catch((err) => {
-        dispatch({ type: 'loading', loading: false });
-      });
-  };
+  const fetchBOMData = async () => {
+    let data: any = [];
+    const response = await axiosInstance().get(`/product/${id}/bom`);
+    data = response?.data?.data;
+    setParts([...data]);
+    let rows = data?.map((i, index) => {
+      return {
+        index: index + 1,
+        ...i,
+        ...i?.childProductDetail
+      }
+    })
+    setRowsData(rows);
+    setSelectedRecords([]);
+  }
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Product&view=true')
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
+  const fetchGridColumns = async () => {
+    const response = await axiosInstance().get('/field?resource=Product&view=true');
+    const data = response?.data?.data;
+    const fields = data?.map((i) => i?.fieldData)
+    const filterFieldnames = ["productDescription", "productNumber", "productCategory", "serializedProduct"];
+    const filteredFields = fields.filter(field => {
+      return filterFieldnames.some(filterFieldname => filterFieldname === field.fieldName);
+    });
+    const newColumns = generateCustomTableColumns(filteredFields, 'USD', renderedFrom);
+    let coloum: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+      },
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        width: 150,
+      },
+      {
+        accessor: 'productName',
+        Header: 'Product Type',
+        width: 200,
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p className="text-truncate">{row.original.productName}</p>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.productDetail.path}/${row.original._id}`)
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        )
+      }
+    ]
+    coloum = [...coloum, ...newColumns];
+    coloum.push({
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 50,
+      width: 50,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          {
+            hasPermissions && (
+              <Tooltip title="Delete">
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setShowConfirmBox({ open: true, data: [row.original] });
+                  }}
+                >
+                  <Delete fontSize="small" color="error" />
+                </IconButton>
+              </Tooltip>
+            )
           }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        });
-        setColumns([...defaultColumns, ...columns]);
-      });
+        </>
+      )
+    })
+    setColumns(coloum)
+    fetchBOMData();
   };
 
   const handleRemove = () => {
@@ -140,7 +137,7 @@ function Parts({ id }) {
       data.forEach((p: any) => {
         axiosInstance()
           .put(`${product.api}/${p.product}/bom/remove`, {
-            ids: [p.id]
+            ids: [p._id]
           })
           .then(() => {
             setIsDeleting(false);
@@ -156,7 +153,7 @@ function Parts({ id }) {
       let d = data[0];
       axiosInstance()
         .put(`${product.api}/${d.product}/bom/remove`, {
-          ids: [d.id]
+          ids: [d._id]
         })
         .then(() => {
           setIsDeleting(false);
@@ -169,20 +166,6 @@ function Parts({ id }) {
         });
     }
   };
-
-  const ActionsRenderer = (params) =>
-    hasPermissions && (
-      <Tooltip title="Delete">
-        <IconButton
-          size="small"
-          onClick={() => {
-            setShowConfirmBox({ open: true, data: [params.data] });
-          }}
-        >
-          <Delete fontSize="small" color="error" />
-        </IconButton>
-      </Tooltip>
-    );
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -246,25 +229,20 @@ function Parts({ id }) {
           </Box>
         </Box>
       )}
-      {frameWorkComponent ? (
-        <CustomAgGrid
-          allowSelection={hasPermissions}
-          allowAction={hasPermissions}
-          columns={columns}
-          dataRows={dataRows}
-          isClientSideGrid={true}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={gridLoading}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchBOMData}
-        />
+      {columns && rowsData ? (
+        <Box zIndex={5} width={'100%'}>
+          <CustomReactTable
+            columns={columns}
+            data={rowsData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+            onSelect={setSelectedRecords}
+            childrenProperty="subRows"
+            uniqueKey="_id"
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            hideExpander={true}
+          />
+        </Box>
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
