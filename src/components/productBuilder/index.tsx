@@ -605,7 +605,7 @@ const ProductBuilder = (props) => {
   };
 
   return (
-    <Box p={1} pt={0}>
+    <Box pt={0}>
       {Editable && (
         <div className="d-flex align-items gap-2 justify-end ml-auto">
           {permissions?.isUpdate && (
