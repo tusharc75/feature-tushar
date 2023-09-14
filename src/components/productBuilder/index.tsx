@@ -102,7 +102,7 @@ const ProductBuilder = (props) => {
 
   useEffect(() => {
     fetchProduct(productBuilderId);
-  }, [productBuilderId]);
+  }, [productBuilderId, stage]);
 
   const fetchProduct = (id) => {
     dispatch({ type: 'loading', loading: true });
@@ -689,8 +689,8 @@ const ProductBuilder = (props) => {
                 isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
                   ? false
                   : selectedRecords.length
-                  ? false
-                  : true
+                    ? false
+                    : true
               }
               onClick={openActions}
               endIcon={<ExpandMore />}
@@ -766,26 +766,26 @@ const ProductBuilder = (props) => {
               dataToShowForMobile
                 ? dataToShowForMobile.some((f) => f.editable === true)
                   ? [
-                      ...dataToShowForMobile
-                        .filter((f) => f.editable === true)
-                        .map((m) => {
-                          return {
-                            label: `${m.headerName}: `,
-                            field: m.field,
-                            forceShow: true
-                            // onClick: (data, index) => {
-                            //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
-                            // }
-                          };
-                        })
-                    ]
+                    ...dataToShowForMobile
+                      .filter((f) => f.editable === true)
+                      .map((m) => {
+                        return {
+                          label: `${m.headerName}: `,
+                          field: m.field,
+                          forceShow: true
+                          // onClick: (data, index) => {
+                          //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
+                          // }
+                        };
+                      })
+                  ]
                   : [
-                      {
-                        label: `Product description: `,
-                        field: 'productName',
-                        forceShow: true
-                      }
-                    ]
+                    {
+                      label: `Product description: `,
+                      field: 'productName',
+                      forceShow: true
+                    }
+                  ]
                 : []
             }
             onCreate={null}
