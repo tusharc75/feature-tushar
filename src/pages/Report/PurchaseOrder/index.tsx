@@ -21,7 +21,8 @@ import {
   primaryFields,
   productInventory,
   isObjectEmpty,
-  sidebarResource
+  sidebarResource,
+  product
 } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import MomentUtils from '@date-io/moment';
@@ -104,6 +105,10 @@ const Report = () => {
         let {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
+
+        productFields?.filter((field) => ['expenseItem'].includes(field?.fieldData.fieldName)).forEach((field) => {
+          resourceFieldData.push(field);
+        })
 
         POFields.filter((field) =>
           ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
@@ -220,6 +225,10 @@ const Report = () => {
         let {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
+
+        productFields?.filter((field) => ['expenseItem'].includes(field?.fieldData.fieldName)).forEach((field) => {
+          resourceFieldData.push(field);
+        })
 
         POFields.filter((field) => ['purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
           if (field?.fieldData.fieldName === 'warehouse') {
@@ -383,6 +392,9 @@ const Report = () => {
             isUpdate: true
           });
         }
+        productFields?.filter((field) => ['expenseItem'].includes(field?.fieldData.fieldName)).forEach((field) => {
+          resourceFieldData.push(field);
+        })
 
         productFields
           .filter((field) => ['productName', 'productDescription', 'productNumber'].includes(field?.fieldData.fieldName))
@@ -462,6 +474,10 @@ const Report = () => {
         let {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
+
+        productFields?.filter((field) => ['expenseItem'].includes(field?.fieldData.fieldName)).forEach((field) => {
+          resourceFieldData.push(field);
+        })
 
         productFields.forEach((o: any) => {
           if (o?.fieldData.fieldName === 'productName') {
@@ -853,26 +869,6 @@ const Report = () => {
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
-      }
-
-      if (['purchaseOrderDetails', 'inventoryEvaluation', 'inventoryHistory', 'averagePriceBySupplier'].includes(resourceCamelCase)) {
-        resourceFieldData.push({
-          fieldData: {
-            _id: "64d21897295ae376509d6129",
-            fieldLabel: "Expense Item",
-            fieldName: "expenseItem",
-            type: "checkBox",
-            option: [],
-            required: false,
-            filter: true,
-            sectionName: "PO Information",
-            resource: sidebarResource.purchaseOrder,
-            brand: user.brand
-          },
-          isCreate: true,
-          isRead: true,
-          isUpdate: true
-        })
       }
 
       setResourceColumns(resourceFieldData);
