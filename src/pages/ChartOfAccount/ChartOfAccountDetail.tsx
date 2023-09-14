@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Menu, MenuItem, Paper, Tab, Tabs, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -12,15 +12,15 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageWorkStations from './ManageWorkStations';
+import ManageChartOfAccount from './ManageChartOfAccount';
 import { sidebarResource } from 'src/constants/helpers';
 
-const WorkStationsDetail = () => {
+const ChartOfAccountDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.workStations]);
-  const [workStationsData, setWorkStationsData] = useState(null);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.chartOfAccount]);
+  const [chartOfAccountData, setChartOfAccountData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -39,7 +39,7 @@ const WorkStationsDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.workStations}`)
+      .get(`/field?resource=${sidebarResource?.chartOfAccount}`)
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -53,9 +53,9 @@ const WorkStationsDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/work-stations/${id}`);
-      setWorkStationsData(data);
-      setCustomizedRoutes([routes.workStations, { title: data?.workStationName }]);
+      } = await axiosInstance().get(`${routes.chartOfAccount.path}/${id}`);
+      setChartOfAccountData(data);
+      setCustomizedRoutes([routes.chartOfAccount, { title: data?.accountNumber }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -64,9 +64,9 @@ const WorkStationsDetail = () => {
 
   const handleDelete = () => {
     if (id) {
-      if (permissions?.workStations?.isDelete) {
+      if (permissions?.chartOfAccount?.isDelete) {
         axiosInstance()
-          .put(`/work-stations/remove`, { ids: [id] })
+          .put(`${routes.chartOfAccount.path}/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
             toastConfig.setToastConfig({
@@ -107,7 +107,7 @@ const WorkStationsDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.workStations?.isUpdate && (
+              {permissions?.chartOfAccount?.isUpdate && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   className="btn-outline-v1"
@@ -116,7 +116,7 @@ const WorkStationsDetail = () => {
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.workStations?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.chartOfAccount?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
           </Box>
         </Box>
@@ -142,7 +142,7 @@ const WorkStationsDetail = () => {
                     <CommonSkeleton lenArray={[...Array(7).keys()]} />
                   </Grid>
                 ) : (
-                  <DetailsPage data={workStationsData} fields={fields} />
+                  <DetailsPage data={chartOfAccountData} fields={fields} />
                 )}
               </Box>
           )}
@@ -150,7 +150,7 @@ const WorkStationsDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.workStations?.title?.toLowerCase()} ${workStationsData.workStationName} ?`}
+          message={`Are you sure you want to delete ${routes?.chartOfAccount?.title?.toLowerCase()} ${chartOfAccountData.accountNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -158,7 +158,7 @@ const WorkStationsDetail = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageWorkStations
+        <ManageChartOfAccount
           id={id}
           isClone={false}
           onClose={closeUpdateDialog}
@@ -172,4 +172,4 @@ const WorkStationsDetail = () => {
   );
 };
 
-export default WorkStationsDetail;
+export default ChartOfAccountDetail;

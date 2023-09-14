@@ -6,11 +6,12 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { HiOutlinePhotograph } from 'react-icons/hi';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { CustomDialogTransition, imageUploadMaxSize } from 'src/constants/helpers';
+import { CustomDialogTransition, imageUploadMaxSize, termsAndConditionDocumentUploadMaxSize } from 'src/constants/helpers';
 import { AiOutlineClose } from 'react-icons/ai';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     padding: '4px',
     paddingLeft: '5px',
-    border: '1px solid lightgray',
+    border: '1px solid var(--common-border-color)',
     borderBottom: '0'
   },
   varibalesButton: {
@@ -33,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
 
 function RichTextEditor({ value, label, name, setFieldValue }) {
   const editorRef = useRef(null);
+  const [themeColor] = useAppTheme();
   const classes = useStyles();
   const [prevData, setPrevData] = useState('');
   const [isUpdate, setIsUpdate] = React.useState(true);
@@ -44,6 +46,15 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
   const [uploadError, setUploadError] = useState(false);
   const [imageDetails, setImageDetails] = useState({ width: 0, height: 0, alt: '' });
   const { setToastConfig } = useContext(CustomToastContext);
+
+  const fileInputRef = useRef(null);
+
+  const handleUploadFileClick = (e) => {
+    // Trigger the file input click event when the "Upload File" button is clicked
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
   const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
@@ -61,6 +72,33 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
       event.target.value = '';
     }
   };
+
+  const handleUploadFile = async (ev) => {
+
+    setToastConfig({
+      open: true,
+      type: 'info',
+      message: `Document upload in progress..`
+    });
+    if (ev.target.files && ev.target.files.length) {
+        let files = ev.target.files;
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file.size > termsAndConditionDocumentUploadMaxSize.size) {
+                setToastConfig({
+                    open: true,
+                    type: 'error',
+                    message: `file must be less than ${termsAndConditionDocumentUploadMaxSize.text} size`
+                });
+                break;
+            }
+           
+            getFileUrl(file, "", {});
+        }
+        ev.target.value = '';
+    }
+};
 
   const getFileUrl = (file, api, details) => {
     setImageUploadProgress(0);
@@ -87,7 +125,12 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
         if (details && details.isImage) {
           setUploadError(false);
           setImageUrl(data.fileUrl);
-        } else {
+        } else {      
+          setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Document upload completed`
+          });    
           editorRef.current.execCommand('mceInsertContent', false, data);
         }
         //data.fileUrl data.fileName
@@ -284,7 +327,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           ],
           menubar: true,
           toolbar:
-            'fullscreen | uploadImage | undo redo | formatselect  | ' +
+            'fullscreen | uploadImage | uploadDocument | undo redo | formatselect  | ' +
             'bold italic backcolor | alignleft aligncenter ' +
             'alignright alignjustify | bullist numlist outdent indent ',
           content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Poppins, sans-serif; font-size:14px }',
@@ -293,9 +336,28 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
               text: 'Upload Image',
               onAction: () => setIsUploadImage(true)
             });
-          }
+            editor.ui.registry.addButton('uploadDocument', {
+              text: 'Upload Document',
+              onAction: (e)=>handleUploadFileClick(e),              
+            });
+
+          },
+          
+          skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
+          content_css: themeColor === 'dark' ? 'dark' : 'default'
         }}
       />
+
+    <input
+        id={`file`}
+        name={`file`}
+        onChange={handleUploadFile}
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        onClick={(e: any) => (e.target.value = null)}
+        type="file"
+        accept=".docx,.doc"
+    />
     </Box>
   );
 }

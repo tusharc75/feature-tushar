@@ -164,7 +164,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           </div>
         )
       },
-      {
+      ...(permissions?.leadTimeMaster ? [{
         accessor: 'leadTime',
         Header: 'Lead Time (Days)',
         Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
@@ -174,7 +174,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
             .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
           return <>{total}</>;
         }
-      },
+      }] : []),
       {
         accessor: 'description',
         Header: 'Description',
@@ -210,7 +210,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           {
             !row.original.hideSelection && (
               <>
-                {row.original.type !== MATERIAL_TYPE.serializedAsset && <IconButton
+                {(row.original.type !== MATERIAL_TYPE.serializedAsset && permissions?.leadTimeMaster) && <IconButton
                   size="small"
                   aria-label="Details"
                   onClick={() => {
@@ -218,7 +218,8 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                   }}
                 >
                   <DateRangeIcon fontSize="small" color="primary" />
-                </IconButton>}
+                </IconButton>
+                }
                 <IconButton
                   size="small"
                   aria-label="Details"
