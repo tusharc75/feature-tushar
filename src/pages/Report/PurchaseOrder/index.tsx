@@ -106,12 +106,7 @@ const Report = () => {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-        productFields?.filter((field) => ['expenseItem'].includes(field?.fieldData.fieldName)).forEach((field) => {
-          resourceFieldData.push(field);
-        })
-
-        POFields.filter((field) =>
-          ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
+        POFields.filter((field) => ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
         ).forEach((field: any) => {
           if (field?.fieldData.fieldName === 'purchaseOrderNumber') {
             resourceFieldData.push(field);
@@ -159,9 +154,11 @@ const Report = () => {
           }
         });
 
-        productFields
-          .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
+        productFields.filter((field) => ['productName', 'productNumber', 'expenseItem'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
+            if (field?.fieldData.fieldName === 'expenseItem') {
+              resourceFieldData.push(field);
+            }
             if (field?.fieldData.fieldName === 'productName') {
               resourceFieldData.push({
                 ...field,
@@ -226,10 +223,6 @@ const Report = () => {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-        productFields?.filter((field) => ['expenseItem'].includes(field?.fieldData.fieldName)).forEach((field) => {
-          resourceFieldData.push(field);
-        })
-
         POFields.filter((field) => ['purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
           if (field?.fieldData.fieldName === 'warehouse') {
             resourceFieldData.push(field);
@@ -243,6 +236,9 @@ const Report = () => {
         });
 
         productFields.forEach((o: any) => {
+          if (o?.fieldData.fieldName === 'expenseItem') {
+            resourceFieldData.push(o);
+          }
           if (o?.fieldData.fieldName === 'productCategory') {
             resourceFieldData.push(o);
           }
@@ -392,13 +388,12 @@ const Report = () => {
             isUpdate: true
           });
         }
-        productFields?.filter((field) => ['expenseItem'].includes(field?.fieldData.fieldName)).forEach((field) => {
-          resourceFieldData.push(field);
-        })
 
-        productFields
-          .filter((field) => ['productName', 'productDescription', 'productNumber'].includes(field?.fieldData.fieldName))
+        productFields.filter((field) => ['productName', 'productDescription', 'productNumber', 'expenseItem'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
+            if (field?.fieldData.fieldName === 'expenseItem') {
+              resourceFieldData.push(field);
+            }
             if (field?.fieldData.fieldName === 'productName') {
               resourceFieldData.push({
                 ...field,
@@ -475,11 +470,10 @@ const Report = () => {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-        productFields?.filter((field) => ['expenseItem'].includes(field?.fieldData.fieldName)).forEach((field) => {
-          resourceFieldData.push(field);
-        })
-
         productFields.forEach((o: any) => {
+          if (o?.fieldData.fieldName === 'expenseItem') {
+            resourceFieldData.push(o);
+          }
           if (o?.fieldData.fieldName === 'productName') {
             resourceFieldData.push({
               ...o,
