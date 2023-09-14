@@ -166,12 +166,23 @@
       background-color: var(--dark-primary);
     }
     .tox-edit-area__iframe .mce-content-body {
-      background-color: var(--dark-secondary);
+      background-color: #24243e;
     }
     .tox-sidebar,
     .tox-edit-area {
       background-color: var(--dark-secondary);
     }
+  }
+}
+body {
+  .tox-tinymce {
+    border: 0;
+  }
+  .tox-sidebar-wrap {
+    border-bottom: 1px solid var(--common-border-color) !important;
+  }
+  .tox.tox-tinymce * {
+    border-color: var(--common-border-color) !important;
   }
 }
 
