@@ -12,6 +12,8 @@ import routes from '../../../components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import { getFrameworkComponents, getStaticFields } from '../../../constants/useColumns';
 import CreateZip from '../CreateZip';
+import { MobileImportIcon, MobileExportIcon } from 'src/assets/svg/svgIcons';
+import { isMobile, isTablet } from 'react-device-detect';
 
 interface ConfigProps {
   id: string;
@@ -217,9 +219,9 @@ const Zipcode = (props: ConfigProps) => {
           Add Zip Code
         </Button>
         <Box className="flex flex-wrap gap-2">
-          <Button size="small" variant="outlined" className="btn-outline-v1">
+          <Button size="small" variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1">
             <label className=" cursor-pointer">
-              Import from Excel
+              {isMobile && !isTablet ? <MobileImportIcon /> : 'Import from Excel'}
               <input
                 onClick={(e: any) => (e.target.value = null)}
                 id="importField"
@@ -234,8 +236,8 @@ const Zipcode = (props: ConfigProps) => {
               />
             </label>
           </Button>
-          <Button size="small" variant="outlined" className="btn-outline-v1" onClick={handleExportFields}>
-            Export to Excel
+          <Button size="small" variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleExportFields}>
+            {isMobile && !isTablet ? <MobileExportIcon /> : 'Export to Excel'}
           </Button>
           <DeleteButton
             mode="light"
