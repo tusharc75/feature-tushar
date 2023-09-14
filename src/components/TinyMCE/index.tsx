@@ -34,10 +34,9 @@ const useStyles = makeStyles((theme) => ({
   },
   buttonContainer: {
     display: 'flex',
-    padding: '4px',
+    padding: '5px',
     paddingLeft: '5px',
-    border: '1px solid var(--common-border-color)',
-    borderBottom: '0'
+    borderBottom: '1px solid var(--common-border-color)'
   },
   varibalesButton: {
     margin: '0 5px'

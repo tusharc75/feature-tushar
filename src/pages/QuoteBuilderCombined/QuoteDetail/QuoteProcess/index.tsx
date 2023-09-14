@@ -1352,7 +1352,7 @@ export default function QuoteProcess(props) {
                       </Tooltip>
                     </>
                   ) : null}
-                  {!['New', 'Price Builder'].includes(ProcessStatus) && (
+                  {!['New', 'Price Builder'].includes(ProcessStatus) && allowedToEdit && (
                     <PreviewDownload
                       resource={sidebarResource.quoteBuilder}
                       referenceId={quoteData?._id}
@@ -1362,42 +1362,46 @@ export default function QuoteProcess(props) {
                       extraQueryParams={{ uniqueId: quoteData.versions[currentVersion]._id }}
                     />
                   )}
-                  <Tooltip title="AI Suggestion">
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      className="btn-outline-v1"
-                      size="small"
-                      color="primary"
-                      startIcon={<GiVintageRobot />}
-                      onClick={() => {
-                        setShowAiDialog(true);
-                      }}
-                    >
-                      {isMobile && !isTablet ? '' : 'AI Suggestion'}
-                    </Button>
-                  </Tooltip>
-                  {permissions[qbResource]?.isUpdate &&
-                    (user?.user?._id === quoteData?.owner?.optionValue ||
-                      quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
-                      <Tooltip title="Edit Quote PDF Template">
+                  {['Send To Customer', 'End'].includes(ProcessStatus) && (
+                    <>
+                      <Tooltip title="AI Suggestion">
                         <Button
-                          onClick={() => {
-                            quoteData?.pDFTemplate.optionValue &&
-                              history.push(
-                                `/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`
-                              );
-                          }}
                           variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                          size="small"
                           className="btn-outline-v1"
-                          startIcon={isMobile && !isTablet ? '' : <AiFillEdit />}
+                          size="small"
                           color="primary"
+                          startIcon={<GiVintageRobot />}
+                          onClick={() => {
+                            setShowAiDialog(true);
+                          }}
                         >
-                          {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
-                          {isMobile && !isTablet ? '' : 'Quote Template'}
+                          {isMobile && !isTablet ? '' : 'AI Suggestion'}
                         </Button>
                       </Tooltip>
-                    )}
+                      {permissions[qbResource]?.isUpdate &&
+                        (user?.user?._id === quoteData?.owner?.optionValue ||
+                          quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
+                          <Tooltip title="Edit Quote PDF Template">
+                            <Button
+                              onClick={() => {
+                                quoteData?.pDFTemplate.optionValue &&
+                                  history.push(
+                                    `/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`
+                                  );
+                              }}
+                              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                              size="small"
+                              className="btn-outline-v1"
+                              startIcon={isMobile && !isTablet ? '' : <AiFillEdit />}
+                              color="primary"
+                            >
+                              {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
+                              {isMobile && !isTablet ? '' : 'Quote Template'}
+                            </Button>
+                          </Tooltip>
+                        )}
+                    </>
+                  )}
                 </div>
                 {ProcessStatus !== 'New' && ProcessStatus !== 'Price Builder' ? (
                   <span className="d-flex flex-wrap gap-2 align-items-center justify-content-end ml-auto">
