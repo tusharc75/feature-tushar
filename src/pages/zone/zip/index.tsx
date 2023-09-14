@@ -1,17 +1,17 @@
-import React from 'react';
 import { Box, Button, IconButton } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
-import CarouselDialog from '../../../components/CarouselDialog';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import { Delete } from '@material-ui/icons';
-import CreateZip from '../CreateZip';
+import React from 'react';
 import { read, utils, writeFile } from 'xlsx';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
+import CarouselDialog from '../../../components/CarouselDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../../components/Helpers/DeleteButton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
+import routes from '../../../components/Helpers/Routes';
+import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
+import { getFrameworkComponents, getStaticFields } from '../../../constants/useColumns';
+import CreateZip from '../CreateZip';
 
 interface ConfigProps {
   id: string;
