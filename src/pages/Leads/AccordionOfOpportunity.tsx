@@ -94,7 +94,7 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
                                 Estimated Amount : {formatAmountWithCurrency(opportunity['currency'], opportunity?.estimatedAmount).fullFormatAmount}
                               </p>
                             )}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div className="grid max-[500px]:grid-cols-1 max-[960px]:grid-cols-2 min-[1153px]:grid-cols-2">
                               <div>
                                 {opportunity?.stage ? (
                                   <DisplayData label="Stage" value={opportunity?.stage ?? ''} icon={<BiCustomize size={20} />} />
