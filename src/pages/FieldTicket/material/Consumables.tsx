@@ -573,7 +573,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
                     </MenuItem>
                   
                     <MenuItem
-                      disabled={isDeleting || selectedRecords.some((record) => record.requestedQty || record.consumedQty)}
+                      disabled={isDeleting || selectedRecords?.some((e) => e?.requestedQty || e?.consumedQty)}
                       onClick={() => {
                         setDeleteData(
                           selectedRecords?.map((d) => {
