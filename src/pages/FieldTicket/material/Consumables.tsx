@@ -483,6 +483,10 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
     setTabValue(newValue);
   };
 
+  const hasRequestedOrConsumedQty = (selectedRecords) => {
+    return selectedRecords.some((record) => record.requestedQty || record.consumedQty);
+  };
+
   return (
     <>
       {allowedToEdit && serviceOption?.length > 0 && (
@@ -575,7 +579,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
                   </HtmlTooltip>
                   <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
                     <MenuItem
-                      disabled={isDeleting}
+                      disabled={isDeleting || hasRequestedOrConsumedQty(selectedRecords)}
                       onClick={() => {
                         setDeleteData(
                           selectedRecords?.map((d) => {
