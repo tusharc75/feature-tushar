@@ -21,7 +21,8 @@ import {
   primaryFields,
   productInventory,
   isObjectEmpty,
-  sidebarResource
+  sidebarResource,
+  product
 } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import MomentUtils from '@date-io/moment';
@@ -104,6 +105,10 @@ const Report = () => {
         let {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
+
+        productFields?.filter((field) => ['expenseItem'].includes(field?.fieldData.fieldName)).forEach((field) => {
+          resourceFieldData.push(field);
+        })
 
         POFields.filter((field) =>
           ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
@@ -220,6 +225,10 @@ const Report = () => {
         let {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
+
+        productFields?.filter((field) => ['expenseItem'].includes(field?.fieldData.fieldName)).forEach((field) => {
+          resourceFieldData.push(field);
+        })
 
         POFields.filter((field) => ['purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
           if (field?.fieldData.fieldName === 'warehouse') {
@@ -383,6 +392,9 @@ const Report = () => {
             isUpdate: true
           });
         }
+        productFields?.filter((field) => ['expenseItem'].includes(field?.fieldData.fieldName)).forEach((field) => {
+          resourceFieldData.push(field);
+        })
 
         productFields
           .filter((field) => ['productName', 'productDescription', 'productNumber'].includes(field?.fieldData.fieldName))
@@ -429,13 +441,13 @@ const Report = () => {
           { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
           ...(user?.user?.brandPolicy?.storageLocation
             ? [
-                {
-                  field: 'storageLocation',
-                  headerName: 'Storage Location',
-                  show: true,
-                  cellRenderer: 'commonRenderer'
-                }
-              ]
+              {
+                field: 'storageLocation',
+                headerName: 'Storage Location',
+                show: true,
+                cellRenderer: 'commonRenderer'
+              }
+            ]
             : []),
           { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
           { field: 'serialNumber', headerName: 'Serial Number', filter: false, show: true, cellRenderer: 'serialNumberRenderer' },
@@ -462,6 +474,10 @@ const Report = () => {
         let {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
+
+        productFields?.filter((field) => ['expenseItem'].includes(field?.fieldData.fieldName)).forEach((field) => {
+          resourceFieldData.push(field);
+        })
 
         productFields.forEach((o: any) => {
           if (o?.fieldData.fieldName === 'productName') {
@@ -1156,13 +1172,17 @@ const Report = () => {
         });
 
         forDeepFilter.forEach((key) => {
-          const options = selectedData[key].value;
-          options.forEach((o: any) => {
+          if (selectedData[key].type === 'checkBox') {
             deepFilter.push({
               field: key,
-              term: o.optionValue
+              term: selectedData[key].value ? 'Yes' : 'No'
             });
-          });
+          } else {
+            deepFilter.push({
+              field: key,
+              term: selectedData[key].value?.map((d: any) => d.optionValue)
+            });
+          }
         });
 
         if (filterById.length > 0) {

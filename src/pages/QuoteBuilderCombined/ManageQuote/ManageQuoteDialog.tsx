@@ -12,7 +12,8 @@ import {
   customerAccount,
   getUniqueCurrencies,
   formFieldNames,
-  setFieldsInAscendingOrder
+  setFieldsInAscendingOrder,
+  GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -239,6 +240,10 @@ export default function ManageQuoteDialog({
           let tempQuoteData = JSON.parse(JSON.stringify(dataToUpdate));
           const { _id, createdBy, updatedBy, quoteName, versions, ...rest } = tempQuoteData;
           rest.owner = user?.user?._id;
+          rest['quoteName'] = GenerateResourceLineNumber(newFields);
+          if (newFields?.some((e) => e.fieldName === 'quoteDate')) {
+            rest['quoteDate'] = new Date();
+          }
           setInitialData({
             fields: newFields,
             values: {

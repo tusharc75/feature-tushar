@@ -1,17 +1,19 @@
-import React from 'react';
 import { Box, Button, IconButton } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
-import CarouselDialog from '../../../components/CarouselDialog';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import { Delete } from '@material-ui/icons';
-import CreateZip from "../CreateZip";
-import { read, utils, writeFile } from "xlsx";
+import React from 'react';
+import { read, utils, writeFile } from 'xlsx';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
+import CarouselDialog from '../../../components/CarouselDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../../components/Helpers/DeleteButton';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
+import routes from '../../../components/Helpers/Routes';
+import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
+import { getFrameworkComponents, getStaticFields } from '../../../constants/useColumns';
+import CreateZip from '../CreateZip';
+import { MobileImportIcon, MobileExportIcon } from 'src/assets/svg/svgIcons';
+import { isMobile, isTablet } from 'react-device-detect';
 
 interface ConfigProps {
   id: string;
@@ -19,7 +21,7 @@ interface ConfigProps {
 
 const Zipcode = (props: ConfigProps) => {
   const { id } = props;
-  const { setToastConfig, toastConfig } = React.useContext(CustomToastContext)
+  const { setToastConfig, toastConfig } = React.useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = React.useState(false);
   const [removing, setRemoving] = React.useState(false);
   const [showConfirmBox, setShowConfirmBox] = React.useState({
@@ -39,11 +41,10 @@ const Zipcode = (props: ConfigProps) => {
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
 
-
   React.useEffect(() => {
     fetchGridColumns();
     getZipData();
-  }, [])
+  }, []);
 
   const ActionRenderer = (params) => (
     <>
@@ -62,14 +63,7 @@ const Zipcode = (props: ConfigProps) => {
     </>
   );
 
-
-  const ZipNameRenderer = (params) => (
-    <>
-      {params.value}
-    </>
-  )
-
-
+  const ZipNameRenderer = (params) => <>{params.value}</>;
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -81,14 +75,13 @@ const Zipcode = (props: ConfigProps) => {
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
           zipNameRenderer: ZipNameRenderer,
-          actionsRenderer: ActionRenderer,
+          actionsRenderer: ActionRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
         setColumns([{ field: 'zipCode', headerName: 'Zip Code', show: true, cellRenderer: 'zipNameRenderer' }]);
       });
   };
-
 
   const getZipData = () => {
     dispatch({ type: 'loading', loading: true });
@@ -146,7 +139,6 @@ const Zipcode = (props: ConfigProps) => {
       });
   };
 
-
   const AddZip = (newZipCode: Array<any>) => {
     let newValues = { zoneZips: newZipCode };
     axiosInstance()
@@ -162,7 +154,7 @@ const Zipcode = (props: ConfigProps) => {
       .catch((error) => {
         setToastConfig(error);
       });
-  }
+  };
 
   const removeData = () => {
     setRemoving(true);
@@ -185,18 +177,18 @@ const Zipcode = (props: ConfigProps) => {
           zips: []
         });
         setRemoving(false);
-        setToastConfig(err)
+        setToastConfig(err);
       });
   };
 
   const handleExportFields = () => {
-    const header = ['Zip Code']
+    const header = ['Zip Code'];
     var ws = utils.json_to_sheet(section);
     if (header.length) {
       utils.sheet_add_aoa(ws, [header]);
     }
     var wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "Sheet1");
+    utils.book_append_sheet(wb, ws, 'Sheet1');
     writeFile(wb, `Zip Code.xlsx`);
   };
 
@@ -207,46 +199,48 @@ const Zipcode = (props: ConfigProps) => {
     var reader = new FileReader();
     reader.onload = function (e) {
       var data: any = e.target.result;
-      let readedData = read(data, { type: "binary" });
+      let readedData = read(data, { type: 'binary' });
       const wsname = readedData.SheetNames[0];
       const ws = readedData.Sheets[wsname];
       const dataParse = utils.sheet_to_json(ws, { header: 1 });
       let zipCode = dataParse.slice(1, dataParse?.length);
       let newZipCode = zipCode.map((item, i) => {
-        return item[0]
-      })
-      AddZip(newZipCode)
+        return item[0];
+      });
+      AddZip(newZipCode);
     };
     reader.readAsBinaryString(f);
   };
 
-
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" >
-        <Box mr={2} component={'div'}>
-          <Button style={{ marginTop: "20px",marginLeft:"20px" }} onClick={() => setOpenDialog(true)} size="small" variant="contained" color="primary" disableElevation>
-            Add Zip Code
+      <Box className="flex flex-wrap justify-between gap-2">
+        <Button onClick={() => setOpenDialog(true)} size="small" variant="contained" color="primary" disableElevation>
+          Add Zip Code
+        </Button>
+        <Box className="flex flex-wrap gap-2">
+          <Button size="small" variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1">
+            <label className=" cursor-pointer">
+              {isMobile && !isTablet ? <MobileImportIcon /> : 'Import from Excel'}
+              <input
+                onClick={(e: any) => (e.target.value = null)}
+                id="importField"
+                name="importField"
+                onChange={handleImportFields}
+                style={{
+                  opacity: '0',
+                  position: 'absolute',
+                  zIndex: -1
+                }}
+                type="file"
+              />
+            </label>
           </Button>
-
-        </Box>
-        <Box p={2} display="flex" justifyContent="space-between" style={{ marginLeft: "" }}>
-          <Box mt={1}> <label style={{ color: "#0E49B5" }}>Import from Excel |
-            <input
-              onClick={(e: any) => (e.target.value = null)}
-              id="importField"
-              name="importField"
-              onChange={handleImportFields}
-              style={{
-                opacity: "0",
-                position: "absolute",
-                zIndex: -1,
-              }}
-              type="file"
-            /></label>
-            <label style={{ color: "#0E49B5" }} onClick={handleExportFields}> Export to Excel</label> <a id="downloadAnchorElem" style={{ display: "none" }}></a></Box>
-
+          <Button size="small" variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleExportFields}>
+            {isMobile && !isTablet ? <MobileExportIcon /> : 'Export to Excel'}
+          </Button>
           <DeleteButton
+            mode="light"
             onClick={() => {
               setShowConfirmBox({
                 open: true,
@@ -257,9 +251,7 @@ const Zipcode = (props: ConfigProps) => {
             disabled={selectedRecords.length === 0}
             disableElevation
             text={'Delete'}
-            style={{ marginLeft: '10px' }}
           />
-
         </Box>
       </Box>
       <Box>
@@ -289,11 +281,9 @@ const Zipcode = (props: ConfigProps) => {
           isClone={false}
           onClose={() => setOpenDialog(false)}
           onSuccess={() => {
-            setOpenDialog(false)
+            setOpenDialog(false);
             getZipData();
-          }
-
-          }
+          }}
         />
       )}
       {carouselDialog.open && (

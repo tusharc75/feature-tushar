@@ -62,7 +62,7 @@ const ProductBuilder = (props) => {
     setColumnForPDFExcel,
     setColumnDatas,
     fullScreen = false,
-    quoteData = null,
+    quoteData = null
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -102,7 +102,7 @@ const ProductBuilder = (props) => {
 
   useEffect(() => {
     fetchProduct(productBuilderId);
-  }, [productBuilderId]);
+  }, [productBuilderId, stage]);
 
   const fetchProduct = (id) => {
     dispatch({ type: 'loading', loading: true });
@@ -158,7 +158,7 @@ const ProductBuilder = (props) => {
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         setColumns([...columns]);
-        setColumnDatas([...columns])
+        setColumnDatas([...columns]);
         if (setColumnForPDFExcel) {
           setColumnForPDFExcel([...columns].filter((d) => d.field !== 'srno').map((d) => d.headerName));
         }
@@ -605,9 +605,9 @@ const ProductBuilder = (props) => {
   };
 
   return (
-    <Box p={1} pt={0}>
+    <Box pt={0}>
       {Editable && (
-        <div className="d-flex align-items justify-content-end">
+        <div className="d-flex align-items gap-2 justify-end ml-auto">
           {permissions?.isUpdate && (
             <ImportExportLinks
               permissions={permissions}
@@ -635,7 +635,6 @@ const ProductBuilder = (props) => {
               variant="contained"
               color="primary"
               size="small"
-              className="float-right ml-1 mr-2"
               onClick={() => {
                 let tempSupplierAccountId = [];
                 selectedRecords?.forEach((element) => {
@@ -673,7 +672,6 @@ const ProductBuilder = (props) => {
               variant="contained"
               color="primary"
               size="small"
-              className="float-right ml-1 mr-2"
               startIcon={<AiTwotoneEdit />}
               onClick={handelOpenBulkEdit}
               disabled={checkUniqTemplate()}
@@ -683,25 +681,23 @@ const ProductBuilder = (props) => {
             </Button>
           )}
           {permissions?.isUpdate && (
-            <div className="ml-[8px]">
-              <Button
-                size="small"
-                color="primary"
-                className="float-right new-dropdown-v1"
-                disabled={
-                  isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
+            <Button
+              size="small"
+              color="primary"
+              className="float-right new-dropdown-v1"
+              disabled={
+                isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
+                  ? false
+                  : selectedRecords.length
                     ? false
-                    : selectedRecords.length
-                      ? false
-                      : true
-                }
-                onClick={openActions}
-                endIcon={<ExpandMore />}
-                aria-controls="action-menu"
-              >
-                {isMobile && !isTablet ? '' : 'Actions'}
-              </Button>
-            </div>
+                    : true
+              }
+              onClick={openActions}
+              endIcon={<ExpandMore />}
+              aria-controls="action-menu"
+            >
+              Actions
+            </Button>
           )}
           <Menu
             anchorEl={anchorEl}
