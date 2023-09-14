@@ -3342,8 +3342,14 @@ body {
     }
     [data-mode='dark'] & {
       background-color: var(--dark-primary) !important;
+      &.light {
+        background-color: var(--dark-secondary) !important;
+      }
       border: 0px !important;
       &:hover {
+        &.light {
+          background-color: hsl(240, 27%, 25%) !important;
+        }
         background-color: hsl(240, 27%, 25%) !important;
       }
     }
