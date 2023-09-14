@@ -53,8 +53,6 @@ function ServiceOrderViews({ serviceData }) {
       }])}`);
 
       const invoices = await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`);
-      console.log(invoices.data.data);
-      console.log(fieldTickets.data.data);
 
       var xPosition = 0;
       var flowEdge: any[] = [];
