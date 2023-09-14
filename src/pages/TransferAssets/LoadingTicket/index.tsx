@@ -12,7 +12,8 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_FROM_TO_TYPE,
   serializedAsset,
-  prepareDataForGrid
+  prepareDataForGrid,
+  ASSET_STATUS
 } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -26,6 +27,9 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import PreviewDownload from 'src/components/PreviewDownload';
 import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import { Link } from 'react-router-dom';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import InfoIcon from '@material-ui/icons/Info';
 
 interface LoadingGridProps {
   permissions: any;
@@ -120,10 +124,47 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         data?.filter(d => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))?.forEach((o) => {
           let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
           if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
+            if (o?.fieldData?.fieldName === 'assetNumber') {
+              const assetNumberColumn = {
+                accessor: o?.fieldData?.fieldName,
+                Header: o?.fieldData?.fieldLabel,
+                width: 300,
+                sticky: isMobile ? 'none' : 'left',
+                primaryField: true,
+                Cell: ({ row }) => (row?.original?.assetNumber ?
+                  <div className="d-flex gap-2 align-items-center">
+                    <p
+                      className="link cursor-pointer"
+                      title={row?.original?.assetNumber}
+                      onClick={() => window.open(`${routes.serializedAssetDetail.path}/${row?.original?._id}`)}>
+                      {row?.original?.assetNumber}
+                    </p>
+                    {row?.original?.isReplaced && (
+                      <Box >
+                        <HtmlTooltip title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
+                          <InfoIcon fontSize="small" color={'primary'} />
+                        </HtmlTooltip>
+                      </Box>
+                    )}
+                  </div>
+                  :
+                  <NoDataCell />),
+                setCellClassNames: (row) => {
+                  if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.status)) {
+                    return 'error';
+                  }
+                  if (row?.isReplaced) {
+                    return 'isPurchaseOrder'
+                  };
+                }
+              }
+              columns = [...columns, assetNumberColumn];
+            }
+            else {
+              columns = [...columns, currentColumn?.columnData];
+            }
           }
         });
-
         const column = [
           {
             accessor: 'index',
@@ -131,16 +172,23 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             width: 70,
             sticky: isMobile ? 'none' : 'left',
             Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
-            Footer: () => {
-              return <>Total</>;
-            }
           },
           ...columns,
           {
             accessor: 'loadingTicket',
             Header: 'Loading Ticket',
             width: 200,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.loadingTicket || <NoDataCell />}</p>
+            Cell: ({ row }) => row?.original?.loadingTicket ?
+              <Link
+                className="link text-truncate"
+                title={row?.original?.loadingTicket}
+                to={`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row?.original?.loadingTicket}
+              </Link>
+              : <NoDataCell />
           },
           {
             accessor: 'loadingTicketStatus',
@@ -278,7 +326,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     data.referenceId = transferAssetId;
     const assets: any = [];
     selectedRecords?.forEach((element: any) => {
-      const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
+      const result = rows.filter((f) => f.productId === element?.productId && !f.isCounted);
       if (result.length) {
         assets.push({ _id: element._id, status: element.status, deliveryTicketId: element.loadingTicketId, newId: result[0]._id });
         result[0].isCounted = true;
@@ -314,7 +362,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         <PreviewDownload
           resource={sidebarResource.transferAsset}
           referenceId={transferAssetId}
-          columns={columns?.filter((e) => ['assetNumber', 'product', 'productDescription', 'status']?.includes(e?.accessor))}
+          columns={columns?.filter((e) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(e?.accessor))}
           hideDetailButton={true}
         />
         {allowedToEdit && !isTransferEnded && (
@@ -417,14 +465,14 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     onClick={() => {
                       const products = [];
                       selectedRecords?.forEach((element) => {
-                        const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
+                        const foundProduct = products.filter((e) => e._id === element?.productId);
                         if (foundProduct.length) {
                           foundProduct[0].qty += 1;
                         } else {
                           products.push({
-                            _id: element?.product?.optionValue,
-                            id: element?.product?.optionValue,
-                            productName: element?.product?.optionLabel,
+                            _id: element?.productId,
+                            id: element?.productId,
+                            productName: element?.product,
                             qty: 1
                           });
                         }
