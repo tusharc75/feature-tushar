@@ -429,13 +429,13 @@ const Report = () => {
           { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
           ...(user?.user?.brandPolicy?.storageLocation
             ? [
-                {
-                  field: 'storageLocation',
-                  headerName: 'Storage Location',
-                  show: true,
-                  cellRenderer: 'commonRenderer'
-                }
-              ]
+              {
+                field: 'storageLocation',
+                headerName: 'Storage Location',
+                show: true,
+                cellRenderer: 'commonRenderer'
+              }
+            ]
             : []),
           { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
           { field: 'serialNumber', headerName: 'Serial Number', filter: false, show: true, cellRenderer: 'serialNumberRenderer' },
@@ -855,6 +855,26 @@ const Report = () => {
         columns = [...columns, ...getStaticFields()];
       }
 
+      if (['purchaseOrderDetails', 'inventoryEvaluation', 'inventoryHistory', 'averagePriceBySupplier'].includes(resourceCamelCase)) {
+        resourceFieldData.push({
+          fieldData: {
+            _id: "64d21897295ae376509d6129",
+            fieldLabel: "Expense Item",
+            fieldName: "expenseItem",
+            type: "checkBox",
+            option: [],
+            required: false,
+            filter: true,
+            sectionName: "PO Information",
+            resource: sidebarResource.purchaseOrder,
+            brand: user.brand
+          },
+          isCreate: true,
+          isRead: true,
+          isUpdate: true
+        })
+      }
+
       setResourceColumns(resourceFieldData);
       setColumns(columns);
       setLoadingColumns(false);
@@ -1156,13 +1176,17 @@ const Report = () => {
         });
 
         forDeepFilter.forEach((key) => {
-          const options = selectedData[key].value;
-          options.forEach((o: any) => {
+          if (selectedData[key].type === 'checkBox') {
             deepFilter.push({
               field: key,
-              term: o.optionValue
+              term: selectedData[key].value ? 'Yes' : 'No'
             });
-          });
+          } else {
+            deepFilter.push({
+              field: key,
+              term: selectedData[key].value?.map((d: any) => d.optionValue)
+            });
+          }
         });
 
         if (filterById.length > 0) {
