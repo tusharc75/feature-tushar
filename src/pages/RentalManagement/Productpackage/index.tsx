@@ -25,7 +25,6 @@ import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { generateCustomTableColumns, flattenArray } from 'src/constants/columns';
-import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AssetAvailability from '../AssetAvailability';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 import { ExpandMore } from '@material-ui/icons';

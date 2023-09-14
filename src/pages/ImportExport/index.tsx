@@ -12,6 +12,8 @@ import CustomContainer from 'src/components/CustomContainer';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateTimeRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import { GetApp } from '@material-ui/icons';
+import {CustomImport} from './customImport';
+
 
 const ImportExport = () => {
 
@@ -29,6 +31,10 @@ const ImportExport = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, page, limit, pageSizes, appendRows } = state;
 
+  const [selectCustomHeader, setSelectCustomHeader] = useState(null);
+  const [selectTemplateHeader, setSelectTemplateHeader] = useState(null);
+  const [customImportDialog, setCustomImportDialog] = useState(false);
+  const [file, setFile] = useState({});
 
   useEffect(() => {
     fetchLogs();
@@ -171,6 +177,72 @@ const ImportExport = () => {
         toastConfig.setToastConfig(err);
       });
   };
+
+
+  const handleCustomImport = async (e) => {
+    let files = e.target.files[0];
+    setExcelUploadProgress(0);
+    let formData = new FormData();
+    formData.append('file', files);
+    let uploadUrl = `/import-export/custom-import${selectResource ? `?resource=${selectResource}` : ''}`;
+    setImgUploading(true);
+    if (uploadingImageOrFileProgress) {
+      setUploadingImageOrFileProgress(1);
+    }
+    await axiosInstance()
+      .post(uploadUrl, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (pE) => {
+          const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
+          setExcelUploadProgress(completedPercent);
+          if (uploadingImageOrFileProgress) {
+            setUploadingImageOrFileProgress(completedPercent);
+          }
+          if (completedPercent === 100) {
+            setTimeout(() => {
+              setExcelUploadProgress(0);
+              if (uploadingImageOrFileProgress) {
+                setUploadingImageOrFileProgress(0);
+              }
+            }, 4000);
+          }
+        }
+      })
+      .then(({ data }) => {
+        setImgUploading(false);
+        let customHeader = data.data.CustomFileHeaders
+        setFile(data.data.file)
+        customHeader = customHeader.reduce((result, curr) => {
+          if (curr == null) {
+            return result
+          }
+          result.push({"value": curr, "label": curr})
+          return result
+        }, [])
+        let templateHeader = data.data.TemplateHeaders
+        templateHeader = templateHeader.reduce((result, curr) => {
+          if (curr == null) {
+            return result
+          }
+          result.push({"value": curr, "label": curr})
+          return result
+        }, [])
+
+        setSelectCustomHeader(customHeader);
+        setSelectTemplateHeader(templateHeader);
+        setCustomImportDialog(true);
+        fetchLogs();
+      })
+      .catch((err) => {
+        setImgUploading(false);
+        setToastConfig(err);
+        setExcelUploadProgress(0);
+        if (uploadingImageOrFileProgress) {
+          setUploadingImageOrFileProgress(0);
+        }
+      });
+  };
+
 
   const column = [
     {
@@ -335,6 +407,36 @@ const ImportExport = () => {
             )}
           </Grid>
           <Grid item>
+            <input
+              id={`customImportFile`}
+              name={`customImportFile`}
+              onChange={handleCustomImport}
+              style={{ display: 'none' }}
+              onClick={(e: any) => (e.target.value = null)}
+              type="file"
+              accept=".xlsx,.csv"
+            />
+            <label htmlFor={`customImportFile`}>
+              <Button
+                size="small"
+                variant="outlined"
+                component="span"
+                disabled={isImgUploading || !selectResource}
+                startIcon={<AiOutlineImport />}
+              >
+                Custom Import 
+              </Button>
+            </label>
+            {isImgUploading && (
+              <>
+                <CircularProgress variant="determinate" value={excelUploadProgress} size={30} />
+                <Box>
+                  <Typography variant="caption" component="div" color="textSecondary">{`${excelUploadProgress}%`}</Typography>
+                </Box>
+              </>
+            )}
+          </Grid>
+          <Grid item>
             <Button
               size="small"
               variant="outlined"
@@ -382,6 +484,18 @@ const ImportExport = () => {
             allowSelection={false}
             refreshGrid={fetchLogs}
           />
+          {
+            customImportDialog && (
+              <CustomImport
+                open={customImportDialog}
+                handleClose={() => setCustomImportDialog(false)}
+                resource={selectResource ? selectResource : ''}
+                customImportHeader={selectCustomHeader}
+                templateImportHeader={selectTemplateHeader}
+                file={file}
+              />
+            )
+          }
         </Box>
       </CustomContainer>
     </Fragment>
