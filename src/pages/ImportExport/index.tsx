@@ -219,18 +219,15 @@ const ImportExport = () => {
           result.push({"value": curr, "label": curr})
           return result
         }, [])
-        console.log("THis is the value of the custom header after the reduce function", customHeader)
         let templateHeader = data.data.TemplateHeaders
         templateHeader = templateHeader.reduce((result, curr) => {
           if (curr == null) {
-            console.log("inside null")
             return result
           }
           result.push({"value": curr, "label": curr})
           return result
         }, [])
 
-        console.log("THis is the value of the template header after the reduce function", templateHeader)
         setSelectCustomHeader(customHeader);
         setSelectTemplateHeader(templateHeader);
         setCustomImportDialog(true);
