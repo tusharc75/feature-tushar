@@ -18,10 +18,12 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 function Parts({ id }) {
+
   const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
   const {
     state: { permissions, user, selectedEntity }
   }: any = useData();
+
   const hasPermissions = permissions && permissions[product.permission]?.isUpdate;
   const { setToastConfig } = useContext(CustomToastContext);
 
@@ -56,13 +58,8 @@ function Parts({ id }) {
 
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get('/field?resource=Product&view=true');
-    const data = response?.data?.data;
-    const fields = data?.map((i) => i?.fieldData)
-    const filterFieldnames = ["productDescription", "productNumber", "productCategory", "serializedProduct"];
-    const filteredFields = fields.filter(field => {
-      return filterFieldnames.some(filterFieldname => filterFieldname === field.fieldName);
-    });
-    const newColumns = generateCustomTableColumns(filteredFields, 'USD', renderedFrom);
+    const fields = response?.data?.data?.map((e) => e?.fieldData);
+
     let coloum: any = [
       {
         accessor: 'index',
@@ -70,15 +67,11 @@ function Parts({ id }) {
         width: 70,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
-      },
-      {
-        accessor: 'qty',
-        Header: 'Qty',
-        width: 150,
-      },
+      }
     ]
-    fields?.forEach((ele) => {
-      if(ele?.fieldName === 'productName') {
+
+    fields?.filter((e) => ['productName']?.includes(e.fieldName))?.forEach((ele) => {
+      if (ele?.fieldName === 'productName') {
         coloum.push({
           accessor: 'productName',
           Header: ele?.fieldLabel,
@@ -101,7 +94,14 @@ function Parts({ id }) {
         })
       }
     })
-    coloum = [...coloum, ...newColumns];
+    const newColumns = generateCustomTableColumns(fields?.filter((e) => ['productDescription', 'productNumber', 'productCategory', 'productCategory']?.includes(e?.fieldName))
+      , 'USD', renderedFrom);
+
+    coloum = [...coloum, ...newColumns, {
+      accessor: 'qty',
+      Header: 'Qty',
+      width: 150,
+    }];
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
@@ -112,19 +112,18 @@ function Parts({ id }) {
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {
-            hasPermissions && (
-              <Tooltip title="Delete">
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setShowConfirmBox({ open: true, data: [row.original] });
-                  }}
-                >
-                  <Delete fontSize="small" color="error" />
-                </IconButton>
-              </Tooltip>
-            )
+          {hasPermissions && (
+            <Tooltip title="Delete">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setShowConfirmBox({ open: true, data: [row.original] });
+                }}
+              >
+                <Delete fontSize="small" color="error" />
+              </IconButton>
+            </Tooltip>
+          )
           }
         </>
       )
@@ -237,6 +236,7 @@ function Parts({ id }) {
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             columns={columns}
+            height={'calc(100vh - 345px)'}
             data={rowsData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
             onSelect={setSelectedRecords}
