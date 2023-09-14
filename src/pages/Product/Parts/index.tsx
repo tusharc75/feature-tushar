@@ -76,27 +76,31 @@ function Parts({ id }) {
         Header: 'Qty',
         width: 150,
       },
-      {
-        accessor: 'productName',
-        Header: 'Product Type',
-        width: 200,
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p className="text-truncate">{row.original.productName}</p>
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.productDetail.path}/${row.original._id}`)
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
-          </div>
-        )
-      }
     ]
+    fields?.forEach((ele) => {
+      if(ele?.fieldName === 'productName') {
+        coloum.push({
+          accessor: 'productName',
+          Header: ele?.fieldLabel,
+          width: 200,
+          Cell: ({ row }) => (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p className="text-truncate">{row.original.productName}</p>
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.productDetail.path}/${row.original._id}`)
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+            </div>
+          )
+        })
+      }
+    })
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
