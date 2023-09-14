@@ -72,54 +72,48 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
                       <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={1}>
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
-                            <Grid container className="detailCardHeader">
-                              <Grid item xs={12} sm={12}>
-                                <Grid item xs={12} sm={8}>
-                                  {opportunity.entity === selectedEntity ? (
-                                    <Link className="link" to={`${routes.opportunityDetail.path}/${opportunity._id}`}>
-                                      <Typography>{opportunity?.opportunityName}</Typography>
-                                    </Link>
-                                  ) : (
-                                    <span className="d-flex gap-2 align-items-center">
-                                      <Typography>{opportunity.opportunityName}</Typography>{' '}
-                                      <Tooltip title={`${opportunity.opportunityName} belongs to different entity`}>
-                                        <InfoOutlinedIcon fontSize="small" />
-                                      </Tooltip>
-                                    </span>
-                                  )}
-                                </Grid>
-                                {opportunity?.estimatedAmount && (
-                                  <Grid item xs={12} sm={4}>
-                                    <Typography
-                                      className="amount"
-                                      title={formatAmountWithCurrency(opportunity['currency'], opportunity?.estimatedAmount).fullFormatAmount}
-                                    >
-                                      {formatAmountWithCurrency(opportunity['currency'], opportunity?.estimatedAmount).fullFormatAmount}
-                                    </Typography>
-                                  </Grid>
+                            <div className="mb-2">
+                              {opportunity.entity === selectedEntity ? (
+                                <Link className="link" to={`${routes.opportunityDetail.path}/${opportunity._id}`}>
+                                  <Typography>{opportunity?.opportunityName}</Typography>
+                                </Link>
+                              ) : (
+                                <span className="d-flex gap-2 align-items-center">
+                                  <Typography>{opportunity.opportunityName}</Typography>{' '}
+                                  <Tooltip title={`${opportunity.opportunityName} belongs to different entity`}>
+                                    <InfoOutlinedIcon fontSize="small" />
+                                  </Tooltip>
+                                </span>
+                              )}
+                            </div>
+                            {opportunity?.estimatedAmount && (
+                              <p
+                                className="font-semibold text-[14px] text-gray-400"
+                                title={formatAmountWithCurrency(opportunity['currency'], opportunity?.estimatedAmount).fullFormatAmount}
+                              >
+                                Estimated Amount : {formatAmountWithCurrency(opportunity['currency'], opportunity?.estimatedAmount).fullFormatAmount}
+                              </p>
+                            )}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div>
+                                {opportunity?.stage ? (
+                                  <DisplayData label="Stage" value={opportunity?.stage ?? ''} icon={<BiCustomize size={20} />} />
+                                ) : (
+                                  ''
                                 )}
-                                <Grid container>
-                                  <Grid item xs={12} sm={12}>
-                                    {opportunity?.stage ? (
-                                      <DisplayData label="Stage" value={opportunity?.stage ?? ''} icon={<BiCustomize size={20} />} />
-                                    ) : (
-                                      ''
-                                    )}
-                                  </Grid>
-                                  <Grid item xs={12} sm={12}>
-                                    {opportunity?.closeDate ? (
-                                      <DisplayData
-                                        label="Closing Date"
-                                        value={displayDate(opportunity.closeDate)}
-                                        icon={<IoCalendarOutline size={20} />}
-                                      />
-                                    ) : (
-                                      ''
-                                    )}
-                                  </Grid>
-                                </Grid>
-                              </Grid>
-                            </Grid>
+                              </div>
+                              <div>
+                                {opportunity?.closeDate ? (
+                                  <DisplayData
+                                    label="Closing Date"
+                                    value={displayDate(opportunity.closeDate)}
+                                    icon={<IoCalendarOutline size={20} />}
+                                  />
+                                ) : (
+                                  ''
+                                )}
+                              </div>
+                            </div>
                           </CardContent>
                         </Card>
                       </Grid>
