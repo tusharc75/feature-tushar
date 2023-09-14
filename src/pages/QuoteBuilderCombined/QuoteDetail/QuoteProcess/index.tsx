@@ -46,7 +46,6 @@ import { utils, write } from 'xlsx-js-style';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import ImportExportIcon from '@material-ui/icons/ImportExport';
-import AdditionalData from './AdditionalData';
 import CustomDialogContent from '../../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -67,7 +66,6 @@ import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import CustomDialogFooter from '../../../../components/CustomDialog/CustomDialogFooter';
 import CustomButton from '../../../../components/Helpers/CustomButton';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-// import Steps from 'src/components/Steps';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import PreviewDownload from 'src/components/PreviewDownload';
 
@@ -120,15 +118,6 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     top: '4px',
     right: '20px'
-  },
-  productPos: {
-    position: 'absolute',
-    top: '1px',
-    left: '6px',
-    [theme.breakpoints.down('xs')]: {
-      display: 'flex',
-      alignItems: 'center'
-    }
   }
 }));
 
@@ -313,7 +302,7 @@ export default function QuoteProcess(props) {
   const [showPDFArrangeColumns, setShowPDFArrangeColumns] = useState(false);
   const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [columns, setColumnDatas] = useState([])
+  const [columns, setColumnDatas] = useState([]);
 
   const [messageDialog, setMessageDialog] = useState({
     open: false,
@@ -1281,6 +1270,7 @@ export default function QuoteProcess(props) {
     return ((profit * 100) / parsedCP).toFixed(2);
   };
 
+
   return (
     <>
       <div>
@@ -1317,7 +1307,6 @@ export default function QuoteProcess(props) {
           setStepFullScreen={() => setStepFullScreen(true)}
         />
       </div>
-
       <div className={`pt-[12px] subDetailModule `}>
         <ContentFullScreen
           title={DOASteps.find((d) => d?.key === ProcessStatus).label || ''}
@@ -1326,52 +1315,99 @@ export default function QuoteProcess(props) {
         >
           {!loading && quoteData ? (
             <Grid container className="position-relative">
-              <Grid item xs={12} sm={12} md={12} className="d-flex align-items-center gap-1">
-                {!ifQuoteApproved.approved && ProcessStatus === 'New' && allowedToEdit ? (
-                  <span className={`${classes.productPos} m-2`}>
-                    <Tooltip title="Add New Product">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        className="mr-1"
-                        startIcon={<AiFillPlusCircle />}
-                        color="primary"
-                        disabled={!permissions.product?.isCreate}
-                        onClick={() => {
-                          setIsAddNewProduct(true);
-                        }}
-                      >
-                        {isMobile && !isTablet ? '' : 'Add New Product'}
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title="Add Existing Product">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<BiLayerPlus />}
-                        color="primary"
-                        onClick={() => {
-                          setIsAddExistingProduct(true);
-                        }}
-                      >
-                        {isMobile && !isTablet ? '' : 'Add Existing Product'}
-                      </Button>
-                    </Tooltip>
-                  </span>
-                ) : null}
-              </Grid>
               <div className="flex items-center justify-between flex-wrap w-full mx-3 gap-[8px]">
-                {!['New', 'Price Builder'].includes(ProcessStatus) && (
-                  <PreviewDownload
-                    resource={sidebarResource.quoteBuilder}
-                    referenceId={quoteData?._id}
-                    columns={columns}
-                    hideDetailButton={true}
-                    isSendEmail={true}
-                    extraQueryParams={{ uniqueId: quoteData.versions[currentVersion]._id }} />
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  {!ifQuoteApproved.approved && ProcessStatus === 'New' && allowedToEdit ? (
+                    <>
+                      <Tooltip title="Add New Product">
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                          className="btn-outline-v1"
+                          size="small"
+                          startIcon={<AiFillPlusCircle />}
+                          color="primary"
+                          disabled={!permissions.product?.isCreate}
+                          onClick={() => {
+                            setIsAddNewProduct(true);
+                          }}
+                        >
+                          {isMobile && !isTablet ? '' : 'Add New Product'}
+                        </Button>
+                      </Tooltip>
+                      <Tooltip title="Add Existing Product">
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                          className="btn-outline-v1"
+                          size="small"
+                          startIcon={<BiLayerPlus />}
+                          color="primary"
+                          onClick={() => {
+                            setIsAddExistingProduct(true);
+                          }}
+                        >
+                          {isMobile && !isTablet ? '' : 'Add Existing Product'}
+                        </Button>
+                      </Tooltip>
+                    </>
+                  ) : null}
+                  {!['New', 'Price Builder'].includes(ProcessStatus) && allowedToEdit && (
+                    <PreviewDownload
+                      resource={sidebarResource.quoteBuilder}
+                      referenceId={quoteData?._id}
+                      columns={columns}
+                      hideDetailButton={true}
+                      isSendEmail={true}
+                      extraQueryParams={{ uniqueId: quoteData.versions[currentVersion]._id }}
+                      defaultColumns={['productName',
+                        'unit',
+                        'qty',
+                        `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
+                        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`]}
+                    />
+                  )}
+                  {['Send To Customer', 'End'].includes(ProcessStatus) && (
+                    <>
+                      <Tooltip title="AI Suggestion">
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                          className="btn-outline-v1"
+                          size="small"
+                          color="primary"
+                          startIcon={<GiVintageRobot />}
+                          onClick={() => {
+                            setShowAiDialog(true);
+                          }}
+                        >
+                          {isMobile && !isTablet ? '' : 'AI Suggestion'}
+                        </Button>
+                      </Tooltip>
+                      {permissions[qbResource]?.isUpdate &&
+                        (user?.user?._id === quoteData?.owner?.optionValue ||
+                          quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
+                          <Tooltip title="Edit Quote PDF Template">
+                            <Button
+                              onClick={() => {
+                                quoteData?.pDFTemplate.optionValue &&
+                                  history.push(
+                                    `/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`
+                                  );
+                              }}
+                              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                              size="small"
+                              className="btn-outline-v1"
+                              startIcon={isMobile && !isTablet ? '' : <AiFillEdit />}
+                              color="primary"
+                            >
+                              {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
+                              {isMobile && !isTablet ? '' : 'Quote Template'}
+                            </Button>
+                          </Tooltip>
+                        )}
+                    </>
+                  )}
+                </div>
                 {ProcessStatus !== 'New' && ProcessStatus !== 'Price Builder' ? (
-                  <span className="d-flex align-items-center justify-content-end">
+                  <span className="d-flex flex-wrap gap-2 align-items-center justify-content-end ml-auto">
                     <Tooltip title="View">
                       <Button
                         onClick={() => {
@@ -1380,7 +1416,7 @@ export default function QuoteProcess(props) {
                         variant="outlined"
                         disabled={viewDownloadLoading || updatingVersion}
                         size="small"
-                        className="mr-1 setIconForMobile"
+                        className="setIconForMobile"
                         startIcon={isMobile && !isTablet ? '' : <AiOutlineEye />}
                         color="primary"
                       >
@@ -1397,48 +1433,12 @@ export default function QuoteProcess(props) {
                         }}
                         variant="outlined"
                         size="small"
-                        className="mr-1 setIconForMobile"
+                        className="setIconForMobile"
                         startIcon={isMobile && !isTablet ? '' : <FiDownloadCloud />}
                         color="primary"
                       >
                         {isMobile && !isTablet ? <FiDownloadCloud size={20} /> : ''}
                         {isMobile && !isTablet ? '' : 'Download'}
-                      </Button>
-                    </Tooltip>
-                    {permissions[qbResource]?.isUpdate &&
-                      (user?.user?._id === quoteData?.owner?.optionValue ||
-                        quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
-                        <Tooltip title="Edit Quote PDF Template">
-                          <Button
-                            onClick={() => {
-                              quoteData?.pDFTemplate.optionValue &&
-                                history.push(
-                                  `/quote-pdf-template/detail/${quoteData.pDFTemplate.optionValue}?quote=${quoteData._id}&version=${currentVersion}`
-                                );
-                            }}
-                            variant="outlined"
-                            size="small"
-                            className="mr-1"
-                            startIcon={isMobile && !isTablet ? '' : <AiFillEdit />}
-                            color="primary"
-                          >
-                            {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
-                            {isMobile && !isTablet ? '' : 'Quote Template'}
-                          </Button>
-                        </Tooltip>
-                      )}
-                    <Tooltip title="AI Suggestion">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="primary"
-                        className="mr-1"
-                        startIcon={<GiVintageRobot />}
-                        onClick={() => {
-                          setShowAiDialog(true);
-                        }}
-                      >
-                        {isMobile && !isTablet ? '' : 'AI Suggestion'}
                       </Button>
                     </Tooltip>
                     {ProcessStatus === 'Quote Builder' && (
@@ -1448,7 +1448,6 @@ export default function QuoteProcess(props) {
                           size="small"
                           startIcon={<AiOutlineFilePdf />}
                           color="primary"
-                          className="mr-1"
                           onClick={() => {
                             setShowPDFArrangeColumns(true);
                           }}
@@ -1462,7 +1461,6 @@ export default function QuoteProcess(props) {
                         <Button
                           variant="outlined"
                           size="small"
-                          className="mr-1"
                           startIcon={<AiOutlineFileExcel />}
                           color="primary"
                           onClick={() => {
@@ -1477,7 +1475,7 @@ export default function QuoteProcess(props) {
                 ) : null}
                 {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
                   (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
-                  <div className={`flex items-center ml-auto ${isMobile ? 'actio-pos-quote' : ''}`}>
+                  <div className={`flex flex-wrap items-center ml-auto ${isMobile ? 'actio-pos-quote' : ''}`}>
                     {!ifQuoteApproved.approved && (
                       <Button
                         onClick={() => {
@@ -1514,17 +1512,6 @@ export default function QuoteProcess(props) {
               </div>
               <Grid item xs={12} sm={12} md={12} className="mt-1">
                 {quoteData && !loading && productBuilderId ? (
-                  // ProcessStatus === "Quote Builder" &&
-                  //     visibleColumns.length > 0 ? (
-                  //     <ProductGrid
-                  //         productBuilderId={productBuilderId}
-                  //         refreshProducts={refreshProducts}
-                  //         stage={"cost"}
-                  //         isAll={true}
-                  //         columnsData={visibleColumns}
-                  //         currency={quoteData?.currency}
-                  //     />
-
                   <ProductBuilder
                     fromQuote={true}
                     quoteData={quoteData}
@@ -1547,15 +1534,6 @@ export default function QuoteProcess(props) {
                 ) : (
                   <Loader style={{ minHeight: 300 }} text="Loading..." />
                 )}
-                {/* {ProcessStatus === "Quote Builder" && (
-                                <AdditionalData
-                                    fetchTNC={fetchTNC}
-                                    state={state}
-                                    dispatch={dispatch}
-                                    allowedToEdit={allowedToEdit}
-                                    handleVersionUpdateFromAdditionalData={handleVersionUpdateFromAdditionalData}
-                                />
-                            )} */}
               </Grid>
             </Grid>
           ) : null}
