@@ -25,24 +25,20 @@ export const CustomImport = ({
         let _keyValue = [];
         customImportHeader.forEach( (_value) => {
             if(templateImportHeader.find((templateImportHeader) => templateImportHeader?.value === _value?.value) ? true : false){
-                console.log("here1", [..._keyValue, {templateImportHeader: _value?.value, customImportHeader: _value?.value}])
                 _keyValue = [..._keyValue, {templateImportHeader: _value?.value, customImportHeader: _value?.value}];
             }
         })
         return _keyValue; 
     });
-    console.log("keyValue", keyValue)
     const handleCustomImport = () => {
         let body = {
             resource: resource,
             file: file,
             keyValue: keyValue,
         }
-        console.log("body", body)
         axiosInstance()
         .post(`/import-export/custom-import/headers?resource=${resource}`, body)
         .then((res) => {
-            console.log(res);
             toastConfig.setToastConfig({
                 open: true,
                 type: 'success',
@@ -50,7 +46,6 @@ export const CustomImport = ({
             });
         })
         .catch((err) => {
-            console.log(err);
         });
     };
 

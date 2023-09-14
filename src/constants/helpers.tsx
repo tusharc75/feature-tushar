@@ -2010,6 +2010,14 @@ export const TRANSFER_INVENTORY_STATUS = {
   delivered: 'Delivered'
 };
 
+export const TRANSFER_ASSET_STATUS = {
+  new: 'New',
+  inProgress: 'In Progress',
+  readyToShip: 'Ready to ship',
+  inTransit: 'In-Transit',
+  delivered: 'Delivered'
+};
+
 export const REPAIR_PROCESS_STATUS = {
   start: 'Start',
   complete: 'Complete',
