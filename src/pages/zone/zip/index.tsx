@@ -212,46 +212,31 @@ const Zipcode = (props: ConfigProps) => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between">
-        <Box mr={2} component={'div'}>
-          <Button
-            style={{ marginTop: '20px', marginLeft: '20px' }}
-            onClick={() => setOpenDialog(true)}
-            size="small"
-            variant="contained"
-            color="primary"
-            disableElevation
-          >
-            Add Zip Code
+      <Box className="flex flex-wrap justify-between gap-2">
+        <Button onClick={() => setOpenDialog(true)} size="small" variant="contained" color="primary" disableElevation>
+          Add Zip Code
+        </Button>
+        <Box className="flex flex-wrap gap-2">
+          <Button size="small" variant="outlined" className="btn-outline-v1">
+            <label className=" cursor-pointer">
+              Import from Excel
+              <input
+                onClick={(e: any) => (e.target.value = null)}
+                id="importField"
+                name="importField"
+                onChange={handleImportFields}
+                style={{
+                  opacity: '0',
+                  position: 'absolute',
+                  zIndex: -1
+                }}
+                type="file"
+              />
+            </label>
           </Button>
-        </Box>
-        <Box p={2} display="flex" justifyContent="space-between" style={{ marginLeft: '' }}>
-          <Box className="flex flex-wrap gap-2">
-            <Button size="small" variant="outlined" className="btn-outline-v1">
-              <label className=" cursor-pointer">
-                Import from Excel
-                <input
-                  onClick={(e: any) => (e.target.value = null)}
-                  id="importField"
-                  name="importField"
-                  onChange={handleImportFields}
-                  style={{
-                    opacity: '0',
-                    position: 'absolute',
-                    zIndex: -1
-                  }}
-                  type="file"
-                />
-              </label>
-            </Button>
-            <Button size="small" variant="outlined" className="btn-outline-v1" onClick={handleExportFields}>
-              Export to Excel
-            </Button>{' '}
-            {/* <a id="downloadAnchorElem" style={{ display: 'none' }}>
-              <span className="sr-only">hi</span>
-            </a> */}
-          </Box>
-
+          <Button size="small" variant="outlined" className="btn-outline-v1" onClick={handleExportFields}>
+            Export to Excel
+          </Button>
           <DeleteButton
             mode="light"
             onClick={() => {
@@ -264,7 +249,6 @@ const Zipcode = (props: ConfigProps) => {
             disabled={selectedRecords.length === 0}
             disableElevation
             text={'Delete'}
-            style={{ marginLeft: '10px' }}
           />
         </Box>
       </Box>
