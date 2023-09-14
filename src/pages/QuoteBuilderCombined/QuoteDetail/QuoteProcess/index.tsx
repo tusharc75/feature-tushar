@@ -46,7 +46,6 @@ import { utils, write } from 'xlsx-js-style';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import ImportExportIcon from '@material-ui/icons/ImportExport';
-import AdditionalData from './AdditionalData';
 import CustomDialogContent from '../../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -67,7 +66,6 @@ import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import CustomDialogFooter from '../../../../components/CustomDialog/CustomDialogFooter';
 import CustomButton from '../../../../components/Helpers/CustomButton';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-// import Steps from 'src/components/Steps';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import PreviewDownload from 'src/components/PreviewDownload';
 
@@ -465,7 +463,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -1272,6 +1270,7 @@ export default function QuoteProcess(props) {
     return ((profit * 100) / parsedCP).toFixed(2);
   };
 
+
   return (
     <>
       <div>
@@ -1281,8 +1280,8 @@ export default function QuoteProcess(props) {
             DOAneeded
               ? DOASteps.findIndex((d) => d?.key === ProcessStatus)
               : ProcessStatus === 'DOA Process'
-              ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
-              : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
+                ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
+                : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
           }
           id={quoteData._id}
           version={currentVersion}
@@ -1308,7 +1307,6 @@ export default function QuoteProcess(props) {
           setStepFullScreen={() => setStepFullScreen(true)}
         />
       </div>
-
       <div className={`pt-[12px] subDetailModule `}>
         <ContentFullScreen
           title={DOASteps.find((d) => d?.key === ProcessStatus).label || ''}
@@ -1360,6 +1358,11 @@ export default function QuoteProcess(props) {
                       hideDetailButton={true}
                       isSendEmail={true}
                       extraQueryParams={{ uniqueId: quoteData.versions[currentVersion]._id }}
+                      defaultColumns={['productName',
+                        'unit',
+                        'qty',
+                        `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
+                        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`]}
                     />
                   )}
                   {['Send To Customer', 'End'].includes(ProcessStatus) && (
@@ -1438,7 +1441,6 @@ export default function QuoteProcess(props) {
                         {isMobile && !isTablet ? '' : 'Download'}
                       </Button>
                     </Tooltip>
-
                     {ProcessStatus === 'Quote Builder' && (
                       <Tooltip title="PDF Columns">
                         <Button
@@ -1472,7 +1474,7 @@ export default function QuoteProcess(props) {
                   </span>
                 ) : null}
                 {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
-                (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
+                  (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
                   <div className={`flex flex-wrap items-center ml-auto ${isMobile ? 'actio-pos-quote' : ''}`}>
                     {!ifQuoteApproved.approved && (
                       <Button
@@ -1510,17 +1512,6 @@ export default function QuoteProcess(props) {
               </div>
               <Grid item xs={12} sm={12} md={12} className="mt-1">
                 {quoteData && !loading && productBuilderId ? (
-                  // ProcessStatus === "Quote Builder" &&
-                  //     visibleColumns.length > 0 ? (
-                  //     <ProductGrid
-                  //         productBuilderId={productBuilderId}
-                  //         refreshProducts={refreshProducts}
-                  //         stage={"cost"}
-                  //         isAll={true}
-                  //         columnsData={visibleColumns}
-                  //         currency={quoteData?.currency}
-                  //     />
-
                   <ProductBuilder
                     fromQuote={true}
                     quoteData={quoteData}
@@ -1543,15 +1534,6 @@ export default function QuoteProcess(props) {
                 ) : (
                   <Loader style={{ minHeight: 300 }} text="Loading..." />
                 )}
-                {/* {ProcessStatus === "Quote Builder" && (
-                                <AdditionalData
-                                    fetchTNC={fetchTNC}
-                                    state={state}
-                                    dispatch={dispatch}
-                                    allowedToEdit={allowedToEdit}
-                                    handleVersionUpdateFromAdditionalData={handleVersionUpdateFromAdditionalData}
-                                />
-                            )} */}
               </Grid>
             </Grid>
           ) : null}
@@ -1788,8 +1770,8 @@ export default function QuoteProcess(props) {
                           checked={
                             (showExcelArrangeColumns &&
                               ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()) ||
-                            (showPDFArrangeColumns &&
-                              ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumns].sort().toString())
+                              (showPDFArrangeColumns &&
+                                ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumns].sort().toString())
                               ? true
                               : selected
                           }
