@@ -483,10 +483,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
     setTabValue(newValue);
   };
 
-  const hasRequestedOrConsumedQty = (selectedRecords) => {
-    return selectedRecords.some((record) => record.requestedQty || record.consumedQty);
-  };
-
   return (
     <>
       {allowedToEdit && serviceOption?.length > 0 && (
@@ -566,7 +562,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
                     horizontal: 'right'
                   }}
                 >
-                  <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                     <MenuItem
                       onClick={() => {
                         setIsConsumableEdit({ open: true, data: null, showSaveAndNext: false });
@@ -576,10 +571,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
                     >
                       Bulk Edit
                     </MenuItem>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
+                  
                     <MenuItem
-                      disabled={isDeleting || hasRequestedOrConsumedQty(selectedRecords)}
+                      disabled={isDeleting || selectedRecords.some((record) => record.requestedQty || record.consumedQty)}
                       onClick={() => {
                         setDeleteData(
                           selectedRecords?.map((d) => {
@@ -593,7 +587,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
                     >
                       Delete
                     </MenuItem>
-                  </HtmlTooltip>
                 </Menu>
               </Box>
             </Box>
