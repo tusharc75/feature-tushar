@@ -666,13 +666,7 @@ export default function QuoteDetail() {
             {quoteData ? (
               <>
                 {permissions[sidebarResource.quoteBuilder]?.isCreate ? (
-                  <Button
-                    variant="text"
-                    size="small"
-                    className="mr-1"
-                    startIcon={<BiLayerPlus />}
-                    onClick={handleOpenCloneDialog}
-                  >
+                  <Button variant="text" size="small" className="mr-1" startIcon={<BiLayerPlus />} onClick={handleOpenCloneDialog}>
                     Clone
                   </Button>
                 ) : null}
@@ -689,9 +683,9 @@ export default function QuoteDetail() {
                       onClick={() => {
                         setShowTotalSalesDialog(true);
                       }}
-                      variant="outlined"
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      className="btn-outline-v1"
                       size="small"
-                      className="mx-1 btn-outline-v1"
                       startIcon={<GiReceiveMoney />}
                       color="primary"
                     >
@@ -704,7 +698,7 @@ export default function QuoteDetail() {
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="primary"
                     size="small"
-                    className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} btn-outline-v1`}
+                    className={`btn-outline-v1`}
                     onClick={() => {
                       setShowAllVersionStatus(true);
                     }}
@@ -870,11 +864,7 @@ export default function QuoteDetail() {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton
-              referenceId={quoteData?._id}
-              resource={ACTIVITY_RESOURCE.quote}
-              resourceLabel={quoteData?.quoteName}
-            />
+            <ActivityButton referenceId={quoteData?._id} resource={ACTIVITY_RESOURCE.quote} resourceLabel={quoteData?.quoteName} />
           </Box>
         </Box>
       </Box>

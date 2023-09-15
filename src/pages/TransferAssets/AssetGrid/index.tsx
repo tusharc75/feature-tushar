@@ -20,7 +20,6 @@ import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSe
 import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 
-
 interface AssetsGridProps {
   permissions?: any;
   user?: any;
@@ -87,13 +86,27 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         let columns = [];
-        data.forEach((o) => {
+        data?.filter(d => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))?.forEach((o) => {
           let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
           }
         });
-        setColumns([...columns, ...ActionsRenderer]);
+
+        setColumns([
+          {
+            accessor: 'index',
+            Header: 'Index',
+            width: 70,
+            sticky: isMobile ? 'none' : 'left',
+            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+            Footer: () => {
+              return <>Total</>;
+            }
+          },
+          ...columns,
+          ...ActionsRenderer
+        ]);
       });
   };
 
@@ -139,9 +152,10 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           }
         }
       }
-      data = data?.map((d: any, index) => {
+      data = data?.map((d: any, index: number) => {
         let finalObject: any = prepareDataForGrid(d);
         return {
+          index: index + 1,
           ...finalObject
         };
       });

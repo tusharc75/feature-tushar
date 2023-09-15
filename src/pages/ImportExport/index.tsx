@@ -12,7 +12,7 @@ import CustomContainer from 'src/components/CustomContainer';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateTimeRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import { GetApp } from '@material-ui/icons';
-import {CustomImport} from './customImport';
+import { CustomImport } from './customImport';
 
 
 const ImportExport = () => {
@@ -38,13 +38,13 @@ const ImportExport = () => {
 
   useEffect(() => {
     fetchLogs();
-  }, [ selectResource, page, limit ]);
+  }, [selectResource, page, limit]);
 
   const fetchLogs = async () => {
     setLoading(true);
     axiosInstance()
       .get(`/import-export/logs${selectResource ? `?resource=${selectResource}` : ''}`)
-      .then(({ data: {data} }) => {
+      .then(({ data: { data } }) => {
         const count = data?.count;
         let rows = data?.data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -216,7 +216,7 @@ const ImportExport = () => {
           if (curr == null) {
             return result
           }
-          result.push({"value": curr, "label": curr})
+          result.push({ "value": curr, "label": curr })
           return result
         }, [])
         let templateHeader = data.data.TemplateHeaders
@@ -224,7 +224,7 @@ const ImportExport = () => {
           if (curr == null) {
             return result
           }
-          result.push({"value": curr, "label": curr})
+          result.push({ "value": curr, "label": curr })
           return result
         }, [])
 
@@ -267,7 +267,7 @@ const ImportExport = () => {
     }
   ];
 
-  const ActionRenderer = (params) => {  
+  const ActionRenderer = (params) => {
     return (
       <>
         <Tooltip
@@ -299,7 +299,7 @@ const ImportExport = () => {
       </>
     );
   };
-  
+
 
   const frameworkComponents = {
     dateTimeRenderer: DateTimeRenderer,
@@ -375,97 +375,85 @@ const ImportExport = () => {
             }}
           />
         </Box>
-        <Grid container spacing={2} xs={12} lg={12} md={12}>
-          <Grid item>
-            <input
-              id={`file`}
-              name={`file`}
-              onChange={handleImportFile}
-              style={{ display: 'none' }}
-              onClick={(e: any) => (e.target.value = null)}
-              type="file"
-              accept=".xlsx,.csv"
-            />
-            <label htmlFor={`file`}>
+
+        <Grid container xs={12} lg={12} md={12} style={{ maxWidth: '100%', justifyContent: "space-between" }}>
+          <Grid container spacing={2} xs={8} lg={8} md={8}>
+            <Grid item>
+              <input
+                id={`file`}
+                name={`file`}
+                onChange={handleImportFile}
+                style={{ display: 'none' }}
+                onClick={(e: any) => (e.target.value = null)}
+                type="file"
+                accept=".xlsx,.csv"
+              />
+              <label htmlFor={`file`}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  component="span"
+                  disabled={isImgUploading || !selectResource}
+                  startIcon={<AiOutlineImport />}
+                >
+                  Import from Excel
+                </Button>
+              </label>
+              {isImgUploading && (
+                <>
+                  <CircularProgress variant="determinate" value={excelUploadProgress} size={30} />
+                  <Box>
+                    <Typography variant="caption" component="div" color="textSecondary">{`${excelUploadProgress}%`}</Typography>
+                  </Box>
+                </>
+              )}
+            </Grid>
+            <Grid item>
               <Button
                 size="small"
                 variant="outlined"
                 component="span"
                 disabled={isImgUploading || !selectResource}
-                startIcon={<AiOutlineImport />}
+                startIcon={<AiOutlineExport />}
+                onClick={() => {
+                  handleDownloadTemplate();
+                }}
               >
-                Import from Excel
+                Download Template {downloading.loading && downloading.type === 'template' && <CircularProgress size={20} />}
               </Button>
-            </label>
-            {isImgUploading && (
-              <>
-                <CircularProgress variant="determinate" value={excelUploadProgress} size={30} />
-                <Box>
-                  <Typography variant="caption" component="div" color="textSecondary">{`${excelUploadProgress}%`}</Typography>
-                </Box>
-              </>
-            )}
-          </Grid>
-          <Grid item>
-            <input
-              id={`customImportFile`}
-              name={`customImportFile`}
-              onChange={handleCustomImport}
-              style={{ display: 'none' }}
-              onClick={(e: any) => (e.target.value = null)}
-              type="file"
-              accept=".xlsx,.csv"
-            />
-            <label htmlFor={`customImportFile`}>
+            </Grid>
+            <Grid item>
               <Button
+                type="button"
                 size="small"
+                color="primary"
                 variant="outlined"
-                component="span"
-                disabled={isImgUploading || !selectResource}
-                startIcon={<AiOutlineImport />}
+                onClick={handleExportExcel}
+                startIcon={<AiOutlineExport />}
+                disabled={selectResource == null}
               >
-                Custom Import 
+                Export to Excel {
+                  downloading.loading && downloading.type === 'export' && <CircularProgress size={20} />
+                }
               </Button>
-            </label>
-            {isImgUploading && (
-              <>
-                <CircularProgress variant="determinate" value={excelUploadProgress} size={30} />
-                <Box>
-                  <Typography variant="caption" component="div" color="textSecondary">{`${excelUploadProgress}%`}</Typography>
-                </Box>
-              </>
-            )}
+            </Grid>
           </Grid>
-          <Grid item>
+          <Grid container xs={4} lg={4} md={4} justify="flex-end">
             <Button
               size="small"
               variant="outlined"
               component="span"
-              disabled={isImgUploading || !selectResource}
-              startIcon={<AiOutlineExport />}
+              disabled={!selectResource}
+              startIcon={<AiOutlineImport />}
               onClick={() => {
-                handleDownloadTemplate();
+                setCustomImportDialog(true)
               }}
             >
-              Download Template {downloading.loading && downloading.type === 'template' && <CircularProgress size={20} />}
-            </Button>
-          </Grid>
-          <Grid item>
-            <Button
-              type="button"
-              size="small"
-              color="primary"
-              variant="outlined"
-              onClick={handleExportExcel}
-              startIcon={<AiOutlineExport />}
-              disabled={selectResource == null}
-            >
-              Export to Excel {
-                downloading.loading && downloading.type === 'export' && <CircularProgress size={20} />
-              }
+              Custom Import
             </Button>
           </Grid>
         </Grid>
+
         <Box>
           <CustomAgGrid
             columns={column}
@@ -488,11 +476,18 @@ const ImportExport = () => {
             customImportDialog && (
               <CustomImport
                 open={customImportDialog}
-                handleClose={() => setCustomImportDialog(false)}
+                refreshGrid={fetchLogs}
+                handleFileImport={handleCustomImport}
+                isImgUploading={isImgUploading}
+                handleClose={() => {
+                  setSelectTemplateHeader(null);
+                  setCustomImportDialog(false)
+                }}
                 resource={selectResource ? selectResource : ''}
                 customImportHeader={selectCustomHeader}
                 templateImportHeader={selectTemplateHeader}
                 file={file}
+                excelUploadProgress={excelUploadProgress}
               />
             )
           }

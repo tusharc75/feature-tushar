@@ -1,6 +1,6 @@
 import { useState, useReducer, Fragment, useContext, useEffect, FC } from 'react';
 import { Button, Box, MenuItem, Menu } from '@material-ui/core';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -11,24 +11,25 @@ import {
   DELIVERY_TICKET_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_FROM_TO_TYPE,
-  ASSET_STATUS,
-  COLOUR_MASTER
+  serializedAsset,
+  prepareDataForGrid,
+  ASSET_STATUS
 } from 'src/constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
-import { CommonRenderer, DateRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { uniq, map, groupBy } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import InfoIcon from '@material-ui/icons/Info';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import PreviewDownload from 'src/components/PreviewDownload';
+import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import { Link } from 'react-router-dom';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import InfoIcon from '@material-ui/icons/Info';
 
 interface LoadingGridProps {
   permissions: any;
@@ -45,6 +46,7 @@ interface LoadingGridProps {
   renderedFrom?: string;
   allowedToEdit: boolean;
   canReceive: boolean;
+  stepFullScreen: any;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -60,7 +62,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     isTransferEnded,
     renderedFrom,
     allowedToEdit,
-    canReceive
+    canReceive,
+    stepFullScreen
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -73,15 +76,14 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
-
+  const [dataRows, setDataRows] = useState(null);
+  const [selectedRecords, setSelectedRecords] = useState([]);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [columns, setColumns] = useState(null);
+
+  const { getColumnData } = useColumns();
 
   useEffect(() => {
     if (transferAssetId) {
@@ -94,16 +96,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty('loadingTicket'));
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
-    if (dataRows.length) {
-      const inventoryDelivered = dataRows.filter((asset: any) => asset['loadingTicketStatus'] === 'Delivered');
-      const inventoryLost = dataRows.filter((asset: any) => asset?.status === 'Lost');
+    if (dataRows?.length) {
+      const inventoryDelivered = dataRows?.filter((asset: any) => asset['loadingTicketStatus'] === 'Delivered');
+      const inventoryLost = dataRows?.filter((asset: any) => asset?.status === 'Lost');
       if (inventoryDelivered.length > 0) {
         setNextStep(true);
       } else {
         setNextStep(false);
       }
       if (transferAssetData?.transferType === 'Internal') {
-        if (inventoryDelivered.length === dataRows.filter((d) => d.status !== 'Lost').length || inventoryLost.length === dataRows.length) {
+        if (inventoryDelivered.length === dataRows?.filter((d) => d.status !== 'Lost').length || inventoryLost.length === dataRows?.length) {
           setTransferIsEnded(true);
           updateTransferStatus('Completed');
         } else {
@@ -115,48 +117,98 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 
   const fetchFields = () => {
     setColumns(null);
-    const column = [
-      {
-        field: 'assetNumber',
-        headerName: 'Asset Number',
-        show: true,
-        disabled: true,
-        cellRenderer: 'assetRenderer',
-        cellStyle: (params) => {
-          if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
-            return { backgroundColor: COLOUR_MASTER.lostAssets.background };
+    axiosInstance()
+      .get(`/field?resource=${serializedAsset.resource}`)
+      .then(({ data: { data } }) => {
+        let columns = [];
+        data?.filter(d => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))?.forEach((o) => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
+          if (currentColumn !== null) {
+            if (o?.fieldData?.fieldName === 'assetNumber') {
+              const assetNumberColumn = {
+                accessor: o?.fieldData?.fieldName,
+                Header: o?.fieldData?.fieldLabel,
+                width: 300,
+                sticky: isMobile ? 'none' : 'left',
+                primaryField: true,
+                Cell: ({ row }) => (row?.original?.assetNumber ?
+                  <div className="d-flex gap-2 align-items-center">
+                    <p
+                      className="link cursor-pointer"
+                      title={row?.original?.assetNumber}
+                      onClick={() => window.open(`${routes.serializedAssetDetail.path}/${row?.original?._id}`)}>
+                      {row?.original?.assetNumber}
+                    </p>
+                    {row?.original?.isReplaced && (
+                      <Box >
+                        <HtmlTooltip title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
+                          <InfoIcon fontSize="small" color={'primary'} />
+                        </HtmlTooltip>
+                      </Box>
+                    )}
+                  </div>
+                  :
+                  <NoDataCell />),
+                setCellClassNames: (row) => {
+                  if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.status)) {
+                    return 'error';
+                  }
+                  if (row?.isReplaced) {
+                    return 'isPurchaseOrder'
+                  };
+                }
+              }
+              columns = [...columns, assetNumberColumn];
+            }
+            else {
+              columns = [...columns, currentColumn?.columnData];
+            }
           }
-          if (params?.data?.isReplaced) {
-            return { backgroundColor: COLOUR_MASTER.replaceAssetColor.background };
-          }
-          return null;
-        }
-      },
-      { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-      { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-      { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productRenderer' },
-      { field: 'productDescription', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
-      { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
-      { field: 'loadingTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
-    ];
-    setColumns(column);
+        });
+        const column = [
+          {
+            accessor: 'index',
+            Header: 'Index',
+            width: 70,
+            sticky: isMobile ? 'none' : 'left',
+            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+          },
+          ...columns,
+          {
+            accessor: 'loadingTicket',
+            Header: 'Loading Ticket',
+            width: 200,
+            Cell: ({ row }) => row?.original?.loadingTicket ?
+              <Link
+                className="link text-truncate"
+                title={row?.original?.loadingTicket}
+                to={`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row?.original?.loadingTicket}
+              </Link>
+              : <NoDataCell />
+          },
+          {
+            accessor: 'loadingTicketStatus',
+            Header: 'Loading Ticket Status',
+            primaryField: true,
+            width: 200,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.loadingTicketStatus || <NoDataCell />}</p>
+          },
+        ]
+        setColumns(column);
+      });
   };
 
   const fetchAssetsData = async () => {
     await fetchFields();
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     try {
       const result = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`);
-      let assetData = result?.data?.data?.assets?.map((d: any) => ({
-        ...d,
-        productName: d?.product?.optionLabel || '',
-        productDescription: d?.productDescription?.optionLabel || '',
-        productId: d?.product?.optionValue ?? '',
-        isChecked: false
-      }));
+
+      let assetData = result?.data?.data?.assets;
+
       let replaceAssetLog = result?.data?.data?.replaceAssetLog ? result?.data?.data?.replaceAssetLog : [];
       let ticketData: any = await fetchLoadingTickets();
       ticketData = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.loading);
@@ -179,16 +231,18 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           }
         });
       }
-      setExistingAssets(assetData);
-      dispatch({
-        type: 'initialize',
-        data: assetData,
-        count: assetData.length,
-        selectedRecords: assetData.filter((f) => f.isChecked === true)
+
+      assetData = assetData?.map((d: any, index: number) => {
+        let finalObject: any = prepareDataForGrid(d);
+        return {
+          index: index + 1,
+          ...finalObject
+        };
       });
-      dispatch({ type: 'loading', loading: false });
+      setExistingAssets(assetData);
+      setDataRows(assetData)
+      setSelectedRecords(assetData?.filter((f) => f.isChecked === true))
     } catch (error) {
-      dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
     }
   };
@@ -205,50 +259,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           reject(err);
         });
     });
-
-  const AssetRenderer = (params) =>
-    params.value ? (
-      <Fragment>
-        <p className="link cursor-pointer" title={params.value} onClick={() => window.open(`${routes.serializedAssetDetail.path}/${params.data._id}`)}>
-          {params.value}
-        </p>
-        {params?.data?.isReplaced && (
-          <Box ml={1}>
-            <HtmlTooltip title={`Replaced Asset ${params?.data?.replaceAsset} Reason-${params?.data?.replaceReason}`}>
-              <InfoIcon fontSize="small" color={'primary'} />
-            </HtmlTooltip>
-          </Box>
-        )}
-      </Fragment>
-    ) : (
-      <NoDataCell />
-    );
-
-  const TicketRenderer = (params) =>
-    params.value ? (
-      <p title={params.value} className="link cursor-pointer" onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`)}>
-        {params.value}
-      </p>
-    ) : (
-      <NoDataCell />
-    );
-
-  const ProductRenderer = (params) =>
-    params.value ? (
-      <p className="link cursor-pointer" title={params.value} onClick={() => window.open(`${routes.productDetail.path}/${params.data.productId}`)}>
-        {params.value}
-      </p>
-    ) : (
-      <NoDataCell />
-    );
-
-  const frameworkComponents = {
-    ticketRenderer: TicketRenderer,
-    productRenderer: ProductRenderer,
-    assetRenderer: AssetRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer
-  };
 
   const handleRemoveTicket = () => {
     setRemovingTicket(true);
@@ -316,7 +326,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     data.referenceId = transferAssetId;
     const assets: any = [];
     selectedRecords?.forEach((element: any) => {
-      const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
+      const result = rows.filter((f) => f.productId === element?.productId && !f.isCounted);
       if (result.length) {
         assets.push({ _id: element._id, status: element.status, deliveryTicketId: element.loadingTicketId, newId: result[0]._id });
         result[0].isCounted = true;
@@ -352,7 +362,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         <PreviewDownload
           resource={sidebarResource.transferAsset}
           referenceId={transferAssetId}
-          columns={columns?.filter((e) => ['assetNumber', 'productName', 'productDescription', 'status']?.includes(e.field))}
+          columns={columns?.filter((e) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(e?.accessor))}
           hideDetailButton={true}
         />
         {allowedToEdit && !isTransferEnded && (
@@ -455,14 +465,14 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     onClick={() => {
                       const products = [];
                       selectedRecords?.forEach((element) => {
-                        const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
+                        const foundProduct = products.filter((e) => e._id === element?.productId);
                         if (foundProduct.length) {
                           foundProduct[0].qty += 1;
                         } else {
                           products.push({
-                            _id: element?.product?.optionValue,
-                            id: element?.product?.optionValue,
-                            productName: element?.product?.optionLabel,
+                            _id: element?.productId,
+                            id: element?.productId,
+                            productName: element?.product,
                             qty: 1
                           });
                         }
@@ -494,69 +504,28 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         )}
       </Box>
       <Box mt={1}>
-        {columns ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={allowedToEdit}
-              allowSwipe={true}
-              permissions={permissions?.transferAsset}
-              primaryField={columns?.find((d) => d.field)}
-              onClick={(data) => {
-                history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => { }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              chips={[
-                {
-                  label: 'Status: ',
-                  field: 'status'
-                },
-                {
-                  label: 'Loading Ticket : ',
-                  field: 'loadingTicket',
-                  onClick: (data: any) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`)
-                }
-              ]}
-              additionalDetails={[]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={false}
-              onClone={(data) => { }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
+        {columns && dataRows ? (
+          <Box zIndex={5} width={'100%'}>
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={false}
-              actionWidth={100}
-              allowSelection={allowedToEdit}
-              isClientSideGrid={true}
-              loading={loading}
+              data={dataRows}
+              onSelect={setSelectedRecords}
+              childrenProperty="subRows"
+              uniqueKey="_id"
+              hideSelection={!allowedToEdit}
+              hideAction={true}
               renderedFrom={renderedFrom}
-              refreshGrid={() => fetchAssetsData()}
+              isClientSideGrid={true}
+              hideExpander={true}
             />
-          )
+          </Box>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        )}
+        )
+        }
       </Box>
       {showTicketDialog.open && (
         <ManageDeliveryTicket
