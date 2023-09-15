@@ -338,6 +338,8 @@ export const sidebarResource = {
   iotDataPoints: 'Iot Data Points',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
+  deviceTemplateAlert: 'Device Template Alert',
+  chartOfAccount: 'Chart Of Account',
 };
 
 export const primaryFields = {
@@ -464,6 +466,8 @@ export const RESOURCE_LABEL = {
   iotReport: 'IoT Report',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
+  deviceTemplateAlert: 'Device Template Alert',
+  chartOfAccount: 'Chart Of Account',
 };
 
 export const CHILD_RESOURCE = {
@@ -494,7 +498,8 @@ export const CHILD_RESOURCE = {
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
-  invoiceCost: 'Invoice Cost'
+  invoiceCost: 'Invoice Cost',
+  serializedAssetsCertification: 'Serialized Assets Certificate'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -2005,6 +2010,14 @@ export const TRANSFER_INVENTORY_STATUS = {
   delivered: 'Delivered'
 };
 
+export const TRANSFER_ASSET_STATUS = {
+  new: 'New',
+  inProgress: 'In Progress',
+  readyToShip: 'Ready to ship',
+  inTransit: 'In-Transit',
+  delivered: 'Delivered'
+};
+
 export const REPAIR_PROCESS_STATUS = {
   start: 'Start',
   complete: 'Complete',
@@ -2445,7 +2458,8 @@ export const QUOTATION_STATUS = {
 export const QUOTATION_TYPE = {
   salesOrder: 'Sales Order',
   rentalJob: 'Rental Job',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  fieldJob: 'Field Job',
 };
 
 export const WORKORDER_SERVICE_COLOR = {

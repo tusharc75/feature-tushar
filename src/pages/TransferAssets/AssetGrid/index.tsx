@@ -1,13 +1,11 @@
-import { useReducer, useState, useEffect, Fragment, FC, useContext } from 'react';
+import { useState, useEffect, Fragment, FC, useContext } from 'react';
 import { Button, Box } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
   prepareDataForGrid,
@@ -15,12 +13,12 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   transferAsset,
-  serializedAsset
+  serializedAsset,
+  dateFormat
 } from 'src/constants/helpers';
-import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { FaSuitcase } from 'react-icons/fa';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
+import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 
 interface AssetsGridProps {
   permissions?: any;
@@ -32,26 +30,24 @@ interface AssetsGridProps {
   transferAssetData?: any;
   renderedFrom?: string;
   allowedToEdit: boolean;
+  stepFullScreen: any;
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-  const { allowedToEdit, permissions, user, fetchAssets, currentStep, setNextStep, updateTransferStatus, transferAssetData, renderedFrom } = props;
+
+  const { allowedToEdit, permissions, user, fetchAssets, currentStep, setNextStep, updateTransferStatus, transferAssetData, renderedFrom, stepFullScreen } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [isRemovingAssets, setRemovingAssets] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [removeData, setRemoveData] = useState([]);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
+  const [dataRows, setDataRows] = useState(null);
+  const [selectedRecords, setSelectedRecords] = useState([]);
   const [openAddNewAssets, setAddSerializedAssetDialog] = useState(false);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [gridApi, setGridApi] = useState(null);
-  const [agGridState, gridDispatch] = useReducer(gridReducer, gridState);
   const { getColumnData } = useColumns();
-  const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = agGridState;
 
   const [isAdding, setIsAdding] = useState(false);
-
-  const history = useHistory();
 
   useEffect(() => {
     if (currentStep === 0) {
@@ -61,47 +57,58 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     }
   }, [transferAssetData, currentStep]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
-  };
-
-  const ActionsRenderer = (params) =>
-    !params.data.hasOwnProperty('deliveryTicket') && (
-      <>
+  const ActionsRenderer = [
+    {
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => (
         <GridDeleteIcon
           hasDeletePermission={permissions?.transferAsset?.isUpdate}
           ownerId={transferAssetData?.createdBy.user._id}
           userId={user?.user?._id}
           onDelete={() => {
             setShowConfirmBox(true);
-            setRemoveData([params.data._id]);
+            setRemoveData([row.original?._id]);
           }}
           entity=""
         />
-      </>
-    );
+      )
+    }
+  ];
+
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get(`/field?resource=${serializedAsset.resource}`)
+      .then(({ data: { data } }) => {
+        let columns = [];
+        data?.filter(d => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))?.forEach((o) => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+          }
+        });
+
+        setColumns([
+          {
+            accessor: 'index',
+            Header: 'Index',
+            width: 70,
+            sticky: isMobile ? 'none' : 'left',
+            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+            Footer: () => {
+              return <>Total</>;
+            }
+          },
+          ...columns,
+          ...ActionsRenderer
+        ]);
+      });
+  };
 
   useEffect(() => {
     if (currentStep === 0) {
@@ -109,7 +116,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         fetchAssetsData(true);
       }
     }
-    // eslint-disable-next-line
   }, [currentStep, transferAssetData]);
 
   const fetchLoadingTickets = () =>
@@ -127,10 +133,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
     });
 
   const fetchAssetsData = async (forceRefresh) => {
-    gridDispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     try {
       let data = await fetchAssets(forceRefresh);
       let ticketData: any = await fetchLoadingTickets();
@@ -150,16 +152,15 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           }
         }
       }
-      data = data?.map((d: any, index) => {
+      data = data?.map((d: any, index: number) => {
         let finalObject: any = prepareDataForGrid(d);
         return {
+          index: index + 1,
           ...finalObject
         };
       });
-      gridDispatch({ type: 'initialize', data: data, count: data.length });
-      gridDispatch({ type: 'loading', loading: false });
+      setDataRows(data)
     } catch (error) {
-      gridDispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
     }
   };
@@ -186,7 +187,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
 
   useEffect(() => {
     if (currentStep === 0) {
-      if (dataRows.length > 0) {
+      if (dataRows?.length > 0) {
         setNextStep(true);
       } else {
         setNextStep(false);
@@ -208,7 +209,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
                 setAddSerializedAssetDialog(true);
               }}
             >
-              {isMobile && !isTablet ? 'Add assets' : `Add ${routes.serializedAsset.title}`}
+              {`Add Existing ${routes.serializedAsset.title}`}
             </Button>
           )}
           {permissions?.transferAsset?.isUpdate && (
@@ -229,69 +230,28 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         </Box>
       )}
       <Box mt={1}>
-        {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={allowedToEdit}
-              allowSwipe={allowedToEdit}
-              permissions={permissions?.transferAsset}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={gridDispatch}
-              onEdit={(data) => {
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {}}
-              rowCount={rowCount}
-              page={page}
-              loading={gridLoading}
-              chips={[
-                {
-                  label: 'Product Desc : ',
-                  field: 'productCategory'
-                }
-              ]}
-              additionalDetails={[
-                {
-                  icon: <FaSuitcase size={18} />,
-                  field: 'customerAccount'
-                }
-              ]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={false}
-              onClone={(data) => {}}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
+        {columns && dataRows ? (
+          <Box zIndex={5} width={'100%'}>
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={gridDispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={allowedToEdit}
-              actionWidth={100}
-              allowSelection={allowedToEdit}
-              isClientSideGrid={true}
-              loading={gridLoading}
+              data={dataRows}
+              onSelect={setSelectedRecords}
+              childrenProperty="subRows"
+              uniqueKey="_id"
+              hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
               renderedFrom={renderedFrom}
-              refreshGrid={() => fetchAssetsData(true)}
+              isClientSideGrid={true}
+              hideExpander={true}
             />
-          )
+          </Box>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        )}
+        )
+        }
       </Box>
       {openAddNewAssets && (
         <AddSerializedAsset
@@ -328,7 +288,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           referenceType="Transfer Asset"
           isAdding={isAdding}
           selectedProducts={[]}
-          filterByPlant={transferAssetData?.transferFromPlant.optionValue}
+          filterByPlant={transferAssetData?.transferFromPlant}
         />
       )}
       {showConfirmBox && (

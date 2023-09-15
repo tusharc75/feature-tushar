@@ -93,6 +93,12 @@ const QuotationDetails = () => {
   const [stepList, setStepList] = useState(quotationProcessSteps);
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
 
+  useEffect(() => {
+    if (tabValue !== tab) {
+      setTabValue(tab ? parseInt(tab) : 0);
+    }
+  }, [tab]);
+
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
@@ -311,6 +317,9 @@ const QuotationDetails = () => {
         if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
           history.push(`${routes.repairOrderDetail.path}/${data?._id}`);
         }
+        if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
+          history.push(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -456,7 +465,8 @@ const QuotationDetails = () => {
                     quotationData?.status === QUOTATION_STATUS.acceptByCustomer &&
                     !quotationData?.rentalJob &&
                     !quotationData?.repairOrder &&
-                    !quotationData?.salesOrder && (
+                    !quotationData?.salesOrder &&
+                    !quotationData?.fieldJob && (
                       <MenuItem>
                         <Button
                           onClick={() => {

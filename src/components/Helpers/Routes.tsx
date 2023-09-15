@@ -1053,6 +1053,32 @@ const routes = {
         : RESOURCE_LABEL.workStations,
     path: '/work-stations/detail'
   },
+  deviceTemplateAlert: {
+    title:
+      storedRoutes && storedRoutes.deviceTemplateAlert && storedRoutes.deviceTemplateAlert.title
+        ? storedRoutes.deviceTemplateAlert?.title
+        : RESOURCE_LABEL.deviceTemplateAlert,
+    path: '/device-template-alert'
+  },
+  deviceTemplateAlertDetail: {
+    title:
+      storedRoutes && storedRoutes.deviceTemplateAlert && storedRoutes.deviceTemplateAlert.title
+        ? storedRoutes.deviceTemplateAlert?.title
+        : RESOURCE_LABEL.deviceTemplateAlert,
+    path: '/device-template-alert/detail'
+  },
+  chartOfAccount: {
+    title: storedRoutes && storedRoutes.chartOfAccount && storedRoutes.chartOfAccount?.title ? storedRoutes.chartOfAccount?.title
+      : RESOURCE_LABEL.chartOfAccount,
+    path: '/chart-of-account'
+  },
+  chartOfAccountDetail: {
+    title:
+      storedRoutes && storedRoutes.chartOfAccount && storedRoutes.chartOfAccount.title
+        ? storedRoutes.chartOfAccount?.title
+        : RESOURCE_LABEL.chartOfAccount,
+    path: '/chart-of-account/detail'
+  },
 };
 
 export default routes;

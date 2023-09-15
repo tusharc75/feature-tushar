@@ -21,7 +21,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource, storageLocation } from '../../constants/helpers';
@@ -317,6 +317,7 @@ const StorageLocation = () => {
                       dispatch={dispatch}
                       title={routes?.storageLocation?.title}
                       filters={filters}
+                      resource={sidebarResource.storageLocation}
                     />
                   </div>
                 </div>
@@ -382,6 +383,7 @@ const StorageLocation = () => {
                 )}
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.storageLocation} />
           </div>
         </div>
         {columns ? (

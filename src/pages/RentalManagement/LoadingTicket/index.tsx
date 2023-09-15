@@ -1390,7 +1390,7 @@ const LoadingTicket = ({
           }}
           isAdding={replaceLoading}
           selectedProducts={addSerializedAssetDialog.products}
-          filterByPlant={rentalManagementData?.warehouse?.optionValue}
+          filterByPlant={rentalManagementData?.warehouse}
         />
       )}
       {showReplaceReason.open && (

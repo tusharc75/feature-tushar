@@ -9,8 +9,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
-import { FaSuitcase } from 'react-icons/fa';
+import { CiUser, GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
 import { GiStockpiles } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -59,10 +58,9 @@ const TransferAsset = () => {
   const [open, setOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const history = useHistory();
-  const { type }: any = queryString.parse(history.location.search);
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.transferAsset.title}`);
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
@@ -76,7 +74,7 @@ const TransferAsset = () => {
 
   useEffect(() => {
     fetchTransferAsset();
-  }, [page, limit, filters, sorting, search, fromRental, selectedEntity, selectedType, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -149,8 +147,8 @@ const TransferAsset = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (fromRental) {
-      filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
+    if (referenceId) {
+      filterByIds.push({ field: 'rentalJob', term: referenceId });
     }
 
     if (filterByIds?.length) {
@@ -215,7 +213,11 @@ const TransferAsset = () => {
   };
   const handleTransferAssetTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+    if (referenceId && referenceType) {
+      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleFilter = (event, newFilter) => {
@@ -289,6 +291,18 @@ const TransferAsset = () => {
 
   const handleClickClose = () => {
     setOpen(false);
+  };
+
+  const updateQueryParams = () => {
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
+    referenceId = queryParams.get('referenceId');
+    referenceType = queryParams.get('referenceType');
+    history.replace({
+      search: queryParams.toString()
+    });
+    fetchTransferAsset();
   };
 
   return (
@@ -391,16 +405,7 @@ const TransferAsset = () => {
                   </div>
                 </HideWhenOffline>
               )}
-              {fromRental && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Rental Job : ${fromRental?.rentalJobName}`}
-                  onDelete={() => {
-                    setFromRental(null);
-                  }}
-                />
-              )}
+              {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
@@ -471,7 +476,7 @@ const TransferAsset = () => {
                 ]}
                 additionalDetails={[
                   {
-                    icon: <FaSuitcase size={18} />,
+                    icon: <CiUser size={18} />,
                     field: 'transferType'
                   }
                 ]}

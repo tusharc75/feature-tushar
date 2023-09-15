@@ -9,8 +9,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
-import { FaSuitcase } from 'react-icons/fa';
+import { CiUser, GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -59,8 +58,6 @@ const TransferInventory = () => {
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const history = useHistory();
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
   const { type }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.transferInventory.title}`);
@@ -76,7 +73,7 @@ const TransferInventory = () => {
 
   useEffect(() => {
     fetchTransferInventory();
-  }, [page, limit, filters, sorting, search, fromRental, selectedEntity, showFilteredRecordsOnly, selectedType]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -454,7 +451,7 @@ const TransferInventory = () => {
                 ]}
                 additionalDetails={[
                   {
-                    icon: <FaSuitcase size={18} />,
+                    icon: <CiUser size={18} />,
                     field: 'transferType'
                   }
                 ]}

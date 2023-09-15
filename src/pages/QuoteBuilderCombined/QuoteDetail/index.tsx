@@ -38,7 +38,8 @@ import {
   formatAmountWithCurrency,
   gridLoadingTimeout,
   termsAndCondition,
-  ACTIVITY_RESOURCE
+  ACTIVITY_RESOURCE,
+  sidebarResource
 } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -59,7 +60,7 @@ import { VscVersions } from 'react-icons/vsc';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import DOAReasonDialog from '../../DOA/DOAReasonDialog';
-import { ExpandMore } from '@material-ui/icons';
+import { Edit, ExpandMore } from '@material-ui/icons';
 import { MdDeleteSweep } from 'react-icons/md';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { AiFillPlusCircle } from 'react-icons/ai';
@@ -664,15 +665,27 @@ export default function QuoteDetail() {
           <Box className="control-buttons-v1">
             {quoteData ? (
               <>
+                {permissions[sidebarResource.quoteBuilder]?.isCreate ? (
+                  <Button variant="text" size="small" className="mr-1" startIcon={<BiLayerPlus />} onClick={handleOpenCloneDialog}>
+                    Clone
+                  </Button>
+                ) : null}
+                {allowedToEdit ? (
+                  <Tooltip title="Edit">
+                    <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
+                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
+                    </Button>
+                  </Tooltip>
+                ) : null}
                 {processStatus !== 'New' && (
                   <Tooltip title="Quote Summary">
                     <Button
                       onClick={() => {
                         setShowTotalSalesDialog(true);
                       }}
-                      variant="outlined"
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      className="btn-outline-v1"
                       size="small"
-                      className="mx-1 btn-outline-v1"
                       startIcon={<GiReceiveMoney />}
                       color="primary"
                     >
@@ -685,7 +698,7 @@ export default function QuoteDetail() {
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="primary"
                     size="small"
-                    className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} btn-outline-v1`}
+                    className={`btn-outline-v1`}
                     onClick={() => {
                       setShowAllVersionStatus(true);
                     }}
@@ -851,11 +864,7 @@ export default function QuoteDetail() {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton
-              referenceId={quoteData?._id}
-              resource={ACTIVITY_RESOURCE.quote}
-              resourceLabel={quoteData?.quoteName}
-            />
+            <ActivityButton referenceId={quoteData?._id} resource={ACTIVITY_RESOURCE.quote} resourceLabel={quoteData?.quoteName} />
           </Box>
         </Box>
       </Box>

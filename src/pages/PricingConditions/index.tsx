@@ -6,7 +6,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaSuitcase, TbArrowsSort } from 'react-icons/all';
+import { CiUser, TbArrowsSort } from 'react-icons/all';
 import { MdOutlineFilterAlt } from 'react-icons/md';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -20,7 +20,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { gridLoadingTimeout, prepareDataForGrid, pricingCondition, sidebarResource } from 'src/constants/helpers';
@@ -332,6 +332,7 @@ const PricingConditions = () => {
                       dispatch={dispatch}
                       title={routes?.pricingCondition?.title}
                       filters={filters}
+                      resource={sidebarResource.pricingCondition}
                     />
                   </div>
                 </div>
@@ -381,6 +382,7 @@ const PricingConditions = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.pricingCondition} />
           </div>
         </div>
         {columns && frameworkComponent ? (
@@ -409,7 +411,7 @@ const PricingConditions = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'conditionName'
                 }
               ]}

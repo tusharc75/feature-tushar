@@ -361,6 +361,7 @@ const TransferAssetDetailPage = () => {
                   transferAssetData={transferAssetData}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   allowedToEdit={allowedToEdit}
+                  stepFullScreen={stepFullScreen}
                 />
               )}
               {currentStep === 1 && (
@@ -379,6 +380,7 @@ const TransferAssetDetailPage = () => {
                   renderedFrom={`${renderedFrom}_grid-2`}
                   allowedToEdit={allowedToEdit || isProcessor}
                   canReceive={canReceive}
+                  stepFullScreen={stepFullScreen}
                 />
               )}
               {currentStep === 2 && (
@@ -396,6 +398,7 @@ const TransferAssetDetailPage = () => {
                   isTransferEnded={isTransferEnded}
                   renderedFrom={`${renderedFrom}_grid-3`}
                   allowedToEdit={allowedToEdit || isProcessor}
+                  stepFullScreen={stepFullScreen}
                 />
               )}
             </ContentFullScreen>

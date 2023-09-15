@@ -105,6 +105,9 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
         } else {
           setTitle(`Create ${routes.repairJob.title}`);
           let initialData = getObjKeys('', fieldsDataForCreate);
+          if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+            initialData['currency'] = user.user?.brandCurrency;
+          }
           initialData['repairJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
           if (fieldsDataForCreate?.some((e) => e.fieldName === 'expectedCompletionDate')) {
             initialData['expectedCompletionDate'] = null;

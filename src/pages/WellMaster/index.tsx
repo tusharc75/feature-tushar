@@ -22,7 +22,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource, wellMaster } from '../../constants/helpers';
@@ -320,6 +320,7 @@ const WellMaster = () => {
                       dispatch={dispatch}
                       title={routes?.wellMaster?.title}
                       filters={filters}
+                      resource={sidebarResource.wellMaster}
                     />
                   </div>
                 </div>
@@ -389,6 +390,7 @@ const WellMaster = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.wellMaster} />
           </div>
         </div>
         {columns ? (

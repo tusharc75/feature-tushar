@@ -400,7 +400,7 @@ const ReportFilters = (props: FiltersProps) => {
                 return prev;
               });
             }
-            
+
             if (reason === 'remove-option' && betweenDate) {
               const selectedKeys = val.map((f) => f?.fieldName);
               setBetweenDate((prevState) => {
@@ -419,7 +419,21 @@ const ReportFilters = (props: FiltersProps) => {
           fullWidth
           getOptionSelected={(option, val) => option.fieldName === val.fieldName}
           getOptionLabel={(option) => option.fieldLabel}
-          renderInput={(params) => <TextField {...params} variant="outlined" label="Select Filter" size="small" />}
+          renderInput={(params) => <TextField
+            {...params}
+            variant="outlined"
+            label="Select Filter"
+            size="small"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loadingColumns ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }}
+          />}
         />
         <Box py={2}>
           <Grid container spacing={2} alignItems="center">

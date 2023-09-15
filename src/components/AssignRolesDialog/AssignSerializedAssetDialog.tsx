@@ -149,6 +149,11 @@ const AssignSerializedAssetDialog = ({
       const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
       deepFilter = `${deepFilter}&date=${JSON.stringify(dateFilter)}`;
     }
+    if (reference === 'quotation') {
+      deepFilter = `${deepFilter}&quotation=true`;
+      const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
+      deepFilter = `${deepFilter}&date=${JSON.stringify(dateFilter)}`;
+    }
     if (reference === 'supplier') {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
     }

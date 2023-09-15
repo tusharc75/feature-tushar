@@ -96,17 +96,19 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
                 <EditIcon color="primary" />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title="Edit Lead Time">
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  setLeadTimeDialog({ open: true, data: row.original });
-                }}
-              >
-                <DateRangeIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
+            {permissions?.leadTimeMaster &&
+              <HtmlTooltip title="Edit Lead Time">
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setLeadTimeDialog({ open: true, data: row.original });
+                  }}
+                >
+                  <DateRangeIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            }
             <GridDeleteIcon
               hasDeletePermission={permissions?.quotation?.isUpdate}
               ownerId={user?.user?._id}
