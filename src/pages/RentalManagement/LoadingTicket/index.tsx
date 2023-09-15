@@ -709,11 +709,14 @@ const LoadingTicket = ({
   };
 
   const handelCancleTickets = () => {
+    setOkBtnLoading(true);
     const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
     if (loadingTicketIds.length) {
       axiosInstance()
         .put(`${deliveryTicket.api}/revert`, { ids: loadingTicketIds })
         .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket({ open: false, type: '' });
           fetchRecords();
           toastConfig.setToastConfig({
             open: true,
@@ -722,12 +725,14 @@ const LoadingTicket = ({
           });
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
   };
 
   const handelCancelDeliveredTicket = () => {
+    setOkBtnLoading(true);
     const loadingTicketId = uniq(map(selectedRecords, 'loadingTicketId'));
     const ticketIds: any = [];
     loadingTicketId?.forEach((e) => {
@@ -741,6 +746,8 @@ const LoadingTicket = ({
       axiosInstance()
         .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
         .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket({ open: false, type: '' });
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -749,6 +756,7 @@ const LoadingTicket = ({
           fetchRecords();
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -1432,7 +1440,6 @@ const LoadingTicket = ({
             else {
               handelCancleTickets();
             }
-            setShowConformationCancleTicket({ open: false, type: '' });
           }}
           okBtnLoading={okBtnLoading}
         />
