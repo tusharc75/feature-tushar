@@ -288,7 +288,7 @@ export default function TinyMCE(props) {
   };
 
   return (
-    <>
+    <div style={{ border: '1px solid var(--common-border-color)' }}>
       {isOffline ? (
         <div style={{ width: width }}>
           <div
@@ -552,6 +552,6 @@ export default function TinyMCE(props) {
           <div style={{ visibility: 'hidden' }} id="contentDiv"></div>
         </>
       )}
-    </>
+    </div>
   );
 }
