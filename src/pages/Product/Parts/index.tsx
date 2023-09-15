@@ -199,7 +199,7 @@ function Parts({ id }) {
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
       const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
-      if (rowData && parseInt(inputField['qty'])) {
+      if ( rowData && parseInt(inputField['qty']) > 0 ) {
         handleSaveData({ _id: rowData._id, qty: parseInt(inputField['qty']) });
       }
     }
