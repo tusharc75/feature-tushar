@@ -53,7 +53,9 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'end'
   },
   tinyMCEContainer: {
-    width: '725px'
+    width: '725px',
+    marginLeft: 'auto',
+    marginRight: 'auto'
   },
   headingLabel: {
     marginBottom: '7px'
@@ -430,43 +432,97 @@ export default function NewCreateQuotePdfTemplate() {
     }
   };
 
-  return (
-    <div className={classes.root}>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs
-            routes={[
-              {
-                title: routes.quotePdfTemplate.title,
-                path: routes.quotePdfTemplate.path
-              },
-              {
-                title: id === '0' ? 'New' : isClone === true ? 'Clone' : initialValues && initialValues.name
-              }
-            ]}
-            isConfirmBeforeClick={hasPermissionToUpdate}
-            onBreadCrumbClick={(path) => {
-              setIsBreakCrumbPath(path);
-              if (hasPermissionToUpdate) {
-                setShowConfirmDialog(true);
-              }
-            }}
-          />
-        </Grid>
-      </Grid>
-      <div className={`main-container ${classes.mainContainer}`}>
-        <Box className={classes.paper}>
-          {initialValues && pdfResourceOption ? (
-            <Formik
-              innerRef={(ref) => ref && setFormValues(ref.values)}
-              initialValues={initialValues}
-              validationSchema={PdfTemplateSchema}
-              onSubmit={handleSubmit}
-            >
-              {({ submitForm, touched, errors, setFieldValue, values }) => (
-                <Form>
-                  <Grid container>
-                    <Grid item xs={12} md={6}>
+  return initialValues && pdfResourceOption ? (
+    <Formik
+      innerRef={(ref) => ref && setFormValues(ref.values)}
+      initialValues={initialValues}
+      validationSchema={PdfTemplateSchema}
+      onSubmit={handleSubmit}
+    >
+      {({ submitForm, touched, errors, setFieldValue, values }) => (
+        <Form>
+          <div className="main-container-v1">
+            <div className="headerbox-v1">
+              <div className="nav-v1">
+                <CustomBreadCrumbs
+                  routes={[
+                    {
+                      title: routes.quotePdfTemplate.title,
+                      path: routes.quotePdfTemplate.path
+                    },
+                    {
+                      title: id === '0' ? 'New' : isClone === true ? 'Clone' : initialValues && initialValues.name
+                    }
+                  ]}
+                  isConfirmBeforeClick={hasPermissionToUpdate}
+                  onBreadCrumbClick={(path) => {
+                    setIsBreakCrumbPath(path);
+                    if (hasPermissionToUpdate) {
+                      setShowConfirmDialog(true);
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
+                  size="small"
+                  color="primary"
+                  onClick={submitForm}
+                  variant="contained"
+                  endIcon={isUpdating && <CircularProgress color="inherit" size={18} />}
+                >
+                  Save
+                </Button>
+
+                {!quoteData && (
+                  <Button
+                    disabled={!isClone && (isUpdatingAndPreview || !hasPermissionToUpdate)}
+                    size="small"
+                    color="primary"
+                    onClick={() => {
+                      setIsPreview(true);
+                      submitForm();
+                    }}
+                    variant="contained"
+                    endIcon={isUpdatingAndPreview && <CircularProgress color="inherit" size={18} />}
+                  >
+                    Save & Preview
+                  </Button>
+                )}
+
+                <Button
+                  size="small"
+                  color="primary"
+                  variant="contained"
+                  onClick={() => {
+                    if (quoteData?._id) {
+                      if (queryParams.quotation) {
+                        history.push(`${routes.quotationDetail.path}/${quoteData._id}`);
+                      } else {
+                        history.push(`/quotes/detail/${quoteData?._id}`, {
+                          versionNumber: `${version}`,
+                          tabValue: 1
+                        });
+                      }
+                    } else {
+                      history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
+                    }
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+            <div className={`main-container ${classes.mainContainer}`}>
+              <Box className={classes.paper}>
+                <Grid container>
+                  <Grid item xs={12} md={6}></Grid>
+                </Grid>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-2 gap-y-3">
+                  {!Boolean(quoteData?._id) && (
+                    <>
                       <TextField
                         disabled={!isClone && (!hasPermissionToUpdate || Boolean(quoteData?._id))}
                         variant="outlined"
@@ -475,399 +531,326 @@ export default function NewCreateQuotePdfTemplate() {
                         required={true}
                         name="name"
                         fullWidth
-                        margin="dense"
+                        margin="none"
+                        size="small"
                         value={values['name']}
                         error={touched['name'] && Boolean(errors['name'])}
                         helperText={touched['name'] && errors['name']}
                         onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
                       />
-                    </Grid>
-                    <Grid item xs={12} md={6} className={`${classes.saveButtonContainer} gap-2`}>
-                      <Button
-                        disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
-                        size="small"
-                        color="primary"
-                        onClick={submitForm}
-                        variant="contained"
-                        endIcon={isUpdating && <CircularProgress color="inherit" size={18} />}
-                      >
-                        Save
-                      </Button>
-
-                      {!quoteData && (
-                        <Button
-                          disabled={!isClone && (isUpdatingAndPreview || !hasPermissionToUpdate)}
-                          size="small"
-                          color="primary"
-                          onClick={() => {
-                            setIsPreview(true);
-                            submitForm();
-                          }}
-                          variant="contained"
-                          endIcon={isUpdatingAndPreview && <CircularProgress color="inherit" size={18} />}
-                        >
-                          Save & Preview
-                        </Button>
-                      )}
-
-                      <Button
-                        size="small"
-                        color="primary"
-                        variant="contained"
-                        onClick={() => {
-                          if (quoteData?._id) {
-                            if (queryParams.quotation) {
-                              history.push(`${routes.quotationDetail.path}/${quoteData._id}`);
-                            }
-                            else {
-                              history.push(`/quotes/detail/${quoteData?._id}`, {
-                                versionNumber: `${version}`,
-                                tabValue: 1
-                              });
-                            }
-                          } else {
-                            history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
-                          }
+                      <Autocomplete
+                        disabled={!isClone && !hasPermissionToUpdate}
+                        multiple
+                        options={user?.entity}
+                        getOptionLabel={(option: any) => (option ? option?.entityName : '')}
+                        value={
+                          user?.entity.filter((data) => values['entity']?.some((d) => d === data._id)).length
+                            ? user?.entity.filter((data) => values['entity']?.some((d) => d === data._id))
+                            : []
+                        }
+                        onChange={(e, val) => {
+                          setFieldValue('entity', val && val?.map((d) => d._id));
+                          val && val.length !== 0
+                            ? setOwnerCollaboratorData(
+                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                              )
+                            : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                         }}
-                      >
-                        Close
-                      </Button>
-                    </Grid>
-                    {showConfirmDialog ? (
-                      <ConfirmCancelDialog
-                        close={() => setShowConfirmDialog(false)}
-                        open={showConfirmDialog}
-                        onSave={() => {
-                          setShowConfirmDialog(false);
-                          submitForm();
-                        }}
-                        onClose={() => {
-                          //  This condition is to check either user is redirected from quote details screen or not
-                          if (history.location?.state?.redirectTo) {
-                            if (isBreakCrumbPath) {
-                              history.push({ pathname: routes.quotePdfTemplate.path });
-                              setIsBreakCrumbPath('');
-                            } else {
-                              history.push(history.location?.state?.redirectTo);
-                            }
-                          } else {
-                            setShowConfirmDialog(false);
-                            history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
-                            setIsBreakCrumbPath('');
-                          }
-                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            margin="none"
+                            size="small"
+                            name="entity"
+                            label="Entity"
+                            variant="outlined"
+                            error={touched['entity'] && Boolean(errors['entity'])}
+                            helperText={touched['entity'] && errors['entity']}
+                            fullWidth
+                          />
+                        )}
                       />
-                    ) : null}
-                  </Grid>
-                  {!Boolean(quoteData?._id) && (
-                    <Grid container spacing={1}>
-                      <Grid item xs={12} sm={3}>
-                        {
-                          <Autocomplete
-                            disabled={!isClone && !hasPermissionToUpdate}
-                            multiple
-                            options={user?.entity}
-                            getOptionLabel={(option: any) => (option ? option?.entityName : '')}
-                            value={
-                              user?.entity.filter((data) => values['entity']?.some((d) => d === data._id)).length
-                                ? user?.entity.filter((data) => values['entity']?.some((d) => d === data._id))
-                                : []
-                            }
-                            onChange={(e, val) => {
-                              setFieldValue('entity', val && val?.map((d) => d._id));
-                              val && val.length !== 0
-                                ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                                )
-                                : setOwnerCollaboratorData(ownerCollaboratorDataConst);
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                margin="dense"
-                                name="entity"
-                                label="Entity"
-                                variant="outlined"
-                                error={touched['entity'] && Boolean(errors['entity'])}
-                                helperText={touched['entity'] && errors['entity']}
-                                fullWidth
-                              />
-                            )}
-                          />
+                      <Autocomplete
+                        disabled={!isClone && !hasPermissionToUpdate}
+                        getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
+                        value={
+                          ownerCollaboratorData.filter((data) => data._id === values['owner']).length
+                            ? ownerCollaboratorData.filter((data) => data._id === values['owner'])[0]
+                            : ''
                         }
-                      </Grid>
-                      <Grid item xs={12} sm={3}>
-                        {
-                          <Autocomplete
-                            disabled={!isClone && !hasPermissionToUpdate}
-                            getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
-                            value={
-                              ownerCollaboratorData.filter((data) => data._id === values['owner']).length
-                                ? ownerCollaboratorData.filter((data) => data._id === values['owner'])[0]
-                                : ''
-                            }
-                            options={ownerCollaboratorData.filter((user) => !values['collaborator']?.some((d) => user._id === d))}
-                            onChange={(e, val) => {
-                              setFieldValue('owner', val && val._id ? val._id : '');
-                            }}
-                            onOpen={() =>
-                              values['entity'] && values['entity'].length !== 0
-                                ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                  )
-                                )
-                                : setOwnerCollaboratorData(ownerCollaboratorDataConst)
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                required={true}
-                                margin="dense"
-                                name="owner"
-                                label="Owner"
-                                variant="outlined"
-                                error={touched['owner'] && Boolean(errors['owner'])}
-                                helperText={touched['owner'] && errors['owner']}
-                                fullWidth
-                              />
-                            )}
-                          />
+                        options={ownerCollaboratorData.filter((user) => !values['collaborator']?.some((d) => user._id === d))}
+                        onChange={(e, val) => {
+                          setFieldValue('owner', val && val._id ? val._id : '');
+                        }}
+                        onOpen={() =>
+                          values['entity'] && values['entity'].length !== 0
+                            ? setOwnerCollaboratorData(
+                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                              )
+                            : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
-                      </Grid>
-                      <Grid item xs={12} sm={3}>
-                        {
-                          <Autocomplete
-                            disabled={!isClone && !hasPermissionToUpdate}
-                            multiple
-                            options={ownerCollaboratorData.filter((d) => d._id !== values['owner'])}
-                            getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
-                            value={
-                              ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id)).length
-                                ? ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id))
-                                : []
-                            }
-                            onChange={(e, val) => {
-                              setFieldValue('collaborator', val && val?.map((d) => d._id));
-                            }}
-                            onOpen={() =>
-                              values['entity'] && values['entity'].length !== 0
-                                ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                  )
-                                )
-                                : setOwnerCollaboratorData(ownerCollaboratorDataConst)
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                margin="dense"
-                                name="collaborator"
-                                label="Collaborator"
-                                variant="outlined"
-                                error={touched['collaborator'] && Boolean(errors['collaborator'])}
-                                helperText={touched['collaborator'] && errors['collaborator']}
-                                fullWidth
-                              />
-                            )}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            required={true}
+                            margin="none"
+                            size="small"
+                            name="owner"
+                            label="Owner"
+                            variant="outlined"
+                            error={touched['owner'] && Boolean(errors['owner'])}
+                            helperText={touched['owner'] && errors['owner']}
+                            fullWidth
                           />
+                        )}
+                      />
+                      <Autocomplete
+                        disabled={!isClone && !hasPermissionToUpdate}
+                        multiple
+                        options={ownerCollaboratorData.filter((d) => d._id !== values['owner'])}
+                        getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
+                        value={
+                          ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id)).length
+                            ? ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id))
+                            : []
                         }
-                      </Grid>
-                      <Grid item xs={12} sm={3}>
-                        {
-                          <Autocomplete
-                            disabled={!isClone && !hasPermissionToUpdate}
-                            getOptionLabel={(option) => option.title}
-                            getOptionSelected={(option, value) => option.value === value.value}
-                            value={
-                              pdfResourceOption.find((data) => data.value === values['type'])
-                                ? pdfResourceOption.find((data) => data.value === values['type'])
-                                : ''
-                            }
-                            options={pdfResourceOption}
-                            onChange={(e, val: any) => {
-                              setFieldValue('type', val ? val.value : '');
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                required={true}
-                                margin="dense"
-                                name="type"
-                                label="Type"
-                                variant="outlined"
-                                error={touched['type'] && Boolean(errors['type'])}
-                                helperText={touched['type'] && errors['type']}
-                                fullWidth
-                              />
-                            )}
+                        onChange={(e, val) => {
+                          setFieldValue('collaborator', val && val?.map((d) => d._id));
+                        }}
+                        onOpen={() =>
+                          values['entity'] && values['entity'].length !== 0
+                            ? setOwnerCollaboratorData(
+                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                              )
+                            : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            margin="none"
+                            size="small"
+                            name="collaborator"
+                            label="Collaborator"
+                            variant="outlined"
+                            error={touched['collaborator'] && Boolean(errors['collaborator'])}
+                            helperText={touched['collaborator'] && errors['collaborator']}
+                            fullWidth
                           />
+                        )}
+                      />
+                      <Autocomplete
+                        disabled={!isClone && !hasPermissionToUpdate}
+                        getOptionLabel={(option) => option.title}
+                        getOptionSelected={(option, value) => option.value === value.value}
+                        value={
+                          pdfResourceOption.find((data) => data.value === values['type'])
+                            ? pdfResourceOption.find((data) => data.value === values['type'])
+                            : ''
                         }
-                      </Grid>
-                    </Grid>
+                        options={pdfResourceOption}
+                        onChange={(e, val: any) => {
+                          setFieldValue('type', val ? val.value : '');
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            required={true}
+                            margin="none"
+                            size="small"
+                            name="type"
+                            label="Type"
+                            variant="outlined"
+                            error={touched['type'] && Boolean(errors['type'])}
+                            helperText={touched['type'] && errors['type']}
+                            fullWidth
+                          />
+                        )}
+                      />
+                    </>
                   )}
 
-                  <Grid container spacing={1}>
-                    <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
-                      <FormControlLabel
-                        disabled={!isClone && !hasPermissionToUpdate}
-                        value={values['showPageNumberInFooter']}
-                        control={
-                          <Checkbox
-                            name="showPageNumberInFooter"
-                            checked={values['showPageNumberInFooter']}
-                            onChange={(e) => {
-                              setFieldValue('showPageNumberInFooter', e.target.checked);
-                            }}
-                            color="primary"
-                          />
-                        }
-                        label="Show page number in footer"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
-                      <FormControlLabel
-                        disabled={!isClone && !hasPermissionToUpdate}
-                        value={values['landscape']}
-                        control={
-                          <Checkbox
-                            name="landscape"
-                            checked={values['landscape']}
-                            onChange={(e) => {
-                              setIsLandscapChecked(e.target.checked);
-                              setFieldValue('landscape', e.target.checked);
-                            }}
-                            color="primary"
-                          />
-                        }
-                        label="Landscape"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={3} style={{ textAlign: 'left' }}>
-                      <TextField
-                        name="productColumns"
-                        label="No. of Product Columns"
-                        value={values['productColumns']}
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        size="small"
-                        InputProps={{ inputProps: { min: 5, max: 20 } }}
+                  <TextField
+                    name="productColumns"
+                    label="No. of Product Columns"
+                    value={values['productColumns']}
+                    type="number"
+                    fullWidth
+                    variant="outlined"
+                    margin="none"
+                    size="small"
+                    InputProps={{ inputProps: { min: 5, max: 20 } }}
+                    onChange={(e) => {
+                      setFieldValue('productColumns', e.target.value);
+                    }}
+                    onBlur={(e) => {
+                      const val = parseInt(e.target.value);
+                      if (!(val >= 5 && val <= 20)) {
+                        setFieldValue('productColumns', defaultProductColumns.toString());
+                      }
+                    }}
+                    helperText="Value must be between 5 to 20"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <FormControlLabel
+                    disabled={!isClone && !hasPermissionToUpdate}
+                    value={values['showPageNumberInFooter']}
+                    control={
+                      <Checkbox
+                        name="showPageNumberInFooter"
+                        checked={values['showPageNumberInFooter']}
                         onChange={(e) => {
-                          setFieldValue('productColumns', e.target.value);
+                          setFieldValue('showPageNumberInFooter', e.target.checked);
                         }}
-                        onBlur={(e) => {
-                          const val = parseInt(e.target.value);
-                          if (!(val >= 5 && val <= 20)) {
-                            setFieldValue('productColumns', defaultProductColumns.toString());
-                          }
-                        }}
-                        helperText="Value must be between 5 to 20"
+                        color="primary"
                       />
-                    </Grid>
-                  </Grid>
-                </Form>
-              )}
-            </Formik>
-          ) : null}
-          <Grid item xs={12} className="mt-4">
-            <Box className={classes.tinyMCEContainer}>
-              <Typography className={classes.headingLabel} variant="h5" component="h5">
-                Header
-              </Typography>
-              <TinyMce
-                disabledEditor={!hasPermissionToUpdate}
-                id="header"
-                onChange={(value) => {
-                  setDetails((prevState) => ({
-                    ...prevState,
-                    header: value
-                  }));
+                    }
+                    label="Show page number in footer"
+                  />
+                  <FormControlLabel
+                    disabled={!isClone && !hasPermissionToUpdate}
+                    value={values['landscape']}
+                    control={
+                      <Checkbox
+                        name="landscape"
+                        checked={values['landscape']}
+                        onChange={(e) => {
+                          setIsLandscapChecked(e.target.checked);
+                          setFieldValue('landscape', e.target.checked);
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label="Landscape"
+                  />
+                </div>
+
+                <Grid item xs={12} className="mt-4">
+                  <Box className={classes.tinyMCEContainer}>
+                    <Typography className={classes.headingLabel} variant="h5" component="h5">
+                      Header
+                    </Typography>
+                    <TinyMce
+                      disabledEditor={!hasPermissionToUpdate}
+                      id="header"
+                      onChange={(value) => {
+                        setDetails((prevState) => ({
+                          ...prevState,
+                          header: value
+                        }));
+                      }}
+                      width={isLandscapChecked ? 793 : 725}
+                      height={300}
+                      initialValue={initialValues?.header}
+                      imageOrFileUploadCompletePercentage={(completePercentage) => null}
+                      showVariableDropdown={true}
+                      variables={variables}
+                      isCheckHeight={true}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={12} className="mt-4">
+                  <Box className={classes.tinyMCEContainer}>
+                    <Typography className={classes.headingLabel} variant="h5" component="h5">
+                      Above Table
+                    </Typography>
+                    <TinyMce
+                      disabledEditor={!hasPermissionToUpdate}
+                      id="aboveTable"
+                      onChange={(value) => {
+                        setDetails((prevState) => ({
+                          ...prevState,
+                          aboveTable: value
+                        }));
+                      }}
+                      width={isLandscapChecked ? 793 : 725}
+                      height={400}
+                      initialValue={initialValues?.aboveTable}
+                      imageOrFileUploadCompletePercentage={(completePercentage) => null}
+                      variables={variables}
+                      showVariableDropdown={true}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={12} className="mt-4">
+                  <Box className={classes.tinyMCEContainer}>
+                    <Typography className={classes.headingLabel} variant="h5" component="h5">
+                      Below Table
+                    </Typography>
+                    <TinyMce
+                      disabledEditor={!hasPermissionToUpdate}
+                      id="belowTable"
+                      onChange={(value) => {
+                        setDetails((prevState) => ({
+                          ...prevState,
+                          belowTable: value
+                        }));
+                      }}
+                      width={isLandscapChecked ? 793 : 725}
+                      height={400}
+                      initialValue={initialValues?.belowTable}
+                      imageOrFileUploadCompletePercentage={(completePercentage) => null}
+                      variables={variables}
+                      showVariableDropdown={true}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={12} className="mt-4">
+                  <Box className={classes.tinyMCEContainer}>
+                    <Typography className={classes.headingLabel} variant="h5" component="h5">
+                      Footer
+                    </Typography>
+                    <TinyMce
+                      disabledEditor={!hasPermissionToUpdate}
+                      id="footer"
+                      onChange={(value) => {
+                        setDetails((prevState) => ({
+                          ...prevState,
+                          footer: value
+                        }));
+                      }}
+                      width={isLandscapChecked ? 793 : 725}
+                      height={300}
+                      initialValue={initialValues?.footer}
+                      imageOrFileUploadCompletePercentage={(completePercentage) => null}
+                      showVariableDropdown={true}
+                      variables={variables}
+                      isCheckHeight={true}
+                    />
+                  </Box>
+                </Grid>
+                <CustomTable id={id} classes={classes} entity={selectedEntity} table={table} setTable={setTable} />
+              </Box>
+            </div>
+            {showConfirmDialog ? (
+              <ConfirmCancelDialog
+                close={() => setShowConfirmDialog(false)}
+                open={showConfirmDialog}
+                onSave={() => {
+                  setShowConfirmDialog(false);
+                  submitForm();
                 }}
-                width={isLandscapChecked ? 793 : 725}
-                height={300}
-                initialValue={initialValues?.header}
-                imageOrFileUploadCompletePercentage={(completePercentage) => null}
-                showVariableDropdown={true}
-                variables={variables}
-                isCheckHeight={true}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12} className="mt-4">
-            <Box className={classes.tinyMCEContainer}>
-              <Typography className={classes.headingLabel} variant="h5" component="h5">
-                Above Table
-              </Typography>
-              <TinyMce
-                disabledEditor={!hasPermissionToUpdate}
-                id="aboveTable"
-                onChange={(value) => {
-                  setDetails((prevState) => ({
-                    ...prevState,
-                    aboveTable: value
-                  }));
+                onClose={() => {
+                  //  This condition is to check either user is redirected from quote details screen or not
+                  if (history.location?.state?.redirectTo) {
+                    if (isBreakCrumbPath) {
+                      history.push({ pathname: routes.quotePdfTemplate.path });
+                      setIsBreakCrumbPath('');
+                    } else {
+                      history.push(history.location?.state?.redirectTo);
+                    }
+                  } else {
+                    setShowConfirmDialog(false);
+                    history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
+                    setIsBreakCrumbPath('');
+                  }
                 }}
-                width={isLandscapChecked ? 793 : 725}
-                height={400}
-                initialValue={initialValues?.aboveTable}
-                imageOrFileUploadCompletePercentage={(completePercentage) => null}
-                variables={variables}
-                showVariableDropdown={true}
               />
-            </Box>
-          </Grid>
-          <Grid item xs={12} className="mt-4">
-            <Box className={classes.tinyMCEContainer}>
-              <Typography className={classes.headingLabel} variant="h5" component="h5">
-                Below Table
-              </Typography>
-              <TinyMce
-                disabledEditor={!hasPermissionToUpdate}
-                id="belowTable"
-                onChange={(value) => {
-                  setDetails((prevState) => ({
-                    ...prevState,
-                    belowTable: value
-                  }));
-                }}
-                width={isLandscapChecked ? 793 : 725}
-                height={400}
-                initialValue={initialValues?.belowTable}
-                imageOrFileUploadCompletePercentage={(completePercentage) => null}
-                variables={variables}
-                showVariableDropdown={true}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={12} className="mt-4">
-            <Box className={classes.tinyMCEContainer}>
-              <Typography className={classes.headingLabel} variant="h5" component="h5">
-                Footer
-              </Typography>
-              <TinyMce
-                disabledEditor={!hasPermissionToUpdate}
-                id="footer"
-                onChange={(value) => {
-                  setDetails((prevState) => ({
-                    ...prevState,
-                    footer: value
-                  }));
-                }}
-                width={isLandscapChecked ? 793 : 725}
-                height={300}
-                initialValue={initialValues?.footer}
-                imageOrFileUploadCompletePercentage={(completePercentage) => null}
-                showVariableDropdown={true}
-                variables={variables}
-                isCheckHeight={true}
-              />
-            </Box>
-          </Grid>
-          <CustomTable id={id} classes={classes} entity={selectedEntity} table={table} setTable={setTable} />
-        </Box>
-      </div>
-    </div>
-  );
+            ) : null}
+          </div>
+        </Form>
+      )}
+    </Formik>
+  ) : null;
 }
