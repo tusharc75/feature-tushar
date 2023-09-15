@@ -400,13 +400,15 @@ const Report = () => {
                 fieldData: { ...field.fieldData, fieldName: 'product', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
               });
             }
-            columns.push({
-              field: field?.fieldData.fieldName === 'productName' ? 'product' : field?.fieldData.fieldName,
-              headerName: field?.fieldData?.fieldLabel,
-              show: true,
-              disabled: false,
-              cellRenderer: field?.fieldData.fieldName === 'productName' ? 'productRenderer' : 'commonRenderer'
-            });
+            if (!['expenseItem'].includes(field?.fieldData.fieldName)) {
+              columns.push({
+                field: field?.fieldData.fieldName === 'productName' ? 'product' : field?.fieldData.fieldName,
+                headerName: field?.fieldData?.fieldLabel,
+                show: true,
+                disabled: false,
+                cellRenderer: field?.fieldData.fieldName === 'productName' ? 'productRenderer' : 'commonRenderer'
+              });
+            }
           });
 
         columns = [
