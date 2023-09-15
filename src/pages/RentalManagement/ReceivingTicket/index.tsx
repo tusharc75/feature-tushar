@@ -980,6 +980,7 @@ const ReceivingTicket = ({
   };
 
   const handelCancelDeliveredTicket = () => {
+    setOkBtnLoading(true);
     const receivingTicketId = uniq(map(selectedRecords, 'receivingTicketId'));
     const returnTicketId = uniq(map(selectedRecords, 'returnTicketId'));
     const ticketIds: any = [];
@@ -999,6 +1000,8 @@ const ReceivingTicket = ({
       axiosInstance()
         .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
         .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket({ open: false, type: '' });
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -1007,6 +1010,7 @@ const ReceivingTicket = ({
           fetchRecords();
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -1094,6 +1098,7 @@ const ReceivingTicket = ({
   };
 
   const handelRevertTickets = () => {
+    setOkBtnLoading(true);
     const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
     if (receivingTicketIds.length) {
       let data = [];
@@ -1107,6 +1112,8 @@ const ReceivingTicket = ({
       axiosInstance()
         .put(`${deliveryTicket.api}/revert-partially`, data)
         .then(({ data: { data } }) => {
+          setOkBtnLoading(false);
+          setShowConformationRevertTicket(false);
           fetchRecords();
           toastConfig.setToastConfig({
             open: true,
@@ -1115,17 +1122,21 @@ const ReceivingTicket = ({
           });
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
   };
 
   const handelCancleTickets = () => {
+    setOkBtnLoading(true);
     const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
     if (receivingTicketIds.length) {
       axiosInstance()
         .put(`${deliveryTicket.api}/revert`, { ids: receivingTicketIds })
         .then(({ data: { data } }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket({ open: false, type: '' });
           fetchRecords();
           toastConfig.setToastConfig({
             open: true,
@@ -1134,6 +1145,7 @@ const ReceivingTicket = ({
           });
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -2004,7 +2016,6 @@ const ReceivingTicket = ({
           }}
           onOk={() => {
             handelRevertTickets();
-            setShowConformationRevertTicket(false);
           }}
           okBtnLoading={okBtnLoading}
         />
@@ -2023,7 +2034,6 @@ const ReceivingTicket = ({
             else {
               handelCancleTickets();
             }
-            setShowConformationCancleTicket({ open: false, type: '' });
           }}
           okBtnLoading={okBtnLoading}
         />
