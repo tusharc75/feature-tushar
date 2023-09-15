@@ -13,9 +13,10 @@ import { camelCase } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { isMobile, isTablet } from 'react-device-detect';
-import { generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 function Parts({ id }) {
 
@@ -101,6 +102,8 @@ function Parts({ id }) {
       accessor: 'qty',
       Header: 'Qty',
       width: 150,
+      editable: permissions?.product?.isUpdate ? true : false,
+      Cell: ({ row }) => (row.original?.qty ? <p>{row.original?.qty}</p> : <NoDataCell />)
     }];
     coloum.push({
       accessor: 'action',
@@ -178,6 +181,29 @@ function Parts({ id }) {
     setAnchorEl(null);
   };
 
+  const handleSaveData = async (row: any) => {
+    axiosInstance()
+      .put(`${product.api}/${id}/bom/${row._id}`,{ qty: row.qty })
+      .then(({ data }) => {
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchBOMData();
+      })
+      .catch((error) => {
+       setToastConfig(error);
+      });
+  };
+
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+      const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+      if (rowData && parseInt(inputField['qty'])) {
+        handleSaveData({ _id: rowData._id, qty: parseInt(inputField['qty']) });
+      }
+    }
+
   return (
     <div>
       {hasPermissions && (
@@ -245,6 +271,7 @@ function Parts({ id }) {
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             hideExpander={true}
+            onSaveEdit={onSaveInlineEdit}
           />
         </Box>
       ) : (
