@@ -1885,6 +1885,8 @@ export const ASSET_STATUS = {
   needRepair: 'Need Repair',
   needRecert: 'Need Recert',
   inRepair: 'In-Repair',
+  customerPossession: 'Customer Possession',
+  onPO: 'On PO',
   notApplied: 'N/A'
 };
 
@@ -2013,9 +2015,7 @@ export const TRANSFER_INVENTORY_STATUS = {
 export const TRANSFER_ASSET_STATUS = {
   new: 'New',
   inProgress: 'In Progress',
-  readyToShip: 'Ready to ship',
-  inTransit: 'In-Transit',
-  delivered: 'Delivered'
+  completed: 'Completed'
 };
 
 export const REPAIR_PROCESS_STATUS = {
