@@ -9,7 +9,7 @@ import { Delete } from '@material-ui/icons';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import AddSerializedAsset from './AddSerializedAsset';
-import { rentalManagement, sidebarResource, treeToFlatArray, ASSET_STATUS, TRANSFER_INVENTORY_STATUS, TRANSFER_ASSET_STATUS } from '../../../constants/helpers';
+import { rentalManagement, sidebarResource, treeToFlatArray, ASSET_STATUS, TRANSFER_ASSET_STATUS } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
@@ -200,9 +200,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                       onClick={() => {
                         setShowConfirmBox(true);
                         let isTransferAsset = false;
-                        if (row.original?.transferData && row.original?.transferData?.status !== TRANSFER_ASSET_STATUS.delivered) {
+                        if (row.original?.transferData
+                          && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(row.original?.transferData?.status)) {
                           isTransferAsset = true;
                         }
+                        console.log(row.original)
                         setDeleteData([
                           {
                             _id: row.original.inventory,
@@ -854,7 +856,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                     const dataTodelete = [];
                     assets?.forEach((element) => {
                       let isTransferAsset = false;
-                      if (element?.transferData && element?.transferData?.status !== TRANSFER_ASSET_STATUS.delivered) {
+                      if (element?.transferData && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(element?.transferData?.status)) {
                         isTransferAsset = true;
                       }
                       dataTodelete.push({
