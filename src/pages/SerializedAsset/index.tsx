@@ -205,10 +205,11 @@ const SerializedAsset = () => {
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.serializedAsset?.isDelete;
           finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
-          finalObject['canDelete'] = [ASSET_STATUS.inUse, ASSET_STATUS.reserved, ASSET_STATUS.delivered]?.includes(u?.status) ? false : true;
+          finalObject['canDelete'] = permissions?.serializedAsset?.isDelete &&
+            ![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.lost, ASSET_STATUS.customerPossession, ASSET_STATUS.onPO,
+            ASSET_STATUS.scrap]?.includes(u?.status) ? false : true;
           return {
             ...finalObject
           };
@@ -887,9 +888,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
