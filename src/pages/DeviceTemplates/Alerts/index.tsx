@@ -13,9 +13,9 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import ManageIotDataPoints from "src/pages/IotDataPoints/ManageIotDataPoints";
 import { ExpandMore } from "@material-ui/icons";
 import ManageDeviceTemplateAlert from "src/pages/DeviceTemplatesAlert/ManageDeviceTemplateAlert";
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 export default function Alerts({ deviceTemplate }) {
 
@@ -55,17 +55,33 @@ export default function Alerts({ deviceTemplate }) {
                 let columns = [];
                 let rendererNames = [];
                 data.forEach((o) => {
-                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.deviceTemplateAlertDetail.path, true);
-                    if (currentColumn !== null) {
-                        columns = [...columns, currentColumn?.columnData];
-                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                            rendererNames.push(currentColumn?.rendererName);
+                    if (['alertNumber'].indexOf(o?.fieldData?.fieldName) === 0) {
+                        columns = [
+                            ...columns,
+                            {
+                                pivotIndex: 0,
+                                field: 'alertNumber',
+                                headerName: 'Alert Number',
+                                show: true,
+                                disabled: true,
+                                cellRenderer: 'alertNumberRenderer'
+                            }
+                        ];
+                    } else {
+                        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.deviceTemplateAlertDetail.path, true);
+                        if (currentColumn !== null) {
+                            columns = [...columns, currentColumn?.columnData];
+                            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                                rendererNames.push(currentColumn?.rendererName);
+                            }
                         }
                     }
                 });
+
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
                 tempFrameworkComponent = {
                     ...tempFrameworkComponent,
+                    alertNumberRenderer: AlertNumberRenderer,
                     actionsRenderer: ActionsRenderer
                 };
                 setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -153,6 +169,26 @@ export default function Alerts({ deviceTemplate }) {
 
         return deepFilter;
     };
+
+    const AlertNumberRenderer = (params) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p className="link text-truncate" onClick={()=>{
+                setOpen({ open: true, isClone: false, id: params?.data?.id });
+            }}>
+                {params?.value}
+            </p>
+            <Box ml={1}>
+                <IconButton
+                    size="small"
+                    onClick={() => {
+                        window.open(`${routes.deviceTemplateAlertDetail.path}/${params.data.id}`);
+                    }}
+                >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+            </Box>
+        </div>
+    );
 
     const ActionsRenderer = (params) => (
         <Fragment>

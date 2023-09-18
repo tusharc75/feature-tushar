@@ -336,6 +336,7 @@ export const sidebarResource = {
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
+  iotDataPointsCategory: 'Iot Data Points Category',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
