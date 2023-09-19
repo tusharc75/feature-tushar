@@ -59,7 +59,7 @@ const useStyles = makeStyles(() => ({
   },
   inboundEmail: {
     '& > div': {
-      borderBottom: '1px solid #E7E7E7',
+      borderBottom: '1px solid var(--common-border-color)',
       marginTop: '14px',
       paddingBottom: '24px'
     }
@@ -98,7 +98,7 @@ const useStyles = makeStyles(() => ({
   mailTimeStamp: { fontWeight: 400, fontSize: '11px', lineHeight: '151%', color: '#717171' },
   inputBox: {
     background: 'var(--dark-secondary,#FFFFFF)',
-    border: '0.945308px solid var(--dark-mode-border-color, #EBEBEB)',
+    border: '1px solid var(--common-border-color)',
     boxShadow: '0px 3.78123px 37.8123px rgba(0, 0, 0, 0.08)',
     borderRadius: '5px'
   },

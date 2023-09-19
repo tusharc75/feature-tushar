@@ -34,10 +34,9 @@ const useStyles = makeStyles((theme) => ({
   },
   buttonContainer: {
     display: 'flex',
-    padding: '4px',
+    padding: '5px',
     paddingLeft: '5px',
-    border: '1px solid var(--common-border-color)',
-    borderBottom: '0'
+    borderBottom: '1px solid var(--common-border-color)'
   },
   varibalesButton: {
     margin: '0 5px'
@@ -289,7 +288,7 @@ export default function TinyMCE(props) {
   };
 
   return (
-    <>
+    <div style={{ border: '1px solid var(--common-border-color)' }}>
       {isOffline ? (
         <div style={{ width: width }}>
           <div
@@ -553,6 +552,6 @@ export default function TinyMCE(props) {
           <div style={{ visibility: 'hidden' }} id="contentDiv"></div>
         </>
       )}
-    </>
+    </div>
   );
 }

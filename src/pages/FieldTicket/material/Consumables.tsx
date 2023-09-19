@@ -562,7 +562,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
                     horizontal: 'right'
                   }}
                 >
-                  <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                     <MenuItem
                       onClick={() => {
                         setIsConsumableEdit({ open: true, data: null, showSaveAndNext: false });
@@ -572,10 +571,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
                     >
                       Bulk Edit
                     </MenuItem>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
+                  
                     <MenuItem
-                      disabled={isDeleting}
+                      disabled={isDeleting || selectedRecords?.some((e) => e?.requestedQty || e?.consumedQty)}
                       onClick={() => {
                         setDeleteData(
                           selectedRecords?.map((d) => {
@@ -589,7 +587,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
                     >
                       Delete
                     </MenuItem>
-                  </HtmlTooltip>
                 </Menu>
               </Box>
             </Box>

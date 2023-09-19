@@ -336,6 +336,7 @@ export const sidebarResource = {
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
+  iotDataPointsCategory: 'Iot Data Points Category',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
@@ -1885,6 +1886,8 @@ export const ASSET_STATUS = {
   needRepair: 'Need Repair',
   needRecert: 'Need Recert',
   inRepair: 'In-Repair',
+  customerPossession: 'Customer Possession',
+  onPO: 'On PO',
   notApplied: 'N/A'
 };
 
@@ -2008,6 +2011,12 @@ export const TRANSFER_INVENTORY_STATUS = {
   readyToShip: 'Ready to ship',
   inTransit: 'In-Transit',
   delivered: 'Delivered'
+};
+
+export const TRANSFER_ASSET_STATUS = {
+  new: 'New',
+  inProgress: 'In Progress',
+  completed: 'Completed'
 };
 
 export const REPAIR_PROCESS_STATUS = {

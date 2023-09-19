@@ -19,7 +19,7 @@ import { UserDropdown } from 'src/components/Activity/Helpers/userDropdown';
 import { TbRuler2Off } from 'react-icons/tb';
 import { isEqual } from 'lodash';
 
-export default function ManageRules({ deviceTemplate, open, id = null, onClose, onSuccess }) {
+export default function ManageRules({ deviceTemplate, open, isClone = false, id = null, onClose, onSuccess }) {
   const OPERATOR = [
     {
       optionLabel: 'Less than',
@@ -46,6 +46,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
   const [initialValue, setInitialValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -58,7 +59,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
         .get(`${routes.deviceTemplates.path}/rule/${id}`)
         .then(({ data: { data } }) => {
           setInitialValue({
-            ruleName: data?.ruleName,
+            ruleName: isClone ? '' : data?.ruleName,
             condition: data?.condition,
             isEmailAlert: data?.isEmailAlert,
             emailAlertUsers: data?.emailAlertUsers?.map((e) => ({ userId: e })),
@@ -104,7 +105,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
 
   const handleSubmit = (values) => {
     setLoading(true);
-    if (id) {
+    if (id && !isClone) {
       values._id = id;
       axiosInstance()
         .put(`${routes.deviceTemplates.path}/rule`, values)
@@ -196,7 +197,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
-                  title={id ? `Update Rule - ${initialValue?.ruleName}` : 'Create Rule'}
+                  title={id ? isClone ? `Clone - ${initialValue?.ruleName}` : `Update Rule - ${initialValue?.ruleName}` : 'Create Rule'}
                   onClose={(e, reason) => {
                     if (isEqual(initialValue, values)) {
                       onClose();

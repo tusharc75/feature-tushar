@@ -9,7 +9,7 @@ import { Delete } from '@material-ui/icons';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import AddSerializedAsset from './AddSerializedAsset';
-import { rentalManagement, sidebarResource, treeToFlatArray, ASSET_STATUS } from '../../../constants/helpers';
+import { rentalManagement, sidebarResource, treeToFlatArray, ASSET_STATUS, TRANSFER_ASSET_STATUS } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
@@ -199,8 +199,19 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                       size="small"
                       onClick={() => {
                         setShowConfirmBox(true);
+                        let isTransferAsset = false;
+                        if (row.original?.transferData
+                          && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(row.original?.transferData?.status)) {
+                          isTransferAsset = true;
+                        }
+                        console.log(row.original)
                         setDeleteData([
-                          { _id: row.original.inventory, assetNumber: row.original.detail, isNonSerializeAsset: row.original.isNonSerializeAsset }
+                          {
+                            _id: row.original.inventory,
+                            assetNumber: row.original.detail,
+                            isNonSerializeAsset: row.original.isNonSerializeAsset,
+                            isTransferAsset: isTransferAsset
+                          }
                         ]);
                       }}
                     >
@@ -844,7 +855,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                     const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
                     const dataTodelete = [];
                     assets?.forEach((element) => {
-                      dataTodelete.push({ _id: element?.inventory, assetNumber: element?.detail, isNonSerializeAsset: element?.isNonSerializeAsset });
+                      let isTransferAsset = false;
+                      if (element?.transferData && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(element?.transferData?.status)) {
+                        isTransferAsset = true;
+                      }
+                      dataTodelete.push({
+                        _id: element?.inventory,
+                        assetNumber: element?.detail,
+                        isNonSerializeAsset: element?.isNonSerializeAsset,
+                        isTransferAsset: isTransferAsset
+                      });
                     });
                     setDeleteData(dataTodelete);
                     setShowConfirmBox(true);
@@ -861,6 +881,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   color="default"
                   size="small"
                   aria-controls="action-menu"
+                  className="normal-case"
                   endIcon={<ExpandMore fontSize="inherit" />}
                 >
                   Order(s)
