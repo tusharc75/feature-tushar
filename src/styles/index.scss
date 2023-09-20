@@ -1206,6 +1206,9 @@ body::-webkit-scrollbar-thumb {
       padding-top: 2px;
       padding-left: 6px;
       color: #7b898e;
+      [data-mode='dark'] & {
+        color: #9a9a9a;
+      }
     }
   }
 
@@ -1288,7 +1291,7 @@ body::-webkit-scrollbar-thumb {
 .btn-view {
   background: #f7fffb;
   [data-mode='dark'] & {
-    background-color: var(--dark-secondary);
+    background-color: var(--dark-primary);
   }
   border: 1px solid #0f9fa9;
   box-shadow: 0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06);
@@ -2506,7 +2509,7 @@ svg.MuiSvgIcon-root {
         justify-content: flex-start;
         background-color: #fff;
         [data-mode='dark'] & {
-          background-color: var(--dark-secondary);
+          background-color: var(--dark-primary);
         }
         border: 2px solid #329592;
         border-radius: 5px;
@@ -2704,7 +2707,7 @@ svg.MuiSvgIcon-root {
         justify-content: flex-start;
         background-color: #fff;
         [data-mode='dark'] & {
-          background-color: var(--dark-secondary);
+          background-color: var(--dark-primary);
         }
         border: 2px solid #329592;
         border-radius: 5px;
