@@ -3,7 +3,7 @@ import { makeStyles, Typography, Box, Grid } from '@material-ui/core';
 import { useDrag, useDrop } from 'react-dnd';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import WorkIcon from '@material-ui/icons/Work';
-import Gauges from '../../components/Gauges';
+
 import MetricsWithIcon from 'src/components/MetricsWithIcon';
 
 const useStyles = makeStyles((theme) => ({
