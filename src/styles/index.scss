@@ -1206,6 +1206,9 @@ body::-webkit-scrollbar-thumb {
       padding-top: 2px;
       padding-left: 6px;
       color: #7b898e;
+      [data-mode='dark'] & {
+        color: #9a9a9a;
+      }
     }
   }
 
@@ -1287,7 +1290,14 @@ body::-webkit-scrollbar-thumb {
 
 .btn-view {
   background: #f7fffb;
-  border: 1px solid #0f9fa9;
+  [data-mode='dark'] & {
+    background-color: var(--dark-primary);
+    color: white;
+    &:hover {
+      color: var(--dark-primary);
+    }
+  }
+  border: 1px solid var(--common-border-color);
   box-shadow: 0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06);
   border-radius: 3.62963px;
   font-weight: 600;
@@ -2501,8 +2511,14 @@ svg.MuiSvgIcon-root {
         right: unset;
         bottom: unset;
         justify-content: flex-start;
-        background-color: #fff;
-        border: 2px solid #329592;
+        [data-mode='dark'] & {
+          background-color: var(--dark-primary);
+          color: white;
+          &:hover {
+            color: var(--dark-primary);
+          }
+        }
+        border: 1px solid var(--common-border-color);
         border-radius: 5px;
         max-width: max-content;
         padding: 5px 20px;
@@ -2697,7 +2713,14 @@ svg.MuiSvgIcon-root {
         bottom: unset;
         justify-content: flex-start;
         background-color: #fff;
-        border: 2px solid #329592;
+        [data-mode='dark'] & {
+          background-color: var(--dark-primary);
+          color: white;
+          &:hover {
+            color: var(--dark-primary);
+          }
+        }
+        border: 1px solid var(--common-border-color);
         border-radius: 5px;
         max-width: max-content;
         padding: 5px 20px;
@@ -4075,4 +4098,10 @@ body {
 }
 .MuiChip-root.MuiAutocomplete-tag {
   max-width: 100% !important;
+}
+
+.MuiTypography-colorSecondary {
+  [data-mode='dark'] & {
+    color: #9a9a9a;
+  }
 }
