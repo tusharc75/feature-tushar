@@ -3,22 +3,20 @@ import { makeStyles, Typography, Box, Grid } from '@material-ui/core';
 import { useDrag, useDrop } from 'react-dnd';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import WorkIcon from '@material-ui/icons/Work';
-import Gauges from '../../components/Gauges';
+
 import MetricsWithIcon from 'src/components/MetricsWithIcon';
 
 const useStyles = makeStyles((theme) => ({
   fleetBox: {
     cursor: 'pointer',
-    display: 'flex',
-    flexDirection: 'column',
     position: 'relative',
     margin: '0px 6px 14px',
-    borderRadius: '4px',
+    borderRadius: '12px',
     border: '1px solid var(--common-border-color)',
-    padding: '15px',
+
     transition: 'transform .2s, background .3s',
-    flexWrap: 'wrap',
-    backgroundColor: 'var(--dark-secondary, #F8FFFC)',
+    backgroundColor: 'var(--dark-secondary, #fff)',
+    boxShadow: '0px 3px 30px rgba(0, 0, 0, 0.08)',
     '&:hover': {
       transform: 'scale(1.01)',
       zIndex: '1'
@@ -55,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '14px',
     lineHeight: '1.28',
     color: 'var(--dark-primary-text, #2A3042)',
-    marginBottom: '14px'
+    marginBottom: '6px'
   },
   secondaryText: {
     fontWeight: 400,
@@ -82,8 +80,7 @@ const useStyles = makeStyles((theme) => ({
   gaugeContainer: {
     display: 'flex',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    justifyContent: 'center'
+    flexWrap: 'wrap'
   },
   singleGauge: {
     maxWidth: '150px',
@@ -163,32 +160,24 @@ const FleetDispatchBox = ({ data, id, index, moveCard, cardType, handleDispatch 
   drag(drop(ref));
 
   const colors = ['#39EA75', '#2AC656', '#FFD92E', '#FCBE00', '#F95353', '#FF3636'];
+
   return (
     <div ref={ref} key={index}>
       {cardType === 'fleet' ? (
-        <Box className={classes.fleetBox} style={{ opacity }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Box className={classes.contentContainer}>
-                <Box sx={{ flexBasis: '20px' }}>
-                  <LocalShippingIcon className={`${classes.truckIcon} ${classes.icon}`} />
-                </Box>
-                <Box sx={{ flexBasis: 'calc(100% - 35px)' }}>
-                  <Typography className={classes.primaryText}>Fleet : {data?.fleetNumber}</Typography>
-                  <Typography className={classes.secondaryText}>
-                    <strong>Location :</strong> {data?.currentLocation?.optionLabel}
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box className={`${classes.gaugeContainer} gap-4`}>
-                <MetricsWithIcon type="temperature" suffixText={<> °F</>} value={data?.temperature || 30} />
-                <MetricsWithIcon type="pressure" suffixText={<> PSI</>} value={data?.pressure || 30} />
-                <MetricsWithIcon type="volume" suffixText={<> MMcf</>} value={data?.volume || 30} />
-              </Box>
-            </Grid>
-          </Grid>
+        <Box className={`${classes.fleetBox} p-[15px]  min-[1201px]:p-[18px_14px_24px_18px]`} style={{ opacity }}>
+          <div>
+            <div className="mb-[14px] md:mb-[24px]">
+              <Typography className={classes.primaryText}>Fleet : {data?.fleetNumber}</Typography>
+              <Typography className={classes.secondaryText}>
+                <strong>Location :</strong> {data?.currentLocation?.optionLabel}
+              </Typography>
+            </div>
+            <Box className={`${classes.gaugeContainer} gap-4`}>
+              <MetricsWithIcon type="temperature" suffixText={<> °F</>} value={data?.temperature || 30} />
+              <MetricsWithIcon type="pressure" suffixText={<> PSI</>} value={data?.pressure || 30} />
+              <MetricsWithIcon type="volume" suffixText={<> MMcf</>} value={data?.volume || 30} />
+            </Box>
+          </div>
         </Box>
       ) : (
         <Box className={classes.jobBox} style={{ opacity }}>
