@@ -9,7 +9,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { camelCase, capitalize } from 'lodash';
 
-const ChangesDialog = ({ open, onClose, changes, operations }) => {
+const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
 
   const [fullScreen, setFullScreen] = useState(true);
 
@@ -81,7 +81,14 @@ const ChangesDialog = ({ open, onClose, changes, operations }) => {
                                 >
                                   {data?.newValue?.label}
                                 </Link>
-                              ) : (
+                              ) : data?.newValue === true ? (
+                                <Typography>True</Typography>
+                              ) : data?.newValue === false ? (
+                                <Typography>False</Typography>
+                              ) : data?.fieldLabel === 'updatedBy' ? (
+                                `${updatedBy}`
+                              ) :
+                              (
                                 data?.newValue
                               )
                             ) : (
@@ -95,7 +102,8 @@ const ChangesDialog = ({ open, onClose, changes, operations }) => {
                 </TableBody>
               </Table>
             </TableContainer>
-          ) : null}
+          ) : 
+          <Typography>No changes</Typography>}
           {operations?.length ?
             <TableContainer component={Paper}>
               <Table aria-label="customized table">
