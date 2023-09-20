@@ -204,7 +204,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                           && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(row.original?.transferData?.status)) {
                           isTransferAsset = true;
                         }
-                        console.log(row.original)
                         setDeleteData([
                           {
                             _id: row.original.inventory,
