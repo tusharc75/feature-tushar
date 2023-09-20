@@ -86,9 +86,6 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
           if (o.fieldName === 'attachments') {
             return;
           }
-          if (["issueDate", "expiryDate"].includes(o.fieldName)) {
-            o.primaryField = true;
-          }
           let currentColumn = getColumnData(renderedFrom, o, routes.serializedAssetDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
@@ -106,6 +103,11 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns?.forEach((e) => {
+          if (["issueDate", "expiryDate"].includes(e.field)) {
+            e.disabled = true;
+          }
+        })
         setColumns([...columns]);
       });
   };

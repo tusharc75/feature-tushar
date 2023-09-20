@@ -59,6 +59,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   const {
     state: { permissions }
   }: any = useData();
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
@@ -117,12 +118,28 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           </IconButton>
         </HtmlTooltip>
         <HtmlTooltip title={'Send Email'}>
-          <IconButton size="small" color="primary" aria-label="send" onClick={() => handleMailForFolder(attachment)}>
+          <IconButton
+            size="small"
+            color="primary"
+            aria-label="send"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMailForFolder(attachment);
+            }}
+          >
             <SendIcon color="primary" style={{ maxWidth: '18px' }} />
           </IconButton>
         </HtmlTooltip>
         <HtmlTooltip title={'Options'}>
-          <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleFolderOptionsOpen(event, attachment)}>
+          <IconButton
+            size="small"
+            color="primary"
+            aria-label="delete"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleFolderOptionsOpen(event, attachment);
+            }}
+          >
             <MoreHorizIcon />
           </IconButton>
         </HtmlTooltip>
@@ -134,11 +151,25 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     return permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
       <Box style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
         <HtmlTooltip title={'Send Email'}>
-          <IconButton size="small" onClick={(event) => handleSendMail(event, attachment)}>
+          <IconButton
+            size="small"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleSendMail(event, attachment);
+            }}
+          >
             <SendIcon color="primary" style={{ maxWidth: '18px' }} />
           </IconButton>
         </HtmlTooltip>
-        <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, attachment._id, attachment)}>
+        <IconButton
+          size="small"
+          color="primary"
+          aria-label="delete"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleOpenMenu(event, attachment._id, attachment);
+          }}
+        >
           <MoreHorizIcon />
         </IconButton>
       </Box>
@@ -524,33 +555,25 @@ type TRenderTreeProps = {
 };
 
 const RenderTree: React.FC<TRenderTreeProps> = ({ tree, folderButtons, fileIconButtons, onFileClick, relatedTo }) => {
-  const [open, setOpen] = useState(false);
-
-  const toggleTree = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    e.stopPropagation();
-    setOpen((prev) => !prev);
-  };
-
   return (
-    <>
+    <Fragment>
       {tree.sort(sortFileStructure).map((node) => {
         if (node.type === 'folder') {
           return (
             <RenderFolder
+              key={node._id}
               iconButtons={() => folderButtons(node)}
               node={node}
-              toggleTree={toggleTree}
-              open={open}
               childNodes={<RenderTree {...{ tree: node.children, folderButtons, fileIconButtons, onFileClick, relatedTo }} />}
             />
           );
         }
         if (node.type === 'file') {
-          return <RenderFiles iconButtons={() => fileIconButtons(node)} node={node} onFileClick={onFileClick} relatedTo={relatedTo} />;
+          return <RenderFiles key={node._id} iconButtons={() => fileIconButtons(node)} node={node} onFileClick={onFileClick} relatedTo={relatedTo} />;
         }
         return null;
       })}
-    </>
+    </Fragment>
   );
 };
 
@@ -562,19 +585,24 @@ type TFolderFilePRops = {
 };
 
 type TFolderPRops = {
-  open: boolean;
-  toggleTree: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   childNodes: ReactNode | undefined;
 } & TFolderFilePRops;
 
-const RenderFolder: React.FC<TFolderPRops> = ({ iconButtons, node, open, toggleTree, childNodes }) => {
+const RenderFolder: React.FC<TFolderPRops> = ({ iconButtons, node, childNodes }) => {
+  const [open, setOpen] = useState(false);
+
+  const toggleTree = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    e.stopPropagation();
+    setOpen((prev) => !prev);
+  };
+
   const childrenLength = node.children.length;
   return (
     <div
       className={`${childrenLength ? 'cursor-pointer' : 'cursor-auto'} ${className}`}
       style={{ borderLeft: '3.473px solid #0F9FA9' }}
       onClick={(e) => {
-        toggleTree(e);
+        if (childrenLength) toggleTree(e);
       }}
     >
       <div className="folder_top-section">
