@@ -25,7 +25,7 @@ const ResourceLogs = () => {
     state: { user, permissions }
   }: any = useData();
   const [gridApi, setGridApi] = useState(null);
-  const [openDialog, setOpenDialog] = useState({ open: false, changes: null, operations: null });
+  const [openDialog, setOpenDialog] = useState({ open: false, changes: null, operations: null, updatedBy: null });
   const [option, setOption] = useState([]);
 
   const [selectedResource, setSelectedResource] = useState(null);
@@ -201,7 +201,7 @@ const ResourceLogs = () => {
     return (
       <>
         <HtmlTooltip title="View Changes">
-          <IconButton onClick={() => setOpenDialog({ open: true, changes: params?.data?.changes || [], operations: params?.data?.operations || [] })}>
+          <IconButton onClick={() => setOpenDialog({ open: true, changes: params?.data?.changes || [], operations: params?.data?.operations || [], updatedBy: params?.data?.updatedBy?.optionLabel || '' })}>
             <VisibilityIcon color="primary" fontSize="small" />
           </IconButton>
         </HtmlTooltip>
@@ -273,9 +273,10 @@ const ResourceLogs = () => {
       {openDialog?.open && (
         <ChangesDialog
           open={openDialog?.open}
-          onClose={() => setOpenDialog({ open: false, changes: null, operations: null })}
+          onClose={() => setOpenDialog({ open: false, changes: null, operations: null, updatedBy: null })}
           changes={openDialog?.changes}
           operations={openDialog.operations}
+          updatedBy={openDialog?.updatedBy}
         />
       )}
     </section>
