@@ -217,7 +217,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
             return { name, sectionFields };
         });
 
-        if (fieldTicketData?.billingAddress && fieldTicketData?.billingAddress?.zipCode) {
+        if (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state)) {
             const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress);
             fields?.forEach((e: any) => {
                 if (e?.fieldName === 'taxCode') {
