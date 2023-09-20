@@ -48,7 +48,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
         try {
             const data = await fetch_field_ticket_submit_fields();
             const tempInitialData = getObjKeys('', data);
-            if (data?.find((d) => d.fieldName === 'customerAccount') && fieldTicketData?.customerAccount.optionValue) {
+            if (data?.find((d) => d.fieldName === 'customerAccount') && fieldTicketData?.customerAccount?.optionValue) {
                 tempInitialData["customerAccount"] = fieldTicketData.customerAccount.optionValue;
             }
             setInitialData({
