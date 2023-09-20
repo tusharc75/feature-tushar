@@ -118,12 +118,28 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           </IconButton>
         </HtmlTooltip>
         <HtmlTooltip title={'Send Email'}>
-          <IconButton size="small" color="primary" aria-label="send" onClick={() => handleMailForFolder(attachment)}>
+          <IconButton
+            size="small"
+            color="primary"
+            aria-label="send"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMailForFolder(attachment);
+            }}
+          >
             <SendIcon color="primary" style={{ maxWidth: '18px' }} />
           </IconButton>
         </HtmlTooltip>
         <HtmlTooltip title={'Options'}>
-          <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleFolderOptionsOpen(event, attachment)}>
+          <IconButton
+            size="small"
+            color="primary"
+            aria-label="delete"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleFolderOptionsOpen(event, attachment);
+            }}
+          >
             <MoreHorizIcon />
           </IconButton>
         </HtmlTooltip>
@@ -135,11 +151,25 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     return permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
       <Box style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
         <HtmlTooltip title={'Send Email'}>
-          <IconButton size="small" onClick={(event) => handleSendMail(event, attachment)}>
+          <IconButton
+            size="small"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleSendMail(event, attachment);
+            }}
+          >
             <SendIcon color="primary" style={{ maxWidth: '18px' }} />
           </IconButton>
         </HtmlTooltip>
-        <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, attachment._id, attachment)}>
+        <IconButton
+          size="small"
+          color="primary"
+          aria-label="delete"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleOpenMenu(event, attachment._id, attachment);
+          }}
+        >
           <MoreHorizIcon />
         </IconButton>
       </Box>
