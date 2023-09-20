@@ -532,11 +532,12 @@ const RenderTree: React.FC<TRenderTreeProps> = ({ tree, folderButtons, fileIconB
   };
 
   return (
-    <>
+    <Fragment>
       {tree.sort(sortFileStructure).map((node) => {
         if (node.type === 'folder') {
           return (
             <RenderFolder
+              key={node._id}
               iconButtons={() => folderButtons(node)}
               node={node}
               toggleTree={toggleTree}
@@ -546,11 +547,11 @@ const RenderTree: React.FC<TRenderTreeProps> = ({ tree, folderButtons, fileIconB
           );
         }
         if (node.type === 'file') {
-          return <RenderFiles iconButtons={() => fileIconButtons(node)} node={node} onFileClick={onFileClick} relatedTo={relatedTo} />;
+          return <RenderFiles key={node._id} iconButtons={() => fileIconButtons(node)} node={node} onFileClick={onFileClick} relatedTo={relatedTo} />;
         }
         return null;
       })}
-    </>
+    </Fragment>
   );
 };
 
