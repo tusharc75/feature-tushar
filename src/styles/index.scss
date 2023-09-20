@@ -1287,6 +1287,9 @@ body::-webkit-scrollbar-thumb {
 
 .btn-view {
   background: #f7fffb;
+  [data-mode='dark'] & {
+    background-color: var(--dark-secondary);
+  }
   border: 1px solid #0f9fa9;
   box-shadow: 0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06);
   border-radius: 3.62963px;
@@ -2502,6 +2505,9 @@ svg.MuiSvgIcon-root {
         bottom: unset;
         justify-content: flex-start;
         background-color: #fff;
+        [data-mode='dark'] & {
+          background-color: var(--dark-secondary);
+        }
         border: 2px solid #329592;
         border-radius: 5px;
         max-width: max-content;
@@ -2697,6 +2703,9 @@ svg.MuiSvgIcon-root {
         bottom: unset;
         justify-content: flex-start;
         background-color: #fff;
+        [data-mode='dark'] & {
+          background-color: var(--dark-secondary);
+        }
         border: 2px solid #329592;
         border-radius: 5px;
         max-width: max-content;
