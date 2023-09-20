@@ -17,23 +17,17 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     position: 'relative',
     margin: '0px 6px 14px',
-    borderRadius: '4px',
+    borderRadius: '12px',
     border: '1px solid var(--common-border-color)',
-    padding: '15px',
     backgroundColor: 'var(--dark-secondary, #F8FFFC)',
     transition: 'transform .2s, background .3s',
+    boxShadow: '0px 3.555040121078491px 35.55039978027344px rgba(0, 0, 0, 0.08)',
     '&:hover': {
       transform: 'scale(1.02)',
       zIndex: '1'
     }
   },
-  contentContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    [theme.breakpoints.down('md')]: {
-      marginBottom: '20px'
-    }
-  },
+
   truckIcon: {
     transform: 'rotateY(180deg)'
   },
@@ -105,24 +99,24 @@ const FleetReceiver = () => {
           fleets?.length > 0 ? (
             <Grid container spacing={2}>
               {fleets?.map((data, index) => (
-                <Grid item md={6} xs={12} sm={4}>
+                <Grid item xs={12} sm={6} md={4}>
                   <Box
                     key={index}
-                    className={classes.fleetBox}
+                    className={`${classes.fleetBox} p-[15px] md:p-[27px_20px_45px]`}
                     onClick={() => {
                       setReceiverDialogOpen({ open: true, fleet: data });
                     }}
                   >
-                    <Box className={classes.contentContainer}>
-                      <Box sx={{ flexBasis: '20px' }}>
-                        <LocalShippingIcon className={`${classes.truckIcon} ${classes.icon}`} />
+                    <Box className={`flex flex-wrap gap-[16px]`}>
+                      <Box className="basis-[28px]">
+                        <LocalShippingIcon className="w-full" />
                       </Box>
-                      <Box sx={{ flexBasis: 'calc(100% - 35px)' }}>
+                      <Box className="basis-[calc(100%-calc(30px+16px))]">
                         <Typography className={classes.primaryText}>Fleet : {data?.fleet?.fleetNumber}</Typography>
-                        <Typography className={classes.primaryText}>
+                        <Typography className={classes.secondaryText}>
                           <strong>PRS :</strong> {data?.asset?.assetNumber}
                         </Typography>
-                        <Typography className={classes.primaryText}>
+                        <Typography className={classes.secondaryText}>
                           <strong>Job :</strong> {data?.job?.jobNumber}
                         </Typography>
                         <Typography className={classes.secondaryText}>
