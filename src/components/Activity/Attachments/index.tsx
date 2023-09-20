@@ -59,6 +59,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   const {
     state: { permissions }
   }: any = useData();
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
@@ -524,13 +525,6 @@ type TRenderTreeProps = {
 };
 
 const RenderTree: React.FC<TRenderTreeProps> = ({ tree, folderButtons, fileIconButtons, onFileClick, relatedTo }) => {
-  const [open, setOpen] = useState(false);
-
-  const toggleTree = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    e.stopPropagation();
-    setOpen((prev) => !prev);
-  };
-
   return (
     <Fragment>
       {tree.sort(sortFileStructure).map((node) => {
@@ -540,8 +534,6 @@ const RenderTree: React.FC<TRenderTreeProps> = ({ tree, folderButtons, fileIconB
               key={node._id}
               iconButtons={() => folderButtons(node)}
               node={node}
-              toggleTree={toggleTree}
-              open={open}
               childNodes={<RenderTree {...{ tree: node.children, folderButtons, fileIconButtons, onFileClick, relatedTo }} />}
             />
           );
@@ -563,19 +555,24 @@ type TFolderFilePRops = {
 };
 
 type TFolderPRops = {
-  open: boolean;
-  toggleTree: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   childNodes: ReactNode | undefined;
 } & TFolderFilePRops;
 
-const RenderFolder: React.FC<TFolderPRops> = ({ iconButtons, node, open, toggleTree, childNodes }) => {
+const RenderFolder: React.FC<TFolderPRops> = ({ iconButtons, node, childNodes }) => {
+  const [open, setOpen] = useState(false);
+
+  const toggleTree = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    e.stopPropagation();
+    setOpen((prev) => !prev);
+  };
+
   const childrenLength = node.children.length;
   return (
     <div
       className={`${childrenLength ? 'cursor-pointer' : 'cursor-auto'} ${className}`}
       style={{ borderLeft: '3.473px solid #0F9FA9' }}
       onClick={(e) => {
-        toggleTree(e);
+        if (childrenLength) toggleTree(e);
       }}
     >
       <div className="folder_top-section">
