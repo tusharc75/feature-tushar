@@ -31,7 +31,8 @@ export default function CustomReactTableHeaderOptions({
   // setSelectedReportView = null
   setHiddenColumns = null,
   getToggleHideAllColumnsProps = null,
-  setColumnOrder = null
+  setColumnOrder = null,
+  setUpdateColumnOrder
 }) {
   const [disableSelectionSwitch, setDisableSelectionSwitch] = useState(true);
 
@@ -65,12 +66,12 @@ export default function CustomReactTableHeaderOptions({
     timeout = setTimeout(function () {
       let data = localStorage.getItem('gridMetaData');
       let request = data === 'undefined' ? {} : { ...JSON.parse(data) };
-      if (request[renderedFrom]) {
-        request[renderedFrom].order = columnOrder;
+            if (request[renderedFrom]) {
+request[renderedFrom].order = columnOrder;
         request[renderedFrom].hide = [...hiddenColumns];
       } else {
         request[renderedFrom] = {
-          order: columnOrder,
+order: columnOrder,
           hide: [...hiddenColumns],
           staticColumns: {
             createdBy: false,
@@ -96,6 +97,7 @@ export default function CustomReactTableHeaderOptions({
     axiosInstance()
       .get(`user/meta-grid/${user?.user?._id}`)
       .then(({ data: { data } }) => {
+        setUpdateColumnOrder()
         let tempMetaData = JSON.stringify(data?.gridMetaData);
         localStorage.setItem('gridMetaData', tempMetaData);
         if (dispatch) {

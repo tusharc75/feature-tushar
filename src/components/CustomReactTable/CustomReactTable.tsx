@@ -149,6 +149,7 @@ export default function CustomReactTable({
   const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
   const toastConfig = React.useContext(CustomToastContext);
   const [excelLoading, setExcelLoading] = useState(false);
+  const [updateColumnOrder, setUpdateColumnOrder] = useState(false);
 
   useEffect(() => {
     setIsCellEditing(false);
@@ -463,7 +464,7 @@ export default function CustomReactTable({
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
     }
-  }, []);
+  }, [updateColumnOrder]);
 
   useEffect(() => {
     let flatSelectedData = [];
@@ -533,6 +534,7 @@ export default function CustomReactTable({
           setHiddenColumns={setHiddenColumns}
           getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
           setColumnOrder={setColumnOrder}
+          setUpdateColumnOrder={()=>{setUpdateColumnOrder(!updateColumnOrder)}}
         />
       )}
       <div
