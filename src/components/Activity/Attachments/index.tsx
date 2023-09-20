@@ -31,7 +31,6 @@ import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CreateEmail } from '../Email/CreateEmail';
 
-
 const order = ['file', 'folder'];
 
 const sortFileStructure = (a, b) => {
@@ -655,9 +654,8 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
         });
     } else {
       const fileUrl = file.map((f) => f.url);
-      axiosInstance().put(`user/download`, { files: fileUrl },
-        { responseType: 'blob' }
-      )
+      axiosInstance()
+        .put(`user/download`, { files: fileUrl }, { responseType: 'blob' })
         .then(({ data }) => {
           const url = window.URL.createObjectURL(new Blob([data]));
           const link = document.createElement('a');
@@ -673,9 +671,10 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   };
 
   const downloadFolder = (_id, name) => {
-    axiosInstance().get(`attachment/zip/${_id}`, {
-      responseType: 'blob'
-    })
+    axiosInstance()
+      .get(`attachment/zip/${_id}`, {
+        responseType: 'blob'
+      })
       .then(({ data }) => {
         const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement('a');
