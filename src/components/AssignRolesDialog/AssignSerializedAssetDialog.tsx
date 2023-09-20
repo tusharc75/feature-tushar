@@ -259,6 +259,7 @@ const AssignSerializedAssetDialog = ({
                     isAssigning ||
                     disableSaveButton ||
                     [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0 ||
+                    (reference === 'quotation' && [...getLocalStorageArrayData(localStorageSelectedRecords)].some(asset => asset.status === "Returned")) ||
                     products?.some((d) => d?.qty < 0)
                   }
                   onClick={() => {
@@ -274,9 +275,11 @@ const AssignSerializedAssetDialog = ({
                             result[0].isCounted = true;
                           }
                           qty--;
+                          console.log(result);
                         }
                       });
-                      handleSucess(data);
+                      console.log(data);
+                      // handleSucess(data);
                     } else {
                       handleSucess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                     }
