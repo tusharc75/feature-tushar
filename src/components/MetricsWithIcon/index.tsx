@@ -8,6 +8,8 @@ interface MetricsWithIconProps extends React.HTMLAttributes<HTMLDivElement> {
   value: number | string;
   prefixText?: ReactNode | string;
   suffixText?: ReactNode | string;
+  icon?: ReactNode;
+  lebel?: string | ReactNode;
 }
 
 const iconMap = (type: MetricsWithIconProps['type']) => {
@@ -32,14 +34,12 @@ const iconMap = (type: MetricsWithIconProps['type']) => {
   return [Icon, text];
 };
 
-const MetricsWithIcon: FC<MetricsWithIconProps> = ({ type, value, prefixText, suffixText, ...rest }) => {
+const MetricsWithIcon: FC<MetricsWithIconProps> = ({ type, value, prefixText, suffixText, icon, lebel, ...rest }) => {
   const [Icon, text] = iconMap(type);
   return (
     <div className={`${styles.metricsWithIcon} ${rest.className} ${styles[type]}`} {...rest}>
-      <div className={styles.iconContainer}>
-        <Icon />
-      </div>
-      <Typography component={'h6'}>{text}</Typography>
+      <div className={styles.iconContainer}>{icon ? icon : <Icon />}</div>
+      <Typography component={'h6'}>{lebel ? lebel : text}</Typography>
       <Typography>
         {prefixText && <Typography component={'span'}>{prefixText}&nbsp;</Typography>}
         {value}

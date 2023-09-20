@@ -276,6 +276,41 @@ export default function CustomReactTable({
 
   const filterTypes = React.useMemo(() => ({ filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue) }), []);
 
+  const getDataFromLocalStorage = () => {
+    try {
+      const data = localStorage.getItem('gridMetaData');
+      return data && data !== 'undefined' ? JSON.parse(data) : {};
+    } catch (ex) {
+      console.error(`Error while getting data from local storage: ${ex.message}`);
+      return {};
+    }
+  };
+
+  const returnHiddenCols = () => {
+    const gridMetaData = getDataFromLocalStorage();
+    const hiddenCols = gridMetaData[renderedFrom]?.hide || [];
+    return hiddenCols;
+  };
+
+  const returnSavedColOrder = () => {
+    const gridMetaData = getDataFromLocalStorage();
+    const colOrder = gridMetaData[renderedFrom]?.order || [];
+    const orderIndices = {};
+    
+    for (let i = 0; i < colOrder.length; i++) {
+      orderIndices[colOrder[i]] = i;
+    }
+
+    const orderedCols = newColumns.slice().sort((a, b) => {
+      const aIndex = orderIndices[a?.id || a?.accessor];
+      const bIndex = orderIndices[b?.id || b?.accessor];
+      return aIndex - bIndex;
+    });
+
+    return orderedCols.length ? orderedCols : newColumns.map((m) => m?.id || m?.accessor);
+  };
+
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -315,9 +350,10 @@ export default function CustomReactTable({
       defaultColumn,
       filterTypes,
       initialState: {
+        columnOrder: returnSavedColOrder(),
         // pageIndex: 0,
         autoResetExpanded: false,
-        hiddenColumns: hideSelection && hideAction ? ['selection', 'action'] : hideSelection ? ['selection'] : hideAction ? ['action'] : [],
+        hiddenColumns: hideSelection && hideAction ? ['selection', 'action'] : hideSelection ? ['selection'] : hideAction ? ['action'] : returnHiddenCols(),
         expanded: false
       },
       getSubRows: (row: any) => row.subRows,
@@ -464,7 +500,7 @@ export default function CustomReactTable({
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
     }
-  }, [updateColumnOrder]);
+  }, []);
 
   useEffect(() => {
     let flatSelectedData = [];
@@ -534,7 +570,6 @@ export default function CustomReactTable({
           setHiddenColumns={setHiddenColumns}
           getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
           setColumnOrder={setColumnOrder}
-          setUpdateColumnOrder={()=>{setUpdateColumnOrder(!updateColumnOrder)}}
         />
       )}
       <div

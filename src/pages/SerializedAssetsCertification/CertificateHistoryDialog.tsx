@@ -22,7 +22,7 @@ const CertificateHistoryDialog = ({ onClose, id, supplierAccount }) => {
         onClose={() => {
           onClose();
         }}
-        title={'Certificate Histrory'}
+        title={'Certificate History'}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
           setFullScreen((prevState) => !prevState);

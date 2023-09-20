@@ -210,7 +210,7 @@ const CageManagement = () => {
                 )}
               />
             </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
+            <div className="flex flex-wrap gap-[8px]  justify-end items-center">
               <SearchBox
                 onChange={(e) => {
                   setSearchVal(e.target.value);

@@ -16,7 +16,6 @@ const containerStyle = {
 };
 
 const MapView = ({ handleClose }) => {
-  
   const [fleets, setFleets] = useState(null);
   const [map, setMap] = useState(null);
   const [activeMarker, setActiveMarker] = useState(null);
