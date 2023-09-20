@@ -1292,8 +1292,12 @@ body::-webkit-scrollbar-thumb {
   background: #f7fffb;
   [data-mode='dark'] & {
     background-color: var(--dark-primary);
+    color: white;
+    &:hover {
+      color: var(--dark-primary);
+    }
   }
-  border: 1px solid #0f9fa9;
+  border: 1px solid var(--common-border-color);
   box-shadow: 0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06);
   border-radius: 3.62963px;
   font-weight: 600;
@@ -2507,11 +2511,14 @@ svg.MuiSvgIcon-root {
         right: unset;
         bottom: unset;
         justify-content: flex-start;
-        background-color: #fff;
         [data-mode='dark'] & {
           background-color: var(--dark-primary);
+          color: white;
+          &:hover {
+            color: var(--dark-primary);
+          }
         }
-        border: 2px solid #329592;
+        border: 1px solid var(--common-border-color);
         border-radius: 5px;
         max-width: max-content;
         padding: 5px 20px;
@@ -2708,8 +2715,12 @@ svg.MuiSvgIcon-root {
         background-color: #fff;
         [data-mode='dark'] & {
           background-color: var(--dark-primary);
+          color: white;
+          &:hover {
+            color: var(--dark-primary);
+          }
         }
-        border: 2px solid #329592;
+        border: 1px solid var(--common-border-color);
         border-radius: 5px;
         max-width: max-content;
         padding: 5px 20px;
