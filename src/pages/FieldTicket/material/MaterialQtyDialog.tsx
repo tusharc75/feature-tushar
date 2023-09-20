@@ -74,6 +74,22 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         fetchData();
     }, [rowData]);
 
+    const fetchTaxRate = async (billingAddress: any) => {
+        const zipCode = billingAddress?.zipCode;
+        const state = billingAddress?.state
+        let materialType;
+        if (isBulkedit)
+            materialType = rowData[0]?.type;
+        else
+            materialType = rowData?.type
+        try {
+            const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}`);
+            return response?.data?.data || [];
+        } catch (e) {
+            toastConfig.setToastConfig(e);
+        }
+    };
+
     const fetchData = async () => {
         setFetchingData(true);
         var data = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
@@ -200,6 +216,15 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
             sectionFields = orderBy(sectionFields, 'order', 'asc');
             return { name, sectionFields };
         });
+
+        if (fieldTicketData?.billingAddress && fieldTicketData?.billingAddress?.zipCode) {
+            const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress);
+            fields?.forEach((e: any) => {
+                if (e?.fieldName === 'taxCode') {
+                    e.option = taxCodeOptions;
+                }
+            });
+        }
         setFields(customData);
     };
 
