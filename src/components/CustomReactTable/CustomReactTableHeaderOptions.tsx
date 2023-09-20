@@ -32,7 +32,6 @@ export default function CustomReactTableHeaderOptions({
   setHiddenColumns = null,
   getToggleHideAllColumnsProps = null,
   setColumnOrder = null,
-  setUpdateColumnOrder
 }) {
   const [disableSelectionSwitch, setDisableSelectionSwitch] = useState(true);
 
@@ -97,7 +96,6 @@ order: columnOrder,
     axiosInstance()
       .get(`user/meta-grid/${user?.user?._id}`)
       .then(({ data: { data } }) => {
-        setUpdateColumnOrder()
         let tempMetaData = JSON.stringify(data?.gridMetaData);
         localStorage.setItem('gridMetaData', tempMetaData);
         if (dispatch) {
