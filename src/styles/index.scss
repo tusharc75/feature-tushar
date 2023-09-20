@@ -4085,3 +4085,9 @@ body {
 .MuiChip-root.MuiAutocomplete-tag {
   max-width: 100% !important;
 }
+
+.MuiTypography-colorSecondary {
+  [data-mode='dark'] & {
+    color: #9a9a9a;
+  }
+}
