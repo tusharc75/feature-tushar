@@ -275,11 +275,9 @@ const AssignSerializedAssetDialog = ({
                             result[0].isCounted = true;
                           }
                           qty--;
-                          console.log(result);
                         }
                       });
-                      console.log(data);
-                      // handleSucess(data);
+                      handleSucess(data);
                     } else {
                       handleSucess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                     }

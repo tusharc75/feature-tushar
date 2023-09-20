@@ -272,13 +272,8 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   };
   const handleMailForFolder = (data) => {
     const folderId = data?._id;
-    const folderName = data?.name || 'Folder';
-
-    if (!folderId || !folderName) {
-      toastConfig.setToastConfig('Invalid Data');
-      return;
-    }
-
+    const folderName = data?.name;
+    
     axiosInstance()
       .get(`attachment/zip/${folderId}`, { responseType: 'blob' })
       .then(({ data }) => {
