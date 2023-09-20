@@ -83,8 +83,11 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
         let columns = [];
         let rendererNames = [];
         data?.forEach((o) => {
-          if (o.fieldName == 'attachments') {
+          if (o.fieldName === 'attachments') {
             return;
+          }
+          if (["issueDate", "expiryDate"].includes(o.fieldName)) {
+            o.primaryField = true;
           }
           let currentColumn = getColumnData(renderedFrom, o, routes.serializedAssetDetail.path, true);
           if (currentColumn !== null) {
