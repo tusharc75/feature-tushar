@@ -684,7 +684,7 @@ export default function Account(props) {
                 type: 'export'
               },
               {
-                title: 'Suppliser View Import',
+                title: 'Supplier View Import',
                 api: `${accountApi}/items/unknown/import`,
                 type: 'import'
               }
