@@ -259,7 +259,6 @@ const AssignSerializedAssetDialog = ({
                     isAssigning ||
                     disableSaveButton ||
                     [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0 ||
-                    (reference === 'quotation' && [...getLocalStorageArrayData(localStorageSelectedRecords)].some(asset => asset.status === "Returned")) ||
                     products?.some((d) => d?.qty < 0)
                   }
                   onClick={() => {

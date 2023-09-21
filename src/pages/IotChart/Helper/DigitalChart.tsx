@@ -29,15 +29,7 @@ const DigitalChart = ({ assetId, dateFilters, dataPoints }) => {
         }
       })
       .then(({ data: { data } }) => {
-        const tempData = data.data;
-        // for (let i = 0; i < tempData.length; i += 2) {
-        //   tempData[i].runningStatus = 1;
-        // }
-        // console.log('this is temp Data');
-        // console.log(tempData);
-        setChartData(tempData);
-        console.log('charData');
-        console.log(chartData);
+        setChartData(data.data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
