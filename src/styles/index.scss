@@ -113,7 +113,7 @@
   --card-body: var(--dark-secondary);
   --dark-primary-text: #fff;
   --dark-secondary-text: #b8b8b8;
-  --dark-error: hsl(358.89deg 62.92% 40.17%);
+  --dark-error: rgb(174 88 88);
   --dark-yellow: hsl(41.65deg 100% 44.31%);
   --dark-gray: hsl(0deg 0% 14.49% / 70%);
   --dark-green: hsl(132.04deg 80.8% 31.18%);
@@ -157,6 +157,35 @@
   }
   .ag-overlay-no-rows-center {
     color: var(--dark-secondary-text);
+  }
+
+  // Rich text
+  .tox {
+    .tox-menubar,
+    .tox-toolbar__primary {
+      background-color: var(--dark-primary);
+    }
+    .tox-edit-area__iframe .mce-content-body {
+      background-color: #24243e;
+    }
+    .tox-sidebar,
+    .tox-edit-area {
+      background-color: var(--dark-secondary);
+    }
+  }
+}
+body {
+  .tox-tinymce {
+    border: 1px solid var(--common-border-color);
+    margin-left: -1px;
+    margin-right: -1px;
+    margin-bottom: -1px;
+  }
+  .tox-sidebar-wrap {
+    border-bottom: 1px solid var(--common-border-color) !important;
+  }
+  .tox.tox-tinymce * {
+    border-color: var(--common-border-color) !important;
   }
 }
 
@@ -619,7 +648,6 @@ body::-webkit-scrollbar-thumb {
 
   & .MuiTablePagination-root:last-child {
     padding: 0;
-    background: #f7f7f7;
     border: 1px solid var(--common-border-color);
     [data-mode='dark'] {
       background-color: var(--dark-primary) !important;
@@ -1149,7 +1177,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .all-check-box {
-  padding-left: 12px !important;
+  padding-left: 14px !important;
 }
 
 .detailHeader {
@@ -1874,7 +1902,7 @@ body::-webkit-scrollbar-thumb {
   }
 
   .all-check-box {
-    padding-left: 12px !important;
+    padding-left: 14px !important;
   }
 
   .sort-filter-tablet {
@@ -2980,7 +3008,7 @@ svg.MuiSvgIcon-root {
   .control-buttons-v1 {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 8px;
 
     @media all and (max-width: 708px) {
       width: 100%;
@@ -3317,8 +3345,14 @@ body {
     }
     [data-mode='dark'] & {
       background-color: var(--dark-primary) !important;
+      &.light {
+        background-color: var(--dark-secondary) !important;
+      }
       border: 0px !important;
       &:hover {
+        &.light {
+          background-color: hsl(240, 27%, 25%) !important;
+        }
         background-color: hsl(240, 27%, 25%) !important;
       }
     }
@@ -4034,4 +4068,8 @@ body {
   & > button {
     margin: 0 !important;
   }
+}
+.small-searchbar .MuiOutlinedInput-inputMarginDense {
+  padding-top: 7.5px;
+  padding-bottom: 7.5px;
 }

@@ -294,12 +294,16 @@ const AddExistingProduct = (props) => {
   };
 
   const handleAdd = () => {
+    const objsWithOrder = getLocalStorageArrayData(localStorageSelectedRecords);
+    const orderIds = objsWithOrder?.sort((a, b) => a?.sequenceOrder - b?.sequenceOrder)?.map((m) => m._id);
+
     dispatch({ type: 'loading', loading: true });
 
     axiosInstance()
       .get(`${product.api}?limit=0&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords).map((m) => m._id))}`)
       .then(({ data: { data } }) => {
-        data.forEach((_d) => {
+        const sortedData = orderIds?.map((m) => data.find((f) => f._id === m));
+        sortedData.forEach((_d) => {
           _d.productId = _d._id;
           if (_d.fields) {
             const qtyField = _d.fields.filter((_f) => _f.fieldName === 'qty');
@@ -328,7 +332,7 @@ const AddExistingProduct = (props) => {
             }
           }
         });
-        addProductInBuilder(data);
+        addProductInBuilder(sortedData);
         handleClose();
       })
       .catch((error) => {
@@ -345,8 +349,8 @@ const AddExistingProduct = (props) => {
           <h6 className="form-label-style mt-0 mb-0" style={{ borderBottom: 'none' }}>
             * Select checkboxes and then click Add button to add the products
           </h6>
-          <Grid container>
-            <Grid className="d-flex align-items-center gap-1" item xs={12} sm={6}>
+          <div className="grid grid-cols-1 md:grid-cols-2 my-3 justify-between gap-2">
+            <div className="flex items-center flex-wrap gap-2 ">
               <Autocomplete
                 style={{ width: '250px' }}
                 options={productCategoryList}
@@ -361,7 +365,7 @@ const AddExistingProduct = (props) => {
                   setProductCategory(val && val._id ? val._id : '');
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="productCategory" label="Product Category" variant="outlined" fullWidth />
+                  <TextField {...params} margin="none" size="small" name="productCategory" label="Product Category" variant="outlined" fullWidth />
                 )}
               />
               {isProductTemplate && (
@@ -383,25 +387,23 @@ const AddExistingProduct = (props) => {
                   )}
                 />
               )}
-            </Grid>
-            <Grid item xs={12} sm={6} container justify="flex-end">
+            </div>
+            <div className="flex flex-wrap justify-end items-start gap-2 ml-auto ">
               <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-              <Box ml={1} mt={1}>
-                <Button
-                  size="small"
-                  color="primary"
-                  onClick={handleAdd}
-                  variant="contained"
-                  disabled={getLocalStorageArrayData(localStorageSelectedRecords).length > 0 ? false : true}
-                >
-                  {getLocalStorageArrayData(localStorageSelectedRecords).length
-                    ? '(' + getLocalStorageArrayData(localStorageSelectedRecords).length + ')  '
-                    : ''}
-                  Add
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
+              <Button
+                size="small"
+                color="primary"
+                onClick={handleAdd}
+                variant="contained"
+                disabled={getLocalStorageArrayData(localStorageSelectedRecords).length > 0 ? false : true}
+              >
+                {getLocalStorageArrayData(localStorageSelectedRecords).length
+                  ? '(' + getLocalStorageArrayData(localStorageSelectedRecords).length + ')  '
+                  : ''}
+                Add
+              </Button>
+            </div>
+          </div>
         </Box>
         {columns && frameWorkComponent ? (
           <CustomAgGrid
@@ -419,6 +421,7 @@ const AddExistingProduct = (props) => {
             refreshGrid={fetchProduct}
             renderedFrom={renderedFrom}
             showOnlyShowFilteredRecordSwitch={true}
+            sequenceWise={true}
           />
         ) : (
           <Box p={2} height={500}>

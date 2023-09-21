@@ -42,7 +42,7 @@ const LeadTimeMaster = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { type }: any = queryString.parse(history.location.search);
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -71,8 +71,6 @@ const LeadTimeMaster = () => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const { getColumnData } = useColumns();
-
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
   useEffect(() => {
     fetchGridColumns();
@@ -143,7 +141,7 @@ const LeadTimeMaster = () => {
     if (renderCount > 0) {
       fetchLeadTimeMasters();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, fromRental, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
 
   const handleSingleDeleteLeadTimeMaster = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -223,6 +221,10 @@ const LeadTimeMaster = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
+    if (referenceId) {
+      filterByIds.push({ field: 'rentalJob', term: referenceId });
+    }
+
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -294,7 +296,11 @@ const LeadTimeMaster = () => {
 
   const handleLeadTimeMasterTypeSel = (filterValues) => {
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+    if (referenceId && referenceType) {
+      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleTransferEntityDialog = () => {
@@ -352,6 +358,18 @@ const LeadTimeMaster = () => {
     }
   };
 
+  const updateQueryParams = () => {
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
+    referenceId = queryParams.get('referenceId');
+    referenceType = queryParams.get('referenceType');
+    history.replace({
+      search: queryParams.toString()
+    });
+    fetchLeadTimeMasters();
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -397,6 +415,7 @@ const LeadTimeMaster = () => {
             heading={routes.leadTimeMaster.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             filters={filters}
+            resource={sidebarResource.leadTimeMaster}
           >
             {accountDetails.accountId && (
               <Chip
@@ -412,16 +431,7 @@ const LeadTimeMaster = () => {
                 }}
               />
             )}
-            {fromRental && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Rental Job : ${fromRental?.rentalJobName}`}
-                onDelete={() => {
-                  setFromRental(null);
-                }}
-              />
-            )}
+            {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
           </LeadTimeHeader>
         </div>
         {Object.keys(frameworkComponents).length > 0 ? (

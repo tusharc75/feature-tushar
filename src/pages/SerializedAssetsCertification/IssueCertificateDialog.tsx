@@ -13,7 +13,16 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { CustomDialogTransition, getObjKeys, serializedAssetsCertification, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
+import routes from '../../components/Helpers/Routes';
+import {
+  CHILD_RESOURCE,
+  CustomDialogTransition,
+  getObjKeys,
+  serializedAssetsCertification,
+  setFieldsInAscendingOrder,
+  yupSchema
+} from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiryDate }) => {
 
@@ -25,18 +34,27 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
   const [loading, setLoading] = useState(false);
   const [formsData, setFormsData] = useState([]);
 
+  const {
+    state: { user }
+  }: any = useData();
+
   useEffect(() => {
     fetchFields();
   }, []);
 
   const fetchFields = async () => {
     try {
-      const tempInitialData: any = getObjKeys('', fields);
-      tempInitialData['issueDate'] = null;
-      tempInitialData['expiryDate'] = null;
+      const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.serializedAssetsCertification}`);
+      const fields = response?.data?.data;
+      let createValues = { ...getObjKeys('', fields) };
+      createValues['issueDate'] = null;
+      createValues['expiryDate'] = null;
+      if (fields?.find((e) => e.fieldName === 'owner')) {
+        createValues['owner'] = user.user._id;
+      }
       setInitialData({
         fields: fields,
-        values: tempInitialData
+        values: createValues
       });
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -44,23 +62,24 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
   };
 
   const handleSubmit = (values) => {
-    setLoading(true)
-    const attachments = values?.attachments?.map((file) => ({ name: file?.fileName?.split('_')[3], url: file?.fileName }))
+    setLoading(true);
+    const attachments = values?.attachments?.map((file) => ({ name: file?.fileName?.split('_')[3], url: file?.fileName }));
     const body = { ...values, asset: assetId, attachments: attachments };
-    axiosInstance().post(`${serializedAssetsCertification.api}/issue-certificate`, body)
+    axiosInstance()
+      .post(`${serializedAssetsCertification.api}/issue-certificate`, body)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        onSuccess()
-        setLoading(false)
+        onSuccess();
+        setLoading(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-      })
-  }
+      });
+  };
 
   function validate(values) {
     const errors = {};
@@ -204,55 +223,5 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
   );
 };
 
-const fields = [
-  {
-    _id: '6426d49d6ccedf33bf69cc7a',
-    fieldLabel: 'Issue Date',
-    type: 'date',
-    option: [],
-    required: true,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    deletAble: true,
-    order: 0,
-    fieldName: 'issueDate',
-    resource: 'Serialized Asset',
-    sectionName: 'Information',
-    roleType: 0
-  },
-  {
-    _id: '6426d49d6ccedf33bf69cc7b',
-    fieldLabel: 'Expiry Date',
-    type: 'date',
-    option: [],
-    required: true,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    deletAble: true,
-    order: 1,
-    fieldName: 'expiryDate',
-    resource: 'Serialized Asset',
-    sectionName: 'Information',
-    roleType: 0
-  },
-  {
-    _id: '6492e7d800bd0966ec702574',
-    fieldLabel: 'Attachment',
-    type: 'multiFileUpload',
-    option: [],
-    required: true,
-    isTooltip: false,
-    tooltipMessage: '',
-    editAble: true,
-    deletAble: true,
-    order: 2,
-    fieldName: 'attachments',
-    resource: 'Serialized Asset',
-    sectionName: 'Information',
-    roleType: 0
-  }
-];
 
 export default IssueCertificateDialog;

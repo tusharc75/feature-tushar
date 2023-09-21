@@ -27,6 +27,10 @@ import { Check, Edit } from '@material-ui/icons';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
 import { flattenArray } from 'src/constants/columns';
+import * as XLSX from 'xlsx';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import {renderToString} from 'react-dom/server';
+
 
 const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, ...rest }: any, ref) => {
   const defaultRef = React.useRef();
@@ -143,6 +147,8 @@ export default function CustomReactTable({
   const [cellValue, setCellValue] = React.useState(null);
   const [isCellEditing, setIsCellEditing] = React.useState(false);
   const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
+  const toastConfig = React.useContext(CustomToastContext);
+  const [excelLoading, setExcelLoading] = useState(false);
 
   useEffect(() => {
     setIsCellEditing(false);
@@ -336,7 +342,101 @@ export default function CustomReactTable({
     useSticky,
     useRowState
   );
-
+  
+  function convertString(inputString) {
+    // Split the input string by underscores
+    const parts = inputString.split('_');
+  
+    // Capitalize the first letter of each part and join them with a space
+    const convertedString = parts.map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+  
+    return convertedString;
+  }
+  
+  function convertHtmlToPlainText(html) {
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = html;
+    return tempElement.textContent || tempElement.innerText || '';
+  }
+  
+  function getExcel() {
+    setExcelLoading(true);
+   
+    try {
+  
+      const flattenedRows = flattenArray(rows);
+      const fileName = convertString(renderedFrom);
+  
+      const config = {
+        filename: fileName,
+        bookType: "xlsx",
+        sheet: {
+          data: [],
+        },
+      };
+  
+      const dataSet = config.sheet.data;
+  
+      // Create a mapping of column IDs to their positions in the row
+      const columnPositionMap: Record<string, number> = {};
+      if (headerGroups && headerGroups[0] && headerGroups[0].headers) {
+        let index = 0;
+        headerGroups[0].headers.forEach((column) => {
+          if (
+            column?.id !== "selection" &&
+            column?.id !== "expander" &&
+            column?.id !== "action"
+          ) {
+            columnPositionMap[column?.id] = index;
+            index = index + 1;
+          }
+        });
+      }
+  
+      // HEADERS
+      const headerRow = [];
+      Object.entries(columnPositionMap).forEach(([columnId, position]) => {
+        const currCol = headerGroups[0].headers.find((col) => col?.id === columnId);
+        headerRow[position] = currCol?.Header; // Use position to set the correct order
+      });
+      dataSet.push(headerRow);
+  
+      flattenedRows.forEach((row) => {
+        const dataRow = [];
+        prepareRow(row);
+        // Iterate through column IDs in the correct order
+        Object.entries(columnPositionMap).forEach(([columnId, position]) => {
+  
+          const cell = row.cells.find((cell) => cell.column.id === columnId);
+          const cellContent = cell ? renderToString(cell.render('Cell')) : '';
+  
+          // Get cell rendering content
+          dataRow[position] = convertHtmlToPlainText(cellContent);
+        });
+  
+        dataSet.push(dataRow);
+      });
+  
+      const ws = XLSX.utils.aoa_to_sheet(dataSet);
+  
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Sheet 1");
+  
+      XLSX.writeFile(wb, fileName + ".xlsx");
+      setExcelLoading(false);
+  
+    } catch (error) {
+      setExcelLoading(false);
+      // Handle the error here and update toastConfig accordingly
+      toastConfig.setToastConfig({
+        hideDuration: null,
+        open: true,
+        type: 'error',
+        message: `An error occurred while downloading Excel: ${error.message}`
+      });
+    }
+  }
+  
   useEffect(() => {
     try {
       let data = localStorage.getItem('gridMetaData');

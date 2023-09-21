@@ -46,6 +46,7 @@ export default function StepDialog({
   const [openFieldDialog, setOpenFieldDialog] = useState(false);
   const [fields, setFields] = useState(stepData ? stepData?.fields : []);
   const [allFollowingStepToJump, setAllFollowingStepToJump] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fllowingStep();
@@ -178,6 +179,8 @@ export default function StepDialog({
   }, []);
 
   const handleSubmit = (values) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     values.leadDay = parseInt(values.leadDay);
     values.costPrice = parseFloat(values.costPrice);
     values.listPrice = parseFloat(values.listPrice);
@@ -207,7 +210,7 @@ export default function StepDialog({
           .catch((err) => {
             setLoading(false);
             toastConfig.setToastConfig(err);
-          });
+          }).finally(() => setIsSubmitting(false));
       } else {
         axiosInstance()
           .post(`${serviceMaster.api}/steps/${serviceId}`, values)
@@ -223,7 +226,7 @@ export default function StepDialog({
           .catch((err) => {
             setLoading(false);
             toastConfig.setToastConfig(err);
-          });
+          }).finally(() => setIsSubmitting(false));
       }
     }
   };
@@ -909,7 +912,7 @@ export default function StepDialog({
                   {reference === 'workOrder' && notEditable ? null : (
                     <CustomButton
                       loading={loading}
-                      disabled={loading}
+                      disabled={loading || isSubmitting}
                       onClick={(e) => {
                         e.preventDefault();
                         submitForm();

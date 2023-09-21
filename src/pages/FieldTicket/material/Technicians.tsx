@@ -6,7 +6,7 @@ import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
 import { fieldTicket, prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Button, IconButton, Menu, MenuItem, Tab, Tabs, TextField, Tooltip } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -19,8 +19,7 @@ import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmploye
 import { displayDate } from 'src/constants/helpers';
 import { Add } from '@material-ui/icons';
 
-
-const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketData, selectedService }) => {
+const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [dataRows, setDataRows] = useState(null);
@@ -96,16 +95,16 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                 Cell: ({ row }) => (row.original['competencies'] ? <p>{row.original?.competencies}</p> : <NoDataCell />)
             },
             {
-                accessor: 'estimateStartDate',
-                Header: 'Estimate Start Date',
+                accessor: 'startDate',
+                Header: 'Start Date',
                 width: 250,
-                Cell: ({ row }) => (row.original?.estimateStartDate ? <p>{displayDate(row.original?.estimateStartDate)}</p> : <NoDataCell />)
+                Cell: ({ row }) => (row.original?.startDate ? <p>{displayDate(row.original?.startDate)}</p> : <NoDataCell />)
             },
             {
-                accessor: 'estimateEndDate',
-                Header: 'Estimate End Date',
+                accessor: 'endDate',
+                Header: 'End Date',
                 width: 250,
-                Cell: ({ row }) => (row.original?.estimateEndDate ? <p>{displayDate(row.original?.estimateEndDate)}</p> : <NoDataCell />)
+                Cell: ({ row }) => (row.original?.endDate ? <p>{displayDate(row.original?.endDate)}</p> : <NoDataCell />)
             },
             {
                 accessor: 'action',
@@ -139,7 +138,7 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
 
     const fetchData = async () => {
         setDataRows(null);
-        let api = `${fieldTicket.api}/technician?fieldTicketId=${id}`;
+        let api = `${fieldTicket.api}/technician?fieldTicketId=${fieldTicketData?._id}`;
         if (selectedService && selectedService?.optionValue !== 'All') {
             api = `${api}&serviceId=${selectedService?.optionValue}&uniqueId=${selectedService?._id}`
         }
@@ -199,13 +198,13 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
         const technician: any = [];
         rows.forEach((d) => {
             const element: any = {};
-            element.fieldTicket = id;
+            element.fieldTicket = fieldTicketData?._id;
             element.technician = d?._id;
             element.uniqueId = selectedService?._id;
             element.service = selectedService?.optionValue !== "All" ? selectedService?.optionValue : null;
             element.status = 'Assigned';
-            element.estimateStartDate = fieldTicketData?.estimateStartDate || new Date()
-            element.estimateEndDate = fieldTicketData?.estimateEndDate || new Date()
+            element.startDate = fieldTicketData?.estimateStartDate || new Date()
+            element.endDate = fieldTicketData?.estimateEndDate || new Date()
             technician.push(element);
         });
         axiosInstance()
@@ -292,7 +291,7 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                     <Grid item xs={12} md={12} sm={12}>
                         {columns && dataRows ? (
                             <CustomReactTable
-                                height={stepFullScreen ? 'calc(100vh - 440px)' : '278px'}
+                                height={'300px'}
                                 columns={columns}
                                 data={dataRows}
                                 onSelect={setSelectedRecords}
@@ -305,7 +304,7 @@ const Technicians = ({ id, allowedToEdit, stepFullScreen = false, fieldTicketDat
                                 hideAction={!allowedToEdit}
                             />
                         ) : (
-                            <Box p={2} height={500}>
+                            <Box p={2} height={300}>
                                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
                             </Box>
                         )}

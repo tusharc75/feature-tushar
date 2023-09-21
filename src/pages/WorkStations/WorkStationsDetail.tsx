@@ -19,7 +19,7 @@ const WorkStationsDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.blog]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.workStations]);
   const [workStationsData, setWorkStationsData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);

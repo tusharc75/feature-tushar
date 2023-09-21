@@ -5,7 +5,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { IconButton, Typography, Paper, Tooltip, Dialog } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import { csvIcon, docIcon, excelSheetIcon, pdfFileIcon, pptIcon, textFileIcon, imageIcon } from 'src/assets/file_icons';
+import { csvIcon, docIcon, excelSheetIcon, pdfFileIcon, pptIcon, textFileIcon, imageIcon, zipIcon } from 'src/assets/file_icons';
 import emailStyles from 'src/pages/Activity/Email/email.module.scss';
 import { useData } from 'src/StateProvider/Provider';
 import PreviewIcon from '@material-ui/icons/Visibility';
@@ -44,6 +44,45 @@ const fileIcons = [
   {
     extensions: ['.tif', 'tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'],
     source: imageIcon
+  },
+  {
+    extensions: [
+      '.arc',
+      '.arj',
+      '.as',
+      '.b64',
+      '.btoa',
+      '.bz',
+      '.bz2',
+      '.cab',
+      '.cpt',
+      '.gz',
+      '.hqx',
+      '.iso',
+      '.lha',
+      '.lzh',
+      '.mim',
+      '.mme',
+      '.pak',
+      '.pf',
+      '.rar',
+      '.rpm',
+      '.sea',
+      '.sit',
+      '.sitx',
+      '.tar',
+      '.gz',
+      '.tbz',
+      '.tbz2',
+      '.tgz',
+      '.uu',
+      '.uue',
+      '.z',
+      '.zip',
+      '.zipx',
+      '.zoo'
+    ],
+    source: zipIcon
   }
 ];
 
@@ -207,7 +246,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                   <Paper className={emailStyles.fileContainer}>
                     <img
                       src={getFileIconSrc(attachment?.contentType ? attachment?.contentType : attachment.url ? attachment.url : attachment)}
-                      className={emailStyles.file}
+                      className={`${emailStyles.file} object-contain`}
                       alt="attchment"
                     />
                     <Typography noWrap variant="body2">

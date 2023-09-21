@@ -222,11 +222,8 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
               )}
               {inputFields?.map((field) => (
                 <Box key={field.id}>
-                  <Box
-                    p={1}
-                    className="shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] border-1 border border-[var(--common-border-color)] rounded-md"
-                  >
-                    <Box display="flex" alignItems={'center'}>
+                  <Box className="p-[14px_12px_12px] shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] border-1 border border-[var(--common-border-color)] rounded-md">
+                    <Box display="flex" alignItems={'center'} className="mb-[10px]">
                       <Box flexGrow={1}>
                         <Autocomplete
                           id={`fieldName_${field.id}`}
@@ -297,7 +294,15 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
                 Save Filter
               </Button>
             )}
-            <Button type="submit" className="no-shadow" color="primary" size="small" variant="contained" onClick={handleSubmit}>
+            <Button
+              disabled={inputFields?.length === 0 || inputFields?.some((v) => v.fieldValue === '' || v.fieldName === '')}
+              type="submit"
+              className="no-shadow"
+              color="primary"
+              size="small"
+              variant="contained"
+              onClick={handleSubmit}
+            >
               Apply Now
             </Button>
           </CustomDialogFooter>

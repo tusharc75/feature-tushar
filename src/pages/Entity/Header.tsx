@@ -6,7 +6,7 @@ import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { BiNetworkChart } from 'react-icons/bi';
 import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import styles from '../Leads/Header.module.scss';
 
@@ -23,7 +23,8 @@ const EntityHeader = (props) => {
     canDelete,
     columns,
     dispatch,
-    filters
+    filters,
+    resource
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [sortOpen, setSortOpen] = useState(false);
@@ -105,6 +106,7 @@ const EntityHeader = (props) => {
                 dispatch={dispatch}
                 title={routes?.entity?.title}
                 filters={filters}
+                resource={resource}
               />
             </Grid>
           </div>
@@ -172,6 +174,7 @@ const EntityHeader = (props) => {
           ) : null}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 };

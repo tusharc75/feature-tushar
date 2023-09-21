@@ -20,7 +20,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import {
@@ -362,6 +362,7 @@ const ServiceMaster = () => {
                       dispatch={dispatch}
                       title={routes?.serviceMaster?.title}
                       filters={filters}
+                      resource={sidebarResource.serviceMaster}
                     />
                   </div>
                 </div>
@@ -425,6 +426,7 @@ const ServiceMaster = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.serviceMaster} />
           </div>
         </div>
         {columns ? (

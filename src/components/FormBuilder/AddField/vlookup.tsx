@@ -316,7 +316,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
             </Grid>
           </Grid>
         </Box>
-        <Box border={1} mt={1} p={1} bgcolor="grey.100" borderColor="var(--common-border-color)">
+        <Box border={1} mt={1} p={1} borderColor="var(--common-border-color)">
           <Box bgcolor="white" border={1} mb={1} p={1} borderColor="var(--common-border-color)" width={'100%'}>
             <Box display="flex" flexDirection="row">
               <Box minWidth={100} pl={2}>

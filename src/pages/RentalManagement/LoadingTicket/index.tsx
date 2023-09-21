@@ -709,11 +709,14 @@ const LoadingTicket = ({
   };
 
   const handelCancleTickets = () => {
+    setOkBtnLoading(true);
     const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
     if (loadingTicketIds.length) {
       axiosInstance()
         .put(`${deliveryTicket.api}/revert`, { ids: loadingTicketIds })
         .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket({ open: false, type: '' });
           fetchRecords();
           toastConfig.setToastConfig({
             open: true,
@@ -722,12 +725,14 @@ const LoadingTicket = ({
           });
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
   };
 
   const handelCancelDeliveredTicket = () => {
+    setOkBtnLoading(true);
     const loadingTicketId = uniq(map(selectedRecords, 'loadingTicketId'));
     const ticketIds: any = [];
     loadingTicketId?.forEach((e) => {
@@ -741,6 +746,8 @@ const LoadingTicket = ({
       axiosInstance()
         .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
         .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket({ open: false, type: '' });
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -749,6 +756,7 @@ const LoadingTicket = ({
           fetchRecords();
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -1081,7 +1089,9 @@ const LoadingTicket = ({
                 ) : null}
                 {(selectedRecords.length > 0 &&
                   selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
-                    && e?.status === ASSET_STATUS.inUse && e?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.inUse).length === selectedRecords?.length)
+                    && [ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(e?.status)
+                    && [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(e?.rentalAssetStatus)).length
+                  === selectedRecords?.length)
                   ?
                   <MenuItem
                     onClick={() => {
@@ -1390,7 +1400,7 @@ const LoadingTicket = ({
           }}
           isAdding={replaceLoading}
           selectedProducts={addSerializedAssetDialog.products}
-          filterByPlant={rentalManagementData?.warehouse?.optionValue}
+          filterByPlant={rentalManagementData?.warehouse}
         />
       )}
       {showReplaceReason.open && (
@@ -1430,7 +1440,6 @@ const LoadingTicket = ({
             else {
               handelCancleTickets();
             }
-            setShowConformationCancleTicket({ open: false, type: '' });
           }}
           okBtnLoading={okBtnLoading}
         />

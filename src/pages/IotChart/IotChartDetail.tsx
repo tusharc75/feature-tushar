@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { useParams } from 'react-router-dom';
@@ -11,13 +11,16 @@ import { serializedAsset } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import PerformanceAnalysis from './PerformanceAnalysis';
 import Current from './Current';
+import DataSimulationDialog from './DataSimulation';
 
 const IotChartDetail = () => {
+
     const toastConfig = useContext(CustomToastContext);
     const { assetId } = useParams();
     const [customizedRoutes, setCustomizedRoutes] = useState([]);
     const [tabValue, setTabValue] = useState(0);
     const [dataPoints, setDataPoints] = useState([]);
+    const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
 
     useEffect(() => {
         fetchData()
@@ -51,10 +54,20 @@ const IotChartDetail = () => {
 
     return (
         <Box className="main-container-v1">
-            <Box className="headerbox-v1">
+            <Box className="headerbox-v1 flex flex-row justify-between">
                 <Box className="nav-v1">
                     <CustomBreadCrumbs routes={customizedRoutes} />
                 </Box>
+                <Button
+                    onClick={() => {
+                        setOpenDataSimulationDialog(!openDataSimulationDialog);
+                    }}
+                    variant='contained'
+                    color="primary"
+                    size="small"
+                >
+                    Data Simulation
+                </Button>
             </Box>
             <Box className={`detail-container-v1`}>
                 <Tabs
@@ -80,6 +93,10 @@ const IotChartDetail = () => {
                 {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />}
                 {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} />}
             </Box>
+            {openDataSimulationDialog &&
+                <DataSimulationDialog
+                    onClose={() => setOpenDataSimulationDialog(false)}
+                />}
         </Box>
     );
 };

@@ -161,11 +161,15 @@ const ReceivingTicket = ({
   const closeLinkActions = () => {
     setAnchorLinkActionEl(null);
   };
-
+  
   useEffect(() => {
     getColumn();
     fetchRecords();
   }, []);
+
+  const OpenInNewWindow = (url) => {
+    window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank')
+  }
 
   const fetchRecords = async () => {
     setLoadingData(true);
@@ -976,6 +980,7 @@ const ReceivingTicket = ({
   };
 
   const handelCancelDeliveredTicket = () => {
+    setOkBtnLoading(true);
     const receivingTicketId = uniq(map(selectedRecords, 'receivingTicketId'));
     const returnTicketId = uniq(map(selectedRecords, 'returnTicketId'));
     const ticketIds: any = [];
@@ -995,6 +1000,8 @@ const ReceivingTicket = ({
       axiosInstance()
         .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
         .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket({ open: false, type: '' });
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -1003,6 +1010,7 @@ const ReceivingTicket = ({
           fetchRecords();
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -1090,6 +1098,7 @@ const ReceivingTicket = ({
   };
 
   const handelRevertTickets = () => {
+    setOkBtnLoading(true);
     const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
     if (receivingTicketIds.length) {
       let data = [];
@@ -1103,6 +1112,8 @@ const ReceivingTicket = ({
       axiosInstance()
         .put(`${deliveryTicket.api}/revert-partially`, data)
         .then(({ data: { data } }) => {
+          setOkBtnLoading(false);
+          setShowConformationRevertTicket(false);
           fetchRecords();
           toastConfig.setToastConfig({
             open: true,
@@ -1111,17 +1122,21 @@ const ReceivingTicket = ({
           });
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
   };
 
   const handelCancleTickets = () => {
+    setOkBtnLoading(true);
     const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
     if (receivingTicketIds.length) {
       axiosInstance()
         .put(`${deliveryTicket.api}/revert`, { ids: receivingTicketIds })
         .then(({ data: { data } }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket({ open: false, type: '' });
           fetchRecords();
           toastConfig.setToastConfig({
             open: true,
@@ -1130,6 +1145,7 @@ const ReceivingTicket = ({
           });
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -1645,9 +1661,7 @@ const ReceivingTicket = ({
             {repairJobCount > 0 && (
               <MenuItem
                 onClick={() => {
-                  history.push(routes.repairJob.path, {
-                    rental: rentalManagementData
-                  });
+                 OpenInNewWindow(routes.repairJob.path)
                 }}
               >
                 {`Created ${routes.repairJob.title}`}
@@ -1656,9 +1670,7 @@ const ReceivingTicket = ({
             {repairOrderCount > 0 && (
               <MenuItem
                 onClick={() => {
-                  history.push(routes.repairOrder.path, {
-                    rental: rentalManagementData
-                  });
+                  OpenInNewWindow(routes.repairOrder.path)
                 }}
               >
                 {`Created ${routes.repairOrder.title}`}
@@ -1956,7 +1968,7 @@ const ReceivingTicket = ({
           }}
           isAdding={replaceLoading}
           selectedProducts={addSerializedAssetDialog.products}
-          filterByPlant={rentalManagementData?.warehouse?.optionValue}
+          filterByPlant={rentalManagementData?.warehouse}
         />
       )}
       {showReplaceReason.open && (
@@ -2004,7 +2016,6 @@ const ReceivingTicket = ({
           }}
           onOk={() => {
             handelRevertTickets();
-            setShowConformationRevertTicket(false);
           }}
           okBtnLoading={okBtnLoading}
         />
@@ -2023,7 +2034,6 @@ const ReceivingTicket = ({
             else {
               handelCancleTickets();
             }
-            setShowConformationCancleTicket({ open: false, type: '' });
           }}
           okBtnLoading={okBtnLoading}
         />

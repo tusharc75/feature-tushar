@@ -28,8 +28,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import moment from 'moment';
 
-const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open }) => {
-
+const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open, versionId = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -130,14 +129,37 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
       axiosInstance()
         .post(`${quotation.api}`, values)
         .then(({ data: { data, message } }) => {
-          history.push(`${routes.quotationDetail.path}/${data._id}`);
-          setLoading(false);
-          onSuccess(data);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
+          if (versionId) {
+            axiosInstance().post(`${quotation.api}/clone-new-quotation-version`, {
+              oldQuotationId: quotationId,
+              newQuotationId: data._id,
+              versionId: versionId
+            })
+              .then(() => {
+                history.push(`${routes.quotationDetail.path}/${data._id}`);
+                setLoading(false);
+                onSuccess(data);
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: 'success',
+                  message: message
+                });
+              })
+              .catch((error) => {
+                setLoading(false);
+                toastConfig.setToastConfig(error);
+              });
+          }
+          else {
+            history.push(`${routes.quotationDetail.path}/${data._id}`);
+            setLoading(false);
+            onSuccess(data);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: message
+            });
+          }
         })
         .catch((error) => {
           setLoading(false);

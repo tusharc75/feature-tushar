@@ -40,10 +40,12 @@ const styles: CssObj = {
     fontSize: '13px',
     fontWeight: 600,
     lineHeight: '1.14',
-    marginBottom: '8px'
+    marginBottom: '8px',
+    color: 'var(--primary-text)'
   },
   typographyd: {
-    fontSize: '13px'
+    fontSize: '13px',
+    color: 'var(--dark-secondary-text)'
   },
   buttonContaier: {
     position: 'absolute',
@@ -53,22 +55,24 @@ const styles: CssObj = {
 };
 
 const ShowProduct = ({ product }) => {
-  const [productHeader, setProductHeader] = useState(null)
+  const [productHeader, setProductHeader] = useState(null);
   const findLabel = async () => {
-    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
       fields: [
         {
           resource: 'Product',
           fieldNames: ['productName']
-        },
+        }
       ]
     });
-    setProductHeader(data[0].fieldNames[0])
-  }
+    setProductHeader(data[0].fieldNames[0]);
+  };
 
   useEffect(() => {
-    findLabel()
-  }, [])
+    findLabel();
+  }, []);
 
   return (
     <div
@@ -127,7 +131,11 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       .then(({ data: { data } }) => {
         const rows: any = data;
         setProducts(rows);
-        if ((rows?.length > 0 && rows?.filter((e) => e.baseWarehouse)?.length === rows?.filter((e) => e.baseWarehouse && e.qty <= e.assetAvailable)?.length) || rows?.length === 0) {
+        if (
+          (rows?.length > 0 &&
+            rows?.filter((e) => e.baseWarehouse)?.length === rows?.filter((e) => e.baseWarehouse && e.qty <= e.assetAvailable)?.length) ||
+          rows?.length === 0
+        ) {
           setCanFulfil(true);
         }
       })

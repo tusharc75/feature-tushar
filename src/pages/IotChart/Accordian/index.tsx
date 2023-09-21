@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Grid, IconButton, Typography } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -58,14 +58,30 @@ const AccordionDetails = withStyles((theme) => ({
 }))(MuiAccordionDetails);
 
 export default function CustomAccordian({ expended, data, onChange, type, allData = [] }) {
-  const [expandedAccordition, setExpandedAccordition] = useState<string | false>('');
+  const [expandedAccordition, setExpandedAccordition] = useState(null);
+
+  useEffect(() => {
+    if (type === 'parentCategory') {
+      const category = _.uniqBy(
+        allData?.filter((d) => d['category']?.parentCategory === data?.parentCategory?.optionValue),
+        'category.optionValue'
+      )[0]
+
+      setExpandedAccordition((prev) => (
+        {
+          ...prev,
+          [category?.category?.optionValue]: true
+        }
+      ));
+    }
+  }, [type])
 
   return (
-    <Accordion expanded={expended === data[type]?.optionValue} className={`omsAccordian w-full`} onChange={onChange}>
+    <Accordion expanded={expended[data[type]?.optionValue]} className={`omsAccordian w-full`} onChange={onChange}>
       <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
         <Box display="flex">
           <Box>
-            <IconButton size="small"> {expended === data[type]?.optionValue ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+            <IconButton size="small"> {expended[data[type]?.optionValue] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
           </Box>
           <Box padding="5px">
             <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
@@ -75,32 +91,42 @@ export default function CustomAccordian({ expended, data, onChange, type, allDat
         </Box>
       </AccordionSummary>
       <AccordionDetails>
-        {expended === data[type]?.optionValue &&
+        {expended[data[type]?.optionValue] &&
           (type === 'parentCategory' ? (
             <div className="grid gap-4">
               {_.uniqBy(
-                allData?.filter((d) => d['category']?.parentCategory === expended),
+                allData?.filter((d) => d['category']?.parentCategory === data[type]?.optionValue),
                 'category.optionValue'
               )?.map((data) => {
                 return (
-                  <CustomAccordian
-                    expended={expandedAccordition}
-                    data={data}
-                    onChange={() => {
-                      setExpandedAccordition((prev) =>
-                        !prev ? data?.category?.optionValue : prev === data?.category?.optionValue ? false : data?.category?.optionValue
-                      );
-                    }}
-                    type={'category'}
-                    allData={allData?.filter((d) => d['category']?.optionValue === expandedAccordition)}
-                  />
+                  <>
+                    {
+                      expandedAccordition ?
+                        <CustomAccordian
+                          expended={expandedAccordition}
+                          data={data}
+                          onChange={() => {
+                            setExpandedAccordition((prev) => (
+                              {
+                                ...prev,
+                                [data?.category?.optionValue]: expandedAccordition[data?.category?.optionValue] ? false : true
+                              }
+                            ));
+                          }}
+                          type={'category'}
+                          allData={allData?.filter((d) => d['category']?.optionValue === data?.category?.optionValue)}
+                        />
+                        :
+                        null
+                    }
+                  </>
                 );
               })}
             </div>
           ) : type === 'category' ? (
             <Grid container spacing={1}>
               {allData
-                ?.filter((d) => d[type]?.optionValue === expended)
+                ?.filter((d) => d[type]?.optionValue === data[type]?.optionValue)
                 ?.map((data) => {
                   return (
                     <Grid item xs={12} sm={6} lg={4} md={4}>

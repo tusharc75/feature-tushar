@@ -33,7 +33,7 @@ import History from '../../ProductInventory/LedgerHistory';
 import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
 import { Add } from '@material-ui/icons';
 
-const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fieldTicketData, renderedFrom }) => {
+const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -78,7 +78,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
 
   useEffect(() => {
     fetchColumns();
-  }, [id]);
+  }, [fieldTicketData]);
 
   useEffect(() => {
     if (columns && !dataRows && tabValue === 0) {
@@ -298,7 +298,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
 
   const fetchData = async () => {
     setDataRows(null);
-    let api = `${fieldTicket.api}/${id}/material?type=product`;
+    let api = `${fieldTicket.api}/${fieldTicketData?._id}/material?type=product`;
     if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedServiceOption?.optionValue}`;
     }
@@ -366,7 +366,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       });
     }
     axiosInstance()
-      .post(`${fieldTicket.api}/${id}/material`, { material })
+      .post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -384,7 +384,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
   const handleDelete = async (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${fieldTicket.api}/${id}/material/delete`, { ids: rows })
+      .put(`${fieldTicket.api}/${fieldTicketData?._id}/material/delete`, { ids: rows })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -416,7 +416,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
     });
     setUpdating(true);
     axiosInstance()
-      .put(`${fieldTicket.api}/${id}/material`, { material: rows })
+      .put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -562,7 +562,6 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
                     horizontal: 'right'
                   }}
                 >
-                  <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                     <MenuItem
                       onClick={() => {
                         setIsConsumableEdit({ open: true, data: null, showSaveAndNext: false });
@@ -572,10 +571,9 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
                     >
                       Bulk Edit
                     </MenuItem>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
+                  
                     <MenuItem
-                      disabled={isDeleting}
+                      disabled={isDeleting || selectedRecords?.some((e) => e?.requestedQty || e?.consumedQty)}
                       onClick={() => {
                         setDeleteData(
                           selectedRecords?.map((d) => {
@@ -589,7 +587,6 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
                     >
                       Delete
                     </MenuItem>
-                  </HtmlTooltip>
                 </Menu>
               </Box>
             </Box>
@@ -598,7 +595,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
             <Grid item xs={12} md={12} sm={12}>
               {columns && dataRows ? (
                 <CustomReactTable
-                  height={stepFullScreen ? 'calc(100vh - 440px)' : '278px'}
+                  height={'300px'}
                   columns={columns}
                   data={dataRows}
                   onSelect={setSelectedRecords}
@@ -612,7 +609,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
                   hideAction={!allowedToEdit}
                 />
               ) : (
-                <Box p={2} height={500}>
+                <Box p={2} height={300}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
               )}
@@ -620,15 +617,16 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
           </Grid>
         </Box>
       </TabPanel>
-
       <TabPanel value={tabValue} index={1}>
-        <Technicians id={id} allowedToEdit={allowedToEdit} stepFullScreen={stepFullScreen} fieldTicketData={fieldTicketData} selectedService={selectedServiceOption} />
+        <Technicians
+          allowedToEdit={allowedToEdit}
+          fieldTicketData={fieldTicketData}
+          selectedService={selectedServiceOption} />
       </TabPanel>
-
       {consumablesDialog && (
         <AssignProductDialog
           productsDialogOpen={consumablesDialog}
-          productId={id}
+          productId={fieldTicketData?._id}
           reference={'fieldTicket'}
           handleCloseDialog={() => setConsumablesDialog(false)}
           assignedProducts={dataRows?.map((d) => d?.materialId)}
@@ -659,7 +657,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
 
       {openConsumablesQtyDialog && (
         <ConsumablesQtyDialog
-          referenceId={id}
+          referenceId={fieldTicketData?._id}
           referenceType={sidebarResource.fieldTicket}
           onClose={() => setOpenConsumablesQtyDialog(false)}
           onSuccess={() => {
@@ -676,7 +674,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
       {openLogDialog.open && (
         <QtyRequestLog
           uniqueId={openLogDialog.uniqueId}
-          referenceId={id}
+          referenceId={fieldTicketData?._id}
           referenceType={sidebarResource.fieldTicket}
           productName={openLogDialog?.data?.productName}
           product={openLogDialog?.product}
@@ -696,7 +694,7 @@ const Consumables = ({ id, allowedToEdit, services, stepFullScreen = false, fiel
         <History
           handleClose={() => setHistoryDialog({ open: false, _id: '', product: '', productName: '' })}
           productName={historyDialog.productName}
-          referenceId={id}
+          referenceId={fieldTicketData?._id}
           uniqueId={historyDialog._id}
           product={historyDialog.product}
         />
