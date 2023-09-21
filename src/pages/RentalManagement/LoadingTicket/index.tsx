@@ -1089,8 +1089,8 @@ const LoadingTicket = ({
                 ) : null}
                 {(selectedRecords.length > 0 &&
                   selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
-                    && [ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(e?.status)
-                    && [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(e?.rentalAssetStatus)).length
+                    && (([ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(e?.status)
+                      && [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(e?.rentalAssetStatus)) || e?.type === 'Product')).length
                   === selectedRecords?.length)
                   ?
                   <MenuItem
