@@ -3252,6 +3252,10 @@ svg.MuiSvgIcon-root {
       &.primaryColoredTab {
         background: var(--sidebar-color);
         border: 1px solid var(--sidebar-color) !important;
+        [data-mode='dark'] & {
+          border: 1px solid var(--common-border-color) !important;
+          background-color: var(--new-theme-color) !important;
+        }
       }
     }
   }
