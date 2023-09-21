@@ -5,7 +5,7 @@ import { Box } from '@material-ui/core';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 
-const DigitalChart = ({ assetId, dateFilters, dataPoints }) => {
+const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
   const toastConfig = useContext(CustomToastContext);
   const [chartData, setChartData] = useState(null);
 
@@ -132,4 +132,4 @@ const DigitalChart = ({ assetId, dateFilters, dataPoints }) => {
   );
 };
 
-export default DigitalChart;
+export default TimelineChart;
