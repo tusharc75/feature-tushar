@@ -255,7 +255,6 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                     <Grid item xs={12} sm={6} md={6} lg={6}>
                       <Box
                         style={{ maxHeight: '350px', overflow: 'auto' }}
-                        bgcolor="white"
                         border={1}
                         mt={2}
                         mb={1}
@@ -263,7 +262,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                         width={'100%'}
                       >
                         <Box p={1}>
-                          <Grid container>
+                          <Grid container alignItems="center">
                             <Grid item xs={2} sm={2} md={2} lg={2}>
                               <Typography variant="body2">Sr.</Typography>
                             </Grid>
@@ -280,8 +279,8 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                           </Grid>
                         </Box>
                         {repairSteps?.map((steps, index) => (
-                          <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
-                            <Grid container>
+                          <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
+                            <Grid container alignItems="center">
                               <Grid item xs={2} sm={2} md={2} lg={2}>
                                 <Typography variant="body2">{steps.order}</Typography>
                               </Grid>

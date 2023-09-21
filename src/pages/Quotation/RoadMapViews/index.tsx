@@ -19,41 +19,10 @@ import { MdZoomOutMap } from 'react-icons/md';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandMore, ExpandLess } from '@material-ui/icons';
-
-const customNodeStyles = {
-  quotation: {
-    name: 'Quotation',
-    background: '#E6E8F5',
-    borderColor: '#9789F0'
-  },
-  product: {
-    name: 'Product',
-    background: '#E2F8FF',
-    borderColor: '#8BCBDF'
-  },
-  package: {
-    name: 'Package',
-    background: '#DFFBF5',
-    borderColor: '#66CDB7'
-  },
-  service: {
-    name: 'Service',
-    background: '#FFF7D9',
-    borderColor: '#FDD33E'
-  },
-  approve: {
-    name: 'Quotation-On-Going',
-    background: '#EDFFE1',
-    borderColor: '#86DB71'
-  },
-  decline: {
-    name: 'Quotation-Rejected',
-    background: '#FFEAEA',
-    borderColor: '#FFA0A0'
-  }
-};
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const QuotationViews = (props) => {
+  const [themeColor] = useAppTheme();
   const { quoteName, quoteId, status, versionId } = props;
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
@@ -65,6 +34,39 @@ const QuotationViews = (props) => {
   useEffect(() => {
     versionId && fetchData();
   }, [versionId]);
+
+  const customNodeStyles = {
+    quotation: {
+      name: 'Quotation',
+      background: themeColor === 'dark' ? 'rgb(178,183,219)' : '#E6E8F5',
+      borderColor: '#9789F0'
+    },
+    product: {
+      name: 'Product',
+      background: themeColor === 'dark' ? 'rgb(161,237,220)' : '#E2F8FF',
+      borderColor: '#8BCBDF'
+    },
+    package: {
+      name: 'Package',
+      background: themeColor === 'dark' ? 'rgb(248,229,159)' : '#DFFBF5',
+      borderColor: '#66CDB7'
+    },
+    service: {
+      name: 'Service',
+      background: themeColor === 'dark' ? 'rgb(158,204,219)' : '#FFF7D9',
+      borderColor: '#FDD33E'
+    },
+    approve: {
+      name: 'Quotation-On-Going',
+      background: themeColor === 'dark' ? 'rgb(165,212,134)' : '#EDFFE1',
+      borderColor: '#86DB71'
+    },
+    decline: {
+      name: 'Quotation-Rejected',
+      background: themeColor === 'dark' ? 'rgb(219,175,175)' : '#FFEAEA',
+      borderColor: '#FFA0A0'
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
