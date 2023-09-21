@@ -577,9 +577,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
         let priceFieldName = Object.keys(element).find((d) => d.includes('price_'));
 
-        const priceField = allFields?.find((e) => e.fieldName === 'price');
-        console.log(priceField)
-
         let calValues: any;
         let values = JSON.parse(JSON.stringify(tempValues));
 
@@ -597,7 +594,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           if (proRata) {
             values['pricingMethod'] = 'Per Day';
             if (priceFieldName) {
-              values[priceFieldName] = parseFloat((orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 7)?.toFixed(priceField?.decimalPlaces || 2));
+              values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 7;
             }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
@@ -606,7 +603,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           if (proRata) {
             values['pricingMethod'] = 'Per Day';
             if (priceFieldName) {
-              values[priceFieldName] = parseFloat((orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 30)?.toFixed(priceField?.decimalPlaces || 2));
+              values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 30;
             }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
