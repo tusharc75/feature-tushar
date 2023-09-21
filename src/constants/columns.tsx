@@ -125,7 +125,7 @@ export const getCustomColumnData = (title, field) => {
       accessor: field?.fieldName,
       Header: fieldHeaderName,
       show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
-      disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
+      disabled: (gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0) || field?.stopHideColumn ? true : false,
       editable: field?.isColumnEditable ?? false,
       isHideColumnSum: field?.isHideColumnSum ?? false,
       decimalPlaces: field?.decimalPlaces,
