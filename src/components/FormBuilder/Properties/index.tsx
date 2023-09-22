@@ -251,6 +251,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.systemGeneratedPrefix = values.systemGeneratedPrefix;
             }
             ele.isColumnEditable = values?.isColumnEditable || false;
+            ele.stopHideColumn = values?.stopHideColumn || false
             ele.isHideColumnSum = values?.isHideColumnSum || false;
 
             if (values?.hasOwnProperty('isWarningTooltip')) {
@@ -1042,6 +1043,19 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         />
                       }
                       label="Editable Column"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="stopHideColumn"
+                          checked={values['stopHideColumn']}
+                          onChange={(e) => {
+                            setFieldValue('stopHideColumn', e.target.checked);
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Stop Hide Column"
                     />
                     <FormControlLabel
                       control={

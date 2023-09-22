@@ -89,7 +89,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate">{row.original.detail}</p>
-          <IconButton
+
+          {['Product', 'Asset'].includes(row.original.type) && <IconButton
             size="small"
             onClick={() => {
               if (row.original.type === 'Product') {
@@ -101,7 +102,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             }}
           >
             <OpenInNewIcon fontSize="small" color="primary" />
-          </IconButton>
+          </IconButton>}
         </div>
       )
     });
