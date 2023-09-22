@@ -12,6 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import PerformanceAnalysis from './PerformanceAnalysis';
 import Current from './Current';
 import DataSimulationDialog from './DataSimulation';
+import Status from './Status';
 
 const IotChartDetail = () => {
 
@@ -88,10 +89,12 @@ const IotChartDetail = () => {
                     <Tab className={'tabLayout'} value={0} label={<div className="d-flex align-items-center tab-font">Current</div>} {...a11yProps(0)} />
                     <Tab className={'tabLayout'} value={1} label={<div className="d-flex align-items-center tab-font">Analysis</div>} {...a11yProps(1)} />
                     <Tab className={'tabLayout'} value={2} label={<div className="d-flex align-items-center tab-font">Performance Analysis</div>} {...a11yProps(2)} />
+                    <Tab className={'tabLayout'} value={3} label={<div className="d-flex align-items-center tab-font">Status</div>} {...a11yProps(3)} />
                 </Tabs>
                 {tabValue === 0 && <Current assetId={assetId} />}
                 {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />}
                 {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} />}
+                {tabValue === 3 && <Status assetId={assetId} dataPoints={dataPoints} />}
             </Box>
             {openDataSimulationDialog &&
                 <DataSimulationDialog
