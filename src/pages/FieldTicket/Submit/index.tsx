@@ -155,17 +155,9 @@ const Submit = ({ stepFullScreen, fieldTicketData, renderedFrom, allowedToEdit, 
                         columns={columns}
                         isSendEmail={true}
                         defaultColumns={[
-                            'index',
                             'type',
                             'detail',
-                            'description',
-                            'qty',
-                            'unit',
-                            'estimateStartDate',
-                            'estimateEndDate',
-                            'estimateJobDuration',
-                            `price_${fieldTicketData?.currency?.toLowerCase()}`,
-                            `finalPrice_${fieldTicketData?.currency?.toLowerCase()}`
+                            'unit'
                         ]}
                     />
                 </Box>
