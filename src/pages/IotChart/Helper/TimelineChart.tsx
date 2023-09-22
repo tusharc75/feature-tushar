@@ -117,7 +117,6 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
     }
   };
 
-  console.log(series);
 
   return (
     <>
