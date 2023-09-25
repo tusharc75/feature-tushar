@@ -78,6 +78,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
     }
   };
 
+
   const handleSubmit = (values) => {
     setLoading(true);
     if (id && !isClone) {
@@ -133,6 +134,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
     }
     return errors;
   }
+
 
   return (
     <>

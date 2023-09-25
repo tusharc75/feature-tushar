@@ -79,7 +79,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     else materialType = rowData?.type;
     try {
       const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}${taxCode && taxCode?.length && `&taxCode=${taxCode}`}`
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
       );
       return response?.data?.data || [];
     } catch (e) {
