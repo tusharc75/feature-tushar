@@ -95,6 +95,7 @@ const ResourceLogs = () => {
             if (Array.isArray(u?.changes)) {
               u?.changes?.forEach((e) => {
                 if (e?.fieldLabel) {
+                  if (e?.fieldLabel === 'consumeProducts') return;
                   changes.push(e);
                   var oldValue = e?.oldValue;
                   var newValue = e?.newValue;
@@ -125,6 +126,9 @@ const ResourceLogs = () => {
               u.changeString = changeString?.toString();
             } else {
               u.changeString = 'Click View for check changes';
+            }
+            if(u?.action == "create"){
+              u.changeString = "Created";
             }
             u.changes = changes;
             u.operations = operations;

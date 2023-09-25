@@ -103,7 +103,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
               </Table>
             </TableContainer>
           ) : 
-          <Typography>No changes</Typography>}
+          <NoDataCell />}
           {operations?.length ?
             <TableContainer component={Paper}>
               <Table aria-label="customized table">
