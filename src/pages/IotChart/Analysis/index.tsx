@@ -49,7 +49,7 @@ const Analysis = ({ assetId, dataPoints }) => {
                 <AccordionDetails>
                   {expandedAccordition === dataPoint?._id && (
                     <div className="container-with-border w-100 sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
-                      <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} alert={null} />
+                      <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} />
                     </div>
                   )}
                 </AccordionDetails>
