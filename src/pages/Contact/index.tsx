@@ -330,12 +330,12 @@ export default function Contact(props) {
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    if (selectedType === 2) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
-
     if (isExport) {
       deepFilter = `?`;
+    }
+
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
 
     if (selectedEntity) {
@@ -883,7 +883,7 @@ export default function Contact(props) {
               onClose={() => {
                 setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
               }}
-              onSuccess={() => {}}
+              onSuccess={() => { }}
               isRedirectToDetailPage={true}
             />
           )}

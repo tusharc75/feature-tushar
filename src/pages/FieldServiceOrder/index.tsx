@@ -222,13 +222,15 @@ const ServiceOrder = () => {
   );
 
   const getQueryString = (isExport = false) => {
+    
     let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (isExport) {
+      deepFilter = `?`;
+    }
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    if (isExport) {
-      deepFilter = `?`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
