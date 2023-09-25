@@ -410,7 +410,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
     <Fragment>
       {allowedToEdit && (
         <div className="my-2 flex flex-wrap justify-between gap-2">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 px-2">
             {(!subleaseData.status || subleaseData.status === SUBLEASE_STATUS.new) && (
               <Fragment>
                 {permissions?.product?.isRead && (
