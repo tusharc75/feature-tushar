@@ -711,35 +711,35 @@ function CustomReactTable({
               setColumnOrder={setColumnOrder}
             />
           </GridHeader>
-
-          <div
-            style={{
-              display: 'block',
-              overflow: 'auto',
-              height: height ?? '100%'
-            }}
-            className="border "
-          >
-            {loading && (
-              <Box
-                bgcolor={'rgba(255,255,255,0.2)'}
-                width="100%"
-                height="100%"
-                zIndex={100}
-                position="absolute"
-                top={0}
-                left={0}
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Box textAlign="center">
-                  <CircularProgress color="inherit" />
-                  <p>Loading...</p>
+          {isMobileView && swipableListProps ? null : (
+            <div
+              style={{
+                display: 'block',
+                overflow: 'auto',
+                height: height ?? '100%'
+              }}
+              className="border "
+            >
+              {loading && (
+                <Box
+                  bgcolor={'rgba(255,255,255,0.2)'}
+                  width="100%"
+                  height="100%"
+                  zIndex={100}
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Box textAlign="center">
+                    <CircularProgress color="inherit" />
+                    <p>Loading...</p>
+                  </Box>
                 </Box>
-              </Box>
-            )}
-            {isMobileView && swipableListProps ? null : (
+              )}
+
               <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
                 <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
                   {headerGroups.map((headerGroup, index) => (
@@ -852,8 +852,8 @@ function CustomReactTable({
                 </TableFooter>
               )} */}
               </MaUTable>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         {!isMobileView && swipableListProps && allowPagination && !loading && (
           <TablePagination
