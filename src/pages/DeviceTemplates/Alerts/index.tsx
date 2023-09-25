@@ -16,6 +16,7 @@ import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomT
 import { ExpandMore } from "@material-ui/icons";
 import ManageDeviceTemplateAlert from "src/pages/DeviceTemplatesAlert/ManageDeviceTemplateAlert";
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import ImportExportMenu from "src/components/Helpers/ImportExportMenu";
 
 export default function Alerts({ deviceTemplate }) {
 
@@ -172,7 +173,7 @@ export default function Alerts({ deviceTemplate }) {
 
     const AlertNumberRenderer = (params) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p className="link text-truncate" onClick={()=>{
+            <p className="link text-truncate" onClick={() => {
                 setOpen({ open: true, isClone: false, id: params?.data?.id });
             }}>
                 {params?.value}
@@ -342,6 +343,18 @@ export default function Alerts({ deviceTemplate }) {
                                     Delete
                                 </MenuItem>
                             </Menu>
+                            <Box ml={1} />
+                            <ImportExportMenu
+                                permissions={permissions?.deviceTemplateAlert}
+                                module="Device Template Alert"
+                                api={`${routes?.deviceTemplateAlert?.path}`}
+                                afterImportCompleted={() => {
+                                    fetchData();
+                                }}
+                                // isExportAllOrSomeFeature={true}
+                                ids={[]}
+                                additionalParams={`deviceTemplate=${deviceTemplate}`}
+                            />
                         </Box>
                     </Grid>
                 </Grid>

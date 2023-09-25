@@ -16,6 +16,7 @@ import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomT
 import ManageIotDataPoints from "src/pages/IotDataPoints/ManageIotDataPoints";
 import { ExpandMore } from "@material-ui/icons";
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import ImportExportMenu from "src/components/Helpers/ImportExportMenu";
 
 export default function IotDataPoints({ deviceTemplate }) {
 
@@ -341,6 +342,18 @@ export default function IotDataPoints({ deviceTemplate }) {
                                     Delete
                                 </MenuItem>
                             </Menu>
+                            <Box ml={1} />
+                            <ImportExportMenu
+                                permissions={permissions?.iotDataPoints}
+                                module="Data Points"
+                                api={`${routes?.iotDataPoints?.path}`}
+                                afterImportCompleted={() => {
+                                    fetchData();
+                                }}
+                                // isExportAllOrSomeFeature={true}
+                                ids={[]}
+                                additionalParams={`deviceTemplate=${deviceTemplate}`}
+                            />
                         </Box>
                     </Grid>
                 </Grid>
