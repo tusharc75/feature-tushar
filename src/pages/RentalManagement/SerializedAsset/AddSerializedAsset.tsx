@@ -274,10 +274,13 @@ const AddSerializedAsset = ({
         deepFilter = `${deepFilter}&availableAsset=true`;
       }
     }
-    if (Number(tabValue) === 1 || referenceType === 'Transfer Asset') {
-      deepFilter = `${deepFilter}&subleaseAsset=1`;
-    } else {
-      deepFilter = `${deepFilter}&subleaseAsset=0`;
+
+    if (referenceType !== 'Transfer Asset') {
+      if (Number(tabValue) === 1) {
+        deepFilter = `${deepFilter}&subleaseAsset=1`;
+      } else {
+        deepFilter = `${deepFilter}&subleaseAsset=0`;
+      }
     }
 
     return deepFilter;
