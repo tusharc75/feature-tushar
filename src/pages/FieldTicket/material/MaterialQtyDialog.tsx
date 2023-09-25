@@ -71,7 +71,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     fetchData();
   }, [rowData]);
 
-  const fetchTaxRate = async (billingAddress: any) => {
+  const fetchTaxRate = async (billingAddress: any, taxCode: string[] = []) => {
     const zipCode = billingAddress?.zipCode;
     const state = billingAddress?.state;
     let materialType;
@@ -79,7 +79,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     else materialType = rowData?.type;
     try {
       const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}`
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}${taxCode && taxCode?.length && `&taxCode=${taxCode}`}`
       );
       return response?.data?.data || [];
     } catch (e) {
@@ -214,8 +214,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       return { name, sectionFields };
     });
 
-    if (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state)) {
-      const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress);
+    if (fieldTicketData?.taxCode || (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))) {
+      const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
           e.option = taxCodeOptions;
@@ -442,8 +442,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                             field.fieldName === 'pricingMethod' && priceConditionList && values['pricingCondition']
                                               ? priceMethodList
                                               : field.fieldName === 'pricingCondition' && values['pricingMethod']
-                                              ? priceConditionList
-                                              : field.option
+                                                ? priceConditionList
+                                                : field.option
                                           }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
@@ -521,8 +521,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                           isTooltip={field.isTooltip}
                                           tooltipMessage={field.tooltipMessage}
                                           size="small"
-                                          // minDate={fieldTicketData?.estimateStartDate}
-                                          // maxDate={fieldTicketData?.estimateEndDate}
+                                        // minDate={fieldTicketData?.estimateStartDate}
+                                        // maxDate={fieldTicketData?.estimateEndDate}
                                         />
                                       </Box>
                                     </Box>
