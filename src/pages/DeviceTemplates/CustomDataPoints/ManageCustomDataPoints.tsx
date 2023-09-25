@@ -197,16 +197,15 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                         <Box>
                           <Autocomplete
                             multiple
-                            options={iotDataPoints}
+                            options={iotDataPoints.filter(
+                              (option) => !values?.dataPoints?.some((selected) => selected.optionValue === option.optionValue)
+                            )}
                             getOptionLabel={(option) => option?.optionLabel}
-                            value={iotDataPoints?.filter((data) => values?.dataPoints?.includes(data?.optionValue)) || []}
+                            value={values?.dataPoints || []}
                             fullWidth
-                            onChange={(e, newValues) =>
-                              setFieldValue(
-                                'dataPoints',
-                                newValues.map((v) => v.optionValue)
-                              )
-                            }
+                            onChange={(e, newValues) => {
+                              setFieldValue('dataPoints', newValues);
+                            }}
                             size="small"
                             renderInput={(params) => (
                               <TextField
