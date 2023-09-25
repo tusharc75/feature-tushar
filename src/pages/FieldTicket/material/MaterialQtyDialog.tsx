@@ -71,7 +71,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     fetchData();
   }, [rowData]);
 
-  const fetchTaxRate = async (billingAddress: any, taxCode: string[] = []) => {
+  const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
     const zipCode = billingAddress?.zipCode;
     const state = billingAddress?.state;
     let materialType;
