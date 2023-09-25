@@ -414,7 +414,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           'aria-labelledby': 'basic-button'
         }}
       >
-        {console.log(folderAnchorEl)}
         {permissions['attachment']?.isUpdate ? (
           <>
             <MenuItem
