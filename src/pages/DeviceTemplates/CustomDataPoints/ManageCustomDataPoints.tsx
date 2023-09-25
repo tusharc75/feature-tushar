@@ -1,5 +1,5 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, TextField, Grid } from '@material-ui/core';
+import { Fragment, useContext, useEffect, useState, useRef } from 'react';
+import { Box, Button, Dialog, TextField, Grid, Chip, Typography } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { Form, Formik } from 'formik';
@@ -15,8 +15,11 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import { DecimalPlaces } from 'src/components/FormBuilder/AddField/decimalPlaces';
+import { checkFormula } from 'src/constants/formulaUtility';
 
 export default function ManageRules({ deviceTemplate, open, isClone = false, id = null, onClose, onSuccess }) {
+  const inputRef = useRef<any>();
+
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(false);
@@ -24,6 +27,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
   const [initialValue, setInitialValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [formulaError, setFormulaError] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -43,7 +47,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
             data: { data }
           }
         }) => {
-          setIotDataPoints(data?.map((d) => ({ optionLabel: d?.fieldLabel, optionValue: d?._id })));
+          setIotDataPoints(data?.map((d) => ({ optionLabel: d?.fieldLabel, optionValue: d?._id, optionName: d?.fieldName })));
         }
       );
   };
@@ -131,8 +135,39 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
     if (values.unit === '') {
       errors['unit'] = 'Please enter Unit';
     }
+
+    let dataPoints = {};
+    values.dataPoints && values.dataPoints.forEach((_input) => {
+        dataPoints[_input.optionName] = 1;
+      });
+      
+    if(!checkFormula(values.formula, dataPoints)) {
+      errors['formula'] = 'Please enter valid formula';
+    }
     return errors;
   }
+
+  const handleAddDataPoint = (dataPoint, values, setFieldValue) => {
+    let pushPosition = inputRef.current.selectionStart;
+    let newFormula = [values['formula'].slice(0, pushPosition), dataPoint, values['formula'].slice(pushPosition)].join('');
+    setFieldValue('formula', newFormula);
+    inputRef.current.focus();
+  };
+
+  const handleCheckSyntax = (values) => {
+    if (values['formula'] && values['formula'] !== '') {
+      let dataPoints = {};
+      values['dataPoints'] &&
+        values['dataPoints'].forEach((_input) => {
+          dataPoints[_input.optionName] = 1;
+        });
+      if (checkFormula(values['formula'], dataPoints)) {
+        setFormulaError('Valid Formula');
+      } else {
+        setFormulaError('Invalid Formula');
+      }
+    }
+  };
 
   return (
     <>
@@ -197,6 +232,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                         <Box>
                           <Autocomplete
                             multiple
+                            disableCloseOnSelect={true}
                             options={iotDataPoints.filter(
                               (option) => !values?.dataPoints?.some((selected) => selected.optionValue === option.optionValue)
                             )}
@@ -220,16 +256,32 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                             )}
                           />
                         </Box>
+                        <Box pt={0.5} pb={0.5}>
+                          {values['dataPoints'] && values['dataPoints'].length > 0 && (
+                            <Box pt={0.5} pb={0.5}>
+                              {values['dataPoints'].map((_dataPoint) => (
+                                <Chip
+                                  className="ml-1 cursor-pointer mb-1"
+                                  key={_dataPoint.optionValue}
+                                  label={`${_dataPoint.optionLabel}-${_dataPoint.optionName}`}
+                                  onClick={() => handleAddDataPoint(_dataPoint.optionLabel, values, setFieldValue)}
+                                />
+                              ))}
+                            </Box>
+                          )}
+                        </Box>
                         <Box>
                           <TextField
+                            inputRef={inputRef}
                             margin="dense"
                             type="text"
                             label="Formula"
                             name="formula"
+                            placeholder="Formula (return field1 + field2)"
                             fullWidth
                             multiline
                             required
-                            rows={3}
+                            rows={4}
                             variant="outlined"
                             value={values['formula']}
                             error={touched['formula'] && Boolean(errors['formula'])}
@@ -237,6 +289,18 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                             onChange={(e) => setFieldValue('formula', e.target.value)}
                           />
                         </Box>
+                        <Grid container>
+                          <Grid item xs={6}>
+                            {formulaError && (
+                              <Typography variant="caption" display="block">
+                                {formulaError}{' '}
+                              </Typography>
+                            )}
+                            <Button size="small" onClick={() => handleCheckSyntax(values)} color="primary">
+                              Check Syntax
+                            </Button>
+                          </Grid>
+                        </Grid>
                         <Grid container spacing={2}>
                           <Grid item xs={6}>
                             <TextField
