@@ -78,7 +78,6 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
     }
   };
 
-  console.log(initialValue?.dataPoints)
 
   const handleSubmit = (values) => {
     setLoading(true);
@@ -136,7 +135,6 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
     return errors;
   }
 
-  console.log(iotDataPoints);
 
   return (
     <>
