@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, TextField, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { Form, Formik } from 'formik';
@@ -19,7 +19,7 @@ import { DecimalPlaces } from 'src/components/FormBuilder/AddField/decimalPlaces
 export default function ManageRules({ deviceTemplate, open, isClone = false, id = null, onClose, onSuccess }) {
   const toastConfig = useContext(CustomToastContext);
 
-  const [fullScreen, setFullScreen] = useState(true);
+  const [fullScreen, setFullScreen] = useState(false);
   const [iotDataPoints, setIotDataPoints] = useState([]);
   const [initialValue, setInitialValue] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -64,7 +64,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
           setLoading(false);
         })
         .catch((error) => {
-            toastConfig.setToastConfig(error);
+          toastConfig.setToastConfig(error);
         });
     } else {
       setInitialValue({
@@ -77,7 +77,6 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
       setLoading(false);
     }
   };
-
 
   const handleSubmit = (values) => {
     setLoading(true);
@@ -135,7 +134,6 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
     return errors;
   }
 
-
   return (
     <>
       <Dialog
@@ -157,7 +155,11 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
               <Fragment>
                 <CustomDialogHeader
                   title={
-                    id ? (isClone ? `Clone - ${initialValue?.fieldLabel}` : `Update FieldLabel - ${initialValue?.fieldLabel}`) : 'Create FieldLabel'
+                    id
+                      ? isClone
+                        ? `Clone - ${initialValue?.fieldLabel}`
+                        : `Update CustomDataPoint - ${initialValue?.fieldLabel}`
+                      : 'Create CustomDataPoint'
                   }
                   onClose={(e, reason) => {
                     if (isEqual(initialValue, values)) {
@@ -223,30 +225,6 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                           <TextField
                             margin="dense"
                             type="text"
-                            label="Unit"
-                            name="unit"
-                            variant="outlined"
-                            required
-                            fullWidth
-                            disabled={false}
-                            value={values['unit']}
-                            error={touched['unit'] && Boolean(errors['unit'])}
-                            helperText={touched['unit'] && errors['unit']}
-                            onChange={(e) => setFieldValue('unit', e.target.value)}
-                          />
-                        </Box>
-                        <Box>
-                          <DecimalPlaces
-                            values={values}
-                            setFieldValue={(name, value) => {
-                              setFieldValue(name, value);
-                            }}
-                          />
-                        </Box>
-                        <Box>
-                          <TextField
-                            margin="dense"
-                            type="text"
                             label="Formula"
                             name="formula"
                             fullWidth
@@ -260,6 +238,32 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                             onChange={(e) => setFieldValue('formula', e.target.value)}
                           />
                         </Box>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <TextField
+                              margin="dense"
+                              type="text"
+                              label="Unit"
+                              name="unit"
+                              variant="outlined"
+                              required
+                              fullWidth
+                              disabled={false}
+                              value={values['unit']}
+                              error={touched['unit'] && Boolean(errors['unit'])}
+                              helperText={touched['unit'] && errors['unit']}
+                              onChange={(e) => setFieldValue('unit', e.target.value)}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <DecimalPlaces
+                              values={values}
+                              setFieldValue={(name, value) => {
+                                setFieldValue(name, value);
+                              }}
+                            />
+                          </Grid>
+                        </Grid>
                         <Box></Box>
                       </div>
                     </div>
