@@ -1005,7 +1005,7 @@ export default function Attachment() {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.id ? deleteRecord?.name ?? 'this attachment?' : 'these attachments?'}`}
+            message={`Are you sure you want to delete this attachment(s)?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord(null);
               setIsConfirmDialogVisible(false);

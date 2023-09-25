@@ -195,12 +195,15 @@ const Invoice = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
@@ -346,7 +349,7 @@ const Invoice = () => {
           permissions={permissions?.invoice}
           module="invoice"
           api={invoice.api}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}

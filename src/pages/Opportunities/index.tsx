@@ -237,12 +237,15 @@ const Opportunities = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -480,9 +483,8 @@ const Opportunities = () => {
               <Chip
                 className="ml-3"
                 color="primary"
-                label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${
-                  accountDetails.accountName
-                }`}
+                label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${accountDetails.accountName
+                  }`}
                 onDelete={() => {
                   setAccountDetails({ accountId: null, accountName: null, resource: null });
                 }}
@@ -581,9 +583,8 @@ const Opportunities = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? 'Opportunity' : 'Opportunities'}   ${
-              deleteRecord.opportunityName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? 'Opportunity' : 'Opportunities'}   ${deleteRecord.opportunityName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

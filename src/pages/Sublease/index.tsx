@@ -147,12 +147,15 @@ const Sublease = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
+    
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+ 
     let filterById = [];
     if (referenceId) {
       filterById.push({ field: 'rentalJob', term: referenceId });
