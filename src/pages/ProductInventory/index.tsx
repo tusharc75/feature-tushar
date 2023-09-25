@@ -122,7 +122,8 @@ const InventoryProduct = () => {
     selectedEntity,
     showFilteredRecordsOnly,
     fromProductMaster,
-    expenseItemValue
+    expenseItemValue,
+    showExpenseItem
   ]);
 
   const getPlants = () => {

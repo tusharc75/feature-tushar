@@ -245,6 +245,7 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
                     allowSelection={allowedToEdit}
                     actionWidth={100}
                     showOnlyShowFilteredRecordSwitch={false}
+                    isClientSideGrid={true}
                 />
             )
                 : (

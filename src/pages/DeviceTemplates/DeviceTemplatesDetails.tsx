@@ -17,6 +17,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import IotDataPoints from './IotDataPoints';
 import Rules from './Rules';
 import Alerts from './Alerts';
+import CustomDataPoints from './CustomDataPoints';
 
 export default function DeviceTemplatesDetails() {
   const toastConfig = useContext(CustomToastContext);
@@ -145,6 +146,7 @@ export default function DeviceTemplatesDetails() {
           />
           <Tab label={<div className="tab-font">Rules</div>} value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className={'tabLayout'} />
           <Tab label={<div className="tab-font">Alerts</div>} value={3} aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className={'tabLayout'} />
+          <Tab label={<div className="tab-font">Custom Data Points</div>} value={4} aria-controls="a11y-tabpanel-4" id="a11y-tab-4" className={'tabLayout'} />
         </Tabs>
         {tabValue === 0 && (
           <Box>
@@ -160,6 +162,7 @@ export default function DeviceTemplatesDetails() {
         {tabValue === 1 && <IotDataPoints deviceTemplate={id} />}
         {tabValue === 2 && <Rules deviceTemplate={id} />}
         {tabValue === 3 && <Alerts deviceTemplate={id} />}
+        {tabValue === 4 && <CustomDataPoints deviceTemplate={id} />}
       </Box>
       {openUpdateDialog && (
         <ManageDeviceTemplates

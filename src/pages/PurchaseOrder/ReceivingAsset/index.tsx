@@ -89,7 +89,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate">{row.original.detail}</p>
-          <IconButton
+
+          {['Product', 'Asset'].includes(row.original.type) && <IconButton
             size="small"
             onClick={() => {
               if (row.original.type === 'Product') {
@@ -101,7 +102,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             }}
           >
             <OpenInNewIcon fontSize="small" color="primary" />
-          </IconButton>
+          </IconButton>}
         </div>
       )
     });
@@ -265,7 +266,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           Cell: ({ row }) =>
             row?.original?.type === 'Product' ? (
               <>
-                {permissions?.serializedAsset?.isCreate &&
+                {/* {permissions?.serializedAsset?.isCreate &&
                   row?.original?.serializedProduct && (row.original?.qty - (row.original?.actualReceived || 0) - (row?.original?.assetQty || 0)) > 0 &&
                   <HtmlTooltip title={`Create ${routes.serializedAsset.title}`}>
                     <IconButton
@@ -278,7 +279,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                       <AddCircleOutlineIcon fontSize="small" color={'primary'} />
                     </IconButton>
                   </HtmlTooltip>
-                }
+                } */}
                 {permissions?.purchaseOrder?.isUpdate &&
                   allowedToEdit &&
                   row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) &&

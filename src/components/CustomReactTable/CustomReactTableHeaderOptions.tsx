@@ -31,7 +31,7 @@ export default function CustomReactTableHeaderOptions({
   // setSelectedReportView = null
   setHiddenColumns = null,
   getToggleHideAllColumnsProps = null,
-  setColumnOrder = null
+  setColumnOrder = null,
 }) {
   const [disableSelectionSwitch, setDisableSelectionSwitch] = useState(true);
 
@@ -65,12 +65,12 @@ export default function CustomReactTableHeaderOptions({
     timeout = setTimeout(function () {
       let data = localStorage.getItem('gridMetaData');
       let request = data === 'undefined' ? {} : { ...JSON.parse(data) };
-      if (request[renderedFrom]) {
-        request[renderedFrom].order = columnOrder;
+            if (request[renderedFrom]) {
+request[renderedFrom].order = columnOrder;
         request[renderedFrom].hide = [...hiddenColumns];
       } else {
         request[renderedFrom] = {
-          order: columnOrder,
+order: columnOrder,
           hide: [...hiddenColumns],
           staticColumns: {
             createdBy: false,

@@ -1,6 +1,6 @@
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { isEqual } from 'lodash';
+import { isArray, isEqual } from 'lodash';
 import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -63,7 +63,7 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
 
   const handleSubmit = (values) => {
     setLoading(true);
-    const attachments = values?.attachments?.map((file) => ({ name: file?.fileName?.split('_')[3], url: file?.fileName }));
+    const attachments = isArray(values?.attachments) ? values?.attachments?.map((file) => ({ name: file?.fileName?.split('_')[3], url: file?.fileName })) : [];
     const body = { ...values, asset: assetId, attachments: attachments };
     axiosInstance()
       .post(`${serializedAssetsCertification.api}/issue-certificate`, body)
@@ -77,6 +77,7 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
         setLoading(false);
       })
       .catch((error) => {
+        setLoading(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -156,7 +157,7 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
                                   tooltipMessage={field?.tooltipMessage}
                                   size="small"
                                   imageOrFileUploadCompletePercentage={
-                                    ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                    ['imageUpload', 'fileUpload', 'multipleFileUpload'].some((s) => s === field.type)
                                       ? (completePercentage) => {
                                         setUploadingImageOrFileProgress(completePercentage);
                                       }

@@ -346,7 +346,7 @@ const AddExistingProduct = (props) => {
       <CustomDialogHeader title={'Add Existing Product'} onClose={handleClose}></CustomDialogHeader>
       <div className="listing-grid p-3">
         <Box mb={2}>
-          <h6 className="form-label-style mt-0 mb-0" style={{ borderBottom: 'none' }}>
+          <h6 className="text-gray-400 mt-0 mb-0 text-[0.8rem]" style={{ borderBottom: 'none' }}>
             * Select checkboxes and then click Add button to add the products
           </h6>
           <div className="grid grid-cols-1 md:grid-cols-2 my-3 justify-between gap-2">

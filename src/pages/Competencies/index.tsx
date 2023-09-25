@@ -120,6 +120,7 @@ const Competencies = () => {
   };
 
   const getQueryString = (isExport = false) => {
+    
     let deepFilter = `?page=${page}&limit=${limit}`;
 
     if (isExport) {
