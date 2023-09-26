@@ -15,9 +15,9 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, dateTimeFormat, fieldTicket } from 'src/constants/helpers';
 import { fetch_field_ticket_submit_fields } from '../helper';
-import { Skeleton } from '@material-ui/lab';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
-function ViewLogs({ id, fieldTicketName, handleClose }) {
+function ViewLogs({ fieldTicketData, handleClose }) {
   const {
     state: { permissions }
   }: any = useData();
@@ -27,15 +27,8 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [openAttachment, setOpenAttachment] = useState({ open: false, attachmentId: null });
-  const [imageDialogProps, setImageDialogProps] = useState<{ open: boolean; src: null | string; alt: string }>({
-    open: false,
-    src: null,
-    alt: ''
-  });
 
-  const onClose = React.useCallback(() => {
-    setImageDialogProps({ open: false, src: null, alt: '' });
-  }, []);
+  const renderedFrom = `${routes.fieldTicket.title}_logs`
 
   useEffect(() => {
     fetchColumn();
@@ -44,7 +37,6 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
 
   const fetchColumn = async () => {
     setColumns(null);
-    const fields = await fetch_field_ticket_submit_fields();
     const column: any = [
       {
         accessor: 'date',
@@ -96,55 +88,9 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
         }
       }
     ];
-
-    fields.forEach((field) => {
-      if (field.type !== 'multiFileUpload') {
-        if (field.type === 'signature') {
-          column.push({
-            accessor: field.fieldName,
-            Header: field.fieldLabel,
-            width: 200,
-            disableFilters: true,
-            Cell: ({ row }) => {
-              return row?.original[field.fieldName] ? (
-                <p
-                  className="text-truncate -my-[2px] cursor-pointer"
-                  role="button"
-                  onClick={() => {
-                    setImageDialogProps({
-                      open: true,
-                      src: row?.original[field.fieldName],
-                      alt: `Signed by ${row?.original['user'] || 'user'}`
-                    });
-                  }}
-                >
-                  <img
-                    src={row?.original[field.fieldName]}
-                    width={65}
-                    className="max-w-[65px] w-full block max-h-[38px] object-contain  dark:invert"
-                    alt={`Signed by ${row?.original['user'] || 'user'}`}
-                  />
-                </p>
-              ) : (
-                <NoDataCell />
-              );
-            }
-          });
-        } else {
-          column.push({
-            accessor: field.fieldName,
-            Header: field.fieldLabel,
-            width: 200,
-            disableFilters: field.type === 'signature' ? true : false,
-            Cell: ({ row }) => {
-              return row?.original[field.fieldName] ? <p className="text-truncate">{row?.original[field.fieldName]}</p> : <NoDataCell />;
-            }
-          });
-        }
-      }
-    });
-
-    column.push({
+    const fields = await fetch_field_ticket_submit_fields();
+    const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
+    const actionColumn = {
       accessor: 'action',
       Header: 'Actions',
       minWidth: 50,
@@ -166,12 +112,12 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
             </IconButton>
           </HtmlTooltip>
         ) : null
-    });
-    setColumns([...column]);
+    }
+    setColumns([...column, ...newColumns, actionColumn]);
   };
 
   const fetchData = async () => {
-    const { data } = await axiosInstance().get(`${fieldTicket.api}/view-logs/${id}`);
+    const { data } = await axiosInstance().get(`${fieldTicket.api}/view-logs/${fieldTicketData?._id}`);
     data?.data.forEach((d) => {
       const invoice = d?.invoice;
       const user = d?.user;
@@ -197,7 +143,7 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
         }}
       >
         <CustomDialogHeader
-          title={`Logs - ${fieldTicketName}`}
+          title={`Logs - ${fieldTicketData?.fieldTicketName}`}
           onClose={handleClose}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
@@ -219,7 +165,7 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
                   uniqueKey="_id"
                   hideSelection={true}
                   hideExpander={true}
-                  renderedFrom={'fieldTicket_logs'}
+                  renderedFrom={renderedFrom}
                   isClientSideGrid={true}
                 />
               </Box>
@@ -264,42 +210,11 @@ function ViewLogs({ id, fieldTicketName, handleClose }) {
           />
         </Dialog>
       )}
-      <ImageDialog onClose={onClose} {...imageDialogProps} />
     </>
   );
 }
 
 export default ViewLogs;
 
-export interface ImageDialogProps {
-  open: boolean;
-  onClose: () => void;
-  src: string | null;
-  alt?: string;
-}
 
-function ImageDialog(props: ImageDialogProps) {
-  const { onClose, open, src, alt } = props;
 
-  return (
-    <Dialog
-      // TransitionComponent={Transition}
-      TransitionProps={{ timeout: 300 }}
-      onClose={onClose}
-      aria-labelledby="simple-dialog-title"
-      open={open}
-      fullWidth
-      maxWidth="xs"
-      // PaperProps={{ className: 'min-w-[300px] max-w-[500px] w-full' }}
-      BackdropProps={{ style: { backdropFilter: 'blur(5px)' } }}
-    >
-      {src ? (
-        <img src={src} alt={alt || ''} className="w-full block max-w-[500px] object-contain mx-auto p-2 h-full dark:invert" />
-      ) : (
-        <div className="w-[444px] h-[278px] p-2 grid place-items-center">
-          <p className="text-gray-500 text-lg">No image to display</p>
-        </div>
-      )}
-    </Dialog>
-  );
-}
