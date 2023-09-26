@@ -134,7 +134,6 @@ const Chart = ({ dateFilters, assetId, dataPoints, customDataPoint = false }) =>
         });
         setHighLowData(yaxis);
         setChartData(newData);
-        console.log(newData);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
