@@ -322,8 +322,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     handleSaveData(rows);
   };
 
-  console.log(showEditAssetDialog.data);
-
   return (
     <Fragment>
       {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
