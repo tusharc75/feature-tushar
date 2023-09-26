@@ -760,24 +760,6 @@ const SerializedAssetTest = () => {
               refreshGrid={fetchProductInventory}
               loading={loading}
               showOnlyShowFilteredRecordSwitch={true}
-              swipableListProps={{
-                // props for mobile view
-                renderPrimaryField: (data) => (
-                  <span className="link" onClick={() => history.push(`${routes.serializedAssetDetail.path}/${data._id}`)}>
-                    {data.assetNumber}
-                  </span>
-                ),
-                renderIcons: (original) => {
-                  const data = { row: { original } };
-                  return ActionsRenderer.Cell(data);
-                },
-                chips: [
-                  {
-                    label: 'Serial Number : ',
-                    field: 'serialNumber'
-                  }
-                ]
-              }}
             />
           </>
         ) : (

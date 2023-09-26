@@ -45,35 +45,6 @@ import { GrFormClose } from 'react-icons/gr';
 import { CgSearch } from 'react-icons/cg';
 import GridHeader from './GridHeader';
 import SwipableListForMobile from 'src/components/SwipableListForMobile';
-import type { TSwipableListInputProps } from 'src/components/SwipableListForMobile';
-
-interface ISwipableListProps
-  extends Omit<TSwipableListInputProps, 'renderedFrom' | 'allowSelection' | 'rowCount' | 'page' | 'loading' | 'dataRows' | 'dispatch'> {}
-type TTableProps = {
-  columns: any;
-  data: any;
-  onSelect?: any;
-  setWholeRowsCellColor?: any; // Use this prop when you want to change whole row's cell color.
-  childrenProperty: any;
-  uniqueKey: any;
-  height?: string;
-  hideSelection: false;
-  renderedFrom: string;
-  isClientSideGrid: boolean;
-  currentPage: number;
-  rowCount: number;
-  expander: boolean;
-  allowPagination: boolean;
-  limit: number;
-  customFilters: [];
-  refreshGrid: null;
-  dispatch: any;
-  sorting: any;
-  loading: any;
-  fetchChildAttachment: null;
-  showOnlyShowFilteredRecordSwitch: boolean;
-  swipableListProps?: ISwipableListProps;
-};
 
 interface CustomCheckBoxProps extends CheckboxProps {
   indeterminate: any;
@@ -274,9 +245,8 @@ function CustomReactTable({
   sorting,
   loading,
   fetchChildAttachment = null,
-  showOnlyShowFilteredRecordSwitch = false,
-  swipableListProps
-}: TTableProps) {
+  showOnlyShowFilteredRecordSwitch = false
+}) {
   const isMobileView = isMobile && !isTablet;
   const defaultColumn = {
     Cell: EditableCell,
@@ -292,6 +262,7 @@ function CustomReactTable({
   const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
   const [baseColumns, setBaseColumns] = React.useState([]);
   const [render, setRender] = React.useState(false);
+  const [mobileAllColumns, setMobileAllColumns] = React.useState([]);
 
   useEffect(() => {
     setBaseColumns(columns);
@@ -362,12 +333,13 @@ function CustomReactTable({
               canDrag: false,
               Cell: ({ row }) =>
                 row.original.type === 'folder' ? (
-                  <span
-                    {...row.getToggleRowExpandedProps({
+                  <IconButton
+                    {...row.getToggleRowExpandedProps?.({
                       style: {
-                        paddingLeft: `${row.depth * 2}rem`
+                        marginLeft: isMobileView ? 0 : `${row.depth * 2}rem`
                       }
                     })}
+                    size="small"
                   >
                     {row.isExpanded ? (
                       <FaAngleDown />
@@ -381,7 +353,7 @@ function CustomReactTable({
                         }}
                       />
                     )}
-                  </span>
+                  </IconButton>
                 ) : null
             },
             {
@@ -711,7 +683,7 @@ function CustomReactTable({
               setColumnOrder={setColumnOrder}
             />
           </GridHeader>
-          {isMobileView && swipableListProps ? null : (
+          {!isMobileView && (
             <div
               style={{
                 display: 'block',
@@ -837,25 +809,11 @@ function CustomReactTable({
                     );
                   })}
                 </TableBody>
-                {/* The below footer render doesnt work because Footer render is empty in props */}
-                {/* {rows?.length > 0 && (
-                <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer">
-                  {footerGroups.map((group, index) => (
-                    <TableRow key={index} {...group.getFooterGroupProps()} className="tr">
-                      {group.headers.map((column, index1) => (
-                        <TableCell key={index1} {...column.getHeaderProps()} className="th text-truncate font-weight-bold text-black">
-                          {column.render('Footer')} 
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableFooter>
-              )} */}
               </MaUTable>
             </div>
           )}
         </div>
-        {!isMobileView && swipableListProps && allowPagination && !loading && (
+        {!isMobileView && allowPagination && !loading && (
           <TablePagination
             component="div"
             count={rowCount}
@@ -871,20 +829,22 @@ function CustomReactTable({
             rowsPerPageOptions={gridPageSizes}
           />
         )}
-        {isMobileView && swipableListProps ? (
+
+        {isMobileView ? (
           <SwipableListForMobile
+            prepareRow={prepareRow}
+            allColumns={allColumns}
             allowSelection={!hideSelection}
-            dataRows={data}
+            dataRows={rows}
             dispatch={dispatch}
             loading={loading}
             page={currentPage}
-            renderPrimaryField={swipableListProps.renderPrimaryField}
-            renderIcons={swipableListProps.renderIcons}
-            renderSecondaryField={swipableListProps.renderSecondaryField}
-            chips={swipableListProps.chips}
             rowCount={rowCount}
-            backgroundColor={swipableListProps.backgroundColor}
+            expander={expander}
+            backgroundColor={setWholeRowsCellColor}
             renderedFrom={renderedFrom}
+            handleCellSelection={handleCellSelection}
+            IndeterminateCheckbox={IndeterminateCheckbox}
           />
         ) : null}
       </div>
