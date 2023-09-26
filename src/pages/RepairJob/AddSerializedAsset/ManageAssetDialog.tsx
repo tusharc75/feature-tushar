@@ -17,7 +17,10 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import CustomButton from 'src/components/Helpers/CustomButton';
 
-export default function ManageAssetDialog({ allFields, isBulkedit, onClose, repairJobData, inventory, selectedRecords, handleSaveData, loadingEdit, showSaveAndNext }) {
+export default function ManageAssetDialog({ allFields, onClose, repairJobData, handleSaveData, loadingEdit, showEditAssetDialog }) {
+
+  let inventory = showEditAssetDialog.data?.inventory;  
+  let {isBulkedit, selectedRecords, showSaveAndNext} = showEditAssetDialog;
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -104,7 +107,7 @@ export default function ManageAssetDialog({ allFields, isBulkedit, onClose, repa
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
-                  title={isBulkedit ? 'Bulk Edit' : `Edit`}
+                  title={isBulkedit ? 'Bulk Edit' : `Edit - ${showEditAssetDialog?.data?.index} (${showEditAssetDialog?.data?.assetNumber || ''})`}
                   onClose={(e, reason) => {
                     onClose();
                   }}

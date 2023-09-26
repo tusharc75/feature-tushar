@@ -514,15 +514,12 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         <ManageAssetDialog
           repairJobData={repairJobData}
           allFields={allFields}
-          isBulkedit={showEditAssetDialog.isBulkedit}
           onClose={() => {
             setShowEditAssetDialog({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
           }}
-          inventory={showEditAssetDialog.data?.inventory}
-          selectedRecords={showEditAssetDialog.selectedRecords}
           handleSaveData={handleSaveData}
           loadingEdit={isUpdating}
-          showSaveAndNext={showEditAssetDialog.showSaveAndNext}
+          showEditAssetDialog={showEditAssetDialog}
         />
       )}
       {statusToUpdate.open && (
