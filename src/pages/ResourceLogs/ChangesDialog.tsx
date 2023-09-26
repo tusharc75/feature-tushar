@@ -87,6 +87,14 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 <Typography>False</Typography>
                               ) : data?.fieldLabel === 'updatedBy' ? (
                                 `${updatedBy}`
+                              ) : Array.isArray(data?.newValue) ? (
+                                data?.newValue?.map((value: any, index: any) => {
+                                  return (
+                                    <Typography key={index} className="text-truncate">
+                                      {value?.product?.optionLabel}
+                                    </Typography>
+                                  );
+                                })
                               ) :
                               (
                                 data?.newValue
@@ -103,7 +111,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
               </Table>
             </TableContainer>
           ) : 
-          <Typography>No changes</Typography>}
+          <NoDataCell />}
           {operations?.length ?
             <TableContainer component={Paper}>
               <Table aria-label="customized table">
