@@ -109,7 +109,6 @@ function PreviewDownload({
     setLoadingType(pdfType);
 
     let api = ''
-    console.log(type, pdfType)
     if (type === 'Export') {
       api = `/excel/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
     } else if (pdfType === 'Detail') {
