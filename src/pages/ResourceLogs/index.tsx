@@ -126,6 +126,9 @@ const ResourceLogs = () => {
             } else {
               u.changeString = 'Click View for check changes';
             }
+            if(u?.action == "create"){
+              u.changeString = "Created";
+            }
             u.changes = changes;
             u.operations = operations;
             u.key = selectedResource?.key;
@@ -164,7 +167,7 @@ const ResourceLogs = () => {
 
   const columns = [
     {
-      field: 'resource',
+      field: 'referenceId',
       headerName: 'Resource',
       show: true,
       cellRenderer: 'resourceRenderer',
