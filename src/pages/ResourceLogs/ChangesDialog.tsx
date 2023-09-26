@@ -58,7 +58,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 <Link
                                   className="link text-truncate"
                                   title={data?.oldValue?.label}
-                                  to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.oldValue?.value}`}
+                                  to={`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`}
                                 >
                                   {data?.oldValue?.label}
                                 </Link>
@@ -77,7 +77,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 <Link
                                   className="link text-truncate"
                                   title={data?.newValue?.label}
-                                  to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.newValue?.value}`}
+                                  to={`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`}
                                 >
                                   {data?.newValue?.label}
                                 </Link>
@@ -87,6 +87,14 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 <Typography>False</Typography>
                               ) : data?.fieldLabel === 'updatedBy' ? (
                                 `${updatedBy}`
+                              ) : Array.isArray(data?.newValue) ? (
+                                data?.newValue?.map((value: any, index: any) => {
+                                  return (
+                                    <Typography key={index} className="text-truncate">
+                                      {value?.product?.optionLabel}
+                                    </Typography>
+                                  );
+                                })
                               ) :
                               (
                                 data?.newValue
@@ -103,7 +111,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
               </Table>
             </TableContainer>
           ) : 
-          <Typography>No changes</Typography>}
+          <NoDataCell />}
           {operations?.length ?
             <TableContainer component={Paper}>
               <Table aria-label="customized table">
@@ -144,7 +152,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                               <Link
                                                 className="link text-truncate"
                                                 title={data?.oldValue?.label}
-                                                to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.oldValue?.value}`}
+                                                to={`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`}
                                               >
                                                 {data?.oldValue?.label}
                                               </Link>
@@ -163,7 +171,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                               <Link
                                                 className="link text-truncate"
                                                 title={data?.newValue?.label}
-                                                to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.newValue?.value}`}
+                                                to={`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`}
                                               >
                                                 {data?.newValue?.label}
                                               </Link>

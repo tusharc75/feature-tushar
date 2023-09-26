@@ -178,7 +178,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   };
 
   const NameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
+    <Link className="link" target='_blank' title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
       {params.value}
     </Link>
   );
