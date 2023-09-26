@@ -90,7 +90,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
 
   const folderIconButtons = (attachment) => {
     return (
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex gap-2 items-center">
         <HtmlTooltip title={'Create File'}>
           <IconButton
             size="small"
@@ -149,7 +149,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
 
   const fileIconButtons = (attachment) => {
     return permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
-      <Box style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="flex gap-2 items-center">
         <HtmlTooltip title={'Send Email'}>
           <IconButton
             size="small"
@@ -172,7 +172,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
         >
           <MoreHorizIcon />
         </IconButton>
-      </Box>
+      </div>
     ) : null;
   };
 
@@ -273,7 +273,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   const handleMailForFolder = (data) => {
     const folderId = data?._id;
     const folderName = data?.name;
-    
+
     axiosInstance()
       .get(`attachment/zip/${folderId}`, { responseType: 'blob' })
       .then(({ data }) => {
