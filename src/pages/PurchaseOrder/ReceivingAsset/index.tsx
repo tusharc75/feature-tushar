@@ -371,9 +371,11 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         if (subRows?.length) {
           let actualReceived = item.actualReceived;
           subRows?.forEach((e: any, index) => {
-            res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.assetNumber, type: 'Asset', assetId: e?._id, hideSelection: true });
-            actualReceived = actualReceived - 1;
-            e.isUsed = true;
+            if (actualReceived && !e.isUsed) {
+              res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.assetNumber, type: 'Asset', assetId: e?._id, hideSelection: true });
+              actualReceived = actualReceived - 1;
+              e.isUsed = true;
+            }
           });
         }
         const subRowsproductSerialNumber = productSerialNumber?.filter((e) => e?.product === res?.productId);
@@ -393,8 +395,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             }
           });
         }
-        res['assetQty'] = subRows?.length;
-        res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - subRows?.length : 0;
+        res['assetQty'] = res?.subRows?.length;
+        res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - res?.subRows?.length : 0;
         return res;
       });
 
