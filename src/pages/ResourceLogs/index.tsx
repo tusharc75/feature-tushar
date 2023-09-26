@@ -95,7 +95,6 @@ const ResourceLogs = () => {
             if (Array.isArray(u?.changes)) {
               u?.changes?.forEach((e) => {
                 if (e?.fieldLabel) {
-                  if (e?.fieldLabel === 'consumeProducts') return;
                   changes.push(e);
                   var oldValue = e?.oldValue;
                   var newValue = e?.newValue;
@@ -168,7 +167,7 @@ const ResourceLogs = () => {
 
   const columns = [
     {
-      field: 'resource',
+      field: 'referenceId',
       headerName: 'Resource',
       show: true,
       cellRenderer: 'resourceRenderer',
