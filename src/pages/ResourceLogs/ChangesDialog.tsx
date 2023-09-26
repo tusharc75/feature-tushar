@@ -58,7 +58,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 <Link
                                   className="link text-truncate"
                                   title={data?.oldValue?.label}
-                                  to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.oldValue?.value}`}
+                                  to={`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`}
                                 >
                                   {data?.oldValue?.label}
                                 </Link>
@@ -77,7 +77,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 <Link
                                   className="link text-truncate"
                                   title={data?.newValue?.label}
-                                  to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.newValue?.value}`}
+                                  to={`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`}
                                 >
                                   {data?.newValue?.label}
                                 </Link>
@@ -152,7 +152,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                               <Link
                                                 className="link text-truncate"
                                                 title={data?.oldValue?.label}
-                                                to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.oldValue?.value}`}
+                                                to={`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`}
                                               >
                                                 {data?.oldValue?.label}
                                               </Link>
@@ -171,7 +171,7 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                               <Link
                                                 className="link text-truncate"
                                                 title={data?.newValue?.label}
-                                                to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.newValue?.value}`}
+                                                to={`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`}
                                               >
                                                 {data?.newValue?.label}
                                               </Link>
