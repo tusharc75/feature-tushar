@@ -233,13 +233,21 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
     setFieldChanges(_fieldChanges);
   };
 
-  const replaceUnit = (label, unit, sUnit = null) => {
-    if (label !== 'Secondary Unit') {
+  const replaceUnit = (label, unit, sUnit = null, tUnit = null) => {
+    if (label !== 'Secondary Unit' && label !== 'Tertiary Unit') {
       if (label.includes('Secondary Unit') && sUnit) {
         label = `${label.split(' Secondary Unit')[0]} Secondary Unit (${sUnit})`;
       }
-
       if (!label.includes('Secondary Unit') && label.includes('Unit') && unit) {
+        if (label !== 'Unit') {
+          label = `${label.split(' Unit')[0]} Unit (${unit})`;
+        }
+      }
+
+      if (label.includes('Tertiary Unit') && tUnit) {
+        label = `${label.split(' Tertiary Unit')[0]} Tertiary Unit (${tUnit})`;
+      }
+      if (!label.includes('Tertiary Unit') && label.includes('Unit') && unit) {
         if (label !== 'Unit') {
           label = `${label.split(' Unit')[0]} Unit (${unit})`;
         }
@@ -348,8 +356,8 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                         touched={touched}
                                         label={
                                           field.isUneditable
-                                            ? `${replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit)} (Auto Calculated Field)`
-                                            : replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit)
+                                            ? `${replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit, values?.tertiaryUnit)} (Auto Calculated Field)`
+                                            : replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit, values?.tertiaryUnit)
                                         }
                                         name={field.fieldName}
                                         type={field.type}
@@ -391,8 +399,8 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                               touched={touched}
                                               label={
                                                 field.isUneditable
-                                                  ? `${replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit)} (Auto Calculated Field)`
-                                                  : replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit)
+                                                  ? `${replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit, values?.tertiaryUnit)} (Auto Calculated Field)`
+                                                  : replaceUnit(field.fieldLabel, values?.unit, values?.secondaryUnit, values?.tertiaryUnit)
                                               }
                                               name={field.fieldName}
                                               type={field.type}

@@ -6,6 +6,7 @@ import { flatMapDeep } from 'lodash';
 import moment from 'moment';
 import { Box, IconButton } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import SignatureCell from 'src/components/Helpers/SignatureCell';
 
 export const headerName = {
   firstName: 'Name'
@@ -256,6 +257,14 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
             width: 200,
             Cell: ({ row }) =>
               row.original[ele.fieldName] ? ele.lookup ? columnData(ele, row) : <p>{row.original[ele.fieldName]?.join()}</p> : <NoDataCell />
+          });
+        } else if (ele.type === 'multiFileUpload') {
+
+        } else if (ele.type === 'signature') {
+          column.push({
+            ...currentColumn,
+            width: 200,
+            Cell: ({ row }) => row.original[ele.fieldName] ? <SignatureCell base64={row?.original[ele.fieldName]} /> : <NoDataCell />
           });
         } else {
           column.push({
