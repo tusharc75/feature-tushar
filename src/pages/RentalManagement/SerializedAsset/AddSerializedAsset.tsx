@@ -274,10 +274,13 @@ const AddSerializedAsset = ({
         deepFilter = `${deepFilter}&availableAsset=true`;
       }
     }
-    if (Number(tabValue) === 1) {
-      deepFilter = `${deepFilter}&subleaseAsset=1`;
-    } else {
-      deepFilter = `${deepFilter}&subleaseAsset=0`;
+
+    if (referenceType !== 'Transfer Asset') {
+      if (Number(tabValue) === 1) {
+        deepFilter = `${deepFilter}&subleaseAsset=1`;
+      } else {
+        deepFilter = `${deepFilter}&subleaseAsset=0`;
+      }
     }
 
     return deepFilter;
@@ -507,32 +510,32 @@ const AddSerializedAsset = ({
                   <Box style={{ display: 'inline' }}>
                     {serializedProducts.length > 0
                       ? serializedProducts.map((d) => (
-                          <Box
-                            m={0.5}
-                            p={1}
-                            border={1}
-                            className="cursor-pointer"
-                            borderColor="var(--common-border-color)"
-                            onClick={() => {
-                              if (selectedProduct === d.id) {
-                                setSelectedProduct(null);
-                              } else {
-                                setSelectedProduct(d.id);
-                              }
-                            }}
-                            style={{ display: 'inline-block' }}
-                            bgcolor={d.id === selectedProduct ? 'var(--dark-primary, var(--primary))' : 'var(--dark-secondary, transparent)'}
-                            color={d.id === selectedProduct && 'white'}
-                          >
-                            {d?.qty < 0 ? (
-                              <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                            ) : d?.qty === 0 ? (
-                              <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                            ) : (
-                              <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                            )}
-                          </Box>
-                        ))
+                        <Box
+                          m={0.5}
+                          p={1}
+                          border={1}
+                          className="cursor-pointer"
+                          borderColor="var(--common-border-color)"
+                          onClick={() => {
+                            if (selectedProduct === d.id) {
+                              setSelectedProduct(null);
+                            } else {
+                              setSelectedProduct(d.id);
+                            }
+                          }}
+                          style={{ display: 'inline-block' }}
+                          bgcolor={d.id === selectedProduct ? 'var(--dark-primary, var(--primary))' : 'var(--dark-secondary, transparent)'}
+                          color={d.id === selectedProduct && 'white'}
+                        >
+                          {d?.qty < 0 ? (
+                            <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                          ) : d?.qty === 0 ? (
+                            <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                          ) : (
+                            <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                          )}
+                        </Box>
+                      ))
                       : null}
                   </Box>
                 </Box>
@@ -613,10 +616,10 @@ const AddSerializedAsset = ({
                           getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()
                             ? 'Direct transfer to customer location'
                             : referenceType === 'Rental Job'
-                            ? 'Add to Job'
-                            : referenceType === 'ReplaceAsset'
-                            ? 'Replace'
-                            : 'Add'
+                              ? 'Add to Job'
+                              : referenceType === 'ReplaceAsset'
+                                ? 'Replace'
+                                : 'Add'
                         }
                       >
                         <Button

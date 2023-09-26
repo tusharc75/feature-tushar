@@ -211,6 +211,17 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
     }
   };
 
+  function validate(values) {
+    const errors = {};
+    let startDate = moment(values?.startDate);
+    let expectedCompletionDate = moment(values?.expectedCompletionDate);
+    if (expectedCompletionDate.diff(startDate, 'days') < 0) {
+      errors['expectedCompletionDate'] = 'Please enter valid expected completion date';
+    }
+    return errors;
+  }
+
+
   return (
     <Dialog
       maxWidth="md"
@@ -226,7 +237,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       open={true}
     >
       {formsData && formsData?.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
+        <Formik validate={validate} initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <>
               <CustomDialogHeader

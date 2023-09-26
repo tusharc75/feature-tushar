@@ -13,6 +13,7 @@ import PerformanceAnalysis from './PerformanceAnalysis';
 import Current from './Current';
 import DataSimulationDialog from './DataSimulation';
 import Status from './Status';
+import CustomDataPoints from './CustomDataPoints';
 
 const IotChartDetail = () => {
 
@@ -22,6 +23,7 @@ const IotChartDetail = () => {
     const [tabValue, setTabValue] = useState(0);
     const [dataPoints, setDataPoints] = useState([]);
     const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
+    const [customDataPoints, setCustomDataPoints] = useState([]);
 
     useEffect(() => {
         fetchData()
@@ -30,6 +32,12 @@ const IotChartDetail = () => {
     useEffect(() => {
         axiosInstance().get(`${routes?.iotDataPoints?.path}`).then(({ data: { data } }) => {
             setDataPoints(data?.data)
+        });
+    }, [assetId]);
+
+    useEffect(() => {
+        axiosInstance().get(`${routes?.deviceTemplates?.path}/custom-data-points`).then(({ data: { data } }) => {
+            setCustomDataPoints(data)
         });
     }, [assetId]);
 
@@ -90,11 +98,13 @@ const IotChartDetail = () => {
                     <Tab className={'tabLayout'} value={1} label={<div className="d-flex align-items-center tab-font">Analysis</div>} {...a11yProps(1)} />
                     <Tab className={'tabLayout'} value={2} label={<div className="d-flex align-items-center tab-font">Performance Analysis</div>} {...a11yProps(2)} />
                     <Tab className={'tabLayout'} value={3} label={<div className="d-flex align-items-center tab-font">Status</div>} {...a11yProps(3)} />
+                    <Tab className={'tabLayout'} value={4} label={<div className="d-flex align-items-center tab-font">Custom Data Points</div>} {...a11yProps(4)} />
                 </Tabs>
                 {tabValue === 0 && <Current assetId={assetId} />}
                 {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />}
                 {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} />}
                 {tabValue === 3 && <Status assetId={assetId} dataPoints={dataPoints} />}
+                {tabValue === 4 && <CustomDataPoints assetId={assetId} dataPoints={customDataPoints} />}
             </Box>
             {openDataSimulationDialog &&
                 <DataSimulationDialog

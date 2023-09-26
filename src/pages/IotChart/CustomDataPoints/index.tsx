@@ -7,7 +7,8 @@ import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/Cu
 import Chart from '../Helper/Chart';
 import FilterModel from '../Helper/FilterModel';
 
-const Analysis = ({ assetId, dataPoints }) => {
+const CustomDataPoints = ({ assetId, dataPoints }) => {
+
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(8, 'days').format('MM-DD-YYYY')),
     to: new Date(),
@@ -49,7 +50,7 @@ const Analysis = ({ assetId, dataPoints }) => {
                 <AccordionDetails>
                   {expandedAccordition === dataPoint?._id && (
                     <div className="container-with-border w-100 sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
-                      <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} />
+                      <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} customDataPoint={true}/>
                     </div>
                   )}
                 </AccordionDetails>
@@ -62,4 +63,4 @@ const Analysis = ({ assetId, dataPoints }) => {
   );
 };
 
-export default Analysis;
+export default CustomDataPoints;

@@ -101,11 +101,11 @@ const ArrangeViewButton = ({
             columnApi={null}
             isClientSideGrid={isClientSideGrid}
             renderedFrom={renderedFrom}
-            defaultColumns = {defaultColumns}
+            defaultColumns={defaultColumns}
             setHiddenColumns={setHiddenColumns}
             getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
             setColumnOrder={setColumnOrder}
-            refColsOrder = {refColsOrder}
+            refColsOrder={refColsOrder}
           />
         </>
       )}
