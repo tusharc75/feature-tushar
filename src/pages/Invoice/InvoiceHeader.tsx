@@ -162,7 +162,7 @@ function InvoiceHeader(props) {
           {invoicePermissions?.isDelete && (
             <>
               <Button
-                disabled={canDelete}
+                disabled={canDelete ? false : true}
                 variant={'outlined'}
                 color="default"
                 size="small"
