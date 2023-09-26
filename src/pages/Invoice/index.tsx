@@ -377,7 +377,7 @@ const Invoice = () => {
               invoicePermissions={permissions?.invoice}
               onCreate={clickCreateNew}
               showConfirmBox={showConfirmBox}
-              canDelete={selectedRecords.length === 0}
+              canDelete={selectedRecords.length > 0 && selectedRecords?.length === selectedRecords?.filter((e) => e.canDelete)?.length ? true : false}
               icon={<FaRegistered className="headerLogo" />}
               heading={routes.invoice.title}
               showTransferEntityDialog={handleTransferEntityDialog}
