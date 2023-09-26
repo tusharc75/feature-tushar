@@ -9,6 +9,7 @@ export default function ContentFullScreen({ children, title, fullScreen, setFull
             fullScreen={true}
             aria-labelledby="customized-dialog-title"
             open={true}
+            disableEnforceFocus
         >
            {isheader && <CustomDialogHeader title={title} showRequiredLabel={false} onClose={() => { setFullScreen(!fullScreen) }} ></CustomDialogHeader>}
             <CustomDialogContent>

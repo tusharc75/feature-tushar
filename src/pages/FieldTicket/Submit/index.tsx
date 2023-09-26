@@ -243,8 +243,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, renderedFrom, allowedToEdit, 
 
             {viewLogsDialog && (
                 <ViewLogs
-                    id={fieldTicketData?._id}
-                    fieldTicketName={fieldTicketData?.fieldTicketNumber}
+                    fieldTicketData={fieldTicketData}
                     handleClose={() => {
                         setViewLogsDialog(false)
                     }}
