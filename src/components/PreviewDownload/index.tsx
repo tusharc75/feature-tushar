@@ -5,10 +5,11 @@ import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
 import { MdEmail } from 'react-icons/md';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
+import { CiExport } from 'react-icons/ci';
 
 function PreviewDownload({
   resource,
@@ -20,7 +21,8 @@ function PreviewDownload({
   button1Title = 'Regular',
   button2Title = 'Detail',
   extraQueryParams = null,
-  subject = ''
+  subject = '',
+  isExcelDownload = false
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -105,9 +107,12 @@ function PreviewDownload({
       ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
       .map((d) => { return d?.fieldName; });
     setLoadingType(pdfType);
-      
+
     let api = ''
-    if (pdfType === 'Detail') {
+    console.log(type, pdfType)
+    if (type === 'Export') {
+      api = `/excel/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
+    } else if (pdfType === 'Detail') {
       api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
     }
     else {
@@ -118,29 +123,35 @@ function PreviewDownload({
         api = `${api}&${key}=${extraQueryParams[key]}`
       }
     }
-  
-    axiosInstance().get(api, { responseType: 'blob' })
-      .then(({ data }) => {
-        const blobData = new Blob([data], { type: 'application/pdf' });
+
+    const responseType = type === 'Export' ? 'arraybuffer' : 'blob';
+    axiosInstance().get(api, { responseType: responseType })
+      .then((response) => {
         setLoadingType(null);
         setLoading(false);
         setShowColumnsDialog({ open: false, type: '' });
-  
-        if (type === 'Download') {
+
+        if (type === 'Export') {
+          const fileName = `${resource}.xlsx`;
+          downloadExcel(response.data, fileName);
+        } else if (type === 'Download') {
+          const blobData = new Blob([response.data], { type: 'application/pdf' });
           const url = window.URL.createObjectURL(blobData);
           const link = document.createElement('a');
           link.href = url;
           link.setAttribute('download', `${resource}.pdf`);
           document.body.appendChild(link);
           link.click();
-        } 
+        }
         else if (type === 'Preview') {
+          const blobData = new Blob([response.data], { type: 'application/pdf' });
           const fileURL = URL.createObjectURL(blobData);
           const pdfWindow = window.open();
           pdfWindow.location.href = fileURL;
           toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-        } 
+        }
         else {
+          const blobData = new Blob([response.data], { type: 'application/pdf' });
           generateBase64forFile(blobData, 'pdf', pdfType);
         }
       })
@@ -148,7 +159,7 @@ function PreviewDownload({
         setLoadingType(null);
         toastConfig.setToastConfig(err);
       });
-  }; 
+  };
 
   const generateBase64forFile = (blobData, type, pdfType) => {
     let reader = new FileReader();
@@ -204,6 +215,24 @@ function PreviewDownload({
           >
             {isMobile && !isTablet ? <IoMdDownload size={20} /> : loadingType === 'download' ? 'Please wait...' : 'Download'}
           </Button>
+          {
+            isExcelDownload && (
+              <Button
+                className="btn-outline-v1"
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                type="button"
+                size="small"
+                startIcon={isMobile && !isTablet ? '' : <CiExport />}
+                disabled={loadingType === 'excel'}
+                onClick={(e) => {
+                  setDownlodingFile('Export');
+                  setShowColumnsDialog({ open: true, type: 'Excel' });
+                }}
+              >
+                {isMobile && !isTablet ? <IoMdDownload size={20} /> : loadingType === 'export' ? 'Please wait...' : 'Export To Excel'}
+              </Button>
+            )}
           {isSendEmail && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
