@@ -58,7 +58,7 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
       return { name, sectionFields };
     });
     setCustomFields(customData);
-  }, []);
+  }, [inventory]);
 
   const handleSubmit = (values) => {
     const returnData = [];
