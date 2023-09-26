@@ -305,7 +305,7 @@ const RenderCellWithHeader = ({ field, row }: any) => {
   return (
     <h6 className=" text-[12px] grid grid-cols-2 justify-between gap-2 max-w-full">
       <span className="">{field.Header}: </span>
-      <span className="text-[12px_!important] line-clamp-1 break-all [&>*]:[flex-wrap:wrap] [&>*]:[font-weight:500_!important] [&>*]:[font-size:12px_!important] [&>*]:line-clamp-1 [&>*]:[white-space:unset_!important] ">
+      <span className="text-[12px_!important] text-right [&>*]:text-right [&>*]:justify-end line-clamp-1 break-all [&>*]:[flex-wrap:wrap] [&>*]:[font-weight:500_!important] [&>*]:[font-size:12px_!important] [&>*]:line-clamp-1 [&>*]:[white-space:unset_!important] ">
         {field.Cell({ row })}
       </span>
     </h6>
