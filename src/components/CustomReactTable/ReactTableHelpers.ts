@@ -35,7 +35,9 @@ export const columnFilter = (rows, columnIds, filterValue, options = null) => {
                 const value = values && values[col];
                 if (typeof value === 'boolean') {
                   return value ? 'yes' : 'no';
-                }
+                }else if (typeof value === 'object' && value && value.optionLabel) {
+                    return value.optionLabel;
+                  }
                 return value;
               })
             .filter((v) => ["string", "number"].includes(typeof v))
