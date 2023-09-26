@@ -158,24 +158,24 @@ const Steps = (props) => {
       <Steps1
         currentStep={currentStep}
         isNextStepEnabled={
-          allowedToEdit ||
-          !loading ||
-          !globalLoading ||
-          nextStep ||
-          !versionStatus.includes('Sent for DOA') ||
-          !versionStatus.includes('Accepted  by DOA') ||
-          steps[currentStep]?.key !== 'DOA Process' ||
+          allowedToEdit &&
+          !loading &&
+          !globalLoading &&
+          nextStep &&
+          !versionStatus.includes('Sent for DOA') &&
+          !versionStatus.includes('Accepted  by DOA') &&
+          steps[currentStep]?.key !== 'DOA Process' &&
           !approvedQuote.approved
         }
         isPrevStep={
-          currentStep >= 0 ||
-          allowedToEdit ||
-          !versionStatus.includes('Rejected by Customer') ||
-          !(steps.length === 5 && currentStep > 3) ||
-          !versionStatus.includes('Sent for DOA') ||
-          !(steps.length === 6 && currentStep >= 4) ||
-          !versionStatus.includes('Sent to Customer') ||
-          !loading ||
+          currentStep >= 0 &&
+          allowedToEdit &&
+          !versionStatus.includes('Rejected by Customer') &&
+          !(steps.length === 5 && currentStep > 3) &&
+          !versionStatus.includes('Sent for DOA') &&
+          !(steps.length === 6 && currentStep >= 4) &&
+          !versionStatus.includes('Sent to Customer') &&
+          !loading &&
           !globalLoading
         }
         isStepEnded={isStepEnded || currentStep === steps.length}

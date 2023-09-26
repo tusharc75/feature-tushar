@@ -93,8 +93,14 @@ const ResourceLogs = () => {
             var operations = [];
 
             if (Array.isArray(u?.changes)) {
+              if(u?.changes?.length === 0){
+                return;
+              }
               u?.changes?.forEach((e) => {
                 if (e?.fieldLabel) {
+                  if (e?.fieldLabel === 'history' || e?.fieldLabel === 'createdBy' || e?.fieldLabel === '_id') {
+                    return
+                  }
                   changes.push(e);
                   var oldValue = e?.oldValue;
                   var newValue = e?.newValue;
@@ -134,6 +140,7 @@ const ResourceLogs = () => {
             u.key = selectedResource?.key;
             return u;
           });
+          rows = rows.filter((e) => e);
           dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
