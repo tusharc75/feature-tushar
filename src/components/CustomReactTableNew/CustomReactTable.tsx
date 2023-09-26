@@ -44,6 +44,7 @@ import ArrangeViewButton from './ArrangeViewButton';
 import { GrFormClose } from 'react-icons/gr';
 import { CgSearch } from 'react-icons/cg';
 import GridHeader from './GridHeader';
+import SwipableListForMobile from 'src/components/SwipableListForMobile';
 
 interface CustomCheckBoxProps extends CheckboxProps {
   indeterminate: any;
@@ -81,12 +82,7 @@ Purpose for removing filters from useTable :
 It filters the data again that comes from backend and client side filtering needs to be avoided
 */
 
-function TempFilter({
-  filterValue,
-  id,
-  setFilters,
-  customFilters
-}) {
+function TempFilter({ filterValue, id, setFilters, customFilters }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = React.useRef(null);
   const inputRef = React.useRef(null);
@@ -108,7 +104,6 @@ function TempFilter({
     }
   }, [isOpen]);
 
-
   const handleFilterChange = (newValue) => {
     let tempArr = Object.keys(customFilters).map((key, i) => {
       return { id: key, value: customFilters[key].filter };
@@ -117,17 +112,14 @@ function TempFilter({
 
     if (existingFilterIndex !== -1) {
       // Update existing filter
-      const updatedFilters = tempArr.map((filter, index) =>
-        index === existingFilterIndex ? { ...filter, value: newValue } : filter
-      );
+      const updatedFilters = tempArr.map((filter, index) => (index === existingFilterIndex ? { ...filter, value: newValue } : filter));
       setFilters(updatedFilters);
     } else {
       // Add new filter
       const newFilter = { id, value: newValue };
       setFilters([...tempArr, newFilter]);
     }
-  }
-
+  };
 
   return (
     <div>
@@ -158,13 +150,7 @@ function TempFilter({
   );
 }
 
-
-function DefaultColumnFilter({
-  column: {
-    filterValue,
-    setFilter
-  }
-}) {
+function DefaultColumnFilter({ column: { filterValue, setFilter } }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = React.useRef(null);
   const inputRef = React.useRef(null);
@@ -260,8 +246,8 @@ function CustomReactTable({
   loading,
   fetchChildAttachment = null,
   showOnlyShowFilteredRecordSwitch = false
-  // customPageSize = 20,
 }) {
+  const isMobileView = isMobile && !isTablet;
   const defaultColumn = {
     Cell: EditableCell,
     // When using the useFlexLayout:
@@ -276,6 +262,7 @@ function CustomReactTable({
   const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
   const [baseColumns, setBaseColumns] = React.useState([]);
   const [render, setRender] = React.useState(false);
+  const [mobileAllColumns, setMobileAllColumns] = React.useState([]);
 
   useEffect(() => {
     setBaseColumns(columns);
@@ -284,9 +271,7 @@ function CustomReactTable({
   const handleCellSelection = (row) => {
     if (!isClientSideGrid) {
       try {
-        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`)
-          ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`))
-          : [];
+        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : [];
 
         if (!row.isSelected && !oldSelectedRecords.some((s) => s['_id'] === row?.original?._id)) {
           oldSelectedRecords = [...oldSelectedRecords, row?.original];
@@ -294,111 +279,120 @@ function CustomReactTable({
           localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
         } else if (row.isSelected) {
           if (oldSelectedRecords.length > 0) {
-            localStorage.setItem(
-              `${renderedFrom}_selected`,
-              JSON.stringify(oldSelectedRecords.filter((f) => f['_id'] !== row?.original?._id))
-            );
+            localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords.filter((f) => f['_id'] !== row?.original?._id)));
           }
         }
       } catch (ex) {
         console.error('Error in getting / storing selected records');
       }
     }
-  }
+  };
 
   const handleAllSelect = (checked) => {
     if (checked) {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
     }
-  }
+  };
 
   const newColumns = React.useMemo(
     () =>
       expander
         ? [
-          {
-            id: 'expander', // Make sure it has an ID
-            Header: ({ isAllRowsExpanded }) => (
-              <span
-                style={{
-                  paddingLeft: '0.3rem',
-                  color: 'black'
-                }}
-              >
-                {isAllRowsExpanded ? (
-                  <FaAngleDown
-                    style={{ color: 'white' }}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      toggleAllRowsExpanded(false);
-                    }}
-                  />
-                ) : (
-                  <FaAngleRight
-                    style={{ color: 'white' }}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      toggleAllRowsExpanded(true);
-                    }}
-                  />
-                )}
-              </span>
-            ),
-            sticky: 'left',
-            width: isMobile && !isTablet ? 40 : 70,
-            minWidth: isMobile && !isTablet ? 40 : 70,
-            //maxWidth: 70,
-            canDrag: false,
-            Cell: ({ row }) =>
-              row.original.type === 'folder' ? (
+            {
+              id: 'expander', // Make sure it has an ID
+              Header: ({ isAllRowsExpanded }) => (
                 <span
-                  {...row.getToggleRowExpandedProps({
-                    style: {
-                      paddingLeft: `${row.depth * 2}rem`
-                    }
-                  })}
+                  style={{
+                    paddingLeft: '0.3rem',
+                    color: 'black'
+                  }}
                 >
-                  {row.isExpanded ? <FaAngleDown /> : <FaAngleRight onClick={async () => {
-                    setRender(false)
-                    const subRows = await fetchChildAttachment(row.original.id)
-                    row.original.subRows = subRows
-                    setRender(true)
-                  }} />}
+                  {isAllRowsExpanded ? (
+                    <FaAngleDown
+                      style={{ color: 'white' }}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        toggleAllRowsExpanded(false);
+                      }}
+                    />
+                  ) : (
+                    <FaAngleRight
+                      style={{ color: 'white' }}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        toggleAllRowsExpanded(true);
+                      }}
+                    />
+                  )}
                 </span>
-              ) : null
-          },
-          {
-            id: 'selection',
-            minWidth: 50,
-            width: 50,
-            maxWidth: 50,
-            Header: ({ getToggleAllRowsSelectedProps }) => (
-              <IndeterminateCheckbox
-                onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)} {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
-            ),
-            Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
-          },
-          ...baseColumns.map((m) => {
-            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-          })
-        ]
+              ),
+              sticky: 'left',
+              width: isMobile && !isTablet ? 40 : 70,
+              minWidth: isMobile && !isTablet ? 40 : 70,
+              //maxWidth: 70,
+              canDrag: false,
+              Cell: ({ row }) =>
+                row.original.type === 'folder' ? (
+                  <IconButton
+                    {...row.getToggleRowExpandedProps?.({
+                      style: {
+                        marginLeft: isMobileView ? 0 : `${row.depth * 2}rem`
+                      }
+                    })}
+                    size="small"
+                  >
+                    {row.isExpanded ? (
+                      <FaAngleDown />
+                    ) : (
+                      <FaAngleRight
+                        onClick={async () => {
+                          setRender(false);
+                          const subRows = await fetchChildAttachment(row.original.id);
+                          row.original.subRows = subRows;
+                          setRender(true);
+                        }}
+                      />
+                    )}
+                  </IconButton>
+                ) : null
+            },
+            {
+              id: 'selection',
+              minWidth: 50,
+              width: 50,
+              maxWidth: 50,
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <IndeterminateCheckbox
+                  onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
+                  {...getToggleAllRowsSelectedProps()}
+                  style={{ marginLeft: '7px' }}
+                />
+              ),
+              Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+            },
+            ...baseColumns.map((m) => {
+              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+            })
+          ]
         : [
-          {
-            id: 'selection',
-            minWidth: 50,
-            width: 50,
-            maxWidth: 50,
-            Header: ({ getToggleAllRowsSelectedProps }) => (
-              <IndeterminateCheckbox
-                onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)} {...getToggleAllRowsSelectedProps()} style={{ marginLeft: '7px' }} />
-            ),
-            Cell: ({ row }) => <IndeterminateCheckbox
-              onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
-          },
-          ...baseColumns.map((m) => {
-            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-          })
-        ],
+            {
+              id: 'selection',
+              minWidth: 50,
+              width: 50,
+              maxWidth: 50,
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <IndeterminateCheckbox
+                  onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
+                  {...getToggleAllRowsSelectedProps()}
+                  style={{ marginLeft: '7px' }}
+                />
+              ),
+              Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+            },
+            ...baseColumns.map((m) => {
+              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+            })
+          ],
     [baseColumns]
   );
 
@@ -408,17 +402,17 @@ function CustomReactTable({
     }),
     []
   );
-  const updateData = () => { };
+  const updateData = () => {};
 
   const returnHiddenCols = () => {
     const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
 
-    let hiddenCols = []
+    let hiddenCols = [];
     if (storedColumns) {
-      hiddenCols = storedColumns.filter((f) => f.isVisible === false).map((m) => m.id)
+      hiddenCols = storedColumns.filter((f) => f.isVisible === false).map((m) => m.id);
     }
     return hiddenCols;
-  }
+  };
   const {
     getTableProps,
     rows,
@@ -453,9 +447,6 @@ function CustomReactTable({
       filterTypes,
       initialState: {
         columnOrder: newColumns.map((col) => col?.id || col?.accessor),
-        // filters: Object.keys(customFilters).map((key, i) => {
-        //   return { id: key, value: customFilters[key].filter };
-        // }),
         sortBy: sorting.map((d) => {
           return { id: d.colId, desc: d.sort === 'asc' ? false : true };
         }),
@@ -464,9 +455,9 @@ function CustomReactTable({
         hiddenColumns: hideSelection ? ['selection', 'action'] : returnHiddenCols(),
         selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`)
           ? Object.assign(
-            {},
-            data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
-          )
+              {},
+              data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
+            )
           : {}
       },
       getSubRows: (row: any) => row.subRows,
@@ -480,12 +471,6 @@ function CustomReactTable({
             }
             return Number(rowOneColumn) > Number(rowTwoColumn) ? 1 : -1;
           }
-          // else {
-          //     dispatch({
-          //         type: 'sort',
-          //         sorting: [{ colId: columnName, sort: desc ? 'desc' : 'asc' }]
-          //     });
-          // }
         }
       },
       updateData
@@ -526,23 +511,6 @@ function CustomReactTable({
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
     }
   }, []);
-
-  // useEffect(() => {
-  //   if (!isClientSideGrid) {
-  //     let tempArray = Object.keys(customFilters).map((key, i) => {
-  //       return { id: key, value: customFilters[key].filter };
-  //     });
-  //     if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
-  //       var tempResult = {};
-  //       filters?.forEach((v) => {
-  //         if (v.value && v.value !== '') {
-  //           tempResult[v.id] = { filter: v.value };
-  //         }
-  //       });
-  //       dispatch({ type: 'filter', filters: tempResult });
-  //     }
-  //   }
-  // }, [filters]);
 
   useEffect(() => {
     if (!isClientSideGrid) {
@@ -588,9 +556,7 @@ function CustomReactTable({
 
     if (renderedFrom) {
       try {
-        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`)
-          ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`))
-          : [];
+        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : [];
         if (oldSelectedRecords.length > 0) {
           const uniqueRecords = uniqBy([...oldSelectedRecords, ...flatSelectedData], '_id');
           localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(uniqueRecords));
@@ -601,8 +567,6 @@ function CustomReactTable({
         console.error('Error in getting / storing selected records');
       }
     }
-
-
   }, [selectedRowIds]);
 
   const reorder = (item: any, newIndex: number) => {
@@ -654,7 +618,6 @@ function CustomReactTable({
     return () => clearTimeout(timeout);
   }, [allColumns]);
 
-
   const submitInput = () => {
     const rowData = Object.keys(rowState[currentRowEditing.id].cellState).filter((k) => rowState[currentRowEditing.id].cellState[k].isEditing);
     const updatedData = data.map((row: any) => {
@@ -682,8 +645,6 @@ function CustomReactTable({
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="custom-react-table custom-react-table-v1 vertical-center">
-
-
         <div className="table-container-v1" style={{ position: 'relative' }}>
           <GridHeader
             refreshGrid={refreshGrid}
@@ -691,7 +652,7 @@ function CustomReactTable({
             buttons={
               <>
                 <ArrangeViewButton
-                  defaultColumns = {allColumns}
+                  defaultColumns={allColumns}
                   loading={loading}
                   columns={baseColumns}
                   renderedFrom={renderedFrom}
@@ -699,7 +660,7 @@ function CustomReactTable({
                   setHiddenColumns={setHiddenColumns}
                   getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
                   setColumnOrder={setColumnOrder}
-                  refColsOrder = {newColumns}
+                  refColsOrder={newColumns}
                 />
               </>
             }
@@ -722,142 +683,137 @@ function CustomReactTable({
               setColumnOrder={setColumnOrder}
             />
           </GridHeader>
-
-          <div
-            style={{
-              display: 'block',
-              overflow: 'auto',
-              height: height ?? '100%'
-            }}
-            className="border "
-          >
-            {loading && (
-              <Box
-                bgcolor={'rgba(255,255,255,0.2)'}
-                width="100%"
-                height="100%"
-                zIndex={100}
-                position="absolute"
-                top={0}
-                left={0}
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Box textAlign="center">
-                  <CircularProgress color="inherit" />
-                  <p>Loading...</p>
+          {!isMobileView && (
+            <div
+              style={{
+                display: 'block',
+                overflow: 'auto',
+                height: height ?? '100%'
+              }}
+              className="border "
+            >
+              {loading && (
+                <Box
+                  bgcolor={'rgba(255,255,255,0.2)'}
+                  width="100%"
+                  height="100%"
+                  zIndex={100}
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Box textAlign="center">
+                    <CircularProgress color="inherit" />
+                    <p>Loading...</p>
+                  </Box>
                 </Box>
-              </Box>
-            )}
+              )}
 
-            <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
-              <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
-                {headerGroups.map((headerGroup, index) => (
-                  <React.Fragment key={index}>
-                    <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
-                      {headerGroup.headers.map((column, index) => (
-                        <>
-                          <DraggableHeader key={column.id} column={column} reorder={reorder} index={index} customFilters={customFilters} dispatch={dispatch} isClientSideGrid={isClientSideGrid} />
-                        </>
-                      ))}
-                    </TableRow>
-                  </React.Fragment>
-                ))}
-              </TableHead>
+              <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
+                <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
+                  {headerGroups.map((headerGroup, index) => (
+                    <React.Fragment key={index}>
+                      <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
+                        {headerGroup.headers.map((column, index) => (
+                          <>
+                            <DraggableHeader
+                              key={column.id}
+                              column={column}
+                              reorder={reorder}
+                              index={index}
+                              customFilters={customFilters}
+                              dispatch={dispatch}
+                              isClientSideGrid={isClientSideGrid}
+                            />
+                          </>
+                        ))}
+                      </TableRow>
+                    </React.Fragment>
+                  ))}
+                </TableHead>
 
-              <TableBody
-                style={{
-                  overflowY: 'scroll',
-                  overflowX: 'hidden'
-                  // height: "250px"
-                }}
-                className="body"
-              >
-                {rows.map((row, index1) => {
-                  prepareRow(row);
-                  return (
-                    <TableRow key={index1} {...row.getRowProps()} className="tr">
-                      {row.cells.map((cell, index2) => {
-                        return (
-                          <TableCell
-                            onDoubleClick={() => {
-                              // setRowState(row.id, { ...row, original: { ...row.original, isEditing: true } });
-                              // Object.keys(rowState).forEach((k) => {
-                              //   if (row.id !== k) {
-                              //     setRowState(k, { ...rowState[k], original: { ...rowState[k].original, isEditing: false } });
-                              //   }
-                              // });
-                              // setCellValue(cell?.value || '');
-                              // setIsCellEditing(true);
-                              // setCurrentRowEditing(row);
-                              // setCellState(row.id, cell.column.id, { isEditing: true });
-                              // Object.keys(rowState).forEach((rowId) => {
-                              //   Object.keys(rowState[rowId].cellState).forEach((colId) => {
-                              //     if (rowState[rowId]?.cellState[colId] !== cell.column?.id && rowState[rowId]?.cellState[colId]?.isEditing) {
-                              //       setCellState(rowId, colId, { isEditing: false });
-                              //     }
-                              //   });
-                              // });
-                            }}
-                            key={index2}
-                            {...cell.getCellProps()}
-                            className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
+                <TableBody
+                  style={{
+                    overflowY: 'scroll',
+                    overflowX: 'hidden'
+                    // height: "250px"
+                  }}
+                  className="body"
+                >
+                  {rows.map((row, index1) => {
+                    prepareRow(row);
+                    return (
+                      <TableRow key={index1} {...row.getRowProps()} className="tr">
+                        {row.cells.map((cell, index2) => {
+                          return (
+                            <TableCell
+                              onDoubleClick={() => {
+                                // setRowState(row.id, { ...row, original: { ...row.original, isEditing: true } });
+                                // Object.keys(rowState).forEach((k) => {
+                                //   if (row.id !== k) {
+                                //     setRowState(k, { ...rowState[k], original: { ...rowState[k].original, isEditing: false } });
+                                //   }
+                                // });
+                                // setCellValue(cell?.value || '');
+                                // setIsCellEditing(true);
+                                // setCurrentRowEditing(row);
+                                // setCellState(row.id, cell.column.id, { isEditing: true });
+                                // Object.keys(rowState).forEach((rowId) => {
+                                //   Object.keys(rowState[rowId].cellState).forEach((colId) => {
+                                //     if (rowState[rowId]?.cellState[colId] !== cell.column?.id && rowState[rowId]?.cellState[colId]?.isEditing) {
+                                //       setCellState(rowId, colId, { isEditing: false });
+                                //     }
+                                //   });
+                                // });
+                              }}
+                              key={index2}
+                              {...cell.getCellProps()}
+                              className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${
+                                setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
                               }`}
-                          >
-                            {!['selection'].includes(cell?.column.id) &&
+                            >
+                              {!['selection'].includes(cell?.column.id) &&
                               rowState &&
                               rowState.hasOwnProperty(row.id) &&
                               rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
-                              <input
-                                autoFocus
-                                onBlur={submitInput}
-                                style={{
-                                  borderLeft: '0',
-                                  borderTop: '0',
-                                  padding: '2px 4px',
-                                  width: cell?.column.width - 20,
-                                  background: 'transparent',
-                                  outline: 'none'
-                                }}
-                                value={cellValue}
-                                onChange={(e) => setCellValue(e.target.value)}
-                              />
-                            ) : isCellEditing && currentRowEditing && currentRowEditing.id === row.id && cell?.column.id === 'action' ? (
-                              <HtmlTooltip title="Save">
-                                <IconButton size="small" aria-label="Save" onClick={submitInput}>
-                                  <Check color="primary" />
-                                </IconButton>
-                              </HtmlTooltip>
-                            ) : (
-                              cell.render('Cell')
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-              {/* The below footer render doesnt work because Footer render is empty in props */}
-              {/* {rows?.length > 0 && (
-                <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer">
-                  {footerGroups.map((group, index) => (
-                    <TableRow key={index} {...group.getFooterGroupProps()} className="tr">
-                      {group.headers.map((column, index1) => (
-                        <TableCell key={index1} {...column.getHeaderProps()} className="th text-truncate font-weight-bold text-black">
-                          {column.render('Footer')} 
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableFooter>
-              )} */}
-            </MaUTable>
-
-          </div>
+                                <input
+                                  autoFocus
+                                  onBlur={submitInput}
+                                  style={{
+                                    borderLeft: '0',
+                                    borderTop: '0',
+                                    padding: '2px 4px',
+                                    width: cell?.column.width - 20,
+                                    background: 'transparent',
+                                    outline: 'none'
+                                  }}
+                                  value={cellValue}
+                                  onChange={(e) => setCellValue(e.target.value)}
+                                />
+                              ) : isCellEditing && currentRowEditing && currentRowEditing.id === row.id && cell?.column.id === 'action' ? (
+                                <HtmlTooltip title="Save">
+                                  <IconButton size="small" aria-label="Save" onClick={submitInput}>
+                                    <Check color="primary" />
+                                  </IconButton>
+                                </HtmlTooltip>
+                              ) : (
+                                cell.render('Cell')
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </MaUTable>
+            </div>
+          )}
         </div>
-        {allowPagination && !loading && (
+        {!isMobileView && allowPagination && !loading && (
           <TablePagination
             component="div"
             count={rowCount}
@@ -873,6 +829,24 @@ function CustomReactTable({
             rowsPerPageOptions={gridPageSizes}
           />
         )}
+
+        {isMobileView ? (
+          <SwipableListForMobile
+            prepareRow={prepareRow}
+            allColumns={allColumns}
+            allowSelection={!hideSelection}
+            dataRows={rows}
+            dispatch={dispatch}
+            loading={loading}
+            page={currentPage}
+            rowCount={rowCount}
+            expander={expander}
+            backgroundColor={setWholeRowsCellColor}
+            renderedFrom={renderedFrom}
+            handleCellSelection={handleCellSelection}
+            IndeterminateCheckbox={IndeterminateCheckbox}
+          />
+        ) : null}
       </div>
     </DndProvider>
   );
@@ -889,8 +863,8 @@ interface DraggableHeaderProps {
   index: number;
   reorder: (item: any, index: number) => void;
   customFilters: any;
-  dispatch: (action: any) => void; 
-  isClientSideGrid: boolean; 
+  dispatch: (action: any) => void;
+  isClientSideGrid: boolean;
 }
 
 const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorder, customFilters, dispatch, isClientSideGrid }) => {
@@ -904,7 +878,7 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
         return { id: key, value: customFilters[key].filter };
       });
     }
-  });  
+  });
 
   const debouncedFilterDispatch = debounce((updatedCustomFilters) => {
     dispatch({ type: 'filter', filters: updatedCustomFilters });
@@ -930,8 +904,7 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
     }),
-    canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action' || column?.id !== 'expand',
-
+    canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action' || column?.id !== 'expand'
   });
 
   useEffect(() => {
@@ -939,26 +912,22 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
       let tempArray = Object.keys(customFilters).map((key, i) => {
         return { id: key, value: customFilters[key].filter };
       });
-      if ((JSON.stringify(filters) !== JSON.stringify(tempArray))) {
-
+      if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
         var tempResult = {};
         filters?.forEach((v) => {
           if (v.value && v.value !== '') {
             tempResult[v.id] = { filter: v.value };
           }
         });
-        debouncedFilterDispatch(tempResult)
+        debouncedFilterDispatch(tempResult);
       }
     }
-  }, [filters])
+  }, [filters]);
 
   drag(drop(ref));
 
   return (
-    <TableCell
-      {...column.getHeaderProps()}
-      className="th text-truncate table-header"
-    >
+    <TableCell {...column.getHeaderProps()} className="th text-truncate table-header">
       <div ref={ref} className="d-flex align-items-center justify-content-space-between pos-rel" style={{ width: '100%' }}>
         <div
           style={{ opacity: isDragging ? 0.2 : 1 }}
@@ -971,7 +940,7 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
         <div>
           {column.canFilter ? (
             <TempFilter
-              filterValue={filters.find(filter => filter.id === column.id)?.value || ''}
+              filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
               id={column?.id}
               setFilters={setFilters}
               customFilters={customFilters}
