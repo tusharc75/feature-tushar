@@ -4109,3 +4109,7 @@ body {
     color: #9a9a9a;
   }
 }
+
+div[class*='line-clamp-'] {
+  display: -webkit-box !important;
+}
