@@ -19,13 +19,11 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
   const [openChild, setOpenChild] = useState({});
 
   const handleChange = (name: string) => {
-    setOpen(prev => (
-      {
-        ...prev,
-        [name]: open[name] ? false : true
-      }
-    ));
-  }
+    setOpen((prev) => ({
+      ...prev,
+      [name]: open[name] ? false : true
+    }));
+  };
 
   const handleChangeChild = (name: string) => {
     setOpenChild((prev) => ({
@@ -46,10 +44,11 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
     return (
       <div key={data[type]?.optionLabel} className=" shadow-[0px_4px_20px_rgba(0,_0,_0,_0.06)] my-3 rounded-md ">
         <div
-          className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all duration-[300ms]  ${compareCollapse(`${data[type]?.optionValue}`, type)
-            ? 'bg-[var(--new-theme-color)] text-white'
-            : 'hover:bg-gray-300 dark:hover:bg-gray-800'
-            }`}
+          className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all duration-[300ms]  ${
+            compareCollapse(`${data[type]?.optionValue}`, type)
+              ? 'bg-[var(--new-theme-color)] text-white'
+              : 'hover:bg-gray-300 dark:hover:bg-gray-800'
+          }`}
           onClick={(e) => {
             e.stopPropagation();
             if (type === 'parentCategory') handleChange(`${data[type]?.optionValue}`);
@@ -77,34 +76,44 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
           <div className="pl-4 pr-2" key={data[type]?.optionLabel}>
             {type === 'parentCategory'
               ? uniqBy(
-                allData?.filter((d) => d['category']?.parentCategory === data[type]?.optionValue),
-                'category.optionValue'
-              )?.map((data) => {
-                return <TreeView data={data} type={'category'} allData={allData?.filter((d) => d['category']?.optionValue === data?.category?.optionValue)} />;
-              })
+                  allData?.filter((d) => d['category']?.parentCategory === data[type]?.optionValue),
+                  'category.optionValue'
+                )?.map((data) => {
+                  return (
+                    <TreeView
+                      data={data}
+                      type={'category'}
+                      allData={allData?.filter((d) => d['category']?.optionValue === data?.category?.optionValue)}
+                    />
+                  );
+                })
               : type === 'category'
-                ? allData
+              ? allData
                   ?.filter((d) => d[type]?.optionValue === data[type]?.optionValue)
                   ?.map((dataPoint) => {
                     return (
-                      <FormControlLabel
-                        key={dataPoint?.fieldName}
-                        control={
-                          <Checkbox
-                            onChange={(e) => {
-                              setSelectedDataPoint({ ...selectedDataPoint, [dataPoint?.fieldName]: e.target.checked });
-                            }}
-                            checked={selectedDataPoint[dataPoint?.fieldName]}
-                            inputProps={{
-                              'aria-labelledby': `checkbox-list-label-select-all`
-                            }}
-                          />
-                        }
-                        label={dataPoint?.fieldLabel}
-                      />
+                      <div className="max-w-full">
+                        <FormControlLabel
+                          key={dataPoint?.fieldName}
+                          title={dataPoint?.fieldLabel}
+                          control={
+                            <Checkbox
+                              onChange={(e) => {
+                                setSelectedDataPoint({ ...selectedDataPoint, [dataPoint?.fieldName]: e.target.checked });
+                              }}
+                              checked={selectedDataPoint[dataPoint?.fieldName]}
+                              inputProps={{
+                                'aria-labelledby': `checkbox-list-label-select-all`
+                              }}
+                            />
+                          }
+                          className="  max-w-full [&>span+span]:max-w-full [&>span+span]:block [&>span+span]:line-clamp-1 "
+                          label={<div className="line-clamp-1 [overflow-wrap:anywhere]">{dataPoint?.fieldLabel}</div>}
+                        />
+                      </div>
                     );
                   })
-                : null}
+              : null}
           </div>
         </Collapse>
       </div>
