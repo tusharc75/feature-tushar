@@ -87,7 +87,9 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                 prepareRow(row);
                 return (
                   <div
-                    className="shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)]"
+                    className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${backgroundColor(
+                      row.original
+                    )}`}
                     key={row.original._id}
                     style={{
                       border: '1px solid var(--common-border-color)',
