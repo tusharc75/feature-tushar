@@ -17,10 +17,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import CustomButton from 'src/components/Helpers/CustomButton';
 
-export default function ManageAssetDialog({ allFields, onClose, repairJobData, handleSaveData, loadingEdit, showEditAssetDialog }) {
-
-  let inventory = showEditAssetDialog.data?.inventory;  
-  let {isBulkedit, selectedRecords, showSaveAndNext} = showEditAssetDialog;
+export default function ManageAssetDialog({ allFields, onClose, repairJobData, handleSaveData, loadingEdit, selectedRecords, showSaveAndNext, isBulkedit, data }) {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -40,7 +37,7 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
       });
     } else {
       axiosInstance()
-        .get(`${repairJob.api}/${repairJobData?._id}/assets/${inventory}`)
+        .get(`${repairJob.api}/${repairJobData?._id}/assets/${data?.inventory}`)
         .then(({ data: { data } }) => {
           setInitialData({
             fields: allFields,
@@ -58,7 +55,7 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
       return { name, sectionFields };
     });
     setCustomFields(customData);
-  }, [inventory]);
+  }, [data]);
 
   const handleSubmit = (values) => {
     const returnData = [];
@@ -75,10 +72,10 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
     } else {
       returnData.push({
         ...values,
-        _id: inventory
+        _id: data?.inventory
       });
     }
-    isBulkedit? handleSaveData(returnData) : handleSaveData(returnData, saveAndNext);
+    isBulkedit ? handleSaveData(returnData) : handleSaveData(returnData, saveAndNext);
   };
 
   return (
@@ -107,7 +104,7 @@ export default function ManageAssetDialog({ allFields, onClose, repairJobData, h
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
-                  title={isBulkedit ? 'Bulk Edit' : `Edit - ${showEditAssetDialog?.data?.index} (${showEditAssetDialog?.data?.assetNumber || ''})`}
+                  title={isBulkedit ? 'Bulk Edit' : `Edit - ${data?.index} (${data?.assetNumber || ''})`}
                   onClose={(e, reason) => {
                     onClose();
                   }}

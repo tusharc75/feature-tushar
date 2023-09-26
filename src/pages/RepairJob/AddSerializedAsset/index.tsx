@@ -30,6 +30,7 @@ import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus, stepFullScreen }) => {
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorElAction, setAnchorElAction] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -46,6 +47,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     state: { user, permissions }
   }: any = useData();
   const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
+
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
 
@@ -285,7 +287,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     axiosInstance()
       .put(`${repairJob.api}/${repairJobData?._id}/assets`, rows)
       .then(({ data }) => {
-        setUpdating(false);
         fetchRecords();
         toastConfig.setToastConfig({
           open: true,
@@ -304,6 +305,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         } else {
           setShowEditAssetDialog({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
         }
+        setUpdating(false);
       })
       .catch((error) => {
         setUpdating(false);
@@ -519,7 +521,10 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
           }}
           handleSaveData={handleSaveData}
           loadingEdit={isUpdating}
-          showEditAssetDialog={showEditAssetDialog}
+          isBulkedit={showEditAssetDialog.isBulkedit}
+          data={showEditAssetDialog.data}
+          selectedRecords={showEditAssetDialog.selectedRecords}
+          showSaveAndNext={showEditAssetDialog.showSaveAndNext}
         />
       )}
       {statusToUpdate.open && (
