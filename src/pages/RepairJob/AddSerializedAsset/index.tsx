@@ -45,7 +45,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   const {
     state: { user, permissions }
   }: any = useData();
-  const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, isBulkedit: false, inventory: null, selectedRecords: [] });
+  const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
 
@@ -117,14 +117,14 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
           Header: ele?.fieldLabel,
           sticky: 'none',
           width: 200,
-          Cell: ({ row }) => (
+          Cell: ({ row, rows }) => (
             <>
               {row.original.assetNumber ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   {allowedToEdit ?
                     <p
                       className="link text-truncate"
-                      onClick={() => setShowEditAssetDialog({ open: true, isBulkedit: false, inventory: row?.original?.inventory, selectedRecords: [] })}
+                      onClick={() => setShowEditAssetDialog({ open: true, isBulkedit: false, data: row?.original, selectedRecords: [], showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false })}
                     >{row.original.assetNumber}</p>
                     :
                     <p className="text-truncate">{row.original.assetNumber}</p>
@@ -217,7 +217,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               color="primary"
               size="small"
               onClick={() => {
-                setShowEditAssetDialog({ open: true, isBulkedit: false, inventory: row?.original?.inventory, selectedRecords: [] })
+                setShowEditAssetDialog({ open: true, isBulkedit: false, data: row?.original, selectedRecords: [], showSaveAndNext: false })
               }
               }
             >
@@ -280,19 +280,30 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       });
   };
 
-  const handleSaveData = async (rows: any) => {
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
     axiosInstance()
       .put(`${repairJob.api}/${repairJobData?._id}/assets`, rows)
       .then(({ data }) => {
         setUpdating(false);
+        fetchRecords();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        setShowEditAssetDialog({ open: false, isBulkedit: false, inventory: null, selectedRecords: [] });
-        fetchRecords();
+        if (saveAndNext) {
+          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          setShowEditAssetDialog({
+            open: true,
+            isBulkedit: false,
+            data: rowsData[rowIndex + 1],
+            selectedRecords: [],
+            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+          });
+        } else {
+          setShowEditAssetDialog({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
+        }
       })
       .catch((error) => {
         setUpdating(false);
@@ -408,7 +419,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               <MenuItem
                 disabled={selectedRecords.length === 0}
                 onClick={() => {
-                  setShowEditAssetDialog({ open: true, isBulkedit: true, inventory: null, selectedRecords: selectedRecords });
+                  setShowEditAssetDialog({ open: true, isBulkedit: true, data: null, selectedRecords: selectedRecords, showSaveAndNext: false });
                 }}
               >
                 {'Bulk Edit'}
@@ -503,14 +514,12 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         <ManageAssetDialog
           repairJobData={repairJobData}
           allFields={allFields}
-          isBulkedit={showEditAssetDialog.isBulkedit}
           onClose={() => {
-            setShowEditAssetDialog({ open: false, isBulkedit: false, inventory: null, selectedRecords: [] });
+            setShowEditAssetDialog({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
           }}
-          inventory={showEditAssetDialog.inventory}
-          selectedRecords={showEditAssetDialog.selectedRecords}
           handleSaveData={handleSaveData}
           loadingEdit={isUpdating}
+          showEditAssetDialog={showEditAssetDialog}
         />
       )}
       {statusToUpdate.open && (
