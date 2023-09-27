@@ -9,7 +9,6 @@ import { Link } from 'react-router-dom';
 import { serializedAsset } from '../../constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { isMobile } from 'react-device-detect';
 import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { getColors } from '../Home/helpers';
@@ -17,6 +16,7 @@ import { DataPointsIcon } from 'src/assets/svg/svgIcons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 function IotChart() {
+
   const toastConfig = useContext(CustomToastContext);
 
   const [rowsData, setRowsData] = useState(null);

@@ -6,7 +6,7 @@ import Chart from '../Helper/Chart';
 import { uniqBy } from 'lodash';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 
-const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
+const PerformanceAnalysis = ({ assetId, dataPoints = [], customDataPoints=[] }) => {
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(8, 'days').format('MM-DD-YYYY')),
     to: new Date(),

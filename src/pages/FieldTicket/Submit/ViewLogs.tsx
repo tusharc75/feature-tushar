@@ -143,7 +143,7 @@ function ViewLogs({ fieldTicketData, handleClose }) {
         }}
       >
         <CustomDialogHeader
-          title={`Logs - ${fieldTicketData?.fieldTicketName}`}
+          title={`Logs - ${fieldTicketData?.fieldTicketNumber}`}
           onClose={handleClose}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {

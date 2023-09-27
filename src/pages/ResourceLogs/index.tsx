@@ -166,9 +166,13 @@ const ResourceLogs = () => {
 
   const UpdatedByRenderer = (params) => (
     <Fragment>
-      <Link className="link text-truncate" title={params?.value?.optionLabel} to={`${routes.userDetail.path}/${params?.value?.optionValue}`}>
+      <p 
+        className="link text-truncate" 
+        title={params?.value?.optionLabel} 
+        onClick = {() => window.open(`${routes.userDetail.path}/${params?.value?.optionValue}`)}
+      >
         {params?.value?.optionLabel}
-      </Link>
+      </p>
     </Fragment>
   );
 
