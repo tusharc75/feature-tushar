@@ -232,7 +232,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
     column.push({
       accessor: 'assetQty',
-      Header: 'Asset Received',
+      Header: 'Received Assets',
       width: 150,
       Cell: ({ row }) => (row.original['assetQty'] ? <p>{row.original['assetQty']}</p> : <NoDataCell />),
       Footer: (info) => {
@@ -243,7 +243,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     });
     column.push({
       accessor: 'inventoryQty',
-      Header: 'Inventory Received',
+      Header: 'Received Quantity',
       width: 150,
       Cell: ({ row }) => (row.original['inventoryQty'] ? <p>{row.original['inventoryQty']}</p> : <NoDataCell />),
       Footer: (info) => {

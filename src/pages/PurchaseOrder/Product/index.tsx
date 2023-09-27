@@ -628,7 +628,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   Add Existing Products
                 </MenuItem>
               )}
-              {permissions?.serviceMaster?.isRead && (
+              {(permissions?.serviceMaster?.isRead && user?.user?.brandPolicy?.purchaseOrderAddService) && (
                 <MenuItem
                   onClick={() => {
                     closeAddActions();
