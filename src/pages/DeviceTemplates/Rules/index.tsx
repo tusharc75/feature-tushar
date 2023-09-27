@@ -19,12 +19,13 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 export default function Rules({ deviceTemplate }) {
+  
   const renderedFrom = camelCase('Rules');
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { selectedEntity }
   }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
@@ -54,13 +55,11 @@ export default function Rules({ deviceTemplate }) {
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes?.deviceTemplates?.path}/rule${queryString}`)
+      .get(`${routes?.deviceTemplates?.path}/rule?deviceTemplate=${deviceTemplate}`)
       .then(({ data }) => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
@@ -68,7 +67,6 @@ export default function Rules({ deviceTemplate }) {
           finalObject['canDelete'] = true;
           finalObject['allowedToEdit'] = true;
           finalObject['isChecked'] = selectedRecords?.some((s) => s?._id === u?._id);
-
           return {
             ...finalObject
           };
@@ -93,35 +91,6 @@ export default function Rules({ deviceTemplate }) {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       });
-  };
-
-  const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-
-    if (isExport) {
-      deepFilter = `?`;
-    }
-
-    if (selectedEntity) {
-      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-    }
-
-    const { deepFilters } = gridFilterParser(filters);
-
-    if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-    }
-
-    if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    }
-
-    if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
-    }
-
-    return deepFilter;
   };
 
   const ActionsRenderer = (params) => (
@@ -308,6 +277,7 @@ export default function Rules({ deviceTemplate }) {
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           showOnlyShowFilteredRecordSwitch={true}
+          isClientSideGrid={true}
         />
       ) : (
         <Box p={2} height={500}>
