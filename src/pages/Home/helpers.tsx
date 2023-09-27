@@ -13,24 +13,17 @@ import {
 } from '../../assets/sidebar_assets/icons';
 import {
   BiCog,
-  IoPeopleOutline,
-  RiSuitcaseLine,
   BiCart,
   FaRegUserCircle,
   FaReact,
   FaRegRegistered,
   FaRegUser,
   MdOutlineDynamicForm,
-  MdMiscellaneousServices,
   RiShieldUserLine,
   SiCivicrm,
-  RiCustomerServiceLine,
-  AiOutlineCalendar,
-  GiCircuitry,
   AiOutlineDatabase,
   HiOutlineWrenchScrewdriver,
   MdOutlineEventAvailable,
-  PiUsersThree
 } from 'react-icons/all';
 
 // CREATE OBJECT FROM LIST GROUPED BY KEYGETTER
@@ -206,3 +199,4 @@ export const getColors = (index: number) => {
   const colorAccessor = index % colourCodes.length;
   return colourCodes[colorAccessor];
 };
+
