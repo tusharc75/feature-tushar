@@ -50,13 +50,17 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
 
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
-
+  const [isRateRequired, setIsRateRequired] = useState(false);
 
   useEffect(() => {
     if (repairJobData) {
       fetchFields();
     }
   }, [repairJobData]);
+
+  useEffect(() => {
+    fetchRecords();
+  }, [columns]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -78,6 +82,10 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     setColumns(null)
     const fieldResponce = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`);
     const repairJobAssetFields = fieldResponce?.data?.data;
+
+    const isPriceRequired = repairJobAssetFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired);
+
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -240,7 +248,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         </div>
     });
     setColumns(coloum)
-    fetchRecords();
   };
 
   const fetchRecords = async () => {
@@ -253,10 +260,14 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       parent.productName = parent.product?.optionLabel
       parent.productDescription = parent?.productDetail?.productDescription
       parent.productCategory = parent?.productCategory?.optionLabel
-      parent.isValid = parent.status === ASSET_STATUS.scrap || parent.status === ASSET_STATUS.lost ? false : true
+      parent.isValid = parent['finalPrice_' + repairJobData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.hideSelection = parent.status === ASSET_STATUS.lost;
     });
-    setNextStep(true);
+    if (data.filter((_rows) => _rows.isValid === false).length > 0 || data.length === 0) {
+      setNextStep(false);
+    } else {
+      setNextStep(true);
+    }
     setRowsData(data);
     setSelectedRecords([]);
   };

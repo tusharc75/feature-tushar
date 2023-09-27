@@ -669,7 +669,7 @@ export default function Account(props) {
           }}
           additionalParams={getQueryString(true)}
           extraImportExportLinks={[
-            ...((accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification) && [
+            ...((accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification) ? [
               {
                 title: 'Supplier View Template',
                 api: `${accountApi}/items/unknown/template`,
@@ -688,7 +688,7 @@ export default function Account(props) {
                 api: `${accountApi}/items/unknown/import`,
                 type: 'import'
               }
-            ])
+            ] : [])
           ]}
         />
       </div>

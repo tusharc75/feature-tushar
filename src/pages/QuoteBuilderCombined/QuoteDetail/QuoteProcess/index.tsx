@@ -1288,7 +1288,7 @@ export default function QuoteProcess(props) {
           id={quoteData._id}
           version={currentVersion}
           Refresh={fetchQuoteData}
-          nextStep={nextStep}
+          nextStep={ProcessStatus === 'Send To Customer' && (ifQuoteApproved.approved || quoteData?.versions[currentVersion]?.offered) ? true : nextStep}
           versionStatus={versionStatus}
           loading={loading}
           approvedQuote={ifQuoteApproved}

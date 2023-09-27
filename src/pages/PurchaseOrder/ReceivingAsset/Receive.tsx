@@ -372,13 +372,13 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                       )}
                                       <TextField
                                         fullWidth
-                                        label="Inventory Quantity"
+                                        label="Quantity"
                                         variant="outlined"
                                         type="number"
                                         size="small"
                                         onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                         name="inventoryQuantity"
-                                        placeholder="Inventory Quantity"
+                                        placeholder="Quantity"
                                         value={data.inventoryQuantity}
                                         onChange={(e) => {
                                           const value = e.target.value.replace(/[^0-9]/g, '');

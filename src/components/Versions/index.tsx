@@ -164,10 +164,8 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
                                 className="cursor-pointer"
                                 borderColor="var(--common-border-color)"
                                 onClick={() => {
-                                    setRowsData(null);
-                                    if (selectedVersion === v?._id) {
-                                        setSelectedVersion(null);
-                                    } else {
+                                    if (selectedVersion !== v?._id) {
+                                        setRowsData(null);
                                         setSelectedVersion(v?._id);
                                     }
                                 }}
