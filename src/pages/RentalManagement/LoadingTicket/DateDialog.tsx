@@ -31,7 +31,6 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
 
 
   function validate(values) {
-    console.log(minDate)
     const errors = {};
     if (!moment(values['date']).isSameOrAfter(moment(minDate))) {
       errors['date'] = `Please select valid date`;

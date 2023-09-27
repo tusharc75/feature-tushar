@@ -15,7 +15,6 @@ import EditIcon from '@material-ui/icons/Edit';
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import ManageIotDataPoints from "src/pages/IotDataPoints/ManageIotDataPoints";
 import { ExpandMore } from "@material-ui/icons";
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ImportExportMenu from "src/components/Helpers/ImportExportMenu";
 
 export default function IotDataPoints({ deviceTemplate }) {
@@ -27,6 +26,7 @@ export default function IotDataPoints({ deviceTemplate }) {
     const {
         state: { user, permissions, selectedEntity }
     }: any = useData();
+    
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
         state;
@@ -177,16 +177,6 @@ export default function IotDataPoints({ deviceTemplate }) {
             }}>
                 {params?.value}
             </p>
-            <Box ml={1}>
-                <IconButton
-                    size="small"
-                    onClick={() => {
-                        window.open(`${routes.iotDataPointsDetail.path}/${params.data.id}`);
-                    }}
-                >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-            </Box>
         </div>
     );
 

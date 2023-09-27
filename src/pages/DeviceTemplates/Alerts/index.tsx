@@ -178,16 +178,6 @@ export default function Alerts({ deviceTemplate }) {
             }}>
                 {params?.value}
             </p>
-            <Box ml={1}>
-                <IconButton
-                    size="small"
-                    onClick={() => {
-                        window.open(`${routes.deviceTemplateAlertDetail.path}/${params.data.id}`);
-                    }}
-                >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-            </Box>
         </div>
     );
 
