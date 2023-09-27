@@ -3253,9 +3253,15 @@ svg.MuiSvgIcon-root {
         background: var(--sidebar-color);
         border: 1px solid var(--sidebar-color) !important;
         [data-mode='dark'] & {
-          border: 1px solid var(--common-border-color) !important;
-          background-color: var(--new-theme-color) !important;
+          border-color: var(--common-border-color) !important;
+          background-color: #282845 !important;
         }
+      }
+    }
+    &.primaryColoredTab {
+      [data-mode='dark'] & {
+        border-color: var(--common-border-color) !important;
+        background-color: var(--dark-primary) !important;
       }
     }
   }
