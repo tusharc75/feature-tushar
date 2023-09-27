@@ -18,9 +18,10 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 export default function CustomDataPoints({ deviceTemplate }) {
-  const renderedFrom = camelCase('CustomDataPoints');
 
+  const renderedFrom = camelCase('CustomDataPoints');
   const toastConfig = useContext(CustomToastContext);
+  
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
@@ -36,6 +37,7 @@ export default function CustomDataPoints({ deviceTemplate }) {
 
   useEffect(() => {
     fetchGridColumns();
+    fetchData();
   }, []);
 
   const fetchGridColumns = () => {
@@ -44,25 +46,20 @@ export default function CustomDataPoints({ deviceTemplate }) {
       { field: 'createdBy', headerName: 'Created By', show: true, filter: false, cellRenderer: 'createdByRenderer' },
       { field: 'updatedBy', headerName: 'Updated By', show: true, filter: false, cellRenderer: 'updatedByRenderer' }
     ]);
-    fetchData();
   };
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    const response = await axiosInstance().get(`${routes?.deviceTemplates?.path}/custom-data-points`);
-
+    const response = await axiosInstance().get(`${routes?.deviceTemplates?.path}/custom-data-points?deviceTemplate=${deviceTemplate}`);
     const data = response?.data?.data;
-
     let rows = data?.map((u: any) => {
       let finalObject: any = prepareDataForGrid(u);
       finalObject['canDelete'] = true;
       finalObject['allowedToEdit'] = true;
       finalObject['isChecked'] = selectedRecords?.some((s) => s?._id === u?._id);
-
       return {
         ...finalObject
       };
@@ -110,7 +107,6 @@ export default function CustomDataPoints({ deviceTemplate }) {
           </IconButton>
         </Tooltip>
       )}
-
       <Tooltip title="Clone">
         <IconButton
           size="small"
@@ -122,7 +118,6 @@ export default function CustomDataPoints({ deviceTemplate }) {
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
-
       {params?.data?.canDelete ? (
         <Tooltip title="Delete">
           <IconButton
@@ -297,7 +292,7 @@ export default function CustomDataPoints({ deviceTemplate }) {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the fieldLabel ?`}
+          message={`Are you sure you want to delete ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

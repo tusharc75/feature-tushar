@@ -16,7 +16,6 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { UserDropdown } from 'src/components/Activity/Helpers/userDropdown';
-import { TbRuler2Off } from 'react-icons/tb';
 import { isEqual } from 'lodash';
 
 export default function ManageRules({ deviceTemplate, open, isClone = false, id = null, onClose, onSuccess }) {
@@ -42,11 +41,10 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(true);
-  const [iotDataPoints, setIotDataPoints] = useState([]);
+  const [iotDataPoints, setIotDataPoints] = useState(null);
   const [initialValue, setInitialValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -86,17 +84,10 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
 
   const findIotDataoints = () => {
     const query = [{ field: 'deviceTemplate', term: deviceTemplate }];
-    axiosInstance()
-      .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&filterType=and`)
-      .then(
-        ({
-          data: {
-            data: { data }
-          }
-        }) => {
-          setIotDataPoints(data?.map((d) => ({ optionLabel: d?.fieldLabel, optionValue: d?._id })));
-        }
-      );
+    axiosInstance().get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&filterType=and`)
+      .then(({ data: { data: { data } } }) => {
+        setIotDataPoints(data?.map((d) => ({ optionLabel: d?.fieldLabel, optionValue: d?._id })));
+      });
   };
 
   useEffect(() => {
@@ -147,7 +138,6 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
     if (values.ruleName === '') {
       errors['ruleName'] = 'Please enter rule name';
     }
-
     if (values?.condition?.length > 0) {
       values?.condition?.forEach((cnd: any, i) => {
         if (!cnd?.dataPoint) {
@@ -161,19 +151,16 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
         }
       });
     }
-
     if (values?.isEmailAlert) {
       if (values?.emailAlertUsers?.length <= 0) {
         errors['emailAlertUsers'] = 'Email Alert Users is Required';
       }
     }
-
     if (values?.isCreateTask) {
       if (values?.taksAssignUsers?.length <= 0) {
         errors['taksAssignUsers'] = 'Taks Assign Users is Required';
       }
     }
-
     return errors;
   }
 
@@ -192,7 +179,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
         }}
         open={open}
       >
-        {initialValue ? (
+        {initialValue && iotDataPoints ? (
           <Formik initialValues={initialValue} validateOnMount validate={validate} onSubmit={handleSubmit}>
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
