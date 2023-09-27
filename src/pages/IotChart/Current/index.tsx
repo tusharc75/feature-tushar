@@ -118,7 +118,7 @@ export default function Current({ assetId }) {
                 expandedAccordition={expandedAccordition}
                 setExpandedAccordition={setExpandedAccordition}
                 category={category}
-                currentData={currentData}
+                currentData={searchValue?.trim() === '' ? currentData : currentData?.filter((e) => e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase()))}
               />
             )) : <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
