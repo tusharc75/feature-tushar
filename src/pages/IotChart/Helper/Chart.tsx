@@ -89,7 +89,7 @@ const Chart = ({ dateFilters, assetId, dataPoints, customDataPoint = false }) =>
       timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone
     };
     if (customDataPoint) {
-      param['customDataPoint'] = dataPoints?.map((e) => e._id)?.toString();
+      param['customDataPoints'] = dataPoints?.map((e) => e._id)?.toString();
     } else {
       param['dataPoints'] = dataPoints?.map((e) => e._id)?.toString();
     }
