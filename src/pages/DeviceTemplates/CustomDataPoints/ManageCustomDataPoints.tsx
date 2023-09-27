@@ -13,42 +13,39 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isEqual } from 'lodash';
+import { camelCase, isEqual } from 'lodash';
 import { DecimalPlaces } from 'src/components/FormBuilder/AddField/decimalPlaces';
 import { checkFormula } from 'src/constants/formulaUtility';
 
 export default function ManageRules({ deviceTemplate, open, isClone = false, id = null, onClose, onSuccess }) {
+
   const inputRef = useRef<any>();
 
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(false);
-  const [iotDataPoints, setIotDataPoints] = useState([]);
+  const [iotDataPoints, setIotDataPoints] = useState(null);
   const [initialValue, setInitialValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formulaError, setFormulaError] = useState(null);
 
   useEffect(() => {
-    fetchData();
-  }, [id]);
-
-  useEffect(() => {
     findIotDataoints();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [id]);
 
   const findIotDataoints = () => {
     const query = [{ field: 'deviceTemplate', term: deviceTemplate }];
     axiosInstance()
       .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&filterType=and`)
-      .then(
-        ({
-          data: {
-            data: { data }
-          }
-        }) => {
-          setIotDataPoints(data?.map((d) => ({ optionLabel: d?.fieldLabel, optionValue: d?._id, optionName: d?.fieldName })));
-        }
+      .then(({ data: { data: { data } }
+      }) => {
+        setIotDataPoints(data?.map((d) => ({ optionLabel: d?.fieldLabel, optionValue: d?._id, optionName: d?.fieldName })));
+      }
       );
   };
 
@@ -83,16 +80,17 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
   };
 
   const handleSubmit = (values) => {
+    values.fieldName = camelCase(values?.fieldLabel)
     setLoading(true);
     if (id && !isClone) {
       values._id = id;
       axiosInstance()
         .put(`${routes.deviceTemplates.path}/custom-data-points`, values)
-        .then(({ data: { data, message } }) => {
+        .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: message
+            message: data.message
           });
           onSuccess();
           setLoading(false);
@@ -105,11 +103,11 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
       values.deviceTemplate = deviceTemplate;
       axiosInstance()
         .post(`${routes.deviceTemplates.path}/custom-data-points`, values)
-        .then(({ data: { data, message } }) => {
+        .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: message
+            message: data.message
           });
           onSuccess();
           setLoading(false);
@@ -124,10 +122,10 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
   function validate(values) {
     const errors = {};
     if (values.fieldLabel === '') {
-      errors['fieldLabel'] = 'Please enter FieldLabel';
+      errors['fieldLabel'] = 'Please enter Field Label';
     }
     if (!values.dataPoints) {
-      errors['dataPoints'] = 'Please select Data Point';
+      errors['dataPoints'] = 'Please select Data Points';
     }
     if (values.formula === '') {
       errors['formula'] = 'Please enter Formula';
@@ -135,13 +133,11 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
     if (values.unit === '') {
       errors['unit'] = 'Please enter Unit';
     }
-
     let dataPoints = {};
-    values.dataPoints && values.dataPoints.forEach((_input) => {
-        dataPoints[_input.optionName] = 1;
-      });
-      
-    if(!checkFormula(values.formula, dataPoints)) {
+    iotDataPoints?.filter((option) => values?.dataPoints?.includes(option.optionValue)).forEach((_input) => {
+      dataPoints[_input.optionName] = 1;
+    });
+    if (!checkFormula(values.formula, dataPoints)) {
       errors['formula'] = 'Please enter valid formula';
     }
     return errors;
@@ -157,10 +153,9 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
   const handleCheckSyntax = (values) => {
     if (values['formula'] && values['formula'] !== '') {
       let dataPoints = {};
-      values['dataPoints'] &&
-        values['dataPoints'].forEach((_input) => {
-          dataPoints[_input.optionName] = 1;
-        });
+      iotDataPoints?.filter((option) => values?.dataPoints?.includes(option.optionValue))?.forEach((_input) => {
+        dataPoints[_input.optionName] = 1;
+      });
       if (checkFormula(values['formula'], dataPoints)) {
         setFormulaError('Valid Formula');
       } else {
@@ -184,7 +179,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
         }}
         open={open}
       >
-        {initialValue ? (
+        {initialValue && iotDataPoints ? (
           <Formik initialValues={initialValue} validateOnMount validate={validate} onSubmit={handleSubmit}>
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
@@ -193,8 +188,8 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                     id
                       ? isClone
                         ? `Clone - ${initialValue?.fieldLabel}`
-                        : `Update CustomDataPoint - ${initialValue?.fieldLabel}`
-                      : 'Create CustomDataPoint'
+                        : `Update - ${initialValue?.fieldLabel}`
+                      : 'Create'
                   }
                   onClose={(e, reason) => {
                     if (isEqual(initialValue, values)) {
@@ -233,14 +228,12 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                           <Autocomplete
                             multiple
                             disableCloseOnSelect={true}
-                            options={iotDataPoints.filter(
-                              (option) => !values?.dataPoints?.some((selected) => selected.optionValue === option.optionValue)
-                            )}
+                            options={iotDataPoints}
+                            value={iotDataPoints?.filter((option) => values?.dataPoints?.includes(option.optionValue))}
                             getOptionLabel={(option) => option?.optionLabel}
-                            value={values?.dataPoints || []}
                             fullWidth
                             onChange={(e, newValues) => {
-                              setFieldValue('dataPoints', newValues);
+                              setFieldValue('dataPoints', newValues?.map((e) => e.optionValue));
                             }}
                             size="small"
                             renderInput={(params) => (
@@ -257,9 +250,9 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                           />
                         </Box>
                         <Box pt={0.5} pb={0.5}>
-                          {values['dataPoints'] && values['dataPoints'].length > 0 && (
+                          {iotDataPoints?.filter((option) => values?.dataPoints?.includes(option.optionValue))?.length > 0 && (
                             <Box pt={0.5} pb={0.5}>
-                              {values['dataPoints'].map((_dataPoint) => (
+                              {iotDataPoints?.filter((option) => values?.dataPoints?.includes(option.optionValue))?.map((_dataPoint) => (
                                 <Chip
                                   className="ml-1 cursor-pointer mb-1"
                                   key={_dataPoint.optionValue}
@@ -301,33 +294,34 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                             </Button>
                           </Grid>
                         </Grid>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6}>
-                            <TextField
-                              margin="dense"
-                              type="text"
-                              label="Unit"
-                              name="unit"
-                              variant="outlined"
-                              required
-                              fullWidth
-                              disabled={false}
-                              value={values['unit']}
-                              error={touched['unit'] && Boolean(errors['unit'])}
-                              helperText={touched['unit'] && errors['unit']}
-                              onChange={(e) => setFieldValue('unit', e.target.value)}
-                            />
+                        <Box pt={2}>
+                          <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                              <TextField
+                                margin="dense"
+                                type="text"
+                                label="Unit"
+                                name="unit"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                disabled={false}
+                                value={values['unit']}
+                                error={touched['unit'] && Boolean(errors['unit'])}
+                                helperText={touched['unit'] && errors['unit']}
+                                onChange={(e) => setFieldValue('unit', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid item xs={6}>
+                              <DecimalPlaces
+                                values={values}
+                                setFieldValue={(name, value) => {
+                                  setFieldValue(name, value);
+                                }}
+                              />
+                            </Grid>
                           </Grid>
-                          <Grid item xs={6}>
-                            <DecimalPlaces
-                              values={values}
-                              setFieldValue={(name, value) => {
-                                setFieldValue(name, value);
-                              }}
-                            />
-                          </Grid>
-                        </Grid>
-                        <Box></Box>
+                        </Box>
                       </div>
                     </div>
                   </Form>
@@ -361,7 +355,6 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                     Save
                   </CustomButton>
                 </CustomDialogFooter>
-
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
                     open={showConfirmDialog}
