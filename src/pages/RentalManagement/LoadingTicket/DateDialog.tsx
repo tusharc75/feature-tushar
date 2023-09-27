@@ -24,13 +24,14 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
     var lastDate: any = new Date();
     if (data?.date) {
       lastDate = new Date(data?.date);
-      lastDate.setHours(0, 0, 0);
     }
+    lastDate.setHours(0, 0, 0);
     setMinDate(lastDate)
   }
 
 
   function validate(values) {
+    console.log(minDate)
     const errors = {};
     if (!moment(values['date']).isSameOrAfter(moment(minDate))) {
       errors['date'] = `Please select valid date`;
