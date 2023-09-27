@@ -2365,7 +2365,6 @@ const FormTypes = (props) => {
             label={getLabel(label)}
             onChange={(date) => handleChange(name, date)}
             onError={console.error}
-            disablePast
             format={dateFormatForInputControl + ' HH:mm'}
             error={touched[name] && Boolean(errors[name])}
             helperText={touched[name] && errors[name]}
