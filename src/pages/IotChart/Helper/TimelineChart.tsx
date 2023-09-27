@@ -6,6 +6,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 
 const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const [chartData, setChartData] = useState(null);
 
@@ -21,10 +22,7 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
           from_date: new Date(dateFilters.from).toISOString(),
           to_date: new Date(dateFilters.to).toISOString(),
           interval: dateFilters.intervals,
-          dataPoints: dataPoints
-            ?.filter((e) => e.type === 'Digital')
-            ?.map((e) => e._id)
-            ?.toString(),
+          dataPoints: dataPoints?.filter((e) => e.type === 'Digital')?.map((e) => e._id)?.toString(),
           timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone
         }
       })
@@ -121,7 +119,12 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
   return (
     <>
       {chartData ? (
-        <ReactApexChart options={chartOptions} series={series} type="rangeBar" height={350} />
+        <ReactApexChart
+          options={chartOptions}
+          series={series}
+          type="rangeBar"
+          height={500}
+        />
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

@@ -23,13 +23,13 @@ function IotChart() {
   const [search, setSearch] = useState();
 
   useEffect(() => {
-    fetchProductInventory();
+    fetchData();
   }, [search]);
 
-  const fetchProductInventory = () => {
+  const fetchData = () => {
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${serializedAsset.api}${queryString}`)
+      .get(`/iot-chart${serializedAsset.api}${queryString}`)
       .then(({ data }) => {
         setRowsData(data.data);
       })
@@ -50,6 +50,26 @@ function IotChart() {
     setSearch(e.target.value);
   };
 
+  const colours: any = [
+    {
+      main: '#FFEFEE',
+      icon: ['#FC5757', '#C60707'],
+      iconGradient: ['#FC5757', '#C60707', '#FC5757'],
+      gradient: ['#FC5757', '#C60707']
+    },
+    {
+      main: '#F3F8FF',
+      icon: ['#68C82E', '#03640D'],
+      iconGradient: ['#68C82E', '#03640D', '#68C82E'],
+      gradient: ['#68C82E', '#03640D']
+    },
+    {
+      main: '#FFFAEC',
+      icon: ['#FAC94B', '#FF9B04'],
+      iconGradient: ['#FAC94B', '#FF9B04', '#FAC94B'],
+      gradient: ['#FAC94B', '#FF9B04']
+    }]
+
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
@@ -62,7 +82,10 @@ function IotChart() {
         {rowsData ? (
           <Box className={cardStyle.reportGrid}>
             {rowsData?.map((asset, i) => {
-              const colors = getColors(i);
+              var colors = colours[0];
+              if (asset?.runningStatus) {
+                colors = colours[1];
+              }
               return (
                 <div key={i} className={cardStyle.singleCard}>
                   <Link to={`${routes.iotChart.path}/${asset?._id}`}>
