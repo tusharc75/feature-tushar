@@ -6,14 +6,18 @@ import Chart from '../Helper/Chart';
 import { uniqBy } from 'lodash';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 
-const PerformanceAnalysis = ({ assetId, dataPoints = [], customDataPoints=[] }) => {
+const PerformanceAnalysis = ({ assetId, dataPoints = [], customDataPoints = [] }) => {
+
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(8, 'days').format('MM-DD-YYYY')),
     to: new Date(),
     intervals: '1hour'
   });
 
-  const [selectedDataPoint, setSelectedDataPoint] = useState({});
+  const [selected, setSelected] = useState({
+    dataPoints: {},
+    customDataPoints: {}
+  });
 
   const [open, setOpen] = useState({});
   const [openChild, setOpenChild] = useState({});
@@ -99,9 +103,12 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [], customDataPoints=[] }) 
                           control={
                             <Checkbox
                               onChange={(e) => {
-                                setSelectedDataPoint({ ...selectedDataPoint, [dataPoint?.fieldName]: e.target.checked });
+                                setSelected({
+                                  dataPoints: { ...selected.dataPoints, [dataPoint?.fieldName]: e.target.checked },
+                                  customDataPoints: {}
+                                });
                               }}
-                              checked={selectedDataPoint[dataPoint?.fieldName]}
+                              checked={selected.dataPoints[dataPoint?.fieldName]}
                               inputProps={{
                                 'aria-labelledby': `checkbox-list-label-select-all`
                               }}
@@ -118,6 +125,29 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [], customDataPoints=[] }) 
         </Collapse>
       </div>
     );
+  };
+
+  const renderCustomDataPoints = () => {
+    return customDataPoints.map((customDataPoint) => (
+      <div className="pl-4 pr-2">
+        <div className="max-w-full">
+          <FormControlLabel
+            key={customDataPoint?.fieldName}
+            title={customDataPoint?.fieldLabel}
+            control={
+              <Checkbox
+                onChange={(e) => {
+                  setSelected({ dataPoints: {}, customDataPoints: { ...selected.customDataPoints, [customDataPoint.fieldName]: e.target.checked } });
+                }}
+                checked={selected.customDataPoints[customDataPoint?.fieldName] || false}
+              />
+            }
+            className="  max-w-full [&>span+span]:max-w-full [&>span+span]:block [&>span+span]:line-clamp-1 "
+            label={<div className="line-clamp-1 [overflow-wrap:anywhere]">{customDataPoint?.fieldLabel}</div>}
+          />
+        </div>
+      </div>
+    ));
   };
 
   return (
@@ -149,17 +179,45 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [], customDataPoints=[] }) 
                     })}
                   </>
                 )}
+                <div className=" shadow-[0px_4px_20px_rgba(0,_0,_0,_0.06)] my-3 rounded-md ">
+                  <div
+                    className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all duration-[300ms] ${
+                      open['CustomDataPoints'] ? 'bg-[var(--new-theme-color)] text-white' : 'hover:bg-gray-300 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    <h6 className="line-clamp-1 text-sm">CustomDataPoints</h6>
+                    <IconButton
+                      size="small"
+                      className={`${open['CustomDataPoints'] ? 'text-white' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleChange('CustomDataPoints');
+                      }}
+                    >
+                      {open['CustomDataPoints'] ? <ExpandLess style={{ color: 'currentcolor' }} /> : <ExpandMore style={{ color: 'currentcolor' }} />}
+                    </IconButton>
+                  </div>
+                </div>
+                {open['CustomDataPoints'] && renderCustomDataPoints()}
               </FormGroup>
             </div>
           </div>
           <div className="container-with-border sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
-            {Object.keys(selectedDataPoint).filter((item) => selectedDataPoint[item]).length ? (
+            {Object.keys(selected.dataPoints).filter((item) => selected.dataPoints[item]).length ||
+            Object.keys(selected.customDataPoints).filter((item) => selected.customDataPoints[item]).length ? (
               <Chart
                 dateFilters={dateFilters}
                 assetId={assetId}
-                dataPoints={Object.keys(selectedDataPoint)
-                  .filter((_k) => selectedDataPoint[_k])
-                  ?.map((k) => dataPoints?.find((d) => d.fieldName === k))}
+                dataPoints={
+                  Object.keys(selected.dataPoints).filter((item) => selected.dataPoints[item]).length
+                    ? Object.keys(selected.dataPoints)
+                        .filter((_k) => selected.dataPoints[_k])
+                        ?.map((k) => dataPoints?.find((d) => d.fieldName === k))
+                    : Object.keys(selected.customDataPoints)
+                        .filter((_k) => selected.customDataPoints[_k])
+                        ?.map((k) => customDataPoints?.find((d) => d.fieldName === k))
+                }
+                customDataPoint={Object.keys(selected.dataPoints).filter((item) => selected.dataPoints[item]).length === 0}
               />
             ) : (
               <div className="text-center grid place-items-center text-xl font-semibold text-gray-400 dark:text-gray-300 min-h-[574px]">
