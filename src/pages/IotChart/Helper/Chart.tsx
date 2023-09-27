@@ -101,7 +101,7 @@ const Chart = ({ dateFilters, assetId, dataPoints, customDataPoint = false }) =>
         dataPoints?.forEach((dataPoint) => {
           newData.push({
             name: dataPoint?.fieldLabel,
-            data: data?.data?.map((e) => [new Date(e.time).getTime(), e[dataPoint?.fieldName] || e['value']])
+            data: data?.data?.map((e) => [new Date(e.time).getTime(), e[dataPoint?.fieldName]])
           });
           if (dataPoint?.highValue) {
             yaxis.push({
