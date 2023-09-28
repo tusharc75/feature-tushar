@@ -29,7 +29,10 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [commentDialog, setCommentDialog] = useState(false)
-  const [isDownloading, setIsDownloading] = useState(false);
+
+
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -212,8 +215,8 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
       });
   }
 
-  const handleDownload = () => {
-    setIsDownloading(true);
+  const handleDownloadZip = () => {
+    setIsDownloadingZip(true);
     axiosInstance()
       .get(`${invoice.api}/zip/${invoiceData._id}`, {
         responseType: 'blob'
@@ -226,11 +229,33 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
         link.setAttribute('download', filename);
         document.body.appendChild(link);
         link.click();
-        setIsDownloading(false);
+        setIsDownloadingZip(false);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setIsDownloading(false);
+        setIsDownloadingZip(false);
+      });
+  };
+
+  const handleDownloadPdf = () => {
+    setIsDownloadingPdf(true);
+    axiosInstance()
+      .get(`${invoice.api}/zip/pdf/${invoiceData._id}`, {
+        responseType: 'blob'
+      })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = response.headers["content-disposition"].split("filename=")[1];
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        setIsDownloadingPdf(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDownloadingPdf(false);
       });
   };
 
@@ -271,13 +296,26 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
                       className="btn-outline-v1 ml-3"
                       type="button"
                       size="small"
-                      disabled={isDownloading ? true : false}
+                      disabled={isDownloadingZip ? true : false}
                       startIcon={isMobile ? '' : <IoMdDownload />}
                       onClick={(e) => {
-                        handleDownload();
+                        handleDownloadZip();
                       }}
                     >
-                      {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Save as Zip File'}
+                      {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
+                    </Button>
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      className="btn-outline-v1 ml-3"
+                      type="button"
+                      size="small"
+                      disabled={isDownloadingPdf ? true : false}
+                      startIcon={isMobile ? '' : <IoMdDownload />}
+                      onClick={(e) => {
+                        handleDownloadPdf();
+                      }}
+                    >
+                      {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download All'}
                     </Button>
                   </Box>
                 }
