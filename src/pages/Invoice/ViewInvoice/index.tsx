@@ -315,6 +315,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
                         handleDownloadPdf();
                       }}
                     >
+                      
                       {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download All'}
                     </Button>
                   </Box>
