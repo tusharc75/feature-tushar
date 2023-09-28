@@ -117,7 +117,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
         isDefaultValue: false,
         disableOnEdit: false,
         unique: true,
-        required: true,
+        required: false,
         lookup: false,
         lookupResource: '',
         entityWiseLookup: false,
@@ -143,7 +143,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
         tooltipMessage: '',
         editAble: true,
         deletAble: true,
-        required: true,
+        required: false,
         order: 4,
         hiddenField: false,
         isDefaultValue: false,
@@ -185,9 +185,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
             values: getObjKeysWithValues(data.data, fieldsDataForCreate)
           });
           setFormsData(
-            setFieldsInAscendingOrder(
-              fieldsDataForCreate.filter((d) => (data?.data['type'] === 'key' ? d.fieldName !== 'file' : d.fieldName !== 'key'))
-            )
+            setFieldsInAscendingOrder(fieldsDataForCreate)
           );
         })
         .catch((error) => {
@@ -198,7 +196,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
         fields: fieldsDataForCreate,
         values: getObjKeysWithValues({ type: 'key' }, fieldsDataForCreate)
       });
-      setFormsData(setFieldsInAscendingOrder(fieldsDataForCreate.filter((d) => d.fieldName !== 'file')));
+      setFormsData(setFieldsInAscendingOrder(fieldsDataForCreate));
     }
   }, []);
 
@@ -259,7 +257,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
             validationSchema={yupSchema(initialData.fields)}
             validateOnMount
             // validate={validate}
-            onSubmit={() => {}}
+            onSubmit={() => { }}
           >
             {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
               <Fragment>
@@ -313,8 +311,8 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                             : null
                                         }
                                         row={true}
