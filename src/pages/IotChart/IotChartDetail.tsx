@@ -7,7 +7,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import Analysis from './Analysis';
 import axiosInstance from 'src/axios/axiosInstance';
-import { product, serializedAsset } from 'src/constants/helpers';
+import { serializedAsset } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import PerformanceAnalysis from './PerformanceAnalysis';
 import Current from './Current';
@@ -53,11 +53,9 @@ const IotChartDetail = () => {
 
     const fetchData = async () => {
         try {
-            const { data: { data } } = await axiosInstance().get(`${serializedAsset.api}/${assetId}`);
+            const { data: { data } } = await axiosInstance().get(`/iot-chart${serializedAsset.api}/${assetId}`);
             setCustomizedRoutes([routes.iotChart, { title: `${data?.assetNumber ?? ''}` }]);
-
-            const productResponce = await axiosInstance().get(`${product.api}/${data?.product?.optionValue}`);
-            setDeviceTemplate(productResponce?.data?.data?.productData?.deviceTemplate)
+            setDeviceTemplate(data?.deviceTemplates?._id)
         } catch (error) {
             toastConfig.setToastConfig(error);
         }
