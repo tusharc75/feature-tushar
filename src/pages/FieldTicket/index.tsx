@@ -33,7 +33,7 @@ import ManageFieldTicket from './ManageFieldTicket';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import { TbArrowsSort } from 'react-icons/tb';
 
@@ -518,6 +518,7 @@ const FieldTicket = () => {
                 )}
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.fieldTicket} />
           </div>
         </div>
         {Object.keys(frameWorkComponent).length > 0 ? (
