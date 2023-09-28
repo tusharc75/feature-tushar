@@ -157,7 +157,12 @@ const Submit = ({ stepFullScreen, fieldTicketData, renderedFrom, allowedToEdit, 
                         defaultColumns={[
                             'type',
                             'detail',
-                            'unit'
+                            'estimateStartDate',
+                            'estimateEndDate',
+                            'pricingMethod',
+                            'qty',
+                            `price_${fieldTicketData?.currency?.toLowerCase()}`,
+                            `finalPrice_${fieldTicketData?.currency?.toLowerCase()}`
                         ]}
                     />
                 </Box>
