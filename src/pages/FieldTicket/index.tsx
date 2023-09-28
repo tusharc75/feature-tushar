@@ -154,7 +154,6 @@ const FieldTicket = () => {
               selectedRecords: rows.filter((f) => f.isChecked === true)
             });
           }
-          dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
           }, gridLoadingTimeout);
