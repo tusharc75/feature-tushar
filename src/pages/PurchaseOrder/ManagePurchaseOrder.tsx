@@ -55,6 +55,9 @@ const ManagePurchaseOrder = ({
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
+  const [requiredCustomerAndProject, setRequiredCustomerAndProject] = useState(false);
+
+
   useEffect(() => {
     axiosInstance()
       .get('/field?resource=Purchase Order')
@@ -189,6 +192,22 @@ const ManagePurchaseOrder = ({
     }
   };
 
+  function validate(values) {
+    const errors = {};
+    if (requiredCustomerAndProject) {
+      const customerAccountField = initialData.fields?.find((e) => e.fieldName === 'customerAccount')
+      if (requiredCustomerAndProject && !values.customerAccount) {
+        errors['customerAccount'] = `${customerAccountField?.fieldLabel} is required`;
+      }
+      const projectField = initialData.fields?.find((e) => e.fieldName === 'project')
+      if (!values.project) {
+        errors['project'] = `${projectField?.fieldLabel} is required`;
+
+      }
+    }
+    return errors;
+  }
+
   return (
     <Dialog
       maxWidth="md"
@@ -204,7 +223,7 @@ const ManagePurchaseOrder = ({
       fullWidth
     >
       {formsData && formsData.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
+        <Formik validate={validate} initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
           {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues, handleSubmit }) => (
             <Fragment>
               <CustomDialogHeader
@@ -277,8 +296,20 @@ const ManagePurchaseOrder = ({
                                     options={field.option}
                                     setFieldValue={(name, value) => {
                                       setFieldValue(name, value);
+                                      if (name === 'chartOfAccount') {
+                                        const chartOfAccountField = initialData.fields?.find((e) => e.fieldName === 'chartOfAccount')
+                                        if (chartOfAccountField) {
+                                          const chartOfAccount = chartOfAccountField?.option?.filter((e) => value?.includes(e.optionValue))
+                                          if (chartOfAccount?.find((e) => e?.optionLabel.includes('55050'))) {
+                                            setRequiredCustomerAndProject(true)
+                                          }
+                                          else {
+                                            setRequiredCustomerAndProject(false)
+                                          }
+                                        }
+                                      }
                                     }}
-                                    required={field.required}
+                                    required={['customerAccount', 'project']?.includes(field.fieldName) ? requiredCustomerAndProject : field.required}
                                     fullWidth
                                     isTooltip={field?.isTooltip || false}
                                     tooltipMessage={field?.tooltipMessage}

@@ -7,11 +7,13 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import Analysis from './Analysis';
 import axiosInstance from 'src/axios/axiosInstance';
-import { serializedAsset } from 'src/constants/helpers';
+import { product, serializedAsset } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import PerformanceAnalysis from './PerformanceAnalysis';
 import Current from './Current';
 import DataSimulationDialog from './DataSimulation';
+import Status from './Status';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const IotChartDetail = () => {
 
@@ -21,21 +23,41 @@ const IotChartDetail = () => {
     const [tabValue, setTabValue] = useState(0);
     const [dataPoints, setDataPoints] = useState([]);
     const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
+    const [customDataPoints, setCustomDataPoints] = useState([]);
+    const [deviceTemplate, setDeviceTemplate] = useState(null);
+
 
     useEffect(() => {
         fetchData()
     }, [assetId])
 
     useEffect(() => {
-        axiosInstance().get(`${routes?.iotDataPoints?.path}`).then(({ data: { data } }) => {
-            setDataPoints(data?.data)
-        });
-    }, [assetId]);
+        if (deviceTemplate) {
+            const query = [{ field: 'deviceTemplate', term: deviceTemplate }];
+            axiosInstance()
+                .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&filterType=and`)
+                .then(({ data: { data }
+                }) => {
+                    setDataPoints(data?.data)
+                });
+        }
+    }, [deviceTemplate]);
+
+    useEffect(() => {
+        if (deviceTemplate) {
+            axiosInstance().get(`${routes?.deviceTemplates?.path}/custom-data-points?deviceTemplate=${deviceTemplate}`).then(({ data: { data } }) => {
+                setCustomDataPoints(data)
+            });
+        }
+    }, [deviceTemplate]);
 
     const fetchData = async () => {
         try {
             const { data: { data } } = await axiosInstance().get(`${serializedAsset.api}/${assetId}`);
             setCustomizedRoutes([routes.iotChart, { title: `${data?.assetNumber ?? ''}` }]);
+
+            const productResponce = await axiosInstance().get(`${product.api}/${data?.product?.optionValue}`);
+            setDeviceTemplate(productResponce?.data?.data?.productData?.deviceTemplate)
         } catch (error) {
             toastConfig.setToastConfig(error);
         }
@@ -69,30 +91,36 @@ const IotChartDetail = () => {
                     Data Simulation
                 </Button>
             </Box>
-            <Box className={`detail-container-v1`}>
-                <Tabs
-                    className="new-tab-container-v1"
-                    variant="scrollable"
-                    scrollButtons="auto"
-                    value={tabValue}
-                    onChange={handleMainTabChange}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    aria-label="Product Details Tab"
-                    TabIndicatorProps={{
-                        style: {
-                            height: 0
-                        }
-                    }}
-                >
-                    <Tab className={'tabLayout'} value={0} label={<div className="d-flex align-items-center tab-font">Current</div>} {...a11yProps(0)} />
-                    <Tab className={'tabLayout'} value={1} label={<div className="d-flex align-items-center tab-font">Analysis</div>} {...a11yProps(1)} />
-                    <Tab className={'tabLayout'} value={2} label={<div className="d-flex align-items-center tab-font">Performance Analysis</div>} {...a11yProps(2)} />
-                </Tabs>
-                {tabValue === 0 && <Current assetId={assetId} />}
-                {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />}
-                {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} />}
-            </Box>
+            {deviceTemplate ?
+                <Box className={`detail-container-v1`}>
+                    <Tabs
+                        className="new-tab-container-v1"
+                        variant="scrollable"
+                        scrollButtons="auto"
+                        value={tabValue}
+                        onChange={handleMainTabChange}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        aria-label="Product Details Tab"
+                        TabIndicatorProps={{
+                            style: {
+                                height: 0
+                            }
+                        }}
+                    >
+                        <Tab className={'tabLayout'} value={0} label={<div className="d-flex align-items-center tab-font">Current</div>} {...a11yProps(0)} />
+                        <Tab className={'tabLayout'} value={1} label={<div className="d-flex align-items-center tab-font">Analysis</div>} {...a11yProps(1)} />
+                        <Tab className={'tabLayout'} value={2} label={<div className="d-flex align-items-center tab-font">Performance Analysis</div>} {...a11yProps(2)} />
+                        <Tab className={'tabLayout'} value={3} label={<div className="d-flex align-items-center tab-font">Status</div>} {...a11yProps(3)} />
+                    </Tabs>
+                    {tabValue === 0 && <Current assetId={assetId} />}
+                    {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} customDataPoints={customDataPoints} />}
+                    {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} customDataPoints={customDataPoints} />}
+                    {tabValue === 3 && <Status assetId={assetId} dataPoints={dataPoints} />}
+                </Box>
+                : <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>}
             {openDataSimulationDialog &&
                 <DataSimulationDialog
                     onClose={() => setOpenDataSimulationDialog(false)}

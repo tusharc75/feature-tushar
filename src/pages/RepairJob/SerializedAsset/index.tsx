@@ -334,7 +334,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             resource={sidebarResource.repairJob}
             referenceId={repairJobData?._id}
             columns={columns}
-            hideDetailButton={true} />
+            hideDetailButton={true}
+            isSendEmail={true}
+          />
           {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
             <Fragment>
               <Button
@@ -403,7 +405,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 size="small"
                 onClick={openActions}
                 aria-controls="action-menu"
-                disabled={selectedRecords.length === 0}
+                disabled={selectedRecords.length === 0 || selectedRecords.some((s) => s.repaired === true) || checkUniqSupplier() || checkUniqWarehouse()}
                 endIcon={<ExpandMore />}
                 className="new-dropdown-v1"
               >
@@ -421,26 +423,24 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 open={Boolean(anchorActionEl)}
                 onClose={closeActions}
               >
-                <MenuItem
-                  disabled={
-                    selectedRecords.length === 0 || checkUniqSupplier() || checkUniqWarehouse() || selectedRecords.some((s) => s.repaired === true)
-                  }
-                  onClick={() => {
-                    if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
-                      if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant);
-                      } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant);
+                {uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount ?
+                  <MenuItem
+                    disabled={checkUniqSupplier() || checkUniqWarehouse()}
+                    onClick={() => {
+                      if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
+                        if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
+                          handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant);
+                        } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
+                          handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant);
+                        }
                       }
-                    }
-                  }}
-                >
-                  Send to Plant
-                </MenuItem>
+                    }}
+                  >
+                    Receive to Plant
+                  </MenuItem> : null
+                }
                 <MenuItem
-                  disabled={
-                    selectedRecords.length === 0 || checkUniqSupplier() || checkUniqWarehouse() || selectedRecords.some((s) => s.repaired === true)
-                  }
+                  disabled={checkUniqSupplier() || checkUniqWarehouse()}
                   onClick={() => {
                     if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
                       if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {

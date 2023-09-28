@@ -15,13 +15,15 @@ import { uniq, map, orderBy } from 'lodash';
 import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import CustomButton from 'src/components/Helpers/CustomButton';
 
-export default function ManageAssetDialog({ allFields, isBulkedit, onClose, repairJobData, inventory, selectedRecords, handleSaveData, loadingEdit }) {
+export default function ManageAssetDialog({ allFields, onClose, repairJobData, handleSaveData, loadingEdit, selectedRecords, showSaveAndNext, isBulkedit, data }) {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [customFields, setCustomFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [saveAndNext, setSaveAndNext] = useState(false);
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export default function ManageAssetDialog({ allFields, isBulkedit, onClose, repa
       });
     } else {
       axiosInstance()
-        .get(`${repairJob.api}/${repairJobData?._id}/assets/${inventory}`)
+        .get(`${repairJob.api}/${repairJobData?._id}/assets/${data?.inventory}`)
         .then(({ data: { data } }) => {
           setInitialData({
             fields: allFields,
@@ -53,7 +55,7 @@ export default function ManageAssetDialog({ allFields, isBulkedit, onClose, repa
       return { name, sectionFields };
     });
     setCustomFields(customData);
-  }, []);
+  }, [data]);
 
   const handleSubmit = (values) => {
     const returnData = [];
@@ -70,10 +72,10 @@ export default function ManageAssetDialog({ allFields, isBulkedit, onClose, repa
     } else {
       returnData.push({
         ...values,
-        _id: inventory
+        _id: data?.inventory
       });
     }
-    handleSaveData(returnData)
+    isBulkedit ? handleSaveData(returnData) : handleSaveData(returnData, saveAndNext);
   };
 
   return (
@@ -102,7 +104,7 @@ export default function ManageAssetDialog({ allFields, isBulkedit, onClose, repa
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
-                  title={isBulkedit ? 'Bulk Edit' : `Edit`}
+                  title={isBulkedit ? 'Bulk Edit' : `Edit - ${data?.index} (${data?.assetNumber || ''})`}
                   onClose={(e, reason) => {
                     onClose();
                   }}
@@ -211,20 +213,37 @@ export default function ManageAssetDialog({ allFields, isBulkedit, onClose, repa
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   <Button size="small" variant="outlined" color="primary" onClick={onClose}>
-                    Cancel
+                    Close
                   </Button>
-                  <Button
-                    size="small"
-                    onClick={() => {
-                      submitForm();
-                    }}
+                  {isBulkedit === false && showSaveAndNext && (
+                    <CustomButton
+                      loading={loadingEdit}
+                      disabled={loadingEdit}
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      onClick={() => {
+                        setSaveAndNext(true);
+                        submitForm();
+                      }}
+                    >
+                      {' '}
+                      Save & Next
+                    </CustomButton>
+                  )}
+                  <CustomButton
+                    loading={loadingEdit}
                     disabled={loadingEdit}
                     variant="contained"
                     color="primary"
+                    type="submit"
+                    onClick={() => {
+                      setSaveAndNext(false);
+                      submitForm();
+                    }}
                   >
-                    {loadingEdit ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
-                    Update
-                  </Button>
+                    Save
+                  </CustomButton>
                 </CustomDialogFooter>
               </Fragment>
             )}

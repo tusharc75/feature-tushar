@@ -11,9 +11,11 @@ import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser }
 import { camelCase } from "lodash";
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import EditIcon from '@material-ui/icons/Edit';
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import ManageIotDataPoints from "src/pages/IotDataPoints/ManageIotDataPoints";
 import { ExpandMore } from "@material-ui/icons";
+import ImportExportMenu from "src/components/Helpers/ImportExportMenu";
 
 export default function IotDataPoints({ deviceTemplate }) {
 
@@ -24,6 +26,7 @@ export default function IotDataPoints({ deviceTemplate }) {
     const {
         state: { user, permissions, selectedEntity }
     }: any = useData();
+    
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
         state;
@@ -53,17 +56,32 @@ export default function IotDataPoints({ deviceTemplate }) {
                 let columns = [];
                 let rendererNames = [];
                 data.forEach((o) => {
-                    let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.iotDataPointsDetail.path, false);
-                    if (currentColumn !== null) {
-                        columns = [...columns, currentColumn?.columnData];
-                        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                            rendererNames.push(currentColumn?.rendererName);
+                    if (['fieldLabel'].indexOf(o?.fieldData?.fieldName) === 0) {
+                        columns = [
+                            ...columns,
+                            {
+                                pivotIndex: 0,
+                                field: 'fieldLabel',
+                                headerName: 'Field Label',
+                                show: true,
+                                disabled: true,
+                                cellRenderer: 'fieldLabelRenderer'
+                            }
+                        ];
+                    } else {
+                        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.iotDataPointsDetail.path, false);
+                        if (currentColumn !== null) {
+                            columns = [...columns, currentColumn?.columnData];
+                            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                                rendererNames.push(currentColumn?.rendererName);
+                            }
                         }
                     }
                 });
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
                 tempFrameworkComponent = {
                     ...tempFrameworkComponent,
+                    fieldLabelRenderer: FieldLabelRenderer,
                     actionsRenderer: ActionsRenderer
                 };
                 setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -152,11 +170,42 @@ export default function IotDataPoints({ deviceTemplate }) {
         return deepFilter;
     };
 
+    const FieldLabelRenderer = (params) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p className="link text-truncate" onClick={() => {
+                setOpen({ open: true, isClone: false, id: params?.data?.id });
+            }}>
+                {params?.value}
+            </p>
+        </div>
+    );
+
     const ActionsRenderer = (params) => (
         <Fragment>
+            {params?.data?.allowedToEdit ? (
+                <Tooltip title="Edit">
+                    <IconButton
+                        size="small"
+                        aria-label="Edit"
+                        onClick={() => {
+                            setOpen({ open: true, isClone: false, id: params?.data?.id });
+                        }}
+                    >
+                        <EditIcon fontSize="small" color="primary" />
+                    </IconButton>
+                </Tooltip>
+            ) : (
+                <Tooltip className="cursor-stop" title="You do not have permission to edit">
+                    <IconButton aria-label="Clone" size="small">
+                        <EditIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            )}
+
             {permissions?.iotDataPoints?.isCreate ? (
                 <Tooltip title="Clone">
                     <IconButton
+                        size="small"
                         aria-label="Clone"
                         onClick={() => {
                             setOpen({ open: true, isClone: true, id: params.data.id });
@@ -176,6 +225,7 @@ export default function IotDataPoints({ deviceTemplate }) {
             {params?.data?.canDelete ? (
                 <Tooltip title="Delete">
                     <IconButton
+                        size="small"
                         aria-label="Delete"
                         onClick={() => {
                             setDeleteRecord(params.data);
@@ -282,6 +332,18 @@ export default function IotDataPoints({ deviceTemplate }) {
                                     Delete
                                 </MenuItem>
                             </Menu>
+                            <Box ml={1} />
+                            <ImportExportMenu
+                                permissions={permissions?.iotDataPoints}
+                                module="Data Points"
+                                api={`${routes?.iotDataPoints?.path}`}
+                                afterImportCompleted={() => {
+                                    fetchData();
+                                }}
+                                // isExportAllOrSomeFeature={true}
+                                ids={[]}
+                                additionalParams={`deviceTemplate=${deviceTemplate}`}
+                            />
                         </Box>
                     </Grid>
                 </Grid>

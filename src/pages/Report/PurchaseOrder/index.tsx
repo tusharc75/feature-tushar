@@ -149,6 +149,8 @@ const Report = () => {
               headerName: field?.fieldData?.fieldLabel,
               show: true,
               disabled: false,
+              filter: false,
+              sortable: false,
               cellRenderer: 'dateRenderer'
             });
           }
@@ -186,7 +188,7 @@ const Report = () => {
         POProductFields.forEach((o) => {
           let currentColumn = getColumnData('Purchase Order Product', o?.fieldData, '');
           if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
+            columns = [...columns, { ...currentColumn?.columnData, filter: false, sortable: false }];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
               rendererNames.push(currentColumn?.rendererName);
             }

@@ -125,9 +125,11 @@ const PurchaseRequisition = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
+    
     if (isExport) {
       deepFilter = `?`;
     }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }

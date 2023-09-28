@@ -825,10 +825,17 @@ const FormTypes = (props) => {
             onChange
               ? onChange
               : (e) => {
-                handleChange(name, e.target.value ?
-                  parseFloat((parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))) : 0);
+                handleChange(name, e.target.value === '' ? 0 : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces)));
               }
           }
+          // onChange={
+          //   onChange
+          //     ? onChange
+          //     : (e) => {
+          //       handleChange(name, e.target.value ?
+          //         parseFloat((parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))) : 0);
+          //     }
+          // }
         />
       </InfoLabel>
     ) : type === 'email' ? (
@@ -2358,7 +2365,6 @@ const FormTypes = (props) => {
             label={getLabel(label)}
             onChange={(date) => handleChange(name, date)}
             onError={console.error}
-            disablePast
             format={dateFormatForInputControl + ' HH:mm'}
             error={touched[name] && Boolean(errors[name])}
             helperText={touched[name] && errors[name]}

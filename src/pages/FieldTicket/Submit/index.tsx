@@ -155,17 +155,9 @@ const Submit = ({ stepFullScreen, fieldTicketData, renderedFrom, allowedToEdit, 
                         columns={columns}
                         isSendEmail={true}
                         defaultColumns={[
-                            'index',
                             'type',
                             'detail',
-                            'description',
-                            'qty',
-                            'unit',
-                            'estimateStartDate',
-                            'estimateEndDate',
-                            'estimateJobDuration',
-                            `price_${fieldTicketData?.currency?.toLowerCase()}`,
-                            `finalPrice_${fieldTicketData?.currency?.toLowerCase()}`
+                            'unit'
                         ]}
                     />
                 </Box>
@@ -251,8 +243,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, renderedFrom, allowedToEdit, 
 
             {viewLogsDialog && (
                 <ViewLogs
-                    id={fieldTicketData?._id}
-                    fieldTicketName={fieldTicketData?.fieldTicketNumber}
+                    fieldTicketData={fieldTicketData}
                     handleClose={() => {
                         setViewLogsDialog(false)
                     }}

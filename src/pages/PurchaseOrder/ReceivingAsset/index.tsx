@@ -89,7 +89,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate">{row.original.detail}</p>
-          <IconButton
+
+          {['Product', 'Asset'].includes(row.original.type) && <IconButton
             size="small"
             onClick={() => {
               if (row.original.type === 'Product') {
@@ -101,7 +102,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             }}
           >
             <OpenInNewIcon fontSize="small" color="primary" />
-          </IconButton>
+          </IconButton>}
         </div>
       )
     });
@@ -231,7 +232,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
     column.push({
       accessor: 'assetQty',
-      Header: 'Asset Received',
+      Header: 'Received Assets',
       width: 150,
       Cell: ({ row }) => (row.original['assetQty'] ? <p>{row.original['assetQty']}</p> : <NoDataCell />),
       Footer: (info) => {
@@ -242,7 +243,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     });
     column.push({
       accessor: 'inventoryQty',
-      Header: 'Inventory Received',
+      Header: 'Received Quantity',
       width: 150,
       Cell: ({ row }) => (row.original['inventoryQty'] ? <p>{row.original['inventoryQty']}</p> : <NoDataCell />),
       Footer: (info) => {
@@ -265,7 +266,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           Cell: ({ row }) =>
             row?.original?.type === 'Product' ? (
               <>
-                {permissions?.serializedAsset?.isCreate &&
+                {/* {permissions?.serializedAsset?.isCreate &&
                   row?.original?.serializedProduct && (row.original?.qty - (row.original?.actualReceived || 0) - (row?.original?.assetQty || 0)) > 0 &&
                   <HtmlTooltip title={`Create ${routes.serializedAsset.title}`}>
                     <IconButton
@@ -278,7 +279,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                       <AddCircleOutlineIcon fontSize="small" color={'primary'} />
                     </IconButton>
                   </HtmlTooltip>
-                }
+                } */}
                 {permissions?.purchaseOrder?.isUpdate &&
                   allowedToEdit &&
                   row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) &&
@@ -370,9 +371,11 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         if (subRows?.length) {
           let actualReceived = item.actualReceived;
           subRows?.forEach((e: any, index) => {
-            res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.assetNumber, type: 'Asset', assetId: e?._id, hideSelection: true });
-            actualReceived = actualReceived - 1;
-            e.isUsed = true;
+            if (actualReceived && !e.isUsed) {
+              res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.assetNumber, type: 'Asset', assetId: e?._id, hideSelection: true });
+              actualReceived = actualReceived - 1;
+              e.isUsed = true;
+            }
           });
         }
         const subRowsproductSerialNumber = productSerialNumber?.filter((e) => e?.product === res?.productId);
@@ -392,8 +395,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             }
           });
         }
-        res['assetQty'] = subRows?.length;
-        res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - subRows?.length : 0;
+        res['assetQty'] = res?.subRows?.length;
+        res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - res?.subRows?.length : 0;
         return res;
       });
 

@@ -24,8 +24,8 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
     var lastDate: any = new Date();
     if (data?.date) {
       lastDate = new Date(data?.date);
-      lastDate.setHours(0, 0, 0);
     }
+    lastDate.setHours(0, 0, 0);
     setMinDate(lastDate)
   }
 

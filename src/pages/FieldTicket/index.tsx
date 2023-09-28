@@ -459,8 +459,7 @@ const FieldTicket = () => {
               permissions={permissions.fieldTicket}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
-                setFieldTicketId(data.id);
-                setOpen({ open: true, isClone: false });
+                history.push(`${routes.fieldTicketDetail.path}/${data.id}`);
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}

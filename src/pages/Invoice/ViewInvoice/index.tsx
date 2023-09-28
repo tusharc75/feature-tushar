@@ -250,6 +250,21 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
                       columns={columns}
                       hideDetailButton={true}
                       isSendEmail={true}
+                      defaultColumns={[
+                        'type',
+                        'detail',
+                        'fieldTicket',
+                        'qty',
+                        'unit',
+                        'pricingMethod',
+                        'actualStartDate',
+                        'actualEndDate',
+                        `price_${invoiceData?.currency?.toLowerCase()}`,
+                        `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
+                        `taxPercentage`,
+                        `tax_${invoiceData?.currency?.toLowerCase()}`,
+                        `finalPrice_${invoiceData?.currency?.toLowerCase()}`
+                      ]}
                     />
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
