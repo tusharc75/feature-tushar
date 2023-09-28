@@ -295,7 +295,7 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
               </Button>
             )}
             <Button
-              disabled={inputFields?.length === 0 || inputFields?.some((v) => v.fieldValue === '' || v.fieldName === '')}
+              disabled={inputFields?.length !== 0 || inputFields?.some((v) => v.fieldValue === '' || v.fieldName === '')}
               type="submit"
               className="no-shadow"
               color="primary"

@@ -73,8 +73,6 @@ const FieldTicket = () => {
   const { getColumnData } = useColumns();
   const { isOffline } = useContext(CustomOfflineContext);
 
-  console.log(page);
-
   const fetchGridColumns = async () => {
     let data;
     if (isOffline) {
