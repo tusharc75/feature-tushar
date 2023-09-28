@@ -114,6 +114,12 @@ export function reducer(state, action) {
         loading: false
       };
 
+    case 'setPage':
+      return {
+        ...state,
+        page: action.page
+      };
+
     case 'showFilteredRecordsOnly':
       return {
         ...state,
@@ -168,7 +174,7 @@ export default function CustomAgGrid({
   customGridOptions = null,
   actionLabel = null,
   actionEditable = false,
-  onCellValueChanged = () => { },
+  onCellValueChanged = () => {},
   showOnlyShowFilteredRecordSwitch = false,
   idProperty = '_id',
   allowHeaderSelection = true,
@@ -180,7 +186,7 @@ export default function CustomAgGrid({
   reportSave = false,
   showFilters = false,
   resource = null,
-  sequenceWise = false,
+  sequenceWise = false
 }) {
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
@@ -265,10 +271,10 @@ export default function CustomAgGrid({
       } else {
         return;
       }
-      const colOrder = gridMetaData[renderedFrom]?.order || []
+      const colOrder = gridMetaData[renderedFrom]?.order || [];
       if (colOrder && colOrder?.length) {
-        const cols = columnState || columnApi.getColumnState()
-        if (colOrder.length === 0) return
+        const cols = columnState || columnApi.getColumnState();
+        if (colOrder.length === 0) return;
         let orderIndices = {};
         for (let i = 0; i < colOrder.length; i++) {
           orderIndices[colOrder[i]] = i;
@@ -363,15 +369,15 @@ export default function CustomAgGrid({
   // }
 
   useEffect(() => {
-    const checkBoxCols = columns?.filter((m) => m?.cellRenderer === "checkboxRenderer")
+    const checkBoxCols = columns?.filter((m) => m?.cellRenderer === 'checkboxRenderer');
     dataRows.map((row) => {
-      checkBoxCols.forEach(col => {
+      checkBoxCols.forEach((col) => {
         if (!row.hasOwnProperty(col?.field)) {
           row[col?.field] = false;
         }
-      })
-    })
-  }, [dataRows, columns])
+      });
+    });
+  }, [dataRows, columns]);
 
   const getActionColumn = () => {
     if (allowAction) {
@@ -418,15 +424,15 @@ export default function CustomAgGrid({
                 ? true
                 : checkStaticField(renderedFrom, column.field)
               : column.hasOwnProperty('show') && !column?.show
-                ? true
-                : false
+              ? true
+              : false
           }
           floatingFilterComponent="customFloatingFilter"
           valueGetter={column.valueGetter ?? null}
-        // floatingFilterComponent={column.floatingFilterComponent ?? null}
-        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-        //   suppressFilterButton: true,
-        // }}
+          // floatingFilterComponent={column.floatingFilterComponent ?? null}
+          // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+          //   suppressFilterButton: true,
+          // }}
         ></AgGridColumn>
       )
     ) : column.isAction ? (
@@ -452,22 +458,21 @@ export default function CustomAgGrid({
               ? true
               : checkStaticField(renderedFrom, column.field)
             : column.hasOwnProperty('show') && !column?.show
-              ? true
-              : false
+            ? true
+            : false
         }
         comparator={() => {
           return 0;
         }}
         floatingFilterComponent="customFloatingFilter"
         valueGetter={column.valueGetter ?? null}
-      // floatingFilterComponent={column.floatingFilterComponent ?? null}
-      // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
-      //   suppressFilterButton: true,
-      // }}
+        // floatingFilterComponent={column.floatingFilterComponent ?? null}
+        // floatingFilterComponentParams={column.floatingFilterComponentParams ?? {
+        //   suppressFilterButton: true,
+        // }}
       ></AgGridColumn>
     );
   });
-
 
   let searchTimeout;
 
@@ -611,7 +616,7 @@ export default function CustomAgGrid({
                         const newRecord = {
                           ...event.node.data,
                           ...(sequenceWise && { sequenceOrder })
-                        }
+                        };
                         oldSelectedRecords = [...oldSelectedRecords, newRecord];
                         localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
                       } else if (event.node.isSelected() === false) {
