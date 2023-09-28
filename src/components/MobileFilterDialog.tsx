@@ -295,7 +295,7 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
               </Button>
             )}
             <Button
-              disabled={inputFields?.length === 0 || inputFields?.some((v) => v.fieldValue === '' || v.fieldName === '')}
+              disabled={inputFields?.some((v) => v.fieldValue === '' || v.fieldName === '')}
               type="submit"
               className="no-shadow"
               color="primary"
@@ -408,7 +408,7 @@ export const DisplayFiltersForMobile = ({ resource = '' }) => {
           </span>
           <span>
             <IconButton aria-label="delete" size="small" style={{ width: 20, height: 20 }} onClick={() => clearFilter(item)}>
-              <Close style={{ width: 16, height: 16 }} />
+              <Close style={{ width: 16, height: 16 }} className="text-[var(--primary)]" />
             </IconButton>
           </span>
         </div>
