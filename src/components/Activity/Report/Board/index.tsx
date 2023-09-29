@@ -153,32 +153,31 @@ const Board = ({ type, filter }) => {
 
   return (
     <>
-      <Box display="flex" style={{ paddingBottom: '18px' }} pb={1}>
+      <Box className="grid grid-cols-1 md:grid-cols-2 gap-2 pb-[18px]">
         <Autocomplete
+          fullWidth
           options={resourceOptions}
           getOptionLabel={(option) => option.optionLabel}
-          style={{ width: isMobile && !isTablet ? '100%' : '50%' }}
           value={resource}
           onChange={(event, newValue) => {
             setResource(newValue);
           }}
           size="small"
-          renderInput={(params) => <TextField {...params} label="Select Resource" variant="outlined" />}
+          renderInput={(params) => <TextField {...params} fullWidth label="Select Resource" variant="outlined" />}
         />
-        <Box mx={isMobile ? 0 : 1} />
         {resource && resourceData && (
           <Autocomplete
+            fullWidth
             disabled={loadingResources}
             options={resourceData}
             getOptionLabel={(option: any) => option.optionLabel}
             getOptionSelected={(option: any, value: any) => option?.optionLabel === value?.optionLabel}
-            style={{ width: '50%' }}
             value={selectedResourceData}
             onChange={(event, newValue) => {
               setSelectedResourceData(newValue);
             }}
             size="small"
-            renderInput={(params) => <TextField {...params} label={`Select ${resource.optionLabel}`} variant="outlined" />}
+            renderInput={(params) => <TextField {...params} fullWidth label={`Select ${resource.optionLabel}`} variant="outlined" />}
           />
         )}
       </Box>
