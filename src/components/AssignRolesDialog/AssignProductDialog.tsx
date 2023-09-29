@@ -187,7 +187,7 @@ const AssignProductDialog = ({
     }
     
     if (reference === 'purchaseOrder') {
-      if (!user?.user?.brandPolicy?.showSerializedProduct) {
+      if (!user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct) {
         deepFilters.push({ field: 'serializedProduct', term: 'No' });
       }
     } else {
