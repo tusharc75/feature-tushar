@@ -248,7 +248,8 @@ export default function QuoteProcess(props) {
   const history = useHistory();
 
   const [quoteCurrency] = useState(quoteData?.currency);
-  const [nextStep, setNextStep] = useState(false);
+  const [nextStep, setNextStep] = useState(true);
+  const [prevStep, setPrevStep] = useState(true)
   const [redCard, setRedCard] = useState(false);
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: '',
@@ -1288,7 +1289,11 @@ export default function QuoteProcess(props) {
           id={quoteData._id}
           version={currentVersion}
           Refresh={fetchQuoteData}
-          nextStep={ProcessStatus === 'Send To Customer' && (ifQuoteApproved.approved || quoteData?.versions[currentVersion]?.offered) ? true : nextStep}
+          nextStep={
+            ProcessStatus === 'Send To Customer' && (!ifQuoteApproved.approved && !quoteData?.versions[currentVersion]?.offered) ? false :
+              ['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? true : nextStep
+          }
+          isPrevStep={['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? false : prevStep}
           versionStatus={versionStatus}
           loading={loading}
           approvedQuote={ifQuoteApproved}
@@ -1563,6 +1568,7 @@ export default function QuoteProcess(props) {
                     isPriceBuilder={ProcessStatus === 'Price Builder'}
                     Editable={allowedToEdit && (ProcessStatus === 'Price Builder' || ProcessStatus === 'New') ? true : false}
                     fullScreen={stepFullScreen}
+                    setNextStep={setNextStep}
                   />
                 ) : (
                   <Loader style={{ minHeight: 300 }} text="Loading..." />

@@ -928,7 +928,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
 export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
   const obj = {};
 
-  const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data.optionValue : '');
+  const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data?.optionValue : '');
   for (const key of arr) {
     if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : false;

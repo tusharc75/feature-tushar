@@ -395,8 +395,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             }
           });
         }
-        res['assetQty'] = res?.subRows?.length;
-        res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - res?.subRows?.length : 0;
+        res['assetQty'] = res?.subRows?.filter((e) => e.type === 'Asset')?.length;
+        res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - res?.subRows?.filter((e) => e.type === 'Asset')?.length : 0;
         return res;
       });
 
