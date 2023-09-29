@@ -89,7 +89,7 @@ const ManagePurchaseOrder = ({
               } else {
                 if (!data?.canDelete) {
                   fieldsDataForUpdate?.forEach((e) => {
-                    if (['warehouse', 'currency', 'chartOfAccount', 'expenseItem']?.includes(e?.fieldName)) {
+                    if (['warehouse', 'currency', 'expenseItem']?.includes(e?.fieldName)) {
                       e.disableOnEdit = true;
                     }
                   });
